@@ -45,6 +45,7 @@ ListView {
                                                      messageData.msgId)
                 }
             }
+
             labelComponent: GridLayout {
                 id: labelGrid
                 rows: bodyText.lineCount > 1 ? 3 : 2
@@ -63,7 +64,8 @@ ListView {
                     Layout.maximumWidth: parent.width
                     elide: "ElideRight"
                     text: messageData.conversationTitle
-                    color: CmnCfg.palette.black
+                    color: messageRectangle.state
+                           !== "" ? CmnCfg.palette.black : CmnCfg.palette.lightGrey
                 }
 
                 Label {
@@ -75,7 +77,8 @@ ListView {
                     text: Utils.friendlyTimestamp(messageData.time)
                     Layout.preferredHeight: labelGrid.height * 0.25
                     Layout.alignment: Qt.AlignRight | Qt.AlignTop
-                    color: CmnCfg.palette.offBlack
+                    color: messageRectangle.state
+                           !== "" ? CmnCfg.palette.offBlack : CmnCfg.palette.medGrey
                 }
 
                 TextMetrics {
@@ -106,7 +109,8 @@ ListView {
                     Layout.fillWidth: true
                     Layout.alignment: Qt.AlignLeft | Qt.alignTop
                     Layout.maximumHeight: labelGrid.height
-                    color: CmnCfg.palette.offBlack
+                    color: messageRectangle.state
+                           !== "" ? CmnCfg.palette.black : CmnCfg.palette.lightGrey
                     textFormat: Text.StyledText
                     wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                 }

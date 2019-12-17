@@ -13,6 +13,7 @@ Column {
     TextArea {
         id: groupSelectText
         leftPadding: 12
+        color: CmnCfg.palette.white
         placeholderText: qsTr("Add members")
         onTextChanged: {
             Herald.usersSearch.filter = groupSelectText.text
@@ -24,7 +25,7 @@ Column {
         height: 1
         width: parent.width - CmnCfg.largeMargin
         anchors.horizontalCenter: parent.horizontalCenter
-        color: "black"
+        color: CmnCfg.palette.lightGrey
     }
 
     ComboBox {
@@ -55,7 +56,7 @@ Column {
             visible: matched && contactData.userId !== Herald.config.configId
 
             Common.PlatonicRectangle {
-                color: "white"
+                color: CmnCfg.palette.offBlack
                 id: contactRectangle
                 boxColor: contactData.color
                 boxTitle: contactData.name
@@ -64,15 +65,16 @@ Column {
 
                 labelComponent: Av.ConversationLabel {
                     contactName: contactData.name
-                    labelColor: CmnCfg.palette.offBlack
+                    labelColor: CmnCfg.palette.white
                     labelSize: 14
                     lastBody: "@" + contactData.userId
                 }
+                states: []
 
                 MouseArea {
+                    id: hoverHandler
                     anchors.fill: parent
                     onClicked: {
-                        //TODO: THIS WILL TAKE MODEL OWNED BY GLOBAL STATE
                         Herald.conversationBuilder.addMember(contactData.userId)
                         contactPopup.popup.close()
                         Herald.usersSearch.clearFilter()

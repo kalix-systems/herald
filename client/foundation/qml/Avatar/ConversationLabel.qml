@@ -21,6 +21,7 @@ Item {
     property int lastReceipt: 0
     property string lastAuthor
     property color labelColor
+    property color secondaryLabelColor: CmnCfg.palette.offBlack
     property int labelSize
 
     // labeling constants
@@ -54,7 +55,7 @@ Item {
             text: lastTimestamp
             Layout.preferredHeight: labelGrid.height * 0.25
             Layout.alignment: Qt.AlignRight | Qt.AlignTop
-            color: CmnCfg.palette.offBlack
+            color: secondaryLabelColor
         }
 
         Label {
@@ -68,7 +69,7 @@ Item {
             Layout.fillWidth: true
             Layout.alignment: Qt.AlignLeft | Qt.alignTop
             Layout.maximumHeight: labelGrid.height * 0.25
-            color: CmnCfg.palette.offBlack
+            color: labelColor
         }
 
         Button {

@@ -91,6 +91,8 @@ declare class Messages {
   searchIndex?: number;
   prevSearchMatch(): number;
   nextSearchMatch(): number;
+
+  saveAllAttachments(index: number, dest: string): boolean;
 }
 
 declare class MessageBuilder {

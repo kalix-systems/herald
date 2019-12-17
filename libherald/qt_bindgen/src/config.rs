@@ -346,6 +346,7 @@ fn messages() -> Object {
         mut setElisionCharCount(char_count: QUint16) => Void,
         mut setElisionCharsPerLine(chars_per_line: QUint8) => Void,
         const indexById(msg_id: QByteArray) => Qint64,
+        const saveAllAttachments(index: QUint64, dest: QString) => Bool,
     };
 
     obj! {
@@ -465,8 +466,8 @@ fn media_attachments() -> Object {
 
 fn document_attachments() -> Object {
     let item_props = item_props! {
-        // Path the the attachment
-        documentAttachmentPath: ItemProp::new(QString),
+        // File name
+        documentAttachmentName: ItemProp::new(QString).get_by_value(),
         documentAttachmentSize: ItemProp::new(QUint64)
     };
 

@@ -10,6 +10,17 @@ Item {
     id: appRoot
     anchors.fill: parent
 
+    readonly property alias globalTimer: globalTimer
+    Timer {
+        id: globalTimer
+        signal refreshTime
+
+        interval: 10000
+        running: true
+        repeat: true
+        onTriggered: refreshTime()
+    }
+
     Component {
         id: cvMain
         HomeScreen.HomeScreenMain {}

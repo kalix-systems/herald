@@ -27,8 +27,6 @@ Rectangle {
     // summy file Dialog
     property alias attachmentsDialogue: attachmentsDialogue
 
-    // camera button
-    // property alias cameraButton: cameraButton
     property string replyText: ""
     property string replyName: ""
     property bool owned: replyUid === Herald.config.configId
@@ -74,6 +72,7 @@ Rectangle {
 
         Column {
             width: parent.width
+            spacing: CmnCfg.smallMargin
             Loader {
                 id: replyLoader
                 property string opName: replyName
@@ -93,6 +92,13 @@ Rectangle {
                 active: ownedConversation.builder.hasMediaAttachment
                 height: item ? item.height : 0
                 sourceComponent: AttachmentsComponent {}
+                width: scrollView.width
+            }
+            Loader {
+                id: fileLoader
+                active: ownedConversation.builder.hasDocAttachment
+                height: item ? item.height : 0
+                sourceComponent: FileAttachmentsComponent {}
                 width: scrollView.width
             }
         }

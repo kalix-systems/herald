@@ -18,18 +18,23 @@ Row {
         id: fileList
         anchors.top: parent.top
         interactive: false
-        width: contentItem.childrenRect.width
+        width: imageAttach ? 300 - downloadList.width : contentItem.childrenRect.width
         height: contentItem.childrenRect.height
         spacing: CmnCfg.smallMargin / 2
 
         delegate: RowLayout {
             clip: true
+
+            // Constrain the maximum width of fileName to force elision when necessary
+            readonly property real _constraint: fileSize.width + fileIcon.width
+                                                + downloadList.width + CmnCfg.smallMargin * 2
             ButtonForm {
                 id: fileIcon
                 icon.source: "qrc:/file-icon.svg"
                 icon.height: 20
                 icon.width: height
             }
+
             Text {
                 id: fileName
                 color: CmnCfg.palette.black
@@ -38,8 +43,8 @@ Row {
                 font.pixelSize: 13
                 font.weight: Font.Medium
                 elide: Text.ElideMiddle
-                Layout.maximumWidth: bubbleRoot.maxWidth - fileSize.width - fileIcon.width
-                                     - CmnCfg.smallMargin * 2 - downloadList.width
+
+                Layout.maximumWidth: (imageAttach ? 300 : bubbleRoot.maxWidth) - parent._constraint
             }
 
             Text {

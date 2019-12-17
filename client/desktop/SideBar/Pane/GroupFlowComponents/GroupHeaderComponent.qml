@@ -13,7 +13,7 @@ Rectangle {
     anchors.top: parent.top
     height: 70
     width: parent.width
-    color: CmnCfg.palette.lightGrey
+    color: CmnCfg.palette.offBlack
     property alias profPic: groupImageLoader.imageSource
 
     Row {
@@ -25,7 +25,7 @@ Rectangle {
         Rectangle {
             width: 42
             height: width
-            color: "black"
+            color: CmnCfg.palette.white
 
             Loader {
                 id: groupImageLoader
@@ -76,7 +76,7 @@ Rectangle {
             Imports.ButtonForm {
                 anchors.centerIn: parent
                 source: "qrc:/camera-icon.svg"
-                fill: CmnCfg.palette.lightGrey
+                fill: CmnCfg.palette.offBlack
                 onClicked: groupPicDialogue.open()
             }
         }

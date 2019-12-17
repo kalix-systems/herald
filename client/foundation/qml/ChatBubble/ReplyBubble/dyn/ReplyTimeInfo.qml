@@ -7,6 +7,11 @@ import "../../../js/utils.mjs" as Utils
 /// NOTE: Here be dragons, this depends on dynamic scoping
 Row {
     spacing: 2
+    Connections {
+        target: appRoot.globalTimer
+        onRefreshTime: replyTs.text = Utils.friendlyTimestamp(
+                           messageModelData.opInsertionTime)
+    }
 
     Label {
         id: replyTs

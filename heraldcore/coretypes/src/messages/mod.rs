@@ -219,6 +219,19 @@ impl MsgData {
             None => false,
         }
     }
+
+    pub fn save_all_attachments<P: AsRef<std::path::Path>>(
+        &self,
+        dest: P,
+    ) -> Result<(), crate::attachments::Error> {
+        let ext = format!(
+            "{author}_{time}",
+            author = self.author,
+            time = self.time.insertion.as_i64()
+        );
+
+        self.attachments.save_all(dest.as_ref().join(ext))
+    }
 }
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]

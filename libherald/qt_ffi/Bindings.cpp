@@ -806,7 +806,7 @@ bool conversations_remove_conversation(Conversations::Private *, quint64);
 bool conversations_toggle_filter_regex(Conversations::Private *);
 }
 extern "C" {
-void document_attachments_data_document_attachment_path(
+void document_attachments_data_document_attachment_name(
     const DocumentAttachments::Private *, int, QString *, qstring_set);
 quint64 document_attachments_data_document_attachment_size(
     const DocumentAttachments::Private *, int);
@@ -872,9 +872,9 @@ Qt::ItemFlags DocumentAttachments::flags(const QModelIndex &i) const {
   return flags;
 }
 
-QString DocumentAttachments::documentAttachmentPath(int row) const {
+QString DocumentAttachments::documentAttachmentName(int row) const {
   QString s;
-  document_attachments_data_document_attachment_path(m_d, row, &s, set_qstring);
+  document_attachments_data_document_attachment_name(m_d, row, &s, set_qstring);
   return s;
 }
 
@@ -888,7 +888,7 @@ QVariant DocumentAttachments::data(const QModelIndex &index, int role) const {
   case 0:
     switch (role) {
     case Qt::UserRole + 0:
-      return QVariant::fromValue(documentAttachmentPath(index.row()));
+      return QVariant::fromValue(documentAttachmentName(index.row()));
     case Qt::UserRole + 1:
       return QVariant::fromValue(documentAttachmentSize(index.row()));
     }
@@ -909,7 +909,7 @@ int DocumentAttachments::role(const char *name) const {
 }
 QHash<int, QByteArray> DocumentAttachments::roleNames() const {
   QHash<int, QByteArray> names = QAbstractItemModel::roleNames();
-  names.insert(Qt::UserRole + 0, "documentAttachmentPath");
+  names.insert(Qt::UserRole + 0, "documentAttachmentName");
   names.insert(Qt::UserRole + 1, "documentAttachmentSize");
   return names;
 }
@@ -2108,6 +2108,8 @@ bool messages_delete_message(Messages::Private *, quint64);
 qint64 messages_index_by_id(const Messages::Private *, const char *, int);
 qint64 messages_next_search_match(Messages::Private *);
 qint64 messages_prev_search_match(Messages::Private *);
+bool messages_save_all_attachments(const Messages::Private *, quint64,
+                                   const ushort *, int);
 void messages_set_elision_char_count(Messages::Private *, quint16);
 void messages_set_elision_chars_per_line(Messages::Private *, quint8);
 void messages_set_elision_line_count(Messages::Private *, quint8);
@@ -4162,6 +4164,9 @@ qint64 Messages::indexById(const QByteArray &msg_id) const {
 }
 qint64 Messages::nextSearchMatch() { return messages_next_search_match(m_d); }
 qint64 Messages::prevSearchMatch() { return messages_prev_search_match(m_d); }
+bool Messages::saveAllAttachments(quint64 index, const QString &dest) const {
+  return messages_save_all_attachments(m_d, index, dest.utf16(), dest.size());
+}
 void Messages::setElisionCharCount(quint16 char_count) {
   return messages_set_elision_char_count(m_d, char_count);
 }

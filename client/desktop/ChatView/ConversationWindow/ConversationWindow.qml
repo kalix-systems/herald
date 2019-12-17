@@ -130,7 +130,9 @@ ListView {
             defaultWidth: chatListView.width * 0.66
             messageModelData: chatRow.messageModelData
 
-            ChatBubbleHover {}
+            ChatBubbleHover {
+                download: bubbleActual.imageAttach || bubbleActual.docAttach
+            }
         }
     }
 }

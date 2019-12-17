@@ -954,7 +954,7 @@ public:
   removeRows(int row, int count,
              const QModelIndex &parent = QModelIndex()) override;
 
-  Q_INVOKABLE QString documentAttachmentPath(int row) const;
+  Q_INVOKABLE QString documentAttachmentName(int row) const;
   Q_INVOKABLE quint64 documentAttachmentSize(int row) const;
 
 Q_SIGNALS:
@@ -1550,6 +1550,7 @@ public:
   Q_INVOKABLE qint64 indexById(const QByteArray &msg_id) const;
   Q_INVOKABLE qint64 nextSearchMatch();
   Q_INVOKABLE qint64 prevSearchMatch();
+  Q_INVOKABLE bool saveAllAttachments(quint64 index, const QString &dest) const;
   Q_INVOKABLE void setElisionCharCount(quint16 char_count);
   Q_INVOKABLE void setElisionCharsPerLine(quint8 chars_per_line);
   Q_INVOKABLE void setElisionLineCount(quint8 line_count);

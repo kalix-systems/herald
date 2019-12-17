@@ -31,6 +31,7 @@ Flickable {
             anchors.leftMargin: CmnCfg.smallMargin
             topPadding: CmnCfg.smallMargin
             font.bold: true
+            color: CmnCfg.palette.lightGrey
             visible: sideBarState.state === "globalSearch"
         }
 
@@ -51,6 +52,7 @@ Flickable {
             anchors.leftMargin: CmnCfg.smallMargin
             topPadding: CmnCfg.smallMargin
             font.bold: true
+            color: CmnCfg.palette.lightGrey
             visible: sideBarState.state === "globalSearch"
         }
 

@@ -319,6 +319,12 @@ pub trait MessagesTrait {
 
     fn prev_search_match(&mut self) -> i64;
 
+    fn save_all_attachments(
+        &self,
+        index: u64,
+        dest: String,
+    ) -> bool;
+
     fn set_elision_char_count(
         &mut self,
         char_count: u16,
@@ -713,6 +719,19 @@ pub unsafe extern "C" fn messages_next_search_match(ptr: *mut Messages) -> i64 {
 pub unsafe extern "C" fn messages_prev_search_match(ptr: *mut Messages) -> i64 {
     let obj = &mut *ptr;
     obj.prev_search_match()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn messages_save_all_attachments(
+    ptr: *const Messages,
+    index: u64,
+    dest_str: *const c_ushort,
+    dest_len: c_int,
+) -> bool {
+    let obj = &*ptr;
+    let mut dest = String::new();
+    set_string_from_utf16(&mut dest, dest_str, dest_len);
+    obj.save_all_attachments(index, dest)
 }
 
 #[no_mangle]

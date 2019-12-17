@@ -9,7 +9,7 @@ pub(super) fn cache() -> &'static Mutex<LruCache<MsgId, MsgData>> {
     CACHE.get_or_init(|| Mutex::new(LruCache::new(1024)))
 }
 
-pub(super) fn get(mid: &MsgId) -> Option<MsgData> {
+pub fn get(mid: &MsgId) -> Option<MsgData> {
     let maybe = cache().lock().get(mid).cloned();
 
     match maybe {

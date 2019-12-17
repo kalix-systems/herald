@@ -22,7 +22,7 @@ Page {
     property alias sideBarState: sideBarState
 
     background: Rectangle {
-        color: CmnCfg.palette.lightGrey
+        color: CmnCfg.palette.offBlack
     }
 
     ///--- SearchBar for contacts, add contact button
@@ -38,6 +38,7 @@ Page {
 
         Common.Divider {
             anchors.top: parent.bottom
+            color: CmnCfg.palette.lightGrey
         }
     }
 
@@ -46,7 +47,6 @@ Page {
         id: headerBarComponent
     }
 
-    //TODO: get rid of this once global search implemented
     Header.SearchComponent {
         id: searchBarComponent
     }

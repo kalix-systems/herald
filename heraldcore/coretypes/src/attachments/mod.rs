@@ -5,7 +5,7 @@ use platform_dirs::attachments_dir;
 use std::{
     ffi::OsString,
     fmt,
-    fs::read_dir,
+    fs::{self, read_dir},
     path::{Path, PathBuf},
 };
 use tar::{Archive, Builder};
@@ -14,6 +14,7 @@ use tar::{Archive, Builder};
 pub enum Error {
     Read(std::io::Error, Location),
     Write(std::io::Error, Location),
+    StripPrefixError(std::path::StripPrefixError, Location),
     Hash,
     InvalidPathComponent(OsString),
     NonUnicodePath(OsString),
@@ -43,6 +44,12 @@ impl fmt::Display for Error {
                 f,
                 "Encountered non-unicode path while converting to Strings, path bytes were: {:x?}",
                 os_str
+            ),
+            StripPrefixError(e, loc) => write!(
+                f,
+                "Strip prefix error saving attachment at {location}: {error}",
+                location = loc,
+                error = e,
             ),
             InvalidPathComponent(os_str) => write!(
                 f,
@@ -128,11 +135,9 @@ impl AttachmentMeta {
     pub fn flat(&self) -> Result<Vec<PathBuf>, Error> {
         let mut out = Vec::with_capacity(self.0.len());
 
+        let path = attachments_dir();
         for p in self.0.iter() {
-            let mut path = attachments_dir();
-            path.push(p);
-
-            for entry in read_dir(path).map_err(|e| Error::Read(e, loc!()))? {
+            for entry in read_dir(path.join(p)).map_err(|e| Error::Read(e, loc!()))? {
                 out.push(entry.map_err(|e| Error::Read(e, loc!()))?.path());
             }
         }
@@ -169,7 +174,7 @@ impl AttachmentMeta {
     pub fn media_attachments(&self) -> Result<Vec<MediaMeta>, Error> {
         let mut out = Vec::with_capacity(self.0.len());
 
-        for p in self.0.as_slice().iter() {
+        for p in self.0.iter() {
             let mut path = attachments_dir();
 
             path.push(p);
@@ -243,6 +248,24 @@ impl AttachmentMeta {
     /// Indicicates whether `AttachmentMeta` is empty.
     pub fn is_empty(&self) -> bool {
         self.0.is_empty()
+    }
+
+    /// Saves all attachments to the `dest` directory
+    pub fn save_all<P: AsRef<Path>>(
+        &self,
+        dest: P,
+    ) -> Result<(), Error> {
+        fs::create_dir_all(&dest).map_err(|e| Error::Write(e, loc!()))?;
+
+        for p in self.flat()? {
+            if let Some(dest_tail) = p.file_name() {
+                let dest = dest.as_ref().join(dest_tail);
+
+                fs::copy(&p, dest).map_err(|e| Error::Write(e, loc!()))?;
+            }
+        }
+
+        Ok(())
     }
 }
 

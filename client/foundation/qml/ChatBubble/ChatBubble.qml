@@ -34,12 +34,19 @@ Pane {
 
     readonly property real maxWidth: imageAttach ? 300 : Math.min(defaultWidth,
                                                                   600)
-    readonly property string friendlyTimestamp: Utils.friendlyTimestamp(
-                                                    messageModelData.insertionTime)
+    property string friendlyTimestamp: Utils.friendlyTimestamp(
+                                           messageModelData.insertionTime)
     readonly property string receiptImage: Utils.receiptCodeSwitch(
                                                messageModelData.receiptStatus)
     readonly property color authorColor: CmnCfg.avatarColors[Herald.users.colorById(
                                                                  authorId)]
+
+    Connections {
+        target: appRoot.globalTimer
+        onRefreshTime: friendlyTimestamp = Utils.friendlyTimestamp(
+                           messageModelData.insertionTime)
+    }
+
     contentWidth: {
         if (imageAttach) {
             return 316
@@ -53,7 +60,7 @@ Pane {
         id: background
         color: CmnCfg.palette.white
         anchors.fill: parent
-        border.color: "black"
+        border.color: CmnCfg.palette.black
         border.width: 1
         ChatLabel {
             id: authorLabel
