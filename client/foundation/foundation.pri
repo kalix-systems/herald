@@ -40,19 +40,22 @@ CONFIG(release, debug|profile|release) {
     }
 }
 
-## platform specific settings
-#iphonesimulator {
-#    LIBS += $${PWD}/../../target/x86_64-apple-ios/$${RUST_BUILD_TYPE}/libherald.a \
-#        -l sqlite3
-#}
-
-iphoneos {
-    LIBS += $${PWD}/../../target/aarch64-apple-ios/$${RUST_BUILD_TYPE}/libherald.a \
+# platform specific settings
+iphonesimulator {
+    LIBS += $${PWD}/../../target/x86_64-apple-ios/$${RUST_BUILD_TYPE}/libherald.a \
         -l sqlite3
     ENABLE_BITCODE = NO
     HEADERS += $$PWD/objectiveutils.h
     SOURCES += $$PWD/objectiveutils.mm
 }
+
+#iphoneos {
+#    LIBS += $${PWD}/../../target/aarch64-apple-ios/$${RUST_BUILD_TYPE}/libherald.a \
+#        -l sqlite3
+#    ENABLE_BITCODE = NO
+#    HEADERS += $$PWD/objectiveutils.h
+#    SOURCES += $$PWD/objectiveutils.mm
+#}
 
 
 macx {

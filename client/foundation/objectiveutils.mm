@@ -1,13 +1,16 @@
 #include "objectiveutils.h"
 #include <QWidget>
 #import <Foundation/Foundation.h>
-#include <Cocoa/Cocoa.h>
+#import <UIKit/UIKit.h>
 
-// sets the color of the frame to off black
-void ObjectiveUtils::set_window_color(WId winId){
-  Q_UNUSED(winId)
-//  NSView* view = (NSView*)winId;
-//  NSWindow* window = [view window];
-//  window.titlebarAppearsTransparent = YES;
-//  window.backgroundColor = [NSColor colorWithRed:0.15 green:0.16 blue:0.17 alpha:1.];
+ObjectiveUtils::ObjectiveUtils(){
+  set_navbar_color();
+};
+
+void ObjectiveUtils::set_navbar_color() {
+       UIApplication *app =  [UIApplication sharedApplication];
+       app.windows.firstObject.rootViewController.view.backgroundColor =  [UIColor colorWithRed:0.23
+                                                                                         green:0.24
+                                                                                          blue:0.25
+                                                                                         alpha:1.0];
 }

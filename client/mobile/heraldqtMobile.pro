@@ -20,8 +20,7 @@ CONFIG+=sdk_no_version_check
 
 RESOURCES +=  qml.qrc
 SOURCES   += main.cpp \
-    ios_sources/IosNotifications.mm \
-    ios_sources/iosutils.mm
+    ios_sources/IosNotifications.mm
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

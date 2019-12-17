@@ -1,6 +1,7 @@
 #include "Bindings.h"
-#include "ios_sources/iosutils.h"
-#include <QWindow>
+#include "objectiveutils.h"
+#include <QTimer>
+#include <QQmlContext>
 #include <QApplication>
 #include <QQmlApplicationEngine>
 #include <QStandardPaths>
@@ -13,12 +14,12 @@ int main(int argc, char* argv[])
   // if this breaks android scale remove it entirely
   QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 #endif
+
   QApplication::setOrganizationName("Kalix Systems");
   QApplication::setOrganizationDomain("kalix.io");
   QApplication::setApplicationName("Herald");
 
   QApplication app(argc, argv);
-
 
   qmlRegisterSingletonType<Herald>(
       "LibHerald", 1, 0, "Herald",
@@ -67,6 +68,8 @@ int main(int argc, char* argv[])
 
   qmlRegisterSingletonType(QUrl("qrc:/qml/Common/CommonConfig.qml"),
                            "LibHerald", 1, 0, "CmnCfg");
+
+  qmlRegisterType<ObjectiveUtils>("LibHerald", 1, 0, "Whoop");
 
   QQmlApplicationEngine engine;
 

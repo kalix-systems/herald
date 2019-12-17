@@ -1,12 +1,15 @@
 #ifndef OBJECTIVEUTILS_H
 #define OBJECTIVEUTILS_H
+#include <QObject>
 
-#include <QWidget>
 
-class ObjectiveUtils
+class ObjectiveUtils : public QObject
 {
+  Q_OBJECT
+
 public:
-  static void set_window_color(WId winId);
+  ObjectiveUtils();
+  static void set_navbar_color();
 };
 
 #endif // OBJECTIVEUTILS_H
