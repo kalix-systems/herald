@@ -25,12 +25,17 @@ Row {
 
         delegate: RowLayout {
             clip: true
+
+            // Constrain the maximum width of fileName to force elision when necessary
+            readonly property real _constraint: fileSize.width + fileIcon.width
+                                                + downloadList.width + CmnCfg.smallMargin * 2
             ButtonForm {
                 id: fileIcon
                 icon.source: "qrc:/file-icon.svg"
                 icon.height: 20
                 icon.width: height
             }
+
             Text {
                 id: fileName
                 color: CmnCfg.palette.black
@@ -39,11 +44,8 @@ Row {
                 font.pixelSize: 13
                 font.weight: Font.Medium
                 elide: Text.ElideMiddle
-                Layout.maximumWidth: imageAttach ? 300 - CmnCfg.smallMargin * 2
-                                                   - fileSize.width - fileIcon.width
-                                                   - downloadList.width : bubbleRoot.maxWidth
-                                                   - fileSize.width - fileIcon.width
-                                                   - CmnCfg.smallMargin * 2 - downloadList.width
+
+                Layout.maximumWidth: (imageAttach ? 300 : bubbleRoot.maxWidth) - parent._constraint
             }
 
             Text {

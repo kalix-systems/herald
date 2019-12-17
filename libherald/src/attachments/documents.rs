@@ -39,9 +39,10 @@ impl Interface for DocumentAttachments {
         none!(
             self.contents
                 .get(index)
-                .and_then(|p| p.file_name())
+                .map(AsRef::as_ref)
+                .and_then(std::path::Path::file_name)
                 .and_then(OsStr::to_str)
-                .map(|p| p.to_string()),
+                .map(str::to_string),
             "".to_owned()
         )
     }
