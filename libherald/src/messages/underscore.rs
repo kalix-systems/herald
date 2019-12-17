@@ -543,7 +543,8 @@ impl Messages {
     ) -> bool {
         let dest = none!(crate::utils::strip_qrc(dest), false);
         let data = none!(self.container.access_by_index(index, MsgData::clone), false);
-        err!(data.save_all_attachments(dest), false);
+
+        spawn!(err!(data.save_all_attachments(dest)), false);
         true
     }
 }
