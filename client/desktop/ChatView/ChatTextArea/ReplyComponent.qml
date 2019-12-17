@@ -10,7 +10,7 @@ import "qrc:/imports/ChatBubble/ReplyBubble"
 
 Rectangle {
     id: wrapper
-    color: CmnCfg.palette.white
+    color: CmnCfg.palette.lightGrey
     border.color: CmnCfg.palette.black
     border.width: 1
     width: parent.width
@@ -31,6 +31,8 @@ Rectangle {
         background: Rectangle {
             color: CmnCfg.palette.avatarColors[Herald.users.colorById(
                                                    ownedConversation.builder.opAuthor)]
+            border.color: Qt.darker(color, 1.3)
+            border.width: 1
         }
     }
 
