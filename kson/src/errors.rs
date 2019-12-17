@@ -48,6 +48,10 @@ pub enum Variant {
         max_len: usize,
         found: usize,
     },
+    WrongCollSize {
+        expected: usize,
+        found: usize,
+    },
     BadUtf8String(Utf8Error),
     UnknownConst(u8),
     UnknownType(u8),
@@ -107,6 +111,10 @@ impl fmt::Display for KsonErrorInner {
                 CollectionTooLarge { max_len, found } => format!(
                     "collection was too large - had capacity for {} elements but {} were found",
                     max_len, found
+                ),
+                WrongCollSize { expected, found } => format!(
+                    "collection was wrong size - expected {} elements but stated length was {}",
+                    expected, found
                 ),
                 BadUtf8String(u) => format!("bad utf-8 string, error was {}", u),
                 UnknownType(u) => format!("unknown type found: {}", u),

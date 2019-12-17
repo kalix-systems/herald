@@ -693,7 +693,7 @@ mod __impls {
         impl<T: De, A: Array<Item = T>> De for ArrayVec<A> {
             fn de(d: &mut Deserializer) -> Result<Self, KsonError> {
                 let tag = d.read_coll_tag()?;
-                let len = d.read_map_len_from_tag(tag)?;
+                let len = d.read_array_len_from_tag(tag)?;
 
                 if len > A::CAPACITY {
                     e!(

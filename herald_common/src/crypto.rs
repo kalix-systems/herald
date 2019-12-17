@@ -22,7 +22,7 @@ pub const TIMESTAMP_FUZZ: i64 = 3_600_000;
 /// the device with id `signer` of a bytestring consisting of `data` followed by
 /// `timestamp.timestamp`
 #[derive(Ser, De, Hash, Debug, Clone, Copy, PartialEq, Eq)]
-pub struct Signed<T: AsRef<[u8]>> {
+pub struct Signed<T> {
     data: T,
     timestamp: Time,
     sig: sign::Signature,
@@ -36,7 +36,7 @@ pub struct SigMeta {
     signed_by: sign::PublicKey,
 }
 
-impl<T: AsRef<[u8]>> From<(T, SigMeta)> for Signed<T> {
+impl<T> From<(T, SigMeta)> for Signed<T> {
     fn from(pair: (T, SigMeta)) -> Signed<T> {
         let (
             data,
@@ -86,7 +86,7 @@ fn verify_sig(
     }
 }
 
-impl<T: AsRef<[u8]>> Signed<T> {
+impl<T: Ser> Signed<T> {
     pub fn into_data(self) -> T {
         self.split().0
     }
@@ -119,7 +119,12 @@ impl<T: AsRef<[u8]>> Signed<T> {
     }
 
     pub fn verify_sig(&self) -> SigValid {
-        verify_sig(self.data.as_ref(), self.timestamp, self.sig, self.signed_by)
+        verify_sig(
+            &kson::to_vec(&self.data),
+            self.timestamp,
+            self.sig,
+            self.signed_by,
+        )
     }
 
     pub fn signed_by(&self) -> &sign::PublicKey {
@@ -167,6 +172,12 @@ pub mod sig {
     pub const PUBLIC_KEY_BYTES: usize = sign::PUBLIC_KEY_LEN;
     pub const SIGNATURE_BYTES: usize = sign::SIGNATURE_LEN;
 
+    #[derive(Ser, De, Debug, Clone, Copy, PartialEq, Eq)]
+    pub struct Endorsement(pub sig::PublicKey);
+
+    #[derive(Ser, De, Debug, Clone, Copy, PartialEq, Eq)]
+    pub struct Deprecation(pub sig::PublicKey);
+
     #[derive(Ser, De, Hash, Debug, Clone, PartialEq, Eq)]
     pub struct PKMeta {
         sig: SigMeta,
@@ -195,12 +206,14 @@ pub mod sig {
             key: PublicKey,
         ) -> bool {
             if let Some(d) = self.deprecated {
-                if d.verify_sig(key.as_ref()) == SigValid::Yes {
+                let to_verify = kson::to_vec(&Deprecation(key));
+                if d.verify_sig(&to_verify) == SigValid::Yes {
                     return false;
                 }
             }
 
-            self.sig.verify_sig(key.as_ref()) == SigValid::Yes
+            let to_verify = kson::to_vec(&Endorsement(key));
+            self.sig.verify_sig(&to_verify) == SigValid::Yes
         }
 
         pub fn deprecate(
@@ -237,12 +250,12 @@ pub mod sig {
             &self.secret
         }
 
-        pub fn sign<T: AsRef<[u8]>>(
+        pub fn sign<T: Ser>(
             &self,
             data: T,
         ) -> Signed<T> {
             let timestamp = Time::now();
-            let to_sign = compute_signing_data(data.as_ref(), timestamp);
+            let to_sign = compute_signing_data(&kson::to_vec(&data), timestamp);
             let sig = self.secret.sign(&to_sign);
             let signed = Signed {
                 data,
@@ -271,6 +284,9 @@ pub mod sig {
         }
     }
 }
+
+#[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
+pub struct Prekey(pub kcl::box_::PublicKey);
 
 // pub mod sealed {
 //     use super::*;

@@ -29,7 +29,7 @@ impl UserMeta {
         maybe_kmeta.unwrap().key_is_valid(key)
     }
 
-    pub fn verify_sig<T: AsRef<[u8]>>(
+    pub fn verify_sig<T: Ser>(
         &self,
         data: &Signed<T>,
     ) -> bool {

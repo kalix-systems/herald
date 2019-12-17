@@ -3,41 +3,31 @@ use super::*;
 pub mod keys_of {
     use super::*;
 
-    #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
-    pub struct Req(pub Vec<UserId>);
+    /// [`UserId`] to fetch keys of
+    pub type Req = UserId;
 
-    #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
-    pub struct Res(pub Vec<(UserId, UserMeta)>);
+    /// [`UserMeta`] found for requested [`UserId`], `None` where the user was not found.
+    pub type Res = Option<UserMeta>;
 }
 
 pub mod key_info {
     use super::*;
 
-    #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
-    pub struct Req(pub Vec<sig::PublicKey>);
+    /// [`sig::PublicKey`] to get info of.
+    pub type Req = sig::PublicKey;
 
-    #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
-    pub struct Res(pub Vec<(sig::PublicKey, sig::PKMeta)>);
+    /// [`sig::PKMeta`] found for requested [`sig::PublicKey`], `None` where the key was not
+    /// found.
+    pub type Res = Option<sig::PKMeta>;
 }
 
-pub mod keys_exist {
+pub mod user_exists {
     use super::*;
 
-    #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
-    pub struct Req(pub Vec<sig::PublicKey>);
-
-    #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
-    pub struct Res(pub Vec<bool>);
-}
-
-pub mod users_exist {
-    use super::*;
-
-    #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
-    pub struct Req(pub Vec<UserId>);
-
-    #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
-    pub struct Res(pub Vec<bool>);
+    /// [`UserId`] to check existence of
+    pub type Req = UserId;
+    /// `true` if requested user exists, false otherwise
+    pub type Res = bool;
 }
 
 pub mod push_users {
@@ -76,61 +66,61 @@ pub mod push_devices {
 pub mod new_key {
     use super::*;
 
-    #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
-    pub struct Req(pub Signed<sig::PublicKey>);
-
-    #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
-    pub struct Res(pub PKIResponse);
+    /// New endorsed key
+    pub type Req = Signed<sig::Endorsement>;
+    /// Result from trying to add key
+    pub type Res = PKIResponse;
 }
 
 pub mod dep_key {
     use super::*;
 
-    #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
-    pub struct Req(pub Signed<sig::PublicKey>);
-
-    #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
-    pub struct Res(pub PKIResponse);
+    /// New deprecated key
+    pub type Req = Signed<sig::Deprecation>;
+    /// Result from trying to deprecate key
+    pub type Res = PKIResponse;
 }
 
-pub mod register {
+pub mod new_prekey {
     use super::*;
 
-    #[derive(Ser, De, Debug, Clone, Copy, PartialEq, Eq)]
-    pub struct Req(pub UserId, pub Signed<sig::PublicKey>);
-
-    #[derive(Ser, De, Debug, Clone, Copy, PartialEq, Eq)]
-    pub enum Res {
-        UIDTaken,
-        KeyTaken,
-        BadSig(SigValid),
-        Success,
-    }
+    /// Signed prekey to be added
+    pub type Req = Signed<Prekey>;
+    /// Replaced prekey
+    pub type Res = Prekey;
 }
 
-// pub mod add_prekeys {
-//     use super::*;
+pub mod get_prekey {
+    use super::*;
 
-//     #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
-//     pub struct Req(pub Vec<sealed::PublicKey>);
+    /// Public key to fetch prekey for
+    pub type Req = sig::PublicKey;
+    /// Corresponding prekey
+    pub type Res = Option<Signed<Prekey>>;
+}
 
-//     #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
-//     pub enum Res {
-//         Missing(Vec<sig::PublicKey>),
-//         BadSig(SigValid),
-//         Success,
-//     }
-// }
+#[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
+pub enum Request {
+    KeysOf(keys_of::Req),
+    KeyInfo(key_info::Req),
+    UserExists(user_exists::Req),
+    PushUsers(push_users::Req),
+    PushDevices(push_devices::Req),
+    NewKey(new_key::Req),
+    DepKey(dep_key::Req),
+    NewPrekey(new_prekey::Req),
+    GetPrekey(get_prekey::Req),
+}
 
-// pub mod get_prekeys {
-//     use super::*;
-
-//     #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
-//     pub struct Req(pub BTreeSet<sig::PublicKey>);
-
-//     #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
-//     pub enum Res {
-//         Success(Vec<(sig::PublicKey, sealed::PublicKey)>),
-//         Missing(Vec<sig::PublicKey>),
-//     }
-// }
+#[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
+pub enum Response {
+    KeysOf(keys_of::Res),
+    KeyInfo(key_info::Res),
+    UserExists(user_exists::Res),
+    PushUsers(push_users::Res),
+    PushDevices(push_devices::Res),
+    NewKey(new_key::Res),
+    DepKey(dep_key::Res),
+    NewPrekey(new_prekey::Res),
+    GetPrekey(get_prekey::Res),
+}
