@@ -31,6 +31,8 @@ Rectangle {
         background: Rectangle {
             color: CmnCfg.palette.avatarColors[Herald.users.colorById(
                                                    ownedConversation.builder.opAuthor)]
+            border.color: Qt.darker(color, 1.3)
+            border.width: 1
         }
     }
 
