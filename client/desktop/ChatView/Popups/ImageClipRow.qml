@@ -16,6 +16,7 @@ ListView {
     anchors.topMargin: CmnCfg.smallMargin
     anchors.horizontalCenter: flickable.horizontalCenter
     model: imageAttachments
+    ScrollBar.horizontal: ScrollBar {}
     spacing: CmnCfg.smallMargin
     delegate: Rectangle {
         property var imageModel: model
