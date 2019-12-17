@@ -20,7 +20,7 @@ ListView {
         width: parent.width
 
         Common.PlatonicRectangle {
-            color: CmnCfg.palette.lightGrey
+            color: CmnCfg.palette.offBlack
             id: memberRectangle
             boxColor: Herald.users.colorById(memberId)
             boxTitle: Herald.users.nameById(memberId)
@@ -32,7 +32,7 @@ ListView {
 
             labelComponent: Av.ConversationLabel {
                 contactName: Herald.users.nameById(memberId)
-                labelColor: CmnCfg.palette.offBlack
+                labelColor: CmnCfg.palette.white
                 labelSize: 14
                 lastBody: "@" + memberId
             }
@@ -43,6 +43,7 @@ ListView {
                 anchors.rightMargin: CmnCfg.largeMargin / 2
                 anchors.verticalCenter: parent.verticalCenter
                 source: "qrc:/x-icon.svg"
+                fill: CmnCfg.palette.lightGrey
                 onClicked: Herald.conversationBuilder.removeMemberById(memberId)
             }
         }

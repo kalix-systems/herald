@@ -14,7 +14,7 @@ Component {
     // spacing behaviour better. (there is no change in layout on resize, anchors more correct)
     Rectangle {
         anchors.fill: parent
-        color: CmnCfg.palette.lightGrey
+        color: CmnCfg.palette.offBlack
 
         //header includes group title and picture settings
         GroupHeaderComponent {
@@ -25,6 +25,7 @@ Component {
             id: titleText
             anchors.top: topRect.bottom
             leftPadding: 12
+            color: CmnCfg.palette.white
             placeholderText: "Group title"
         }
 
@@ -34,7 +35,7 @@ Component {
             height: 1
             width: parent.width - CmnCfg.largeMargin
             anchors.horizontalCenter: parent.horizontalCenter
-            color: "black"
+            color: CmnCfg.palette.lightGrey
         }
 
         Rectangle {
@@ -43,7 +44,7 @@ Component {
             id: bigDivider
             height: 1
             width: parent.width
-            color: "black"
+            color: CmnCfg.palette.lightGrey
         }
 
         //component for searching contacts to add
@@ -65,13 +66,13 @@ Component {
 
             background: Rectangle {
                 anchors.fill: parent
-                color: CmnCfg.palette.offBlack
+                color: CmnCfg.palette.lightGrey
             }
 
             Text {
                 text: qsTr("CREATE")
                 anchors.centerIn: parent
-                color: "white"
+                color: CmnCfg.palette.black
                 font.family: CmnCfg.labelFont.name
             }
             onClicked: {

@@ -13,7 +13,7 @@ Rectangle {
     anchors.top: parent.top
     height: 70
     width: parent.width
-    color: CmnCfg.palette.lightGrey
+    color: CmnCfg.palette.offBlack
     property alias profPic: groupImageLoader.imageSource
 
     Row {
