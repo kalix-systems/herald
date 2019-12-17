@@ -19,6 +19,17 @@ Item {
         }
     }
 
+    readonly property alias globalTimer: globalTimer
+    Timer {
+        id: globalTimer
+        signal refreshTime
+
+        interval: 10000
+        running: true
+        repeat: true
+        onTriggered: refreshTime()
+    }
+
     Popups.ColorPicker {
         id: avatarColorPicker
     }
