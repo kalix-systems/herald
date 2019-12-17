@@ -20,9 +20,6 @@ ColumnLayout {
         galleryLoader.imageAttachments = mediaParsed
         galleryLoader.currentIndex = currentIndex
         galleryLoader.active = true
-
-        //        galleryLoader.item.imageAttachments = mediaParsed
-        //        galleryLoader.item.currentIndex = currentIndex
         galleryLoader.item.open()
         // imageViewerPopup.sourceAtc = mediaParsed
         // imageViewerPopup.index = currentIndex

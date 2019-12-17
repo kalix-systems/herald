@@ -17,8 +17,31 @@ Popup {
     height: root.height
     width: root.width
     anchors.centerIn: parent
+    enter: Transition {
+
+        NumberAnimation {
+            property: "opacity"
+            from: 0.0
+            to: 1.0
+            duration: 200
+            easing.type: Easing.OutQuad
+        }
+    }
+    exit: Transition {
+
+        NumberAnimation {
+            id: exitAnimation
+            property: "opacity"
+            from: 1.0
+            to: 0.0
+            duration: 200
+            easing.type: Easing.OutQuad
+        }
+    }
+
     background: Rectangle {
-        color: "black"
+        id: background
+        color: CmnCfg.palette.black
     }
 
     Row {
