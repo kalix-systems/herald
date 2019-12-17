@@ -14,7 +14,7 @@ import QtGraphicalEffects 1.0
 Component {
     ToolBar {
         id: headerBarComponent
-        height: CmnCfg.toolbarHeight
+        height: CmnCfg.toolbarHeight + 1
         background: Rectangle {
             color: CmnCfg.palette.offBlack
         }

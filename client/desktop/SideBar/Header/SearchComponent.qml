@@ -15,7 +15,7 @@ Component {
     id: searchBarComponent
 
     ToolBar {
-        height: CmnCfg.toolbarHeight
+        height: CmnCfg.toolbarHeight + 1
         background: Rectangle {
             color: CmnCfg.palette.offBlack
         }

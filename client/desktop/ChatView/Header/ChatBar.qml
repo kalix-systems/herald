@@ -19,6 +19,12 @@ ToolBar {
     background: Rectangle {
         color: CmnCfg.palette.offBlack
     }
+    Rectangle {
+        anchors.left: parent.left
+        height: parent.height + 1
+        width: 1
+        color: CmnCfg.palette.lightGrey
+    }
 
     RowLayout {
         id: buttonRow
