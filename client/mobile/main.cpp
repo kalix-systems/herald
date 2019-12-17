@@ -7,7 +7,12 @@
 
 int main(int argc, char* argv[])
 {
- // QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+
+#ifndef Q_OS_IOS
+  // if this breaks android scale remove it entirely
+  QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+#endif
+
   QApplication::setOrganizationName("Kalix Systems");
   QApplication::setOrganizationDomain("kalix.io");
   QApplication::setApplicationName("Herald");
