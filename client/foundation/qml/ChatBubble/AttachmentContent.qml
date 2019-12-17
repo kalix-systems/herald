@@ -2,7 +2,7 @@ import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
 import LibHerald 1.0
-import QtGraphicalEffects 1.12
+import QtGraphicalEffects 1.1
 
 ColumnLayout {
     id: wrapperCol
@@ -17,12 +17,18 @@ ColumnLayout {
 
             return String("file:" + object.path) === String(source)
         })
+        galleryLoader.imageAttachments = mediaParsed
+        galleryLoader.currentIndex = currentIndex
+        galleryLoader.active = true
 
-        imageViewerPopup.sourceAtc = mediaParsed
-        imageViewerPopup.index = currentIndex
-        imageViewerPopup.reset()
-        imageViewerPopup.show()
-        imageViewerPopup.raise()
+        //        galleryLoader.item.imageAttachments = mediaParsed
+        //        galleryLoader.item.currentIndex = currentIndex
+        galleryLoader.item.open()
+        // imageViewerPopup.sourceAtc = mediaParsed
+        // imageViewerPopup.index = currentIndex
+        // imageViewerPopup.reset()
+        // imageViewerPopup.show()
+        // imageViewerPopup.raise()
     }
 
     spacing: 0
@@ -58,16 +64,16 @@ ColumnLayout {
     Loader {
         id: imageLoader
 
-           DropShadow {
-               source: parent.item
-               anchors.fill: parent.item
-               horizontalOffset: 3
-               verticalOffset: 3
-               radius: 8.0
-               samples: 12
-               color: CmnCfg.palette.black
-               opacity: 0.55
-           }
+        DropShadow {
+            source: parent.item
+            anchors.fill: parent.item
+            horizontalOffset: 3
+            verticalOffset: 3
+            radius: 8.0
+            samples: 12
+            color: CmnCfg.palette.black
+            opacity: 0.55
+        }
     }
 
     Component {

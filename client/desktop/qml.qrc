@@ -64,5 +64,6 @@
         <file>SideBar/popups/ConfigComponents/ConfRadio.qml</file>
         <file>ChatView/ChatTextArea/FileAttachmentsComponent.qml</file>
         <file>ChatView/ChatTextArea/FileClip.qml</file>
+        <file>ChatView/Popups/GalleryView.qml</file>
     </qresource>
 </RCC>
