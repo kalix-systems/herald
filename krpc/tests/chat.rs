@@ -6,7 +6,6 @@ use kson::prelude::*;
 use std::{
     collections::{HashMap, HashSet},
     net::SocketAddr,
-    ops::Deref,
     sync::Arc,
     time::Duration,
 };
@@ -16,11 +15,10 @@ use tokio::{
             unbounded_channel as unbounded, UnboundedReceiver as Receiver,
             UnboundedSender as Sender,
         },
-        *,
+        Mutex,
     },
-    time::*,
+    time,
 };
-
 use void::Void;
 
 #[derive(Ser, De, Eq, PartialEq, Hash, Debug, Clone, Copy)]
@@ -237,7 +235,7 @@ impl KrpcClient for Chatter {
         Ok(())
     }
 
-    async fn on_close(&self) {}
+    fn on_close(&self) {}
 }
 
 const DELAY: Duration = Duration::from_millis(10);
@@ -249,8 +247,8 @@ async fn ping_pong() {
     let u1 = User(UQ::gen_new());
     let u2 = User(UQ::gen_new());
 
-    let (sock, cert) = start_server().await;
-    dbg!();
+    let (sock, cert, driver) = start_server();
+    tokio::spawn(driver);
 
     let c1 = start_client(u1, &sock, &cert).await;
     dbg!();
@@ -258,61 +256,55 @@ async fn ping_pong() {
     let c2 = start_client(u2, &sock, &cert).await;
     dbg!();
 
-    delay_for(DELAY).await;
+    time::delay_for(DELAY).await;
+
+    let c1_were_online = c1.online.lock().await.clone();
     dbg!();
 
-    assert_eq!(
-        c1.online.lock().await.deref(),
-        c2.online.lock().await.deref()
-    );
-    dbg!();
-
-    let m1 = c1
+    let c1_found_online = c1
         .req(&Req::CheckOnline)
         .await
         .expect("c1 failed to check who was online");
     dbg!();
 
-    let m2 = c2
+    let c1_send_resp = c1
+        .req(&Req::Send("msg1".into()))
+        .await
+        .expect("c1 failed to send msg");
+    dbg!();
+
+    let c2_were_online = c2.online.lock().await.clone();
+    dbg!();
+
+    let c2_found_online = c2
         .req(&Req::CheckOnline)
         .await
         .expect("c2 failed to check who was online");
     dbg!();
 
-    delay_for(DELAY).await;
+    let c2_send_resp = c2
+        .req(&Req::Send("msg2".into()))
+        .await
+        .expect("c2 failed to send msg");
     dbg!();
 
-    assert_eq!(Resp::Users(c1.online.lock().await.clone()), m1);
+    assert_eq!(c1_were_online, c2_were_online);
+    assert_eq!(c1_found_online, c2_found_online);
+    assert_eq!(c1_send_resp, c2_send_resp);
+
+    assert_eq!(c1_were_online, [u1, u2].iter().copied().collect());
+    assert_eq!(c1_found_online, Resp::Users(c1_were_online));
+    assert_eq!(c1_send_resp, Resp::Success);
+
+    time::delay_for(DELAY).await;
+
+    let c1_log = c1.msgs.lock().await.clone();
+    dbg!();
+    let c2_log = c2.msgs.lock().await.clone();
     dbg!();
 
-    assert_eq!(Resp::Users(c2.online.lock().await.clone()), m2);
-    dbg!();
-
-    assert_eq!(m1, m2);
-
-    assert_eq!(
-        c1.req(&Req::Send("msg1".into()))
-            .await
-            .expect("c1 failed to send msg"),
-        Resp::Success
-    );
-    dbg!();
-
-    delay_for(DELAY).await;
-    dbg!();
-
-    assert_eq!(
-        c2.req(&Req::Send("msg2".into()))
-            .await
-            .expect("c2 failed to send msg"),
-        Resp::Success
-    );
-    dbg!();
-
-    delay_for(DELAY).await;
-    dbg!();
-
-    assert_eq!(c1.msgs.lock().await.deref(), c2.msgs.lock().await.deref());
+    assert_eq!(c1_log, c2_log);
+    assert_eq!(c1_log, vec![(u1, "msg1".into()), (u2, "msg2".into())]);
 }
 
 async fn start_client(
@@ -323,6 +315,7 @@ async fn start_client(
     let e_config = quinn_proto::EndpointConfig::default();
 
     let c_config = tls::configure_client(&[cert]).expect("failed to generate client config");
+    // let c_config = tls::configure_client(&[]).expect("failed to generate client config");
     let c_port = portpicker::pick_unused_port().expect("failed to pick client port");
     let c_socket = ([127u8, 0, 0, 1], c_port).into();
 
@@ -331,7 +324,7 @@ async fn start_client(
         .expect("failed to connect client")
 }
 
-async fn start_server() -> (SocketAddr, Vec<u8>) {
+fn start_server() -> (SocketAddr, Vec<u8>, impl Future<Output = ()>) {
     let e_config = quinn_proto::EndpointConfig::default();
     let (s_config, cert) = tls::configure_server().expect("failed to generate server config");
 
@@ -339,12 +332,12 @@ async fn start_server() -> (SocketAddr, Vec<u8>) {
     let s_port = portpicker::pick_unused_port().expect("failed to pick port");
     let s_socket: SocketAddr = ([127u8, 0, 0, 1], s_port).into();
 
-    tokio::spawn(async move {
+    let driver = async move {
         krpc::serve_arc(server, e_config, s_config, &s_socket)
             .unwrap_or_else(|e| panic!("Server error: {}", e))
             .await
-    });
-    (s_socket, cert)
+    };
+    (s_socket, cert, driver)
 }
 
 /// Shamelessly copied from the quinn examples

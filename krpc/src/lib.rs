@@ -247,7 +247,7 @@ pub trait KrpcClient: Send + Sync + Sized + 'static {
         resp: &Self::Resp,
     ) -> Result<(), KrpcError<Self::InitError>>;
 
-    async fn on_close(&self);
+    fn on_close(&self);
 }
 
 pub struct Client<K: KrpcClient> {
@@ -257,10 +257,7 @@ pub struct Client<K: KrpcClient> {
 
 impl<K: KrpcClient> Drop for Client<K> {
     fn drop(&mut self) {
-        tokio::spawn({
-            let c = self.inner.clone();
-            async move { c.on_close().await }
-        });
+        self.inner.on_close()
     }
 }
 
