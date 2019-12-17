@@ -12,8 +12,6 @@ Popup {
     property int currentIndex: parent.currentIndex
     property var imageAttachments: parent.imageAttachments
     property real imageScale: 1.0
-    readonly property var reset: function () {//should reset the window
-    }
     onClosed: galleryLoader.active = false
 
     height: root.height

@@ -30,10 +30,9 @@ ApplicationWindow {
         }
     }
 
-    CvPopups.ImageViewerPopup {
-        id: imageViewerPopup
-    }
-
+    //    CvPopups.ImageViewerPopup {
+    //        id: imageViewerPopup
+    //    }
     Loader {
         id: galleryLoader
         anchors.fill: active ? parent : undefined
