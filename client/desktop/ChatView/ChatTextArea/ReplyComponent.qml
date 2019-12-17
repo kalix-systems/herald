@@ -10,7 +10,7 @@ import "qrc:/imports/ChatBubble/ReplyBubble"
 
 Rectangle {
     id: wrapper
-    color: CmnCfg.palette.white
+    color: CmnCfg.palette.lightGrey
     border.color: CmnCfg.palette.black
     border.width: 1
     width: parent.width
