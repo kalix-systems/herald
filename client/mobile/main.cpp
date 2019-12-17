@@ -1,4 +1,5 @@
 #include "Bindings.h"
+#include <QtDebug>
 #include <QApplication>
 #include <QQmlApplicationEngine>
 #include <QStandardPaths>
@@ -16,13 +17,15 @@ int main(int argc, char* argv[])
   qmlRegisterSingletonType<Herald>(
       "LibHerald", 1, 0, "Herald",
       [](QQmlEngine* engine, QJSEngine* scriptEngine) {
-        Q_UNUSED(engine);
-        Q_UNUSED(scriptEngine);
+        Q_UNUSED(engine)
+        Q_UNUSED(scriptEngine)
 
         QStandardPaths::StandardLocation local =
             QStandardPaths::AppDataLocation;
 
         QString path = QStandardPaths::writableLocation(local);
+
+        qDebug() << path;
 
         Herald* state = new Herald();
         state->setAppLocalDataDir(path);
@@ -33,8 +36,8 @@ int main(int argc, char* argv[])
   qmlRegisterSingletonType<ReplyWidthCalc>(
       "LibHerald", 1, 0, "ReplyWidthCalc",
       [](QQmlEngine* engine, QJSEngine* scriptEngine) {
-        Q_UNUSED(engine);
-        Q_UNUSED(scriptEngine);
+        Q_UNUSED(engine)
+        Q_UNUSED(scriptEngine)
 
         ReplyWidthCalc* rw_calc = new ReplyWidthCalc();
 
