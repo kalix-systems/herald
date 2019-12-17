@@ -133,6 +133,7 @@ struct ConversationContentPtrBundle {
   void (*message_builder_op_author_changed)(MessageBuilder *);
   void (*message_builder_op_body_changed)(MessageBuilder *);
   void (*message_builder_op_doc_attachments_changed)(MessageBuilder *);
+  void (*message_builder_op_expiration_time_changed)(MessageBuilder *);
   void (*message_builder_op_id_changed)(MessageBuilder *);
   void (*message_builder_op_media_attachments_changed)(MessageBuilder *);
   void (*message_builder_op_time_changed)(MessageBuilder *);
@@ -426,6 +427,7 @@ struct MessageBuilderPtrBundle {
   void (*message_builder_op_author_changed)(MessageBuilder *);
   void (*message_builder_op_body_changed)(MessageBuilder *);
   void (*message_builder_op_doc_attachments_changed)(MessageBuilder *);
+  void (*message_builder_op_expiration_time_changed)(MessageBuilder *);
   void (*message_builder_op_id_changed)(MessageBuilder *);
   void (*message_builder_op_media_attachments_changed)(MessageBuilder *);
   void (*message_builder_op_time_changed)(MessageBuilder *);
@@ -505,6 +507,7 @@ struct MessagesPtrBundle {
   void (*message_builder_op_author_changed)(MessageBuilder *);
   void (*message_builder_op_body_changed)(MessageBuilder *);
   void (*message_builder_op_doc_attachments_changed)(MessageBuilder *);
+  void (*message_builder_op_expiration_time_changed)(MessageBuilder *);
   void (*message_builder_op_id_changed)(MessageBuilder *);
   void (*message_builder_op_media_attachments_changed)(MessageBuilder *);
   void (*message_builder_op_time_changed)(MessageBuilder *);
@@ -1316,6 +1319,8 @@ private:
   Q_PROPERTY(QString opBody READ opBody NOTIFY opBodyChanged FINAL)
   Q_PROPERTY(QString opDocAttachments READ opDocAttachments NOTIFY
                  opDocAttachmentsChanged FINAL)
+  Q_PROPERTY(QVariant opExpirationTime READ opExpirationTime NOTIFY
+                 opExpirationTimeChanged FINAL)
   Q_PROPERTY(QByteArray opId READ opId NOTIFY opIdChanged FINAL)
   Q_PROPERTY(QString opMediaAttachments READ opMediaAttachments NOTIFY
                  opMediaAttachmentsChanged FINAL)
@@ -1337,6 +1342,7 @@ public:
   QString opAuthor() const;
   QString opBody() const;
   QString opDocAttachments() const;
+  QVariant opExpirationTime() const;
   QByteArray opId() const;
   QString opMediaAttachments() const;
   QVariant opTime() const;
@@ -1388,6 +1394,7 @@ Q_SIGNALS:
   void opAuthorChanged();
   void opBodyChanged();
   void opDocAttachmentsChanged();
+  void opExpirationTimeChanged();
   void opIdChanged();
   void opMediaAttachmentsChanged();
   void opTimeChanged();

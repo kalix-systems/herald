@@ -158,6 +158,9 @@ inline void messageBuilderOpBodyChanged(MessageBuilder *o) {
 inline void messageBuilderOpDocAttachmentsChanged(MessageBuilder *o) {
   Q_EMIT o->opDocAttachmentsChanged();
 }
+inline void messageBuilderOpExpirationTimeChanged(MessageBuilder *o) {
+  Q_EMIT o->opExpirationTimeChanged();
+}
 inline void messageBuilderOpIdChanged(MessageBuilder *o) {
   Q_EMIT o->opIdChanged();
 }
@@ -1498,6 +1501,8 @@ void message_builder_op_body_get(const MessageBuilder::Private *, QString *,
                                  qstring_set);
 void message_builder_op_doc_attachments_get(const MessageBuilder::Private *,
                                             QString *, qstring_set);
+option_qint64
+message_builder_op_expiration_time_get(const MessageBuilder::Private *);
 void message_builder_op_id_get(const MessageBuilder::Private *, QByteArray *,
                                qbytearray_set);
 void message_builder_op_media_attachments_get(const MessageBuilder::Private *,
@@ -2868,6 +2873,7 @@ ConversationContent::ConversationContent(QObject *parent)
           messageBuilderOpAuthorChanged,
           messageBuilderOpBodyChanged,
           messageBuilderOpDocAttachmentsChanged,
+          messageBuilderOpExpirationTimeChanged,
           messageBuilderOpIdChanged,
           messageBuilderOpMediaAttachmentsChanged,
           messageBuilderOpTimeChanged,
@@ -3674,6 +3680,7 @@ MessageBuilder::MessageBuilder(QObject *parent)
           messageBuilderOpAuthorChanged,
           messageBuilderOpBodyChanged,
           messageBuilderOpDocAttachmentsChanged,
+          messageBuilderOpExpirationTimeChanged,
           messageBuilderOpIdChanged,
           messageBuilderOpMediaAttachmentsChanged,
           messageBuilderOpTimeChanged,
@@ -3789,6 +3796,15 @@ QString MessageBuilder::opDocAttachments() const {
   QString v;
   message_builder_op_doc_attachments_get(m_d, &v, set_qstring);
   return v;
+}
+
+QVariant MessageBuilder::opExpirationTime() const {
+  QVariant v;
+  auto r = message_builder_op_expiration_time_get(m_d);
+  if (r.some) {
+    v.setValue(r.value);
+  }
+  return r;
 }
 
 QByteArray MessageBuilder::opId() const {
@@ -3978,6 +3994,7 @@ Messages::Messages(QObject *parent)
           messageBuilderOpAuthorChanged,
           messageBuilderOpBodyChanged,
           messageBuilderOpDocAttachmentsChanged,
+          messageBuilderOpExpirationTimeChanged,
           messageBuilderOpIdChanged,
           messageBuilderOpMediaAttachmentsChanged,
           messageBuilderOpTimeChanged,

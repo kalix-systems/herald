@@ -56,6 +56,7 @@ impl MessageBuilder {
         self.emit.op_time_changed();
         self.emit.op_doc_attachments_changed();
         self.emit.op_media_attachments_changed();
+        self.emit.op_expiration_time_changed();
     }
 
     pub(in crate::messages) fn try_clear_reply(
@@ -73,6 +74,7 @@ impl MessageBuilder {
 #[derive(Debug)]
 pub(super) struct Reply {
     pub(super) time: Time,
+    pub(super) expiration: Option<Time>,
     pub(super) body: Option<MessageBody>,
     pub(super) author: UserId,
     pub(super) doc_attachments_json: Option<String>,
@@ -86,6 +88,7 @@ impl Reply {
 
         Reply {
             time: data.time.insertion,
+            expiration: data.time.expiration,
             body: data.body.clone(),
             author: data.author,
             doc_attachments_json,

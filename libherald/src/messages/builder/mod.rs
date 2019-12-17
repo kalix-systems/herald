@@ -147,6 +147,10 @@ impl MessageBuilderTrait for MessageBuilder {
         Some(self.op.as_ref()?.time.into())
     }
 
+    fn op_expiration_time(&self) -> Option<i64> {
+        self.op.as_ref()?.expiration.map(Time::into)
+    }
+
     fn op_doc_attachments(&self) -> &str {
         self.op.as_ref().map(Reply::doc).unwrap_or("")
     }

@@ -373,7 +373,9 @@ fn message_builder() -> Object {
         // Media attachments metadata, serialized as JSON
         opMediaAttachments: Prop::new().simple(QString),
         // Document attachments metadata, serialized as JSON
-        opDocAttachments: Prop::new().simple(QString)
+        opDocAttachments: Prop::new().simple(QString),
+        // Time the message will expire, if ever
+        opExpirationTime: Prop::new().simple(Qint64).optional()
     );
 
     let funcs = functions! {
