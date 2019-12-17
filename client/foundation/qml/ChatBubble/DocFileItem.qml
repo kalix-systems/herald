@@ -19,7 +19,7 @@ Row {
         id: fileList
         anchors.top: parent.top
         interactive: false
-        width: contentItem.childrenRect.width
+        width: imageAttach ? 300 - downloadList.width : contentItem.childrenRect.width
         height: contentItem.childrenRect.height
         spacing: CmnCfg.smallMargin / 2
 
@@ -39,8 +39,11 @@ Row {
                 font.pixelSize: 13
                 font.weight: Font.Medium
                 elide: Text.ElideMiddle
-                Layout.maximumWidth: bubbleRoot.maxWidth - fileSize.width - fileIcon.width
-                                     - CmnCfg.smallMargin * 2 - downloadList.width
+                Layout.maximumWidth: imageAttach ? 300 - CmnCfg.smallMargin * 2
+                                                   - fileSize.width - fileIcon.width
+                                                   - downloadList.width : bubbleRoot.maxWidth
+                                                   - fileSize.width - fileIcon.width
+                                                   - CmnCfg.smallMargin * 2 - downloadList.width
             }
 
             Text {
