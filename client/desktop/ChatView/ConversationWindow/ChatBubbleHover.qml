@@ -75,7 +75,7 @@ MouseArea {
             source: "qrc:/reply-icon.svg"
             z: CmnCfg.overlayZ
 
-            onClicked: ownedConversation.builderOpMsgId = msgId
+            onClicked: ownedConversation.builder.opId = msgId
         }
     }
 }

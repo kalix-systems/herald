@@ -282,9 +282,7 @@ fn messages() -> Object {
         // Position in search results of focused item, e.g., 4 out of 7
         searchIndex: Prop::new().simple(QUint64),
 
-        builder: Prop::new().object(message_builder()),
-        // Id of the message the message builder is replying to, if any
-        builderOpMsgId: Prop::new().simple(QByteArray).optional().write()
+        builder: Prop::new().object(message_builder())
     };
 
     let item_props = item_props! {
@@ -366,7 +364,7 @@ fn message_builder() -> Object {
         mediaAttachments: Prop::new().object(media_attachments()),
 
         // Message id of the message being replied to, if any
-        opId: Prop::new().simple(QByteArray).optional(),
+        opId: Prop::new().simple(QByteArray).optional().write(),
         opAuthor: Prop::new().simple(QString).optional(),
         opBody: Prop::new().simple(QString).optional(),
         opTime: Prop::new().simple(Qint64).optional(),

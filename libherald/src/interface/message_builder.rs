@@ -287,6 +287,11 @@ pub trait MessageBuilderTrait {
 
     fn op_id(&self) -> Option<&[u8]>;
 
+    fn set_op_id(
+        &mut self,
+        value: Option<&[u8]>,
+    );
+
     fn op_media_attachments(&self) -> &str;
 
     fn op_time(&self) -> Option<i64>;
@@ -663,6 +668,23 @@ pub unsafe extern "C" fn message_builder_op_id_get(
         let str_: *const c_char = value.as_ptr() as (*const c_char);
         set(prop, str_, to_c_int(value.len()));
     }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn message_builder_op_id_set(
+    ptr: *mut MessageBuilder,
+    value: *const c_char,
+    len: c_int,
+) {
+    let obj = &mut *ptr;
+    let value = qba_slice!(value, len);
+    obj.set_op_id(Some(value));
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn message_builder_op_id_set_none(ptr: *mut MessageBuilder) {
+    let obj = &mut *ptr;
+    obj.set_op_id(None);
 }
 
 #[no_mangle]

@@ -1,5 +1,5 @@
 use super::*;
-use crate::messages::{Container, MsgData};
+use crate::messages::MsgData;
 
 impl MessageBuilder {
     pub(super) fn clear_reply_(&mut self) -> OpChanged {
@@ -18,7 +18,6 @@ impl MessageBuilder {
     pub(super) fn update_op_id(
         &mut self,
         op_msg_id: &MsgId,
-        container: &Container,
     ) -> OpChanged {
         let was_none = self.inner.op.is_none();
 
@@ -28,7 +27,7 @@ impl MessageBuilder {
             }
         }
 
-        let reply = match get_reply(&op_msg_id, container) {
+        let reply = match get_reply(&op_msg_id) {
             Some(reply) => reply,
             None => return self.clear_reply_(),
         };
@@ -43,10 +42,6 @@ impl MessageBuilder {
         }
 
         OpChanged::Changed
-    }
-
-    pub(in crate::messages) fn op_id_slice(&self) -> Option<ffi::MsgIdRef> {
-        Some(self.inner.op.as_ref()?.as_slice())
     }
 
     pub(super) fn emit_op_changed(&mut self) {
@@ -82,7 +77,7 @@ pub(super) struct Reply {
 }
 
 impl Reply {
-    pub(super) fn from_msg_data(data: MsgData) -> Reply {
+    pub(super) fn from_msg_data(data: &MsgData) -> Reply {
         let doc_attachments_json = messages_helper::doc_attachments_json(&data.attachments);
         let media_attachments_json = messages_helper::media_attachments_json(&data.attachments);
 
@@ -111,11 +106,8 @@ impl Reply {
     }
 }
 
-fn get_reply(
-    op_msg_id: &MsgId,
-    container: &Container,
-) -> Option<Reply> {
-    container.get_data(op_msg_id).map(Reply::from_msg_data)
+fn get_reply(op_msg_id: &MsgId) -> Option<Reply> {
+    messages_helper::container::access(op_msg_id, Reply::from_msg_data)
 }
 
 #[derive(Debug)]
