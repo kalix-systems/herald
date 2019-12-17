@@ -12,11 +12,13 @@ Popup {
     property int currentIndex: parent.currentIndex
     property var imageAttachments: parent.imageAttachments
     property real imageScale: 1.0
+    property real constrainedZoom: Math.max(0.5, Math.min(imageScale, 4.0))
     onClosed: galleryLoader.active = false
 
     height: root.height
     width: root.width
     anchors.centerIn: parent
+
     enter: Transition {
 
         NumberAnimation {
@@ -114,6 +116,8 @@ Popup {
             fill: CmnCfg.palette.white
             icon.height: 30
             icon.width: 30
+            enabled: imageScale < 4.0
+            opacity: enabled ? 1.0 : 0.5
             z: galleryPopup.z + 1
         }
         ButtonForm {
@@ -123,6 +127,8 @@ Popup {
             fill: CmnCfg.palette.white
             icon.height: 30
             icon.width: 30
+            enabled: imageScale > 0.5
+            opacity: enabled ? 1.0 : 0.5
             z: galleryPopup.z + 1
         }
     }
@@ -188,11 +194,10 @@ Popup {
         shortcut: StandardKey.ZoomIn
         onTriggered: {
             galleryPopup.imageScale += 0.3
-            flickable.resizeContent(
-                        galleryPopup.width * galleryPopup.imageScale,
-                        galleryPopup.height * galleryPopup.imageScale,
-                        Qt.point(image.width / 2 + image.x,
-                                 image.height / 2 + image.y))
+            flickable.resizeContent(galleryPopup.width * constrainedZoom,
+                                    galleryPopup.height * constrainedZoom,
+                                    Qt.point(image.width / 2 + image.x,
+                                             image.height / 2 + image.y))
         }
     }
 
@@ -201,11 +206,10 @@ Popup {
         shortcut: StandardKey.ZoomOut
         onTriggered: {
             galleryPopup.imageScale -= 0.3
-            flickable.resizeContent(
-                        galleryPopup.width * galleryPopup.imageScale,
-                        galleryPopup.height * galleryPopup.imageScale,
-                        Qt.point(image.width / 2 + image.x,
-                                 image.height / 2 + image.y))
+            flickable.resizeContent(galleryPopup.width * constrainedZoom,
+                                    galleryPopup.height * constrainedZoom,
+                                    Qt.point(image.width / 2 + image.x,
+                                             image.height / 2 + image.y))
         }
     }
 
@@ -238,11 +242,11 @@ Popup {
         id: pinchArea
         anchors.fill: parent
         onPinchUpdated: {
+
             galleryPopup.imageScale += (pinch.scale - pinch.previousScale) * 1.2
-            flickable.resizeContent(
-                        galleryPopup.width * galleryPopup.imageScale,
-                        galleryPopup.height * galleryPopup.imageScale,
-                        pinch.center)
+            flickable.resizeContent(galleryPopup.width * constrainedZoom,
+                                    galleryPopup.height * constrainedZoom,
+                                    pinch.center)
         }
     }
     ImageClipRow {
