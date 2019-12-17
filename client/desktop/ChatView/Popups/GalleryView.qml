@@ -171,12 +171,14 @@ Popup {
 
     Action {
         shortcut: StandardKey.MoveToNextChar
-        onTriggered: flickable.contentX += flickable.contentWidth * 0.1
+        onTriggered: if (galleryView.currentIndex < imageAttachments.length - 1)
+                         galleryView.currentIndex += 1
     }
 
     Action {
         shortcut: StandardKey.MoveToPreviousChar
-        onTriggered: flickable.contentX -= flickable.contentWidth * 0.1
+        onTriggered: if (galleryView.currentIndex > 0)
+                         galleryView.currentIndex -= 1
     }
 
     Action {
