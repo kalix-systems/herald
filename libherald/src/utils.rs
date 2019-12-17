@@ -11,7 +11,7 @@ pub fn strip_qrc(mut path: String) -> Option<String> {
 /// On Ios there are no QRC prefixes on directories
 /// from QT, this function is effectively a no-op
 #[cfg(target_os = "ios")]
-pub fn strip_qrc(mut path: String) -> Option<String> {
+pub fn strip_qrc(path: String) -> Option<String> {
     if path.len() < 7 {
         None
     } else {

@@ -69,9 +69,8 @@ int main(int argc, char* argv[])
   qmlRegisterSingletonType(QUrl("qrc:/qml/Common/CommonConfig.qml"),
                            "LibHerald", 1, 0, "CmnCfg");
 
-  qmlRegisterType<ObjectiveUtils>("LibHerald", 1, 0, "Whoop");
-
   QQmlApplicationEngine engine;
+  ObjectiveUtils::set_navbar_color();
 
   engine.load(QUrl(QStringLiteral("qrc:/qml/main.qml")));
   if (engine.rootObjects().isEmpty()) return -1;

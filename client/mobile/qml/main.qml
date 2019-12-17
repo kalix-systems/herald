@@ -50,8 +50,4 @@ ApplicationWindow {
         anchors.fill: parent
         sourceComponent: App {}
     }
-
-    Whoop {
-        Component.onCompleted: print("wat")
-    }
 }

@@ -9,8 +9,6 @@ ObjectiveUtils::ObjectiveUtils(){
 
 void ObjectiveUtils::set_navbar_color() {
        UIApplication *app =  [UIApplication sharedApplication];
-       app.windows.firstObject.rootViewController.view.backgroundColor =  [UIColor colorWithRed:0.23
-                                                                                         green:0.24
-                                                                                          blue:0.25
-                                                                                         alpha:1.0];
+       app.windows.firstObject.rootViewController.view.backgroundColor
+           =  [UIColor colorWithRed:0.23  green:0.24   blue:0.25   alpha:1.0];
 }
