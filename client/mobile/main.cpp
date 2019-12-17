@@ -70,7 +70,10 @@ int main(int argc, char* argv[])
                            "LibHerald", 1, 0, "CmnCfg");
 
   QQmlApplicationEngine engine;
+
+#ifdef Q_OS_IOS
   ObjectiveUtils::set_navbar_color();
+#endif
 
   engine.load(QUrl(QStringLiteral("qrc:/qml/main.qml")));
   if (engine.rootObjects().isEmpty()) return -1;

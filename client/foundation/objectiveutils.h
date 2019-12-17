@@ -9,7 +9,9 @@ class ObjectiveUtils : public QObject
 
 public:
   ObjectiveUtils();
+#ifdef Q_OS_IOS
   static void set_navbar_color();
+#endif
 };
 
 #endif // OBJECTIVEUTILS_H
