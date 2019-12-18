@@ -1,7 +1,13 @@
+#![allow(unused)]
+
 use async_trait::*;
-use futures::{FutureExt, Stream};
+use futures::{FutureExt, Stream, StreamExt, TryStreamExt};
 use herald_common::*;
 use server_errors::{Error, Error::*};
+use std::convert::TryFrom;
+
+use std::future::Future;
+use std::pin::Pin;
 use tokio_postgres::{types::Type, Client, Error as PgError, NoTls};
 
 mod pool;
@@ -44,7 +50,7 @@ pub trait ServerStore {
         keys: Keys,
     ) -> Result<Vec<(sig::PublicKey, Signed<Prekey>)>, Error>;
 
-    async fn add_to_group<Users: Stream<Item = UserId> + Send>(
+    async fn add_to_group<Users: Stream<Item = UserId> + TryStreamExt + Send + Unpin>(
         &mut self,
         users: Users,
         conv: ConversationId,
@@ -81,6 +87,28 @@ pub trait ServerStore {
     ) -> Result<register::Res, Error>;
 }
 
+macro_rules! sql {
+    ($path: literal) => {
+        include_str!(concat!("sql/", $path, ".sql"))
+    };
+}
+
+macro_rules! types {
+    ($($typ: ident,)+) => (types!($($typ),+));
+
+    ( $($typ:ident),* ) => {
+        &[$(Type::$typ, )*]
+    }
+}
+
+macro_rules! params {
+    ($($val:expr,)+) => (params!($($val),+));
+
+    ( $($val:expr),* ) => {
+        &[$(&$val, )*]
+    }
+}
+
 #[async_trait]
 impl ServerStore for Conn {
     async fn get_sigchain(
@@ -92,25 +120,128 @@ impl ServerStore for Conn {
 
     async fn recip_exists(
         &mut self,
-        user: Recip,
+        recip: Recip,
     ) -> Result<bool, Error> {
-        unimplemented!()
+        use Recip::*;
+
+        match recip {
+            One(single) => {
+                use SingleRecip::*;
+                match single {
+                    Group(cid) => {
+                        let stmt = self
+                            .prepare_typed(sql!("group_exists"), types![BYTEA])
+                            .await?;
+
+                        let row = self.query_one(&stmt, params![cid.as_slice()]).await?;
+
+                        Ok(row.get(0))
+                    }
+                    User(uid) => {
+                        let stmt = self
+                            .prepare_typed(sql!("user_exists"), types![TEXT])
+                            .await?;
+
+                        let res = self.query(&stmt, params![uid.as_str()]).await?;
+
+                        Ok(!res.is_empty())
+                    }
+                    Key(key) => {
+                        let stmt = self
+                            .prepare_typed(sql!("device_exists"), types![BYTEA])
+                            .await?;
+
+                        let row = self.query_one(&stmt, params![key.as_ref()]).await?;
+
+                        Ok(row.get(0))
+                    }
+                }
+            }
+            Many(recips) => {
+                use Recips::*;
+
+                // is this any or all?
+                match recips {
+                    Groups(cids) => unimplemented!(),
+                    Users(uids) => unimplemented!(),
+                    Keys(keys) => unimplemented!(),
+                }
+            }
+        }
     }
 
     async fn add_to_sigchain(
         &mut self,
         new: Signed<sig::SigUpdate>,
     ) -> Result<PKIResponse, Error> {
-        unimplemented!()
+        use sig::SigUpdate::*;
+
+        let (update, meta) = new.split();
+
+        match update {
+            Endorse(signed_uid) => unimplemented!(),
+            Deprecate(pk) => {
+                let signer_key = meta.signed_by();
+
+                let tx = self.transaction().await?;
+
+                let signer_key_exists_stmt = tx
+                    .prepare_typed(sql!("key_is_valid"), types![BYTEA])
+                    .await?;
+
+                let signer_key_exists: bool = tx
+                    .query_one(&signer_key_exists_stmt, params![signer_key.as_ref()])
+                    .await?
+                    .get(0);
+
+                if !signer_key_exists {
+                    return Ok(PKIResponse::DeadKey);
+                }
+
+                let dep_stmt = tx
+                    .prepare_typed(sql!("deprecate_key"), types![INT8, BYTEA, BYTEA, BYTEA])
+                    .await?;
+
+                let num_updated = tx
+                    .execute(
+                        &dep_stmt,
+                        params![
+                            meta.timestamp().as_i64(),
+                            signer_key.as_ref(),
+                            meta.sig().as_ref(),
+                            pk.as_ref(),
+                        ],
+                    )
+                    .await?;
+
+                if num_updated != 1 {
+                    return Ok(PKIResponse::Redundant);
+                }
+
+                tx.commit().await?;
+                Ok(PKIResponse::Success)
+            }
+        }
     }
 
     async fn user_of(
         &mut self,
         key: sig::PublicKey,
     ) -> Result<Option<UserId>, Error> {
-        unimplemented!()
+        let stmt = self.prepare_typed(sql!("user_of"), types![BYTEA]).await?;
+
+        Ok(self
+            .query(&stmt, params![key.as_ref()])
+            .await?
+            .into_iter()
+            .next()
+            .and_then(|row: tokio_postgres::Row| -> Option<UserId> {
+                let uid_str: &str = row.get(0);
+                UserId::try_from(uid_str).ok()
+            }))
     }
 
+    // what does this API do?
     async fn new_prekeys<Keys: Stream<Item = (Signed<Prekey>, Option<Prekey>)> + Send>(
         &mut self,
         keys: Keys,
@@ -125,12 +256,58 @@ impl ServerStore for Conn {
         unimplemented!()
     }
 
-    async fn add_to_group<Users: Stream<Item = UserId> + Send>(
+    async fn add_to_group<Users: Stream<Item = UserId> + Send + Unpin>(
         &mut self,
         users: Users,
         conv: ConversationId,
     ) -> Result<add_to_group::Res, Error> {
-        unimplemented!()
+        let tx = self.transaction().await?;
+
+        let insert_stmt = tx
+            .prepare_typed(sql!("add_to_group"), types![BYTEA, TEXT])
+            .await?;
+
+        let exists_stmt = tx.prepare_typed(sql!("user_exists"), types![TEXT]).await?;
+
+        let res: Result<(), Result<add_to_group::Res, Error>> = users
+            .map(Ok::<UserId, Result<add_to_group::Res, Error>>)
+            .try_for_each_concurrent(10, |u| {
+                let tx = &tx;
+                let insert_stmt = &insert_stmt;
+                let exists_stmt = &exists_stmt;
+
+                async move {
+                    let uid_str: &str = u.as_str();
+
+                    if !tx
+                        .query_one(exists_stmt, params![uid_str])
+                        .await
+                        .map_err(Error::from)
+                        .map_err(Err)?
+                        .get::<_, bool>(0)
+                    {
+                        return Err(Ok(add_to_group::Res::MissingUser(u)));
+                    }
+
+                    tx.execute(insert_stmt, params![uid_str])
+                        .await
+                        .map_err(Error::from)
+                        .map_err(Err)?;
+
+                    Ok(())
+                }
+            })
+            .await;
+
+        match res {
+            Err(v @ Ok(add_to_group::Res::MissingUser(_))) => return v,
+            Err(Err(e)) => return Err(e.into()),
+            _ => {}
+        };
+
+        tx.commit().await?;
+
+        Ok(add_to_group::Res::Success)
     }
 
     async fn leave_group<Convs: Stream<Item = ConversationId> + Send>(
@@ -138,7 +315,53 @@ impl ServerStore for Conn {
         user: UserId,
         groups: Convs,
     ) -> Result<leave_groups::Res, Error> {
-        unimplemented!()
+        let leave_stmt = self
+            .prepare_typed(sql!("leave_group"), types![TEXT, BYTEA])
+            .await?;
+
+        let exists_stmt = self
+            .prepare_typed(sql!("group_exists"), types![BYTEA])
+            .await?;
+
+        let uid_str: &str = user.as_str();
+
+        let res: Result<(), Result<leave_groups::Res, Error>> = groups
+            .map(Ok::<ConversationId, Result<leave_groups::Res, Error>>)
+            .try_for_each_concurrent(10, |cid| {
+                let conn = &self;
+                let exists_stmt = &exists_stmt;
+                let leave_stmt = &leave_stmt;
+
+                async move {
+                    let cid_slice: &[u8] = cid.as_slice();
+
+                    if !conn
+                        .query_one(exists_stmt, params![cid_slice])
+                        .await
+                        .map_err(Error::from)
+                        .map_err(Err)?
+                        .get::<_, bool>(0)
+                    {
+                        return Err(Ok(leave_groups::Res::Missing(cid)));
+                    }
+
+                    conn.execute(leave_stmt, params![uid_str])
+                        .await
+                        .map_err(Error::from)
+                        .map_err(Err)?;
+
+                    Ok(())
+                }
+            })
+            .await;
+
+        match res {
+            Err(v @ Ok(leave_groups::Res::Missing(_))) => return v,
+            Err(Err(e)) => return Err(e.into()),
+            _ => {}
+        };
+
+        Ok(leave_groups::Res::Success)
     }
 
     // should be done transactionally, returns Missing(r) for the first missing recip r
@@ -170,29 +393,60 @@ impl ServerStore for Conn {
         &mut self,
         init: Signed<UserId>,
     ) -> Result<register::Res, Error> {
-        unimplemented!()
+        let (user_id, meta) = init.split();
+
+        let tx = self.transaction().await?;
+
+        let exists_stmt = tx.prepare_typed(sql!("user_exists"), types![TEXT]).await?;
+
+        if !tx
+            .query(&exists_stmt, params![user_id.as_str()])
+            .await?
+            .is_empty()
+        {
+            return Ok(register::Res::UserAlreadyClaimed);
+        }
+
+        let add_key_stmt = tx
+            .prepare_typed(sql!("add_key"), types![BYTEA, BYTEA, INT8, BYTEA])
+            .await?;
+
+        //tx.execute(
+        //    &add_key_stmt,
+        //    params![
+        //        key.data().as_ref(),
+        //        key.signed_by().as_ref(),
+        //        key.timestamp().as_i64(),
+        //        key.sig().as_ref(),
+        //    ],
+        //)
+        //.await?;
+
+        let add_user_key_stmt = tx
+            .prepare_typed(sql!("add_user_key"), types![TEXT, BYTEA])
+            .await?;
+
+        //tx.execute(
+        //    &add_user_key_stmt,
+        //    params![user_id.as_str(), key.data().as_ref()],
+        //)
+        //.await?;
+        tx.commit().await?;
+
+        Ok(register::Res::Success)
     }
 }
 
-// macro_rules! sql {
-//     ($path: literal) => {
-//         include_str!(concat!("sql/", $path, ".sql"))
-//     };
-// }
-
-// macro_rules! types {
-//     ($($typ: ident,)+) => (types!($($typ),+));
-
-//     ( $($typ:ident),* ) => {
-//         &[$(Type::$typ, )*]
-//     }
-// }
-
-// macro_rules! params {
-//     ($($val:expr,)+) => (params!($($val),+));
-
-//     ( $($val:expr),* ) => {
-//         &[$(&$val, )*]
+// fn is_unique_violation(query_res: &Result<u64, PgError>) -> bool {
+//     use tokio_postgres::error::SqlState;
+//     if let Err(e) = query_res {
+//         if let Some(code) = e.code() {
+//             code == &SqlState::UNIQUE_VIOLATION
+//         } else {
+//             false
+//         }
+//     } else {
+//         false
 //     }
 // }
 
@@ -639,36 +893,28 @@ impl ServerStore for Conn {
 //         Ok(())
 //     }
 // }
-// impl Conn {
-//     pub async fn setup(&mut self) -> Result<(), Error> {
-//         // create
-//         self.batch_execute(include_str!(
-//             "../migrations/2019-09-21-221007_herald/up.sql"
-//         ))
-//         .await?;
-//         self.execute(sql!("user_exists_func"), params![]).await?;
-//         Ok(())
-//     }
+//
+impl Conn {
+    pub async fn setup(&mut self) -> Result<(), Error> {
+        // create
+        self.batch_execute(include_str!("../schema/up.sql")).await?;
+        self.execute(sql!("user_exists_func"), params![]).await?;
+        Ok(())
+    }
 
-//     pub async fn reset_all(&mut self) -> Result<(), Error> {
-//         let tx = self.transaction().await?;
+    pub async fn reset_all(&mut self) -> Result<(), Error> {
+        let tx = self.transaction().await?;
 
-//         // drop
-//         tx.batch_execute(include_str!(
-//             "../migrations/2019-09-21-221007_herald/down.sql"
-//         ))
-//         .await?;
+        // drop
+        tx.batch_execute(include_str!("../schema/down.sql")).await?;
 
-//         // create
-//         tx.batch_execute(include_str!(
-//             "../migrations/2019-09-21-221007_herald/up.sql"
-//         ))
-//         .await?;
-//         tx.execute(sql!("user_exists_func"), params![]).await?;
-//         tx.commit().await?;
-//         Ok(())
-//     }
-// }
+        // create
+        tx.batch_execute(include_str!("../schema/up.sql")).await?;
+        tx.execute(sql!("user_exists_func"), params![]).await?;
+        tx.commit().await?;
+        Ok(())
+    }
+}
 
 // #[cfg(test)]
 // mod tests;

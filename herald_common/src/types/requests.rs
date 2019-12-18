@@ -76,7 +76,7 @@ pub mod add_to_group {
     #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
     pub enum Res {
         Success,
-        MissingUsers(UserId),
+        MissingUser(UserId),
     }
 }
 

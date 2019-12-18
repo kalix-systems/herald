@@ -82,9 +82,14 @@ impl TryFrom<&str> for UserId {
 pub struct ConversationId(pub UQ);
 
 impl ConversationId {
-    /// Creates a new random ConversationId
+    /// Creates a new random `ConversationId`
     pub fn gen_new() -> Self {
         Self(UQ::gen_new())
+    }
+
+    /// Returns byte slice from `ConversationId`
+    pub fn as_slice(&self) -> &[u8] {
+        self.0.as_ref()
     }
 }
 
