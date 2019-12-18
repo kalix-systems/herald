@@ -1,69 +1,67 @@
 use super::*;
 
-pub mod keys_of {
+#[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
+pub enum Recips {
+    Groups(Vec<ConversationId>),
+    Users(Vec<UserId>),
+    Keys(Vec<sig::PublicKey>),
+}
+
+#[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
+pub enum SingleRecip {
+    Group(ConversationId),
+    User(UserId),
+    Key(sig::PublicKey),
+}
+
+#[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
+pub enum Recip {
+    One(SingleRecip),
+    Many(Recips),
+}
+
+pub mod get_sigchain {
     use super::*;
 
     /// [`UserId`] to fetch keys of
     pub type Req = UserId;
 
     /// [`UserMeta`] found for requested [`UserId`], `None` where the user was not found.
-    pub type Res = Option<UserMeta>;
+    pub type Res = Option<sig::SigChain>;
 }
 
-pub mod key_info {
+pub mod recip_exists {
     use super::*;
 
-    /// [`sig::PublicKey`] to get info of.
-    pub type Req = sig::PublicKey;
+    /// [`Recip`] to check existence of
+    pub type Req = Recip;
 
-    /// [`sig::PKMeta`] found for requested [`sig::PublicKey`], `None` where the key was not
-    /// found.
-    pub type Res = Option<sig::PKMeta>;
-}
-
-pub mod user_exists {
-    use super::*;
-
-    /// [`UserId`] to check existence of
-    pub type Req = UserId;
-    /// `true` if requested user exists, false otherwise
+    /// `true` if requested [`Recip`] exists, false otherwise
     pub type Res = bool;
 }
 
-pub mod new_key {
+pub mod new_sig {
     use super::*;
 
-    /// New endorsed key
-    pub type Req = Signed<sig::Endorsement>;
-    /// Result from trying to add key
+    pub type Req = Signed<sig::SigUpdate>;
     pub type Res = PKIResponse;
 }
 
-pub mod dep_key {
+pub mod new_prekeys {
     use super::*;
 
-    /// New deprecated key
-    pub type Req = Signed<sig::Deprecation>;
-    /// Result from trying to deprecate key
-    pub type Res = PKIResponse;
+    pub type Req = Vec<(Signed<Prekey>, Option<Prekey>)>;
+    pub type Res = Vec<PKIResponse>;
 }
 
-pub mod new_prekey {
+pub mod get_prekeys {
     use super::*;
 
-    /// Signed prekey to be added
-    pub type Req = Signed<Prekey>;
-    /// Replaced prekey
-    pub type Res = Option<Prekey>;
-}
+    /// Public key to fetch prekeys for
+    pub type Req = Vec<sig::PublicKey>;
 
-pub mod get_prekey {
-    use super::*;
-
-    /// Public key to fetch prekey for
-    pub type Req = sig::PublicKey;
-    /// Corresponding prekey
-    pub type Res = Option<Signed<Prekey>>;
+    /// Corresponding prekeys
+    pub type Res = Vec<(sig::PublicKey, Signed<Prekey>)>;
 }
 
 pub mod add_to_group {
@@ -72,40 +70,31 @@ pub mod add_to_group {
     #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
     pub struct Req {
         users: Vec<UserId>,
-        conversation: Vec<ConversationId>,
+        conversation: ConversationId,
     }
 
     #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
     pub enum Res {
         Success,
-        Missing(Vec<UserId>, Vec<ConversationId>),
+        MissingConversation(ConversationId),
+        MissingUsers(UserId),
     }
 }
 
-pub mod leave_group {
+pub mod leave_groups {
     use super::*;
 
-    #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
-    pub struct Req {
-        conversation: Vec<ConversationId>,
-    }
+    pub type Req = Vec<ConversationId>;
 
     #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
     pub enum Res {
         Success,
-        Missing(Vec<ConversationId>),
+        Missing(ConversationId),
     }
 }
 
 pub mod push {
     use super::*;
-
-    #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
-    pub enum Recip {
-        Groups(Vec<ConversationId>),
-        Users(Vec<UserId>),
-        Keys(Vec<sig::PublicKey>),
-    }
 
     #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
     pub struct Req {
@@ -116,42 +105,29 @@ pub mod push {
     #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
     pub enum Res {
         Success,
-        Missing(Recip),
+        Missing(SingleRecip),
     }
 }
 
-#[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
-pub enum Request {
-    KeysOf(keys_of::Req),
-    KeyInfo(key_info::Req),
-    UserExists(user_exists::Req),
+macro_rules! proto_enum {
+    ($name:ident, $inner:ident) => {
+        #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
+        pub enum $name {
+            GetSigchain(get_sigchain::$inner),
+            RecipExists(recip_exists::$inner),
 
-    NewKey(new_key::Req),
-    DepKey(dep_key::Req),
+            NewSig(new_sig::$inner),
 
-    NewPrekey(new_prekey::Req),
-    GetPrekey(get_prekey::Req),
+            NewPrekey(new_prekeys::$inner),
+            GetPrekey(get_prekeys::$inner),
 
-    AddToGroup(add_to_group::Req),
-    LeaveGroup(leave_group::Req),
+            AddToGroup(add_to_group::$inner),
+            LeaveGroups(leave_groups::$inner),
 
-    Push(push::Req),
+            Push(push::$inner),
+        }
+    };
 }
 
-#[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
-pub enum Response {
-    KeysOf(Box<keys_of::Res>),
-    KeyInfo(Box<key_info::Res>),
-    UserExists(user_exists::Res),
-
-    NewKey(new_key::Res),
-    DepKey(dep_key::Res),
-
-    NewPrekey(new_prekey::Res),
-    GetPrekey(get_prekey::Res),
-
-    AddToGroup(add_to_group::Res),
-    LeaveGroup(leave_group::Res),
-
-    Push(push::Res),
-}
+proto_enum!(Request, Req);
+proto_enum!(Response, Res);

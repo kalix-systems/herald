@@ -91,8 +91,7 @@ impl ConversationId {
 #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
 pub struct UserMeta {
     pub initial: Signed<UserId>,
-    pub initial_dep: Option<Signed<sig::Deprecation>>,
-    pub keys: BTreeMap<sig::PublicKey, sig::PKMeta>,
+    pub sig_chain: Vec<Signed<sig::SigUpdate>>,
 }
 
 #[derive(Ser, De, Hash, Debug, Clone, Copy, PartialEq, Eq)]

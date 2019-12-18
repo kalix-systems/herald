@@ -1,5 +1,5 @@
 use async_trait::*;
-use futures::FutureExt;
+use futures::{FutureExt, Stream};
 use herald_common::*;
 use server_errors::{Error, Error::*};
 use tokio_postgres::{types::Type, Client, Error as PgError, NoTls};
@@ -7,81 +7,57 @@ use tokio_postgres::{types::Type, Client, Error as PgError, NoTls};
 mod pool;
 pub use pool::*;
 
+pub enum FoundDevs {
+    Found(Vec<sig::PublicKey>),
+    Missing(SingleRecip),
+}
+
 #[async_trait]
 pub trait ServerStore {
-    async fn device_exists(
+    async fn get_sigchain(
         &mut self,
-        pk: &sig::PublicKey,
+        user: UserId,
+    ) -> Result<Option<sig::SigChain>, Error>;
+
+    async fn recip_exists(
+        &mut self,
+        user: Recip,
     ) -> Result<bool, Error>;
 
-    async fn add_prekeys(
+    async fn add_to_sigchain(
         &mut self,
-        pres: &Signed<Prekey>,
-    ) -> Result<Option<Prekey>, Error>;
-
-    async fn get_prekey(
-        &mut self,
-        keys: sig::PublicKey,
-    ) -> Result<Option<Signed<Prekey>>, Error>;
-
-    async fn register_user(
-        &mut self,
-        user_id: UserId,
-        key: Signed<sig::PublicKey>,
-    ) -> Result<register::Res, Error>;
-
-    async fn add_key(
-        &mut self,
-        key: Signed<sig::PublicKey>,
+        new: Signed<sig::SigUpdate>,
     ) -> Result<PKIResponse, Error>;
 
-    async fn read_key(
+    async fn new_prekeys<Keys: Stream<Item = (Signed<Prekey>, Option<Prekey>)>>(
         &mut self,
-        key: sig::PublicKey,
-    ) -> Result<sig::PKMeta, Error>;
+        keys: Keys,
+    ) -> Result<new_prekeys::Res, Error>;
 
-    async fn deprecate_key(
+    async fn get_random_prekeys<Keys: Stream<Item = sig::PublicKey>>(
         &mut self,
-        signed_key: Signed<sig::PublicKey>,
-    ) -> Result<PKIResponse, Error>;
+        keys: Keys,
+    ) -> Result<Vec<(sig::PublicKey, Signed<Prekey>)>, Error>;
 
-    async fn user_exists(
+    async fn add_to_group<Users: Stream<Item = UserId>>(
         &mut self,
-        uid: &UserId,
-    ) -> Result<bool, Error>;
+        users: Users,
+        conv: ConversationId,
+    ) -> Result<add_to_group::Res, Error>;
 
-    async fn key_is_valid(
+    async fn leave_group<Convs: Stream<Item = ConversationId>>(
         &mut self,
-        key: sig::PublicKey,
-    ) -> Result<bool, Error>;
+        user: UserId,
+        groups: Convs,
+    ) -> Result<leave_groups::Res, Error>;
 
-    async fn get_pending(
+    // should be done transactionally, returns Missing(r) for the first missing recip r
+    // only adds to pending when it finds all devices
+    async fn add_to_pending_and_get_valid_devs(
         &mut self,
-        key: sig::PublicKey,
-        limit: u32,
-    ) -> Result<Vec<Push>, Error>;
-
-    async fn expire_pending(
-        &mut self,
-        key: sig::PublicKey,
-        limit: u32,
-    ) -> Result<(), Error>;
-
-    async fn valid_keys(
-        &mut self,
-        uid: &UserId,
-    ) -> Result<Vec<sig::PublicKey>, Error>;
-
-    async fn read_meta(
-        &mut self,
-        uid: &UserId,
-    ) -> Result<UserMeta, Error>;
-
-    async fn add_pending(
-        &mut self,
-        keys: Vec<sig::PublicKey>,
-        msgs: &[Push],
-    ) -> Result<(), Error>;
+        recip: &Recip,
+        msg: &Push,
+    ) -> Result<FoundDevs, Error>;
 }
 
 // macro_rules! sql {
