@@ -169,6 +169,8 @@ fn utils() -> Object {
         const compareByteArray(bs1: QByteArray, bs2: QByteArray) => Bool,
         const isValidRandId(bs: QByteArray) => Bool,
         const saveFile(fpath: QString, target_path: QString) => Bool,
+        // Returns image dimensions of the image at `path`, serialized as JSON
+        const imageDimensions(path: QString) => QString,
     };
 
     obj! {

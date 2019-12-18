@@ -2606,6 +2606,8 @@ Utils::Private *utils_new(UtilsPtrBundle *);
 void utils_free(Utils::Private *);
 bool utils_compare_byte_array(const Utils::Private *, const char *, int,
                               const char *, int);
+void utils_image_dimensions(const Utils::Private *, const ushort *, int,
+                            QString *, qstring_set);
 bool utils_is_valid_rand_id(const Utils::Private *, const char *, int);
 bool utils_save_file(const Utils::Private *, const ushort *, int,
                      const ushort *, int);
@@ -4405,6 +4407,11 @@ bool Utils::compareByteArray(const QByteArray &bs1,
                              const QByteArray &bs2) const {
   return utils_compare_byte_array(m_d, bs1.data(), bs1.size(), bs2.data(),
                                   bs2.size());
+}
+QString Utils::imageDimensions(const QString &path) const {
+  QString s;
+  utils_image_dimensions(m_d, path.utf16(), path.size(), &s, set_qstring);
+  return s;
 }
 bool Utils::isValidRandId(const QByteArray &bs) const {
   return utils_is_valid_rand_id(m_d, bs.data(), bs.size());

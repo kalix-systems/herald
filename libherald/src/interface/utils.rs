@@ -36,6 +36,11 @@ pub trait UtilsTrait {
         bs2: &[u8],
     ) -> bool;
 
+    fn image_dimensions(
+        &self,
+        path: String,
+    ) -> String;
+
     fn is_valid_rand_id(
         &self,
         bs: &[u8],
@@ -82,6 +87,22 @@ pub unsafe extern "C" fn utils_compare_byte_array(
     let bs1 = { qba_slice!(bs1_str, bs1_len) };
     let bs2 = { qba_slice!(bs2_str, bs2_len) };
     obj.compare_byte_array(bs1, bs2)
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn utils_image_dimensions(
+    ptr: *const Utils,
+    path_str: *const c_ushort,
+    path_len: c_int,
+    data: *mut QString,
+    set: fn(*mut QString, str_: *const c_char, len: c_int),
+) {
+    let obj = &*ptr;
+    let mut path = String::new();
+    set_string_from_utf16(&mut path, path_str, path_len);
+    let ret = obj.image_dimensions(path);
+    let str_: *const c_char = ret.as_ptr() as (*const c_char);
+    set(data, str_, ret.len() as i32);
 }
 
 #[no_mangle]
