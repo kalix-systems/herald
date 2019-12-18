@@ -7,8 +7,8 @@ use tokio_postgres::{types::Type, Client, Error as PgError, NoTls};
 mod pool;
 pub use pool::*;
 
-pub enum FoundDevs {
-    Found(Vec<sig::PublicKey>),
+pub enum PushedTo {
+    PushedTo(Vec<(sig::PublicKey, i64)>),
     Missing(SingleRecip),
 }
 
@@ -28,6 +28,11 @@ pub trait ServerStore {
         &mut self,
         new: Signed<sig::SigUpdate>,
     ) -> Result<PKIResponse, Error>;
+
+    async fn user_of(
+        &mut self,
+        key: sig::PublicKey,
+    ) -> Result<Option<UserId>, Error>;
 
     async fn new_prekeys<Keys: Stream<Item = (Signed<Prekey>, Option<Prekey>)>>(
         &mut self,
@@ -57,7 +62,23 @@ pub trait ServerStore {
         &mut self,
         recip: &Recip,
         msg: &Push,
-    ) -> Result<FoundDevs, Error>;
+    ) -> Result<PushedTo, Error>;
+
+    async fn get_pending(
+        &mut self,
+        of: sig::PublicKey,
+    ) -> Vec<(Push, i64)>;
+
+    async fn del_pending<S: Stream<Item = i64>>(
+        &mut self,
+        of: sig::PublicKey,
+        items: S,
+    ) -> Result<(), Error>;
+
+    async fn new_user(
+        &mut self,
+        init: Signed<UserId>,
+    ) -> Result<register::Res, Error>;
 }
 
 // macro_rules! sql {
