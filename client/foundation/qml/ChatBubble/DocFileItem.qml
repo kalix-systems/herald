@@ -5,77 +5,83 @@ import LibHerald 1.0
 import QtGraphicalEffects 1.12
 import "./../"
 import Qt.labs.platform 1.1
-//import QtQuick.Dialogs 1.3
+import QtQuick.Dialogs 1.3
 import "../js/utils.mjs" as Utils
 
-ListView {
-    id: docFileItemRoot
-    interactive: false
-    width: 200
-    delegate: Item {
-        id: fileRow
-        width: Math.max(bubbleRoot.width - CmnCfg.smallMargin * 2, 100)
-        height: 24
-        clip: true
+Row {
+    property alias fileModel: fileList.model
+    property alias downloadModel: downloadList.model
+    height: childrenRect.height
+    width: childrenRect.width
+    spacing: CmnCfg.smallMargin / 2
 
-        Image {
-            anchors.left: parent.left
-            id: fileIcon
-            anchors.verticalCenter: parent.verticalCenter
-            source: "qrc:/file-icon.svg"
-            height: 20
-            width: height
-        }
+    ListView {
+        id: fileList
+        anchors.top: parent.top
+        interactive: false
+        width: imageAttach ? 300 - downloadList.width : contentItem.childrenRect.width
+        height: contentItem.childrenRect.height
+        spacing: CmnCfg.smallMargin / 2
 
-        TextMetrics {
-            id: nameMetrics
-            text: name
-            elide: Text.ElideMiddle
-            elideWidth: fileRow.width - fileSize.width - 40 - CmnCfg.smallMargin * 2
-        }
+        delegate: RowLayout {
+            clip: true
 
-        Text {
-            anchors.left: fileIcon.right
-            anchors.leftMargin: CmnCfg.smallMargin
-            anchors.verticalCenter: parent.verticalCenter
-            id: fileName
-            color: CmnCfg.palette.black
-            text: nameMetrics.elidedText
-            font.family: CmnCfg.chatFont.name
-            font.pixelSize: 13
-            font.weight: Font.Medium
-        }
+            // Constrain the maximum width of fileName to force elision when necessary
+            readonly property real _constraint: fileSize.width + fileIcon.width
+                                                + downloadList.width + CmnCfg.smallMargin * 2
+            ButtonForm {
+                id: fileIcon
+                icon.source: "qrc:/file-icon.svg"
+                icon.height: 20
+                icon.width: height
+            }
 
-        Text {
-            id: fileSize
-            anchors.left: fileName.right
-            anchors.leftMargin: CmnCfg.smallMargin
-            anchors.verticalCenter: parent.verticalCenter
-            text: Utils.friendlyFileSize(size)
-            font.family: CmnCfg.chatFont.name
-            font.pixelSize: 10
-            font.weight: Font.Light
-            color: CmnCfg.palette.darkGrey
-        }
+            Text {
+                id: fileName
+                color: CmnCfg.palette.black
+                text: name
+                font.family: CmnCfg.chatFont.name
+                font.pixelSize: 13
+                font.weight: Font.Medium
+                elide: Text.ElideMiddle
 
-        ButtonForm {
-            id: downloadIcon
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.right: parent.right
-            source: "qrc:/download-icon.svg"
-            height: 20
-            width: height
-            fill: CmnCfg.palette.black
-            onClicked: {
-                fileChooser.open()
+                Layout.maximumWidth: (imageAttach ? 300 : bubbleRoot.maxWidth) - parent._constraint
+            }
+
+            Text {
+                id: fileSize
+                text: Utils.friendlyFileSize(size)
+                font.family: CmnCfg.chatFont.name
+                font.pixelSize: 10
+                font.weight: Font.Light
+                color: CmnCfg.palette.darkGrey
             }
         }
+    }
 
-        FileDialog {
-            id: fileChooser
-            folder: StandardPaths.writableLocation(
-                        StandardPaths.DesktopLocation)
-            onAccepted: Herald.utils.saveFile(path, fileUrl)
+    ListView {
+        id: downloadList
+        height: fileList.height
+        width: contentItem.childrenRect.width
+        anchors.top: parent.top
+        spacing: CmnCfg.smallMargin / 2
+        interactive: false
+        delegate: ButtonForm {
+            id: downloadIcon
+            source: "qrc:/download-icon.svg"
+            icon.width: 20
+            icon.height: 20
+            fill: CmnCfg.palette.black
+            onClicked: fileChooser.open()
+
+            FileDialog {
+                id: fileChooser
+                selectFolder: true
+                folder: StandardPaths.writableLocation(
+                            StandardPaths.DesktopLocation)
+                onAccepted: Herald.utils.saveFile(path, fileUrl)
+                selectExisting: false
+            }
         }
     }
 }

@@ -74,7 +74,10 @@ ListView {
                 lastAuthor: outbound ? qsTr("You") : convContent.messages.lastAuthor
                 lastTimestamp: !convContent.messages.isEmpty ? Utils.friendlyTimestamp(
                                                                    convContent.messages.lastTime) : ""
-                labelColor: CmnCfg.palette.black
+                labelColor: convoRectangle.state
+                            !== "" ? CmnCfg.palette.black : CmnCfg.palette.lightGrey
+                secondaryLabelColor: convoRectangle.state
+                                     !== "" ? CmnCfg.palette.offBlack : CmnCfg.palette.medGrey
                 labelSize: 14
             }
 

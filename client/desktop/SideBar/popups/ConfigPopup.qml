@@ -124,7 +124,6 @@ Window {
                 Layout.fillHeight: true
                 contentHeight: col.height
                 boundsBehavior: Flickable.StopAtBounds
-                boundsMovement: Flickable.StopAtBounds
                 Column {
                     id: col
                     spacing: CmnCfg.smallMargin

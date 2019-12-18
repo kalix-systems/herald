@@ -173,20 +173,6 @@ impl Messages {
         self.container.op_body(index)
     }
 
-    pub(crate) fn set_builder_op_msg_id_(
-        &mut self,
-        id: Option<ffi::MsgIdRef>,
-    ) {
-        use builder::OpChanged;
-
-        match err!(self.builder.set_op_id(id, &self.container)) {
-            OpChanged::Changed => {
-                self.emit.builder_op_msg_id_changed();
-            }
-            OpChanged::NotChanged => {}
-        }
-    }
-
     pub(crate) fn set_search_hint_(
         &mut self,
         scroll_position: f32,
@@ -417,10 +403,6 @@ impl Messages {
         &mut self.builder
     }
 
-    pub(crate) fn builder_op_msg_id_(&self) -> Option<ffi::MsgIdRef> {
-        self.builder.op_id_slice()
-    }
-
     pub(crate) fn op_msg_id_(
         &self,
         index: usize,
@@ -534,5 +516,17 @@ impl Messages {
         chars_per_line: u8,
     ) {
         self.elider.set_char_per_line(chars_per_line as usize);
+    }
+
+    pub(crate) fn save_all_attachments_(
+        &self,
+        index: usize,
+        dest: String,
+    ) -> bool {
+        let dest = none!(crate::utils::strip_qrc(dest), false);
+        let data = none!(self.container.access_by_index(index, MsgData::clone), false);
+
+        spawn!(err!(data.save_all_attachments(dest)), false);
+        true
     }
 }

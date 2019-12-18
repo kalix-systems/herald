@@ -8,9 +8,10 @@ import "qrc:/imports" as Imports
 
 ScrollView {
     width: parent.width
-    height: wrapperRow.height
-    ScrollBar.horizontal: ScrollBar {}
+    height: wrapperRow.height + 10
 
+    clip: true
+    ScrollBar.horizontal.policy: contentWidth > width ? ScrollBar.AlwaysOn : ScrollBar.AlwaysOff
     Row {
         id: wrapperRow
         height: 100
@@ -27,7 +28,6 @@ ScrollView {
                 Image {
                     id: image
                     anchors.fill: parent
-                    // anchors.margins: CmnCfg.smallMargin
                     source: "file:" + mediaAttachmentPath
                     fillMode: Image.PreserveAspectCrop
                     asynchronous: true

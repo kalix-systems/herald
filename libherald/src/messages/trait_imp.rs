@@ -143,13 +143,6 @@ impl Interface for Messages {
         self.set_search_hint_(scroll_position, scroll_height)
     }
 
-    fn set_builder_op_msg_id(
-        &mut self,
-        id: Option<ffi::MsgIdRef>,
-    ) {
-        self.set_builder_op_msg_id_(id)
-    }
-
     fn op_body(
         &self,
         index: usize,
@@ -191,10 +184,6 @@ impl Interface for Messages {
 
     fn builder_mut(&mut self) -> &mut MessageBuilder {
         self.builder_mut_()
-    }
-
-    fn builder_op_msg_id(&self) -> Option<ffi::MsgIdRef> {
-        self.builder_op_msg_id_()
     }
 
     fn op_msg_id(
@@ -304,5 +293,13 @@ impl Interface for Messages {
         chars_per_line: u8,
     ) {
         self.set_elision_chars_per_line_(chars_per_line)
+    }
+
+    fn save_all_attachments(
+        &self,
+        index: u64,
+        dest: String,
+    ) -> bool {
+        self.save_all_attachments_(index as usize, dest)
     }
 }

@@ -52,12 +52,6 @@ Page {
                                                     ScrollBar.AlwaysOn,
                                                     ScrollBar.AsNeeded)
 
-        Connections {
-            target: ownedConversation
-            onRowsInserted: {
-                convWindow.contentY = convWindow.contentHeight
-            }
-        }
 
         Connections {
             target: conversationList

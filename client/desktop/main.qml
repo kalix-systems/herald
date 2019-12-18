@@ -30,10 +30,19 @@ ApplicationWindow {
         }
     }
 
-    CvPopups.ImageViewerPopup {
-        id: imageViewerPopup
+    //    CvPopups.ImageViewerPopup {
+    //        id: imageViewerPopup
+    //    }
+    Loader {
+        id: galleryLoader
+        anchors.fill: active ? parent : undefined
+        property var imageAttachments
+        property int currentIndex: 0
+        active: false
+        sourceComponent: CvPopups.GalleryView {
+            id: galleryView
+        }
     }
-
     Loader {
         id: appLoader
         active: Herald.configInit

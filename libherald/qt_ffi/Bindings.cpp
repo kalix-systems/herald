@@ -158,6 +158,9 @@ inline void messageBuilderOpBodyChanged(MessageBuilder *o) {
 inline void messageBuilderOpDocAttachmentsChanged(MessageBuilder *o) {
   Q_EMIT o->opDocAttachmentsChanged();
 }
+inline void messageBuilderOpExpirationTimeChanged(MessageBuilder *o) {
+  Q_EMIT o->opExpirationTimeChanged();
+}
 inline void messageBuilderOpIdChanged(MessageBuilder *o) {
   Q_EMIT o->opIdChanged();
 }
@@ -172,9 +175,6 @@ inline void messageSearchRegexSearchChanged(MessageSearch *o) {
 }
 inline void messageSearchSearchPatternChanged(MessageSearch *o) {
   Q_EMIT o->searchPatternChanged();
-}
-inline void messagesBuilderOpMsgIdChanged(Messages *o) {
-  Q_EMIT o->builderOpMsgIdChanged();
 }
 inline void messagesIsEmptyChanged(Messages *o) { Q_EMIT o->isEmptyChanged(); }
 inline void messagesLastAuthorChanged(Messages *o) {
@@ -806,7 +806,7 @@ bool conversations_remove_conversation(Conversations::Private *, quint64);
 bool conversations_toggle_filter_regex(Conversations::Private *);
 }
 extern "C" {
-void document_attachments_data_document_attachment_path(
+void document_attachments_data_document_attachment_name(
     const DocumentAttachments::Private *, int, QString *, qstring_set);
 quint64 document_attachments_data_document_attachment_size(
     const DocumentAttachments::Private *, int);
@@ -872,9 +872,9 @@ Qt::ItemFlags DocumentAttachments::flags(const QModelIndex &i) const {
   return flags;
 }
 
-QString DocumentAttachments::documentAttachmentPath(int row) const {
+QString DocumentAttachments::documentAttachmentName(int row) const {
   QString s;
-  document_attachments_data_document_attachment_path(m_d, row, &s, set_qstring);
+  document_attachments_data_document_attachment_name(m_d, row, &s, set_qstring);
   return s;
 }
 
@@ -888,7 +888,7 @@ QVariant DocumentAttachments::data(const QModelIndex &index, int role) const {
   case 0:
     switch (role) {
     case Qt::UserRole + 0:
-      return QVariant::fromValue(documentAttachmentPath(index.row()));
+      return QVariant::fromValue(documentAttachmentName(index.row()));
     case Qt::UserRole + 1:
       return QVariant::fromValue(documentAttachmentSize(index.row()));
     }
@@ -909,7 +909,7 @@ int DocumentAttachments::role(const char *name) const {
 }
 QHash<int, QByteArray> DocumentAttachments::roleNames() const {
   QHash<int, QByteArray> names = QAbstractItemModel::roleNames();
-  names.insert(Qt::UserRole + 0, "documentAttachmentPath");
+  names.insert(Qt::UserRole + 0, "documentAttachmentName");
   names.insert(Qt::UserRole + 1, "documentAttachmentSize");
   return names;
 }
@@ -1498,8 +1498,13 @@ void message_builder_op_body_get(const MessageBuilder::Private *, QString *,
                                  qstring_set);
 void message_builder_op_doc_attachments_get(const MessageBuilder::Private *,
                                             QString *, qstring_set);
+option_qint64
+message_builder_op_expiration_time_get(const MessageBuilder::Private *);
 void message_builder_op_id_get(const MessageBuilder::Private *, QByteArray *,
                                qbytearray_set);
+void message_builder_op_id_set(MessageBuilder::Private *, const char *bytes,
+                               int len);
+void message_builder_op_id_set_none(MessageBuilder::Private *);
 void message_builder_op_media_attachments_get(const MessageBuilder::Private *,
                                               QString *, qstring_set);
 option_qint64 message_builder_op_time_get(const MessageBuilder::Private *);
@@ -2081,11 +2086,6 @@ extern "C" {
 Messages::Private *messages_new(MessagesPtrBundle *);
 void messages_free(Messages::Private *);
 MessageBuilder::Private *messages_builder_get(const Messages::Private *);
-void messages_builder_op_msg_id_get(const Messages::Private *, QByteArray *,
-                                    qbytearray_set);
-void messages_builder_op_msg_id_set(Messages::Private *, const char *bytes,
-                                    int len);
-void messages_builder_op_msg_id_set_none(Messages::Private *);
 bool messages_is_empty_get(const Messages::Private *);
 void messages_last_author_get(const Messages::Private *, QString *,
                               qstring_set);
@@ -2108,10 +2108,26 @@ bool messages_delete_message(Messages::Private *, quint64);
 qint64 messages_index_by_id(const Messages::Private *, const char *, int);
 qint64 messages_next_search_match(Messages::Private *);
 qint64 messages_prev_search_match(Messages::Private *);
+bool messages_save_all_attachments(const Messages::Private *, quint64,
+                                   const ushort *, int);
 void messages_set_elision_char_count(Messages::Private *, quint16);
 void messages_set_elision_chars_per_line(Messages::Private *, quint8);
 void messages_set_elision_line_count(Messages::Private *, quint8);
 void messages_set_search_hint(Messages::Private *, float, float);
+}
+extern "C" {
+ReplyWidthCalc::Private *reply_width_calc_new(ReplyWidthCalcPtrBundle *);
+void reply_width_calc_free(ReplyWidthCalc::Private *);
+double reply_width_calc_doc(const ReplyWidthCalc::Private *, double, double,
+                            double, double, double, double, double, double);
+double reply_width_calc_hybrid(const ReplyWidthCalc::Private *, double, double,
+                               double, double, double, double, double, double);
+double reply_width_calc_image(const ReplyWidthCalc::Private *, double, double,
+                              double, double, double, double, double);
+double reply_width_calc_text(const ReplyWidthCalc::Private *, double, double,
+                             double, double, double, double, double);
+double reply_width_calc_unknown(const ReplyWidthCalc::Private *, double, double,
+                                double, double);
 }
 extern "C" {
 quint32 users_data_color(const Users::Private *, int);
@@ -2852,6 +2868,7 @@ ConversationContent::ConversationContent(QObject *parent)
           messageBuilderOpAuthorChanged,
           messageBuilderOpBodyChanged,
           messageBuilderOpDocAttachmentsChanged,
+          messageBuilderOpExpirationTimeChanged,
           messageBuilderOpIdChanged,
           messageBuilderOpMediaAttachmentsChanged,
           messageBuilderOpTimeChanged,
@@ -2882,7 +2899,6 @@ ConversationContent::ConversationContent(QObject *parent)
             o->beginRemoveRows(QModelIndex(), first, last);
           },
           [](MessageBuilder *o) { o->endRemoveRows(); },
-          messagesBuilderOpMsgIdChanged,
           messagesIsEmptyChanged,
           messagesLastAuthorChanged,
           messagesLastBodyChanged,
@@ -3658,6 +3674,7 @@ MessageBuilder::MessageBuilder(QObject *parent)
           messageBuilderOpAuthorChanged,
           messageBuilderOpBodyChanged,
           messageBuilderOpDocAttachmentsChanged,
+          messageBuilderOpExpirationTimeChanged,
           messageBuilderOpIdChanged,
           messageBuilderOpMediaAttachmentsChanged,
           messageBuilderOpTimeChanged,
@@ -3775,10 +3792,26 @@ QString MessageBuilder::opDocAttachments() const {
   return v;
 }
 
+QVariant MessageBuilder::opExpirationTime() const {
+  QVariant v;
+  auto r = message_builder_op_expiration_time_get(m_d);
+  if (r.some) {
+    v.setValue(r.value);
+  }
+  return r;
+}
+
 QByteArray MessageBuilder::opId() const {
   QByteArray v;
   message_builder_op_id_get(m_d, &v, set_qbytearray);
   return v;
+}
+void MessageBuilder::setOpId(const QByteArray &v) {
+  if (v.isNull()) {
+    message_builder_op_id_set_none(m_d);
+  } else {
+    message_builder_op_id_set(m_d, v.data(), v.size());
+  }
 }
 
 QString MessageBuilder::opMediaAttachments() const {
@@ -3962,6 +3995,7 @@ Messages::Messages(QObject *parent)
           messageBuilderOpAuthorChanged,
           messageBuilderOpBodyChanged,
           messageBuilderOpDocAttachmentsChanged,
+          messageBuilderOpExpirationTimeChanged,
           messageBuilderOpIdChanged,
           messageBuilderOpMediaAttachmentsChanged,
           messageBuilderOpTimeChanged,
@@ -3992,7 +4026,6 @@ Messages::Messages(QObject *parent)
             o->beginRemoveRows(QModelIndex(), first, last);
           },
           [](MessageBuilder *o) { o->endRemoveRows(); },
-          messagesBuilderOpMsgIdChanged,
           messagesIsEmptyChanged,
           messagesLastAuthorChanged,
           messagesLastBodyChanged,
@@ -4070,19 +4103,6 @@ void Messages::initHeaderData() {}
 const MessageBuilder *Messages::builder() const { return m_builder; }
 MessageBuilder *Messages::builder() { return m_builder; }
 
-QByteArray Messages::builderOpMsgId() const {
-  QByteArray v;
-  messages_builder_op_msg_id_get(m_d, &v, set_qbytearray);
-  return v;
-}
-void Messages::setBuilderOpMsgId(const QByteArray &v) {
-  if (v.isNull()) {
-    messages_builder_op_msg_id_set_none(m_d);
-  } else {
-    messages_builder_op_msg_id_set(m_d, v.data(), v.size());
-  }
-}
-
 bool Messages::isEmpty() const { return messages_is_empty_get(m_d); }
 
 QString Messages::lastAuthor() const {
@@ -4148,6 +4168,9 @@ qint64 Messages::indexById(const QByteArray &msg_id) const {
 }
 qint64 Messages::nextSearchMatch() { return messages_next_search_match(m_d); }
 qint64 Messages::prevSearchMatch() { return messages_prev_search_match(m_d); }
+bool Messages::saveAllAttachments(quint64 index, const QString &dest) const {
+  return messages_save_all_attachments(m_d, index, dest.utf16(), dest.size());
+}
 void Messages::setElisionCharCount(quint16 char_count) {
   return messages_set_elision_char_count(m_d, char_count);
 }
@@ -4159,6 +4182,65 @@ void Messages::setElisionLineCount(quint8 line_count) {
 }
 void Messages::setSearchHint(float scrollbar_position, float scrollbar_height) {
   return messages_set_search_hint(m_d, scrollbar_position, scrollbar_height);
+}
+
+ReplyWidthCalc::ReplyWidthCalc(bool /*owned*/, QObject *parent)
+    : QObject(parent), m_d(nullptr), m_ownsPrivate(false) {}
+
+ReplyWidthCalc::ReplyWidthCalc(QObject *parent)
+    : QObject(parent),
+      m_d(reply_width_calc_new(new ReplyWidthCalcPtrBundle{this})),
+      m_ownsPrivate(true) {}
+
+ReplyWidthCalc::~ReplyWidthCalc() {
+  if (m_ownsPrivate) {
+    reply_width_calc_free(m_d);
+  }
+}
+double ReplyWidthCalc::doc(double bubble_max_width, double message_label_width,
+                           double message_body_width, double stamp_width,
+                           double reply_label_width, double reply_body_width,
+                           double reply_ts_width,
+                           double reply_file_clip_width) const {
+  return reply_width_calc_doc(m_d, bubble_max_width, message_label_width,
+                              message_body_width, stamp_width,
+                              reply_label_width, reply_body_width,
+                              reply_ts_width, reply_file_clip_width);
+}
+double ReplyWidthCalc::hybrid(double bubble_max_width,
+                              double message_label_width,
+                              double message_body_width, double stamp_width,
+                              double reply_label_width, double reply_body_width,
+                              double reply_ts_width,
+                              double reply_file_clip_width) const {
+  return reply_width_calc_hybrid(m_d, bubble_max_width, message_label_width,
+                                 message_body_width, stamp_width,
+                                 reply_label_width, reply_body_width,
+                                 reply_ts_width, reply_file_clip_width);
+}
+double ReplyWidthCalc::image(double bubble_max_width,
+                             double message_label_width,
+                             double message_body_width, double stamp_width,
+                             double reply_label_width, double reply_body_width,
+                             double reply_ts_width) const {
+  return reply_width_calc_image(
+      m_d, bubble_max_width, message_label_width, message_body_width,
+      stamp_width, reply_label_width, reply_body_width, reply_ts_width);
+}
+double ReplyWidthCalc::text(double bubble_max_width, double message_label_width,
+                            double message_body_width, double stamp_width,
+                            double reply_label_width, double reply_body_width,
+                            double reply_ts_width) const {
+  return reply_width_calc_text(
+      m_d, bubble_max_width, message_label_width, message_body_width,
+      stamp_width, reply_label_width, reply_body_width, reply_ts_width);
+}
+double ReplyWidthCalc::unknown(double bubble_max_width,
+                               double message_label_width,
+                               double message_body_width,
+                               double unknown_body_width) const {
+  return reply_width_calc_unknown(m_d, bubble_max_width, message_label_width,
+                                  message_body_width, unknown_body_width);
 }
 
 Users::Users(bool /*owned*/, QObject *parent)

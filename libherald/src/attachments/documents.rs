@@ -3,12 +3,13 @@ use crate::interface::{
     DocumentAttachmentsTrait as Interface,
 };
 use crate::{err, none};
+use std::{ffi::OsStr, path::PathBuf};
 
 /// Document attachments
 pub struct DocumentAttachments {
     emit: Emitter,
     model: List,
-    contents: Vec<String>,
+    contents: Vec<PathBuf>,
 }
 
 impl Interface for DocumentAttachments {
@@ -31,11 +32,19 @@ impl Interface for DocumentAttachments {
         self.contents.len()
     }
 
-    fn document_attachment_path(
+    fn document_attachment_name(
         &self,
         index: usize,
-    ) -> &str {
-        none!(self.contents.get(index), "")
+    ) -> String {
+        none!(
+            self.contents
+                .get(index)
+                .map(AsRef::as_ref)
+                .and_then(std::path::Path::file_name)
+                .and_then(OsStr::to_str)
+                .map(str::to_string),
+            "".to_owned()
+        )
     }
 
     fn document_attachment_size(
@@ -56,8 +65,6 @@ impl DocumentAttachments {
         &mut self,
         path: std::path::PathBuf,
     ) -> Option<()> {
-        let path = path.into_os_string().into_string().ok()?;
-
         self.model
             .begin_insert_rows(self.contents.len(), self.contents.len());
         self.contents.push(path);
@@ -85,6 +92,8 @@ impl DocumentAttachments {
         self.model.begin_reset_model();
         let all = std::mem::replace(&mut self.contents, Vec::new());
         self.model.end_reset_model();
-        all
+        all.into_iter()
+            .map(|p| p.into_os_string().to_string_lossy().to_string())
+            .collect()
     }
 }

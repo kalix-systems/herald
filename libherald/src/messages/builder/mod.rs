@@ -7,7 +7,7 @@ use crate::{
 use herald_common::{Time, UserId};
 use heraldcore::{
     message::{attachments::is_media, *},
-    types::{ConversationId, InvalidRandomIdLength, MsgId},
+    types::{ConversationId, MsgId},
 };
 use std::{convert::TryInto, path::PathBuf};
 
@@ -147,6 +147,10 @@ impl MessageBuilderTrait for MessageBuilder {
         Some(self.op.as_ref()?.time.into())
     }
 
+    fn op_expiration_time(&self) -> Option<i64> {
+        self.op.as_ref()?.expiration.map(Time::into)
+    }
+
     fn op_doc_attachments(&self) -> &str {
         self.op.as_ref().map(Reply::doc).unwrap_or("")
     }
@@ -242,6 +246,21 @@ impl MessageBuilderTrait for MessageBuilder {
     fn has_media_attachment(&self) -> bool {
         !self.media_attachments.is_empty()
     }
+
+    fn set_op_id(
+        &mut self,
+        op_msg_id: Option<ffi::MsgIdRef>,
+    ) {
+        match op_msg_id {
+            Some(op_msg_id) => {
+                let op_msg_id = err!(op_msg_id.try_into());
+                self.update_op_id(&op_msg_id);
+            }
+            None => {
+                self.clear_reply_();
+            }
+        };
+    }
 }
 
 impl MessageBuilder {
@@ -250,19 +269,5 @@ impl MessageBuilder {
         cid: ConversationId,
     ) {
         self.inner.conversation_id(cid);
-    }
-
-    pub(super) fn set_op_id(
-        &mut self,
-        op_msg_id: Option<ffi::MsgIdRef>,
-        container: &super::Container,
-    ) -> Result<OpChanged, InvalidRandomIdLength> {
-        match op_msg_id {
-            Some(op_msg_id) => {
-                let op_msg_id = op_msg_id.try_into()?;
-                Ok(self.update_op_id(&op_msg_id, container))
-            }
-            None => Ok(self.clear_reply_()),
-        }
     }
 }

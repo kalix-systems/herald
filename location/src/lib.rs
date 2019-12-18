@@ -21,7 +21,7 @@ impl fmt::Display for Location {
             "{file}:{line}:{column}",
             file = self.file,
             line = self.line,
-            column = self.file
+            column = self.col
         )
     }
 }

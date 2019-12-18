@@ -2,11 +2,11 @@ import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
 import LibHerald 1.0
-import QtGraphicalEffects 1.12
+import QtGraphicalEffects 1.1
 
 ColumnLayout {
     id: wrapperCol
-    property real maxWidth: Math.min(bubbleRoot.maxWidth, 600)
+    property real maxWidth: Math.min(contentRoot.maxWidth, 600)
     property var mediaParsed
     // callback triggered whenever an image is tapped
     property var imageTappedCallBack: function (source) {
@@ -17,12 +17,15 @@ ColumnLayout {
 
             return String("file:" + object.path) === String(source)
         })
-
-        imageViewerPopup.sourceAtc = mediaParsed
-        imageViewerPopup.index = currentIndex
-        imageViewerPopup.reset()
-        imageViewerPopup.show()
-        imageViewerPopup.raise()
+        galleryLoader.imageAttachments = mediaParsed
+        galleryLoader.currentIndex = currentIndex
+        galleryLoader.active = true
+        galleryLoader.item.open()
+        // imageViewerPopup.sourceAtc = mediaParsed
+        // imageViewerPopup.index = currentIndex
+        // imageViewerPopup.reset()
+        // imageViewerPopup.show()
+        // imageViewerPopup.raise()
     }
 
     spacing: 0
@@ -57,8 +60,6 @@ ColumnLayout {
 
     Loader {
         id: imageLoader
-
-        Layout.margins: CmnCfg.smallMargin
 
         DropShadow {
             source: parent.item

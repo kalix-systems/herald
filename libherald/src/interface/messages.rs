@@ -4,7 +4,6 @@ pub struct MessagesQObject;
 
 pub struct MessagesEmitter {
     pub(super) qobject: Arc<AtomicPtr<MessagesQObject>>,
-    pub(super) builder_op_msg_id_changed: fn(*mut MessagesQObject),
     pub(super) is_empty_changed: fn(*mut MessagesQObject),
     pub(super) last_author_changed: fn(*mut MessagesQObject),
     pub(super) last_body_changed: fn(*mut MessagesQObject),
@@ -28,7 +27,6 @@ impl MessagesEmitter {
     pub fn clone(&mut self) -> MessagesEmitter {
         MessagesEmitter {
             qobject: self.qobject.clone(),
-            builder_op_msg_id_changed: self.builder_op_msg_id_changed,
             is_empty_changed: self.is_empty_changed,
             last_author_changed: self.last_author_changed,
             last_body_changed: self.last_body_changed,
@@ -47,14 +45,6 @@ impl MessagesEmitter {
         let n: *const MessagesQObject = null();
         self.qobject
             .store(n as *mut MessagesQObject, Ordering::SeqCst);
-    }
-
-    pub fn builder_op_msg_id_changed(&mut self) {
-        let ptr = self.qobject.load(Ordering::SeqCst);
-
-        if !ptr.is_null() {
-            (self.builder_op_msg_id_changed)(ptr);
-        }
     }
 
     pub fn is_empty_changed(&mut self) {
@@ -259,13 +249,6 @@ pub trait MessagesTrait {
 
     fn builder_mut(&mut self) -> &mut MessageBuilder;
 
-    fn builder_op_msg_id(&self) -> Option<&[u8]>;
-
-    fn set_builder_op_msg_id(
-        &mut self,
-        value: Option<&[u8]>,
-    );
-
     fn is_empty(&self) -> bool;
 
     fn last_author(&self) -> Option<&str>;
@@ -318,6 +301,12 @@ pub trait MessagesTrait {
     fn next_search_match(&mut self) -> i64;
 
     fn prev_search_match(&mut self) -> i64;
+
+    fn save_all_attachments(
+        &self,
+        index: u64,
+        dest: String,
+    ) -> bool;
 
     fn set_elision_char_count(
         &mut self,
@@ -522,6 +511,7 @@ pub unsafe fn messages_new_inner(ptr_bundle: *mut MessagesPtrBundle) -> Messages
         builder_op_author_changed,
         builder_op_body_changed,
         builder_op_doc_attachments_changed,
+        builder_op_expiration_time_changed,
         builder_op_id_changed,
         builder_op_media_attachments_changed,
         builder_op_time_changed,
@@ -537,7 +527,6 @@ pub unsafe fn messages_new_inner(ptr_bundle: *mut MessagesPtrBundle) -> Messages
         builder_end_move_rows,
         builder_begin_remove_rows,
         builder_end_remove_rows,
-        messages_builder_op_msg_id_changed,
         messages_is_empty_changed,
         messages_last_author_changed,
         messages_last_body_changed,
@@ -608,6 +597,7 @@ pub unsafe fn messages_new_inner(ptr_bundle: *mut MessagesPtrBundle) -> Messages
         op_author_changed: builder_op_author_changed,
         op_body_changed: builder_op_body_changed,
         op_doc_attachments_changed: builder_op_doc_attachments_changed,
+        op_expiration_time_changed: builder_op_expiration_time_changed,
         op_id_changed: builder_op_id_changed,
         op_media_attachments_changed: builder_op_media_attachments_changed,
         op_time_changed: builder_op_time_changed,
@@ -635,7 +625,6 @@ pub unsafe fn messages_new_inner(ptr_bundle: *mut MessagesPtrBundle) -> Messages
     );
     let messages_emit = MessagesEmitter {
         qobject: Arc::new(AtomicPtr::new(messages)),
-        builder_op_msg_id_changed: messages_builder_op_msg_id_changed,
         is_empty_changed: messages_is_empty_changed,
         last_author_changed: messages_last_author_changed,
         last_body_changed: messages_last_body_changed,
@@ -716,6 +705,19 @@ pub unsafe extern "C" fn messages_prev_search_match(ptr: *mut Messages) -> i64 {
 }
 
 #[no_mangle]
+pub unsafe extern "C" fn messages_save_all_attachments(
+    ptr: *const Messages,
+    index: u64,
+    dest_str: *const c_ushort,
+    dest_len: c_int,
+) -> bool {
+    let obj = &*ptr;
+    let mut dest = String::new();
+    set_string_from_utf16(&mut dest, dest_str, dest_len);
+    obj.save_all_attachments(index, dest)
+}
+
+#[no_mangle]
 pub unsafe extern "C" fn messages_set_elision_char_count(
     ptr: *mut Messages,
     char_count: u16,
@@ -755,37 +757,6 @@ pub unsafe extern "C" fn messages_set_search_hint(
 #[no_mangle]
 pub unsafe extern "C" fn messages_builder_get(ptr: *mut Messages) -> *mut MessageBuilder {
     (&mut *ptr).builder_mut()
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn messages_builder_op_msg_id_get(
-    ptr: *const Messages,
-    prop: *mut QByteArray,
-    set: fn(*mut QByteArray, *const c_char, c_int),
-) {
-    let obj = &*ptr;
-    let value = obj.builder_op_msg_id();
-    if let Some(value) = value {
-        let str_: *const c_char = value.as_ptr() as (*const c_char);
-        set(prop, str_, to_c_int(value.len()));
-    }
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn messages_builder_op_msg_id_set(
-    ptr: *mut Messages,
-    value: *const c_char,
-    len: c_int,
-) {
-    let obj = &mut *ptr;
-    let value = qba_slice!(value, len);
-    obj.set_builder_op_msg_id(Some(value));
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn messages_builder_op_msg_id_set_none(ptr: *mut Messages) {
-    let obj = &mut *ptr;
-    obj.set_builder_op_msg_id(None);
 }
 
 #[no_mangle]
@@ -1242,6 +1213,7 @@ pub struct MessagesPtrBundle {
     builder_op_author_changed: fn(*mut MessageBuilderQObject),
     builder_op_body_changed: fn(*mut MessageBuilderQObject),
     builder_op_doc_attachments_changed: fn(*mut MessageBuilderQObject),
+    builder_op_expiration_time_changed: fn(*mut MessageBuilderQObject),
     builder_op_id_changed: fn(*mut MessageBuilderQObject),
     builder_op_media_attachments_changed: fn(*mut MessageBuilderQObject),
     builder_op_time_changed: fn(*mut MessageBuilderQObject),
@@ -1257,7 +1229,6 @@ pub struct MessagesPtrBundle {
     builder_end_move_rows: fn(*mut MessageBuilderQObject),
     builder_begin_remove_rows: fn(*mut MessageBuilderQObject, usize, usize),
     builder_end_remove_rows: fn(*mut MessageBuilderQObject),
-    messages_builder_op_msg_id_changed: fn(*mut MessagesQObject),
     messages_is_empty_changed: fn(*mut MessagesQObject),
     messages_last_author_changed: fn(*mut MessagesQObject),
     messages_last_body_changed: fn(*mut MessagesQObject),

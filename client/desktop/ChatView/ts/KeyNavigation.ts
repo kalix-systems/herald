@@ -14,22 +14,29 @@ export function convWindowKeyHandler(
       chatListView.contentY -= chatListView.height;
       break;
     case Qt.Key_Home:
-      chatListView.positionViewAtBeginning();
+      toBeginning(chatScrollBar);
       break;
     case Qt.Key_End:
-      chatListView.positionViewAtEnd();
+      toEnd(chatScrollBar);
       break;
     case Qt.Key_Up:
-      chatScrollBar.decrease();
+      moveUp(chatScrollBar);
       break;
     case Qt.Key_Down:
-      chatScrollBar.increase();
+      moveDown(chatScrollBar);
+      break;
+    case Qt.Key_G:
+      if (event.modifiers & Qt.ShiftModifier) {
+        toEnd(chatScrollBar);
+      } else {
+        toBeginning(chatScrollBar);
+      }
       break;
     case Qt.Key_J:
-      chatScrollBar.increase();
+      moveDown(chatScrollBar);
       break;
     case Qt.Key_K:
-      chatScrollBar.decrease();
+      moveUp(chatScrollBar);
       break;
     case Qt.Key_Space:
       if (event.modifiers & Qt.ShiftModifier) {
@@ -40,4 +47,20 @@ export function convWindowKeyHandler(
       break;
   }
   chatScrollBar.policy = asNeededPolicy;
+}
+
+function moveDown(chatScrollBar: ScrollBar): void {
+  chatScrollBar.increase();
+}
+
+function moveUp(chatScrollBar: ScrollBar): void {
+  chatScrollBar.decrease();
+}
+
+function toEnd(chatScrollBar: ScrollBar): void {
+  chatScrollBar.position = 1;
+}
+
+function toBeginning(chatScrollBar: ScrollBar): void {
+  chatScrollBar.position = 0;
 }

@@ -141,7 +141,7 @@ export function safeStringOrDefault(maybeString, fallback) {
     return "";
 }
 export function initialize(name) {
-    const tokens = name.split(' ').slice(0, 3);
+    const tokens = name.split(" ").slice(0, 3);
     var str = "";
     tokens.forEach(function anon(string) {
         str += string[0].toUpperCase();
@@ -154,18 +154,19 @@ export function initialize(name) {
  * */
 export function receiptCodeSwitch(receiptCode) {
     switch (receiptCode) {
-        case 0: {
+        case 0 /* NoAck */: {
             return "";
         }
-        case 1: {
+        case 1 /* Received */: {
             return "qrc:/single-check-receipt-icon.svg";
         }
-        case 2: {
+        case 2 /* Read */: {
             return "qrc:/double-check-receipt-icon.svg";
         }
-        case 3: {
+        case 3 /* AckTerminal */: {
             return "qrc:/single-check-receipt-icon.svg";
         }
+        default:
+            return "";
     }
-    return "";
 }

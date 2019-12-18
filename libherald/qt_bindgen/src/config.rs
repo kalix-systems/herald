@@ -52,7 +52,9 @@ fn objects() -> BTreeMap<String, Rc<Object>> {
        message_builder(),
 
        media_attachments(),
-       document_attachments()
+       document_attachments(),
+
+       reply_width_calc()
     }
 }
 
@@ -95,6 +97,70 @@ fn errors() -> Object {
 
     obj! {
         Errors: Obj::new().props(properties).funcs(functions)
+    }
+}
+
+fn reply_width_calc() -> Object {
+    let functions = functions! {
+        const unknown(
+            bubble_max_width: Double,
+
+            message_label_width: Double,
+            message_body_width: Double,
+
+            unknown_body_width: Double
+        ) => Double,
+
+        const doc(
+            bubble_max_width: Double,
+
+            message_label_width: Double,
+            message_body_width: Double,
+            stamp_width: Double,
+
+            reply_label_width: Double,
+            reply_body_width: Double,
+            reply_ts_width: Double,
+            reply_file_clip_width: Double
+        ) => Double,
+
+        const text(
+            bubble_max_width: Double,
+            message_label_width: Double,
+            message_body_width: Double,
+            stamp_width: Double,
+
+            reply_label_width: Double,
+            reply_body_width: Double,
+            reply_ts_width: Double
+        ) => Double,
+
+        const image(
+            bubble_max_width: Double,
+            message_label_width: Double,
+            message_body_width: Double,
+            stamp_width: Double,
+
+            reply_label_width: Double,
+            reply_body_width: Double,
+            reply_ts_width: Double
+        ) => Double,
+
+        const hybrid(
+            bubble_max_width: Double,
+            message_label_width: Double,
+            message_body_width: Double,
+            stamp_width: Double,
+
+            reply_label_width: Double,
+            reply_body_width: Double,
+            reply_ts_width: Double,
+            reply_file_clip_width: Double
+        ) => Double,
+    };
+
+    obj! {
+        ReplyWidthCalc: Obj::new().funcs(functions)
     }
 }
 
@@ -216,9 +282,7 @@ fn messages() -> Object {
         // Position in search results of focused item, e.g., 4 out of 7
         searchIndex: Prop::new().simple(QUint64),
 
-        builder: Prop::new().object(message_builder()),
-        // Id of the message the message builder is replying to, if any
-        builderOpMsgId: Prop::new().simple(QByteArray).optional().write()
+        builder: Prop::new().object(message_builder())
     };
 
     let item_props = item_props! {
@@ -280,6 +344,7 @@ fn messages() -> Object {
         mut setElisionCharCount(char_count: QUint16) => Void,
         mut setElisionCharsPerLine(chars_per_line: QUint8) => Void,
         const indexById(msg_id: QByteArray) => Qint64,
+        const saveAllAttachments(index: QUint64, dest: QString) => Bool,
     };
 
     obj! {
@@ -299,14 +364,16 @@ fn message_builder() -> Object {
         mediaAttachments: Prop::new().object(media_attachments()),
 
         // Message id of the message being replied to, if any
-        opId: Prop::new().simple(QByteArray).optional(),
+        opId: Prop::new().simple(QByteArray).optional().write(),
         opAuthor: Prop::new().simple(QString).optional(),
         opBody: Prop::new().simple(QString).optional(),
         opTime: Prop::new().simple(Qint64).optional(),
         // Media attachments metadata, serialized as JSON
         opMediaAttachments: Prop::new().simple(QString),
         // Document attachments metadata, serialized as JSON
-        opDocAttachments: Prop::new().simple(QString)
+        opDocAttachments: Prop::new().simple(QString),
+        // Time the message will expire, if ever
+        opExpirationTime: Prop::new().simple(Qint64).optional()
     );
 
     let funcs = functions! {
@@ -399,8 +466,8 @@ fn media_attachments() -> Object {
 
 fn document_attachments() -> Object {
     let item_props = item_props! {
-        // Path the the attachment
-        documentAttachmentPath: ItemProp::new(QString),
+        // File name
+        documentAttachmentName: ItemProp::new(QString).get_by_value(),
         documentAttachmentSize: ItemProp::new(QUint64)
     };
 

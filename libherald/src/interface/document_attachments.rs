@@ -175,10 +175,10 @@ pub trait DocumentAttachmentsTrait {
     ) {
     }
 
-    fn document_attachment_path(
+    fn document_attachment_name(
         &self,
         index: usize,
-    ) -> &str;
+    ) -> String;
 
     fn document_attachment_size(
         &self,
@@ -292,14 +292,14 @@ pub unsafe extern "C" fn document_attachments_sort(
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn document_attachments_data_document_attachment_path(
+pub unsafe extern "C" fn document_attachments_data_document_attachment_name(
     ptr: *const DocumentAttachments,
     row: c_int,
     d: *mut QString,
     set: fn(*mut QString, *const c_char, len: c_int),
 ) {
     let obj = &*ptr;
-    let data = obj.document_attachment_path(to_usize(row).unwrap_or(0));
+    let data = obj.document_attachment_name(to_usize(row).unwrap_or(0));
     let str_: *const c_char = data.as_ptr() as *const c_char;
     set(d, str_, to_c_int(data.len()));
 }

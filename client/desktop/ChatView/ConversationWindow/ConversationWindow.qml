@@ -25,6 +25,10 @@ ListView {
         easing.type: Easing.InCubic
     }
 
+    // disable these, we're handling them differently
+    keyNavigationEnabled: false
+    keyNavigationWraps: false
+
     // TODO this only clips because of highlight rectangles, figure out a way to
     // not use clip
     clip: true
@@ -53,19 +57,29 @@ ListView {
     boundsBehavior: ListView.StopAtBounds
     boundsMovement: Flickable.StopAtBounds
 
-    model: ownedConversation
+    model: chatPane.ownedConversation
 
     Component.onCompleted: {
-        ownedConversation.setElisionLineCount(38)
-        ownedConversation.setElisionCharCount(38 * 40)
-        ownedConversation.setElisionCharsPerLine(40)
+        model.setElisionLineCount(38)
+        model.setElisionCharCount(38 * 40)
+        model.setElisionCharsPerLine(40)
         positionViewAtEnd()
+
+        // heuristic overshoot
+        chatScrollBarInner.setPosition(2)
+    }
+
+    Connections {
+        target: model
+        onRowsInserted: {
+            chatListView.contentY = chatListView.contentHeight
+        }
     }
 
     delegate: Row {
         id: chatRow
         readonly property string proxyBody: body
-        property string proxyReceiptImage: CUtils.receiptStatusSwitch(
+        property string proxyReceiptImage: Utils.receiptCodeSwitch(
                                                receiptStatus)
         readonly property color userColor: CmnCfg.avatarColors[Herald.users.colorById(
                                                                    author)]
@@ -88,40 +102,23 @@ ListView {
             rightMargin: CmnCfg.margin
             leftMargin: CmnCfg.smallMargin
         }
+        layoutDirection: outbound ? Qt.RightToLeft : Qt.LeftToRight
 
         spacing: CmnCfg.margin
         bottomPadding: isTail ? CmnCfg.mediumMargin / 2 : CmnCfg.smallMargin / 2
         topPadding: isHead ? CmnCfg.mediumMargin / 2 : CmnCfg.smallMargin / 2
 
-        Component {
-            id: std
-            CB.StandardBubble {
-                body: proxyBody
-                friendlyTimestamp: timestamp
-                authorName: authName
-                receiptImage: proxyReceiptImage
-                authorColor: userColor
-                elided: chatRow.elided
-                medAttachments: mediaAttachments
-                documentAttachments: docAttachments
-                imageAttach: mediaAttachments.length !== 0
-                docAttach: docAttachments.length !== 0
-                replyId: opMsgId
-                reply: replyType > 0
-                maxWidth: chatListView.width * 0.66
-                messageModelData: chatRow.messageModelData
-            }
-        }
         AvatarMain {
             iconColor: userColor
             initials: authName[0].toUpperCase()
-            opacity: isTail && !outbound ? 1 : 0
             size: 28
+            opacity: isTail ? 1 : 0
             anchors {
                 bottom: parent.bottom
                 margins: CmnCfg.margin
                 bottomMargin: parent.bottomPadding
             }
+
             z: 10
             pfpPath: parent.pfpUrl
             avatarHeight: 28
@@ -129,29 +126,13 @@ ListView {
 
         CB.ChatBubble {
             id: bubbleActual
-            color: CmnCfg.palette.lightGrey
-            senderColor: userColor
-            convContainer: convWindow
-            highlight: matchStatus === 2
-            content: std
-            maxWidth: chatListView.width * 0.66
+            convContainer: chatListView
+            defaultWidth: chatListView.width * 0.66
+            messageModelData: chatRow.messageModelData
 
-            ChatBubbleHover {}
-        }
-
-        AvatarMain {
-            iconColor: userColor
-            initials: authName[0].toUpperCase()
-            opacity: isTail && outbound ? 1 : 0
-            size: 28
-            anchors {
-                bottom: parent.bottom
-                margins: CmnCfg.margin
-                bottomMargin: parent.bottomPadding
+            ChatBubbleHover {
+                download: bubbleActual.imageAttach || bubbleActual.docAttach
             }
-            z: 10
-            pfpPath: parent.pfpUrl
-            avatarHeight: 28
         }
     }
 }
