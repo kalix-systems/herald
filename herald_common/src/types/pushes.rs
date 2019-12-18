@@ -20,6 +20,18 @@ pub struct PushMeta {
     pub timestamp: Time,
 }
 
+pub mod register {
+    use super::*;
+
+    pub type Claim = Signed<UserId>;
+
+    #[derive(Ser, De, Debug, Clone, Copy, PartialEq, Eq)]
+    pub enum Res {
+        Success,
+        UserAlreadyClaimed,
+        BadSig,
+    }
+}
 pub mod login {
     use super::*;
 

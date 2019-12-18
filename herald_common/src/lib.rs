@@ -12,8 +12,10 @@ pub use kson::{self, prelude::*};
 pub use std::collections::BTreeMap;
 
 impl UserMeta {
-    pub fn new() -> Self {
+    pub fn new(initial: Signed<UserId>) -> Self {
         UserMeta {
+            initial,
+            initial_dep: None,
             keys: BTreeMap::new(),
         }
     }
@@ -22,11 +24,13 @@ impl UserMeta {
         &self,
         key: sig::PublicKey,
     ) -> bool {
-        let maybe_kmeta = self.keys.get(&key);
-        if maybe_kmeta.is_none() {
-            return false;
+        if key == *self.initial.signed_by() {
+            self.initial_dep.is_none()
+        } else if let Some(m) = self.keys.get(&key) {
+            m.key_is_valid(key)
+        } else {
+            false
         }
-        maybe_kmeta.unwrap().key_is_valid(key)
     }
 
     pub fn verify_sig<T: Ser>(
@@ -38,13 +42,13 @@ impl UserMeta {
 
     pub fn add_new_key(
         &mut self,
-        new: Signed<sig::PublicKey>,
+        new: Signed<sig::Endorsement>,
     ) -> bool {
         if !self.verify_sig(&new) {
             return false;
         }
         let (pk, sig) = new.split();
-        self.keys.insert(pk, sig.into());
+        self.keys.insert(pk.0, sig.into());
         true
     }
 
@@ -58,21 +62,28 @@ impl UserMeta {
 
     pub fn deprecate_key(
         &mut self,
-        dep: Signed<sig::PublicKey>,
+        dep: Signed<sig::Deprecation>,
     ) -> bool {
         // cannot have a key deprecate itself
-        if !self.verify_sig(&dep) || *dep.signed_by() == *dep.data() {
+        if !self.verify_sig(&dep) || *dep.signed_by() == dep.data().0 {
             return false;
         }
         let (pk, sig) = dep.split();
-        self.keys.get_mut(&pk).unwrap().deprecate(sig);
+        self.keys.get_mut(&pk.0).unwrap().deprecate(sig);
         true
     }
 
     pub fn valid_keys(&self) -> impl Iterator<Item = sig::PublicKey> + '_ {
-        self.keys
-            .iter()
-            .filter(|(k, m)| m.key_is_valid(**k))
-            .map(|(k, _)| *k)
+        let init = if self.initial_dep.is_some() {
+            None
+        } else {
+            Some(*self.initial.signed_by())
+        };
+        init.into_iter().chain(
+            self.keys
+                .iter()
+                .filter(|(_, m)| m.dep().is_none())
+                .map(|(k, _)| *k),
+        )
     }
 }

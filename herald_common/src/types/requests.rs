@@ -54,7 +54,7 @@ pub mod new_prekey {
     /// Signed prekey to be added
     pub type Req = Signed<Prekey>;
     /// Replaced prekey
-    pub type Res = Prekey;
+    pub type Res = Option<Prekey>;
 }
 
 pub mod get_prekey {
@@ -139,9 +139,9 @@ pub enum Request {
 }
 
 #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
-pub enum Resuest {
-    KeysOf(keys_of::Res),
-    KeyInfo(key_info::Res),
+pub enum Response {
+    KeysOf(Box<keys_of::Res>),
+    KeyInfo(Box<key_info::Res>),
     UserExists(user_exists::Res),
 
     NewKey(new_key::Res),

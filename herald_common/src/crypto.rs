@@ -181,31 +181,28 @@ pub mod sig {
     #[derive(Ser, De, Hash, Debug, Clone, PartialEq, Eq)]
     pub struct PKMeta {
         sig: SigMeta,
-        deprecated: Option<SigMeta>,
+        dep: Option<SigMeta>,
     }
 
     impl From<SigMeta> for PKMeta {
         fn from(sig: SigMeta) -> Self {
-            PKMeta {
-                sig,
-                deprecated: None,
-            }
+            PKMeta { sig, dep: None }
         }
     }
 
     impl PKMeta {
         pub fn new(
             sig: SigMeta,
-            deprecated: Option<SigMeta>,
+            dep: Option<SigMeta>,
         ) -> Self {
-            Self { sig, deprecated }
+            Self { sig, dep }
         }
 
         pub fn key_is_valid(
             &self,
             key: PublicKey,
         ) -> bool {
-            if let Some(d) = self.deprecated {
+            if let Some(d) = self.dep {
                 let to_verify = kson::to_vec(&Deprecation(key));
                 if d.verify_sig(&to_verify) == SigValid::Yes {
                     return false;
@@ -218,14 +215,18 @@ pub mod sig {
 
         pub fn deprecate(
             &mut self,
-            deprecation: SigMeta,
+            dep: SigMeta,
         ) -> bool {
-            if self.deprecated.is_some() {
+            if self.dep.is_some() {
                 false
             } else {
-                self.deprecated = Some(deprecation);
+                self.dep = Some(dep);
                 true
             }
+        }
+
+        pub fn dep(&self) -> Option<SigMeta> {
+            self.dep
         }
     }
 

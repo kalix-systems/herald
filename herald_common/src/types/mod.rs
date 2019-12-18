@@ -88,8 +88,10 @@ impl ConversationId {
     }
 }
 
-#[derive(Ser, De, Debug, Clone, PartialEq, Eq, Default)]
+#[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
 pub struct UserMeta {
+    pub initial: Signed<UserId>,
+    pub initial_dep: Option<Signed<sig::Deprecation>>,
     pub keys: BTreeMap<sig::PublicKey, sig::PKMeta>,
 }
 

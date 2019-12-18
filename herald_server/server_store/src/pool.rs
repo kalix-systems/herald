@@ -2,6 +2,12 @@ use super::*;
 use crossbeam_channel::{bounded, Receiver, Sender};
 use std::ops::{Deref, DerefMut, Drop};
 
+#[cfg(not(target_os = "macos"))]
+const DATABASE_URL: &str = "host=/var/run/postgresql user=postgres";
+
+#[cfg(target_os = "macos")]
+const DATABASE_URL: &str = "postgres://postgres:docker@127.0.0.1:5432";
+
 pub struct Conn {
     tx: Sender<Client>,
     inner: Option<Client>,
