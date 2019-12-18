@@ -2,6 +2,7 @@ use super::*;
 
 #[derive(Ser, De, Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PushTag {
+    Group,
     User,
     Device,
 }

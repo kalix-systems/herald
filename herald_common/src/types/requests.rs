@@ -30,39 +30,6 @@ pub mod user_exists {
     pub type Res = bool;
 }
 
-pub mod push_users {
-    use super::*;
-
-    #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
-    pub struct Req {
-        pub to: Vec<UserId>,
-        pub exc: sig::PublicKey,
-        pub msg: Bytes,
-    }
-
-    #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
-    pub enum Res {
-        Success,
-        Missing(Vec<UserId>),
-    }
-}
-
-pub mod push_devices {
-    use super::*;
-
-    #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
-    pub struct Req {
-        pub to: Vec<sig::PublicKey>,
-        pub msg: Bytes,
-    }
-
-    #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
-    pub enum Res {
-        Success,
-        Missing(Vec<sig::PublicKey>),
-    }
-}
-
 pub mod new_key {
     use super::*;
 
@@ -99,28 +66,92 @@ pub mod get_prekey {
     pub type Res = Option<Signed<Prekey>>;
 }
 
+pub mod add_to_group {
+    use super::*;
+
+    #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
+    pub struct Req {
+        users: Vec<UserId>,
+        conversation: Vec<ConversationId>,
+    }
+
+    #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
+    pub enum Res {
+        Success,
+        Missing(Vec<UserId>, Vec<ConversationId>),
+    }
+}
+
+pub mod leave_group {
+    use super::*;
+
+    #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
+    pub struct Req {
+        conversation: Vec<ConversationId>,
+    }
+
+    #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
+    pub enum Res {
+        Success,
+        Missing(Vec<ConversationId>),
+    }
+}
+
+pub mod push {
+    use super::*;
+
+    #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
+    pub enum Recip {
+        Groups(Vec<ConversationId>),
+        Users(Vec<UserId>),
+        Keys(Vec<sig::PublicKey>),
+    }
+
+    #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
+    pub struct Req {
+        pub to: Recip,
+        pub msg: Bytes,
+    }
+
+    #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
+    pub enum Res {
+        Success,
+        Missing(Recip),
+    }
+}
+
 #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
 pub enum Request {
     KeysOf(keys_of::Req),
     KeyInfo(key_info::Req),
     UserExists(user_exists::Req),
-    PushUsers(push_users::Req),
-    PushDevices(push_devices::Req),
+
     NewKey(new_key::Req),
     DepKey(dep_key::Req),
+
     NewPrekey(new_prekey::Req),
     GetPrekey(get_prekey::Req),
+
+    AddToGroup(add_to_group::Req),
+    LeaveGroup(leave_group::Req),
+
+    Push(push::Req),
 }
 
 #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
-pub enum Response {
+pub enum Resuest {
     KeysOf(keys_of::Res),
     KeyInfo(key_info::Res),
     UserExists(user_exists::Res),
-    PushUsers(push_users::Res),
-    PushDevices(push_devices::Res),
+
     NewKey(new_key::Res),
     DepKey(dep_key::Res),
+
     NewPrekey(new_prekey::Res),
     GetPrekey(get_prekey::Res),
+
+    AddToGroup(add_to_group::Res),
+    LeaveGroup(leave_group::Res),
+
+    Push(push::Res),
 }

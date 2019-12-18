@@ -2029,7 +2029,9 @@ dependencies = [
 name = "server_errors"
 version = "0.1.0"
 dependencies = [
- "herald_common 0.1.0",
+ "krpc 0.1.0",
+ "kson 0.1.0",
+ "thiserror 1.0.9 (registry+https://github.com/rust-lang/crates.io-index)",
  "tokio 0.2.4 (registry+https://github.com/rust-lang/crates.io-index)",
  "tokio-postgres 0.5.0-alpha.2 (registry+https://github.com/rust-lang/crates.io-index)",
 ]

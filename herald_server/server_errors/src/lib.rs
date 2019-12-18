@@ -1,41 +1,27 @@
-use herald_common::UserId;
+use thiserror::Error;
 
 // TODO: have fewer of these
-#[derive(Debug)]
+#[derive(Debug, Error)]
 pub enum Error {
-    IO(std::io::Error),
-    Kson(herald_common::KsonError),
-    Warp(warp::Error),
+    #[error("IO: {0}")]
+    IO(#[from] std::io::Error),
+    #[error("Kson: {0}")]
+    Kson(#[from] kson::prelude::KsonError),
+    #[error("Postgres: {0}")]
+    PgError(#[from] tokio_postgres::Error),
+    #[error("Timeout: {0}")]
+    TimedOut(#[from] tokio::time::Elapsed),
+    #[error("Krpc: {0}")]
+    Krpc(#[from] krpc::KrpcError),
+
+    #[error("Invalid signature")]
     InvalidSig,
+    #[error("Invalid key")]
     InvalidKey,
+    #[error("Invalid key")]
     MissingData,
-    CommandFailed,
-    BadData,
-    RedundantDeprecation,
-    PgError(tokio_postgres::Error),
-    UnknownUser(UserId),
-    CatchupFailed,
+    #[error("Login failed")]
     LoginFailed,
-    RegistrationFailed,
-    BadSessionType(u8),
-    TimedOut(tokio::timer::timeout::Elapsed),
-    StreamDied,
 }
 
 pub use Error::*;
-
-macro_rules! from_fn {
-    ($to:ty, $from:ty, $fn:expr) => {
-        impl From<$from> for $to {
-            fn from(f: $from) -> $to {
-                $fn(f)
-            }
-        }
-    };
-}
-
-from_fn!(Error, std::io::Error, Error::IO);
-from_fn!(Error, tokio_postgres::Error, Error::PgError);
-from_fn!(Error, herald_common::KsonError, Kson);
-from_fn!(Error, warp::Error, Error::Warp);
-from_fn!(Error, tokio::timer::timeout::Elapsed, TimedOut);

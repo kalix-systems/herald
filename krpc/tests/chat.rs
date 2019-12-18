@@ -19,7 +19,6 @@ use tokio::{
     },
     time,
 };
-use void::Void;
 
 #[derive(Ser, De, Eq, PartialEq, Hash, Debug, Clone, Copy)]
 struct User(UQ);
@@ -57,7 +56,7 @@ enum Req {
 }
 
 #[derive(Ser, De, Debug, Eq, PartialEq)]
-enum Resp {
+enum Res {
     Users(HashSet<User>),
     Success,
 }
@@ -71,9 +70,17 @@ enum Push {
 
 type PushAck = ();
 
+struct ChatProtocol;
+
+impl Protocol for ChatProtocol {
+    type Req = Req;
+    type Res = Res;
+    type Push = Push;
+    type PushAck = ();
+}
+
 #[async_trait]
-impl KrpcServer for Server {
-    type InitError = Void;
+impl KrpcServer<ChatProtocol> for Server {
     type ConnInfo = User;
 
     const MAX_CONCURRENT_REQS: usize = 10;
@@ -86,7 +93,7 @@ impl KrpcServer for Server {
         &self,
         mut tx: quinn::SendStream,
         rx: quinn::RecvStream,
-    ) -> Result<Self::ConnInfo, KrpcError<Self::InitError>> {
+    ) -> Result<Self::ConnInfo, KrpcError> {
         let u_bytes = rx.read_to_end(128).await?;
         let u = kson::from_bytes(u_bytes.into())?;
 
@@ -94,7 +101,6 @@ impl KrpcServer for Server {
         Ok(u)
     }
 
-    type Push = Push;
     type Pushes = Receiver<Push>;
 
     async fn pushes(
@@ -117,25 +123,21 @@ impl KrpcServer for Server {
         rx
     }
 
-    type PushAck = PushAck;
     #[allow(clippy::unit_arg)]
     async fn on_push_ack(
         &self,
-        _: Self::Push,
-        _: Self::PushAck,
+        _: Push,
+        _: PushAck,
     ) {
     }
-
-    type Req = Req;
-    type Resp = Resp;
 
     async fn handle_req(
         &self,
         user: &Self::ConnInfo,
-        req: Self::Req,
-    ) -> Self::Resp {
+        req: Req,
+    ) -> Res {
         match req {
-            Req::CheckOnline => Resp::Users(self.sessions.lock().await.keys().copied().collect()),
+            Req::CheckOnline => Res::Users(self.sessions.lock().await.keys().copied().collect()),
             Req::Send(b) => {
                 for sender in self.senders_except(user).await {
                     sender
@@ -143,7 +145,7 @@ impl KrpcServer for Server {
                         .expect("failed to send push");
                 }
 
-                Resp::Success
+                Res::Success
             }
         }
     }
@@ -164,26 +166,20 @@ struct Chatter {
 }
 
 #[async_trait]
-impl KrpcClient for Chatter {
+impl KrpcClient<ChatProtocol> for Chatter {
     const MAX_CONCURRENT_REQS: usize = 10;
     const MAX_CONCURRENT_PUSHES: usize = 10;
 
     const MAX_PUSH_SIZE: usize = 4096;
     const MAX_RESP_SIZE: usize = 4096;
 
-    type Req = Req;
-    type Resp = Resp;
-    type Push = Push;
-    type PushAck = PushAck;
-
     type InitInfo = User;
-    type InitError = Void;
 
     async fn init(
         info: Self::InitInfo,
         mut tx: quinn::SendStream,
         _rx: quinn::RecvStream,
-    ) -> Result<Self, KrpcError<Self::InitError>> {
+    ) -> Result<Self, KrpcError> {
         tx.write_all(&kson::to_vec(&info)).await?;
         tx.finish().await?;
 
@@ -198,8 +194,8 @@ impl KrpcClient for Chatter {
 
     async fn handle_push(
         &self,
-        push: Self::Push,
-    ) -> Self::PushAck {
+        push: Push,
+    ) -> PushAck {
         match push {
             Push::Joined(u) => {
                 self.online.lock().await.insert(u);
@@ -213,23 +209,23 @@ impl KrpcClient for Chatter {
         }
     }
 
-    async fn on_resp(
+    async fn on_res(
         &self,
-        req: &Self::Req,
-        resp: &Self::Resp,
-    ) -> Result<(), KrpcError<Self::InitError>> {
-        match (req, resp) {
-            (Req::CheckOnline, Resp::Users(s)) => {
+        req: &Req,
+        res: &Res,
+    ) -> Result<(), KrpcError> {
+        match (req, res) {
+            (Req::CheckOnline, Res::Users(s)) => {
                 let mut online = self.online.lock().await;
                 for u in s {
                     online.insert(*u);
                 }
             }
-            (Req::Send(b), Resp::Success) => {
+            (Req::Send(b), Res::Success) => {
                 self.msgs.lock().await.push((self.my_id, b.clone()));
             }
-            (req, resp) => {
-                panic!("bad response\nreq:  {:?}\nresp: {:?}", req, resp);
+            (req, res) => {
+                panic!("bad resonse\nreq:  {:?}\nres: {:?}", req, res);
             }
         }
         Ok(())
@@ -267,7 +263,7 @@ async fn ping_pong() {
         .expect("c1 failed to check who was online");
     dbg!();
 
-    let c1_send_resp = c1
+    let c1_send_res = c1
         .req(&Req::Send("msg1".into()))
         .await
         .expect("c1 failed to send msg");
@@ -282,7 +278,7 @@ async fn ping_pong() {
         .expect("c2 failed to check who was online");
     dbg!();
 
-    let c2_send_resp = c2
+    let c2_send_res = c2
         .req(&Req::Send("msg2".into()))
         .await
         .expect("c2 failed to send msg");
@@ -290,11 +286,11 @@ async fn ping_pong() {
 
     assert_eq!(c1_were_online, c2_were_online);
     assert_eq!(c1_found_online, c2_found_online);
-    assert_eq!(c1_send_resp, c2_send_resp);
+    assert_eq!(c1_send_res, c2_send_res);
 
     assert_eq!(c1_were_online, [u1, u2].iter().copied().collect());
-    assert_eq!(c1_found_online, Resp::Users(c1_were_online));
-    assert_eq!(c1_send_resp, Resp::Success);
+    assert_eq!(c1_found_online, Res::Users(c1_were_online));
+    assert_eq!(c1_send_res, Res::Success);
 
     time::delay_for(DELAY).await;
 
@@ -308,10 +304,10 @@ async fn ping_pong() {
 }
 
 async fn start_client(
-    info: <Chatter as KrpcClient>::InitInfo,
+    info: <Chatter as KrpcClient<ChatProtocol>>::InitInfo,
     s_socket: &SocketAddr,
     cert: &[u8],
-) -> Client<Chatter> {
+) -> Client<ChatProtocol, Chatter> {
     let e_config = quinn_proto::EndpointConfig::default();
 
     let c_config = tls::configure_client(&[cert]).expect("failed to generate client config");

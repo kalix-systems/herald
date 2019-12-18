@@ -45,17 +45,6 @@ impl std::error::Error for InvalidRandomIdLength {}
 /// Length of randomly generated unique ids
 pub const UID_LEN: usize = 32;
 
-#[derive(Hash, Debug, Clone, PartialEq, Eq, Copy, Ser, De)]
-/// Conversation ID
-pub struct ConversationId(pub UQ);
-
-impl ConversationId {
-    /// Creates a new random ConversationId
-    pub fn gen_new() -> Self {
-        Self(UQ::gen_new())
-    }
-}
-
 #[derive(Hash, Debug, Clone, PartialEq, Eq, Copy, Ser, De, PartialOrd, Ord)]
 /// Message ID
 pub struct MsgId(pub UQ);

@@ -16,14 +16,14 @@ pub mod prelude {
     pub use backtrace;
     pub use bytes::{self, Bytes};
 }
+use prelude::*;
+
 pub mod de;
 pub mod errors;
 pub mod ser;
 pub mod utils;
 pub mod value;
 pub use kson_derive::*;
-
-use prelude::*;
 
 pub fn to_vec<T: ser::Ser + ?Sized>(t: &T) -> Vec<u8> {
     use ser::*;

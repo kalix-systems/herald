@@ -14,15 +14,15 @@ pub trait ServerStore {
         pk: &sig::PublicKey,
     ) -> Result<bool, Error>;
 
-    // async fn add_prekeys(
-    //     &mut self,
-    //     pres: &[sealed::PublicKey],
-    // ) -> Result<Vec<PKIResponse>, Error>;
-    //
-    // async fn pop_prekeys(
-    //     &mut self,
-    //     keys: &[sig::PublicKey],
-    // ) -> Result<Vec<Option<sealed::PublicKey>>, Error>;
+    async fn add_prekeys(
+        &mut self,
+        pres: &[Prekey],
+    ) -> Result<Vec<PKIResponse>, Error>;
+
+    async fn pop_prekeys(
+        &mut self,
+        keys: &[sig::PublicKey],
+    ) -> Result<Vec<Option<sealed::PublicKey>>, Error>;
 
     async fn register_user(
         &mut self,
@@ -183,56 +183,56 @@ impl ServerStore for Conn {
         Ok(row.get(0))
     }
 
-    //  async fn add_prekeys(
-    //     &mut self,
-    //     pres: &[sealed::PublicKey],
-    // ) -> Result<Vec<PKIResponse>, Error> {
-    //     let stmt = self
-    //         .prepare_typed(sql!("add_prekey"), types![BYTEA, BYTEA])
-    //         .await?;
+    async fn add_prekeys(
+        &mut self,
+        pres: &[sealed::PublicKey],
+    ) -> Result<Vec<PKIResponse>, Error> {
+        let stmt = self
+            .prepare_typed(sql!("add_prekey"), types![BYTEA, BYTEA])
+            .await?;
 
-    //     let mut out = Vec::with_capacity(pres.len());
+        let mut out = Vec::with_capacity(pres.len());
 
-    //     for pre in pres {
-    //         let res = self
-    //             .execute(&stmt, params![pre.signed_by().as_ref(), kson::to_vec(&pre)])
-    //             .await;
+        for pre in pres {
+            let res = self
+                .execute(&stmt, params![pre.signed_by().as_ref(), kson::to_vec(&pre)])
+                .await;
 
-    //         out.push(unique_violation_to_redundant(res)?);
-    //     }
+            out.push(unique_violation_to_redundant(res)?);
+        }
 
-    //     Ok(out)
-    // }
+        Ok(out)
+    }
 
-    //  async fn pop_prekeys(
-    //     &mut self,
-    //     keys: &[sig::PublicKey],
-    // ) -> Result<Vec<Option<sealed::PublicKey>>, Error> {
-    //     let stmt = self
-    //         .prepare_typed(sql!("pop_prekey"), types![BYTEA])
-    //         .await?;
+    async fn pop_prekeys(
+        &mut self,
+        keys: &[sig::PublicKey],
+    ) -> Result<Vec<Option<sealed::PublicKey>>, Error> {
+        let stmt = self
+            .prepare_typed(sql!("pop_prekey"), types![BYTEA])
+            .await?;
 
-    //     let mut prekeys = Vec::with_capacity(keys.len());
+        let mut prekeys = Vec::with_capacity(keys.len());
 
-    //     for k in keys {
-    //         let prekey = match self
-    //             .query(&stmt, params![k.as_ref()])
-    //             .await?
-    //             .into_iter()
-    //             .next()
-    //         {
-    //             Some(row) => {
-    //                 let val = row.get::<_, &[u8]>(0);
-    //                 kson::from_slice(val)?
-    //             }
-    //             None => None,
-    //         };
+        for k in keys {
+            let prekey = match self
+                .query(&stmt, params![k.as_ref()])
+                .await?
+                .into_iter()
+                .next()
+            {
+                Some(row) => {
+                    let val = row.get::<_, &[u8]>(0);
+                    kson::from_slice(val)?
+                }
+                None => None,
+            };
 
-    //         prekeys.push(prekey);
-    //     }
+            prekeys.push(prekey);
+        }
 
-    //     Ok(prekeys)
-    // }
+        Ok(prekeys)
+    }
 
     async fn register_user(
         &mut self,

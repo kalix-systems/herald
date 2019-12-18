@@ -5,12 +5,20 @@ use futures::{
 };
 use kson::prelude::*;
 use location::*;
-use std::{error::Error, fmt::Debug, io::Error as IOErr, net::SocketAddr, ops::Deref, sync::Arc};
+use std::{
+    fmt::Debug, io::Error as IOErr, marker::PhantomData, net::SocketAddr, ops::Deref, sync::Arc,
+};
 use thiserror::Error;
 
+pub trait Protocol {
+    type Req: Ser + De + Send;
+    type Res: Ser + De + Send;
+    type Push: Ser + De + Send;
+    type PushAck: Ser + De + Send;
+}
+
 #[async_trait]
-pub trait KrpcServer: Sync {
-    type InitError: Debug + Error + Send;
+pub trait KrpcServer<P: Protocol>: Sync {
     type ConnInfo: Debug + Send + Sync;
 
     const MAX_CONCURRENT_REQS: usize;
@@ -23,30 +31,25 @@ pub trait KrpcServer: Sync {
         &self,
         tx: quinn::SendStream,
         rx: quinn::RecvStream,
-    ) -> Result<Self::ConnInfo, KrpcError<Self::InitError>>;
+    ) -> Result<Self::ConnInfo, KrpcError>;
 
-    type Push: Ser + Send;
-    type Pushes: Stream<Item = Self::Push> + Send;
+    type Pushes: Stream<Item = P::Push> + Send;
     async fn pushes(
         &self,
         meta: &Self::ConnInfo,
     ) -> Self::Pushes;
 
-    type PushAck: De + Send;
     async fn on_push_ack(
         &self,
-        push: Self::Push,
-        ack: Self::PushAck,
+        push: P::Push,
+        ack: P::PushAck,
     );
-
-    type Req: De + Send;
-    type Resp: Ser + Send;
 
     async fn handle_req(
         &self,
         conn: &Self::ConnInfo,
-        req: Self::Req,
-    ) -> Self::Resp;
+        req: P::Req,
+    ) -> P::Res;
 
     async fn on_close(
         &self,
@@ -56,9 +59,7 @@ pub trait KrpcServer: Sync {
 }
 
 #[derive(Debug, Error)]
-pub enum KrpcError<InitError: Error> {
-    #[error("Init: {0}")]
-    Init(InitError),
+pub enum KrpcError {
     #[error("Connection: {0}")]
     Connection(#[from] quinn::ConnectionError),
     #[error("Connect: {0}")]
@@ -75,15 +76,18 @@ pub enum KrpcError<InitError: Error> {
     Kson(#[from] KsonError),
     #[error("Special: {0}")]
     Special(String, Location),
+    #[error("Dyn: {0}")]
+    Dyn(#[from] Box<dyn std::error::Error + Send>),
 }
 
-pub async fn handle_conn<S>(
+pub async fn handle_conn<S, P>(
     server: &S,
     conn: quinn::Connection,
     mut incoming: quinn::IncomingBiStreams,
-) -> Result<(), KrpcError<S::InitError>>
+) -> Result<(), KrpcError>
 where
-    S: KrpcServer,
+    S: KrpcServer<P>,
+    P: Protocol,
 {
     let (handshake_tx, handshake_rx) = incoming
         .next()
@@ -110,11 +114,11 @@ where
 
                 Ok(())
             }
-                .unwrap_or_else(|e: KrpcError<S::InitError>| eprintln!("{}", e))
+                .unwrap_or_else(|e: KrpcError| eprintln!("{}", e))
         })
         .boxed();
 
-    let req_resp = incoming
+    let req_res = incoming
         .for_each_concurrent(S::MAX_CONCURRENT_REQS, |res| {
             async {
                 let (mut tx, rx) = res?;
@@ -122,30 +126,34 @@ where
                 let req_bytes = rx.read_to_end(S::MAX_REQ_SIZE).await?;
                 let req = kson::from_bytes(req_bytes.into())?;
 
-                let resp = server.handle_req(&cinfo, req).await;
-                let rbytes = kson::to_vec(&resp);
+                let res = server.handle_req(&cinfo, req).await;
+                let rbytes = kson::to_vec(&res);
                 tx.write_all(&rbytes).await?;
 
                 tx.finish().await?;
 
                 Ok(())
             }
-                .unwrap_or_else(|e: KrpcError<S::InitError>| eprintln!("{}", e))
+                .unwrap_or_else(|e: KrpcError| eprintln!("{}", e))
         })
         .boxed();
 
-    future::join(send_pushes, req_resp).await;
+    future::join(send_pushes, req_res).await;
     server.on_close(cinfo, conn).await;
 
     Ok(())
 }
 
-pub async fn serve_static<Server: KrpcServer>(
-    server: &'static Server,
+pub async fn serve_static<S, P>(
+    server: &'static S,
     endpoint_config: quinn_proto::EndpointConfig,
     server_config: quinn::ServerConfig,
     socket: &SocketAddr,
-) -> Result<(), KrpcError<Server::InitError>> {
+) -> Result<(), KrpcError>
+where
+    S: KrpcServer<P> + Send + Sync,
+    P: Protocol,
+{
     let mut endpoint_builder = quinn::EndpointBuilder::new(endpoint_config);
     endpoint_builder.listen(server_config);
     let (driver, _endpoint, listener) = endpoint_builder.bind(socket)?;
@@ -177,12 +185,16 @@ pub async fn serve_static<Server: KrpcServer>(
     Ok(())
 }
 
-pub async fn serve_arc<Server: KrpcServer + Send + 'static>(
-    server: Arc<Server>,
+pub async fn serve_arc<S, P>(
+    server: Arc<S>,
     endpoint_config: quinn_proto::EndpointConfig,
     server_config: quinn::ServerConfig,
     socket: &SocketAddr,
-) -> Result<(), KrpcError<Server::InitError>> {
+) -> Result<(), KrpcError>
+where
+    S: KrpcServer<P> + Send + Sync + 'static,
+    P: Protocol,
+{
     let mut endpoint_builder = quinn::EndpointBuilder::new(endpoint_config);
     endpoint_builder.listen(server_config);
     let (driver, _endpoint, listener) = endpoint_builder.bind(socket)?;
@@ -214,54 +226,54 @@ pub async fn serve_arc<Server: KrpcServer + Send + 'static>(
 
     Ok(())
 }
+
 #[async_trait]
-pub trait KrpcClient: Send + Sync + Sized + 'static {
+pub trait KrpcClient<P: Protocol>: Send + Sync + Sized + 'static {
     const MAX_CONCURRENT_REQS: usize;
     const MAX_CONCURRENT_PUSHES: usize;
 
     const MAX_RESP_SIZE: usize;
     const MAX_PUSH_SIZE: usize;
 
-    type Req: Ser + Send;
-    type Resp: De + Send;
-    type Push: De + Send;
-    type PushAck: Ser + Send;
-
     type InitInfo: Send + Sized;
-    type InitError: Debug + Error + Send;
 
     async fn init(
         info: Self::InitInfo,
         tx: quinn::SendStream,
         rx: quinn::RecvStream,
-    ) -> Result<Self, KrpcError<Self::InitError>>;
+    ) -> Result<Self, KrpcError>;
 
     async fn handle_push(
         &self,
-        push: Self::Push,
-    ) -> Self::PushAck;
+        push: P::Push,
+    ) -> P::PushAck;
 
-    async fn on_resp(
+    async fn on_res(
         &self,
-        req: &Self::Req,
-        resp: &Self::Resp,
-    ) -> Result<(), KrpcError<Self::InitError>>;
+        req: &P::Req,
+        res: &P::Res,
+    ) -> Result<(), KrpcError>;
 
     fn on_close(&self);
 }
 
-pub struct Client<K: KrpcClient> {
+pub struct Client<P, K>
+where
+    P: Protocol,
+    K: KrpcClient<P>,
+{
+    phantom: PhantomData<P>,
     inner: Arc<K>,
     connection: quinn::Connection,
 }
 
-impl<K: KrpcClient> Drop for Client<K> {
+impl<P: Protocol, K: KrpcClient<P>> Drop for Client<P, K> {
     fn drop(&mut self) {
         self.inner.on_close()
     }
 }
 
-impl<K: KrpcClient> Deref for Client<K> {
+impl<P: Protocol, K: KrpcClient<P>> Deref for Client<P, K> {
     type Target = Arc<K>;
 
     fn deref(&self) -> &Arc<K> {
@@ -269,7 +281,7 @@ impl<K: KrpcClient> Deref for Client<K> {
     }
 }
 
-impl<K: KrpcClient> Client<K> {
+impl<P: Protocol, K: KrpcClient<P>> Client<P, K> {
     pub async fn connect(
         info: K::InitInfo,
         endpoint_config: quinn_proto::EndpointConfig,
@@ -277,7 +289,7 @@ impl<K: KrpcClient> Client<K> {
         client_socket: &SocketAddr,
         server_socket: &SocketAddr,
         server_name: &str,
-    ) -> Result<Self, KrpcError<K::InitError>> {
+    ) -> Result<Self, KrpcError> {
         let mut endpoint_builder = quinn::EndpointBuilder::new(endpoint_config);
         endpoint_builder.default_client_config(client_config);
         let (driver, endpoint, _incoming) = endpoint_builder.bind(client_socket)?;
@@ -315,24 +327,28 @@ impl<K: KrpcClient> Client<K> {
 
                     Ok(())
                 }
-                    .unwrap_or_else(|e: KrpcError<K::InitError>| eprintln!("{}", e))
+                    .unwrap_or_else(|e: KrpcError| eprintln!("{}", e))
             })
         });
 
-        Ok(Client { inner, connection })
+        Ok(Client {
+            inner,
+            connection,
+            phantom: PhantomData,
+        })
     }
 
     pub async fn req(
         &self,
-        req: &K::Req,
-    ) -> Result<K::Resp, KrpcError<K::InitError>> {
+        req: &P::Req,
+    ) -> Result<P::Res, KrpcError> {
         let (mut tx, rx) = self.connection.open_bi().await?;
         let req_bytes = kson::to_vec(req);
         tx.write_all(&req_bytes).await?;
         tx.finish().await?;
-        let resp_bytes = rx.read_to_end(K::MAX_RESP_SIZE).await?;
-        let resp = kson::from_bytes(resp_bytes.into())?;
-        self.on_resp(req, &resp).await?;
-        Ok(resp)
+        let res_bytes = rx.read_to_end(K::MAX_RESP_SIZE).await?;
+        let res = kson::from_bytes(res_bytes.into())?;
+        self.on_res(req, &res).await?;
+        Ok(res)
     }
 }
