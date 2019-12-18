@@ -1,6 +1,6 @@
-import QtQuick.Controls 2.13
+import QtQuick.Controls 2.14
 import QtQuick.Layouts 1.12
-import QtQuick 2.13
+import QtQuick 2.14
 import LibHerald 1.0
 import "qrc:/imports/ChatBubble" as CB
 import "qrc:/imports/Avatar"
@@ -56,7 +56,6 @@ ListView {
 
     boundsBehavior: ListView.StopAtBounds
     boundsMovement: Flickable.StopAtBounds
-
     model: chatPane.ownedConversation
 
     Component.onCompleted: {
@@ -69,15 +68,13 @@ ListView {
         chatScrollBarInner.setPosition(2)
     }
 
-    Connections {
-        target: model
-        onRowsInserted: {
-            chatListView.contentY = chatListView.contentHeight
-        }
-    }
-
     delegate: Row {
         id: chatRow
+
+        ListView.onAdd: {
+            chatScrollBarInner.setPosition(1)
+        }
+
         readonly property string proxyBody: body
         property string proxyReceiptImage: Utils.receiptCodeSwitch(
                                                receiptStatus)
@@ -102,12 +99,17 @@ ListView {
             rightMargin: CmnCfg.margin
             leftMargin: CmnCfg.smallMargin
         }
+
         layoutDirection: outbound ? Qt.RightToLeft : Qt.LeftToRight
 
         spacing: CmnCfg.margin
-        bottomPadding: isTail ? CmnCfg.mediumMargin / 2 : CmnCfg.smallMargin / 2
-        topPadding: isHead ? CmnCfg.mediumMargin / 2 : CmnCfg.smallMargin / 2
 
+        bottomPadding: if (index === count - 1) {
+                           return chatTextArea.height
+                       } else {
+                           return isTail ? CmnCfg.mediumMargin / 2 : CmnCfg.smallMargin / 2
+                       }
+        topPadding: isHead ? CmnCfg.mediumMargin / 2 : CmnCfg.smallMargin / 2
         AvatarMain {
             iconColor: userColor
             initials: authName[0].toUpperCase()
