@@ -1,5 +1,6 @@
 #include "objectiveutils.h"
 #include <QWidget>
+#include <QColor>
 #import <Foundation/Foundation.h>
 
 ObjectiveUtils::ObjectiveUtils(){
@@ -7,9 +8,9 @@ ObjectiveUtils::ObjectiveUtils(){
 
 #ifdef Q_OS_IOS
 #import <UIKit/UIKit.h>
-void ObjectiveUtils::set_navbar_color() {
+void ObjectiveUtils::set_status_bar_color(QColor color) {
        UIApplication *app =  [UIApplication sharedApplication];
        app.windows.firstObject.rootViewController.view.backgroundColor
-           =  [UIColor colorWithRed:0.23  green:0.24   blue:0.25   alpha:1.0];
+           =  [UIColor colorWithRed:color.redF() green:color.greenF() blue:color.blueF()  alpha:1.0];
 }
 #endif

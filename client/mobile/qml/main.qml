@@ -27,6 +27,12 @@ ApplicationWindow {
         }
     }
 
+    MobileHelper {
+        Component.onCompleted: {
+            set_navbar_color(CmnCfg.palette.offBlack)
+        }
+    }
+
     Loader {
         id: capitan
         active: false

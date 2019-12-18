@@ -1,6 +1,7 @@
 #include "Bindings.h"
 #include "objectiveutils.h"
-#include <QTimer>
+#include "androidhelpers.h"
+#include <QScreen>
 #include <QQmlContext>
 #include <QApplication>
 #include <QQmlApplicationEngine>
@@ -10,11 +11,8 @@
 int main(int argc, char* argv[])
 {
 
-#ifndef Q_OS_IOS
-  // if this breaks android scale remove it entirely
-  QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-#endif
 
+  QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
   QApplication::setOrganizationName("Kalix Systems");
   QApplication::setOrganizationDomain("kalix.io");
   QApplication::setApplicationName("Herald");
@@ -69,14 +67,17 @@ int main(int argc, char* argv[])
   qmlRegisterSingletonType(QUrl("qrc:/qml/Common/CommonConfig.qml"),
                            "LibHerald", 1, 0, "CmnCfg");
 
+#ifdef Q_OS_IOS
+  qmlRegisterType<ObjectiveUtils>("LibHerald", 1, 0, "MobileHelper");
+# elseif  Q_OS_ANDROID
+  qmlRegisterType<AndroidUtils>("LibHerald", 1, 0, "MobileHelper");
+#else
+  qmlRegisterType<QObject>("LibHerald", 1, 0, "MobileHelper");
+#endif
   QQmlApplicationEngine engine;
 
-#ifdef Q_OS_IOS
-  ObjectiveUtils::set_navbar_color();
-#endif
 
   engine.load(QUrl(QStringLiteral("qrc:/qml/main.qml")));
   if (engine.rootObjects().isEmpty()) return -1;
-
   return QApplication::exec();
 }

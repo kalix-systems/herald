@@ -19,18 +19,12 @@ QMAKE_CXXFLAGS += -isystem $$[QT_INSTALL_HEADERS]
 CONFIG+=sdk_no_version_check
 
 RESOURCES +=  qml.qrc
-SOURCES   += main.cpp \
-    ios_sources/IosNotifications.mm
+SOURCES   += main.cpp
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
-DISTFILES += \
-    android_sources/NotificationsObject.java
-
-HEADERS += \
-    ios_sources/iosutils.h
 
 

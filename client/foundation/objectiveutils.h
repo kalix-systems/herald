@@ -1,6 +1,7 @@
 #ifndef OBJECTIVEUTILS_H
 #define OBJECTIVEUTILS_H
 #include <QObject>
+#include <QColor>
 
 
 class ObjectiveUtils : public QObject
@@ -10,7 +11,7 @@ class ObjectiveUtils : public QObject
 public:
   ObjectiveUtils();
 #ifdef Q_OS_IOS
-  static void set_navbar_color();
+  Q_INVOKABLE static void set_status_bar_color(QColor color);
 #endif
 };
 

@@ -4,12 +4,15 @@ VERSION = 0.0.1
 INCLUDEPATH += $$PWD/../../libherald/qt_ffi \
                $$PWD
 
+QML_IMPORT_PATH +=\
+    $$PWD
+
 HEADERS += \
-     $$PWD/../../libherald/qt_ffi/Bindings.h \
+     $$PWD/../../libherald/qt_ffi/Bindings.h
 
 
 SOURCES += \
-    $$PWD/../../libherald/qt_ffi/Bindings.cpp \
+    $$PWD/../../libherald/qt_ffi/Bindings.cpp
 
 
 # set build type for Rust library
@@ -71,6 +74,8 @@ android {
      ANDROID_NDK_PLATFORM = android-28
      ANDROID_API_VERSION = 28
      LIBS +=  $${PWD}/../../target/armv7-linux-androideabi/$${RUST_BUILD_TYPE}/libherald.a
+     HEADERS += $$PWD/androidhelpers.h
+     SOURCES += $$PWD/androidhelpers.cpp
   }
 
 

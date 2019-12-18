@@ -18,7 +18,7 @@ CONFIG += sdk_no_version_check
 RESOURCES += \
     qml.qrc
 
-SOURCES   += main.cpp
+SOURCES   += main.cpp \
 
 # libherald headers, source, and libs
 include(../foundation/foundation.pri)
@@ -53,3 +53,5 @@ unix:!macx {
         herald.desktop \
         ../foundation/icons/herald.png
 }
+
+
