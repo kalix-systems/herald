@@ -23,6 +23,7 @@ ListView {
         height: 64
         width: 64
         clip: true
+        color: "transparent"
         property real aspectRatio: imageAttachments[index].width / imageAttachments[index].height
         property var imageSource: "file:" + imageAttachments[index].path
         Image {

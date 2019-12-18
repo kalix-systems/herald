@@ -104,7 +104,7 @@ ListView {
 
         spacing: CmnCfg.margin
 
-        bottomPadding: if (index === count - 1) {
+        bottomPadding: if (false) {
                            return chatTextArea.height
                        } else {
                            return isTail ? CmnCfg.mediumMargin / 2 : CmnCfg.smallMargin / 2

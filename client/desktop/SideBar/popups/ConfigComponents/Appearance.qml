@@ -89,7 +89,14 @@ ColumnLayout {
         property bool pfpValid: true
         folder: shortcuts.desktop
         nameFilters: ["(*.jpg *.png *.jpeg)"]
-        onSelectionAccepted: Herald.config.profilePicture = fileUrl
+        onSelectionAccepted: {
+            var parsed = JSON.parse(Herald.utils.imageDimensions(fileUrl))
+            imageCrop.imageWidth = parsed.width
+            imageCrop.imageHeight = parsed.height
+            imageCrop.imageSource = fileUrl
+            imageCrop.show()
+            Herald.config.profilePicture = fileUrl
+        }
     }
 
     RowLayout {

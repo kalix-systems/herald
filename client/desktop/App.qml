@@ -45,6 +45,9 @@ Item {
     Popups.NewMessagePopup {
         id: convoMenu
     }
+    Popups.ImageCropPopup {
+        id: imageCrop
+    }
 
     Component {
         id: splash
