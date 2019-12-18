@@ -14,8 +14,9 @@ Window {
     property url imageSource
     property real aspectRatio: imageWidth / imageHeight
     property real maxSize: Math.min(imageWidth, imageHeight)
-    width: imageWidth
-    height: imageHeight
+    property int maxWindowSize: 400
+    width: (aspectRatio > 1) ? maxWindowSize : maxWindowSize / aspectRatio
+    height: (aspectRatio > 1) ? maxWindowSize * aspectRatio : maxWindowSize
 
     Image {
         anchors.centerIn: parent
@@ -23,8 +24,6 @@ Window {
         fillMode: Image.PreserveAspectFit
         Item {
             id: wrapperItem
-            //   property real clipWidth
-            //     property real clipHeight
             anchors.centerIn: parent
 
             //  clipWidth: Math.min(cropWindow.imageHeight, cropWindow.imageWidth)
@@ -66,8 +65,8 @@ Window {
             }
 
             MouseArea {
-                width: parent.clipWidth
-                height: parent.clipHeight
+                width: parent.width
+                height: parent.height
                 anchors.centerIn: parent
                 drag.target: wrapperItem
                 drag.axis: Drag.XandYAxis

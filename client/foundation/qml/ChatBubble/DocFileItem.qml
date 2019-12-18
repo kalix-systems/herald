@@ -20,7 +20,7 @@ Row {
         anchors.top: parent.top
         interactive: false
         width: imageAttach ? 300 - downloadList.width : contentItem.childrenRect.width
-        height: contentItem.childrenRect.height
+        height: docParsed.length * 24 //fileModel.length * 20 //contentItem.childrenRect.height
         spacing: CmnCfg.smallMargin / 2
 
         delegate: RowLayout {

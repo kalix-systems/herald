@@ -47,6 +47,8 @@ Pane {
                            messageModelData.insertionTime)
     }
 
+
+
     contentWidth: {
         if (imageAttach) {
             return 316

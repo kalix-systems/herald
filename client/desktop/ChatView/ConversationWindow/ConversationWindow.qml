@@ -71,10 +71,9 @@ ListView {
     delegate: Row {
         id: chatRow
 
-        ListView.onAdd: {
-            chatScrollBarInner.setPosition(1)
-        }
-
+        //ListView.onAdd: {
+        //    chatScrollBarInner.setPosition(1)
+        //}
         readonly property string proxyBody: body
         property string proxyReceiptImage: Utils.receiptCodeSwitch(
                                                receiptStatus)
@@ -93,6 +92,12 @@ ListView {
         property bool elided: body.length !== fullBody.length
 
         property var messageModelData: model
+
+        onPositioningComplete: {
+            if (index === count - 1)
+                chatScrollBarInner.setPosition(1)
+        }
+
         anchors {
             right: outbound ? parent.right : undefined
             left: !outbound ? parent.left : undefined
@@ -104,11 +109,7 @@ ListView {
 
         spacing: CmnCfg.margin
 
-        bottomPadding: if (false) {
-                           return chatTextArea.height
-                       } else {
-                           return isTail ? CmnCfg.mediumMargin / 2 : CmnCfg.smallMargin / 2
-                       }
+        bottomPadding: isTail ? CmnCfg.mediumMargin / 2 : CmnCfg.smallMargin / 2
         topPadding: isHead ? CmnCfg.mediumMargin / 2 : CmnCfg.smallMargin / 2
         AvatarMain {
             iconColor: userColor
