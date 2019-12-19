@@ -30,6 +30,7 @@ ApplicationWindow {
     MobileHelper {
         Component.onCompleted: {
             set_status_bar_color(CmnCfg.palette.offBlack)
+            send_notification()
         }
     }
 

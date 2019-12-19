@@ -13,4 +13,7 @@ void ObjectiveUtils::set_status_bar_color(QColor color) {
        app.windows.firstObject.rootViewController.view.backgroundColor
            =  [UIColor colorWithRed:color.redF() green:color.greenF() blue:color.blueF()  alpha:1.0];
 }
+
+
+
 #endif

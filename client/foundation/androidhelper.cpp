@@ -6,12 +6,13 @@ AndroidHelper::AndroidHelper()
 
 }
 
-
-
 #ifdef Q_OS_ANDROID
 #include <QtAndroidExtras/QAndroidJniObject>
 #include <QtAndroid>
 #include <QColor>
+
+
+
 void AndroidHelper::set_status_bar_color(QColor color) {
   QtAndroid::runOnAndroidThread([=]() {
   QAndroidJniObject window = QtAndroid::androidActivity().callObjectMethod("getWindow", "()Landroid/view/Window;");
@@ -22,6 +23,9 @@ void AndroidHelper::set_status_bar_color(QColor color) {
 }
 
 void AndroidHelper::send_notification() {
-
+  QtAndroid::runOnAndroidThread([=]() {
+    QAndroidJniObject javaNotification = QAndroidJniObject::fromString("GRAPPO");
+    QAndroidJniObject::callStaticMethod<void>("org/qtproject/qt5/NotificationBuilder", "notify", "(Ljava/lang/String;)V", javaNotification.object<jstring>());
+  });
 }
 #endif

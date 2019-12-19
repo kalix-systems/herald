@@ -7,14 +7,13 @@ INCLUDEPATH += $$PWD/../../libherald/qt_ffi \
 QML_IMPORT_PATH +=\
     $$PWD
 
+
 HEADERS += \
      $$PWD/../../libherald/qt_ffi/Bindings.h \
-     $$PWD/androidhelper.h
 
 
 SOURCES += \
     $$PWD/../../libherald/qt_ffi/Bindings.cpp \
-    $$PWD/androidhelper.cpp
 
 
 # set build type for Rust library
@@ -74,14 +73,16 @@ macx {
 
 
 android {
-      # QMAKE_LFLAGS += -nostdlib++
+     ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android-sources
+     DISTFILES += $$PWD/android-sources/src/NotificationBuilder.java
      QT += androidextras
      ANDROID_ABIS = armeabi-v7a
      ANDROID_NDK_PLATFORM = android-28
      ANDROID_API_VERSION = 28
      LIBS +=  $${PWD}/../../target/armv7-linux-androideabi/$${RUST_BUILD_TYPE}/libherald.a
-     HEADERS +=
-     SOURCES +=
+     HEADERS +=  $$PWD/androidhelper.h
+     SOURCES +=  $$PWD/androidhelper.cpp
+
   }
 
 
