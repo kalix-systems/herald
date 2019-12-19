@@ -79,7 +79,7 @@ Rectangle {
         initials: authorName[0].toUpperCase()
         size: 36
         avatarHeight: 36
-        visible: isHead || isSingleHead ? true : false
+        visible: isHead ? true : false
         anchors {
             left: parent.left
             top: parent.top

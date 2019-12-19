@@ -8,7 +8,7 @@ import "qrc:/imports/js/utils.mjs" as Utils
 ListView {
     id: chatListView
     property Messages messageListModel
-
+    spacing: 0
     highlightFollowsCurrentItem: false
     cacheBuffer: chatListView.height * 3
 
@@ -22,11 +22,11 @@ ListView {
         minimumSize: 0.1
     }
 
-    spacing: CmnCfg.margin
     model: messageListModel
     delegate: Column {
         id: containerCol
         readonly property string proxyBody: body
+        spacing: 0
 
         // no receipt images for now
         property string proxyReceiptImage
@@ -41,26 +41,11 @@ ListView {
         readonly property bool elided: body.length !== fullBody.length
         property var messageModelData: model
 
-        anchors {
-            right: outbound ? parent.right : undefined
-            left: !outbound ? parent.left : undefined
-            rightMargin: CmnCfg.margin * 2.0
-            leftMargin: CmnCfg.margin * 2.0
-        }
+        anchors.left: parent.left
+        anchors.right: parent.right
 
-        //        Component {
-        //            id: std
-        //            CB.StandardBubble {
-        //                body: proxyBody
-        //                friendlyTimestamp: timestamp
-        //                authorName: authName
-        //                receiptImage: proxyReceiptImage
-        //                authorColor: userColor
-        //                elided: containerCol.elided
-        //            }
-        //        }
         CB.ChatBubble {
-            defaultWidth: chatListView.width * 0.66
+            defaultWidth: chatListView.width
             messageModelData: containerCol.messageModelData
             convContainer: parent
         }

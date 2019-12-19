@@ -93,7 +93,6 @@ ListView {
         property bool elided: body.length !== fullBody.length
 
         property var messageModelData: model
-        property bool isSingleHead: isHead && isTail
 
         onPositioningComplete: {
             if (index === count - 1)
