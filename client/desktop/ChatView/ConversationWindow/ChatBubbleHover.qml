@@ -14,6 +14,13 @@ MouseArea {
     propagateComposedEvents: true
     hoverEnabled: true
     anchors.fill: bubbleActual
+    z: CmnCfg.underlayZ
+    onClicked: mouse.accepted = false
+    onPressed: mouse.accepted = false
+    onReleased: mouse.accepted = false
+    onDoubleClicked: mouse.accepted = false
+    onPositionChanged: mouse.accepted = false
+    onPressAndHold: mouse.accepted = false
 
     //    z: contentRoot.z + 1
     Row {
@@ -39,19 +46,18 @@ MouseArea {
             id: messageOptionsMenu
         }
 
-//        ToolButton {
-//            text: qsTr("( ͡° ͜ʖ ͡°)")
-//            indicator: Item {
-//                width: 0
-//                height: 0
-//            }
-//            visible: chatBubbleHitbox.containsMouse
-//            display: AbstractButton.TextOnly
-//            anchors.margins: CmnCfg.margin
-//            spacing: 0
-//            padding: 0
-//        }
-
+        //        ToolButton {
+        //            text: qsTr("( ͡° ͜ʖ ͡°)")
+        //            indicator: Item {
+        //                width: 0
+        //                height: 0
+        //            }
+        //            visible: chatBubbleHitbox.containsMouse
+        //            display: AbstractButton.TextOnly
+        //            anchors.margins: CmnCfg.margin
+        //            spacing: 0
+        //            padding: 0
+        //        }
         Imports.ButtonForm {
             id: downloadButton
             visible: chatBubbleHitbox.containsMouse && download

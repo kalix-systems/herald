@@ -31,7 +31,7 @@ Page {
         spacing: CmnCfg.smallMargin
         ReplyElidedBody {
             id: replyElidedBody
-            maximumWidth: bubbleRoot.maxWidth // - CmnCfg.smallMargin * 2
+            maximumWidth: bubbleRoot.maxWidth * 0.8 // - CmnCfg.smallMargin * 2
         }
 
         ReplyTimeInfo {
