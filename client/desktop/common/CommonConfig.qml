@@ -28,7 +28,7 @@ Item {
     /// standard toolbar height
     readonly property int toolbarHeight: 40
     /// standard chat text size
-    property int chatTextSize: 10
+    property int chatTextSize: 12
     /// standard header size
     property int headerSize: 16
     /// standard popup height and width

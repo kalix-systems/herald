@@ -1,6 +1,6 @@
 #include "Bindings.h"
 #include "objectiveutils.h"
-#include "androidhelpers.h"
+#include "androidhelper.h"
 #include <QScreen>
 #include <QQmlContext>
 #include <QApplication>
@@ -69,8 +69,8 @@ int main(int argc, char* argv[])
 
 #ifdef Q_OS_IOS
   qmlRegisterType<ObjectiveUtils>("LibHerald", 1, 0, "MobileHelper");
-# elseif  Q_OS_ANDROID
-  qmlRegisterType<AndroidUtils>("LibHerald", 1, 0, "MobileHelper");
+#elif defined Q_OS_ANDROID
+  qmlRegisterType<AndroidHelper>("LibHerald", 1, 0, "MobileHelper");
 #else
   qmlRegisterType<QObject>("LibHerald", 1, 0, "MobileHelper");
 #endif

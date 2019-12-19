@@ -9,7 +9,7 @@ Column {
 
     Button {
         id: button
-        height: CmnCfg.units.dp(36)
+        height: CmnCfg.units.dp(48)
         width: height
 
         Label {
@@ -45,8 +45,7 @@ Column {
     }
 
     Button {
-
-        height: CmnCfg.units.dp(36)
+        height: CmnCfg.units.dp(48)
         width: height
         Label {
             anchors.right: parent.left
@@ -97,7 +96,7 @@ Column {
             }
         }
 
-        height: CmnCfg.units.dp(48)
+        height: CmnCfg.units.dp(54)
         width: height
 
         icon.source: "qrc:/pencil-icon-black.svg"

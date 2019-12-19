@@ -1,7 +1,7 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
-import LibHerald 1.0
 import QtQuick.Layouts 1.12
+import LibHerald 1.0
 
 Label {
     id: authorLabel
@@ -17,7 +17,7 @@ Label {
     horizontalAlignment: Text.AlignLeft
     font.weight: Font.Bold
     font.family: CmnCfg.chatFont.name
-
+    font.pixelSize: CmnCfg.chatPreviewSize
     color: CmnCfg.palette.white
 
     background: Rectangle {
@@ -30,6 +30,7 @@ Label {
         id: authorNameTM
         text: authorName
         font.weight: Font.Bold
+        font.pixelSize: CmnCfg.chatPreviewSize
         font.family: CmnCfg.chatFont.name
         elideWidth: imageAttach ? 300 : bubbleRoot.maxWidth
         elide: Text.ElideRight

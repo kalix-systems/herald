@@ -20,7 +20,6 @@ RowLayout {
         wrapMode: "WrapAtWordBoundaryOrAnywhere"
         color: CmnCfg.palette.black
         selectionColor: CmnCfg.palette.highlightColor
-
         font {
             pixelSize: CmnCfg.chatTextSize
             family: CmnCfg.chatFont.name

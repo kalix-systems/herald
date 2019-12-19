@@ -58,7 +58,6 @@ Item {
             rightMargin: CmnCfg.margin / 2
             topMargin: topTextMargin
             bottomMargin: bottomTextMargin
-
             left: avatarIcon.right
             right: parent.right
             top: parent.top

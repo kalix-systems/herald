@@ -1,11 +1,12 @@
 #ifndef ANDROIDHELPERS_H
 #define ANDROIDHELPERS_H
+#include <QObject>
 
-
-class AndroidHelpers
+class AndroidHelper: public QObject
 {
+  Q_OBJECT
 public:
-  AndroidHelpers();
+  AndroidHelper();
 };
 
 #endif // ANDROIDHELPERS_H

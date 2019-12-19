@@ -29,7 +29,7 @@ ApplicationWindow {
 
     MobileHelper {
         Component.onCompleted: {
-            set_navbar_color(CmnCfg.palette.offBlack)
+            set_status_bar_color_color(CmnCfg.palette.offBlack)
         }
     }
 

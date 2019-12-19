@@ -39,8 +39,8 @@ Rectangle {
             initials: Utils.initialize(title)
             size: CmnCfg.units.dp(56)
             avatarHeight: CmnCfg.units.dp(48)
-            topTextMargin: CmnCfg.units.dp(8)
-            bottomTextMargin: CmnCfg.units.dp(12)
+            topTextMargin: CmnCfg.units.dp(4)
+            bottomTextMargin: CmnCfg.units.dp(16)
 
             anchors {
                 right: parent.right
@@ -54,6 +54,7 @@ Rectangle {
                                                                   convContent.messages.lastTime)
                 lastReceipt: convContent.messages.lastStatus
                              === undefined ? 0 : convContent.messages.lastStatus
+                labelSize: CmnCfg.labelSize
             }
         }
     }

@@ -8,11 +8,13 @@ QML_IMPORT_PATH +=\
     $$PWD
 
 HEADERS += \
-     $$PWD/../../libherald/qt_ffi/Bindings.h
+     $$PWD/../../libherald/qt_ffi/Bindings.h \
+     $$PWD/androidhelper.h
 
 
 SOURCES += \
-    $$PWD/../../libherald/qt_ffi/Bindings.cpp
+    $$PWD/../../libherald/qt_ffi/Bindings.cpp \
+    $$PWD/androidhelper.cpp
 
 
 # set build type for Rust library
@@ -43,7 +45,7 @@ CONFIG(release, debug|profile|release) {
     }
 }
 
-# platform specific settings
+#platform specific settings
 iphonesimulator {
     LIBS += $${PWD}/../../target/x86_64-apple-ios/$${RUST_BUILD_TYPE}/libherald.a \
         -l sqlite3
@@ -53,9 +55,12 @@ iphonesimulator {
 }
 
 #iphoneos {
+#   Q_ENABLE_BITCODE.name = ENABLE_BITCODE
+#   Q_ENABLE_BITCODE.value = NO
+#   QMAKE_MAC_XCODE_SETTINGS += Q_ENABLE_BITCODE
+
 #    LIBS += $${PWD}/../../target/aarch64-apple-ios/$${RUST_BUILD_TYPE}/libherald.a \
 #        -l sqlite3
-#    ENABLE_BITCODE = NO
 #    HEADERS += $$PWD/objectiveutils.h
 #    SOURCES += $$PWD/objectiveutils.mm
 #}
@@ -70,12 +75,12 @@ macx {
 
 android {
       # QMAKE_LFLAGS += -nostdlib++
-     ANDROID_ABIS= armeabi-v7a
+     ANDROID_ABIS = armeabi-v7a
      ANDROID_NDK_PLATFORM = android-28
      ANDROID_API_VERSION = 28
      LIBS +=  $${PWD}/../../target/armv7-linux-androideabi/$${RUST_BUILD_TYPE}/libherald.a
-     HEADERS += $$PWD/androidhelpers.h
-     SOURCES += $$PWD/androidhelpers.cpp
+     HEADERS +=
+     SOURCES +=
   }
 
 

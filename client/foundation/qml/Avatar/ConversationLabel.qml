@@ -22,7 +22,7 @@ Item {
     property string lastAuthor
     property color labelColor
     property color secondaryLabelColor: CmnCfg.palette.offBlack
-    property int labelSize
+    property real labelSize
 
     // labeling constants
     GridLayout {
