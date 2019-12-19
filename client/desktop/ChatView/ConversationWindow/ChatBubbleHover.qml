@@ -9,35 +9,29 @@ import QtQuick.Dialogs 1.3
 
 MouseArea {
     id: chatBubbleHitbox
-    z: CmnCfg.underlayZ
     property bool download: false
     propagateComposedEvents: true
     hoverEnabled: true
-    width: download ? parent.width + 110 : parent.width + 80
+    anchors.fill: bubbleActual
 
-    anchors {
-        left: !outbound ? parent.left : undefined
-        right: outbound ? parent.right : undefined
-        bottom: parent.bottom
-        top: parent.top
-    }
+    //    z: contentRoot.z + 1
     Row {
         spacing: CmnCfg.margin
-        anchors.left: outbound ? parent.left : undefined
-        anchors.right: !outbound ? parent.right : undefined
+        anchors.right: parent.right
+        anchors.top: parent.top
+        anchors.margins: CmnCfg.smallMargin
         anchors.verticalCenter: parent.verticalCenter
-        layoutDirection: outbound ? Qt.LeftToRight : Qt.RightToLeft
-        Imports.ButtonForm {
-            id: messageOptionsButton
-            visible: chatBubbleHitbox.containsMouse
 
+        Imports.ButtonForm {
+            id: replyButton
+            visible: chatBubbleHitbox.containsMouse
             anchors {
                 margins: CmnCfg.margin
-                verticalCenter: parent.verticalCenter
             }
-            source: "qrc:/options-icon.svg"
+            source: "qrc:/reply-icon.svg"
             z: CmnCfg.overlayZ
-            onClicked: messageOptionsMenu.open()
+
+            onClicked: ownedConversation.builder.opId = msgId
         }
 
         Popups.MessageOptionsPopup {
@@ -48,7 +42,6 @@ MouseArea {
             id: downloadButton
             visible: chatBubbleHitbox.containsMouse && download
             anchors {
-                verticalCenter: parent.verticalCenter
                 margins: visible ? CmnCfg.margin : 0
             }
             z: CmnCfg.overlayZ
@@ -66,16 +59,15 @@ MouseArea {
         }
 
         Imports.ButtonForm {
-            id: replyButton
+            id: messageOptionsButton
             visible: chatBubbleHitbox.containsMouse
+
             anchors {
                 margins: CmnCfg.margin
-                verticalCenter: parent.verticalCenter
             }
-            source: "qrc:/reply-icon.svg"
+            source: "qrc:/options-icon.svg"
             z: CmnCfg.overlayZ
-
-            onClicked: ownedConversation.builder.opId = msgId
+            onClicked: messageOptionsMenu.open()
         }
     }
 }

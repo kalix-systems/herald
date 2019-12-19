@@ -114,10 +114,18 @@ ListView {
             convContainer: chatListView
             defaultWidth: chatListView.width
             messageModelData: chatRow.messageModelData
+           ChatBubbleHover {
+               id: bubbleHoverHandler
+           }
 
-            ChatBubbleHover {
-                download: bubbleActual.imageAttach || bubbleActual.docAttach
-            }
+           states: State {
+               name: "hoverstate"
+               when: bubbleHoverHandler.containsMouse
+               PropertyChanges {
+                   target: bubbleActual
+                   color: CmnCfg.palette.medGrey
+               }
+           }
         }
     }
 }

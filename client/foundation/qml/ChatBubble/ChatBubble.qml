@@ -213,10 +213,6 @@ Rectangle {
             id: messageStamps
         }
 
-        //        StandardStamps {
-        //            id: messageStamps
-        //            visible: isTail
-        //        }
         ElideHandler {}
     }
 }
