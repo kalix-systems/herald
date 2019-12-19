@@ -1,3 +1,3 @@
 SELECT EXISTS (
-   SELECT 1 FROM conversations WHERE key=$1
+   SELECT 1 FROM conversations WHERE conversation_id=$1
 )

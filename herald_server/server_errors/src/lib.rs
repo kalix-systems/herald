@@ -22,6 +22,8 @@ pub enum Error {
     MissingData,
     #[error("Login failed")]
     LoginFailed,
+    #[error("Uncategorized error. Please downcast")]
+    Underscore(#[from] Box<dyn std::error::Error + Send + 'static>),
 }
 
 pub use Error::*;

@@ -36,10 +36,11 @@ CREATE TABLE pending (
 );
 
 CREATE TABLE prekeys (
-  -- sealing_key, 32 bytes
-  sealed_key BYTEA PRIMARY KEY,
+  -- sealed_key, 32 bytes
+  sealed_key BYTEA NOT NULL,
   -- signing_key, 32 bytes
   signing_key BYTEA NOT NULL,
+  key_number INT2 NOT NULL,
   FOREIGN KEY(signing_key) REFERENCES keys(key)
 );
 
@@ -49,14 +50,10 @@ CREATE TABLE userkeys (
   user_id CHAR(32) NOT NULL,
   key BYTEA NOT NULL,
   PRIMARY KEY(user_id, key),
-  FOREIGN KEY(key) REFERENCES keys(key)
+  FOREIGN KEY(key) REFERENCES key_creations(key)
 );
 
 CREATE INDEX userkey_key_ix ON userkeys(key);
-
-CREATE TABLE conversations (
-    conversation_id BYTEA PRIMARY KEY
-);
 
 CREATE TABLE conversation_members (
     conversation_id BYTEA NOT NULL,
