@@ -13,7 +13,7 @@ import Qt.labs.platform 1.0
 
 ToolBar {
     id: contextBar
-    height: CmnCfg.toolbarHeight
+    height: CmnCfg.toolbarHeight + 1
 
     background: Rectangle {
         color: CmnCfg.palette.offBlack

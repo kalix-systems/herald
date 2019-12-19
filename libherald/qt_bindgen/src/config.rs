@@ -169,6 +169,8 @@ fn utils() -> Object {
         const compareByteArray(bs1: QByteArray, bs2: QByteArray) => Bool,
         const isValidRandId(bs: QByteArray) => Bool,
         const saveFile(fpath: QString, target_path: QString) => Bool,
+        // Returns image dimensions of the image at `path`, serialized as JSON
+        const imageDimensions(path: QString) => QString,
     };
 
     obj! {
@@ -282,9 +284,7 @@ fn messages() -> Object {
         // Position in search results of focused item, e.g., 4 out of 7
         searchIndex: Prop::new().simple(QUint64),
 
-        builder: Prop::new().object(message_builder()),
-        // Id of the message the message builder is replying to, if any
-        builderOpMsgId: Prop::new().simple(QByteArray).optional().write()
+        builder: Prop::new().object(message_builder())
     };
 
     let item_props = item_props! {
@@ -366,14 +366,16 @@ fn message_builder() -> Object {
         mediaAttachments: Prop::new().object(media_attachments()),
 
         // Message id of the message being replied to, if any
-        opId: Prop::new().simple(QByteArray).optional(),
+        opId: Prop::new().simple(QByteArray).optional().write(),
         opAuthor: Prop::new().simple(QString).optional(),
         opBody: Prop::new().simple(QString).optional(),
         opTime: Prop::new().simple(Qint64).optional(),
         // Media attachments metadata, serialized as JSON
         opMediaAttachments: Prop::new().simple(QString),
         // Document attachments metadata, serialized as JSON
-        opDocAttachments: Prop::new().simple(QString)
+        opDocAttachments: Prop::new().simple(QString),
+        // Time the message will expire, if ever
+        opExpirationTime: Prop::new().simple(Qint64).optional()
     );
 
     let funcs = functions! {

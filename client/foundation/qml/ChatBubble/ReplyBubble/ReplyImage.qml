@@ -39,12 +39,7 @@ Page {
         Item {
             id: replyWrapperCol
             height: 64
-            width: imageAttach ? 300 : ReplyWidthCalc.image(
-                                     bubbleRoot.maxWidth,
-                                     contentRoot.unameWidth, messageBody.width,
-                                     contentRoot.messageStamps.width,
-                                     replyLabel.opNameWidth,
-                                     replyElidedBody.width, replyTimeInfo.width)
+            width: bubbleRoot.maxWidth * 0.8
             ReplyElidedBody {
                 anchors.top: parent.top
                 id: replyElidedBody

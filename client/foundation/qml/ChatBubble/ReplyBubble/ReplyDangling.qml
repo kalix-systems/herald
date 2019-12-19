@@ -18,15 +18,11 @@ Pane {
     padding: CmnCfg.smallMargin
 
     contentHeight: unknownBody.height
-    contentWidth: imageAttach ? 300 : ReplyWidthCalc.unknown(
-                                    bubbleRoot.maxWidth,
-                                    contentRoot.unameWidth,
-                                    contentRoot.messageBody.width,
-                                    unknownBody.width)
+    contentWidth: bubbleRoot.maxWidth * 0.8
     RowLayout {
         Text {
             id: unknownBody
-            Layout.maximumWidth: bubbleRoot.maxWidth
+            Layout.maximumWidth: bubbleRoot.maxWidth * 0.8
             font.family: CmnCfg.chatFont.name
             color: CmnCfg.palette.black
             textFormat: TextEdit.AutoText

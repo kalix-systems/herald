@@ -158,6 +158,9 @@ inline void messageBuilderOpBodyChanged(MessageBuilder *o) {
 inline void messageBuilderOpDocAttachmentsChanged(MessageBuilder *o) {
   Q_EMIT o->opDocAttachmentsChanged();
 }
+inline void messageBuilderOpExpirationTimeChanged(MessageBuilder *o) {
+  Q_EMIT o->opExpirationTimeChanged();
+}
 inline void messageBuilderOpIdChanged(MessageBuilder *o) {
   Q_EMIT o->opIdChanged();
 }
@@ -172,9 +175,6 @@ inline void messageSearchRegexSearchChanged(MessageSearch *o) {
 }
 inline void messageSearchSearchPatternChanged(MessageSearch *o) {
   Q_EMIT o->searchPatternChanged();
-}
-inline void messagesBuilderOpMsgIdChanged(Messages *o) {
-  Q_EMIT o->builderOpMsgIdChanged();
 }
 inline void messagesIsEmptyChanged(Messages *o) { Q_EMIT o->isEmptyChanged(); }
 inline void messagesLastAuthorChanged(Messages *o) {
@@ -1498,8 +1498,13 @@ void message_builder_op_body_get(const MessageBuilder::Private *, QString *,
                                  qstring_set);
 void message_builder_op_doc_attachments_get(const MessageBuilder::Private *,
                                             QString *, qstring_set);
+option_qint64
+message_builder_op_expiration_time_get(const MessageBuilder::Private *);
 void message_builder_op_id_get(const MessageBuilder::Private *, QByteArray *,
                                qbytearray_set);
+void message_builder_op_id_set(MessageBuilder::Private *, const char *bytes,
+                               int len);
+void message_builder_op_id_set_none(MessageBuilder::Private *);
 void message_builder_op_media_attachments_get(const MessageBuilder::Private *,
                                               QString *, qstring_set);
 option_qint64 message_builder_op_time_get(const MessageBuilder::Private *);
@@ -2081,11 +2086,6 @@ extern "C" {
 Messages::Private *messages_new(MessagesPtrBundle *);
 void messages_free(Messages::Private *);
 MessageBuilder::Private *messages_builder_get(const Messages::Private *);
-void messages_builder_op_msg_id_get(const Messages::Private *, QByteArray *,
-                                    qbytearray_set);
-void messages_builder_op_msg_id_set(Messages::Private *, const char *bytes,
-                                    int len);
-void messages_builder_op_msg_id_set_none(Messages::Private *);
 bool messages_is_empty_get(const Messages::Private *);
 void messages_last_author_get(const Messages::Private *, QString *,
                               qstring_set);
@@ -2606,6 +2606,8 @@ Utils::Private *utils_new(UtilsPtrBundle *);
 void utils_free(Utils::Private *);
 bool utils_compare_byte_array(const Utils::Private *, const char *, int,
                               const char *, int);
+void utils_image_dimensions(const Utils::Private *, const ushort *, int,
+                            QString *, qstring_set);
 bool utils_is_valid_rand_id(const Utils::Private *, const char *, int);
 bool utils_save_file(const Utils::Private *, const ushort *, int,
                      const ushort *, int);
@@ -2868,6 +2870,7 @@ ConversationContent::ConversationContent(QObject *parent)
           messageBuilderOpAuthorChanged,
           messageBuilderOpBodyChanged,
           messageBuilderOpDocAttachmentsChanged,
+          messageBuilderOpExpirationTimeChanged,
           messageBuilderOpIdChanged,
           messageBuilderOpMediaAttachmentsChanged,
           messageBuilderOpTimeChanged,
@@ -2898,7 +2901,6 @@ ConversationContent::ConversationContent(QObject *parent)
             o->beginRemoveRows(QModelIndex(), first, last);
           },
           [](MessageBuilder *o) { o->endRemoveRows(); },
-          messagesBuilderOpMsgIdChanged,
           messagesIsEmptyChanged,
           messagesLastAuthorChanged,
           messagesLastBodyChanged,
@@ -3674,6 +3676,7 @@ MessageBuilder::MessageBuilder(QObject *parent)
           messageBuilderOpAuthorChanged,
           messageBuilderOpBodyChanged,
           messageBuilderOpDocAttachmentsChanged,
+          messageBuilderOpExpirationTimeChanged,
           messageBuilderOpIdChanged,
           messageBuilderOpMediaAttachmentsChanged,
           messageBuilderOpTimeChanged,
@@ -3791,10 +3794,26 @@ QString MessageBuilder::opDocAttachments() const {
   return v;
 }
 
+QVariant MessageBuilder::opExpirationTime() const {
+  QVariant v;
+  auto r = message_builder_op_expiration_time_get(m_d);
+  if (r.some) {
+    v.setValue(r.value);
+  }
+  return r;
+}
+
 QByteArray MessageBuilder::opId() const {
   QByteArray v;
   message_builder_op_id_get(m_d, &v, set_qbytearray);
   return v;
+}
+void MessageBuilder::setOpId(const QByteArray &v) {
+  if (v.isNull()) {
+    message_builder_op_id_set_none(m_d);
+  } else {
+    message_builder_op_id_set(m_d, v.data(), v.size());
+  }
 }
 
 QString MessageBuilder::opMediaAttachments() const {
@@ -3978,6 +3997,7 @@ Messages::Messages(QObject *parent)
           messageBuilderOpAuthorChanged,
           messageBuilderOpBodyChanged,
           messageBuilderOpDocAttachmentsChanged,
+          messageBuilderOpExpirationTimeChanged,
           messageBuilderOpIdChanged,
           messageBuilderOpMediaAttachmentsChanged,
           messageBuilderOpTimeChanged,
@@ -4008,7 +4028,6 @@ Messages::Messages(QObject *parent)
             o->beginRemoveRows(QModelIndex(), first, last);
           },
           [](MessageBuilder *o) { o->endRemoveRows(); },
-          messagesBuilderOpMsgIdChanged,
           messagesIsEmptyChanged,
           messagesLastAuthorChanged,
           messagesLastBodyChanged,
@@ -4085,19 +4104,6 @@ void Messages::initHeaderData() {}
 
 const MessageBuilder *Messages::builder() const { return m_builder; }
 MessageBuilder *Messages::builder() { return m_builder; }
-
-QByteArray Messages::builderOpMsgId() const {
-  QByteArray v;
-  messages_builder_op_msg_id_get(m_d, &v, set_qbytearray);
-  return v;
-}
-void Messages::setBuilderOpMsgId(const QByteArray &v) {
-  if (v.isNull()) {
-    messages_builder_op_msg_id_set_none(m_d);
-  } else {
-    messages_builder_op_msg_id_set(m_d, v.data(), v.size());
-  }
-}
 
 bool Messages::isEmpty() const { return messages_is_empty_get(m_d); }
 
@@ -4401,6 +4407,11 @@ bool Utils::compareByteArray(const QByteArray &bs1,
                              const QByteArray &bs2) const {
   return utils_compare_byte_array(m_d, bs1.data(), bs1.size(), bs2.data(),
                                   bs2.size());
+}
+QString Utils::imageDimensions(const QString &path) const {
+  QString s;
+  utils_image_dimensions(m_d, path.utf16(), path.size(), &s, set_qstring);
+  return s;
 }
 bool Utils::isValidRandId(const QByteArray &bs) const {
   return utils_is_valid_rand_id(m_d, bs.data(), bs.size());

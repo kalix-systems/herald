@@ -4,8 +4,9 @@ import QtQuick.Controls 2.13
 import LibHerald 1.0
 import "./ReplyBubble"
 import "../js/utils.mjs" as Utils
+import "../Avatar"
 
-Pane {
+Rectangle {
     id: bubbleRoot
 
     property real defaultWidth
@@ -16,7 +17,6 @@ Pane {
     property var messageModelData
 
     property alias highlightItem: bubbleHighlight
-
     readonly property color bubbleColor: CmnCfg.palette.lightGrey
     readonly property bool highlight: messageModelData.matchStatus === 2
 
@@ -32,8 +32,7 @@ Pane {
     readonly property var replyId: messageModelData.opMsgId
     readonly property bool reply: messageModelData.replyType > 0
 
-    readonly property real maxWidth: imageAttach ? 300 : Math.min(defaultWidth,
-                                                                  600)
+    readonly property real maxWidth: defaultWidth * 0.75
     property string friendlyTimestamp: Utils.friendlyTimestamp(
                                            messageModelData.insertionTime)
     readonly property string receiptImage: Utils.receiptCodeSwitch(
@@ -41,51 +40,90 @@ Pane {
     readonly property color authorColor: CmnCfg.avatarColors[Herald.users.colorById(
                                                                  authorId)]
 
+    readonly property string pfpUrl: Herald.users.profilePictureById(authorId)
+
     Connections {
         target: appRoot.globalTimer
         onRefreshTime: friendlyTimestamp = Utils.friendlyTimestamp(
                            messageModelData.insertionTime)
     }
+    height: contentRoot.height
+    width: defaultWidth
 
-    contentWidth: {
-        if (imageAttach) {
-            return 316
-        }
-        Math.max(contentRoot.width, contentRoot.unameWidth)
+    color: outbound ? CmnCfg.palette.lightGrey : CmnCfg.palette.white
+
+    Rectangle {
+        anchors.top: parent.top
+        width: parent.width
+        height: 1
+        color: CmnCfg.palette.medGrey
+        visible: isHead
     }
-    contentHeight: contentRoot.height
-    padding: CmnCfg.smallMargin
 
-    background: Rectangle {
-        id: background
-        color: CmnCfg.palette.white
-        anchors.fill: parent
-        border.color: CmnCfg.palette.black
-        border.width: 1
-        ChatLabel {
-            id: authorLabel
+    Rectangle {
+        anchors.bottom: parent.bottom
+        width: parent.width
+
+        height: 1
+        color: CmnCfg.palette.medGrey
+        visible: isTail
+    }
+
+    Highlight {
+        id: bubbleHighlight
+        z: bubbleRoot.z + 1
+    }
+    AvatarMain {
+        id: avatar
+        iconColor: authorColor
+        initials: authorName[0].toUpperCase()
+        size: 36
+        avatarHeight: 36
+        visible: isHead ? true : false
+        anchors {
+            left: parent.left
+            top: parent.top
+            margins: CmnCfg.margin
         }
 
-        Highlight {
-            id: bubbleHighlight
-            z: background.z - 1
-        }
+        z: contentRoot.z + 1
+        pfpPath: pfpUrl
+    }
+
+    Rectangle {
+        id: accent
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
+        anchors.topMargin: isHead ? CmnCfg.smallMargin : 0
+        anchors.bottomMargin: isTail ? CmnCfg.smallMargin : 0
+        width: CmnCfg.smallMargin / 2
+        color: authorColor
+        anchors.left: avatar.right
+        anchors.leftMargin: CmnCfg.smallMargin
     }
 
     Column {
+        z: highlight.z + 1
         id: contentRoot
+        anchors.left: accent.right
         // Text edit alias
         readonly property alias messageBody: messageBody
         /// User name label alias
-        readonly property real unameWidth: authorLabel.authorNameTM.width
+        readonly property real unameWidth: authorLabel.width
         // Stamps alias
         readonly property alias messageStamps: messageStamps
 
         // all messages are un-expanded on completion
         Component.onCompleted: bubbleRoot.expanded = false
 
-        spacing: CmnCfg.smallMargin
-        topPadding: authorLabel.height
+        spacing: CmnCfg.smallMargin / 2
+        topPadding: isHead ? CmnCfg.smallMargin : CmnCfg.smallMargin
+        leftPadding: CmnCfg.smallMargin
+        bottomPadding: isTail ? CmnCfg.margin : CmnCfg.smallMargin
+        ChatLabel {
+            id: authorLabel
+            visible: isHead
+        }
 
         //reply bubble loader
         Loader {
@@ -169,10 +207,9 @@ Pane {
         //message body
         StandardTextEdit {
             id: messageBody
-            maximumWidth: bubbleRoot.imageAttach ? 300 : bubbleRoot.maxWidth
+            maximumWidth: bubbleRoot.maxWidth
         }
-
-        StandardStamps {
+        Item {
             id: messageStamps
         }
 

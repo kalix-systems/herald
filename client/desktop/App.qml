@@ -45,6 +45,9 @@ Item {
     Popups.NewMessagePopup {
         id: convoMenu
     }
+    Popups.ImageCropPopup {
+        id: imageCrop
+    }
 
     Component {
         id: splash
@@ -58,6 +61,13 @@ Item {
                 width: parent.width
                 color: CmnCfg.palette.offBlack
                 height: CmnCfg.toolbarHeight + 1
+
+                Rectangle {
+                    anchors.left: parent.left
+                    height: parent.height
+                    width: 1
+                    color: CmnCfg.palette.lightGrey
+                }
 
                 Text {
                     anchors.left: parent.left
@@ -100,15 +110,16 @@ Item {
             Rectangle {
                 id: toolBarHandle
                 implicitWidth: 1
-                color: CmnCfg.palette.medGrey
-                height: CmnCfg.toolbarHeight
+                color: CmnCfg.palette.offBlack
+                height: CmnCfg.toolbarHeight + 1
                 anchors {
                     top: parent.top
                 }
             }
+
             Rectangle {
                 implicitWidth: 1
-                color: CmnCfg.palette.black
+                color: CmnCfg.palette.offBlack
                 anchors {
                     top: toolBarHandle.bottom
                     bottom: parent.bottom

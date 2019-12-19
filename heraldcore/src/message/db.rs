@@ -64,6 +64,44 @@ pub(crate) fn message_meta(
     )))
 }
 
+/// Get message data by message id
+pub(crate) fn message_data(
+    conn: &Conn,
+    msg_id: &MsgId,
+) -> Result<MsgData, HErr> {
+    let mut stmt = conn.prepare_cached(include_str!("sql/message_data.sql"))?;
+
+    let receipts = get_receipts(conn, msg_id)?;
+    let replies = self::replies(conn, msg_id)?;
+    let attachments = crate::message::attachments::db::get(conn, &msg_id)?;
+
+    Ok(w!(stmt.query_row_named(
+        named_params! { "@msg_id": msg_id },
+        |row| {
+            let time = MessageTime {
+                insertion: row.get("insertion_ts")?,
+                server: row.get("server_ts")?,
+                expiration: row.get("expiration_ts")?,
+            };
+
+            let is_reply: bool = row.get("is_reply")?;
+            let op: Option<MsgId> = row.get("op_msg_id")?;
+            let op = (op, is_reply).into();
+
+            Ok(MsgData {
+                author: row.get("author")?,
+                body: row.get("body")?,
+                send_status: row.get("send_status")?,
+                op,
+                attachments,
+                time,
+                receipts,
+                replies,
+            })
+        }
+    )))
+}
+
 /// Get message by message id
 pub(crate) fn get_message_opt(
     conn: &Conn,

@@ -8,7 +8,7 @@ Column {
     id: wrapperCol
 
     property real maxWidth: Math.min(contentRoot.maxWidth, 600)
-    property var docParsed
+    property var docParsed: JSON.parse(documentAttachments)
 
     spacing: 0
 

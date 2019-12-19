@@ -7,18 +7,7 @@ Item {
     z: -1
     opacity: highlight == true ? 1.0 : 0.0
     Rectangle {
-        width: convContainer.width
-        anchors.right: parent.right
+        anchors.fill: parent
         color: CmnCfg.palette.medGrey
-        anchors.verticalCenter: parent.verticalCenter
-        height: parent.height + CmnCfg.smallMargin
-    }
-
-    Rectangle {
-        width: convContainer.width
-        anchors.left: parent.right
-        color: CmnCfg.palette.medGrey
-        anchors.verticalCenter: parent.verticalCenter
-        height: parent.height + CmnCfg.smallMargin
     }
 }

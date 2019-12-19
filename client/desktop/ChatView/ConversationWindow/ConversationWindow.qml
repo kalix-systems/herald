@@ -1,6 +1,6 @@
-import QtQuick.Controls 2.13
+import QtQuick.Controls 2.14
 import QtQuick.Layouts 1.12
-import QtQuick 2.13
+import QtQuick 2.14
 import LibHerald 1.0
 import "qrc:/imports/ChatBubble" as CB
 import "qrc:/imports/Avatar"
@@ -24,6 +24,7 @@ ListView {
         duration: 600
         easing.type: Easing.InCubic
     }
+    spacing: 0
 
     // disable these, we're handling them differently
     keyNavigationEnabled: false
@@ -56,7 +57,6 @@ ListView {
 
     boundsBehavior: ListView.StopAtBounds
     boundsMovement: Flickable.StopAtBounds
-
     model: chatPane.ownedConversation
 
     Component.onCompleted: {
@@ -69,15 +69,12 @@ ListView {
         chatScrollBarInner.setPosition(2)
     }
 
-    Connections {
-        target: model
-        onRowsInserted: {
-            chatListView.contentY = chatListView.contentHeight
-        }
-    }
-
     delegate: Row {
         id: chatRow
+
+        //ListView.onAdd: {
+        //    chatScrollBarInner.setPosition(1)
+        //}
         readonly property string proxyBody: body
         property string proxyReceiptImage: Utils.receiptCodeSwitch(
                                                receiptStatus)
@@ -96,42 +93,38 @@ ListView {
         property bool elided: body.length !== fullBody.length
 
         property var messageModelData: model
+
+        onPositioningComplete: {
+            if (index === count - 1)
+                chatScrollBarInner.setPosition(1)
+        }
+
         anchors {
-            right: outbound ? parent.right : undefined
-            left: !outbound ? parent.left : undefined
-            rightMargin: CmnCfg.margin
-            leftMargin: CmnCfg.smallMargin
+            left: parent.left
+            right: parent.right
         }
-        layoutDirection: outbound ? Qt.RightToLeft : Qt.LeftToRight
 
-        spacing: CmnCfg.margin
-        bottomPadding: isTail ? CmnCfg.mediumMargin / 2 : CmnCfg.smallMargin / 2
-        topPadding: isHead ? CmnCfg.mediumMargin / 2 : CmnCfg.smallMargin / 2
-
-        AvatarMain {
-            iconColor: userColor
-            initials: authName[0].toUpperCase()
-            size: 28
-            opacity: isTail ? 1 : 0
-            anchors {
-                bottom: parent.bottom
-                margins: CmnCfg.margin
-                bottomMargin: parent.bottomPadding
-            }
-
-            z: 10
-            pfpPath: parent.pfpUrl
-            avatarHeight: 28
-        }
+        //  layoutDirection: outbound ? Qt.RightToLeft : Qt.LeftToRight
+        bottomPadding: 0 //CmnCfg.smallMargin / 2
+        topPadding: 0 //CmnCfg.smallMargin / 2
 
         CB.ChatBubble {
             id: bubbleActual
             convContainer: chatListView
-            defaultWidth: chatListView.width * 0.66
+            defaultWidth: chatListView.width
             messageModelData: chatRow.messageModelData
-
             ChatBubbleHover {
+                id: bubbleHoverHandler
                 download: bubbleActual.imageAttach || bubbleActual.docAttach
+            }
+
+            states: State {
+                name: "hoverstate"
+                when: bubbleHoverHandler.containsMouse
+                PropertyChanges {
+                    target: bubbleActual
+                    color: CmnCfg.palette.medGrey
+                }
             }
         }
     }

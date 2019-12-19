@@ -44,13 +44,7 @@ Page {
             id: replyWrapperCol
             spacing: CmnCfg.smallMargin
 
-            width: imageAttach ? (300 - imageClip.width) : ReplyWidthCalc.hybrid(
-                                     bubbleRoot.maxWidth,
-                                     contentRoot.unameWidth, messageBody.width,
-                                     contentRoot.messageStamps.width,
-                                     replyLabel.opNameWidth,
-                                     replyElidedBody.width,
-                                     replyTimeInfo.width, replyFileClip.width)
+            width: bubbleRoot.maxWidth* 0.8 - imageClip.width
             ReplyFileClip {
                 id: replyFileClip
                 constraint: imageSize

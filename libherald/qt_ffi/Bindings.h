@@ -133,6 +133,7 @@ struct ConversationContentPtrBundle {
   void (*message_builder_op_author_changed)(MessageBuilder *);
   void (*message_builder_op_body_changed)(MessageBuilder *);
   void (*message_builder_op_doc_attachments_changed)(MessageBuilder *);
+  void (*message_builder_op_expiration_time_changed)(MessageBuilder *);
   void (*message_builder_op_id_changed)(MessageBuilder *);
   void (*message_builder_op_media_attachments_changed)(MessageBuilder *);
   void (*message_builder_op_time_changed)(MessageBuilder *);
@@ -149,7 +150,6 @@ struct ConversationContentPtrBundle {
   void (*message_builder_end_move_rows)(MessageBuilder *);
   void (*message_builder_begin_remove_rows)(MessageBuilder *, int, int);
   void (*message_builder_end_remove_rows)(MessageBuilder *);
-  void (*messages_builder_op_msg_id_changed)(Messages *);
   void (*messages_is_empty_changed)(Messages *);
   void (*messages_last_author_changed)(Messages *);
   void (*messages_last_body_changed)(Messages *);
@@ -426,6 +426,7 @@ struct MessageBuilderPtrBundle {
   void (*message_builder_op_author_changed)(MessageBuilder *);
   void (*message_builder_op_body_changed)(MessageBuilder *);
   void (*message_builder_op_doc_attachments_changed)(MessageBuilder *);
+  void (*message_builder_op_expiration_time_changed)(MessageBuilder *);
   void (*message_builder_op_id_changed)(MessageBuilder *);
   void (*message_builder_op_media_attachments_changed)(MessageBuilder *);
   void (*message_builder_op_time_changed)(MessageBuilder *);
@@ -505,6 +506,7 @@ struct MessagesPtrBundle {
   void (*message_builder_op_author_changed)(MessageBuilder *);
   void (*message_builder_op_body_changed)(MessageBuilder *);
   void (*message_builder_op_doc_attachments_changed)(MessageBuilder *);
+  void (*message_builder_op_expiration_time_changed)(MessageBuilder *);
   void (*message_builder_op_id_changed)(MessageBuilder *);
   void (*message_builder_op_media_attachments_changed)(MessageBuilder *);
   void (*message_builder_op_time_changed)(MessageBuilder *);
@@ -521,7 +523,6 @@ struct MessagesPtrBundle {
   void (*message_builder_end_move_rows)(MessageBuilder *);
   void (*message_builder_begin_remove_rows)(MessageBuilder *, int, int);
   void (*message_builder_end_remove_rows)(MessageBuilder *);
-  void (*messages_builder_op_msg_id_changed)(Messages *);
   void (*messages_is_empty_changed)(Messages *);
   void (*messages_last_author_changed)(Messages *);
   void (*messages_last_body_changed)(Messages *);
@@ -1316,7 +1317,9 @@ private:
   Q_PROPERTY(QString opBody READ opBody NOTIFY opBodyChanged FINAL)
   Q_PROPERTY(QString opDocAttachments READ opDocAttachments NOTIFY
                  opDocAttachmentsChanged FINAL)
-  Q_PROPERTY(QByteArray opId READ opId NOTIFY opIdChanged FINAL)
+  Q_PROPERTY(QVariant opExpirationTime READ opExpirationTime NOTIFY
+                 opExpirationTimeChanged FINAL)
+  Q_PROPERTY(QByteArray opId READ opId WRITE setOpId NOTIFY opIdChanged FINAL)
   Q_PROPERTY(QString opMediaAttachments READ opMediaAttachments NOTIFY
                  opMediaAttachmentsChanged FINAL)
   Q_PROPERTY(QVariant opTime READ opTime NOTIFY opTimeChanged FINAL)
@@ -1337,7 +1340,9 @@ public:
   QString opAuthor() const;
   QString opBody() const;
   QString opDocAttachments() const;
+  QVariant opExpirationTime() const;
   QByteArray opId() const;
+  void setOpId(const QByteArray &v);
   QString opMediaAttachments() const;
   QVariant opTime() const;
   Q_INVOKABLE bool addAttachment(const QString &path);
@@ -1388,6 +1393,7 @@ Q_SIGNALS:
   void opAuthorChanged();
   void opBodyChanged();
   void opDocAttachmentsChanged();
+  void opExpirationTimeChanged();
   void opIdChanged();
   void opMediaAttachmentsChanged();
   void opTimeChanged();
@@ -1505,8 +1511,6 @@ private:
   Private *m_d;
   bool m_ownsPrivate;
   Q_PROPERTY(MessageBuilder *builder READ builder NOTIFY builderChanged FINAL)
-  Q_PROPERTY(QByteArray builderOpMsgId READ builderOpMsgId WRITE
-                 setBuilderOpMsgId NOTIFY builderOpMsgIdChanged FINAL)
   Q_PROPERTY(bool isEmpty READ isEmpty NOTIFY isEmptyChanged FINAL)
   Q_PROPERTY(QString lastAuthor READ lastAuthor NOTIFY lastAuthorChanged FINAL)
   Q_PROPERTY(QString lastBody READ lastBody NOTIFY lastBodyChanged FINAL)
@@ -1529,8 +1533,6 @@ public:
   ~Messages() override;
   const MessageBuilder *builder() const;
   MessageBuilder *builder();
-  QByteArray builderOpMsgId() const;
-  void setBuilderOpMsgId(const QByteArray &v);
   bool isEmpty() const;
   QString lastAuthor() const;
   QString lastBody() const;
@@ -1613,7 +1615,6 @@ private:
   void updatePersistentIndexes();
 Q_SIGNALS:
   void builderChanged();
-  void builderOpMsgIdChanged();
   void isEmptyChanged();
   void lastAuthorChanged();
   void lastBodyChanged();
@@ -1884,6 +1885,7 @@ public:
   ~Utils() override;
   Q_INVOKABLE bool compareByteArray(const QByteArray &bs1,
                                     const QByteArray &bs2) const;
+  Q_INVOKABLE QString imageDimensions(const QString &path) const;
   Q_INVOKABLE bool isValidRandId(const QByteArray &bs) const;
   Q_INVOKABLE bool saveFile(const QString &fpath,
                             const QString &target_path) const;
