@@ -103,19 +103,16 @@ ListView {
         anchors {
             left: parent.left
             right: parent.right
-            rightMargin: CmnCfg.margin
-            leftMargin: CmnCfg.smallMargin
         }
 
         //  layoutDirection: outbound ? Qt.RightToLeft : Qt.LeftToRight
-        spacing: CmnCfg.margin * 2
         bottomPadding: 0 //CmnCfg.smallMargin / 2
         topPadding: 0 //CmnCfg.smallMargin / 2
 
         CB.ChatBubble {
             id: bubbleActual
             convContainer: chatListView
-            defaultWidth: chatListView.width - CmnCfg.margin * 3.5
+            defaultWidth: chatListView.width
             messageModelData: chatRow.messageModelData
 
             ChatBubbleHover {

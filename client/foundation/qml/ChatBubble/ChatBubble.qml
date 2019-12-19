@@ -6,7 +6,7 @@ import "./ReplyBubble"
 import "../js/utils.mjs" as Utils
 import "../Avatar"
 
-Pane {
+Rectangle {
     id: bubbleRoot
 
     property real defaultWidth
@@ -17,7 +17,6 @@ Pane {
     property var messageModelData
 
     property alias highlightItem: bubbleHighlight
-
     readonly property color bubbleColor: CmnCfg.palette.lightGrey
     readonly property bool highlight: messageModelData.matchStatus === 2
 
@@ -33,7 +32,7 @@ Pane {
     readonly property var replyId: messageModelData.opMsgId
     readonly property bool reply: messageModelData.replyType > 0
 
-    readonly property real maxWidth: defaultWidth
+    readonly property real maxWidth: defaultWidth * 0.75
     property string friendlyTimestamp: Utils.friendlyTimestamp(
                                            messageModelData.insertionTime)
     readonly property string receiptImage: Utils.receiptCodeSwitch(
@@ -48,53 +47,43 @@ Pane {
         onRefreshTime: friendlyTimestamp = Utils.friendlyTimestamp(
                            messageModelData.insertionTime)
     }
-    contentHeight: Math.max(contentRoot.height, avatar.height)
-    contentWidth: defaultWidth
-    padding: CmnCfg.smallMargin
-    topPadding: isHead || isSingleHead ? CmnCfg.smallMargin : 0
-    spacing: 0
+    height: contentRoot.height
+    width: defaultWidth
 
-    background: Rectangle {
-        id: background
-        color: outbound ? CmnCfg.palette.lightGrey : CmnCfg.palette.white
-        anchors.fill: parent
+    color: outbound ? CmnCfg.palette.lightGrey : CmnCfg.palette.white
 
-        Rectangle {
-            anchors.top: parent.top
-            width: parent.width
-
-            height: 1
-            color: CmnCfg.palette.medGrey
-            visible: isHead || isSingleHead
-        }
-
-        Rectangle {
-            anchors.bottom: parent.bottom
-            width: parent.width
-
-            height: 1
-            color: CmnCfg.palette.medGrey
-            visible: isTail || isSingleHead
-        }
-
-        Highlight {
-            id: bubbleHighlight
-            z: background.z - 1
-        }
+    Rectangle {
+        anchors.top: parent.top
+        width: parent.width
+        height: 1
+        color: CmnCfg.palette.medGrey
+        visible: isHead
     }
 
+    Rectangle {
+        anchors.bottom: parent.bottom
+        width: parent.width
+
+        height: 1
+        color: CmnCfg.palette.medGrey
+        visible: isTail
+    }
+
+    Highlight {
+        id: bubbleHighlight
+        z: -1
+    }
     AvatarMain {
         id: avatar
         iconColor: authorColor
         initials: authorName[0].toUpperCase()
-        size: 28
-        avatarHeight: 28
+        size: 36
+        avatarHeight: 36
         visible: isHead || isSingleHead ? true : false
         anchors {
             left: parent.left
             top: parent.top
             margins: CmnCfg.margin
-            // topMargin: CmnCfg.margin * 2
         }
 
         z: contentRoot.z + 1
@@ -103,18 +92,14 @@ Pane {
 
     Rectangle {
         id: accent
-        height: contentRoot.height
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
+        anchors.topMargin: isHead ? CmnCfg.smallMargin : 0
+        anchors.bottomMargin: isTail ? CmnCfg.smallMargin : 0
         width: CmnCfg.smallMargin / 2
         color: authorColor
         anchors.left: avatar.right
         anchors.leftMargin: CmnCfg.smallMargin
-        anchors.top: parent.top
-        anchors.topMargin: isHead || isSingleHead ? CmnCfg.smallMargin : 0
-    }
-    ChatLabel {
-        id: authorLabel
-        anchors.left: accent.right
-        visible: isHead || isSingleHead
     }
 
     Column {
@@ -124,17 +109,21 @@ Pane {
         // Text edit alias
         readonly property alias messageBody: messageBody
         /// User name label alias
-        readonly property real unameWidth: authorLabel.authorNameTM.width
+        readonly property real unameWidth: authorLabel.width
         // Stamps alias
         readonly property alias messageStamps: messageStamps
 
         // all messages are un-expanded on completion
         Component.onCompleted: bubbleRoot.expanded = false
 
-        spacing: CmnCfg.smallMargin
-        topPadding: isHead || isSingleHead ? authorLabel.height : 0
+        spacing: CmnCfg.smallMargin / 2
+        topPadding: isHead ? CmnCfg.smallMargin : CmnCfg.smallMargin
         leftPadding: CmnCfg.smallMargin
-        bottomPadding: 0
+        bottomPadding: isTail ? CmnCfg.margin : CmnCfg.smallMargin
+        ChatLabel {
+            id: authorLabel
+            visible: isHead
+        }
 
         //reply bubble loader
         Loader {
@@ -218,7 +207,7 @@ Pane {
         //message body
         StandardTextEdit {
             id: messageBody
-            maximumWidth: bubbleRoot.imageAttach ? 300 : bubbleRoot.maxWidth
+            maximumWidth: bubbleRoot.maxWidth
         }
         Item {
             id: messageStamps

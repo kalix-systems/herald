@@ -24,12 +24,7 @@ Page {
     }
 
     contentHeight: replyWrapperCol.height
-    contentWidth: imageAttach ? 300 : ReplyWidthCalc.text(
-                                    bubbleRoot.maxWidth,
-                                    contentRoot.unameWidth, messageBody.width,
-                                    contentRoot.messageStamps.width,
-                                    replyLabel.opNameWidth,
-                                    replyElidedBody.width, replyTimeInfo.width)
+    contentWidth: bubbleRoot.maxWidth
 
     Column {
         id: replyWrapperCol
