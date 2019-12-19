@@ -6,6 +6,7 @@ import QtQuick.Layouts 1.12
 import "../Popups" as Popups
 import Qt.labs.platform 1.1
 import QtQuick.Dialogs 1.3
+import QtQuick.Controls 2.3
 
 MouseArea {
     id: chatBubbleHitbox
@@ -37,6 +38,19 @@ MouseArea {
         Popups.MessageOptionsPopup {
             id: messageOptionsMenu
         }
+
+//        ToolButton {
+//            text: qsTr("( ͡° ͜ʖ ͡°)")
+//            indicator: Item {
+//                width: 0
+//                height: 0
+//            }
+//            visible: chatBubbleHitbox.containsMouse
+//            display: AbstractButton.TextOnly
+//            anchors.margins: CmnCfg.margin
+//            spacing: 0
+//            padding: 0
+//        }
 
         Imports.ButtonForm {
             id: downloadButton
