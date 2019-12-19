@@ -23,71 +23,78 @@ MouseArea {
     onPressAndHold: mouse.accepted = false
 
     //    z: contentRoot.z + 1
-    Row {
-        spacing: CmnCfg.margin
+    Rectangle {
+        width: buttonRow.width
+        height: buttonRow.height
+        color: CmnCfg.palette.medGrey
+        z: CmnCfg.overlayZ
         anchors.right: parent.right
         anchors.top: parent.top
-        anchors.margins: CmnCfg.smallMargin
-        anchors.verticalCenter: parent.verticalCenter
+        anchors.margins: CmnCfg.smallMargin / 2
+        // anchors.verticalCenter: parent.verticalCenter
+        Row {
+            id: buttonRow
+            spacing: CmnCfg.margin
 
-        Imports.ButtonForm {
-            id: replyButton
-            visible: chatBubbleHitbox.containsMouse
-            anchors {
-                margins: CmnCfg.margin
+            Imports.ButtonForm {
+                id: replyButton
+                visible: chatBubbleHitbox.containsMouse
+                anchors {
+                    margins: CmnCfg.margin
+                }
+                source: "qrc:/reply-icon.svg"
+                z: CmnCfg.overlayZ
+
+                onClicked: ownedConversation.builder.opId = msgId
             }
-            source: "qrc:/reply-icon.svg"
-            z: CmnCfg.overlayZ
 
-            onClicked: ownedConversation.builder.opId = msgId
-        }
-
-        Popups.MessageOptionsPopup {
-            id: messageOptionsMenu
-        }
-
-        //        ToolButton {
-        //            text: qsTr("( ͡° ͜ʖ ͡°)")
-        //            indicator: Item {
-        //                width: 0
-        //                height: 0
-        //            }
-        //            visible: chatBubbleHitbox.containsMouse
-        //            display: AbstractButton.TextOnly
-        //            anchors.margins: CmnCfg.margin
-        //            spacing: 0
-        //            padding: 0
-        //        }
-        Imports.ButtonForm {
-            id: downloadButton
-            visible: chatBubbleHitbox.containsMouse && download
-            anchors {
-                margins: visible ? CmnCfg.margin : 0
+            Popups.MessageOptionsPopup {
+                id: messageOptionsMenu
             }
-            z: CmnCfg.overlayZ
-            icon.width: visible ? 22 : 0
-            source: "qrc:/download-icon.svg"
-            onClicked: downloadFileChooser.open()
-        }
-        FileDialog {
-            id: downloadFileChooser
-            selectFolder: true
-            folder: StandardPaths.writableLocation(
-                        StandardPaths.DesktopLocation)
-            onAccepted: ownedConversation.saveAllAttachments(index, fileUrl)
-            selectExisting: false
-        }
 
-        Imports.ButtonForm {
-            id: messageOptionsButton
-            visible: chatBubbleHitbox.containsMouse
-
-            anchors {
-                margins: CmnCfg.margin
+            //        ToolButton {
+            //            text: qsTr("( ͡° ͜ʖ ͡°)")
+            //            indicator: Item {
+            //                width: 0
+            //                height: 0
+            //            }
+            //            visible: chatBubbleHitbox.containsMouse
+            //            display: AbstractButton.TextOnly
+            //            anchors.margins: CmnCfg.margin
+            //            spacing: 0
+            //            padding: 0
+            //        }
+            Imports.ButtonForm {
+                id: downloadButton
+                visible: chatBubbleHitbox.containsMouse && download
+                anchors {
+                    margins: visible ? CmnCfg.margin : 0
+                }
+                z: CmnCfg.overlayZ
+                icon.width: visible ? 22 : 0
+                source: "qrc:/download-icon.svg"
+                onClicked: downloadFileChooser.open()
             }
-            source: "qrc:/options-icon.svg"
-            z: CmnCfg.overlayZ
-            onClicked: messageOptionsMenu.open()
+            FileDialog {
+                id: downloadFileChooser
+                selectFolder: true
+                folder: StandardPaths.writableLocation(
+                            StandardPaths.DesktopLocation)
+                onAccepted: ownedConversation.saveAllAttachments(index, fileUrl)
+                selectExisting: false
+            }
+
+            Imports.ButtonForm {
+                id: messageOptionsButton
+                visible: chatBubbleHitbox.containsMouse
+
+                anchors {
+                    margins: CmnCfg.margin
+                }
+                source: "qrc:/options-icon.svg"
+                z: CmnCfg.overlayZ
+                onClicked: messageOptionsMenu.open()
+            }
         }
     }
 }

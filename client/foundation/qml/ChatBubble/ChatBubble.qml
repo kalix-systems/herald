@@ -102,17 +102,24 @@ Rectangle {
         anchors.leftMargin: CmnCfg.smallMargin
     }
 
+    Button {
+        id: receipt
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        anchors.margins: CmnCfg.smallMargin
+
+        icon.source: receiptImage
+        icon.height: 16
+        icon.width: 16
+        icon.color: CmnCfg.palette.iconMatte
+        padding: 0
+        background: Item {}
+    }
+
     Column {
         z: highlight.z + 1
         id: contentRoot
         anchors.left: accent.right
-        // Text edit alias
-        readonly property alias messageBody: messageBody
-        /// User name label alias
-        readonly property real unameWidth: authorLabel.width
-        // Stamps alias
-        readonly property alias messageStamps: messageStamps
-
         // all messages are un-expanded on completion
         Component.onCompleted: bubbleRoot.expanded = false
 
@@ -122,7 +129,6 @@ Rectangle {
         bottomPadding: isTail ? CmnCfg.margin : CmnCfg.smallMargin
         ChatLabel {
             id: authorLabel
-            visible: isHead
         }
 
         //reply bubble loader
@@ -208,9 +214,6 @@ Rectangle {
         StandardTextEdit {
             id: messageBody
             maximumWidth: bubbleRoot.maxWidth
-        }
-        Item {
-            id: messageStamps
         }
 
         ElideHandler {}

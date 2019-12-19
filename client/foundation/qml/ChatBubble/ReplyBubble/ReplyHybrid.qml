@@ -44,7 +44,7 @@ Page {
             id: replyWrapperCol
             spacing: CmnCfg.smallMargin
 
-            width: bubbleRoot.maxWidth* 0.8 - imageClip.width
+            width: bubbleRoot.maxWidth * 0.8 - imageClip.width
             ReplyFileClip {
                 id: replyFileClip
                 constraint: imageSize
@@ -55,7 +55,7 @@ Page {
             ReplyElidedBody {
                 id: replyElidedBody
                 elideConstraint: imageSize
-                maximumWidth: bubbleRoot.maxWidth - imageSize
+                maximumWidth: bubbleRoot.maxWidth * 0.8 - imageSize
             }
 
             ReplyTimeInfo {
