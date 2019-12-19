@@ -43,6 +43,8 @@ ListView {
 
         anchors.left: parent.left
         anchors.right: parent.right
+        bottomPadding: 0
+        topPadding: 0
 
         CB.ChatBubble {
             defaultWidth: chatListView.width
