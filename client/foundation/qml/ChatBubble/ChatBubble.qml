@@ -4,6 +4,7 @@ import QtQuick.Controls 2.13
 import LibHerald 1.0
 import "./ReplyBubble"
 import "../js/utils.mjs" as Utils
+import "../Avatar"
 
 Pane {
     id: bubbleRoot
@@ -32,8 +33,7 @@ Pane {
     readonly property var replyId: messageModelData.opMsgId
     readonly property bool reply: messageModelData.replyType > 0
 
-    readonly property real maxWidth: imageAttach ? 300 : Math.min(defaultWidth,
-                                                                  600)
+    readonly property real maxWidth: defaultWidth
     property string friendlyTimestamp: Utils.friendlyTimestamp(
                                            messageModelData.insertionTime)
     readonly property string receiptImage: Utils.receiptCodeSwitch(
@@ -41,31 +41,40 @@ Pane {
     readonly property color authorColor: CmnCfg.avatarColors[Herald.users.colorById(
                                                                  authorId)]
 
+    readonly property string pfpUrl: Herald.users.profilePictureById(authorId)
+
     Connections {
         target: appRoot.globalTimer
         onRefreshTime: friendlyTimestamp = Utils.friendlyTimestamp(
                            messageModelData.insertionTime)
     }
-
-
-
-    contentWidth: {
-        if (imageAttach) {
-            return 316
-        }
-        Math.max(contentRoot.width, contentRoot.unameWidth)
-    }
-    contentHeight: contentRoot.height
+    contentHeight: Math.max(contentRoot.height, avatar.height)
+    contentWidth: defaultWidth
     padding: CmnCfg.smallMargin
+    topPadding: isHead || isSingleHead ? CmnCfg.smallMargin : 0
+    spacing: 0
 
     background: Rectangle {
         id: background
-        color: CmnCfg.palette.white
+        color: outbound ? CmnCfg.palette.lightGrey : CmnCfg.palette.white
         anchors.fill: parent
-        border.color: CmnCfg.palette.black
-        border.width: 1
-        ChatLabel {
-            id: authorLabel
+
+        Rectangle {
+            anchors.top: parent.top
+            width: parent.width
+
+            height: 1
+            color: CmnCfg.palette.medGrey
+            visible: isHead || isSingleHead
+        }
+
+        Rectangle {
+            anchors.bottom: parent.bottom
+            width: parent.width
+
+            height: 1
+            color: CmnCfg.palette.medGrey
+            visible: isTail || isSingleHead
         }
 
         Highlight {
@@ -74,8 +83,44 @@ Pane {
         }
     }
 
+    AvatarMain {
+        id: avatar
+        iconColor: authorColor
+        initials: authorName[0].toUpperCase()
+        size: 28
+        avatarHeight: 28
+        visible: isHead || isSingleHead ? true : false
+        anchors {
+            left: parent.left
+            top: parent.top
+            margins: CmnCfg.margin
+            // topMargin: CmnCfg.margin * 2
+        }
+
+        z: contentRoot.z + 1
+        pfpPath: pfpUrl
+    }
+
+    Rectangle {
+        id: accent
+        height: contentRoot.height
+        width: CmnCfg.smallMargin / 2
+        color: authorColor
+        anchors.left: avatar.right
+        anchors.leftMargin: CmnCfg.smallMargin
+        anchors.top: parent.top
+        anchors.topMargin: isHead || isSingleHead ? CmnCfg.smallMargin : 0
+    }
+    ChatLabel {
+        id: authorLabel
+        anchors.left: accent.right
+        visible: isHead || isSingleHead
+    }
+
     Column {
+
         id: contentRoot
+        anchors.left: accent.right
         // Text edit alias
         readonly property alias messageBody: messageBody
         /// User name label alias
@@ -87,7 +132,9 @@ Pane {
         Component.onCompleted: bubbleRoot.expanded = false
 
         spacing: CmnCfg.smallMargin
-        topPadding: authorLabel.height
+        topPadding: isHead || isSingleHead ? authorLabel.height : 0
+        leftPadding: CmnCfg.smallMargin
+        bottomPadding: 0
 
         //reply bubble loader
         Loader {
@@ -173,11 +220,14 @@ Pane {
             id: messageBody
             maximumWidth: bubbleRoot.imageAttach ? 300 : bubbleRoot.maxWidth
         }
-
-        StandardStamps {
+        Item {
             id: messageStamps
         }
 
+        //        StandardStamps {
+        //            id: messageStamps
+        //            visible: isTail
+        //        }
         ElideHandler {}
     }
 }

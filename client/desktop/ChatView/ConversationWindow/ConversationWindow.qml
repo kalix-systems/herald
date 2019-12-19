@@ -24,6 +24,7 @@ ListView {
         duration: 600
         easing.type: Easing.InCubic
     }
+    spacing: 0
 
     // disable these, we're handling them differently
     keyNavigationEnabled: false
@@ -92,6 +93,7 @@ ListView {
         property bool elided: body.length !== fullBody.length
 
         property var messageModelData: model
+        property bool isSingleHead: isHead && isTail
 
         onPositioningComplete: {
             if (index === count - 1)
@@ -99,38 +101,21 @@ ListView {
         }
 
         anchors {
-            right: outbound ? parent.right : undefined
-            left: !outbound ? parent.left : undefined
+            left: parent.left
+            right: parent.right
             rightMargin: CmnCfg.margin
             leftMargin: CmnCfg.smallMargin
         }
 
-        layoutDirection: outbound ? Qt.RightToLeft : Qt.LeftToRight
-
-        spacing: CmnCfg.margin
-
-        bottomPadding: isTail ? CmnCfg.mediumMargin / 2 : CmnCfg.smallMargin / 2
-        topPadding: isHead ? CmnCfg.mediumMargin / 2 : CmnCfg.smallMargin / 2
-        AvatarMain {
-            iconColor: userColor
-            initials: authName[0].toUpperCase()
-            size: 28
-            opacity: isTail ? 1 : 0
-            anchors {
-                bottom: parent.bottom
-                margins: CmnCfg.margin
-                bottomMargin: parent.bottomPadding
-            }
-
-            z: 10
-            pfpPath: parent.pfpUrl
-            avatarHeight: 28
-        }
+        //  layoutDirection: outbound ? Qt.RightToLeft : Qt.LeftToRight
+        spacing: CmnCfg.margin * 2
+        bottomPadding: 0 //CmnCfg.smallMargin / 2
+        topPadding: 0 //CmnCfg.smallMargin / 2
 
         CB.ChatBubble {
             id: bubbleActual
             convContainer: chatListView
-            defaultWidth: chatListView.width * 0.66
+            defaultWidth: chatListView.width - CmnCfg.margin * 3.5
             messageModelData: chatRow.messageModelData
 
             ChatBubbleHover {

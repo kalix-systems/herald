@@ -12,19 +12,13 @@ Label {
     anchors.top: parent.top
 
     padding: CmnCfg.smallMargin / 4
-    leftPadding: CmnCfg.smallMargin / 2
+    leftPadding: CmnCfg.smallMargin
 
     horizontalAlignment: Text.AlignLeft
     font.weight: Font.Bold
     font.family: CmnCfg.chatFont.name
 
-    color: CmnCfg.palette.white
-
-    background: Rectangle {
-        color: authorColor
-        border.color: Qt.darker(color, 1.3)
-        border.width: 1
-    }
+    color: authorColor
 
     TextMetrics {
         id: authorNameTM
