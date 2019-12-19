@@ -15,8 +15,8 @@ Window {
     property real aspectRatio: imageWidth / imageHeight
     property real maxSize: Math.min(imageWidth, imageHeight)
     property int maxWindowSize: 400
-    width: (aspectRatio > 1) ? maxWindowSize : maxWindowSize / aspectRatio
-    height: (aspectRatio > 1) ? maxWindowSize * aspectRatio : maxWindowSize
+    width: (aspectRatio > 1) ? maxWindowSize : maxWindowSize * aspectRatio
+    height: (aspectRatio > 1) ? maxWindowSize / aspectRatio : maxWindowSize
 
     Image {
         anchors.centerIn: parent
@@ -26,8 +26,6 @@ Window {
             id: wrapperItem
             anchors.centerIn: parent
 
-            //  clipWidth: Math.min(cropWindow.imageHeight, cropWindow.imageWidth)
-            //  clipHeight: clipWidth
             width: Math.min(cropWindow.imageHeight, cropWindow.imageWidth)
             height: width
 
