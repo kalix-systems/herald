@@ -72,9 +72,9 @@ ListView {
     delegate: Row {
         id: chatRow
 
-        //ListView.onAdd: {
-        //    chatScrollBarInner.setPosition(1)
-        //}
+        ListView.onAdd: {
+            chatScrollBarInner.setPosition(3)
+        }
         readonly property string proxyBody: body
         property string proxyReceiptImage: Utils.receiptCodeSwitch(
                                                receiptStatus)
@@ -94,11 +94,10 @@ ListView {
 
         property var messageModelData: model
 
-        onPositioningComplete: {
-            if (index === count - 1)
-                chatScrollBarInner.setPosition(1)
-        }
-
+        //        onPositioningComplete: {
+        //            if (index === count - 1)
+        //                chatScrollBarInner.setPosition(1)
+        //        }
         anchors {
             left: parent.left
             right: parent.right

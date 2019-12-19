@@ -129,6 +129,7 @@ Rectangle {
         bottomPadding: isTail ? CmnCfg.margin : CmnCfg.smallMargin
         ChatLabel {
             id: authorLabel
+            visible: isHead
         }
 
         //reply bubble loader
@@ -202,8 +203,10 @@ Rectangle {
             Loader {
                 id: fileLoader
                 sourceComponent: docAttach ? doc : undefined
+                asynchronous: true
                 // document component
                 Component {
+
                     id: doc
                     FileAttachmentContent {}
                 }

@@ -11,7 +11,7 @@ import "../js/utils.mjs" as Utils
 Row {
     property alias fileModel: fileList.model
     property alias downloadModel: downloadList.model
-    height: childrenRect.height
+    height: docParsed.length * 28 //childrenRect.height
     width: childrenRect.width
     spacing: CmnCfg.smallMargin / 2
 
@@ -19,7 +19,7 @@ Row {
         id: fileList
         anchors.top: parent.top
         interactive: false
-        width: imageAttach ? 300 - downloadList.width : contentItem.childrenRect.width
+        width: contentItem.childrenRect.width
         height: docParsed.length * 24 //fileModel.length * 20 //contentItem.childrenRect.height
         spacing: CmnCfg.smallMargin / 2
 
@@ -45,7 +45,7 @@ Row {
                 font.weight: Font.Medium
                 elide: Text.ElideMiddle
 
-                Layout.maximumWidth: (imageAttach ? 300 : bubbleRoot.maxWidth) - parent._constraint
+                Layout.maximumWidth: bubbleRoot.maxWidth * 0.8 - parent._constraint
             }
 
             Text {

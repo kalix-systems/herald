@@ -22,7 +22,6 @@ MouseArea {
     onPositionChanged: mouse.accepted = false
     onPressAndHold: mouse.accepted = false
 
-    //    z: contentRoot.z + 1
     Rectangle {
         width: buttonRow.width
         height: buttonRow.height
@@ -31,7 +30,6 @@ MouseArea {
         anchors.right: parent.right
         anchors.top: parent.top
         anchors.margins: CmnCfg.smallMargin / 2
-        // anchors.verticalCenter: parent.verticalCenter
         Row {
             id: buttonRow
             spacing: CmnCfg.margin
