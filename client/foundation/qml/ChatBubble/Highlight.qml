@@ -11,7 +11,7 @@ Item {
         anchors.right: parent.right
         color: CmnCfg.palette.medGrey
         anchors.verticalCenter: parent.verticalCenter
-        height: parent.height + CmnCfg.smallMargin
+        height: parent.height
     }
 
     Rectangle {
@@ -19,6 +19,6 @@ Item {
         anchors.left: parent.right
         color: CmnCfg.palette.medGrey
         anchors.verticalCenter: parent.verticalCenter
-        height: parent.height + CmnCfg.smallMargin
+        height: parent.height
     }
 }

@@ -71,7 +71,7 @@ Rectangle {
 
     Highlight {
         id: bubbleHighlight
-        z: -1
+        z: bubbleRoot.z + 1
     }
     AvatarMain {
         id: avatar
@@ -103,7 +103,7 @@ Rectangle {
     }
 
     Column {
-
+        z: highlight.z + 1
         id: contentRoot
         anchors.left: accent.right
         // Text edit alias
