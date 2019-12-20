@@ -19,7 +19,7 @@ Row {
 
         TextMetrics {
             id: opNameTM
-            text: Herald.users.nameById(messageModelData.opAuthor)
+            text: messageModelData.opName
             font.weight: Font.Bold
             font.family: CmnCfg.chatFont.name
             elideWidth: {
@@ -42,16 +42,14 @@ Row {
         id: replyTs
 
         font.pixelSize: 11
-        text: messageModelData.replyType === 2 ? Utils.friendlyTimestamp(
-                                                     messageModelData.opInsertionTime) : ""
+        text: Utils.friendlyTimestamp(messageModelData.opInsertionTime)
         color: CmnCfg.palette.darkGrey
         anchors.verticalCenter: replyLabel.verticalCenter
     }
 
     Button {
         id: clock
-        icon.source: messageModelData.opExpirationTime
-                     !== undefined ? "qrc:/countdown-icon-temp.svg" : ""
+        icon.source: "qrc:/countdown-icon-temp.svg"
         icon.height: 16
         icon.width: 16
         icon.color: "grey"
