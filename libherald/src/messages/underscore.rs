@@ -324,7 +324,7 @@ impl Messages {
             .access_by_index(index, |data| data.author.to_string())
     }
 
-    pub(crate) fn user_color_(
+    pub(crate) fn author_color_(
         &self,
         index: usize,
     ) -> Option<u32> {
@@ -332,7 +332,7 @@ impl Messages {
         crate::users::shared::color(&uid)
     }
 
-    pub(crate) fn user_name_(
+    pub(crate) fn author_name_(
         &self,
         index: usize,
     ) -> Option<ffi::UserId> {
@@ -340,7 +340,7 @@ impl Messages {
         crate::users::shared::name(&uid)
     }
 
-    pub(crate) fn user_profile_picture_(
+    pub(crate) fn author_profile_picture_(
         &self,
         index: usize,
     ) -> Option<String> {

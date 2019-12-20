@@ -47,25 +47,25 @@ impl Interface for Messages {
         self.author_(index)
     }
 
-    fn user_color(
+    fn author_color(
         &self,
         index: usize,
     ) -> Option<u32> {
-        self.user_color_(index)
+        self.author_color_(index)
     }
 
-    fn user_name(
+    fn author_name(
         &self,
         index: usize,
     ) -> Option<ffi::UserId> {
-        self.user_name_(index)
+        self.author_name_(index)
     }
 
-    fn user_profile_picture(
+    fn author_profile_picture(
         &self,
         index: usize,
     ) -> Option<String> {
-        self.user_profile_picture_(index)
+        self.author_profile_picture_(index)
     }
 
     fn body(
