@@ -188,7 +188,7 @@ fn conversations() -> Object {
        pairwise: ItemProp::new(Bool),
        expirationPeriod: ItemProp::new(QUint8).write(),
        matched: matched_item_prop(),
-       picture: picture_item_prop().write().get_by_value(),
+       picture: picture_item_prop().get_by_value(),
        color: color_item_prop().write()
     };
 
@@ -196,6 +196,8 @@ fn conversations() -> Object {
         mut removeConversation(row_index: QUint64) => Bool,
         mut toggleFilterRegex() => Bool,
         mut clearFilter() => Void,
+        // `cropRect` is a bounding rectangle encoded as JSON.
+        mut setProfilePicture(index: QUint64, path: QString, cropRect: QString) => Void,
         const indexById(conversation_id: QByteArray) => Qint64,
     };
 
@@ -213,7 +215,7 @@ fn users() -> Object {
        pairwiseConversationId: ItemProp::new(QByteArray).get_by_value(),
        status: ItemProp::new(QUint8).write(),
        matched: matched_item_prop(),
-       profilePicture: picture_item_prop().get_by_value().write(),
+       profilePicture: picture_item_prop().get_by_value(),
        color: color_item_prop().write()
     };
 
@@ -221,6 +223,8 @@ fn users() -> Object {
         mut add(id: QString) => QByteArray,
         mut toggleFilterRegex() => Bool,
         mut clearFilter() => Void,
+        // `cropRect` is a bounding rectangle encoded as JSON.
+        mut setProfilePicture(index: Qint64, Upath: QString, cropRect: QString) => Void,
         const colorById(id: QString) => QUint32,
         const nameById(id: QString) => QString,
         const profilePictureById(id: QString) => QString,
@@ -403,15 +407,20 @@ fn config() -> Object {
     let props = props! {
         configId: Prop::new().simple(QString),
         name: Prop::new().simple(QString).write(),
-        profilePicture: Prop::new().simple(QString).write().optional(),
+        profilePicture: Prop::new().simple(QString).optional(),
         color: Prop::new().simple(QUint32).write(),
         colorscheme: Prop::new().simple(QUint32).write(),
         ntsConversationId: Prop::new().simple(QByteArray),
         preferredExpiration: Prop::new().simple(QUint8).write()
     };
 
+    let funcs = functions! {
+        // `cropRect` is a bounding rectangle encoded as JSON.
+        mut setProfilePicture(path: QString, cropRect: QString) => Void,
+    };
+
     obj! {
-        Config: Obj::new().props(props)
+        Config: Obj::new().props(props).funcs(funcs)
     }
 }
 
@@ -424,7 +433,7 @@ fn conversation_builder() -> Object {
     };
 
     let prop = props! {
-        picture: Prop::new().simple(QString).write().optional()
+        picture: Prop::new().simple(QString).optional()
     };
 
     let funcs = functions! {
@@ -432,9 +441,12 @@ fn conversation_builder() -> Object {
         mut removeMemberById(user_id: QString) => Bool,
         mut removeMemberByIndex(index: QUint64) => Bool,
         mut removeLast() => Void,
-        mut setTitle(title: QString) => Void,
         mut finalize() => Void,
         mut clear() => Void,
+
+        mut setTitle(title: QString) => Void,
+        // `cropRect` is a bounding rectangle encoded as JSON.
+        mut setProfilePicture(path: QString, cropRect: QString) => Void,
     };
 
     obj! {
