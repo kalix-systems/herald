@@ -52,9 +52,7 @@ fn objects() -> BTreeMap<String, Rc<Object>> {
        message_builder(),
 
        media_attachments(),
-       document_attachments(),
-
-       reply_width_calc()
+       document_attachments()
     }
 }
 
@@ -100,70 +98,6 @@ fn errors() -> Object {
     }
 }
 
-fn reply_width_calc() -> Object {
-    let functions = functions! {
-        const unknown(
-            bubble_max_width: Double,
-
-            message_label_width: Double,
-            message_body_width: Double,
-
-            unknown_body_width: Double
-        ) => Double,
-
-        const doc(
-            bubble_max_width: Double,
-
-            message_label_width: Double,
-            message_body_width: Double,
-            stamp_width: Double,
-
-            reply_label_width: Double,
-            reply_body_width: Double,
-            reply_ts_width: Double,
-            reply_file_clip_width: Double
-        ) => Double,
-
-        const text(
-            bubble_max_width: Double,
-            message_label_width: Double,
-            message_body_width: Double,
-            stamp_width: Double,
-
-            reply_label_width: Double,
-            reply_body_width: Double,
-            reply_ts_width: Double
-        ) => Double,
-
-        const image(
-            bubble_max_width: Double,
-            message_label_width: Double,
-            message_body_width: Double,
-            stamp_width: Double,
-
-            reply_label_width: Double,
-            reply_body_width: Double,
-            reply_ts_width: Double
-        ) => Double,
-
-        const hybrid(
-            bubble_max_width: Double,
-            message_label_width: Double,
-            message_body_width: Double,
-            stamp_width: Double,
-
-            reply_label_width: Double,
-            reply_body_width: Double,
-            reply_ts_width: Double,
-            reply_file_clip_width: Double
-        ) => Double,
-    };
-
-    obj! {
-        ReplyWidthCalc: Obj::new().funcs(functions)
-    }
-}
-
 fn utils() -> Object {
     let functions = functions! {
         const compareByteArray(bs1: QByteArray, bs2: QByteArray) => Bool,
@@ -196,8 +130,9 @@ fn conversations() -> Object {
         mut removeConversation(row_index: QUint64) => Bool,
         mut toggleFilterRegex() => Bool,
         mut clearFilter() => Void,
-        // `cropRect` is a bounding rectangle encoded as JSON.
-        mut setProfilePicture(index: QUint64, path: QString, cropRect: QString) => Void,
+        // `profile_picture` is a path and bounding rectangle encoded as JSON.
+        // See `heraldcore/image_utils`.
+        mut setProfilePicture(index: QUint64, profile_picture: QString) => Void,
         const indexById(conversation_id: QByteArray) => Qint64,
     };
 
@@ -223,8 +158,9 @@ fn users() -> Object {
         mut add(id: QString) => QByteArray,
         mut toggleFilterRegex() => Bool,
         mut clearFilter() => Void,
-        // `cropRect` is a bounding rectangle encoded as JSON.
-        mut setProfilePicture(index: Qint64, Upath: QString, cropRect: QString) => Void,
+        // `profile_picture` is a path and bounding rectangle encoded as JSON.
+        // See `heraldcore/image_utils`.
+        mut setProfilePicture(index: QUint64, profile_picture: QString) => Void,
         const colorById(id: QString) => QUint32,
         const nameById(id: QString) => QString,
         const profilePictureById(id: QString) => QString,
@@ -415,8 +351,9 @@ fn config() -> Object {
     };
 
     let funcs = functions! {
-        // `cropRect` is a bounding rectangle encoded as JSON.
-        mut setProfilePicture(path: QString, cropRect: QString) => Void,
+        // `profile_picture` is a path and bounding rectangle encoded as JSON.
+        // See `heraldcore/image_utils`.
+        mut setProfilePicture(profile_picture: QString) => Void,
     };
 
     obj! {
@@ -445,8 +382,9 @@ fn conversation_builder() -> Object {
         mut clear() => Void,
 
         mut setTitle(title: QString) => Void,
-        // `cropRect` is a bounding rectangle encoded as JSON.
-        mut setProfilePicture(path: QString, cropRect: QString) => Void,
+        // `profile_picture` is a path and bounding rectangle encoded as JSON.
+        // See `heraldcore/image_utils`.
+        mut setProfilePicture(profile_picture: QString) => Void,
     };
 
     obj! {

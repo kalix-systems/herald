@@ -38,7 +38,7 @@ pub fn conversation_members(conversation_id: &ConversationId) -> Result<Vec<User
 /// Updates a user's profile picture.
 pub fn set_profile_picture(
     id: UserId,
-    profile_picture: Option<String>,
+    profile_picture: Option<image_utils::ProfilePicture>,
 ) -> Result<Option<String>, HErr> {
     let db = Database::get()?;
     db::set_profile_picture(&db, id, profile_picture)

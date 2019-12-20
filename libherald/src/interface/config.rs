@@ -137,8 +137,8 @@ pub trait ConfigTrait {
 
     fn set_profile_picture(
         &mut self,
-        value: Option<String>,
-    );
+        profile_picture: String,
+    ) -> ();
 }
 
 #[no_mangle]
@@ -177,6 +177,22 @@ pub unsafe fn config_new_inner(ptr_bundle: *mut ConfigPtrBundle) -> Config {
 #[no_mangle]
 pub unsafe extern "C" fn config_free(ptr: *mut Config) {
     Box::from_raw(ptr).emit().clear();
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn config_set_profile_picture(
+    ptr: *mut Config,
+    profile_picture_str: *const c_ushort,
+    profile_picture_len: c_int,
+) {
+    let obj = &mut *ptr;
+    let mut profile_picture = String::new();
+    set_string_from_utf16(
+        &mut profile_picture,
+        profile_picture_str,
+        profile_picture_len,
+    );
+    obj.set_profile_picture(profile_picture)
 }
 
 #[no_mangle]
@@ -278,24 +294,6 @@ pub unsafe extern "C" fn config_profile_picture_get(
         let str_: *const c_char = value.as_ptr() as (*const c_char);
         set(prop, str_, to_c_int(value.len()));
     }
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn config_profile_picture_set(
-    ptr: *mut Config,
-    value: *const c_ushort,
-    len: c_int,
-) {
-    let obj = &mut *ptr;
-    let mut s = String::new();
-    set_string_from_utf16(&mut s, value, len);
-    obj.set_profile_picture(Some(s));
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn config_profile_picture_set_none(ptr: *mut Config) {
-    let obj = &mut *ptr;
-    obj.set_profile_picture(None);
 }
 
 #[derive(Clone, Copy)]
