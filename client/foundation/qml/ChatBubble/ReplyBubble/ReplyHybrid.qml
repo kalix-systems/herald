@@ -10,7 +10,7 @@ import "./js/utils.js" as JS
 // Components that depend on dynamic scope
 import "dyn"
 
-Page {
+Rectangle {
     id: replyWrapper
 
     property color opColor: CmnCfg.avatarColors[Herald.users.colorById(
@@ -26,25 +26,38 @@ Page {
         JS.parseMedia(messageModelData, imageClip)
     }
 
-    padding: CmnCfg.smallMargin
+    Rectangle {
+        id: accent
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
 
-    background: ReplyBackground {}
-
-    header: ReplyLabel {
-        id: replyLabel
+        width: CmnCfg.smallMargin / 2
+        color: opColor
+        anchors.left: parent.left
     }
-    contentHeight: wrapRow.implicitHeight
-    contentWidth: wrapRow.implicitWidth
+
+    ReplyMouseArea {}
+
+    height: wrapRow.height
+    width: bubbleRoot.maxWidth
+    color: CmnCfg.palette.medGrey
 
     Row {
         id: wrapRow
         spacing: CmnCfg.smallMargin
+        anchors.left: accent.right
+        topPadding: CmnCfg.smallMargin
+        bottomPadding: CmnCfg.margin
+        leftPadding: CmnCfg.smallMargin
 
         Column {
             id: replyWrapperCol
+            ReplyLabel {
+                id: replyLabel
+            }
             spacing: CmnCfg.smallMargin
 
-            width: bubbleRoot.maxWidth* 0.8 - imageClip.width
+            width: bubbleRoot.maxWidth - imageClip.width - CmnCfg.smallMargin * 3
             ReplyFileClip {
                 id: replyFileClip
                 constraint: imageSize
@@ -54,12 +67,8 @@ Page {
 
             ReplyElidedBody {
                 id: replyElidedBody
-                elideConstraint: imageSize
-                maximumWidth: bubbleRoot.maxWidth - imageSize
-            }
 
-            ReplyTimeInfo {
-                id: replyTimeInfo
+                maximumWidth: bubbleRoot.maxWidth * 0.8 - imageSize
             }
         }
 

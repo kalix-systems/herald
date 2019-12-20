@@ -7,6 +7,9 @@ import "qrc:/imports/Avatar"
 import "." as CVUtils
 import "qrc:/imports/js/utils.mjs" as Utils
 import "../../SideBar/js/ContactView.mjs" as CUtils
+import Qt.labs.platform 1.1
+import QtQuick.Dialogs 1.3
+import QtGraphicalEffects 1.0
 
 ListView {
     id: chatListView
@@ -69,12 +72,21 @@ ListView {
         chatScrollBarInner.setPosition(2)
     }
 
+    FileDialog {
+        id: attachmentDownloader
+        property string filePath
+        selectFolder: true
+        folder: StandardPaths.writableLocation(StandardPaths.DesktopLocation)
+        onAccepted: Herald.utils.saveFile(filePath, fileUrl)
+        selectExisting: false
+    }
+
     delegate: Row {
         id: chatRow
 
-        //ListView.onAdd: {
-        //    chatScrollBarInner.setPosition(1)
-        //}
+        ListView.onAdd: {
+            chatScrollBarInner.setPosition(3)
+        }
         readonly property string proxyBody: body
         property string proxyReceiptImage: Utils.receiptCodeSwitch(
                                                receiptStatus)
@@ -94,11 +106,10 @@ ListView {
 
         property var messageModelData: model
 
-        onPositioningComplete: {
-            if (index === count - 1)
-                chatScrollBarInner.setPosition(1)
-        }
-
+        //        onPositioningComplete: {
+        //            if (index === count - 1)
+        //                chatScrollBarInner.setPosition(1)
+        //        }
         anchors {
             left: parent.left
             right: parent.right
@@ -113,18 +124,12 @@ ListView {
             convContainer: chatListView
             defaultWidth: chatListView.width
             messageModelData: chatRow.messageModelData
+
             ChatBubbleHover {
                 id: bubbleHoverHandler
                 download: bubbleActual.imageAttach || bubbleActual.docAttach
-            }
-
-            states: State {
-                name: "hoverstate"
-                when: bubbleHoverHandler.containsMouse
-                PropertyChanges {
-                    target: bubbleActual
-                    color: CmnCfg.palette.medGrey
-                }
+                onEntered: bubbleActual.hoverHighlight = true
+                onExited: bubbleActual.hoverHighlight = false
             }
         }
     }

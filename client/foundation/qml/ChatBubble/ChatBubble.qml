@@ -41,6 +41,7 @@ Rectangle {
                                                                  authorId)]
 
     readonly property string pfpUrl: Herald.users.profilePictureById(authorId)
+    property bool hoverHighlight: false
 
     Connections {
         target: appRoot.globalTimer
@@ -50,7 +51,7 @@ Rectangle {
     height: contentRoot.height
     width: defaultWidth
 
-    color: outbound ? CmnCfg.palette.lightGrey : CmnCfg.palette.white
+    color: CmnCfg.palette.white
 
     Rectangle {
         anchors.top: parent.top
@@ -94,25 +95,31 @@ Rectangle {
         id: accent
         anchors.top: parent.top
         anchors.bottom: parent.bottom
-        anchors.topMargin: isHead ? CmnCfg.smallMargin : 0
-        anchors.bottomMargin: isTail ? CmnCfg.smallMargin : 0
+
         width: CmnCfg.smallMargin / 2
         color: authorColor
         anchors.left: avatar.right
         anchors.leftMargin: CmnCfg.smallMargin
     }
 
+    Button {
+        id: receipt
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        anchors.margins: CmnCfg.smallMargin
+
+        icon.source: receiptImage
+        icon.height: 16
+        icon.width: 16
+        icon.color: CmnCfg.palette.iconMatte
+        padding: 0
+        background: Item {}
+    }
+
     Column {
         z: highlight.z + 1
         id: contentRoot
         anchors.left: accent.right
-        // Text edit alias
-        readonly property alias messageBody: messageBody
-        /// User name label alias
-        readonly property real unameWidth: authorLabel.width
-        // Stamps alias
-        readonly property alias messageStamps: messageStamps
-
         // all messages are un-expanded on completion
         Component.onCompleted: bubbleRoot.expanded = false
 
@@ -196,8 +203,10 @@ Rectangle {
             Loader {
                 id: fileLoader
                 sourceComponent: docAttach ? doc : undefined
+                asynchronous: true
                 // document component
                 Component {
+
                     id: doc
                     FileAttachmentContent {}
                 }
@@ -208,9 +217,6 @@ Rectangle {
         StandardTextEdit {
             id: messageBody
             maximumWidth: bubbleRoot.maxWidth
-        }
-        Item {
-            id: messageStamps
         }
 
         ElideHandler {}

@@ -10,7 +10,7 @@ import "."
 // Components that depend on dynamic scope
 import "dyn"
 
-Page {
+Rectangle {
     id: replyWrapper
 
     // TODO move this into CmnCfg
@@ -21,35 +21,44 @@ Page {
 
     Component.onCompleted: JS.parseMedia(messageModelData, imageClip)
 
-    padding: CmnCfg.smallMargin
+    color: CmnCfg.palette.medGrey
+    width: bubbleRoot.maxWidth
+    height: wrapRow.height
 
-    background: ReplyBackground {}
+    ReplyMouseArea {}
 
-    header: ReplyLabel {
-        id: replyLabel
+    Rectangle {
+        id: accent
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
+
+        width: CmnCfg.smallMargin / 2
+        color: opColor
+        anchors.left: parent.left
     }
-
-    contentHeight: wrapRow.implicitHeight
-    contentWidth: wrapRow.implicitWidth
 
     Row {
         id: wrapRow
         spacing: CmnCfg.smallMargin
+        anchors.left: accent.right
+        topPadding: CmnCfg.smallMargin
+        bottomPadding: CmnCfg.margin
+        leftPadding: CmnCfg.smallMargin
 
         Item {
             id: replyWrapperCol
             height: 64
-            width: bubbleRoot.maxWidth * 0.8
-            ReplyElidedBody {
+            width: bubbleRoot.maxWidth - imageClip.width - CmnCfg.smallMargin * 3
+            ReplyLabel {
+                id: replyLabel
                 anchors.top: parent.top
+            }
+            ReplyElidedBody {
+                anchors.top: replyLabel.bottom
+                anchors.topMargin: CmnCfg.smallMargin
                 id: replyElidedBody
                 elideConstraint: imageSize
-                maximumWidth: bubbleRoot.maxWidth - imageSize
-            }
-
-            ReplyTimeInfo {
-                anchors.bottom: parent.bottom
-                id: replyTimeInfo
+                maximumWidth: bubbleRoot.maxWidth * 0.8 - imageSize
             }
         }
 

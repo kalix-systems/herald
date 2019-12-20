@@ -5,9 +5,10 @@ import LibHerald 1.0
 Item {
     anchors.fill: parent
     z: -1
-    opacity: highlight == true ? 1.0 : 0.0
+    opacity: highlight || hoverHighlight ? 1.0 : 0.0
     Rectangle {
         anchors.fill: parent
-        color: CmnCfg.palette.medGrey
+        color: authorColor
+        opacity: 0.2
     }
 }
