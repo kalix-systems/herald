@@ -9,33 +9,45 @@ import "../"
 // Components that depend on dynamic scope
 import "dyn"
 
-Page {
+Rectangle {
     id: replyWrapper
 
     property color opColor: CmnCfg.avatarColors[Herald.users.colorById(
                                                     messageModelData.opAuthor)]
     property string replyBody: messageModelData.opBody
-    padding: CmnCfg.smallMargin
+    color: CmnCfg.palette.medGrey
+    width: bubbleRoot.maxWidth
+    height: replyWrapperCol.height
 
-    background: ReplyBackground {}
+    ReplyMouseArea {}
 
-    header: ReplyLabel {
-        id: replyLabel
+    Rectangle {
+        id: accent
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
+        anchors.topMargin: CmnCfg.smallMargin
+        anchors.bottomMargin: CmnCfg.smallMargin
+        width: CmnCfg.smallMargin / 2
+        color: opColor
+        anchors.left: parent.left
+        anchors.leftMargin: CmnCfg.smallMargin
     }
-
-    contentHeight: replyWrapperCol.height
-    contentWidth: bubbleRoot.maxWidth
 
     Column {
         id: replyWrapperCol
         spacing: CmnCfg.smallMargin
-        ReplyElidedBody {
-            id: replyElidedBody
-            maximumWidth: bubbleRoot.maxWidth * 0.8 // - CmnCfg.smallMargin * 2
+        topPadding: CmnCfg.smallMargin
+        bottomPadding: CmnCfg.margin
+        leftPadding: CmnCfg.smallMargin
+        anchors.left: accent.right
+
+        ReplyLabel {
+            id: replyLabel
         }
 
-        ReplyTimeInfo {
-            id: replyTimeInfo
+        ReplyElidedBody {
+            id: replyElidedBody
+            maximumWidth: bubbleRoot.maxWidth - CmnCfg.smallMargin * 3 // - CmnCfg.smallMargin * 2
         }
     }
 }

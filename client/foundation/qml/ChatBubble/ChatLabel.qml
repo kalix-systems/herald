@@ -4,7 +4,7 @@ import LibHerald 1.0
 import QtQuick.Layouts 1.12
 
 Row {
-    spacing: CmnCfg.smallMargin
+    spacing: CmnCfg.smallMargin / 2
     Label {
         id: authorLabel
         text: authorNameTM.elidedText

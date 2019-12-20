@@ -41,6 +41,7 @@ Rectangle {
                                                                  authorId)]
 
     readonly property string pfpUrl: Herald.users.profilePictureById(authorId)
+    property bool hoverHighlight: false
 
     Connections {
         target: appRoot.globalTimer
@@ -50,7 +51,7 @@ Rectangle {
     height: contentRoot.height
     width: defaultWidth
 
-    color: outbound ? CmnCfg.palette.lightGrey : CmnCfg.palette.white
+    color: CmnCfg.palette.white
 
     Rectangle {
         anchors.top: parent.top
@@ -94,8 +95,7 @@ Rectangle {
         id: accent
         anchors.top: parent.top
         anchors.bottom: parent.bottom
-        anchors.topMargin: isHead ? CmnCfg.smallMargin : 0
-        anchors.bottomMargin: isTail ? CmnCfg.smallMargin : 0
+
         width: CmnCfg.smallMargin / 2
         color: authorColor
         anchors.left: avatar.right

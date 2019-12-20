@@ -23,12 +23,14 @@ MouseArea {
     onPressAndHold: mouse.accepted = false
 
     Rectangle {
+        id: buttonRect
         width: buttonRow.width
         height: buttonRow.height
-        color: CmnCfg.palette.medGrey
+        // color: bubbleActual.authorColor
         z: CmnCfg.overlayZ
         anchors.right: parent.right
         anchors.top: parent.top
+        color: "transparent"
         anchors.margins: CmnCfg.smallMargin / 2
         Row {
             id: buttonRow

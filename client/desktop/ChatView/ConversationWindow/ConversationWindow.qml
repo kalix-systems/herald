@@ -9,6 +9,7 @@ import "qrc:/imports/js/utils.mjs" as Utils
 import "../../SideBar/js/ContactView.mjs" as CUtils
 import Qt.labs.platform 1.1
 import QtQuick.Dialogs 1.3
+import QtGraphicalEffects 1.0
 
 ListView {
     id: chatListView
@@ -123,18 +124,12 @@ ListView {
             convContainer: chatListView
             defaultWidth: chatListView.width
             messageModelData: chatRow.messageModelData
+
             ChatBubbleHover {
                 id: bubbleHoverHandler
                 download: bubbleActual.imageAttach || bubbleActual.docAttach
-            }
-
-            states: State {
-                name: "hoverstate"
-                when: bubbleHoverHandler.containsMouse
-                PropertyChanges {
-                    target: bubbleActual
-                    color: CmnCfg.palette.medGrey
-                }
+                onEntered: bubbleActual.hoverHighlight = true
+                onExited: bubbleActual.hoverHighlight = false
             }
         }
     }
