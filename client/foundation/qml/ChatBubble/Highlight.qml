@@ -9,6 +9,6 @@ Item {
     Rectangle {
         anchors.fill: parent
         color: authorColor
-        opacity: 0.15
+        opacity: 0.2
     }
 }
