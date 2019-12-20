@@ -18,8 +18,8 @@ void AndroidHelper::set_status_bar_color(QColor color) {
   });
 }
 
-void AndroidHelper::send_notification() {
-    QAndroidJniObject javaNotification = QAndroidJniObject::fromString("GRAPPO");
+void AndroidHelper::send_notification(QString content) {
+    QAndroidJniObject javaNotification = QAndroidJniObject::fromString(content);
     QAndroidJniObject::callStaticMethod<void>("org/qtproject/example/notification/NotificationBuilder", "notify", "(Ljava/lang/String;)V", javaNotification.object<jstring>());
 }
 #endif

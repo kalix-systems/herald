@@ -33,7 +33,7 @@ public class NotificationBuilder extends org.qtproject.qt5.android.bindings.QtAc
             m_notificationManager.createNotificationChannel(m_channel);
             m_builder = new Notification.Builder(m_instance);
             m_builder.setSmallIcon(android.R.drawable.btn_star);
-            m_builder.setContentTitle("A message from Qt!");
+            m_builder.setContentTitle("New Message");
         }
 
         m_builder.setContentText(s);

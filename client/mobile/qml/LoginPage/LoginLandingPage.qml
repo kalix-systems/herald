@@ -60,10 +60,6 @@ Page {
         }
 
         onClicked: {
-            mobHelper.send_notification()
-            mobHelper.send_notification()
-            mobHelper.send_notification()
-            mobHelper.send_notification()
             Herald.registerNewUser(entryField.text.trim(),
                                    serverAddrTextField.text.trim(),
                                    serverPortTextField.text.trim())
