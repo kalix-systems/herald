@@ -55,5 +55,6 @@
         <file>download-icon.svg</file>
         <file>dropdown-arrow-icon.svg</file>
         <file>minus-icon.svg</file>
+        <file>file-download-icon.svg</file>
     </qresource>
 </RCC>
