@@ -3,6 +3,7 @@ import QtQuick.Controls 2.12
 import Qt.labs.platform 1.1
 import LibHerald 1.0
 import "qrc:/imports/errors"
+import "./Headers"
 import "./LoginPage" as LoginPage
 
 ApplicationWindow {
@@ -10,6 +11,10 @@ ApplicationWindow {
     visible: true
     width: 300
     height: 500
+
+    header: HeadersMain {
+        id: rootHeader
+    }
 
     ErrorDialog {
         id: errPopup
