@@ -15,7 +15,7 @@ pub struct ConfigEmitter {
 
 impl ConfigEmitter {
     /// Clone the emitter
-    ///
+    /// 
     /// The emitter can only be cloned when it is mutable. The emitter calls
     /// into C++ code which may call into Rust again. If emmitting is possible
     /// from immutable structures, that might lead to access to a mutable
@@ -35,8 +35,7 @@ impl ConfigEmitter {
 
     pub fn clear(&self) {
         let n: *const ConfigQObject = null();
-        self.qobject
-            .store(n as *mut ConfigQObject, Ordering::SeqCst);
+        self.qobject.store(n as *mut ConfigQObject, Ordering::SeqCst);
     }
 
     pub fn color_changed(&mut self) {
@@ -103,42 +102,27 @@ pub trait ConfigTrait {
 
     fn color(&self) -> u32;
 
-    fn set_color(
-        &mut self,
-        value: u32,
-    );
+    fn set_color(&mut self, value: u32);
 
     fn colorscheme(&self) -> u32;
 
-    fn set_colorscheme(
-        &mut self,
-        value: u32,
-    );
+    fn set_colorscheme(&mut self, value: u32);
 
     fn config_id(&self) -> &str;
 
     fn name(&self) -> &str;
 
-    fn set_name(
-        &mut self,
-        value: String,
-    );
+    fn set_name(&mut self, value: String);
 
     fn nts_conversation_id(&self) -> &[u8];
 
     fn preferred_expiration(&self) -> u8;
 
-    fn set_preferred_expiration(
-        &mut self,
-        value: u8,
-    );
+    fn set_preferred_expiration(&mut self, value: u8);
 
     fn profile_picture(&self) -> Option<&str>;
 
-    fn set_profile_picture(
-        &mut self,
-        value: Option<String>,
-    );
+    fn set_profile_picture(&mut self, value: Option<String>);
 }
 
 #[no_mangle]
@@ -151,7 +135,8 @@ pub unsafe fn config_new_inner(ptr_bundle: *mut ConfigPtrBundle) -> Config {
     let ptr_bundle = *ptr_bundle;
 
     let ConfigPtrBundle {
-        config,
+        config
+        ,
         config_color_changed,
         config_colorscheme_changed,
         config_config_id_changed,
@@ -170,7 +155,8 @@ pub unsafe fn config_new_inner(ptr_bundle: *mut ConfigPtrBundle) -> Config {
         preferred_expiration_changed: config_preferred_expiration_changed,
         profile_picture_changed: config_profile_picture_changed,
     };
-    let d_config = Config::new(config_emit);
+    let d_config = Config::new(config_emit
+    );
     d_config
 }
 
@@ -185,10 +171,7 @@ pub unsafe extern "C" fn config_color_get(ptr: *const Config) -> u32 {
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn config_color_set(
-    ptr: *mut Config,
-    value: u32,
-) {
+pub unsafe extern "C" fn config_color_set(ptr: *mut Config, value: u32) {
     (&mut *ptr).set_color(value)
 }
 
@@ -198,19 +181,12 @@ pub unsafe extern "C" fn config_colorscheme_get(ptr: *const Config) -> u32 {
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn config_colorscheme_set(
-    ptr: *mut Config,
-    value: u32,
-) {
+pub unsafe extern "C" fn config_colorscheme_set(ptr: *mut Config, value: u32) {
     (&mut *ptr).set_colorscheme(value)
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn config_config_id_get(
-    ptr: *const Config,
-    prop: *mut QString,
-    set: fn(*mut QString, *const c_char, c_int),
-) {
+pub unsafe extern "C" fn config_config_id_get(ptr: *const Config, prop: *mut QString, set: fn(*mut QString, *const c_char, c_int)) {
     let obj = &*ptr;
     let value = obj.config_id();
     let str_: *const c_char = value.as_ptr() as *const c_char;
@@ -218,11 +194,7 @@ pub unsafe extern "C" fn config_config_id_get(
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn config_name_get(
-    ptr: *const Config,
-    prop: *mut QString,
-    set: fn(*mut QString, *const c_char, c_int),
-) {
+pub unsafe extern "C" fn config_name_get(ptr: *const Config, prop: *mut QString, set: fn(*mut QString, *const c_char, c_int)) {
     let obj = &*ptr;
     let value = obj.name();
     let str_: *const c_char = value.as_ptr() as *const c_char;
@@ -230,11 +202,7 @@ pub unsafe extern "C" fn config_name_get(
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn config_name_set(
-    ptr: *mut Config,
-    value: *const c_ushort,
-    len: c_int,
-) {
+pub unsafe extern "C" fn config_name_set(ptr: *mut Config, value: *const c_ushort, len: c_int) {
     let obj = &mut *ptr;
     let mut s = String::new();
     set_string_from_utf16(&mut s, value, len);
@@ -242,11 +210,7 @@ pub unsafe extern "C" fn config_name_set(
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn config_nts_conversation_id_get(
-    ptr: *const Config,
-    prop: *mut QByteArray,
-    set: fn(*mut QByteArray, *const c_char, c_int),
-) {
+pub unsafe extern "C" fn config_nts_conversation_id_get(ptr: *const Config, prop: *mut QByteArray, set: fn(*mut QByteArray, *const c_char, c_int)) {
     let obj = &*ptr;
     let value = obj.nts_conversation_id();
     let str_: *const c_char = value.as_ptr() as *const c_char;
@@ -259,19 +223,12 @@ pub unsafe extern "C" fn config_preferred_expiration_get(ptr: *const Config) -> 
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn config_preferred_expiration_set(
-    ptr: *mut Config,
-    value: u8,
-) {
+pub unsafe extern "C" fn config_preferred_expiration_set(ptr: *mut Config, value: u8) {
     (&mut *ptr).set_preferred_expiration(value)
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn config_profile_picture_get(
-    ptr: *const Config,
-    prop: *mut QString,
-    set: fn(*mut QString, *const c_char, c_int),
-) {
+pub unsafe extern "C" fn config_profile_picture_get(ptr: *const Config, prop: *mut QString, set: fn(*mut QString, *const c_char, c_int)) {
     let obj = &*ptr;
     let value = obj.profile_picture();
     if let Some(value) = value {
@@ -281,11 +238,7 @@ pub unsafe extern "C" fn config_profile_picture_get(
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn config_profile_picture_set(
-    ptr: *mut Config,
-    value: *const c_ushort,
-    len: c_int,
-) {
+pub unsafe extern "C" fn config_profile_picture_set(ptr: *mut Config, value: *const c_ushort, len: c_int) {
     let obj = &mut *ptr;
     let mut s = String::new();
     set_string_from_utf16(&mut s, value, len);

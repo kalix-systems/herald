@@ -10,7 +10,7 @@ pub struct ConversationContentEmitter {
 
 impl ConversationContentEmitter {
     /// Clone the emitter
-    ///
+    /// 
     /// The emitter can only be cloned when it is mutable. The emitter calls
     /// into C++ code which may call into Rust again. If emmitting is possible
     /// from immutable structures, that might lead to access to a mutable
@@ -25,8 +25,7 @@ impl ConversationContentEmitter {
 
     pub fn clear(&self) {
         let n: *const ConversationContentQObject = null();
-        self.qobject
-            .store(n as *mut ConversationContentQObject, Ordering::SeqCst);
+        self.qobject.store(n as *mut ConversationContentQObject, Ordering::SeqCst);
     }
 
     pub fn conversation_id_changed(&mut self) {
@@ -55,113 +54,66 @@ pub struct ConversationContentList {
     pub(super) end_insert_rows: fn(*mut ConversationContentQObject),
     pub(super) end_move_rows: fn(*mut ConversationContentQObject),
     pub(super) end_remove_rows: fn(*mut ConversationContentQObject),
-    pub(super) begin_insert_rows: fn(*mut ConversationContentQObject, usize, usize),
-    pub(super) begin_remove_rows: fn(*mut ConversationContentQObject, usize, usize),
+    pub(super) begin_insert_rows: fn(*mut ConversationContentQObject,  usize, usize),
+    pub(super) begin_remove_rows: fn(*mut ConversationContentQObject,  usize, usize),
     pub(super) data_changed: fn(*mut ConversationContentQObject, usize, usize),
     pub(super) begin_move_rows: fn(*mut ConversationContentQObject, usize, usize, usize),
 }
 
 impl ConversationContentList {
     pub fn layout_about_to_be_changed(&mut self) {
-        if !self.qobject.is_null() {
-            (self.layout_about_to_be_changed)(self.qobject);
-        }
+        if !self.qobject.is_null() { (self.layout_about_to_be_changed)(self.qobject); }
     }
 
     pub fn layout_changed(&mut self) {
-        if !self.qobject.is_null() {
-            (self.layout_changed)(self.qobject)
-        }
+        if !self.qobject.is_null() { (self.layout_changed)(self.qobject) }
     }
 
     pub fn begin_reset_model(&mut self) {
-        if !self.qobject.is_null() {
-            (self.begin_reset_model)(self.qobject);
-        }
+        if !self.qobject.is_null() { (self.begin_reset_model)(self.qobject); }
     }
 
     pub fn end_reset_model(&mut self) {
-        if !self.qobject.is_null() {
-            (self.end_reset_model)(self.qobject);
-        }
+        if !self.qobject.is_null() { (self.end_reset_model)(self.qobject); }
     }
 
     pub fn end_insert_rows(&mut self) {
-        if !self.qobject.is_null() {
-            (self.end_insert_rows)(self.qobject);
-        }
+        if !self.qobject.is_null() { (self.end_insert_rows)(self.qobject); }
     }
 
     pub fn end_move_rows(&mut self) {
-        if !self.qobject.is_null() {
-            (self.end_move_rows)(self.qobject);
-        }
+        if !self.qobject.is_null() { (self.end_move_rows)(self.qobject); }
     }
 
     pub fn end_remove_rows(&mut self) {
-        if !self.qobject.is_null() {
-            (self.end_remove_rows)(self.qobject);
-        }
+        if !self.qobject.is_null() { (self.end_remove_rows)(self.qobject); }
     }
 
-    pub fn begin_insert_rows(
-        &mut self,
-        first: usize,
-        last: usize,
-    ) {
-        if !self.qobject.is_null() {
-            (self.begin_insert_rows)(self.qobject, first, last);
-        }
+    pub fn begin_insert_rows(&mut self, first: usize, last: usize) {
+        if !self.qobject.is_null() { (self.begin_insert_rows)(self.qobject, first, last); }
     }
 
-    pub fn begin_remove_rows(
-        &mut self,
-        first: usize,
-        last: usize,
-    ) {
-        if !self.qobject.is_null() {
-            (self.begin_remove_rows)(self.qobject, first, last);
-        }
+    pub fn begin_remove_rows(&mut self, first: usize, last: usize) {
+        if !self.qobject.is_null() { (self.begin_remove_rows)(self.qobject, first, last); }
     }
 
-    pub fn data_changed(
-        &mut self,
-        first: usize,
-        last: usize,
-    ) {
-        if !self.qobject.is_null() {
-            (self.data_changed)(self.qobject, first, last);
-        }
+    pub fn data_changed(&mut self, first: usize, last: usize) {
+        if !self.qobject.is_null() { (self.data_changed)(self.qobject, first, last); }
     }
 
-    pub fn begin_move_rows(
-        &mut self,
-        first: usize,
-        last: usize,
-        destination: usize,
-    ) {
-        if !self.qobject.is_null() {
-            (self.begin_move_rows)(self.qobject, first, last, destination);
-        }
+    pub fn begin_move_rows(&mut self, first: usize, last: usize, destination: usize) {
+        if !self.qobject.is_null() { (self.begin_move_rows)(self.qobject, first, last, destination); }
     }
 }
 
 pub trait ConversationContentTrait {
-    fn new(
-        emit: ConversationContentEmitter,
-        model: ConversationContentList,
-        members: Members,
-        messages: Messages,
-    ) -> Self;
+    fn new(emit: ConversationContentEmitter, model: ConversationContentList, members: Members, messages: Messages) -> Self;
 
     fn emit(&mut self) -> &mut ConversationContentEmitter;
 
     fn conversation_id(&self) -> Option<&[u8]>;
 
-    fn set_conversation_id(
-        &mut self,
-        value: Option<&[u8]>,
-    );
+    fn set_conversation_id(&mut self, value: Option<&[u8]>);
 
     fn members(&self) -> &Members;
 
@@ -173,19 +125,11 @@ pub trait ConversationContentTrait {
 
     fn row_count(&self) -> usize;
 
-    fn insert_rows(
-        &mut self,
-        _row: usize,
-        _count: usize,
-    ) -> bool {
+    fn insert_rows(&mut self, _row: usize, _count: usize) -> bool {
         false
     }
 
-    fn remove_rows(
-        &mut self,
-        _row: usize,
-        _count: usize,
-    ) -> bool {
+    fn remove_rows(&mut self, _row: usize, _count: usize) -> bool {
         false
     }
 
@@ -193,33 +137,30 @@ pub trait ConversationContentTrait {
         false
     }
 
-    fn fetch_more(&mut self) {}
+    fn fetch_more(&mut self) {
 
-    fn sort(
-        &mut self,
-        _: u8,
-        _: SortOrder,
-    ) {
+    }
+
+    fn sort(&mut self, _: u8, _: SortOrder) {
+
     }
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn conversation_content_new(
-    ptr_bundle: *mut ConversationContentPtrBundle
-) -> *mut ConversationContent {
+pub unsafe extern "C" fn conversation_content_new(ptr_bundle: *mut ConversationContentPtrBundle) -> *mut ConversationContent {
     let d_conversation_content = conversation_content_new_inner(ptr_bundle);
     Box::into_raw(Box::new(d_conversation_content))
 }
 
-pub unsafe fn conversation_content_new_inner(
-    ptr_bundle: *mut ConversationContentPtrBundle
-) -> ConversationContent {
+pub unsafe fn conversation_content_new_inner(ptr_bundle: *mut ConversationContentPtrBundle) -> ConversationContent {
     let ptr_bundle = *ptr_bundle;
 
     let ConversationContentPtrBundle {
-        conversation_content,
+        conversation_content
+        ,
         conversation_content_conversation_id_changed,
-        members,
+        members
+        ,
         members_filter_changed,
         members_filter_regex_changed,
         members_new_data_ready,
@@ -234,10 +175,13 @@ pub unsafe fn conversation_content_new_inner(
         members_end_move_rows,
         members_begin_remove_rows,
         members_end_remove_rows,
-        messages,
-        builder,
+        messages
+        ,
+        builder
+        ,
         builder_body_changed,
-        document_attachments,
+        document_attachments
+        ,
         document_attachments_new_data_ready,
         document_attachments_layout_about_to_be_changed,
         document_attachments_layout_changed,
@@ -253,7 +197,8 @@ pub unsafe fn conversation_content_new_inner(
         builder_has_doc_attachment_changed,
         builder_has_media_attachment_changed,
         builder_is_reply_changed,
-        media_attachments,
+        media_attachments
+        ,
         media_attachments_new_data_ready,
         media_attachments_layout_about_to_be_changed,
         media_attachments_layout_changed,
@@ -327,58 +272,67 @@ pub unsafe fn conversation_content_new_inner(
         new_data_ready: members_new_data_ready,
     };
     let model = MembersList {
-        qobject: members,
-        layout_about_to_be_changed: members_layout_about_to_be_changed,
-        layout_changed: members_layout_changed,
-        data_changed: members_data_changed,
-        begin_reset_model: members_begin_reset_model,
-        end_reset_model: members_end_reset_model,
-        begin_insert_rows: members_begin_insert_rows,
-        end_insert_rows: members_end_insert_rows,
-        begin_move_rows: members_begin_move_rows,
-        end_move_rows: members_end_move_rows,
-        begin_remove_rows: members_begin_remove_rows,
-        end_remove_rows: members_end_remove_rows,
+
+                qobject: members,
+                layout_about_to_be_changed: members_layout_about_to_be_changed,
+                layout_changed: members_layout_changed,
+                data_changed: members_data_changed,
+                begin_reset_model: members_begin_reset_model,
+                end_reset_model: members_end_reset_model,
+                begin_insert_rows: members_begin_insert_rows,
+                end_insert_rows: members_end_insert_rows,
+                begin_move_rows: members_begin_move_rows,
+                end_move_rows: members_end_move_rows,
+                begin_remove_rows: members_begin_remove_rows,
+                end_remove_rows: members_end_remove_rows,
+                
     };
-    let d_members = Members::new(members_emit, model);
+    let d_members = Members::new(members_emit, model
+    );
     let document_attachments_emit = DocumentAttachmentsEmitter {
         qobject: Arc::new(AtomicPtr::new(document_attachments)),
         new_data_ready: document_attachments_new_data_ready,
     };
     let model = DocumentAttachmentsList {
-        qobject: document_attachments,
-        layout_about_to_be_changed: document_attachments_layout_about_to_be_changed,
-        layout_changed: document_attachments_layout_changed,
-        data_changed: document_attachments_data_changed,
-        begin_reset_model: document_attachments_begin_reset_model,
-        end_reset_model: document_attachments_end_reset_model,
-        begin_insert_rows: document_attachments_begin_insert_rows,
-        end_insert_rows: document_attachments_end_insert_rows,
-        begin_move_rows: document_attachments_begin_move_rows,
-        end_move_rows: document_attachments_end_move_rows,
-        begin_remove_rows: document_attachments_begin_remove_rows,
-        end_remove_rows: document_attachments_end_remove_rows,
+
+                qobject: document_attachments,
+                layout_about_to_be_changed: document_attachments_layout_about_to_be_changed,
+                layout_changed: document_attachments_layout_changed,
+                data_changed: document_attachments_data_changed,
+                begin_reset_model: document_attachments_begin_reset_model,
+                end_reset_model: document_attachments_end_reset_model,
+                begin_insert_rows: document_attachments_begin_insert_rows,
+                end_insert_rows: document_attachments_end_insert_rows,
+                begin_move_rows: document_attachments_begin_move_rows,
+                end_move_rows: document_attachments_end_move_rows,
+                begin_remove_rows: document_attachments_begin_remove_rows,
+                end_remove_rows: document_attachments_end_remove_rows,
+                
     };
-    let d_document_attachments = DocumentAttachments::new(document_attachments_emit, model);
+    let d_document_attachments = DocumentAttachments::new(document_attachments_emit, model
+    );
     let media_attachments_emit = MediaAttachmentsEmitter {
         qobject: Arc::new(AtomicPtr::new(media_attachments)),
         new_data_ready: media_attachments_new_data_ready,
     };
     let model = MediaAttachmentsList {
-        qobject: media_attachments,
-        layout_about_to_be_changed: media_attachments_layout_about_to_be_changed,
-        layout_changed: media_attachments_layout_changed,
-        data_changed: media_attachments_data_changed,
-        begin_reset_model: media_attachments_begin_reset_model,
-        end_reset_model: media_attachments_end_reset_model,
-        begin_insert_rows: media_attachments_begin_insert_rows,
-        end_insert_rows: media_attachments_end_insert_rows,
-        begin_move_rows: media_attachments_begin_move_rows,
-        end_move_rows: media_attachments_end_move_rows,
-        begin_remove_rows: media_attachments_begin_remove_rows,
-        end_remove_rows: media_attachments_end_remove_rows,
+
+                qobject: media_attachments,
+                layout_about_to_be_changed: media_attachments_layout_about_to_be_changed,
+                layout_changed: media_attachments_layout_changed,
+                data_changed: media_attachments_data_changed,
+                begin_reset_model: media_attachments_begin_reset_model,
+                end_reset_model: media_attachments_end_reset_model,
+                begin_insert_rows: media_attachments_begin_insert_rows,
+                end_insert_rows: media_attachments_end_insert_rows,
+                begin_move_rows: media_attachments_begin_move_rows,
+                end_move_rows: media_attachments_end_move_rows,
+                begin_remove_rows: media_attachments_begin_remove_rows,
+                end_remove_rows: media_attachments_end_remove_rows,
+                
     };
-    let d_media_attachments = MediaAttachments::new(media_attachments_emit, model);
+    let d_media_attachments = MediaAttachments::new(media_attachments_emit, model
+    );
     let builder_emit = MessageBuilderEmitter {
         qobject: Arc::new(AtomicPtr::new(builder)),
         body_changed: builder_body_changed,
@@ -395,24 +349,24 @@ pub unsafe fn conversation_content_new_inner(
         new_data_ready: builder_new_data_ready,
     };
     let model = MessageBuilderList {
-        qobject: builder,
-        layout_about_to_be_changed: builder_layout_about_to_be_changed,
-        layout_changed: builder_layout_changed,
-        data_changed: builder_data_changed,
-        begin_reset_model: builder_begin_reset_model,
-        end_reset_model: builder_end_reset_model,
-        begin_insert_rows: builder_begin_insert_rows,
-        end_insert_rows: builder_end_insert_rows,
-        begin_move_rows: builder_begin_move_rows,
-        end_move_rows: builder_end_move_rows,
-        begin_remove_rows: builder_begin_remove_rows,
-        end_remove_rows: builder_end_remove_rows,
+
+                qobject: builder,
+                layout_about_to_be_changed: builder_layout_about_to_be_changed,
+                layout_changed: builder_layout_changed,
+                data_changed: builder_data_changed,
+                begin_reset_model: builder_begin_reset_model,
+                end_reset_model: builder_end_reset_model,
+                begin_insert_rows: builder_begin_insert_rows,
+                end_insert_rows: builder_end_insert_rows,
+                begin_move_rows: builder_begin_move_rows,
+                end_move_rows: builder_end_move_rows,
+                begin_remove_rows: builder_begin_remove_rows,
+                end_remove_rows: builder_end_remove_rows,
+                
     };
-    let d_builder = MessageBuilder::new(
-        builder_emit,
-        model,
-        d_document_attachments,
-        d_media_attachments,
+    let d_builder = MessageBuilder::new(builder_emit, model
+    , d_document_attachments
+    , d_media_attachments
     );
     let messages_emit = MessagesEmitter {
         qobject: Arc::new(AtomicPtr::new(messages)),
@@ -429,41 +383,49 @@ pub unsafe fn conversation_content_new_inner(
         new_data_ready: messages_new_data_ready,
     };
     let model = MessagesList {
-        qobject: messages,
-        layout_about_to_be_changed: messages_layout_about_to_be_changed,
-        layout_changed: messages_layout_changed,
-        data_changed: messages_data_changed,
-        begin_reset_model: messages_begin_reset_model,
-        end_reset_model: messages_end_reset_model,
-        begin_insert_rows: messages_begin_insert_rows,
-        end_insert_rows: messages_end_insert_rows,
-        begin_move_rows: messages_begin_move_rows,
-        end_move_rows: messages_end_move_rows,
-        begin_remove_rows: messages_begin_remove_rows,
-        end_remove_rows: messages_end_remove_rows,
+
+                qobject: messages,
+                layout_about_to_be_changed: messages_layout_about_to_be_changed,
+                layout_changed: messages_layout_changed,
+                data_changed: messages_data_changed,
+                begin_reset_model: messages_begin_reset_model,
+                end_reset_model: messages_end_reset_model,
+                begin_insert_rows: messages_begin_insert_rows,
+                end_insert_rows: messages_end_insert_rows,
+                begin_move_rows: messages_begin_move_rows,
+                end_move_rows: messages_end_move_rows,
+                begin_remove_rows: messages_begin_remove_rows,
+                end_remove_rows: messages_end_remove_rows,
+                
     };
-    let d_messages = Messages::new(messages_emit, model, d_builder);
+    let d_messages = Messages::new(messages_emit, model
+    , d_builder
+    );
     let conversation_content_emit = ConversationContentEmitter {
         qobject: Arc::new(AtomicPtr::new(conversation_content)),
         conversation_id_changed: conversation_content_conversation_id_changed,
         new_data_ready: conversation_content_new_data_ready,
     };
     let model = ConversationContentList {
-        qobject: conversation_content,
-        layout_about_to_be_changed: conversation_content_layout_about_to_be_changed,
-        layout_changed: conversation_content_layout_changed,
-        data_changed: conversation_content_data_changed,
-        begin_reset_model: conversation_content_begin_reset_model,
-        end_reset_model: conversation_content_end_reset_model,
-        begin_insert_rows: conversation_content_begin_insert_rows,
-        end_insert_rows: conversation_content_end_insert_rows,
-        begin_move_rows: conversation_content_begin_move_rows,
-        end_move_rows: conversation_content_end_move_rows,
-        begin_remove_rows: conversation_content_begin_remove_rows,
-        end_remove_rows: conversation_content_end_remove_rows,
+
+                qobject: conversation_content,
+                layout_about_to_be_changed: conversation_content_layout_about_to_be_changed,
+                layout_changed: conversation_content_layout_changed,
+                data_changed: conversation_content_data_changed,
+                begin_reset_model: conversation_content_begin_reset_model,
+                end_reset_model: conversation_content_end_reset_model,
+                begin_insert_rows: conversation_content_begin_insert_rows,
+                end_insert_rows: conversation_content_end_insert_rows,
+                begin_move_rows: conversation_content_begin_move_rows,
+                end_move_rows: conversation_content_end_move_rows,
+                begin_remove_rows: conversation_content_begin_remove_rows,
+                end_remove_rows: conversation_content_end_remove_rows,
+                
     };
-    let d_conversation_content =
-        ConversationContent::new(conversation_content_emit, model, d_members, d_messages);
+    let d_conversation_content = ConversationContent::new(conversation_content_emit, model
+    , d_members
+    , d_messages
+    );
     d_conversation_content
 }
 
@@ -473,11 +435,7 @@ pub unsafe extern "C" fn conversation_content_free(ptr: *mut ConversationContent
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn conversation_content_conversation_id_get(
-    ptr: *const ConversationContent,
-    prop: *mut QByteArray,
-    set: fn(*mut QByteArray, *const c_char, c_int),
-) {
+pub unsafe extern "C" fn conversation_content_conversation_id_get(ptr: *const ConversationContent, prop: *mut QByteArray, set: fn(*mut QByteArray, *const c_char, c_int)) {
     let obj = &*ptr;
     let value = obj.conversation_id();
     if let Some(value) = value {
@@ -487,35 +445,25 @@ pub unsafe extern "C" fn conversation_content_conversation_id_get(
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn conversation_content_conversation_id_set(
-    ptr: *mut ConversationContent,
-    value: *const c_char,
-    len: c_int,
-) {
+pub unsafe extern "C" fn conversation_content_conversation_id_set(ptr: *mut ConversationContent, value: *const c_char, len: c_int) {
     let obj = &mut *ptr;
     let value = qba_slice!(value, len);
     obj.set_conversation_id(Some(value));
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn conversation_content_conversation_id_set_none(
-    ptr: *mut ConversationContent
-) {
+pub unsafe extern "C" fn conversation_content_conversation_id_set_none(ptr: *mut ConversationContent) {
     let obj = &mut *ptr;
     obj.set_conversation_id(None);
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn conversation_content_members_get(
-    ptr: *mut ConversationContent
-) -> *mut Members {
+pub unsafe extern "C" fn conversation_content_members_get(ptr: *mut ConversationContent) -> *mut Members {
     (&mut *ptr).members_mut()
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn conversation_content_messages_get(
-    ptr: *mut ConversationContent
-) -> *mut Messages {
+pub unsafe extern "C" fn conversation_content_messages_get(ptr: *mut ConversationContent) -> *mut Messages {
     (&mut *ptr).messages_mut()
 }
 
@@ -525,33 +473,29 @@ pub unsafe extern "C" fn conversation_content_row_count(ptr: *const Conversation
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn conversation_content_insert_rows(
-    ptr: *mut ConversationContent,
-    row: c_int,
-    count: c_int,
-) -> bool {
+pub unsafe extern "C" fn conversation_content_insert_rows(ptr: *mut ConversationContent, row: c_int, count: c_int) -> bool {
     match (to_usize(row), to_usize(count)) {
-        (Some(row), Some(count)) => (&mut *ptr).insert_rows(row, count),
-        _ => false,
+        (Some(row), Some(count)) => 
+        {
+            (&mut *ptr).insert_rows(row, count)
+        }
+        _ => false
     }
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn conversation_content_remove_rows(
-    ptr: *mut ConversationContent,
-    row: c_int,
-    count: c_int,
-) -> bool {
+pub unsafe extern "C" fn conversation_content_remove_rows(ptr: *mut ConversationContent, row: c_int, count: c_int) -> bool {
     match (to_usize(row), to_usize(count)) {
-        (Some(row), Some(count)) => (&mut *ptr).remove_rows(row, count),
-        _ => false,
+        (Some(row), Some(count)) => 
+        {
+            (&mut *ptr).remove_rows(row, count)
+        }
+        _ => false
     }
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn conversation_content_can_fetch_more(
-    ptr: *const ConversationContent
-) -> bool {
+pub unsafe extern "C" fn conversation_content_can_fetch_more(ptr: *const ConversationContent) -> bool {
     (&*ptr).can_fetch_more()
 }
 
@@ -561,11 +505,7 @@ pub unsafe extern "C" fn conversation_content_fetch_more(ptr: *mut ConversationC
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn conversation_content_sort(
-    ptr: *mut ConversationContent,
-    column: u8,
-    order: SortOrder,
-) {
+pub unsafe extern "C" fn conversation_content_sort(ptr: *mut ConversationContent, column: u8, order: SortOrder) {
     (&mut *ptr).sort(column, order)
 }
 

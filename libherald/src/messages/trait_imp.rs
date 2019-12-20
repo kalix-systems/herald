@@ -47,6 +47,27 @@ impl Interface for Messages {
         self.author_(index)
     }
 
+    fn user_color(
+        &self,
+        index: usize,
+    ) -> Option<u32> {
+        self.user_color_(index)
+    }
+
+    fn user_name(
+        &self,
+        index: usize,
+    ) -> Option<ffi::UserId> {
+        self.user_name_(index)
+    }
+
+    fn user_profile_picture(
+        &self,
+        index: usize,
+    ) -> Option<String> {
+        self.user_profile_picture_(index)
+    }
+
     fn body(
         &self,
         index: usize,
@@ -226,6 +247,20 @@ impl Interface for Messages {
         index: usize,
     ) -> String {
         self.op_doc_attachments_(index).unwrap_or_default()
+    }
+
+    fn op_color(
+        &self,
+        index: usize,
+    ) -> Option<u32> {
+        self.op_color_(index)
+    }
+
+    fn op_name(
+        &self,
+        index: usize,
+    ) -> Option<String> {
+        self.op_name_(index)
     }
 
     fn msg_id(

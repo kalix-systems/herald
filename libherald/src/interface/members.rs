@@ -11,7 +11,7 @@ pub struct MembersEmitter {
 
 impl MembersEmitter {
     /// Clone the emitter
-    ///
+    /// 
     /// The emitter can only be cloned when it is mutable. The emitter calls
     /// into C++ code which may call into Rust again. If emmitting is possible
     /// from immutable structures, that might lead to access to a mutable
@@ -27,8 +27,7 @@ impl MembersEmitter {
 
     pub fn clear(&self) {
         let n: *const MembersQObject = null();
-        self.qobject
-            .store(n as *mut MembersQObject, Ordering::SeqCst);
+        self.qobject.store(n as *mut MembersQObject, Ordering::SeqCst);
     }
 
     pub fn filter_changed(&mut self) {
@@ -65,146 +64,84 @@ pub struct MembersList {
     pub(super) end_insert_rows: fn(*mut MembersQObject),
     pub(super) end_move_rows: fn(*mut MembersQObject),
     pub(super) end_remove_rows: fn(*mut MembersQObject),
-    pub(super) begin_insert_rows: fn(*mut MembersQObject, usize, usize),
-    pub(super) begin_remove_rows: fn(*mut MembersQObject, usize, usize),
+    pub(super) begin_insert_rows: fn(*mut MembersQObject,  usize, usize),
+    pub(super) begin_remove_rows: fn(*mut MembersQObject,  usize, usize),
     pub(super) data_changed: fn(*mut MembersQObject, usize, usize),
     pub(super) begin_move_rows: fn(*mut MembersQObject, usize, usize, usize),
 }
 
 impl MembersList {
     pub fn layout_about_to_be_changed(&mut self) {
-        if !self.qobject.is_null() {
-            (self.layout_about_to_be_changed)(self.qobject);
-        }
+        if !self.qobject.is_null() { (self.layout_about_to_be_changed)(self.qobject); }
     }
 
     pub fn layout_changed(&mut self) {
-        if !self.qobject.is_null() {
-            (self.layout_changed)(self.qobject)
-        }
+        if !self.qobject.is_null() { (self.layout_changed)(self.qobject) }
     }
 
     pub fn begin_reset_model(&mut self) {
-        if !self.qobject.is_null() {
-            (self.begin_reset_model)(self.qobject);
-        }
+        if !self.qobject.is_null() { (self.begin_reset_model)(self.qobject); }
     }
 
     pub fn end_reset_model(&mut self) {
-        if !self.qobject.is_null() {
-            (self.end_reset_model)(self.qobject);
-        }
+        if !self.qobject.is_null() { (self.end_reset_model)(self.qobject); }
     }
 
     pub fn end_insert_rows(&mut self) {
-        if !self.qobject.is_null() {
-            (self.end_insert_rows)(self.qobject);
-        }
+        if !self.qobject.is_null() { (self.end_insert_rows)(self.qobject); }
     }
 
     pub fn end_move_rows(&mut self) {
-        if !self.qobject.is_null() {
-            (self.end_move_rows)(self.qobject);
-        }
+        if !self.qobject.is_null() { (self.end_move_rows)(self.qobject); }
     }
 
     pub fn end_remove_rows(&mut self) {
-        if !self.qobject.is_null() {
-            (self.end_remove_rows)(self.qobject);
-        }
+        if !self.qobject.is_null() { (self.end_remove_rows)(self.qobject); }
     }
 
-    pub fn begin_insert_rows(
-        &mut self,
-        first: usize,
-        last: usize,
-    ) {
-        if !self.qobject.is_null() {
-            (self.begin_insert_rows)(self.qobject, first, last);
-        }
+    pub fn begin_insert_rows(&mut self, first: usize, last: usize) {
+        if !self.qobject.is_null() { (self.begin_insert_rows)(self.qobject, first, last); }
     }
 
-    pub fn begin_remove_rows(
-        &mut self,
-        first: usize,
-        last: usize,
-    ) {
-        if !self.qobject.is_null() {
-            (self.begin_remove_rows)(self.qobject, first, last);
-        }
+    pub fn begin_remove_rows(&mut self, first: usize, last: usize) {
+        if !self.qobject.is_null() { (self.begin_remove_rows)(self.qobject, first, last); }
     }
 
-    pub fn data_changed(
-        &mut self,
-        first: usize,
-        last: usize,
-    ) {
-        if !self.qobject.is_null() {
-            (self.data_changed)(self.qobject, first, last);
-        }
+    pub fn data_changed(&mut self, first: usize, last: usize) {
+        if !self.qobject.is_null() { (self.data_changed)(self.qobject, first, last); }
     }
 
-    pub fn begin_move_rows(
-        &mut self,
-        first: usize,
-        last: usize,
-        destination: usize,
-    ) {
-        if !self.qobject.is_null() {
-            (self.begin_move_rows)(self.qobject, first, last, destination);
-        }
+    pub fn begin_move_rows(&mut self, first: usize, last: usize, destination: usize) {
+        if !self.qobject.is_null() { (self.begin_move_rows)(self.qobject, first, last, destination); }
     }
 }
 
 pub trait MembersTrait {
-    fn new(
-        emit: MembersEmitter,
-        model: MembersList,
-    ) -> Self;
+    fn new(emit: MembersEmitter, model: MembersList) -> Self;
 
     fn emit(&mut self) -> &mut MembersEmitter;
 
     fn filter(&self) -> &str;
 
-    fn set_filter(
-        &mut self,
-        value: String,
-    );
+    fn set_filter(&mut self, value: String);
 
     fn filter_regex(&self) -> bool;
 
-    fn set_filter_regex(
-        &mut self,
-        value: bool,
-    );
+    fn set_filter_regex(&mut self, value: bool);
 
-    fn add_to_conversation(
-        &mut self,
-        id: String,
-    ) -> bool;
+    fn add_to_conversation(&mut self, id: String) -> bool;
 
-    fn remove_from_conversation_by_index(
-        &mut self,
-        row_index: u64,
-    ) -> bool;
+    fn remove_from_conversation_by_index(&mut self, row_index: u64) -> bool;
 
     fn toggle_filter_regex(&mut self) -> bool;
 
     fn row_count(&self) -> usize;
 
-    fn insert_rows(
-        &mut self,
-        _row: usize,
-        _count: usize,
-    ) -> bool {
+    fn insert_rows(&mut self, _row: usize, _count: usize) -> bool {
         false
     }
 
-    fn remove_rows(
-        &mut self,
-        _row: usize,
-        _count: usize,
-    ) -> bool {
+    fn remove_rows(&mut self, _row: usize, _count: usize) -> bool {
         false
     }
 
@@ -212,49 +149,27 @@ pub trait MembersTrait {
         false
     }
 
-    fn fetch_more(&mut self) {}
+    fn fetch_more(&mut self) {
 
-    fn sort(
-        &mut self,
-        _: u8,
-        _: SortOrder,
-    ) {
     }
 
-    fn color(
-        &self,
-        index: usize,
-    ) -> u32;
+    fn sort(&mut self, _: u8, _: SortOrder) {
 
-    fn matched(
-        &self,
-        index: usize,
-    ) -> bool;
+    }
 
-    fn name(
-        &self,
-        index: usize,
-    ) -> String;
+    fn color(&self, index: usize) -> u32;
 
-    fn pairwise_conversation_id(
-        &self,
-        index: usize,
-    ) -> Vec<u8>;
+    fn matched(&self, index: usize) -> bool;
 
-    fn profile_picture(
-        &self,
-        index: usize,
-    ) -> Option<String>;
+    fn name(&self, index: usize) -> String;
 
-    fn status(
-        &self,
-        index: usize,
-    ) -> u8;
+    fn pairwise_conversation_id(&self, index: usize) -> Vec<u8>;
 
-    fn user_id(
-        &self,
-        index: usize,
-    ) -> &str;
+    fn profile_picture(&self, index: usize) -> Option<String>;
+
+    fn status(&self, index: usize) -> u8;
+
+    fn user_id(&self, index: usize) -> &str;
 }
 
 #[no_mangle]
@@ -267,7 +182,8 @@ pub unsafe fn members_new_inner(ptr_bundle: *mut MembersPtrBundle) -> Members {
     let ptr_bundle = *ptr_bundle;
 
     let MembersPtrBundle {
-        members,
+        members
+        ,
         members_filter_changed,
         members_filter_regex_changed,
         members_new_data_ready,
@@ -290,20 +206,23 @@ pub unsafe fn members_new_inner(ptr_bundle: *mut MembersPtrBundle) -> Members {
         new_data_ready: members_new_data_ready,
     };
     let model = MembersList {
-        qobject: members,
-        layout_about_to_be_changed: members_layout_about_to_be_changed,
-        layout_changed: members_layout_changed,
-        data_changed: members_data_changed,
-        begin_reset_model: members_begin_reset_model,
-        end_reset_model: members_end_reset_model,
-        begin_insert_rows: members_begin_insert_rows,
-        end_insert_rows: members_end_insert_rows,
-        begin_move_rows: members_begin_move_rows,
-        end_move_rows: members_end_move_rows,
-        begin_remove_rows: members_begin_remove_rows,
-        end_remove_rows: members_end_remove_rows,
+
+                qobject: members,
+                layout_about_to_be_changed: members_layout_about_to_be_changed,
+                layout_changed: members_layout_changed,
+                data_changed: members_data_changed,
+                begin_reset_model: members_begin_reset_model,
+                end_reset_model: members_end_reset_model,
+                begin_insert_rows: members_begin_insert_rows,
+                end_insert_rows: members_end_insert_rows,
+                begin_move_rows: members_begin_move_rows,
+                end_move_rows: members_end_move_rows,
+                begin_remove_rows: members_begin_remove_rows,
+                end_remove_rows: members_end_remove_rows,
+                
     };
-    let d_members = Members::new(members_emit, model);
+    let d_members = Members::new(members_emit, model
+    );
     d_members
 }
 
@@ -313,38 +232,32 @@ pub unsafe extern "C" fn members_free(ptr: *mut Members) {
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn members_add_to_conversation(
-    ptr: *mut Members,
-    id_str: *const c_ushort,
-    id_len: c_int,
-) -> bool {
+pub unsafe extern "C" fn members_add_to_conversation(ptr: *mut Members, id_str: *const c_ushort, id_len: c_int) -> bool {
     let obj = &mut *ptr;
     let mut id = String::new();
     set_string_from_utf16(&mut id, id_str, id_len);
-    obj.add_to_conversation(id)
+    obj.add_to_conversation(
+    id,
+    )
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn members_remove_from_conversation_by_index(
-    ptr: *mut Members,
-    row_index: u64,
-) -> bool {
+pub unsafe extern "C" fn members_remove_from_conversation_by_index(ptr: *mut Members, row_index: u64) -> bool {
     let obj = &mut *ptr;
-    obj.remove_from_conversation_by_index(row_index)
+    obj.remove_from_conversation_by_index(
+    row_index,
+    )
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn members_toggle_filter_regex(ptr: *mut Members) -> bool {
     let obj = &mut *ptr;
-    obj.toggle_filter_regex()
+    obj.toggle_filter_regex(
+    )
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn members_filter_get(
-    ptr: *const Members,
-    prop: *mut QString,
-    set: fn(*mut QString, *const c_char, c_int),
-) {
+pub unsafe extern "C" fn members_filter_get(ptr: *const Members, prop: *mut QString, set: fn(*mut QString, *const c_char, c_int)) {
     let obj = &*ptr;
     let value = obj.filter();
     let str_: *const c_char = value.as_ptr() as *const c_char;
@@ -352,11 +265,7 @@ pub unsafe extern "C" fn members_filter_get(
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn members_filter_set(
-    ptr: *mut Members,
-    value: *const c_ushort,
-    len: c_int,
-) {
+pub unsafe extern "C" fn members_filter_set(ptr: *mut Members, value: *const c_ushort, len: c_int) {
     let obj = &mut *ptr;
     let mut s = String::new();
     set_string_from_utf16(&mut s, value, len);
@@ -369,10 +278,7 @@ pub unsafe extern "C" fn members_filter_regex_get(ptr: *const Members) -> bool {
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn members_filter_regex_set(
-    ptr: *mut Members,
-    value: bool,
-) {
+pub unsafe extern "C" fn members_filter_regex_set(ptr: *mut Members, value: bool) {
     (&mut *ptr).set_filter_regex(value)
 }
 
@@ -382,26 +288,24 @@ pub unsafe extern "C" fn members_row_count(ptr: *const Members) -> c_int {
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn members_insert_rows(
-    ptr: *mut Members,
-    row: c_int,
-    count: c_int,
-) -> bool {
+pub unsafe extern "C" fn members_insert_rows(ptr: *mut Members, row: c_int, count: c_int) -> bool {
     match (to_usize(row), to_usize(count)) {
-        (Some(row), Some(count)) => (&mut *ptr).insert_rows(row, count),
-        _ => false,
+        (Some(row), Some(count)) => 
+        {
+            (&mut *ptr).insert_rows(row, count)
+        }
+        _ => false
     }
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn members_remove_rows(
-    ptr: *mut Members,
-    row: c_int,
-    count: c_int,
-) -> bool {
+pub unsafe extern "C" fn members_remove_rows(ptr: *mut Members, row: c_int, count: c_int) -> bool {
     match (to_usize(row), to_usize(count)) {
-        (Some(row), Some(count)) => (&mut *ptr).remove_rows(row, count),
-        _ => false,
+        (Some(row), Some(count)) => 
+        {
+            (&mut *ptr).remove_rows(row, count)
+        }
+        _ => false
     }
 }
 
@@ -416,39 +320,24 @@ pub unsafe extern "C" fn members_fetch_more(ptr: *mut Members) {
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn members_sort(
-    ptr: *mut Members,
-    column: u8,
-    order: SortOrder,
-) {
+pub unsafe extern "C" fn members_sort(ptr: *mut Members, column: u8, order: SortOrder) {
     (&mut *ptr).sort(column, order)
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn members_data_color(
-    ptr: *const Members,
-    row: c_int,
-) -> u32 {
+pub unsafe extern "C" fn members_data_color(ptr: *const Members, row: c_int) -> u32 {
     let obj = &*ptr;
     obj.color(to_usize(row).unwrap_or(0))
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn members_data_matched(
-    ptr: *const Members,
-    row: c_int,
-) -> bool {
+pub unsafe extern "C" fn members_data_matched(ptr: *const Members, row: c_int) -> bool {
     let obj = &*ptr;
     obj.matched(to_usize(row).unwrap_or(0))
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn members_data_name(
-    ptr: *const Members,
-    row: c_int,
-    d: *mut QString,
-    set: fn(*mut QString, *const c_char, len: c_int),
-) {
+pub unsafe extern "C" fn members_data_name(ptr: *const Members, row: c_int, d: *mut QString, set: fn(*mut QString, *const c_char, len: c_int)) {
     let obj = &*ptr;
     let data = obj.name(to_usize(row).unwrap_or(0));
     let str_: *const c_char = data.as_ptr() as *const c_char;
@@ -456,12 +345,7 @@ pub unsafe extern "C" fn members_data_name(
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn members_data_pairwise_conversation_id(
-    ptr: *const Members,
-    row: c_int,
-    d: *mut QByteArray,
-    set: fn(*mut QByteArray, *const c_char, len: c_int),
-) {
+pub unsafe extern "C" fn members_data_pairwise_conversation_id(ptr: *const Members, row: c_int, d: *mut QByteArray, set: fn(*mut QByteArray, *const c_char, len: c_int)) {
     let obj = &*ptr;
     let data = obj.pairwise_conversation_id(to_usize(row).unwrap_or(0));
     let str_: *const c_char = data.as_ptr() as *const c_char;
@@ -469,12 +353,7 @@ pub unsafe extern "C" fn members_data_pairwise_conversation_id(
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn members_data_profile_picture(
-    ptr: *const Members,
-    row: c_int,
-    d: *mut QString,
-    set: fn(*mut QString, *const c_char, len: c_int),
-) {
+pub unsafe extern "C" fn members_data_profile_picture(ptr: *const Members, row: c_int, d: *mut QString, set: fn(*mut QString, *const c_char, len: c_int)) {
     let obj = &*ptr;
     let data = obj.profile_picture(to_usize(row).unwrap_or(0));
     if let Some(data) = data {
@@ -484,21 +363,13 @@ pub unsafe extern "C" fn members_data_profile_picture(
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn members_data_status(
-    ptr: *const Members,
-    row: c_int,
-) -> u8 {
+pub unsafe extern "C" fn members_data_status(ptr: *const Members, row: c_int) -> u8 {
     let obj = &*ptr;
     obj.status(to_usize(row).unwrap_or(0))
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn members_data_user_id(
-    ptr: *const Members,
-    row: c_int,
-    d: *mut QString,
-    set: fn(*mut QString, *const c_char, len: c_int),
-) {
+pub unsafe extern "C" fn members_data_user_id(ptr: *const Members, row: c_int, d: *mut QString, set: fn(*mut QString, *const c_char, len: c_int)) {
     let obj = &*ptr;
     let data = obj.user_id(to_usize(row).unwrap_or(0));
     let str_: *const c_char = data.as_ptr() as *const c_char;
