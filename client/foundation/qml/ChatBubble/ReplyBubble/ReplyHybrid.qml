@@ -68,7 +68,7 @@ Rectangle {
             ReplyElidedBody {
                 id: replyElidedBody
 
-                maximumWidth: bubbleRoot.maxWidth - imageSize - CmnCfg.smallMargin
+                maximumWidth: bubbleRoot.maxWidth * 0.8 - imageSize
             }
         }
 

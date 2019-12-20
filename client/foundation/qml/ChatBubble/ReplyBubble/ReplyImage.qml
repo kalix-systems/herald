@@ -48,7 +48,7 @@ Rectangle {
         Item {
             id: replyWrapperCol
             height: 64
-            width: bubbleRoot.maxWidth * 0.8
+            width: bubbleRoot.maxWidth - imageClip.width - CmnCfg.smallMargin * 3
             ReplyLabel {
                 id: replyLabel
                 anchors.top: parent.top
