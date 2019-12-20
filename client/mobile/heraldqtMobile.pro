@@ -26,5 +26,14 @@ qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
+DISTFILES += \
+    ../foundation/android-sources/AndroidManifest.xml \
+    ../foundation/android-sources/build.gradle \
+    ../foundation/android-sources/gradle/wrapper/gradle-wrapper.jar \
+    ../foundation/android-sources/gradle/wrapper/gradle-wrapper.properties \
+    ../foundation/android-sources/gradlew \
+    ../foundation/android-sources/gradlew.bat \
+    ../foundation/android-sources/res/values/libs.xml
+
 
 
