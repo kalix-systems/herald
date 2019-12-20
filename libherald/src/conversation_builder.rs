@@ -161,6 +161,39 @@ impl ConversationBuilderTrait for ConversationBuilder {
     ) -> ffi::UserIdRef {
         none!(self.inner.members().get(index), "").as_str()
     }
+
+    fn member_color(
+        &self,
+        index: usize,
+    ) -> u32 {
+        self.inner
+            .members()
+            .get(index)
+            .and_then(|uid| crate::users::shared::color(uid))
+            .unwrap_or(0)
+    }
+
+    fn member_name(
+        &self,
+        index: usize,
+    ) -> String {
+        self.inner
+            .members()
+            .get(index)
+            .and_then(|uid| crate::users::shared::name(uid))
+            .unwrap_or_default()
+    }
+
+    fn member_profile_picture(
+        &self,
+        index: usize,
+    ) -> String {
+        self.inner
+            .members()
+            .get(index)
+            .and_then(|uid| crate::users::shared::profile_picture(uid))
+            .unwrap_or_default()
+    }
 }
 
 impl ConversationBuilder {

@@ -1,3 +1,4 @@
+use riqtshaw_types::*;
 use crate::imp::*;
 pub use config::*;
 pub use conversation_builder::*;
@@ -12,7 +13,6 @@ pub use message_builder::*;
 pub use message_search::*;
 pub use messages::*;
 pub use reply_width_calc::*;
-use riqtshaw_types::*;
 pub use users::*;
 pub use users_search::*;
 pub use utils::*;

@@ -417,7 +417,10 @@ fn config() -> Object {
 
 fn conversation_builder() -> Object {
     let item_prop = item_props! {
-        memberId: ItemProp::new(QString)
+        memberId: ItemProp::new(QString),
+        memberColor: ItemProp::new(QUint32),
+        memberName: ItemProp::new(QString).get_by_value(),
+        memberProfilePicture: ItemProp::new(QString).get_by_value()
     };
 
     let prop = props! {
