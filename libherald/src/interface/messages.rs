@@ -378,7 +378,7 @@ pub trait MessagesTrait {
     fn author_profile_picture(
         &self,
         index: usize,
-    ) -> Option<String>;
+    ) -> String;
 
     fn body(
         &self,
@@ -1001,10 +1001,8 @@ pub unsafe extern "C" fn messages_data_author_profile_picture(
 ) {
     let obj = &*ptr;
     let data = obj.author_profile_picture(to_usize(row).unwrap_or(0));
-    if let Some(data) = data {
-        let str_: *const c_char = data.as_ptr() as (*const c_char);
-        set(d, str_, to_c_int(data.len()));
-    }
+    let str_: *const c_char = data.as_ptr() as *const c_char;
+    set(d, str_, to_c_int(data.len()));
 }
 
 #[no_mangle]

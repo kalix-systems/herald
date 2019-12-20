@@ -303,7 +303,7 @@ fn messages() -> Object {
         // Time the message will expire, if ever
         expirationTime: ItemProp::new(Qint64).optional(),
         // User profile picture
-        authorProfilePicture: ItemProp::new(QString).optional().get_by_value(),
+        authorProfilePicture: ItemProp::new(QString).get_by_value(),
         // User color
         authorColor: ItemProp::new(QUint32).optional(),
         // User name

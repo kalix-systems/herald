@@ -64,8 +64,8 @@ impl Interface for Messages {
     fn author_profile_picture(
         &self,
         index: usize,
-    ) -> Option<String> {
-        self.author_profile_picture_(index)
+    ) -> String {
+        self.author_profile_picture_(index).unwrap_or_default()
     }
 
     fn body(

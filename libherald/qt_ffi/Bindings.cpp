@@ -2023,8 +2023,7 @@ QVariant Messages::data(const QModelIndex &index, int role) const {
     case Qt::UserRole + 2:
       return cleanNullQVariant(QVariant::fromValue(authorName(index.row())));
     case Qt::UserRole + 3:
-      return cleanNullQVariant(
-          QVariant::fromValue(authorProfilePicture(index.row())));
+      return QVariant::fromValue(authorProfilePicture(index.row()));
     case Qt::UserRole + 4:
       return cleanNullQVariant(QVariant::fromValue(body(index.row())));
     case Qt::UserRole + 5:
