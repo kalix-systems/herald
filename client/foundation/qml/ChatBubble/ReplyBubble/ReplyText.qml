@@ -25,12 +25,11 @@ Rectangle {
         id: accent
         anchors.top: parent.top
         anchors.bottom: parent.bottom
-        anchors.topMargin: CmnCfg.smallMargin
-        anchors.bottomMargin: CmnCfg.smallMargin
+
         width: CmnCfg.smallMargin / 2
         color: opColor
         anchors.left: parent.left
-        anchors.leftMargin: CmnCfg.smallMargin
+
     }
 
     Column {
