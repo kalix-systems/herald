@@ -1,8 +1,8 @@
 use super::*;
 use futures::{
-    future,
+    future::{self, BoxFuture},
     sink::SinkExt,
-    stream::{StreamExt, TryStreamExt},
+    stream::{self, BoxStream, StreamExt, TryStreamExt},
 };
 use sharded_slab::*;
 use std::cmp::min;
@@ -37,7 +37,9 @@ impl std::fmt::Display for ConnectionClosed {
 
 impl std::error::Error for ConnectionClosed {}
 
-pub async fn handle_conn<S, P, Conn>(
+/// Does the server init handshake and sets up request/response + push loops.
+/// Does not handle TLS handshake
+pub async fn handle_conn<P, S, Conn>(
     server: &S,
     conn: Conn,
 ) -> Result<(), Error>
@@ -45,7 +47,7 @@ where
     S: KrpcServer<P>,
     P: Protocol,
     P::Push: Clone,
-    Conn: AsyncRead + AsyncWrite + Unpin,
+    Conn: AsyncRead + AsyncWrite + Unpin + Send,
 {
     let (mut rx, mut tx) = tokio::io::split(conn);
     let cinfo = server.init(&mut tx, &mut rx).await?;
@@ -110,7 +112,8 @@ where
                     }
                 }
             }
-        });
+        })
+        .boxed();
 
     let sink_pushes = async {
         let mut pushes = server.pushes(&cinfo).await;
@@ -129,4 +132,37 @@ where
     future::try_join3(recv_cframes, sink_pushes, send_sframes).await?;
 
     Ok(())
+}
+
+/// `serve(server,socket,tls,out)` listens for connections on `socket`, performs tls handshake
+/// using acceptor `tls`, then leaves the stream of futures in a variable `out`, to be handled
+/// however the caller decides to.
+pub async fn serve<'a, P, S>(
+    server: &'a S,
+    socket: &'a SocketAddr,
+    tls: &'a tokio_rustls::TlsAcceptor,
+) -> BoxStream<'a, BoxFuture<'a, Result<(), Error>>>
+where
+    P: Protocol,
+    S: KrpcServer<P>,
+    P::Push: Clone,
+{
+    match tokio::net::TcpListener::bind(socket).await {
+        Err(e) => stream::once({ future::ready(future::err(e.into()).boxed()) }).boxed(),
+        Ok(listener) => stream::unfold(listener, move |mut listener| {
+            async move {
+                let (stream, _) = listener.accept().await.ok()?;
+                let fut: BoxFuture<'a, Result<(), Error>> = async move {
+                    let stream = tls.accept(stream).await?;
+                    handle_conn::<P, S, tokio_rustls::server::TlsStream<tokio::net::TcpStream>>(
+                        server, stream,
+                    )
+                    .await
+                }
+                .boxed();
+                Some((fut, listener))
+            }
+        })
+        .boxed(),
+    }
 }

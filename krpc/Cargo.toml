@@ -54,7 +54,7 @@ optional = true
 default = ["quic", "ws"]
 quic = ["quinn","quinn-proto"]
 ws-sync = ["tungstenite", "rustls"]
-ws = ["ws-sync", "tokio-tungstenite", "tokio-rustls", "tokio/io-util", "tokio/sync"]
+ws = ["ws-sync", "tokio-tungstenite", "tokio-rustls", "tokio/io-util", "tokio/sync", "tokio/full"]
 
 [dev-dependencies]
 portpicker = "0.1"
