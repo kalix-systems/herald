@@ -18,19 +18,19 @@ Page {
 
                 Row {
                     Common.HeaderText {
-                        font.pointSize: 18
+                        font.pixelSize: 18
                         text: qsTr("Username:") + " "
                         leftPadding: CmnCfg.margin
                     }
                     Common.HeaderText {
-                        font.pointSize: 18
+                        font.pixelSize: 18
                         text: Herald.config.name
                         color: CmnCfg.palette.darkGrey
                     }
                 }
 
                 Common.HeaderText {
-                    font.pointSize: 12
+                    font.pixelSize: 12
                     text: qsTr("The primary identifying contact information of your account,\
 any of your contacts must know this identifier exactly. \
 It is not searchable, nor can it be changed.")

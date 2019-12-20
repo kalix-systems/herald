@@ -27,10 +27,11 @@ ApplicationWindow {
         }
     }
 
-    Loader {
-        id: capitan
-        active: false
-        sourceComponent: Item {}
+    MobileHelper {
+        id: mobHelper
+        Component.onCompleted: {
+            set_status_bar_color(CmnCfg.palette.offBlack)
+        }
     }
 
     Loader {
