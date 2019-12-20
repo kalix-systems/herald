@@ -13,8 +13,7 @@ import "dyn"
 Rectangle {
     id: replyWrapper
 
-    property color opColor: CmnCfg.avatarColors[Herald.users.colorById(
-                                                    messageModelData.opAuthor)]
+    property color opColor: CmnCfg.avatarColors[messageModelData.opColor]
     property string replyBody: messageModelData.opBody
     property int fileCount
     readonly property real imageSize: 80
