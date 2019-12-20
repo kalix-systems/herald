@@ -1,4 +1,4 @@
-CREATE TABLE keys (
+CREATE TABLE key_creations (
   -- key, 32 bytes
   key BYTEA PRIMARY KEY,
   -- signed by, 32 bytes
@@ -6,11 +6,17 @@ CREATE TABLE keys (
   -- timestamp of creation
   ts BIGINT NOT NULL,
   -- signature, 64 bytes
-  signature BYTEA NOT NULL,
+  signature BYTEA NOT NULL
+);
+
+CREATE TABLE key_deprecations (
+  -- key, 32 bytes
+  key BYTEA PRIMARY KEY,
   -- timestamp of the deprecation
-  dep_ts BIGINT DEFAULT NULL,
-  dep_signed_by BYTEA DEFAULT NULL,
-  dep_signature BYTEA DEFAULT NULL
+  ts BIGINT NOT NULL,
+  signed_by BYTEA NOT NULL,
+  signature BYTEA NOT NULL,
+  FOREIGN KEY(key) REFERENCES key_creations(key)
 );
 
 CREATE TABLE pushes (
@@ -29,12 +35,12 @@ CREATE TABLE pending (
   FOREIGN KEY(push_id) REFERENCES pushes(push_id) ON DELETE CASCADE
 );
 
-
 CREATE TABLE prekeys (
-  -- sealing_key, 32 bytes
-  sealed_key BYTEA PRIMARY KEY,
+  -- sealed_key, 32 bytes
+  sealed_key BYTEA NOT NULL,
   -- signing_key, 32 bytes
   signing_key BYTEA NOT NULL,
+  key_number INT2 NOT NULL,
   FOREIGN KEY(signing_key) REFERENCES keys(key)
 );
 
@@ -44,6 +50,14 @@ CREATE TABLE userkeys (
   user_id CHAR(32) NOT NULL,
   key BYTEA NOT NULL,
   PRIMARY KEY(user_id, key),
-  FOREIGN KEY(key) REFERENCES keys(key)
+  FOREIGN KEY(key) REFERENCES key_creations(key)
 );
 
+CREATE INDEX userkey_key_ix ON userkeys(key);
+
+CREATE TABLE conversation_members (
+    conversation_id BYTEA NOT NULL,
+    user_id CHAR(32) NOT NULL,
+    FOREIGN KEY(conversation_id) REFERENCES(conversations.conversation_id),
+    FOREIGN KEY(user_id) REFERENCES(userkeys.user_id)
+);
