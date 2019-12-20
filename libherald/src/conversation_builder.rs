@@ -169,7 +169,7 @@ impl ConversationBuilderTrait for ConversationBuilder {
         self.inner
             .members()
             .get(index)
-            .and_then(|uid| crate::users::shared::color(uid))
+            .and_then(crate::users::shared::color)
             .unwrap_or(0)
     }
 
@@ -180,7 +180,7 @@ impl ConversationBuilderTrait for ConversationBuilder {
         self.inner
             .members()
             .get(index)
-            .and_then(|uid| crate::users::shared::name(uid))
+            .and_then(crate::users::shared::name)
             .unwrap_or_default()
     }
 
@@ -191,7 +191,7 @@ impl ConversationBuilderTrait for ConversationBuilder {
         self.inner
             .members()
             .get(index)
-            .and_then(|uid| crate::users::shared::profile_picture(uid))
+            .and_then(crate::users::shared::profile_picture)
             .unwrap_or_default()
     }
 }
