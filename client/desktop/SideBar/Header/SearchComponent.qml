@@ -24,7 +24,7 @@ Component {
             anchors.fill: parent
             spacing: 0
 
-            Common.ConfigAvatar {
+            HeaderAvatar {
                 Layout.leftMargin: CmnCfg.smallMargin
             }
 

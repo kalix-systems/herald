@@ -27,7 +27,7 @@ Component {
             }
             spacing: CmnCfg.margin
 
-            Common.ConfigAvatar {
+            HeaderAvatar {
                 anchors.verticalCenter: parent.verticalCenter
             }
 

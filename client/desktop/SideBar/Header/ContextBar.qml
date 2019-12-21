@@ -19,7 +19,7 @@ ToolBar {
         color: CmnCfg.palette.offBlack
     }
 
-    Common.ConfigAvatar {
+    HeaderAvatar {
         anchors {
             verticalCenter: parent.verticalCenter
             left: parent.left
