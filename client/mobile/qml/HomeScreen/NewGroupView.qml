@@ -101,10 +101,9 @@ Page {
                     Herald.conversationBuilder.setTitle(topRect.groupTitle)
                 }
 
-                if (topRect.profPic !== "") {
-                    Herald.conversationBuilder.picture = topRect.profPic
-                }
-
+                //TODO: impl for setting prof pic once file dialog exists
+                //                if (topRect.profPic !== "") {
+                //                }
                 Herald.conversationBuilder.finalize()
                 mainView.pop()
             }
