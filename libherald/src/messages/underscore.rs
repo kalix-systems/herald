@@ -346,16 +346,15 @@ impl Messages {
         let pattern = &self.search.pattern;
         let match_status = self.container.get(index).as_ref()?.match_status;
 
-        self.container.access_by_index(index, |data| {
-            if match_status.is_match() {
-                Some(messages_helper::search::highlight_message(
-                    pattern.as_ref()?,
-                    data.body.as_ref()?,
-                ))
-            } else {
-                Some(elider.elided_body(data.body.as_ref()?))
-            }
-        })?
+        let body = self
+            .container
+            .access_by_index(index, |data| data.body.clone())?;
+
+        if match_status.is_match() {
+            messages_helper::search::highlight_message(pattern.as_ref()?, body.as_ref()?).into()
+        } else {
+            elider.elided_body(body?).into()
+        }
     }
 
     pub(crate) fn full_body_(
