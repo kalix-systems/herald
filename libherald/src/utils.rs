@@ -12,11 +12,7 @@ pub fn strip_qrc(mut path: String) -> Option<String> {
 /// from QT, this function is effectively a no-op
 #[cfg(target_os = "ios")]
 pub fn strip_qrc(path: String) -> Option<String> {
-    if path.len() < 7 {
-        None
-    } else {
-        Some(path)
-    }
+    Some(path)
 }
 
 pub(crate) fn err_string_msg<E: std::error::Error>(
