@@ -12,6 +12,7 @@ Item {
     Imports.Units {
         id: units
     }
+    // TODO do we use this radius anywhere?
     /// edge rounding for all rectangles that use the radius property
     readonly property int radius: 10
     /// standard margin size used to interior objects

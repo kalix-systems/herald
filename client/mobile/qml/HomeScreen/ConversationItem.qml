@@ -34,7 +34,7 @@ Rectangle {
 
         AvatarMain {
             id: avatar
-            iconColor: CmnCfg.avatarColors[colorCode]
+            backgroundColor: CmnCfg.avatarColors[colorCode]
             anchors.verticalCenter: parent.verticalCenter
             initials: Utils.initialize(title)
             size: CmnCfg.units.dp(56)

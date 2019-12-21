@@ -21,7 +21,7 @@ ListView {
 
         AvatarMain {
             id: contactAvatar
-            iconColor: CmnCfg.palette.avatarColors[Herald.users.colorById(
+            backgroundColor: CmnCfg.palette.avatarColors[Herald.users.colorById(
                                                        memberId)]
             anchors.verticalCenter: parent.verticalCenter
             initials: Utils.initialize(Herald.users.nameById(memberId))

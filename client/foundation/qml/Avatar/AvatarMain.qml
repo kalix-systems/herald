@@ -10,7 +10,7 @@ Item {
     // path to the profile picture, or the empty string
     property string pfpPath
     // the color with which to fill the icon if there is not profile picture
-    property color iconColor
+    property color backgroundColor
     property real size: CmnCfg.avatarSize
     // the label, must be one of the sibling components in this directory with the Label suffix
     // for example
@@ -39,7 +39,7 @@ Item {
 
     AvatarIcon {
         id: avatarIcon
-        color: iconColor
+        color: backgroundColor
         textColor: parent.textColor
         initials: parent.initials
         height: parent.avatarHeight

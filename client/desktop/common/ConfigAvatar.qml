@@ -8,17 +8,19 @@ import Qt.labs.platform 1.0
 import "qrc:/imports/Avatar"
 import "qrc:/imports/js/utils.mjs" as Utils
 
+// TODOs for this file:
+// - rename something like HeaderAvatar or IdentityAvatar
+// - move to /Sidebar/header
+// - clicking this avatar should open the "identity switcher," a thing we
+//   haven't designed yet; for now clicking on it does nothing
 //common desktop config avatar with overlay
 AvatarMain {
     id: configAvatar
-    iconColor: CmnCfg.palette.avatarColors[Herald.config.color]
+    backgroundColor: CmnCfg.palette.avatarColors[Herald.config.color]
     initials: Herald.config.name[0].toUpperCase()
     pfpPath: Utils.safeStringOrDefault(Herald.config.profilePicture, "")
 
     size: 28
-    Layout.alignment: Qt.AlignCenter
-    Layout.leftMargin: 12
-    Layout.rightMargin: 12
     avatarHeight: 28
 
     MouseArea {

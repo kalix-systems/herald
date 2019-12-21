@@ -78,7 +78,7 @@ Rectangle {
     }
     AvatarMain {
         id: avatar
-        iconColor: authorColor
+        backgroundColor: authorColor
         initials: authorName[0].toUpperCase()
         size: 36
         avatarHeight: 36

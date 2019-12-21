@@ -25,7 +25,7 @@ ToolBar {
             Layout.leftMargin: CmnCfg.units.dp(12)
             spacing: CmnCfg.units.dp(16)
             AvatarMain {
-                iconColor: CmnCfg.palette.avatarColors[Herald.config.color]
+                backgroundColor: CmnCfg.palette.avatarColors[Herald.config.color]
                 initials: Herald.config.name[0].toUpperCase()
                 pfpPath: Utils.safeStringOrDefault(
                              Herald.config.profilePicture, "")

@@ -22,7 +22,7 @@ Rectangle {
     AvatarMain {
         anchors.fill: parent
         id: conversationItemAvatar
-        iconColor: CmnCfg.avatarColors[boxColor]
+        backgroundColor: CmnCfg.avatarColors[boxColor]
         initials: boxTitle[0].toUpperCase()
         pfpPath: Utils.safeStringOrDefault(picture)
         anchors {

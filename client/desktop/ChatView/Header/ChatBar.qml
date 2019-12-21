@@ -41,7 +41,7 @@ ToolBar {
             id: avatar
             size: 32
             avatarHeight: groupAvatar ? 30 : 32
-            iconColor: CmnCfg.avatarColors[conversationItem.color]
+            backgroundColor: CmnCfg.avatarColors[conversationItem.color]
             textColor: CmnCfg.palette.iconFill
             initials: conversationItem.title[0].toUpperCase()
             Layout.alignment: Qt.AlignLeft
