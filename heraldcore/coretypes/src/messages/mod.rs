@@ -174,8 +174,6 @@ pub enum MessageReceiptStatus {
     AckTerminal = 3,
 }
 
-const FLURRY_FUZZ: i64 = 5 * 60_000;
-
 #[derive(Clone, Debug)]
 pub struct MsgData {
     pub author: UserId,
@@ -203,13 +201,6 @@ impl MatchStatus {
 }
 
 impl MsgData {
-    pub fn same_flurry(
-        &self,
-        rhs: &Self,
-    ) -> bool {
-        (self.author == rhs.author) && self.time.insertion.within(FLURRY_FUZZ, rhs.time.insertion)
-    }
-
     pub fn matches(
         &self,
         pattern: &search_pattern::SearchPattern,
