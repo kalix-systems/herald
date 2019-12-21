@@ -2,8 +2,8 @@ SELECT EXISTS (
   SELECT
     1
   FROM
-    key_creations
+    key_deprecations
   WHERE
-    key_creations.key = $1 AND
+    key_deprecations.key = $1 AND
   LIMIT 1
 )

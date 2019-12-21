@@ -14,8 +14,8 @@ tokio-postgres  = "0.5.0-alpha.2"
 version = "0.2"
 features = ["time"]
 
-[dependencies.krpc]
-path = "../../krpc"
+# [dependencies.krpc]
+# path = "../../krpc"
 
 [dependencies.kson]
 path = "../../kson"

@@ -2,15 +2,15 @@ use super::*;
 
 #[async_trait]
 pub trait ServerStore {
-    async fn get_sigchain(
-        &mut self,
-        user: UserId,
-    ) -> Result<Option<sig::SigChain>, Error>;
-
     async fn recip_exists(
         &mut self,
         user: Recip,
     ) -> Result<bool, Error>;
+
+    async fn get_sigchain(
+        &mut self,
+        user: UserId,
+    ) -> Result<Option<sig::SigChain>, Error>;
 
     async fn add_to_sigchain(
         &mut self,
