@@ -1,5 +1,5 @@
 use async_trait::*;
-use futures::{join, FutureExt, Stream, StreamExt, TryStreamExt};
+use futures::{try_join, FutureExt, Stream, StreamExt, TryStreamExt};
 use herald_common::*;
 use parking_lot::Mutex;
 use server_errors::Error;
@@ -9,6 +9,8 @@ use tokio_postgres::{
     types::{ToSql, Type},
     Client, Error as PgError, NoTls,
 };
+
+type Res<T> = Result<T, Error>;
 
 mod imp;
 mod macros;
@@ -25,34 +27,44 @@ pub enum PushedTo {
     Missing(SingleRecip),
 }
 
+pub struct TaggedPrekey {
+    pub key: sig::PublicKey,
+    pub prekey: Signed<Prekey>,
+}
+
+pub struct PrekeyReplace {
+    pub new: Signed<Prekey>,
+    pub old: Option<Prekey>,
+}
+
 #[async_trait]
 impl ServerStore for Conn {
     async fn get_sigchain(
         &mut self,
         user: UserId,
-    ) -> Result<Option<sig::SigChain>, Error> {
-        let (stmt, dep_stmt) = join!(
-            self.prepare_typed(sql!("key_creations"), types![TEXT]),
-            self.prepare_typed(sql!("key_deprecations"), types![TEXT])
-        );
-        let (stmt, dep_stmt) = (stmt?, dep_stmt?);
-
+    ) -> Res<Option<sig::SigChain>> {
         let (rows, dep_rows) = {
             let conn = &self;
-            let stmt = &stmt;
-            let dep_stmt = &dep_stmt;
 
-            join!(
-                async move { conn.query(stmt, params![user.as_str()]).await },
-                async move { conn.query(dep_stmt, params![user.as_str()]).await }
+            try_join!(
+                async move {
+                    let stmt = conn
+                        .prepare_typed(sql!("key_creations"), types![TEXT])
+                        .await?;
+                    conn.query(&stmt, params![user.as_str()]).await
+                },
+                async move {
+                    let stmt = conn
+                        .prepare_typed(sql!("key_deprecations"), types![TEXT])
+                        .await?;
+                    conn.query(&stmt, params![user.as_str()]).await
+                }
             )
-        };
-
-        let (rows, dep_rows) = (rows?, dep_rows?);
+        }?;
 
         let mut rows = rows.into_iter();
 
-        let get_inner_meta = |row| {
+        let get_inner_meta = |row: &tokio_postgres::Row| -> Res<SigMeta> {
             let signed_by = row.get("key");
             let sig = row.get("inner_signature");
             let timestamp: i64 = row.get("inner_ts");
@@ -64,35 +76,33 @@ impl ServerStore for Conn {
             ))
         };
 
-        let get_meta = |row| {
+        let get_meta = |row: &tokio_postgres::Row| -> Res<SigMeta> {
             let sig = row.get("signature");
             let signed_by = row.get("signed_by");
             let timestamp: i64 = row.get("timestamp");
 
-            SigMeta::new(
+            Ok(SigMeta::new(
                 sig::Signature::from_slice(sig).ok_or(Error::InvalidSig)?,
                 sig::PublicKey::from_slice(signed_by).ok_or(Error::InvalidKey)?,
                 Time::from(timestamp),
-            )
-            .into()
+            ))
         };
 
         let initial = match rows.next() {
             None => return Ok(None),
             Some(initial) => {
-                let meta = get_inner_meta(initial)?;
+                let meta = get_inner_meta(&initial)?;
                 (user, meta).into()
             }
         };
 
-        let mut sig_chain: Vec<Signed<sig::SigUpdate>> =
-            Vec::with_capacity(rows.len() + dep_rows.len());
+        let mut sig_chain = Vec::with_capacity(rows.len() + dep_rows.len());
 
         for row in rows {
-            let inner_meta: SigMeta = get_inner_meta(row)?;
+            let inner_meta: SigMeta = get_inner_meta(&row)?;
             let inner = sig::SigUpdate::Endorse((user, inner_meta).into());
 
-            let meta: SigMeta = get_meta(row)?;
+            let meta: SigMeta = get_meta(&row)?;
             let update = Signed::from((inner, meta));
 
             sig_chain.push(update);
@@ -100,7 +110,7 @@ impl ServerStore for Conn {
 
         for row in dep_rows {
             let pk = sig::PublicKey::from_slice(row.get("key")).ok_or(Error::InvalidKey)?;
-            let meta = get_meta(row)?;
+            let meta = get_meta(&row)?;
             let update = Signed::from((sig::SigUpdate::Deprecate(pk), meta));
 
             sig_chain.push(update);
@@ -114,7 +124,7 @@ impl ServerStore for Conn {
     async fn recip_exists(
         &mut self,
         recip: Recip,
-    ) -> Result<bool, Error> {
+    ) -> Res<bool> {
         use Recip::*;
 
         match recip {
@@ -131,80 +141,76 @@ impl ServerStore for Conn {
 
         let (update, meta) = new.split();
 
+        let tx = self.transaction().await?;
+
+        let (key_created, key_deprecated) = {
+            let tx = &tx;
+            try_join!(
+                async move {
+                    Ok::<bool, Error>(
+                        tx.query_one(sql!("key_created"), params![meta.signed_by().as_ref()])
+                            .await?
+                            .get::<_, bool>(0),
+                    )
+                },
+                async move {
+                    Ok::<bool, Error>(
+                        tx.query_one(sql!("key_deprecated"), params![meta.signed_by().as_ref()])
+                            .await?
+                            .get::<_, bool>(0),
+                    )
+                },
+            )?
+        };
+
+        if !key_created || key_deprecated {
+            return Ok(PKIResponse::DeadKey);
+        }
+
         match update {
             Endorse(signed_uid) => {
                 let (uid, inner_meta) = signed_uid.split();
 
-                let tx = self.transaction().await?;
-
-                let (key_created_stmt, key_deprecated_stmt) = join!(
-                    tx.prepare_typed(sql!("key_is_valid"), types![BYTEA]),
-                    tx.pre
-                );
-
-                let signer_key_exists_stmt = tx
-                    .prepare_typed(sql!("key_is_valid"), types![BYTEA])
-                    .await?;
-
-                let signer_key_exists: bool = tx
-                    .query_one(&signer_key_exists_stmt, params![meta.signed_by().as_ref()])
-                    .await?
-                    .get(0);
-
-                if !signer_key_exists {
-                    return Ok(PKIResponse::DeadKey);
-                }
-
-                let (user_key_stmt, endorsement_stmt) = join!(
+                let (user_key_stmt, endorsement_stmt) = try_join!(
                     tx.prepare_typed(sql!("add_user_key"), types!(TEXT, BYTEA)),
                     tx.prepare_typed(
                         sql!("add_endorsement"),
                         types!(BYTEA, BYTEA, INT8, BYTEA, BYTEA, INT8),
                     )
-                );
+                )?;
 
-                let (user_key_stmt, endorsement_stmt) = (user_key_stmt?, endorsement_stmt?);
+                let num_updated = tx
+                    .execute(
+                        &user_key_stmt,
+                        params![uid.as_str(), inner_meta.signed_by().as_ref()],
+                    )
+                    .await?;
 
-                tx.execute(
-                    &user_key_stmt,
-                    params![uid.as_str(), inner_meta.signed_by().as_ref()],
-                )
-                .await?;
+                if num_updated != 1 {
+                    return Ok(PKIResponse::Redundant);
+                }
 
-                tx.execute(
-                    &endorsement_stmt,
-                    params![
-                        inner_meta.signed_by().as_ref(),
-                        inner_meta.sig().as_ref(),
-                        inner_meta.timestamp().as_i64(),
-                        meta.signed_by().as_ref(),
-                        meta.timestamp().as_i64(),
-                        meta.sig().as_ref(),
-                    ],
-                )
-                .await?;
+                let num_updated = tx
+                    .execute(
+                        &endorsement_stmt,
+                        params![
+                            inner_meta.signed_by().as_ref(),
+                            inner_meta.sig().as_ref(),
+                            inner_meta.timestamp().as_i64(),
+                            meta.signed_by().as_ref(),
+                            meta.timestamp().as_i64(),
+                            meta.sig().as_ref(),
+                        ],
+                    )
+                    .await?;
 
-                tx.commit().await?;
-
-                Ok(PKIResponse::Success)
+                if num_updated != 1 {
+                    return Ok(PKIResponse::Redundant);
+                }
             }
 
             Deprecate(pk) => {
                 let signer_key = meta.signed_by();
-
-                let tx = self.transaction().await?;
-                let signer_key_exists_stmt = tx
-                    .prepare_typed(sql!("key_is_valid"), types![BYTEA])
-                    .await?;
-
-                let signer_key_exists: bool = tx
-                    .query_one(&signer_key_exists_stmt, params![signer_key.as_ref()])
-                    .await?
-                    .get(0);
-
-                if !signer_key_exists {
-                    return Ok(PKIResponse::DeadKey);
-                }
 
                 let dep_stmt = tx
                     .prepare_typed(sql!("deprecate_key"), types![INT8, BYTEA, BYTEA, BYTEA])
@@ -225,12 +231,12 @@ impl ServerStore for Conn {
                 if num_updated != 1 {
                     return Ok(PKIResponse::Redundant);
                 }
-
-                tx.commit().await?;
-
-                Ok(PKIResponse::Success)
             }
         }
+
+        tx.commit().await?;
+
+        Ok(PKIResponse::Success)
     }
 
     async fn user_of(
@@ -250,24 +256,67 @@ impl ServerStore for Conn {
             }))
     }
 
-    async fn new_prekeys<Keys: Stream<Item = (Signed<Prekey>, Option<Prekey>)> + Send>(
+    async fn new_prekeys<Keys: Stream<Item = PrekeyReplace> + Send>(
         &mut self,
         keys: Keys,
     ) -> Result<new_prekeys::Res, Error> {
+        let (insert_stmt, update_stmt) = try_join!(
+            self.prepare_typed("TODO", types![BYTEA, BYTEA, BYTEA, INT8]),
+            self.prepare_typed("TODO", types![BYTEA, BYTEA, BYTEA, BYTEA, BYTEA, INT8])
+        )?;
+
+        keys.map(Ok::<_, Error>)
+            .try_for_each_concurrent(10, |PrekeyReplace { new, old }| {
+                let conn = &self;
+                let insert_stmt = &insert_stmt;
+                let update_stmt = &update_stmt;
+
+                async move {
+                    match old {
+                        Some(Prekey(old)) => todo!(),
+                        None => todo!(),
+                    }
+                }
+            })
+            .await?;
+
         unimplemented!()
     }
 
     async fn get_random_prekeys<Keys: Stream<Item = sig::PublicKey> + Send>(
         &mut self,
         keys: Keys,
-    ) -> Result<Vec<(sig::PublicKey, Signed<Prekey>)>, Error> {
+    ) -> Res<Vec<TaggedPrekey>> {
         let prekeys = Mutex::new(Vec::new());
+
         let stmt = self.prepare_typed("TODO", types![BYTEA]).await?;
 
         keys.map(Ok::<_, Error>)
             .try_for_each_concurrent(10, |k| {
                 let conn = &self;
-                async { unimplemented!() }
+                let stmt = &stmt;
+                let prekeys = &prekeys;
+
+                async move {
+                    let row = conn.query_one(stmt, params![k.as_ref()]).await?;
+
+                    let prekey = Prekey::from_slice(row.get("prekey")).ok_or(Error::InvalidKey)?;
+
+                    let sig = sig::Signature::from_slice(row.get("signature"))
+                        .ok_or(Error::InvalidSig)?;
+                    let signed_by = sig::PublicKey::from_slice(row.get("signed_by"))
+                        .ok_or(Error::InvalidKey)?;
+                    let timestamp = Time::from(row.get::<_, i64>("timestamp"));
+
+                    let meta = SigMeta::new(sig, signed_by, timestamp);
+
+                    prekeys.lock().push(TaggedPrekey {
+                        key: k,
+                        prekey: Signed::from((prekey, meta)),
+                    });
+
+                    Ok(())
+                }
             })
             .await?;
 
@@ -281,14 +330,13 @@ impl ServerStore for Conn {
     ) -> Result<add_to_group::Res, Error> {
         let tx = self.transaction().await?;
 
-        let (insert_stmt, exists_stmt) = join!(
+        let (insert_stmt, exists_stmt) = try_join!(
             tx.prepare_typed(sql!("add_to_group"), types![BYTEA, TEXT]),
             tx.prepare_typed(sql!("user_exists"), types![TEXT])
-        );
-        let (insert_stmt, exists_stmt) = (insert_stmt?, exists_stmt?);
+        )?;
 
-        let res: Result<(), Result<add_to_group::Res, Error>> = users
-            .map(Ok::<UserId, Result<add_to_group::Res, Error>>)
+        let res: Result<(), Res<add_to_group::Res>> = users
+            .map(Ok::<UserId, Res<add_to_group::Res>>)
             .try_for_each_concurrent(10, |u| {
                 let tx = &tx;
                 let insert_stmt = &insert_stmt;
@@ -510,7 +558,6 @@ impl Conn {
     pub async fn setup(&mut self) -> Result<(), Error> {
         // create
         self.batch_execute(include_str!("../schema/up.sql")).await?;
-        self.execute(sql!("user_exists_func"), params![]).await?;
         Ok(())
     }
 
@@ -522,7 +569,6 @@ impl Conn {
 
         // create
         tx.batch_execute(include_str!("../schema/up.sql")).await?;
-        tx.execute(sql!("user_exists_func"), params![]).await?;
         tx.commit().await?;
         Ok(())
     }
@@ -535,4 +581,4 @@ fn slice_iter<'a>(
 }
 
 #[cfg(test)]
-mod tests;
+pub(crate) mod tests;

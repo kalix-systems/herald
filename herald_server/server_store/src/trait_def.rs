@@ -22,7 +22,7 @@ pub trait ServerStore {
         key: sig::PublicKey,
     ) -> Result<Option<UserId>, Error>;
 
-    async fn new_prekeys<Keys: Stream<Item = (Signed<Prekey>, Option<Prekey>)> + Send>(
+    async fn new_prekeys<Keys: Stream<Item = PrekeyReplace> + Send>(
         &mut self,
         keys: Keys,
     ) -> Result<new_prekeys::Res, Error>;
@@ -30,7 +30,7 @@ pub trait ServerStore {
     async fn get_random_prekeys<Keys: Stream<Item = sig::PublicKey> + Send>(
         &mut self,
         keys: Keys,
-    ) -> Result<Vec<(sig::PublicKey, Signed<Prekey>)>, Error>;
+    ) -> Result<Vec<TaggedPrekey>, Error>;
 
     async fn add_to_group<Users: Stream<Item = UserId> + TryStreamExt + Send + Unpin>(
         &mut self,

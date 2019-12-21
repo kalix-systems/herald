@@ -1,12 +1,3 @@
-UPDATE
-  keys
-SET
-  dep_ts = $1,
-  dep_signed_by = $2,
-  dep_signature = $3
-WHERE
-  key = $4 AND
-  dep_ts IS NULL AND
-  dep_signature IS NULL AND
-  dep_signed_by IS NULL
-
+INSERT OR IGNORE INTO
+  key_deprecations(ts, signed_by, signature, key)
+VALUES($1, $2, $3, $4)

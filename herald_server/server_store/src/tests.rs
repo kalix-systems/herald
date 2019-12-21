@@ -1,24 +1,26 @@
-//use super::*;
-//use serial_test_derive::serial;
-//use std::convert::TryInto;
-//use womp::*;
-//
-//macro_rules! w {
-//    ($maybe_val: expr) => {
-//        $maybe_val.expect(womp!())
-//    };
-//}
-//
-//macro_rules! wa {
-//    ($maybe_fut: expr) => {
-//        w!($maybe_fut.await)
-//    };
-//}
-//
-//async fn get_client() -> Result<Conn, Error> {
-//    let pool = Pool::new();
-//    pool.get().await
-//}
+use super::*;
+use serial_test_derive::serial;
+use std::convert::TryInto;
+use womp::*;
+
+#[macro_export]
+macro_rules! w {
+    ($maybe_val: expr) => {
+        $maybe_val.expect(womp!())
+    };
+}
+
+#[macro_export]
+macro_rules! wa {
+    ($maybe_fut: expr) => {
+        w!($maybe_fut.await)
+    };
+}
+
+pub(crate) async fn get_client() -> Result<Conn, Error> {
+    let pool = Pool::new();
+    pool.get().await
+}
 
 //#[tokio::test]
 //#[serial]

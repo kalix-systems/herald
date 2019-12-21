@@ -39,11 +39,10 @@ impl Conn {
                 .get(0)
         };
 
-        let (keys_stmt, pending_stmt) = join!(
+        let (keys_stmt, pending_stmt) = try_join!(
             tx.prepare_typed(sql!("conversation_member_keys"), types![BYTEA]),
             tx.prepare_typed(sql!("add_pending"), types![BYTEA, INT8])
-        );
-        let (keys_stmt, pending_stmt) = (keys_stmt?, pending_stmt?);
+        )?;
 
         let pushed_to = Mutex::new(Vec::new());
 
@@ -108,11 +107,10 @@ impl Conn {
                 .get(0)
         };
 
-        let (keys_stmt, pending_stmt) = join!(
-            tx.prepare_typed("TODO: valid user keys", types![BYTEA]),
+        let (keys_stmt, pending_stmt) = try_join!(
+            tx.prepare_typed(sql!("valid_user_keys"), types![BYTEA]),
             tx.prepare_typed(sql!("add_pending"), types![BYTEA, INT8])
-        );
-        let (keys_stmt, pending_stmt) = (keys_stmt?, pending_stmt?);
+        )?;
 
         let pushed_to = Mutex::new(Vec::new());
 
@@ -211,13 +209,11 @@ impl Conn {
 
         let pushed_to = Mutex::new(Vec::new());
 
-        let (keys_stmt, pending_stmt, exists_stmt) = join!(
+        let (keys_stmt, pending_stmt, exists_stmt) = try_join!(
             tx.prepare_typed(sql!("conversation_member_keys"), types![BYTEA]),
             tx.prepare_typed(sql!("add_pending"), types![BYTEA, INT8]),
             tx.prepare_typed(sql!("group_exists"), types![BYTEA])
-        );
-
-        let (keys_stmt, pending_stmt, exists_stmt) = (keys_stmt?, pending_stmt?, exists_stmt?);
+        )?;
 
         // TODO: process concurrently?
         for cid in cids {
@@ -284,13 +280,11 @@ impl Conn {
 
         let pushed_to = Mutex::new(Vec::new());
 
-        let (keys_stmt, pending_stmt, exists_stmt) = join!(
-            tx.prepare_typed("TODO: valid user keys", types![BYTEA]),
+        let (keys_stmt, pending_stmt, exists_stmt) = try_join!(
+            tx.prepare_typed(sql!("valid_user_keys"), types![TEXT]),
             tx.prepare_typed(sql!("add_pending"), types![BYTEA, INT8]),
             tx.prepare_typed(sql!("user_exists"), types![BYTEA]),
-        );
-
-        let (keys_stmt, pending_stmt, exists_stmt) = (keys_stmt?, pending_stmt?, exists_stmt?);
+        )?;
 
         // TODO: process concurrently?
         for uid in uids {
@@ -353,12 +347,10 @@ impl Conn {
                 .await?
                 .get(0)
         };
-        let (pending_stmt, exists_stmt) = join!(
+        let (pending_stmt, exists_stmt) = try_join!(
             tx.prepare_typed(sql!("add_pending"), types![BYTEA, INT8]),
             tx.prepare_typed(sql!("device_exists"), types![BYTEA])
-        );
-
-        let (pending_stmt, exists_stmt) = (pending_stmt?, exists_stmt?);
+        )?;
 
         let mut pushed_to = Vec::new();
 

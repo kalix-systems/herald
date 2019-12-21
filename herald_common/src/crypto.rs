@@ -297,3 +297,9 @@ pub mod sig {
 
 #[derive(Ser, De, Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Prekey(pub kcl::box_::PublicKey);
+
+impl Prekey {
+    pub fn from_slice(bytes: &[u8]) -> Option<Self> {
+        kcl::box_::PublicKey::from_slice(bytes).map(Self)
+    }
+}

@@ -102,3 +102,42 @@ impl Conn {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use serial_test_derive::serial;
+    use std::convert::TryInto;
+    use womp::*;
+
+    macro_rules! w {
+        ($maybe_val: expr) => {
+            $maybe_val.expect(womp!())
+        };
+    }
+
+    macro_rules! wa {
+        ($maybe_fut: expr) => {
+            w!($maybe_fut.await)
+        };
+    }
+
+    use crate::tests::get_client;
+
+    #[tokio::test]
+    #[serial]
+    async fn device_exists() {
+        let mut client = wa!(get_client());
+        wa!(client.reset_all());
+
+        //let kp = sig::KeyPair::gen_new();
+        //let user_id = "Hello".try_into().expect(womp!());
+
+        //let signed_pk = kp.sign(*kp.public_key());
+        //assert!(!wa!(client.device_exists(kp.public_key())));
+
+        //wa!(client.register_user(user_id, signed_pk));
+
+        //assert!(wa!(client.device_exists(kp.public_key())));
+    }
+}
