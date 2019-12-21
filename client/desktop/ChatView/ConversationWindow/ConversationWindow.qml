@@ -54,6 +54,10 @@ ListView {
     boundsMovement: Flickable.StopAtBounds
     model: chatPage.ownedConversation
 
+    // this is set to a higher value in `Component.onCompleted`
+    // but is set to `0` here to improve initial load times
+    cacheBuffer: 0
+
     Component.onCompleted: {
         model.setElisionLineCount(38)
         model.setElisionCharCount(38 * 40)
