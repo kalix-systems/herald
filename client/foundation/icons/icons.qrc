@@ -56,5 +56,7 @@
         <file>minus-icon.svg</file>
         <file>file-download-icon.svg</file>
         <file>pencil-icon.svg</file>
+        <file>down-chevron-icon.svg</file>
+        <file>up-chevron-icon.svg</file>
     </qresource>
 </RCC>
