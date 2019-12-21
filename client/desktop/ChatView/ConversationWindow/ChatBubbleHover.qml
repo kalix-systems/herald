@@ -14,7 +14,7 @@ MouseArea {
     propagateComposedEvents: true
     hoverEnabled: true
     anchors.fill: bubbleActual
-    z: CmnCfg.underlayZ
+    z: 100
     onClicked: mouse.accepted = false
     onPressed: mouse.accepted = false
     onReleased: mouse.accepted = false

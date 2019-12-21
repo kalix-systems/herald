@@ -58,7 +58,7 @@ ToolBar {
 
             Imports.ButtonForm {
                 id: newMessageButton
-                source: "qrc:/compose-icon-white.svg"
+                source: "qrc:/pencil-icon.svg"
                 fill: CmnCfg.palette.lightGrey
                 onClicked: convoMenu.open()
             }
