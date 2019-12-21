@@ -108,8 +108,8 @@ impl MessageBody {
         self.as_ref().as_bytes()
     }
 
-    /// Returns inner `String`, consuming the body
-    pub fn into_inner(self) -> String {
+    /// Returns inner `String`
+    pub fn inner(self) -> String {
         self.0
     }
 }
@@ -347,14 +347,24 @@ impl Elider {
 
     pub fn elided_body(
         &self,
-        body: &MessageBody,
+        body: MessageBody,
     ) -> String {
-        let char_count = UnicodeSegmentation::graphemes(body.as_str(), true).count();
+        let graphemes = UnicodeSegmentation::graphemes(body.as_str(), true);
+        let mut char_count = 0;
+        let mut line_count = 0;
 
-        let line_count = body.as_str().lines().count();
+        for s in graphemes {
+            if char_count >= self.char_count || line_count >= self.line_count {
+                break;
+            }
+
+            char_count += 1;
+
+            line_count += s.lines().count();
+        }
 
         if char_count < self.char_count && line_count < self.line_count {
-            return body.to_string();
+            return body.inner();
         }
 
         let chars_to_take = self.char_count.min(self.line_count * self.char_per_line);

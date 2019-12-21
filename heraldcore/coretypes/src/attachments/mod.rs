@@ -189,6 +189,7 @@ impl AttachmentMeta {
                         .file_name()
                         .into_string()
                         .map_err(Error::NonUnicodePath)?;
+
                     let path = file
                         .into_os_string()
                         .into_string()
