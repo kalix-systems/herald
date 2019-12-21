@@ -9,10 +9,6 @@ Page {
     property Messages ownedMessages
     property string headerTitle
 
-    header: ChatViewHeader {
-        title: headerTitle
-    }
-
     background: Rectangle {
         color: CmnCfg.palette.white
     }

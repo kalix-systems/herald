@@ -36,7 +36,6 @@ Page {
                     conversationId: conversationIdProxy
                 }
                 convContent: ownedConversationContent
-
                 colorCode: colorProxy
             }
         }

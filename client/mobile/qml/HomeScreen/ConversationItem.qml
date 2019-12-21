@@ -99,6 +99,7 @@ Rectangle {
     Component {
         id: ownedChatView
         ChatView.ChatViewMain {
+            property string stateName: "chat"
             ownedMessages: contactItem.convContent.messages
             headerTitle: proxyTitle
         }

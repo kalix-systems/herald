@@ -7,5 +7,4 @@ import "../Common" as Common
 
 Page {
     id: configPage
-    header: ConfigHeader {}
 }

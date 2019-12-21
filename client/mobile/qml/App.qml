@@ -1,12 +1,13 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
 import LibHerald 1.0
+import "./Headers" as Headers
 import "./HomeScreen" as HomeScreen
 import "./NewContactView" as NewContactView
 import "./ChatView" as ChatView
 import "./ConfigMenu" as ConfigMenu
 
-Item {
+Page {
     id: appRoot
     anchors.fill: parent
 
@@ -21,31 +22,46 @@ Item {
         onTriggered: refreshTime()
     }
 
+    header: Headers.HeadersMain {
+        id: rootHeader
+    }
+
     //TODO: Rename me
     Component {
         id: cvMain
-        HomeScreen.HomeScreenMain {}
+        HomeScreen.HomeScreenMain {
+            readonly property string stateName: "home"
+        }
     }
     //TODO: Rename meEEEeeee!
     Component {
         id: configMain
-        ConfigMenu.ConfigMenuMain {}
+        ConfigMenu.ConfigMenuMain {
+            readonly property string stateName: "config"
+        }
     }
 
     Component {
         id: newContactViewMain
-        NewContactView.NewContactViewMain {}
+        NewContactView.NewContactViewMain {
+            readonly property string stateName: "newContacts"
+        }
     }
 
     Component {
         id: newGroupViewMain
-        HomeScreen.NewGroupView {}
+        HomeScreen.NewGroupView {
+            readonly property string stateName: "newGroup"
+        }
     }
 
     StackView {
         id: mainView
         anchors.fill: parent
         initialItem: cvMain
+        onCurrentItemChanged: {
+            rootHeader.state = currentItem.stateName
+        }
     }
 
     Component.onCompleted: Herald.login()
