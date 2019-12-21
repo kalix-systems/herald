@@ -89,7 +89,7 @@ ToolBar {
             Imports.ButtonForm {
                 id: timerButton
                 source: timerMenu.chosenTimer
-                fill: CmnCfg.palette.lightGrey
+                fill: "transparent"
                 topPadding: 1
                 onClicked: timerMenu.open()
             }

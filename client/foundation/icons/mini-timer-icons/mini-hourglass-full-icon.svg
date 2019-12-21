@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16px" height="16px" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 57.1 (83088) - https://sketch.com -->
+    <title>mini-hourglass-1-icon</title>
+    <desc>Created with Sketch.</desc>
+    <g id="mini-hourglass-1-icon" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <polygon id="Path" points="0 0 16 0 16 16 0 16"></polygon>
+        <path d="M12.5,2 L12.5,3.05882353 L11.634,3.058 L11.6346154,5.31010903 L8.702,7.984 L11.6346154,10.6611747 L11.634,12.941 L12.5,12.9411765 L12.5,14 L3.5,14 L3.5,12.9411765 L4.365,12.941 L4.36538462,10.6611747 L7.297,7.984 L4.36538462,5.31010903 L4.365,3.058 L3.5,3.05882353 L3.5,2 L12.5,2 Z M8,8.625 L5.27403846,11.1117907 L5.274,12.941 L10.725,12.941 L10.7259615,11.1117907 L8,8.625 Z" id="Combined-Shape" fill="#000000"></path>
+    </g>
+</svg>

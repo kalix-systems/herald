@@ -39,11 +39,21 @@
         <file>emoji-categories/sports.svg</file>
         <file>emoji-categories/symbols.svg</file>
         <file>emoji-categories/transport.svg</file>
-        <file>timer-icons/12h.svg</file>
-        <file>timer-icons/1min.svg</file>
-        <file>timer-icons/1y.svg</file>
-        <file>timer-icons/30min.svg</file>
-        <file>timer-icons/off.svg</file>
+        <file>mini-timer-icons/mini-hourglass-empty-icon.svg</file>
+        <file>mini-timer-icons/mini-hourglass-full-icon.svg</file>
+        <file>mini-timer-icons/mini-hourglass-half-icon.svg</file>
+        <file>mini-timer-icons/mini-hourglass-quarter-icon.svg</file>
+        <file>mini-timer-icons/mini-hourglass-three-quarter-icon.svg</file>
+        <file>timer-option-icons/1d.svg</file>
+        <file>timer-option-icons/1h.svg</file>
+        <file>timer-option-icons/1min.svg</file>
+        <file>timer-option-icons/1mo.svg</file>
+        <file>timer-option-icons/1w.svg</file>
+        <file>timer-option-icons/1y.svg</file>
+        <file>timer-option-icons/12h.svg</file>
+        <file>timer-option-icons/30min.svg</file>
+        <file>timer-option-icons/30s.svg</file>
+        <file>timer-option-icons/off.svg</file>
         <file>herald.icns</file>
         <file>compose-icon-white.svg</file>
         <file>down-chevron-icon-white.svg</file>
