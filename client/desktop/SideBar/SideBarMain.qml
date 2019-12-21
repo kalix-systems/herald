@@ -21,6 +21,11 @@ Page {
 
     property alias sideBarState: sideBarState
 
+    // TODO: RENAME the PANE to sideBarContent
+    Pane.SideBarPane {
+        id: sideBarPane
+    }
+
     background: Rectangle {
         color: CmnCfg.palette.offBlack
     }
