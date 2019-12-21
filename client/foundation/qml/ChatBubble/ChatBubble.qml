@@ -12,7 +12,7 @@ Rectangle {
     property real defaultWidth
     property bool elided: body.length !== messageModelData.fullBody.length
     property bool expanded: false
-    property bool outbound: parent.outbound
+    property bool outbound: author === Herald.config.configId
     property Item convContainer
     property var messageModelData
 
@@ -31,6 +31,9 @@ Rectangle {
 
     readonly property var replyId: messageModelData.opMsgId
     readonly property bool reply: messageModelData.replyType > 0
+
+    readonly property bool isHead: messageModelData.isHead
+    readonly property bool isTail: messageModelData.isTail
 
     readonly property real maxWidth: defaultWidth * 0.75
     property string friendlyTimestamp: Utils.friendlyTimestamp(

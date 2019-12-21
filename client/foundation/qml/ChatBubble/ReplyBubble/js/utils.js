@@ -7,7 +7,8 @@ function jumpHandler(replyId, ownedConversation, convWindow) {
     const window = convWindow
 
     window.positionViewAtIndex(msgIndex, ListView.Center)
-    window.highlightAnimation.target = window.itemAtIndex(msgIndex).highlight
+    window.highlightAnimation.target = window.itemAtIndex(
+                msgIndex).highlightItem
     window.highlightAnimation.start()
 }
 
