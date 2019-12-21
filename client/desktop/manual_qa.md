@@ -31,7 +31,7 @@ Global search
 ADDITIONAL CHECKS
 
 Messages (additional)
-	d. Check flurry logic - messages sent in a row should only have an avatar on the last
+	d. Check flurry logic - messages sent in a row should only have an avatar on the first
 	e. Check colors/timestamps on reply bubbles, make sure they match originals
 	f. Check that setting disappearing timer to off removes timer icon on ensuing message bubbles
 

@@ -5,6 +5,7 @@ import LibHerald 1.0
 
 ToolButton {
     property string source
+    // TODO rename this fillColor
     property color fill: CmnCfg.palette.iconMatte
     background: Item {}
     padding: 0
