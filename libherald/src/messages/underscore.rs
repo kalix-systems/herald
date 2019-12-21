@@ -84,12 +84,7 @@ impl Messages {
         }
 
         // other cases
-        let (msg, succ) = (
-            self.container.msg_data(index)?,
-            self.container.msg_data(index + 1)?,
-        );
-
-        Some(!msg.same_flurry(&succ))
+        self.container.same_flurry(index, index + 1)
     }
 
     pub(crate) fn is_head_(
@@ -106,12 +101,7 @@ impl Messages {
         }
 
         // other cases
-        let (msg, prev) = (
-            self.container.msg_data(index)?,
-            self.container.msg_data(index - 1)?,
-        );
-
-        Some(!msg.same_flurry(&prev))
+        self.container.same_flurry(index, index - 1)
     }
 
     pub(crate) fn clear_conversation_history_(&mut self) -> bool {

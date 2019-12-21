@@ -5,11 +5,13 @@ use heraldcore::message::{
     Elider,
 };
 use im::vector::Vector;
+use message_cache as cache;
 use search::*;
 use std::collections::HashSet;
 use types::*;
 
-mod cache;
+const FLURRY_FUZZ: i64 = 5 * 60_000;
+
 pub mod handlers;
 pub use cache::{access, get, update};
 
@@ -389,5 +391,18 @@ impl Container {
         }
 
         Some(())
+    }
+
+    pub fn same_flurry(
+        &self,
+        a_ix: usize,
+        b_ix: usize,
+    ) -> Option<bool> {
+        let flurry_info = |data: &MsgData| (data.author, data.time.insertion);
+
+        let (a_author, a_ts) = self.access_by_index(a_ix, flurry_info)?;
+        let (b_author, b_ts) = self.access_by_index(b_ix, flurry_info)?;
+
+        ((a_author == b_author) && a_ts.within(FLURRY_FUZZ, b_ts)).into()
     }
 }
