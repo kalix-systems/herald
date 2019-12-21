@@ -37,6 +37,16 @@ ToolBar {
         ConfigHeader {}
     }
 
+    Component {
+        id: newContactHeader
+        NewContactHeader {}
+    }
+
+    Component {
+        id: newGroupHeader
+        NewGroupHeader {}
+    }
+
     states: [
         State {
             name: "home"
@@ -62,11 +72,17 @@ ToolBar {
         },
         State {
             name: "newGroup"
-            PropertyChanges {}
+            PropertyChanges {
+                target: rootLoader
+                sourceComponent: newGroupHeader
+            }
         },
         State {
             name: "newContact"
-            PropertyChanges {}
+            PropertyChanges {
+                target: rootLoader
+                sourceComponent: newContactHeader
+            }
         },
         State {
             name: "config"

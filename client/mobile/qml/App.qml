@@ -44,7 +44,7 @@ Page {
     Component {
         id: newContactViewMain
         NewContactView.NewContactViewMain {
-            readonly property string stateName: "newContacts"
+            readonly property string stateName: "newContact"
         }
     }
 

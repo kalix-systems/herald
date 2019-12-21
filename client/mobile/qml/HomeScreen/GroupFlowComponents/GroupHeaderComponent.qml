@@ -18,6 +18,7 @@ Column {
     property alias groupTitle: titleText.text
     spacing: CmnCfg.units.dp(12)
     topPadding: CmnCfg.units.dp(24)
+
     Rectangle {
         anchors.horizontalCenter: parent.horizontalCenter
         id: cameraSection
