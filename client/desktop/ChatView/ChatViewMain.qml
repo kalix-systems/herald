@@ -50,7 +50,7 @@ Page {
 
         Component.onCompleted: forceActiveFocus()
         Keys.onPressed: KeyNav.convWindowKeyHandler(event, chatScrollBar,
-                                                    chatListView,
+                                                    convWindow,
                                                     ScrollBar.AlwaysOn,
                                                     ScrollBar.AsNeeded)
 
