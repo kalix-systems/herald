@@ -38,7 +38,6 @@ ListView {
     onFlickStarted: focus = true
 
     highlightFollowsCurrentItem: false
-    cacheBuffer: chatListView.height * 5
 
     ScrollBar.vertical: ScrollBar {
         id: chatScrollBarInner
@@ -65,6 +64,7 @@ ListView {
         // however 1.0 does not seem to be the actual bottom of the page.
         // ain't that Qt.
         chatScrollBarInner.setPosition(3.0)
+        cacheBuffer = chatListView.height * 5
     }
 
     FileDialog {
