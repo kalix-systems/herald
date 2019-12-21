@@ -76,6 +76,7 @@ ListView {
         selectExisting: false
     }
 
+    // TODO delegate should be ChatBubble
     delegate: Row {
         id: chatRow
 

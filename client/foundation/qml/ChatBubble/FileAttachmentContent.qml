@@ -1,9 +1,11 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
-import LibHerald 1.0
 import QtGraphicalEffects 1.12
+import LibHerald 1.0
 
+// wrapper component for the file list component.
+// TODO: move into the DocFileItem, this wrapping is inane
 Column {
     id: wrapperCol
 

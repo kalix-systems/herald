@@ -45,6 +45,7 @@ Rectangle {
         leftPadding: CmnCfg.smallMargin
 
         Item {
+            //TODO: rename this, beware of dyn depending on this name.
             id: replyWrapperCol
             height: 64
             width: bubbleRoot.maxWidth - imageClip.width - CmnCfg.smallMargin * 3
