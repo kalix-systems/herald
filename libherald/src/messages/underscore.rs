@@ -84,7 +84,9 @@ impl Messages {
         }
 
         // other cases
-        self.container.same_flurry(index, index + 1)
+        self.container
+            .same_flurry(index, index + 1)
+            .map(std::ops::Not::not)
     }
 
     pub(crate) fn is_head_(
@@ -101,7 +103,9 @@ impl Messages {
         }
 
         // other cases
-        self.container.same_flurry(index, index - 1)
+        self.container
+            .same_flurry(index, index - 1)
+            .map(std::ops::Not::not)
     }
 
     pub(crate) fn clear_conversation_history_(&mut self) -> bool {
