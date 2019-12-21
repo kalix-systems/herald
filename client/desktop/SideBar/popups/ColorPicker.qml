@@ -4,6 +4,8 @@ import LibHerald 1.0
 import QtQuick.Layouts 1.12
 import QtQuick.Window 2.13
 
+//TODO: Make Color Settings Exist
+// UNREACHABLE !
 Window {
     id: colorWindow
     width: CmnCfg.popupWidth

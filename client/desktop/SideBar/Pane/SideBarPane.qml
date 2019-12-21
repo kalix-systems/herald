@@ -25,12 +25,14 @@ Flickable {
     Column {
         id: wrapperCol
         width: parent.width
+
         Text {
             text: qsTr("Conversations")
             anchors.left: parent.left
             anchors.leftMargin: CmnCfg.smallMargin
             topPadding: CmnCfg.smallMargin
             font.bold: true
+            font.family: CmnCfg.chatFont.name
             color: CmnCfg.palette.lightGrey
             visible: sideBarState.state === "globalSearch"
         }
@@ -52,6 +54,7 @@ Flickable {
             anchors.leftMargin: CmnCfg.smallMargin
             topPadding: CmnCfg.smallMargin
             font.bold: true
+            font.family: CmnCfg.chatFont.name
             color: CmnCfg.palette.lightGrey
             visible: sideBarState.state === "globalSearch"
         }

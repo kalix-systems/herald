@@ -30,9 +30,9 @@ Page {
         color: CmnCfg.palette.offBlack
     }
 
-    ///--- SearchBar for contacts, add contact button
     header: Loader {
         id: headerLoader
+
         property string searchPlaceholder: ""
         property bool contactsSearch: false
         property string headerText: ""
@@ -46,15 +46,15 @@ Page {
             color: CmnCfg.palette.lightGrey
             width: parent.width + 1
         }
-    }
 
-    //component loaded into header depending on sidebar state
-    Header.HeaderComponent {
-        id: headerBarComponent
-    }
+        //component loaded into header depending on sidebar state
+        Header.HeaderComponent {
+            id: headerBarComponent
+        }
 
-    Header.SearchComponent {
-        id: searchBarComponent
+        Header.SearchComponent {
+            id: searchBarComponent
+        }
     }
 
     GroupFlow.NewGroupComponent {

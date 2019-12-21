@@ -14,7 +14,6 @@ import QtGraphicalEffects 1.0
 ListView {
     id: chatListView
     property alias chatScrollBar: chatScrollBarInner
-    property alias chatListView: chatListView
 
     //this should be in here and not in the bubble because conversation window
     //needs access to it, add a separate animation to mobile
@@ -33,10 +32,6 @@ ListView {
     keyNavigationEnabled: false
     keyNavigationWraps: false
 
-    // TODO this only clips because of highlight rectangles, figure out a way to
-    // not use clip
-    clip: true
-
     maximumFlickVelocity: 1500
     flickDeceleration: chatListView.height * 10
 
@@ -44,8 +39,6 @@ ListView {
 
     highlightFollowsCurrentItem: false
     cacheBuffer: chatListView.height * 5
-
-    Layout.maximumWidth: parent.width
 
     ScrollBar.vertical: ScrollBar {
         id: chatScrollBarInner
@@ -60,7 +53,7 @@ ListView {
 
     boundsBehavior: ListView.StopAtBounds
     boundsMovement: Flickable.StopAtBounds
-    model: chatPane.ownedConversation
+    model: chatPage.ownedConversation
 
     Component.onCompleted: {
         model.setElisionLineCount(38)
@@ -68,8 +61,10 @@ ListView {
         model.setElisionCharsPerLine(40)
         positionViewAtEnd()
 
-        // heuristic overshoot
-        chatScrollBarInner.setPosition(2)
+        // made with the understanding that position goes from 0.0-1.0
+        // however 1.0 does not seem to be the actual bottom of the page.
+        // ain't that Qt.
+        chatScrollBarInner.setPosition(3.0)
     }
 
     FileDialog {
@@ -85,31 +80,32 @@ ListView {
         id: chatRow
 
         ListView.onAdd: {
-            chatScrollBarInner.setPosition(3)
+
+            // made with the understanding that position goes from 0.0-1.0
+            // however 1.0 does not seem to be the actual bottom of the page.
+            // ain't that Qt.
+            chatScrollBarInner.setPosition(3.0)
         }
-        readonly property string proxyBody: body
+
+        // path to image file
         property string proxyReceiptImage: Utils.receiptCodeSwitch(
                                                receiptStatus)
 
         readonly property bool outbound: author === Herald.config.configId
 
         property alias highlight: bubbleActual.highlightItem
+
         property bool elided: body.length !== fullBody.length
 
         property var messageModelData: model
 
-        //        onPositioningComplete: {
-        //            if (index === count - 1)
-        //                chatScrollBarInner.setPosition(1)
-        //        }
         anchors {
             left: parent.left
             right: parent.right
         }
 
-        //  layoutDirection: outbound ? Qt.RightToLeft : Qt.LeftToRight
-        bottomPadding: 0 //CmnCfg.smallMargin / 2
-        topPadding: 0 //CmnCfg.smallMargin / 2
+        bottomPadding: 0
+        topPadding: 0
 
         CB.ChatBubble {
             id: bubbleActual

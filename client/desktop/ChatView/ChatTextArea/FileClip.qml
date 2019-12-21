@@ -6,6 +6,7 @@ import "qrc:/imports/js/utils.mjs" as Utils
 
 Row {
     id: fileClip
+    // set in ReplyComponent.loadDocs()
     property alias nameMetrics: nameMetrics.text
     property alias fileSize: fileSize.text
     property real constraint: 0
@@ -31,6 +32,7 @@ Row {
             color: CmnCfg.palette.black
             text: nameMetrics.text
             font.family: CmnCfg.chatFont.name
+            // TODO: nix magic number
             font.pixelSize: 13
             font.weight: Font.Medium
             maximumLineCount: 1

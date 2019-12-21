@@ -113,12 +113,6 @@ Rectangle {
             id: textCol
             width: parent.width - imageClipLoader.width - CmnCfg.smallMargin * 2
             spacing: CmnCfg.smallMargin
-            TextMetrics {
-                id: opTextMetrics
-                text: ownedConversation.builder.opBody
-                elideWidth: (wrapper.width - CmnCfg.smallMargin) * 2
-                elide: Text.ElideRight
-            }
 
             Loader {
                 id: fileClipLoader
@@ -131,6 +125,14 @@ Rectangle {
             }
 
             TextEdit {
+
+                TextMetrics {
+                    id: opTextMetrics
+                    text: ownedConversation.builder.opBody
+                    elideWidth: (wrapper.width - CmnCfg.smallMargin) * 2
+                    elide: Text.ElideRight
+                }
+
                 text: opTextMetrics.elidedText
                 Layout.rightMargin: CmnCfg.smallMargin
                 Layout.alignment: Qt.AlignLeft

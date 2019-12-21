@@ -36,6 +36,7 @@ Window {
             color: CmnCfg.palette.offBlack
             height: CmnCfg.toolbarHeight
 
+            //TODO: excise this row
             Row {
                 leftPadding: CmnCfg.margin
                 anchors.fill: parent

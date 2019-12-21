@@ -14,9 +14,10 @@ ListView {
     id: messageSearchList
 
     signal messageClicked(var searchConversationId, var searchMsgId)
-    clip: true
     currentIndex: -1
     height: contentHeight
+    // conversations and messages are in a single column,
+    // this needs to be uninteractive so that they scroll together
     interactive: false
 
     delegate: Item {
@@ -40,10 +41,8 @@ ListView {
                 hoverEnabled: true
                 z: CmnCfg.overlayZ
                 anchors.fill: parent
-                onClicked: {
-                    messageSearchList.messageClicked(messageData.conversation,
-                                                     messageData.msgId)
-                }
+                onClicked: messageSearchList.messageClicked(
+                               messageData.conversation, messageData.msgId)
             }
 
             labelComponent: GridLayout {
@@ -56,7 +55,7 @@ ListView {
                     font {
                         bold: true
                         family: CmnCfg.chatFont.name
-                        pixelSize: 13
+                        pixelSize: CmnCfg.labelSize
                     }
                     Layout.topMargin: labelGrid.rows > 2 ? -CmnCfg.smallMargin : 0
                     Layout.alignment: Qt.AlignLeft | Qt.AlignTop
@@ -72,6 +71,7 @@ ListView {
                     id: ts
                     font {
                         family: CmnCfg.chatFont.name
+                        //TODO: Magic number erasure, we need a secondary small label size
                         pixelSize: 11
                     }
                     text: Utils.friendlyTimestamp(messageData.time)
@@ -92,6 +92,7 @@ ListView {
                     id: bodyText
                     font {
                         family: CmnCfg.chatFont.name
+                        //TODO: Magic number erasure
                         pixelSize: 13
                     }
                     Layout.topMargin: labelGrid.rows > 2 ? -CmnCfg.smallMargin : 0
