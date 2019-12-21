@@ -85,6 +85,7 @@ ListView {
         id: chatRow
 
         ListView.onAdd: {
+
             chatScrollBarInner.setPosition(3)
         }
         readonly property string proxyBody: body

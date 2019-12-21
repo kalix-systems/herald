@@ -91,11 +91,20 @@ ColumnLayout {
         nameFilters: ["(*.jpg *.png *.jpeg)"]
         onSelectionAccepted: {
             var parsed = JSON.parse(Herald.utils.imageDimensions(fileUrl))
-            imageCrop.imageWidth = parsed.width
-            imageCrop.imageHeight = parsed.height
-            imageCrop.imageSource = fileUrl
-            imageCrop.show()
-            Herald.config.profilePicture = fileUrl
+
+            const picture = {
+                "width": Math.round(parsed.width),
+                "height": Math.round(parsed.height),
+                "x": 0,
+                "y": 0,
+                "path": fileUrl
+            }
+
+            Herald.config.setProfilePicture(JSON.stringify(picture))
+            //            imageCrop.imageWidth = parsed.width
+            //            imageCrop.imageHeight = parsed.height
+            //            imageCrop.imageSource = fileUrl
+            //            imageCrop.show()
         }
     }
 
