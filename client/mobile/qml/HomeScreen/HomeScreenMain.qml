@@ -10,11 +10,6 @@ import QtGraphicalEffects 1.0
 Page {
     id: cvMainView
 
-    header: Loader {
-        id: headerLoader
-        sourceComponent: HomeHeader {}
-    }
-
     background: Rectangle {
         color: CmnCfg.palette.white
     }

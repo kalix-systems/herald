@@ -1,11 +1,22 @@
 import QtQuick 2.14
 import QtQuick.Controls 2.14
 
-Rectangle {
+ToolBar {
     id: headerRoot
+    height: CmnCfg.toolbarHeight
+    background: Rectangle {
+        color: CmnCfg.palette.offBlack
+    }
+
+    LoginHeader {
+        id: loginHeader
+    }
+
     // header is initially empty, flat and colorless
     Loader {
         id: rootLoader
+        anchors.fill: parent
+        sourceComponent: loginHeader
     }
 
     states: [
@@ -33,4 +44,10 @@ Rectangle {
             PropertyChanges {}
         }
     ]
+
+    Transitions {
+        id: trs
+    }
+
+    transitions: trs.transitionsArray
 }
