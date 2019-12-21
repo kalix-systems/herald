@@ -3,6 +3,8 @@ import Qt.labs.platform 1.1
 import QtQuick 2.13
 import LibHerald 1.0
 
+// TODO: Make this a menu, perhaps.
+// TODO: take a listModel, dumbo.
 Rectangle {
     id: self
     property var model: ["no", "model", "defined"]
@@ -16,6 +18,7 @@ Rectangle {
         id: nativeMenu
     }
 
+    // TODO: use instantiator
     Repeater {
         model: self.model
         Item {
@@ -48,6 +51,7 @@ Rectangle {
             font.pixelSize: CmnCfg.headerSize
         }
 
+        //TODO: use an SVG image here
         Canvas {
             id: canvas
             anchors.verticalCenter: parent.verticalCenter

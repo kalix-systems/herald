@@ -10,15 +10,20 @@ import ".././js/ContactView.mjs" as JS
 import "../popups" as Popups
 
 /// --- displays a list of conversations
+/// TODO: fix bounds bounds behavior
 ListView {
     id: conversationList
     clip: true
     currentIndex: -1
+
+    // conversations and messages are in a single column,
+    // this needs to be uninteractive so that they scroll together
     interactive: false
     height: contentHeight
 
     signal messagePositionRequested(var requestedMsgId)
 
+    // Jump to message on message searched.
     Connections {
         target: sideBarPaneRoot.messageSearchLoader.item
 
@@ -49,7 +54,7 @@ ListView {
             conversationId: conversationIdProxy
         }
 
-        property var childChatView: Component {
+        property Component childChatView: Component {
             CV.ChatViewMain {
                 id: cvMain
                 conversationItem: conversationData
@@ -57,7 +62,7 @@ ListView {
             }
         }
 
-        visible: matched
+        visible: conversationData.matched
         height: visible ? CmnCfg.convoHeight : 0
         width: parent.width
 
@@ -93,5 +98,4 @@ ListView {
             }
         }
     }
-
 }

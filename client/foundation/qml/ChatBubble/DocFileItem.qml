@@ -1,13 +1,12 @@
-import QtQuick 2.4
-import QtQuick.Controls 2.4
-//import QtQuick.Layouts 1.12
-import LibHerald 1.0
-import QtGraphicalEffects 1.12
-import "./../"
+import QtQuick 2.14
+import QtQuick.Controls 2.14
 import Qt.labs.platform 1.1
-import QtQuick.Dialogs 1.3
+import QtGraphicalEffects 1.12
+import LibHerald 1.0
+import "./../"
 import "../js/utils.mjs" as Utils
 
+// A visual list of documents
 ListView {
     id: fileList
 
@@ -43,9 +42,6 @@ ListView {
             font.family: CmnCfg.chatFont.name
             font.pixelSize: 13
             font.weight: Font.Medium
-            // Constrain the maximum width of fileName to force elision when necessary
-            readonly property real _constraint: fileSize.width + downloadIcon.width
-                                                + CmnCfg.smallMargin * 2
 
             TextMetrics {
                 id: fileNameMetrics

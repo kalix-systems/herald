@@ -30,8 +30,6 @@ int main(int argc, char* argv[])
         return state;
       });
 
-
-
   qmlRegisterAnonymousType<Users>("LibHerald", 1);
   qmlRegisterAnonymousType<Config>("LibHerald", 1);
   qmlRegisterAnonymousType<Utils>("LibHerald", 1);

@@ -9,6 +9,7 @@ ColumnLayout {
     property real maxWidth: Math.min(contentRoot.maxWidth, 600)
     property var mediaParsed
     // callback triggered whenever an image is tapped
+    // TODO: Rename this it is nonsense
     property var imageTappedCallBack: function (source) {
         let currentIndex = mediaParsed.findIndex(function (object) {
             if (object === undefined || object === null) {
@@ -21,11 +22,6 @@ ColumnLayout {
         galleryLoader.currentIndex = currentIndex
         galleryLoader.active = true
         galleryLoader.item.open()
-        // imageViewerPopup.sourceAtc = mediaParsed
-        // imageViewerPopup.index = currentIndex
-        // imageViewerPopup.reset()
-        // imageViewerPopup.show()
-        // imageViewerPopup.raise()
     }
 
     spacing: 0

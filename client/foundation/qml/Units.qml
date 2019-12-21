@@ -85,11 +85,10 @@ QtObject {
      * The devicePixelRatio follows the definition of "device independent pixel" by Microsoft.
      */
     readonly property real devicePixelRatio: Screen.devicePixelRatio
-    readonly property real deviceDotsPerInch: Screen.pixelDensity * 25.4
+    readonly property real deviceDotsPerInch: (Screen.pixelDensity * 25.4) / 160
 
     function dp(dips) {
-        var ref_dpi = deviceDotsPerInch
-        return dips
+        return dips * deviceDotsPerInch
     }
 
 

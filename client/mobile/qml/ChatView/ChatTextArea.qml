@@ -20,16 +20,16 @@ RowLayout {
         wrapMode: "WrapAtWordBoundaryOrAnywhere"
         color: CmnCfg.palette.black
         selectionColor: CmnCfg.palette.highlightColor
-
         font {
-            pointSize: CmnCfg.chatPreviewSize
+            pixelSize: CmnCfg.chatTextSize
             family: CmnCfg.chatFont.name
         }
     }
 
     Grid {
         // TODO: Collapse options into plus when typing
-        columns: 2 //cta.lineCount > 1 ? 1 : 2
+        // TODO: this is a binding loop use TextMetrics
+        columns: cta.lineCount > 1 ? 1 : 2
         Layout.alignment: Qt.AlignRight | Qt.AlignBottom
         Layout.margins: CmnCfg.units.dp(12)
         Layout.bottomMargin: CmnCfg.units.dp(6)

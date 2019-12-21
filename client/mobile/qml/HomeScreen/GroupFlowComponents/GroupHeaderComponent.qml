@@ -8,6 +8,8 @@ import "../../Common"
 import QtGraphicalEffects 1.0
 import Qt.labs.platform 1.0
 
+// TODO: Factor this out into foundation.
+// ^^^^ FOR ALL FILES IN THIS DIRECTORY
 Column {
     id: topRect
     anchors.top: parent.top
@@ -25,6 +27,7 @@ Column {
         Loader {
             id: groupImageLoader
             active: false
+            //TODO: this is a rage manuever, please ammend
             z: 100
             property string imageSource
             anchors.fill: parent

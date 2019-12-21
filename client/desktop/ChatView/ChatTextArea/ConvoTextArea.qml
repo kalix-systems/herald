@@ -114,6 +114,7 @@ Rectangle {
                 background: Rectangle {
                     color: CmnCfg.palette.white
                 }
+                //TODO: use system palette.
                 bottomPadding: CmnCfg.smallMargin * 0.5
                 selectionColor: CmnCfg.palette.highlightColor
                 color: CmnCfg.palette.black

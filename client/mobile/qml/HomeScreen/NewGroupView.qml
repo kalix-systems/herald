@@ -43,7 +43,7 @@ Page {
                     id: stateLabel
                     text: qsTr("New group")
                     font {
-                        pointSize: CmnCfg.chatPreviewSize
+                        pixelSize: CmnCfg.chatPreviewSize
                         family: CmnCfg.labelFont.name
                     }
                     anchors.verticalCenter: parent.verticalCenter

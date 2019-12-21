@@ -7,6 +7,8 @@ import "./Controls"
 import "../Common" as Common
 import QtGraphicalEffects 1.0
 
+// The home page of the entire application
+// contains a list of conversations by default
 Page {
     id: cvMainView
 
@@ -19,13 +21,9 @@ Page {
         color: CmnCfg.palette.white
     }
 
-    Common.Drawer {
-        id: contextDrawer
-        DrawerContents {}
-    }
-
     // the body of this entire element
     // displays conversations
+    // TODO: figure out why this is in a loader.
     Loader {
         id: listViewLoader
         anchors.fill: parent
@@ -35,6 +33,7 @@ Page {
             boundsBehavior: ListView.StopAtBounds
             anchors.fill: parent
             model: Herald.conversations
+            // TODO: give delegate a reference to the model to avoid "proxy" everywhere
             delegate: ConversationItem {
                 readonly property var conversationIdProxy: conversationId
                 readonly property int colorProxy: model.color
@@ -48,6 +47,7 @@ Page {
         }
     }
 
+    // TODO: maybe make this a popup?
     ColorOverlay {
         id: disabledOverlay
         visible: false
@@ -57,9 +57,7 @@ Page {
 
         TapHandler {
             //grabPermissions: PointerHandler.TakeOverForbidden
-            onTapped: {
-                cvMainView.state = "default"
-            }
+            onTapped: cvMainView.state = "default"
         }
     }
 

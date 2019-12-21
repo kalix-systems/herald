@@ -22,7 +22,7 @@ Item {
     property string lastAuthor
     property color labelColor
     property color secondaryLabelColor: CmnCfg.palette.offBlack
-    property int labelSize
+    property real labelSize
 
     // labeling constants
     GridLayout {
@@ -50,7 +50,7 @@ Item {
             id: ts
             font {
                 family: CmnCfg.chatFont.name
-                pixelSize: 11
+                pixelSize: labelSize
             }
             text: lastTimestamp
             Layout.preferredHeight: labelGrid.height * 0.25

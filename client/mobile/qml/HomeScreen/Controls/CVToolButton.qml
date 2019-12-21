@@ -3,8 +3,9 @@ import QtQuick 2.12
 import QtQuick.Layouts 1.12
 import LibHerald 1.0
 
+// TODO move this into common & rename, it's an abstract animated icon button thing
 ToolButton {
-    property var tapCallback: function anon() {
+    property var tapCallback: function () {
         throw "undefined callback"
     }
     property string imageSource: ""

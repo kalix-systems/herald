@@ -6,27 +6,9 @@ import "../SideBar/Header" as Header
 import "../SideBar/Pane" as Pane
 import "../SideBar/Pane/GroupFlowComponents" as GroupFlow
 
-Page {
-    id: sideBarStateLoader
-    padding: 0
+Item {
 
-    background: Rectangle {
-        color: CmnCfg.palette.offBlack
-    }
-
-    Component {
-        id: contactslvComponent
-        Pane.ContactView {
-            id: contactsListView
-            anchors.fill: parent
-            model: Herald.users
-        }
-    }
-
-    Pane.SideBarPane {
-        id: sideBarPane
-    }
-
+    // TODO PAUL: add transitions
     states: [
         State {
             name: "newContactState"

@@ -3,6 +3,7 @@ import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
 import LibHerald 1.0
 
+// TODO: All these image layouts should be in an image layout subdirectory
 Row {
     height: 150
     spacing: CmnCfg.smallMargin

@@ -1,7 +1,7 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
-import LibHerald 1.0
 import QtQuick.Layouts 1.12
+import LibHerald 1.0
 
 Row {
     spacing: CmnCfg.smallMargin / 2
@@ -12,8 +12,8 @@ Row {
 
         font.family: CmnCfg.chatFont.name
         padding: 0
-        font.pixelSize: 13
         font.weight: Font.Bold
+        font.pixelSize: 13
         color: authorColor
         TextMetrics {
             id: authorNameTM

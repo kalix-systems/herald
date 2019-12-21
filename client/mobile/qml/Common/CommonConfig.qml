@@ -17,7 +17,7 @@ Item {
     /// standard margin size used to interior objects
     readonly property real margin: units.largeSpacing
     /// standard half margin
-    readonly property real smallMargin: 8
+    readonly property real smallMargin: units.dp(8)
     /// standard half padding unit
     readonly property real smallPadding: units.smallSpacing
     /// standard padding unit
@@ -29,15 +29,16 @@ Item {
     /// gap used for larger spacings in tool bars.
     readonly property real largeSpacer: units.dp(12)
 
-    /// Font sizes, IMPORTANT: these are in PT, not pixels
+    /// size of labels a
+    property real labelSize: units.dp(20)
     /// standard chat text size
-    property int chatTextSize: 14
+    property real chatTextSize: units.dp(18)
     /// Chat preview size
-    property int chatPreviewSize: 15
+    property real chatPreviewSize: units.dp(18)
     /// standard header size
-    property int headerTextSize: 20
+    property real headerTextSize: units.dp(18)
     /// standard button text size
-    property int buttonTextSize: 17
+    property real buttonTextSize: units.dp(17)
 
     /// standard z values
     property int overlayZ: 10
@@ -46,7 +47,7 @@ Item {
     property int bottomZ: 1
     property int underlayZ: -1
     /// standard avatar size
-    property int avatarSize: units.dp(48)
+    property int avatarSize: units.dp(56)
     /// user settable cfg
     property int theme: 0
 

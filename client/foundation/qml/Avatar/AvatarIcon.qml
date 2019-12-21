@@ -29,7 +29,8 @@ Item {
             Text {
                 text: initials
                 font.bold: true
-                font.pixelSize: 0.67 * parent.width / initials.length
+                font.pixelSize: ((initials.length > 1 ? 1.0 : 0.67)
+                                 * parent.width) / initials.length
                 anchors.centerIn: parent
                 color: textColor
             }

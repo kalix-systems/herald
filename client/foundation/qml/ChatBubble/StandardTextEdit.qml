@@ -22,6 +22,7 @@ GridLayout {
         selectByKeyboard: true
         readOnly: true
         font.family: CmnCfg.chatFont.name
+        font.pixelSize: CmnCfg.chatTextSize
         color: CmnCfg.palette.black
         textFormat: TextEdit.AutoText
         selectionColor: CmnCfg.palette.highlightColor

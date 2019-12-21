@@ -8,6 +8,8 @@ import "./LoginPage" as LoginPage
 ApplicationWindow {
     id: root
     visible: true
+    // for desktop prototyping
+    // removed on desktop
     width: 300
     height: 500
 
@@ -27,17 +29,16 @@ ApplicationWindow {
         }
     }
 
-    Loader {
-        id: capitan
-        active: false
-        sourceComponent: Item {}
+    MobileHelper {
+        id: mobHelper
+        Component.onCompleted: set_status_bar_color(CmnCfg.palette.offBlack)
     }
 
     Loader {
         id: loginPageLoader
         active: !Herald.configInit
         anchors.fill: parent
-        // windows cannot be filled, unless reffered to as parent
+        // windows cannot be filled, unless referred to as parent
         sourceComponent: LoginPage.LoginLandingPage {
             id: lpMain
             anchors.fill: parent

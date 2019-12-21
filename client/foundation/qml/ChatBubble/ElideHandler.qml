@@ -2,6 +2,7 @@ import QtQuick 2.13
 import QtQuick.Layouts 1.12
 import LibHerald 1.0
 
+// Collapse and expands message text if it is too long.
 TextEdit {
     visible: elided
     text: !bubbleRoot.expanded ? qsTr("Read more") : qsTr("Collapse")

@@ -10,6 +10,7 @@ import "./js/utils.js" as JS
 // Components that depend on dynamic scope
 import "dyn"
 
+// TODO: describe each of these components with a comment above the first line
 Rectangle {
     id: replyWrapper
 

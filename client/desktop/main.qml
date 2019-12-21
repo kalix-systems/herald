@@ -1,6 +1,6 @@
-import QtQuick 2.13
-import QtQuick.Window 2.13
-import QtQuick.Controls 2.13
+import QtQuick 2.14
+import QtQuick.Window 2.14
+import QtQuick.Controls 2.14
 import LibHerald 1.0
 import "qrc:/imports/errors"
 import "ChatView/Popups" as CvPopups
@@ -16,7 +16,6 @@ ApplicationWindow {
 
     ErrorDialog {
         id: errPopup
-
         Connections {
             target: Herald.errors
             onTryPollChanged: {
@@ -30,9 +29,6 @@ ApplicationWindow {
         }
     }
 
-    //    CvPopups.ImageViewerPopup {
-    //        id: imageViewerPopup
-    //    }
     Loader {
         id: galleryLoader
         anchors.fill: active ? parent : undefined
@@ -43,6 +39,7 @@ ApplicationWindow {
             id: galleryView
         }
     }
+
     Loader {
         id: appLoader
         active: Herald.configInit
@@ -51,8 +48,8 @@ ApplicationWindow {
     }
 
     Loader {
-        anchors.fill: parent
         id: registrationLoader
+        anchors.fill: parent
         active: !Herald.configInit
         sourceComponent: RegistrationPage {}
     }
