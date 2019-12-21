@@ -996,6 +996,7 @@ version = "0.1.0"
 dependencies = [
  "hex 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "image 0.22.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "json 0.12.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "kcl 0.1.0",
  "platform_dirs 0.1.0",
 ]

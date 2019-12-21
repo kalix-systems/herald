@@ -92,11 +92,8 @@ Rectangle {
             from: 0.2
             to: 0
         }
-        onRunningChanged: {
-            if (!!!running) {
-                mainView.push(ownedChatView)
-            }
-        }
+        onRunningChanged: if (!running)
+                              mainView.push(ownedChatView)
     }
 
     Component {

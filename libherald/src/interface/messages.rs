@@ -365,6 +365,21 @@ pub trait MessagesTrait {
         index: usize,
     ) -> Option<String>;
 
+    fn author_color(
+        &self,
+        index: usize,
+    ) -> Option<u32>;
+
+    fn author_name(
+        &self,
+        index: usize,
+    ) -> Option<String>;
+
+    fn author_profile_picture(
+        &self,
+        index: usize,
+    ) -> String;
+
     fn body(
         &self,
         index: usize,
@@ -425,6 +440,11 @@ pub trait MessagesTrait {
         index: usize,
     ) -> Option<String>;
 
+    fn op_color(
+        &self,
+        index: usize,
+    ) -> Option<u32>;
+
     fn op_doc_attachments(
         &self,
         index: usize,
@@ -449,6 +469,11 @@ pub trait MessagesTrait {
         &self,
         index: usize,
     ) -> Option<Vec<u8>>;
+
+    fn op_name(
+        &self,
+        index: usize,
+    ) -> Option<String>;
 
     fn receipt_status(
         &self,
@@ -944,6 +969,43 @@ pub unsafe extern "C" fn messages_data_author(
 }
 
 #[no_mangle]
+pub unsafe extern "C" fn messages_data_author_color(
+    ptr: *const Messages,
+    row: c_int,
+) -> COption<u32> {
+    let obj = &*ptr;
+    obj.author_color(to_usize(row).unwrap_or(0)).into()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn messages_data_author_name(
+    ptr: *const Messages,
+    row: c_int,
+    d: *mut QString,
+    set: fn(*mut QString, *const c_char, len: c_int),
+) {
+    let obj = &*ptr;
+    let data = obj.author_name(to_usize(row).unwrap_or(0));
+    if let Some(data) = data {
+        let str_: *const c_char = data.as_ptr() as (*const c_char);
+        set(d, str_, to_c_int(data.len()));
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn messages_data_author_profile_picture(
+    ptr: *const Messages,
+    row: c_int,
+    d: *mut QString,
+    set: fn(*mut QString, *const c_char, len: c_int),
+) {
+    let obj = &*ptr;
+    let data = obj.author_profile_picture(to_usize(row).unwrap_or(0));
+    let str_: *const c_char = data.as_ptr() as *const c_char;
+    set(d, str_, to_c_int(data.len()));
+}
+
+#[no_mangle]
 pub unsafe extern "C" fn messages_data_body(
     ptr: *const Messages,
     row: c_int,
@@ -1090,6 +1152,15 @@ pub unsafe extern "C" fn messages_data_op_body(
 }
 
 #[no_mangle]
+pub unsafe extern "C" fn messages_data_op_color(
+    ptr: *const Messages,
+    row: c_int,
+) -> COption<u32> {
+    let obj = &*ptr;
+    obj.op_color(to_usize(row).unwrap_or(0)).into()
+}
+
+#[no_mangle]
 pub unsafe extern "C" fn messages_data_op_doc_attachments(
     ptr: *const Messages,
     row: c_int,
@@ -1142,6 +1213,21 @@ pub unsafe extern "C" fn messages_data_op_msg_id(
 ) {
     let obj = &*ptr;
     let data = obj.op_msg_id(to_usize(row).unwrap_or(0));
+    if let Some(data) = data {
+        let str_: *const c_char = data.as_ptr() as (*const c_char);
+        set(d, str_, to_c_int(data.len()));
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn messages_data_op_name(
+    ptr: *const Messages,
+    row: c_int,
+    d: *mut QString,
+    set: fn(*mut QString, *const c_char, len: c_int),
+) {
+    let obj = &*ptr;
+    let data = obj.op_name(to_usize(row).unwrap_or(0));
     if let Some(data) = data {
         let str_: *const c_char = data.as_ptr() as (*const c_char);
         set(d, str_, to_c_int(data.len()));

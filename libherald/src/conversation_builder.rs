@@ -140,14 +140,21 @@ impl ConversationBuilderTrait for ConversationBuilder {
     }
 
     fn picture(&self) -> Option<&str> {
-        Some(self.inner.picture.as_ref()?.as_str())
+        Some(self.inner.picture.as_ref()?.path.as_str())
     }
 
-    fn set_picture(
+    fn set_profile_picture(
         &mut self,
-        picture: Option<String>,
+        picture_json: String,
     ) {
-        self.inner.picture = picture.and_then(crate::utils::strip_qrc);
+        self.inner.picture = heraldcore::image_utils::ProfilePicture::from_json_string(
+            picture_json,
+        )
+        .and_then(|mut p| {
+            let stripped = crate::utils::strip_qrc(std::mem::take(&mut p.path))?;
+            p.path = stripped;
+            Some(p)
+        });
         self.emit.picture_changed();
     }
 
@@ -160,6 +167,39 @@ impl ConversationBuilderTrait for ConversationBuilder {
         index: usize,
     ) -> ffi::UserIdRef {
         none!(self.inner.members().get(index), "").as_str()
+    }
+
+    fn member_color(
+        &self,
+        index: usize,
+    ) -> u32 {
+        self.inner
+            .members()
+            .get(index)
+            .and_then(crate::users::shared::color)
+            .unwrap_or(0)
+    }
+
+    fn member_name(
+        &self,
+        index: usize,
+    ) -> String {
+        self.inner
+            .members()
+            .get(index)
+            .and_then(crate::users::shared::name)
+            .unwrap_or_default()
+    }
+
+    fn member_profile_picture(
+        &self,
+        index: usize,
+    ) -> String {
+        self.inner
+            .members()
+            .get(index)
+            .and_then(crate::users::shared::profile_picture)
+            .unwrap_or_default()
     }
 }
 

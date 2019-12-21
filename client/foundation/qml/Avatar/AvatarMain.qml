@@ -2,6 +2,8 @@ import QtQuick 2.12
 import QtQuick.Controls 2.12
 import LibHerald 1.0
 
+// TODO Avatar should not include any elements aside from the user or group's
+// profile image
 Item {
     // whether or not the AvatarIcon is square.
     property bool groupAvatar: false

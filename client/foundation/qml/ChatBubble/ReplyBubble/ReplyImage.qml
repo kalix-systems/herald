@@ -15,9 +15,8 @@ Rectangle {
 
     // TODO move this into CmnCfg
     readonly property real imageSize: 80
-    property color opColor: CmnCfg.avatarColors[Herald.users.colorById(
-                                                    messageModelData.opAuthor)]
     property string replyBody: messageModelData.opBody
+    property color opColor: CmnCfg.avatarColors[messageModelData.opColor]
 
     Component.onCompleted: JS.parseMedia(messageModelData, imageClip)
 
@@ -46,6 +45,7 @@ Rectangle {
         leftPadding: CmnCfg.smallMargin
 
         Item {
+            //TODO: rename this, beware of dyn depending on this name.
             id: replyWrapperCol
             height: 64
             width: bubbleRoot.maxWidth - imageClip.width - CmnCfg.smallMargin * 3

@@ -1,7 +1,7 @@
 import QtQuick 2.14
 import LibHerald 1.0
 
-//two rectangles to extend to both sides of pane
+// TODO: "TWO"
 Item {
     anchors.fill: parent
     z: -1

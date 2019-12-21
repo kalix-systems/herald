@@ -81,7 +81,16 @@ android {
      SOURCES +=  $$PWD/androidhelper.cpp
 
      ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android-sources
-     DISTFILES += $$PWD/android-sources/src/NotificationBuilder.java
+
+DISTFILES += \
+      $$PWD/android-sources/AndroidManifest.xml \
+      $$PWD/android-sources/build.gradle \
+      $$PWD/android-sources/gradle/wrapper/gradle-wrapper.jar \
+      $$PWD/android-sources/gradle/wrapper/gradle-wrapper.properties \
+      $$PWD/android-sources/gradlew \
+      $$PWD/android-sources/gradlew.bat \
+      $$PWD/android-sources/res/values/libs.xml \
+      $$PWD/android-sources/src/NotificationBuilder.java
 
 }
 

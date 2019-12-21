@@ -11,7 +11,6 @@ pub use members::*;
 pub use message_builder::*;
 pub use message_search::*;
 pub use messages::*;
-pub use reply_width_calc::*;
 use riqtshaw_types::*;
 pub use users::*;
 pub use users_search::*;
@@ -42,8 +41,6 @@ mod message_builder;
 mod message_search;
 
 mod messages;
-
-mod reply_width_calc;
 
 mod users;
 

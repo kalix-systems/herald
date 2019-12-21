@@ -152,7 +152,9 @@ pub fn set_name(name: String) -> Result<(), HErr> {
 }
 
 /// Updates user's profile picture
-pub fn set_profile_picture(profile_picture: Option<String>) -> Result<Option<String>, HErr> {
+pub fn set_profile_picture(
+    profile_picture: Option<image_utils::ProfilePicture>
+) -> Result<Option<String>, HErr> {
     let db = Database::get()?;
     db::set_profile_picture(&db, profile_picture)
 }

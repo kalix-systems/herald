@@ -4,8 +4,6 @@ Menu {
     id: convoMenu
     MenuItem {
         text: qsTr("New group conversation")
-        onTriggered: {
-            sideBar.sideBarState.state = "newGroupState"
-        }
+        onTriggered: sideBar.sideBarState.state = "newGroupState"
     }
 }

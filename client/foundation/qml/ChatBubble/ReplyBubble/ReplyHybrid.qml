@@ -10,11 +10,11 @@ import "./js/utils.js" as JS
 // Components that depend on dynamic scope
 import "dyn"
 
+// TODO: describe each of these components with a comment above the first line
 Rectangle {
     id: replyWrapper
 
-    property color opColor: CmnCfg.avatarColors[Herald.users.colorById(
-                                                    messageModelData.opAuthor)]
+    property color opColor: CmnCfg.avatarColors[messageModelData.opColor]
     property string replyBody: messageModelData.opBody
     property int fileCount
     readonly property real imageSize: 80

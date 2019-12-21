@@ -12,9 +12,8 @@ import "dyn"
 
 Page {
     id: replyWrapper
+    property color opColor: CmnCfg.avatarColors[messageModelData.opColor]
 
-    property color opColor: CmnCfg.avatarColors[Herald.users.colorById(
-                                                    messageModelData.opAuthor)]
     property string replyBody: messageModelData.opBody
     property int fileCount
 

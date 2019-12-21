@@ -11,9 +11,8 @@ import "dyn"
 
 Rectangle {
     id: replyWrapper
+    property color opColor: CmnCfg.avatarColors[messageModelData.opColor]
 
-    property color opColor: CmnCfg.avatarColors[Herald.users.colorById(
-                                                    messageModelData.opAuthor)]
     property string replyBody: messageModelData.opBody
     color: CmnCfg.palette.medGrey
     width: bubbleRoot.maxWidth
@@ -29,7 +28,6 @@ Rectangle {
         width: CmnCfg.smallMargin / 2
         color: opColor
         anchors.left: parent.left
-
     }
 
     Column {

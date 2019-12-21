@@ -22,7 +22,7 @@ Rectangle {
 
     readonly property string body: messageModelData.body
     readonly property string authorId: messageModelData.author
-    readonly property string authorName: Herald.users.nameById(authorId)
+    readonly property string authorName: messageModelData.authorName
 
     readonly property string medAttachments: messageModelData.mediaAttachments
     readonly property string documentAttachments: messageModelData.docAttachments
@@ -37,10 +37,9 @@ Rectangle {
                                            messageModelData.insertionTime)
     readonly property string receiptImage: Utils.receiptCodeSwitch(
                                                messageModelData.receiptStatus)
-    readonly property color authorColor: CmnCfg.avatarColors[Herald.users.colorById(
-                                                                 authorId)]
+    readonly property color authorColor: CmnCfg.avatarColors[messageModelData.authorColor]
 
-    readonly property string pfpUrl: Herald.users.profilePictureById(authorId)
+    readonly property string pfpUrl: messageModelData.authorProfilePicture
     property bool hoverHighlight: false
 
     Connections {

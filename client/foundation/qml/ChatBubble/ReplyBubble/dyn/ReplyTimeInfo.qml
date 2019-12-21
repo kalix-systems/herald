@@ -17,15 +17,13 @@ Row {
         id: replyTs
 
         font.pixelSize: 10
-        text: messageModelData.replyType === 2 ? Utils.friendlyTimestamp(
-                                                     messageModelData.opInsertionTime) : ""
+        text: Utils.friendlyTimestamp(messageModelData.opInsertionTime)
         color: CmnCfg.palette.darkGrey
     }
 
     Button {
         id: clock
-        icon.source: messageModelData.opExpirationTime
-                     !== undefined ? "qrc:/countdown-icon-temp.svg" : ""
+        icon.source: "qrc:/countdown-icon-temp.svg"
         icon.height: 16
         icon.width: 16
         icon.color: "grey"

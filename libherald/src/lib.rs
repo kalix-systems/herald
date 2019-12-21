@@ -36,8 +36,6 @@ pub mod members;
 pub mod message_search;
 /// Messages object
 pub mod messages;
-/// Reply width calculation helper object
-pub mod reply_width;
 /// Desktop push notifications
 pub mod toasts;
 /// Users object

@@ -83,7 +83,20 @@ Component {
                 }
 
                 if (topRect.profPic !== "") {
-                    Herald.conversationBuilder.picture = topRect.profPic
+
+                    var parsed = JSON.parse(Herald.utils.imageDimensions(
+                                                topRect.profPic))
+
+                    const picture = {
+                        "width": Math.round(parsed.width),
+                        "height": Math.round(parsed.height),
+                        "x": 0,
+                        "y": 0,
+                        "path": topRect.profPic
+                    }
+
+                    Herald.conversationBuilder.setProfilePicture(
+                                JSON.stringify(picture))
                 }
 
                 Herald.conversationBuilder.finalize()

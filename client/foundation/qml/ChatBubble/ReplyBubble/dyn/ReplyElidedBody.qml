@@ -20,12 +20,12 @@ GridLayout {
         font.family: CmnCfg.chatFont.name
         color: CmnCfg.palette.black
         textFormat: TextEdit.AutoText
-    }
 
-    TextMetrics {
-        id: opBodyTextMetrics
-        text: messageModelData.opBody
-        elideWidth: (bubbleRoot.maxWidth - elideConstraint) * 2
-        elide: Text.ElideRight
+        TextMetrics {
+            id: opBodyTextMetrics
+            text: messageModelData.opBody
+            elideWidth: (bubbleRoot.maxWidth - elideConstraint) * 2
+            elide: Text.ElideRight
+        }
     }
 }

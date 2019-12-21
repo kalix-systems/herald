@@ -23,20 +23,13 @@ ListView {
     }
 
     model: messageListModel
+
+    // TODO: Delegate should just be the ChatBubble
     delegate: Column {
         id: containerCol
-        readonly property string proxyBody: body
         spacing: 0
 
         // no receipt images for now
-        property string proxyReceiptImage
-
-        readonly property color userColor: CmnCfg.avatarColors[Herald.users.colorById(
-                                                                   author)]
-        readonly property string timestamp: Utils.friendlyTimestamp(
-                                                insertionTime)
-
-        readonly property string authName: Herald.users.nameById(author)
         readonly property bool outbound: author === Herald.config.configId
         readonly property bool elided: body.length !== fullBody.length
         property var messageModelData: model

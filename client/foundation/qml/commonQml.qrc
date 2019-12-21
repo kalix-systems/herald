@@ -34,7 +34,6 @@
         <file>ChatBubble/ReplyBubble/dyn/ReplyMouseArea.qml</file>
         <file>ChatBubble/ReplyBubble/dyn/ReplyTimeInfo.qml</file>
         <file>ChatBubble/ReplyBubble/dyn/ReplyLabel.qml</file>
-        <file>ChatBubble/ReplyBubble/dyn/ReplyVerticalAccent.qml</file>
         <file>ChatBubble/ReplyBubble/js/utils.js</file>
         <file>ChatBubble/StandardStamps.qml</file>
         <file>ChatBubble/StandardTextEdit.qml</file>
@@ -42,13 +41,11 @@
         <file>ChatBubble/TwoImageLayout.qml</file>
         <file>StandardCombo.qml</file>
         <file>StandardLabel.qml</file>
-        <file>TeamColumn.qml</file>
         <file>TimerOptions.qml</file>
         <file>Units.qml</file>
         <file>errors/ErrorDialog.qml</file>
         <file>js/Avatar.mjs</file>
         <file>js/utils.mjs</file>
-        <file>qmldir</file>
         <file>themes/Dark.qml</file>
         <file>themes/EarthTones.qml</file>
         <file>themes/Light.qml</file>

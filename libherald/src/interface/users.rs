@@ -199,6 +199,12 @@ pub trait UsersTrait {
         id: String,
     ) -> String;
 
+    fn set_profile_picture(
+        &mut self,
+        index: u64,
+        profile_picture: String,
+    ) -> ();
+
     fn toggle_filter_regex(&mut self) -> bool;
 
     fn row_count(&self) -> usize;
@@ -268,12 +274,6 @@ pub trait UsersTrait {
         &self,
         index: usize,
     ) -> Option<String>;
-
-    fn set_profile_picture(
-        &mut self,
-        index: usize,
-        _: Option<String>,
-    ) -> bool;
 
     fn status(
         &self,
@@ -411,6 +411,23 @@ pub unsafe extern "C" fn users_profile_picture_by_id(
     let ret = obj.profile_picture_by_id(id);
     let str_: *const c_char = ret.as_ptr() as (*const c_char);
     set(data, str_, ret.len() as i32);
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn users_set_profile_picture(
+    ptr: *mut Users,
+    index: u64,
+    profile_picture_str: *const c_ushort,
+    profile_picture_len: c_int,
+) {
+    let obj = &mut *ptr;
+    let mut profile_picture = String::new();
+    set_string_from_utf16(
+        &mut profile_picture,
+        profile_picture_str,
+        profile_picture_len,
+    );
+    obj.set_profile_picture(index, profile_picture)
 }
 
 #[no_mangle]
@@ -583,27 +600,6 @@ pub unsafe extern "C" fn users_data_profile_picture(
         let str_: *const c_char = data.as_ptr() as (*const c_char);
         set(d, str_, to_c_int(data.len()));
     }
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn users_set_data_profile_picture(
-    ptr: *mut Users,
-    row: c_int,
-    str_: *const c_ushort,
-    len: c_int,
-) -> bool {
-    let obj = &mut *ptr;
-    let mut value = String::new();
-    set_string_from_utf16(&mut value, str_, len);
-    obj.set_profile_picture(to_usize(row).unwrap_or(0), Some(value))
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn users_set_data_profile_picture_none(
-    ptr: *mut Users,
-    row: c_int,
-) -> bool {
-    (&mut *ptr).set_profile_picture(to_usize(row).unwrap_or(0), None)
 }
 
 #[no_mangle]

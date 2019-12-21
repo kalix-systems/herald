@@ -14,7 +14,7 @@ pub(crate) fn set_name(
 
 pub(crate) fn set_profile_picture(
     conn: &rusqlite::Connection,
-    profile_picture: Option<String>,
+    profile_picture: Option<image_utils::ProfilePicture>,
 ) -> Result<Option<String>, HErr> {
     let id = id(conn)?;
     Ok(crate::user::db::set_profile_picture(

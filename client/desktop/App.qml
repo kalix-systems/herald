@@ -45,10 +45,11 @@ Item {
     Popups.NewMessagePopup {
         id: convoMenu
     }
+
     Popups.ImageCropPopup {
         id: imageCrop
     }
-
+    // TODO: move into seperate file
     Component {
         id: splash
 
@@ -104,6 +105,7 @@ Item {
             sourceComponent: splash
         }
 
+        // TODO: combine these two rectangles and figure out width
         handle: Item {
             id: handle
             implicitWidth: 1

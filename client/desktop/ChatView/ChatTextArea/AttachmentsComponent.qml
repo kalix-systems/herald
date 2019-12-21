@@ -6,6 +6,7 @@ import "qrc:/common" as Common
 import LibHerald 1.0
 import "qrc:/imports" as Imports
 
+// TODO rename ImageAttachmentsComponent
 ScrollView {
     width: parent.width
     height: wrapperRow.height + 10

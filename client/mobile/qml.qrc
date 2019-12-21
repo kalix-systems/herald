@@ -7,11 +7,9 @@
         <file>qml/LoginPage/LoginLandingPage.qml</file>
         <file>qml/LoginPage/LoginPageMain.qml</file>
         <file>qml/LoginPage/Registration.qml</file>
-        <file>qml/Common/BusyIndicator.qml</file>
         <file>qml/Common/CommonConfig.qml</file>
         <file>qml/Common/Divider.qml</file>
         <file>qml/Common/IconButton.qml</file>
-        <file>qml/Common/StdText.qml</file>
         <file>qml/SearchView/SearchViewHeader.qml</file>
         <file>qml/SearchView/SearchViewMain.qml</file>
         <file>qml/LoginPage/Controls/LoginButton.qml</file>
@@ -19,7 +17,6 @@
         <file>qml/Common/Drawer.qml</file>
         <file>qml/ConfigMenu/ConfigMenuMain.qml</file>
         <file>qml/ConfigMenu/Controls/ConfigHeader.qml</file>
-        <file>qml/Common/HeaderText.qml</file>
         <file>qml/ConfigMenu/Controls/ConfigSection.qml</file>
         <file>qml/NewContactView/NewContactViewMain.qml</file>
         <file>qml/NewContactView/Controls/NewContactHeader.qml</file>
@@ -30,7 +27,6 @@
         <file>qml/HomeScreen/Controls/ComposeButton.qml</file>
         <file>qml/HomeScreen/Controls/CVToolButton.qml</file>
         <file>qml/HomeScreen/ConversationItem.qml</file>
-        <file>qml/HomeScreen/DrawerContents.qml</file>
         <file>qml/HomeScreen/HomeHeader.qml</file>
         <file>qml/HomeScreen/HomeScreenMain.qml</file>
         <file>qml/HomeScreen/Controls/FloatingActionButtons.qml</file>
