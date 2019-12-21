@@ -32,11 +32,11 @@
         <file>emoji-categories/sports.svg</file>
         <file>emoji-categories/symbols.svg</file>
         <file>emoji-categories/transport.svg</file>
-        <file>mini-timer-icons/mini-hourglass-empty-icon.svg</file>
-        <file>mini-timer-icons/mini-hourglass-full-icon.svg</file>
-        <file>mini-timer-icons/mini-hourglass-half-icon.svg</file>
-        <file>mini-timer-icons/mini-hourglass-quarter-icon.svg</file>
-        <file>mini-timer-icons/mini-hourglass-three-quarter-icon.svg</file>
+        <file>mini-timer-icons/mini-timer-empty-icon.svg</file>
+        <file>mini-timer-icons/mini-timer-full-icon.svg</file>
+        <file>mini-timer-icons/mini-timer-half-icon.svg</file>
+        <file>mini-timer-icons/mini-timer-quarter-icon.svg</file>
+        <file>mini-timer-icons/mini-timer-three-quarter-icon.svg</file>
         <file>timer-option-icons/1d.svg</file>
         <file>timer-option-icons/1h.svg</file>
         <file>timer-option-icons/1min.svg</file>
