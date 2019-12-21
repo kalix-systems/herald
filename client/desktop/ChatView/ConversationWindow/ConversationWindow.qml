@@ -80,9 +80,12 @@ ListView {
         selectExisting: false
     }
 
-    // TODO delegate should be ChatBubble
-    delegate: Row {
-        id: chatRow
+    delegate: CB.ChatBubble {
+        id: bubbleActual
+        convContainer: chatListView
+        defaultWidth: chatListView.width
+        width: parent.width
+        messageModelData: model
 
         ListView.onAdd: {
             // made with the understanding that position goes from 0.0-1.0
@@ -91,38 +94,16 @@ ListView {
             chatScrollBarInner.setPosition(3.0)
         }
 
-        // path to image file
-        property string proxyReceiptImage: Utils.receiptCodeSwitch(
-                                               receiptStatus)
-
-        readonly property bool outbound: author === Herald.config.configId
-
-        property alias highlight: bubbleActual.highlightItem
-
-        property bool elided: body.length !== fullBody.length
-
-        property var messageModelData: model
-
         anchors {
             left: parent.left
             right: parent.right
         }
 
-        bottomPadding: 0
-        topPadding: 0
-
-        CB.ChatBubble {
-            id: bubbleActual
-            convContainer: chatListView
-            defaultWidth: chatListView.width
-            messageModelData: chatRow.messageModelData
-
-            ChatBubbleHover {
-                id: bubbleHoverHandler
-                download: bubbleActual.imageAttach || bubbleActual.docAttach
-                onEntered: bubbleActual.hoverHighlight = true
-                onExited: bubbleActual.hoverHighlight = false
-            }
+        ChatBubbleHover {
+            id: bubbleHoverHandler
+            download: bubbleActual.imageAttach || bubbleActual.docAttach
+            onEntered: bubbleActual.hoverHighlight = true
+            onExited: bubbleActual.hoverHighlight = false
         }
     }
 }
