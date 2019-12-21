@@ -28,6 +28,7 @@ RowLayout {
 
     Grid {
         // TODO: Collapse options into plus when typing
+        // TODO: this is a binding loop use TextMetrics
         columns: cta.lineCount > 1 ? 1 : 2
         Layout.alignment: Qt.AlignRight | Qt.AlignBottom
         Layout.margins: CmnCfg.units.dp(12)

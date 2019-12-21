@@ -21,11 +21,12 @@ Item {
         onTriggered: refreshTime()
     }
 
+    //TODO: Rename me
     Component {
         id: cvMain
         HomeScreen.HomeScreenMain {}
     }
-
+    //TODO: Rename meEEEeeee!
     Component {
         id: configMain
         ConfigMenu.ConfigMenuMain {}

@@ -9,11 +9,6 @@ ColumnLayout {
     property Component content
     width: parent.width
 
-    Common.HeaderText {
-        text: title
-        leftPadding: CmnCfg.margin
-    }
-
     Common.Divider {
         Layout.fillWidth: true
         Layout.alignment: Qt.AlignCenter
