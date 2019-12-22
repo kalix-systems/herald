@@ -350,6 +350,8 @@ impl Container {
         let mut matches: Vec<Match> = Vec::new();
 
         for (ix, msg) in self.list.iter_mut().enumerate() {
+            let old_match_status = msg.match_status;
+
             let matched = access(&msg.msg_id, |m| m.matches(pattern))?;
 
             msg.match_status = if matched {
@@ -358,7 +360,9 @@ impl Container {
                 MatchStatus::NotMatched
             };
 
-            data_changed(ix);
+            if old_match_status != msg.match_status {
+                data_changed(ix);
+            }
 
             if !matched {
                 continue;
