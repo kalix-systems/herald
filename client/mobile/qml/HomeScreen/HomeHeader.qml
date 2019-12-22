@@ -3,7 +3,7 @@ import QtQuick.Layouts 1.12
 import QtQuick 2.12
 import LibHerald 1.0
 import "../Common"
-import "../ConfigMenu"
+import "../SettingsMenu"
 import "qrc:/imports/Avatar"
 import "qrc:/imports/js/utils.mjs" as Utils
 import Qt.labs.platform 1.0
@@ -64,7 +64,7 @@ ToolBar {
                 color: CmnCfg.palette.iconFill
                 imageSource: "qrc:/options-icon.svg"
                 tapCallback: function () {
-                    mainView.push(configMain)
+                    mainView.push(settingsMain)
                 }
             }
         }

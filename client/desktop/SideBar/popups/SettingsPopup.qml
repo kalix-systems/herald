@@ -6,13 +6,13 @@ import QtQuick.Window 2.2
 import LibHerald 1.0
 import "qrc:/imports"
 import "../../common" as Common
-import "./ConfigComponents" as CfgComps
-import "./js/ConfigPopupSubmission.mjs" as JS
+import "./SettingsComponents" as SetsComps
+import "./js/SettingsPopupSubmission.mjs" as JS
 
 Window {
-    id: configPopup
-    width: CmnCfg.configWidth
-    height: CmnCfg.configHeight
+    id: settingsPopup
+    width: CmnCfg.settingsPaneWidth
+    height: CmnCfg.settingsPaneHeight
     minimumWidth: 500
     minimumHeight: 250
 
@@ -22,7 +22,7 @@ Window {
     }
 
     FileDialog {
-        id: cfgPfp
+        id: settingsProfPic
         property bool pfpValid: true
         folder: shortcuts.desktop
         nameFilters: ["(*.jpg *.png *.jpeg)"]
@@ -112,7 +112,7 @@ Window {
                             id: hover
                             hoverEnabled: true
                             anchors.fill: parent
-                            onClicked: configScroll.contentY = col.children[index].y
+                            onClicked: settingsScroll.contentY = col.children[index].y
                             cursorShape: Qt.PointingHandCursor
                         }
                     }
@@ -120,7 +120,7 @@ Window {
             }
 
             Flickable {
-                id: configScroll
+                id: settingsScroll
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 contentHeight: col.height
@@ -131,38 +131,38 @@ Window {
                     topPadding: CmnCfg.margin
                     anchors.right: parent.right
                     anchors.left: parent.left
-                    CfgComps.ConfigListItem {
+                    SetsComps.SettingsListItem {
                         id: notifications
                         headerText: qsTr("Notifications")
-                        configContent: CfgComps.Notifications {}
+                        settingsContent: SetsComps.Notifications {}
                     }
-                    CfgComps.ConfigListItem {
+                    SetsComps.SettingsListItem {
                         id: appearance
                         headerText: qsTr("Appearance")
-                        configContent: CfgComps.Appearance {}
+                        settingsContent: SetsComps.Appearance {}
                     }
-                    CfgComps.ConfigListItem {
+                    SetsComps.SettingsListItem {
                         id: security
                         headerText: qsTr("Privacy & Security")
-                        configContent: CfgComps.Privacy {}
+                        settingsContent: SetsComps.Privacy {}
                     }
 
-                    CfgComps.ConfigListItem {
+                    SetsComps.SettingsListItem {
                         id: storage
                         headerText: qsTr("Data & Storage")
-                        configContent: CfgComps.Storage {}
+                        settingsContent: SetsComps.Storage {}
                     }
 
-                    CfgComps.ConfigListItem {
+                    SetsComps.SettingsListItem {
                         id: advanced
                         headerText: qsTr("Advanced")
-                        configContent: CfgComps.Advanced {}
+                        settingsContent: SetsComps.Advanced {}
                     }
 
-                    CfgComps.ConfigListItem {
+                    SetsComps.SettingsListItem {
                         id: feedback
                         headerText: qsTr("Help & Feedback")
-                        configContent: CfgComps.Feedback {}
+                        settingsContent: SetsComps.Feedback {}
                     }
                 }
             }

@@ -5,7 +5,6 @@ import LibHerald 1.0
 import "../../Common"
 
 ToolBar {
-    id: configHeader
     height: CmnCfg.toolbarHeight
     background: Rectangle {
         color: CmnCfg.palette.offBlack
