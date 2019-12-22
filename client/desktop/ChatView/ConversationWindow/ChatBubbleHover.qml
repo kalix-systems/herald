@@ -29,13 +29,17 @@ MouseArea {
         height: buttonRow.height
         // color: bubbleActual.authorColor
         z: CmnCfg.overlayZ
-        anchors.right: parent.right
-        anchors.top: parent.top
         color: "transparent"
-        anchors.margins: CmnCfg.smallMargin / 2
+        anchors {
+            right: parent.right
+            top: parent.top
+            topMargin: CmnCfg.smallMargin
+        }
+
         Row {
             id: buttonRow
             spacing: CmnCfg.margin
+            rightPadding: CmnCfg.smallMargin
 
             Imports.ButtonForm {
                 id: replyButton
