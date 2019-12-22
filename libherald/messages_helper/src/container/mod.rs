@@ -334,6 +334,7 @@ impl Container {
         Some(())
     }
 
+    // FIXME make this incremental, long conversations with a large number of matches freeze the UI
     pub fn apply_search<D: FnMut(usize), N: FnMut()>(
         &mut self,
         search: &SearchState,

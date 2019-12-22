@@ -119,6 +119,7 @@ impl Messages {
         }
     }
 
+    // FIXME: The flurry logic might not be sound here
     pub(super) fn insert_helper(
         &mut self,
         msg: Msg,
