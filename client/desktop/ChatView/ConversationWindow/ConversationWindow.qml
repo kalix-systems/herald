@@ -21,7 +21,7 @@ ListView {
     property NumberAnimation highlightAnimation: NumberAnimation {
         id: bubbleHighlightAnimation
         property: "opacity"
-        from: 1.0
+        from: 0.2
         to: 0.0
         duration: 600
         easing.type: Easing.InCubic
