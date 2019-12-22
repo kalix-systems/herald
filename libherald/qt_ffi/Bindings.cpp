@@ -133,6 +133,9 @@ inline void heraldConnectionPendingChanged(Herald *o) {
 inline void heraldConnectionUpChanged(Herald *o) {
   Q_EMIT o->connectionUpChanged();
 }
+inline void heraldRegistrationFailureCodeChanged(Herald *o) {
+  Q_EMIT o->registrationFailureCodeChanged();
+}
 inline void membersFilterChanged(Members *o) { Q_EMIT o->filterChanged(); }
 inline void membersFilterRegexChanged(Members *o) {
   Q_EMIT o->filterRegexChanged();
@@ -1071,6 +1074,7 @@ herald_conversation_builder_get(const Herald::Private *);
 Conversations::Private *herald_conversations_get(const Herald::Private *);
 Errors::Private *herald_errors_get(const Herald::Private *);
 MessageSearch::Private *herald_message_search_get(const Herald::Private *);
+option_quint8 herald_registration_failure_code_get(const Herald::Private *);
 Users::Private *herald_users_get(const Herald::Private *);
 UsersSearch::Private *herald_users_search_get(const Herald::Private *);
 Utils::Private *herald_utils_get(const Herald::Private *);
@@ -3324,6 +3328,7 @@ Herald::Herald(QObject *parent)
             o->beginRemoveRows(QModelIndex(), first, last);
           },
           [](MessageSearch *o) { o->endRemoveRows(); },
+          heraldRegistrationFailureCodeChanged,
           m_users,
           usersFilterChanged,
           usersFilterRegexChanged,
@@ -3479,6 +3484,15 @@ Errors *Herald::errors() { return m_errors; }
 
 const MessageSearch *Herald::messageSearch() const { return m_messageSearch; }
 MessageSearch *Herald::messageSearch() { return m_messageSearch; }
+
+QVariant Herald::registrationFailureCode() const {
+  QVariant v;
+  auto r = herald_registration_failure_code_get(m_d);
+  if (r.some) {
+    v.setValue(r.value);
+  }
+  return r;
+}
 
 const Users *Herald::users() const { return m_users; }
 Users *Herald::users() { return m_users; }

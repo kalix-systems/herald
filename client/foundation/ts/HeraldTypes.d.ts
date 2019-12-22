@@ -38,6 +38,13 @@ declare const enum MessageReceiptStatus {
   AckTerminal = 3
 }
 
+declare const enum RegistrationFailureCode {
+  UserIdTaken = 0,
+  KeyTaken = 1,
+  BadSignature = 2,
+  Other = 3
+}
+
 declare const enum MatchStatus {
   NotMatched = 0,
   Matched = 1,
