@@ -8,14 +8,13 @@ import Qt.labs.platform 1.0
 import "qrc:/imports/Avatar"
 import "qrc:/imports/js/utils.mjs" as Utils
 
-AvatarMain {
+Avatar {
     id: headerAvatar
-    backgroundColor: CmnCfg.palette.avatarColors[Herald.config.color]
+    color: CmnCfg.palette.avatarColors[Herald.config.color]
     initials: Herald.config.name[0].toUpperCase()
     pfpPath: Utils.safeStringOrDefault(Herald.config.profilePicture, "")
+    diameter: 28
 
-    size: 28
-    avatarHeight: 28
 
     // TODO onclicked this should open identity switcher, once that exists;
     // uncomment following code once identity switcher is implemented
@@ -29,6 +28,7 @@ AvatarMain {
 //        onReleased: overlay.visible = false
 //    }
 
+    //TODO dead code?
     ColorOverlay {
         id: overlay
         anchors.fill: parent

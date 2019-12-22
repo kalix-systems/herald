@@ -11,7 +11,7 @@ Item {
     property string pfpPath
     // the color with which to fill the icon if there is not profile picture
     property color backgroundColor
-    property real size: CmnCfg.avatarSize
+    property real size: CmnCfg.avatarDiameter
     // the label, must be one of the sibling components in this directory with the Label suffix
     // for example
     //```
@@ -32,25 +32,26 @@ Item {
     property real bottomTextMargin: 4
     //split this from size of avatarMain to allow for convolabel to take up the same space
     //regardless of whether avatar is square or round
-    property real avatarHeight: CmnCfg.avatarSize
+    property real avatarHeight: CmnCfg.avatarDiameter
 
     height: size
     width: size
 
-    AvatarIcon {
-        id: avatarIcon
+    Avatar {
+        id: avatar
         color: backgroundColor
         textColor: parent.textColor
         initials: parent.initials
         height: parent.avatarHeight
         width: height
-        pfpUrl: pfpPath
+        pfpPath: pfpPath
         anchors {
             verticalCenter: parent.verticalCenter
             left: parent.left
             leftMargin: groupAvatar ? 2 : 0
         }
-        groupAvatar: parent.groupAvatar
+        diameter: avatarHeight
+        isGroup: parent.groupAvatar
     }
 
     Loader {
@@ -60,7 +61,7 @@ Item {
             rightMargin: CmnCfg.margin / 2
             topMargin: topTextMargin
             bottomMargin: bottomTextMargin
-            left: avatarIcon.right
+            left: avatar.right
             right: parent.right
             top: parent.top
             bottom: parent.bottom

@@ -11,7 +11,7 @@
         <file alias="/Assets/Jura-Bold.ttf">../Assets/Jura-Bold.ttf</file>
         <file alias="/Assets/Jura-Regular.ttf">../Assets/Jura-Regular.ttf</file>
         <file alias="/Assets/Monoid-Regular.ttf">../Assets/Monoid-Regular.ttf</file>
-        <file>Avatar/AvatarIcon.qml</file>
+        <file>Avatar/Avatar.qml</file>
         <file>Avatar/AvatarMain.qml</file>
         <file>Avatar/ConversationLabel.qml</file>
         <file>ButtonForm.qml</file>

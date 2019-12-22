@@ -38,18 +38,16 @@ ToolBar {
             rightMargin: CmnCfg.smallMargin
         }
 
-        AvatarMain {
+        Avatar {
             id: avatar
-            size: 32
-            avatarHeight: groupAvatar ? 30 : 32
-            backgroundColor: CmnCfg.avatarColors[conversationItem.color]
-            textColor: CmnCfg.palette.iconFill
+            diameter: 32
+            color: CmnCfg.avatarColors[conversationItem.color]
             initials: conversationItem.title[0].toUpperCase()
             Layout.alignment: Qt.AlignLeft
             pfpPath: Utils.safeStringOrDefault(conversationItem.picture, "")
-            groupAvatar: !conversationItem.pairwise
+            isGroup: !conversationItem.pairwise
             anchors {
-                margins: 16
+                margins: CmnCfg.margin
             }
         }
 

@@ -51,7 +51,7 @@ Item {
     // STANDARD COMPONENT SIZES
 
     /// standard avatar size
-    property int avatarSize: 44
+    property int avatarDiameter: 44
     /// standard conversation/contact height
     property int convoHeight: 56
     /// standard toolbar height

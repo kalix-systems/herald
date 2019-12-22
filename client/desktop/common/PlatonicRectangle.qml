@@ -8,6 +8,7 @@ import "../SideBar" as SideBar
 import "qrc:/imports/Avatar"
 
 // Shared rectangle for displaying contact and conversation items in sidebar
+// conversations lists, search results, and contact selection autocompletion
 Rectangle {
     property alias conversationItemAvatar: conversationItemAvatar
     id: bgBox

@@ -76,17 +76,17 @@ Rectangle {
         id: bubbleHighlight
         z: bubbleRoot.z + 1
     }
-    AvatarMain {
+
+    Avatar {
         id: avatar
-        backgroundColor: authorColor
+        color: authorColor
         initials: authorName[0].toUpperCase()
-        size: 36
-        avatarHeight: 36
+        diameter: 36
         visible: isHead ? true : false
         anchors {
             left: parent.left
             top: parent.top
-            margins: CmnCfg.margin
+            margins: CmnCfg.smallMargin
         }
 
         z: contentRoot.z + 1
