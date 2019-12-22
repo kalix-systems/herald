@@ -129,7 +129,7 @@ impl ServerStore for Conn {
 
         match recip {
             One(single) => self.one_recip_exists(single).await,
-            Many(recips) => self.many_recip_exists(recips).await,
+            Many(recips) => self.many_recips_exist(recips).await,
         }
     }
 
@@ -516,25 +516,24 @@ impl ServerStore for Conn {
 
         let exists_stmt = tx.prepare_typed(sql!("user_exists"), types![TEXT]).await?;
 
-        if !tx
-            .query(&exists_stmt, params![user_id.as_str()])
+        if tx
+            .query_one(&exists_stmt, params![user_id.as_str()])
             .await?
-            .is_empty()
+            .get::<_, bool>(0)
         {
             return Ok(register::Res::UserAlreadyClaimed);
         }
 
         let add_key_stmt = tx
-            .prepare_typed(sql!("add_key"), types![BYTEA, BYTEA, INT8, BYTEA])
+            .prepare_typed(sql!("add_key"), types![BYTEA, BYTEA, INT8])
             .await?;
 
         tx.execute(
             &add_key_stmt,
             params![
                 meta.signed_by().as_ref(),
-                meta.signed_by().as_ref(),
-                meta.timestamp().as_i64(),
                 meta.sig().as_ref(),
+                meta.timestamp().as_i64(),
             ],
         )
         .await?;
