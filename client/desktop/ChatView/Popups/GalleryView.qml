@@ -19,6 +19,13 @@ Popup {
     width: root.width
     anchors.centerIn: parent
 
+    onWidthChanged: {
+
+    }
+    onHeightChanged: {
+
+    }
+
     enter: Transition {
 
         NumberAnimation {
@@ -243,12 +250,26 @@ Popup {
     PinchArea {
         id: pinchArea
         anchors.fill: parent
+
+        property point pt: Qt.point(0, 0)
+
+        onPinchStarted: {
+            pt = pinch.center
+        }
+
         onPinchUpdated: {
+
+            dumb.x = pt.x
+            dumb.y = pt.y
 
             galleryPopup.imageScale += (pinch.scale - pinch.previousScale) * 1.2
             flickable.resizeContent(galleryPopup.width * constrainedZoom,
                                     galleryPopup.height * constrainedZoom,
-                                    pinch.center)
+                                    Qt.point(0, 0))
+        }
+
+        onPinchFinished: {
+            flickable.returnToBounds()
         }
     }
     ImageClipRow {
