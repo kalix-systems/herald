@@ -15,7 +15,7 @@ Image {
     fillMode: Image.PreserveAspectCrop
     asynchronous: true
     MouseArea {
-        onClicked: imageTappedCallBack(parent.source)
+        onClicked: imageClickedCallBack(parent.source)
         anchors.fill: parent
     }
 }

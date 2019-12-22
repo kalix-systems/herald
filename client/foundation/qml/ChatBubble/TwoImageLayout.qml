@@ -29,7 +29,7 @@ Row {
             fillMode: Image.PreserveAspectFit
             asynchronous: true
             MouseArea {
-                onClicked: imageTappedCallBack(parent.source)
+                onClicked: imageClickedCallBack(parent.source)
                 anchors.fill: parent
             }
         }
@@ -51,7 +51,7 @@ Row {
             anchors.centerIn: parent
             asynchronous: true
             MouseArea {
-                onClicked: imageTappedCallBack(parent.source)
+                onClicked: imageClickedCallBack(parent.source)
                 anchors.fill: parent
             }
         }

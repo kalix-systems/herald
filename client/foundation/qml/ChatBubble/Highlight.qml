@@ -1,7 +1,6 @@
 import QtQuick 2.14
 import LibHerald 1.0
 
-// TODO: "TWO"
 Rectangle {
     anchors.fill: parent
     opacity: highlight || hoverHighlight ? 0.2 : 0.0
