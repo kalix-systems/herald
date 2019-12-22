@@ -61,7 +61,7 @@ Item {
     property int popupHeight: 250
     /// standard settings pane width and height
     property int settingsPaneWidth: 750
-    property int settingsPaneHeight: 400
+    property int settingsPaneHeight: 500
 
     property real minChatViewWidth: 300
     property real minContactsWidth: 300

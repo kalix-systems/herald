@@ -12,7 +12,7 @@ import QtGraphicalEffects 1.0
 import Qt.labs.platform 1.0
 
 ToolBar {
-    id: contextBar
+    id: conversationsHeader
     height: CmnCfg.toolbarHeight + 1
 
     background: Rectangle {

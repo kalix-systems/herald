@@ -15,6 +15,7 @@ Column {
         leftPadding: 12
         color: CmnCfg.palette.white
         placeholderText: qsTr("Add members")
+        width: parent.width - CmnCfg.largeMargin
         onTextChanged: {
             Herald.usersSearch.filter = groupSelectText.text
             contactPopup.popup.open()

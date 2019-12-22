@@ -2,6 +2,7 @@
     <qresource prefix="/imports">
         <file alias="/Assets/Cairo-Regular.ttf">../Assets/Cairo-Regular.ttf</file>
         <file alias="/Assets/Cairo-DemiBold.ttf">../Assets/Cairo-DemiBold.ttf</file>
+        <file alias="/Assets/Cairo-Bold.ttf">../Assets/Cairo-Bold.ttf</file>
         <file alias="/Assets/IBMPlexSans-Bold.ttf">../Assets/IBMPlexSans-Bold.ttf</file>
         <file alias="/Assets/IBMPlexSans-BoldItalic.ttf">../Assets/IBMPlexSans-BoldItalic.ttf</file>
         <file alias="/Assets/IBMPlexSans-Italic.ttf">../Assets/IBMPlexSans-Italic.ttf</file>

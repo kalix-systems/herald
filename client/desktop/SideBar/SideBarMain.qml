@@ -37,7 +37,7 @@ Page {
         property bool contactsSearch: false
         property string headerText: ""
 
-        sourceComponent: Header.ContextBar {
+        sourceComponent: Header.ConversationsHeader {
             id: contextBarComponent
         }
 
@@ -48,8 +48,8 @@ Page {
         }
 
         //component loaded into header depending on sidebar state
-        Header.HeaderComponent {
-            id: headerBarComponent
+        Header.AltContextHeader {
+            id: altContextHeader
         }
 
         Header.SearchComponent {

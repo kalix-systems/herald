@@ -17,7 +17,7 @@ ColumnLayout {
         text: qsTr("Open help center")
         color: "#0066cc"
         Layout.leftMargin: CmnCfg.margin
-        font.pixelSize: 14
+        font.pixelSize: CmnCfg.chatTextSize
     }
 
     Rectangle {
@@ -30,7 +30,7 @@ ColumnLayout {
         text: qsTr("Report an issue")
         color: "#0066cc"
         Layout.leftMargin: CmnCfg.margin
-        font.pixelSize: 14
+        font.pixelSize: CmnCfg.chatTextSize
     }
 
     Rectangle {

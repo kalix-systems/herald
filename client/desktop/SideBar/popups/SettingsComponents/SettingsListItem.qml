@@ -13,8 +13,7 @@ Column {
     Label {
         text: headerText
         font.family: CmnCfg.labelFont.name
-        font.bold: true
-        font.weight: Font.Black
+        font.weight: Font.DemiBold
         font.pixelSize: CmnCfg.headerSize
     }
     Loader {

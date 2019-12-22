@@ -10,8 +10,8 @@
         <file>EmojiKeyboard/EmojiPicker.qml</file>
         <file>EmojiKeyboard/PickerInterior.qml</file>
         <file>RegistrationPage.qml</file>
-        <file>SideBar/Header/ContextBar.qml</file>
-        <file>SideBar/Header/HeaderComponent.qml</file>
+        <file>SideBar/Header/ConversationsHeader.qml</file>
+        <file>SideBar/Header/AltContextHeader.qml</file>
         <file>SideBar/Header/SearchComponent.qml</file>
         <file>SideBar/Pane/ContactFlowComponents/NewContactComponent.qml</file>
         <file>SideBar/Pane/ContactView.qml</file>

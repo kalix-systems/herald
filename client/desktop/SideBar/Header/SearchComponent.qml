@@ -43,11 +43,6 @@ Component {
                     anchors.top: parent.top
                     anchors.topMargin: CmnCfg.smallMargin / 4
 
-                    background: Rectangle {
-                        color: CmnCfg.palette.offBlack
-                        anchors.fill: parent
-                    }
-
                     Keys.onPressed: {
                         // this makes sure that returns and tabs are not evaluated
                         if (event.key === Qt.Key_Return

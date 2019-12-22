@@ -13,7 +13,6 @@ import QtGraphicalEffects 1.0
 //header component loaded during new group & new contact flow
 Component {
     ToolBar {
-        id: headerBarComponent
         height: CmnCfg.toolbarHeight + 1
         background: Rectangle {
             color: CmnCfg.palette.offBlack
