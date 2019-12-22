@@ -7,6 +7,7 @@ import Qt.labs.platform 1.0
 import "qrc:/imports" as Imports
 import "qrc:/imports/Avatar"
 import "qrc:/imports/js/utils.mjs" as Utils
+import "../../common" as Common
 
 ToolBar {
     id: chatToolBar
@@ -54,16 +55,15 @@ ToolBar {
 
         Label {
             id: uid
-            font {
-                bold: true
-                family: CmnCfg.labelFont.name
-                pixelSize: 18
-            }
+            font: CmnCfg.headerBarFont
             Layout.alignment: Qt.AlignLeft
             Layout.fillWidth: true
             elide: Label.ElideRight
             text: conversationItem.title
             color: CmnCfg.palette.white
+            // top padding aligns headerText baseline with baseline of
+            // initial in user avatar to right
+            topPadding: 1
         }
 
         Loader {
