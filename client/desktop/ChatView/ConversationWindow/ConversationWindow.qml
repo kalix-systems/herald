@@ -62,12 +62,13 @@ ListView {
         model.setElisionLineCount(38)
         model.setElisionCharCount(38 * 40)
         model.setElisionCharsPerLine(40)
-        positionViewAtEnd()
 
+        chatListView.positionViewAtEnd()
         // made with the understanding that position goes from 0.0-1.0
         // however 1.0 does not seem to be the actual bottom of the page.
         // ain't that Qt.
         chatScrollBarInner.setPosition(3.0)
+        chatScrollBarInner.setPosition(1.0)
         cacheBuffer = chatListView.height * 5
     }
 
@@ -91,12 +92,7 @@ ListView {
             // made with the understanding that position goes from 0.0-1.0
             // however 1.0 does not seem to be the actual bottom of the page.
             // ain't that Qt.
-            chatScrollBarInner.setPosition(3.0)
-        }
-
-        anchors {
-            left: parent.left
-            right: parent.right
+            chatScrollBarInner.setPosition(1.0)
         }
 
         ChatBubbleHover {
@@ -114,7 +110,7 @@ ListView {
                 Connections {
                     target: bubbleActual
                     onAttachmentsLoaded: {
-                        chatListView.positionViewAtEnd()
+                        chatScrollBarInner.setPosition(1.0)
                     }
                 }
             }

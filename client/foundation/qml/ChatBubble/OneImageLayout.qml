@@ -4,13 +4,15 @@ import QtQuick.Layouts 1.12
 import LibHerald 1.0
 
 Row {
-    height: image.height
     id: wrapperRow
+
+    height: image.height
     property var firstImage
     property var aspectRatio: firstImage.width / firstImage.height
     property var imageTappedCallback: function () {
         throw "undefined callback"
     }
+
     onPositioningComplete: bubbleRoot.attachmentsLoaded()
 
     Image {
@@ -20,6 +22,7 @@ Row {
         source: "file:" + firstImage.path
         fillMode: Image.PreserveAspectCrop
         asynchronous: true
+
         MouseArea {
             onClicked: imageClickedCallBack(wrapperRow.source)
             anchors.fill: parent
