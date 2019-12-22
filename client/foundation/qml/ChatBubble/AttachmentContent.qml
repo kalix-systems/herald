@@ -4,8 +4,9 @@ import QtQuick.Layouts 1.12
 import LibHerald 1.0
 import QtGraphicalEffects 1.1
 
-ColumnLayout {
+Column {
     id: wrapperCol
+    onPositioningComplete: bubbleRoot.attachmentsLoaded()
 
     property real maxWidth: Math.min(contentRoot.maxWidth, 600)
     property var mediaParsed

@@ -11,7 +11,7 @@ Row {
     property var imageTappedCallback: function () {
         throw "undefined callback"
     }
-
+ onPositioningComplete: bubbleRoot.attachmentsLoaded()
     height: 150
     spacing: CmnCfg.smallMargin
     Rectangle {

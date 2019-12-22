@@ -12,7 +12,7 @@ Row {
     property var imageTappedCallback: function () {
         throw "undefined callback"
     }
-
+ onPositioningComplete: bubbleRoot.attachmentsLoaded()
     Rectangle {
         height: 150
         width: height
