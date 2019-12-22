@@ -91,7 +91,7 @@ Rectangle {
                 id: attachmentLoader
                 active: ownedConversation.builder.hasMediaAttachment
                 height: item ? item.height : 0
-                sourceComponent: AttachmentsComponent {}
+                sourceComponent: ImageAttachmentsComponent {}
                 width: scrollView.width
             }
             Loader {

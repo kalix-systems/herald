@@ -18,7 +18,7 @@
         <file>ChatBubble/AttachmentContent.qml</file>
         <file>ChatBubble/ChatBubble.qml</file>
         <file>ChatBubble/Highlight.qml</file>
-        <file>ChatBubble/ChatLabel.qml</file>
+        <file>ChatBubble/BubbleLabel.qml</file>
         <file>ChatBubble/DocFileItem.qml</file>
         <file>ChatBubble/ElideHandler.qml</file>
         <file>ChatBubble/FileAttachmentContent.qml</file>

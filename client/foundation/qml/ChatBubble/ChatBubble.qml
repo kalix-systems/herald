@@ -129,7 +129,8 @@ Rectangle {
         topPadding: isHead ? CmnCfg.smallMargin : CmnCfg.smallMargin
         leftPadding: CmnCfg.smallMargin
         bottomPadding: isTail ? CmnCfg.margin : CmnCfg.smallMargin
-        ChatLabel {
+
+        BubbleLabel {
             id: authorLabel
             visible: isHead
         }
