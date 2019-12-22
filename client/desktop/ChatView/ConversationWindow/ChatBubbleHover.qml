@@ -11,10 +11,11 @@ import QtQuick.Controls 2.3
 MouseArea {
     id: chatBubbleHitbox
     property bool download: false
+
     propagateComposedEvents: true
     hoverEnabled: true
     anchors.fill: bubbleActual
-    z: CmnCfg.underlayZ
+    z: 100
     onClicked: mouse.accepted = false
     onPressed: mouse.accepted = false
     onReleased: mouse.accepted = false
@@ -28,13 +29,17 @@ MouseArea {
         height: buttonRow.height
         // color: bubbleActual.authorColor
         z: CmnCfg.overlayZ
-        anchors.right: parent.right
-        anchors.top: parent.top
         color: "transparent"
-        anchors.margins: CmnCfg.smallMargin / 2
+        anchors {
+            right: parent.right
+            top: parent.top
+            topMargin: CmnCfg.smallMargin
+        }
+
         Row {
             id: buttonRow
             spacing: CmnCfg.margin
+            rightPadding: CmnCfg.smallMargin
 
             Imports.ButtonForm {
                 id: replyButton
@@ -45,6 +50,7 @@ MouseArea {
                 source: "qrc:/reply-icon.svg"
                 z: CmnCfg.overlayZ
 
+                // changing the opId transfers focus to the compose field
                 onClicked: ownedConversation.builder.opId = msgId
             }
 
@@ -74,14 +80,6 @@ MouseArea {
                 icon.width: visible ? 22 : 0
                 source: "qrc:/download-icon.svg"
                 onClicked: downloadFileChooser.open()
-            }
-            FileDialog {
-                id: downloadFileChooser
-                selectFolder: true
-                folder: StandardPaths.writableLocation(
-                            StandardPaths.DesktopLocation)
-                onAccepted: ownedConversation.saveAllAttachments(index, fileUrl)
-                selectExisting: false
             }
 
             Imports.ButtonForm {

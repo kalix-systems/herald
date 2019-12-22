@@ -21,17 +21,19 @@ Component {
             id: topRect
         }
 
+
         TextArea {
             id: titleText
             anchors.top: topRect.bottom
             leftPadding: 12
             color: CmnCfg.palette.white
             placeholderText: "Group title"
+            width: parent.width - CmnCfg.largeMargin
         }
 
         Rectangle {
-            anchors.top: titleText.bottom
             id: divider
+            anchors.top: titleText.bottom
             height: 1
             width: parent.width - CmnCfg.largeMargin
             anchors.horizontalCenter: parent.horizontalCenter
@@ -39,9 +41,9 @@ Component {
         }
 
         Rectangle {
+            id: bigDivider
             anchors.top: divider.bottom
             anchors.topMargin: 20
-            id: bigDivider
             height: 1
             width: parent.width
             color: CmnCfg.palette.lightGrey

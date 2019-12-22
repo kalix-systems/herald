@@ -5,7 +5,7 @@ import "./Headers" as Headers
 import "./HomeScreen" as HomeScreen
 import "./NewContactView" as NewContactView
 import "./ChatView" as ChatView
-import "./ConfigMenu" as ConfigMenu
+import "./SettingsMenu" as SettingsMenu
 
 Page {
     id: appRoot
@@ -33,12 +33,11 @@ Page {
             readonly property string stateName: "home"
         }
     }
-    //TODO: Rename meEEEeeee!
+
     Component {
-        id: configMain
-        ConfigMenu.ConfigMenuMain {
+         SettingsMenu.SettingsMenuMain {
             readonly property string stateName: "config"
-        }
+         }
     }
 
     Component {

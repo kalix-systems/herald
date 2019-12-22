@@ -2,6 +2,7 @@ import QtQuick.Controls 2.13
 import QtQuick 2.13
 import LibHerald 1.0
 
+// TODO move this to foundation
 RadioButton {
     id: control
     indicator: Rectangle {

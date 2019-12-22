@@ -84,7 +84,9 @@ impl Messages {
         }
 
         // other cases
-        self.container.same_flurry(index, index + 1)
+        self.container
+            .same_flurry(index, index + 1)
+            .map(std::ops::Not::not)
     }
 
     pub(crate) fn is_head_(
@@ -101,7 +103,9 @@ impl Messages {
         }
 
         // other cases
-        self.container.same_flurry(index, index - 1)
+        self.container
+            .same_flurry(index, index - 1)
+            .map(std::ops::Not::not)
     }
 
     pub(crate) fn clear_conversation_history_(&mut self) -> bool {
@@ -237,8 +241,8 @@ impl Messages {
 
         let changed = err!(self
             .search
-            .set_pattern(pattern, || emit.search_pattern_changed()))
-        .changed();
+            .set_pattern(pattern, || emit.search_pattern_changed())
+            .map(messages_helper::search::SearchChanged::changed));
 
         if changed && self.search.active {
             let model = &mut self.model;
@@ -346,16 +350,15 @@ impl Messages {
         let pattern = &self.search.pattern;
         let match_status = self.container.get(index).as_ref()?.match_status;
 
-        self.container.access_by_index(index, |data| {
-            if match_status.is_match() {
-                Some(messages_helper::search::highlight_message(
-                    pattern.as_ref()?,
-                    data.body.as_ref()?,
-                ))
-            } else {
-                Some(elider.elided_body(data.body.as_ref()?))
-            }
-        })?
+        let body = self
+            .container
+            .access_by_index(index, |data| data.body.clone())?;
+
+        if match_status.is_match() {
+            messages_helper::search::highlight_message(pattern.as_ref()?, body.as_ref()?).into()
+        } else {
+            elider.elided_body(body?).into()
+        }
     }
 
     pub(crate) fn full_body_(

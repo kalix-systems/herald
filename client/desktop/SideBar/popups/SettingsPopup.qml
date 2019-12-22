@@ -6,13 +6,13 @@ import QtQuick.Window 2.2
 import LibHerald 1.0
 import "qrc:/imports"
 import "../../common" as Common
-import "./ConfigComponents" as CfgComps
-import "./js/ConfigPopupSubmission.mjs" as JS
+import "./SettingsComponents" as SetsComps
+import "./js/SettingsPopupSubmission.mjs" as JS
 
 Window {
-    id: configPopup
-    width: CmnCfg.configWidth
-    height: CmnCfg.configHeight
+    id: settingsPopup
+    width: CmnCfg.settingsPaneWidth
+    height: CmnCfg.settingsPaneHeight
     minimumWidth: 500
     minimumHeight: 250
 
@@ -22,7 +22,7 @@ Window {
     }
 
     FileDialog {
-        id: cfgPfp
+        id: settingsProfPic
         property bool pfpValid: true
         folder: shortcuts.desktop
         nameFilters: ["(*.jpg *.png *.jpeg)"]
@@ -36,20 +36,16 @@ Window {
             color: CmnCfg.palette.offBlack
             height: CmnCfg.toolbarHeight
 
-            //TODO: excise this row
-            Row {
+            Label {
+                id: label
+                text: qsTr("Settings")
+                color: CmnCfg.palette.white
+                font.pixelSize: CmnCfg.headerSize
+                font.family: CmnCfg.labelFont.name
+                font.weight: Font.DemiBold
+                anchors.verticalCenter: parent.verticalCenter
+                elide: Label.ElideRight
                 leftPadding: CmnCfg.margin
-                anchors.fill: parent
-                Label {
-                    id: label
-                    text: qsTr("Settings")
-                    color: CmnCfg.palette.white
-                    font.pixelSize: CmnCfg.headerSize
-                    font.family: CmnCfg.labelFont.name
-                    font.bold: true
-                    anchors.verticalCenter: parent.verticalCenter
-                    elide: Label.ElideRight
-                }
             }
 
             Rectangle {
@@ -87,6 +83,7 @@ Window {
         RowLayout {
             anchors.fill: parent
             spacing: 0
+
             Rectangle {
                 id: headersRect
                 Layout.preferredWidth: 250
@@ -95,6 +92,8 @@ Window {
 
                 ListView {
                     anchors.fill: parent
+                    // align with first header in right pane ListView
+                    anchors.topMargin: 2
                     model: settingsModel
                     delegate: Rectangle {
                         height: 40
@@ -103,7 +102,7 @@ Window {
                         StandardLabel {
                             text: name
                             font.family: CmnCfg.labelFont.name
-                            font.bold: true
+                            font.weight: Font.DemiBold
                             anchors.verticalCenter: parent.verticalCenter
                             anchors.left: parent.left
                             anchors.leftMargin: CmnCfg.margin
@@ -112,7 +111,7 @@ Window {
                             id: hover
                             hoverEnabled: true
                             anchors.fill: parent
-                            onClicked: configScroll.contentY = col.children[index].y
+                            onClicked: settingsScroll.contentY = col.children[index].y
                             cursorShape: Qt.PointingHandCursor
                         }
                     }
@@ -120,49 +119,50 @@ Window {
             }
 
             Flickable {
-                id: configScroll
+                id: settingsScroll
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 contentHeight: col.height
                 boundsBehavior: Flickable.StopAtBounds
+
                 Column {
                     id: col
                     spacing: CmnCfg.smallMargin
-                    topPadding: CmnCfg.margin
+                    topPadding: CmnCfg.smallMargin
                     anchors.right: parent.right
                     anchors.left: parent.left
-                    CfgComps.ConfigListItem {
+                    SetsComps.SettingsListItem {
                         id: notifications
                         headerText: qsTr("Notifications")
-                        configContent: CfgComps.Notifications {}
+                        settingsContent: SetsComps.Notifications {}
                     }
-                    CfgComps.ConfigListItem {
+                    SetsComps.SettingsListItem {
                         id: appearance
                         headerText: qsTr("Appearance")
-                        configContent: CfgComps.Appearance {}
+                        settingsContent: SetsComps.Appearance {}
                     }
-                    CfgComps.ConfigListItem {
+                    SetsComps.SettingsListItem {
                         id: security
                         headerText: qsTr("Privacy & Security")
-                        configContent: CfgComps.Privacy {}
+                        settingsContent: SetsComps.Privacy {}
                     }
 
-                    CfgComps.ConfigListItem {
+                    SetsComps.SettingsListItem {
                         id: storage
                         headerText: qsTr("Data & Storage")
-                        configContent: CfgComps.Storage {}
+                        settingsContent: SetsComps.Storage {}
                     }
 
-                    CfgComps.ConfigListItem {
+                    SetsComps.SettingsListItem {
                         id: advanced
                         headerText: qsTr("Advanced")
-                        configContent: CfgComps.Advanced {}
+                        settingsContent: SetsComps.Advanced {}
                     }
 
-                    CfgComps.ConfigListItem {
+                    SetsComps.SettingsListItem {
                         id: feedback
                         headerText: qsTr("Help & Feedback")
-                        configContent: CfgComps.Feedback {}
+                        settingsContent: SetsComps.Feedback {}
                     }
                 }
             }

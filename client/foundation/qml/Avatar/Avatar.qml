@@ -6,16 +6,20 @@ import QtGraphicalEffects 1.0
 Item {
     id: wrapperItem
 
-    property string pfpUrl
-    property bool groupAvatar: false
+    property bool isGroup: false
+    property string pfpPath
+
     property color color
+    property real diameter: CmnCfg.avatarDiameter
     property color textColor: CmnCfg.palette.iconFill
     property string initials
-    property real avatarHeight: parent.avatarHeight
+
+    height: diameter
+    width: height
 
     Loader {
         id: iconLoader
-        sourceComponent: pfpUrl === "" ? textAvatar : imageAvatar
+        sourceComponent: pfpPath === "" ? textAvatar : imageAvatar
         anchors.fill: parent
     }
 
@@ -24,7 +28,7 @@ Item {
         Rectangle {
             height: parent.height
             width: height
-            radius: groupAvatar ? 0 : width
+            radius: isGroup ? 0 : width
             color: wrapperItem.color
             Text {
                 text: initials
@@ -43,10 +47,10 @@ Item {
             color: CmnCfg.palette.offBlack
             height: parent.height
             width: height
-            radius: groupAvatar ? 0 : width
+            radius: isGroup ? 0 : width
             id: mask
             Image {
-                source: JS.safeToQrcURI(pfpUrl)
+                source: JS.safeToQrcURI(pfpPath)
                 anchors.fill: mask
                 layer.enabled: true
                 layer.effect: OpacityMask {

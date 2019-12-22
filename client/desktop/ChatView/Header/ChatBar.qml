@@ -7,6 +7,7 @@ import Qt.labs.platform 1.0
 import "qrc:/imports" as Imports
 import "qrc:/imports/Avatar"
 import "qrc:/imports/js/utils.mjs" as Utils
+import "../../common" as Common
 
 ToolBar {
     id: chatToolBar
@@ -37,33 +38,30 @@ ToolBar {
             rightMargin: CmnCfg.smallMargin
         }
 
-        AvatarMain {
+        Avatar {
             id: avatar
-            size: 32
-            avatarHeight: groupAvatar ? 30 : 32
-            iconColor: CmnCfg.avatarColors[conversationItem.color]
-            textColor: CmnCfg.palette.iconFill
+            diameter: 32
+            color: CmnCfg.avatarColors[conversationItem.color]
             initials: conversationItem.title[0].toUpperCase()
             Layout.alignment: Qt.AlignLeft
             pfpPath: Utils.safeStringOrDefault(conversationItem.picture, "")
-            groupAvatar: !conversationItem.pairwise
+            isGroup: !conversationItem.pairwise
             anchors {
-                margins: 16
+                margins: CmnCfg.margin
             }
         }
 
         Label {
             id: uid
-            font {
-                bold: true
-                family: CmnCfg.labelFont.name
-                pixelSize: 18
-            }
+            font: CmnCfg.headerBarFont
             Layout.alignment: Qt.AlignLeft
             Layout.fillWidth: true
             elide: Label.ElideRight
             text: conversationItem.title
             color: CmnCfg.palette.white
+            // top padding aligns headerText baseline with baseline of
+            // initial in user avatar to right
+            topPadding: 1
         }
 
         Loader {

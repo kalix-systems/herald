@@ -4,7 +4,7 @@ import LibHerald 1.0
 
 Column {
     property string headerText
-    property Component configContent
+    property Component settingsContent
     leftPadding: CmnCfg.margin
     anchors {
         right: parent.right
@@ -13,8 +13,7 @@ Column {
     Label {
         text: headerText
         font.family: CmnCfg.labelFont.name
-        font.bold: true
-        font.weight: Font.Black
+        font.weight: Font.DemiBold
         font.pixelSize: CmnCfg.headerSize
     }
     Loader {
@@ -22,6 +21,6 @@ Column {
             right: parent.right
             left: parent.left
         }
-        sourceComponent: configContent
+        sourceComponent: settingsContent
     }
 }

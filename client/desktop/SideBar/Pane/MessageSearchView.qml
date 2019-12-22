@@ -55,7 +55,8 @@ ListView {
                     font {
                         bold: true
                         family: CmnCfg.chatFont.name
-                        pixelSize: CmnCfg.labelSize
+                        // TODO change when we make font defaults make sense
+                        pixelSize: 14
                     }
                     Layout.topMargin: labelGrid.rows > 2 ? -CmnCfg.smallMargin : 0
                     Layout.alignment: Qt.AlignLeft | Qt.AlignTop

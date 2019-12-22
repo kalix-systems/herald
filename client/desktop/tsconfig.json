@@ -10,7 +10,7 @@
         "ChatView/ChatTextArea/ts/ChatViewTypes.d.ts",
         "SideBar/ts/ContactView.ts",
         "SideBar/ts/ContactViewTypes.d.ts",
-        "SideBar/popups/ts/ConfigPopupSubmission.ts",
+        "SideBar/popups/ts/SettingsPopupSubmission.ts",
         "SideBar/popups/ts/NewContactDialogue.ts",
         "../foundation/ts/HeraldTypes.d.ts",
         "../foundation/ts/HeraldUITypes.d.ts",

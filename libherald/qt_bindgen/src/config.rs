@@ -62,6 +62,13 @@ fn herald() -> Object {
         connectionUp: Prop::new().simple(Bool),
         connectionPending: Prop::new().simple(Bool),
 
+        // Registration failure code
+        // UserIdTaken  => 0,
+        // KeyTaken     => 1,
+        // BadSignature => 2,
+        // Other        => 3,
+        registrationFailureCode: Prop::new().simple(QUint8).optional(),
+
         // object props
         config: Prop::new().object(config()),
         conversationBuilder: Prop::new().object(conversation_builder()),
@@ -233,9 +240,9 @@ fn messages() -> Object {
         // Author of the message
         author: ItemProp::new(QString).optional().get_by_value(),
         // Message body. Possibly truncated if the message is too long
-        body: ItemProp::new(QString).optional().get_by_value(),
+        body: ItemProp::new(QString).get_by_value(),
         // Full message body
-        fullBody: ItemProp::new(QString).optional().get_by_value(),
+        fullBody: ItemProp::new(QString).get_by_value(),
         // Time the message was saved locally
         insertionTime: ItemProp::new(Qint64).optional(),
         // Time the message arrived at the server (only valid for inbound messages)
@@ -271,7 +278,7 @@ fn messages() -> Object {
         // Message preview properties
         opMsgId: ItemProp::new(QByteArray).optional().get_by_value(),
         opAuthor: ItemProp::new(QString).optional().get_by_value(),
-        opBody: ItemProp::new(QString).optional().get_by_value(),
+        opBody: ItemProp::new(QString).get_by_value(),
         opInsertionTime: ItemProp::new(Qint64).optional(),
         opExpirationTime: ItemProp::new(Qint64).optional(),
         opColor: ItemProp::new(QUint32).optional(),

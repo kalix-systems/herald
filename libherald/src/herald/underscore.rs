@@ -30,6 +30,7 @@ impl Herald {
             errors,
             users_search,
             utils,
+            registration_failure_code: None,
         }
     }
 
@@ -53,20 +54,25 @@ impl Herald {
 
         let uid = err!(UserId::try_from(user_id.as_str()));
 
-        spawn!(match err!(net::register(uid, addr)) {
-            Res::UIDTaken => {
-                eprintln!("UID taken!");
+        spawn!(
+            match push_err!(net::register(uid, addr), "Registration failed") {
+                Some(Res::UIDTaken) => {
+                    push(shared::RegistrationFailureCode::UserIdTaken);
+                }
+                Some(Res::KeyTaken) => {
+                    push(shared::RegistrationFailureCode::KeyTaken);
+                }
+                Some(Res::BadSig(_)) => {
+                    push(shared::RegistrationFailureCode::BadSignature);
+                }
+                Some(Res::Success) => {
+                    push(shared::Update::RegistrationSuccess);
+                }
+                None => {
+                    push(shared::RegistrationFailureCode::Other);
+                }
             }
-            Res::KeyTaken => {
-                eprintln!("Key taken!");
-            }
-            Res::BadSig(s) => {
-                eprintln!("Bad sig: {:?}", s);
-            }
-            Res::Success => {
-                push(shared::Update::RegistrationSuccess);
-            }
-        });
+        );
     }
 
     pub(crate) fn can_fetch_more_(&self) -> bool {

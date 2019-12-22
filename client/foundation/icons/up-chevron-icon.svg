@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="22px" height="22px" viewBox="0 0 22 22" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 57.1 (83088) - https://sketch.com -->
+    <title>up-chevron-icon</title>
+    <desc>Created with Sketch.</desc>
+    <g id="up-chevron-icon" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <polygon id="Path" points="0 0 22 0 22 22 0 22"></polygon>
+        <polygon id="Path" fill="#000000" fill-rule="nonzero" transform="translate(10.729583, 11.000000) rotate(-270.000000) translate(-10.729583, -11.000000) " points="14.1258333 6.7925 12.8333333 5.5 7.33333333 11 12.8333333 16.5 14.1258333 15.2075 9.9275 11"></polygon>
+    </g>
+</svg>

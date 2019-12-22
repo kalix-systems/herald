@@ -18,7 +18,7 @@ Item {
             }
             PropertyChanges {
                 target: headerLoader
-                sourceComponent: headerBarComponent
+                sourceComponent: altContextHeader
                 searchPlaceholder: qsTr("Search your conversations")
                 headerText: qsTr("Add contact")
             }
@@ -33,7 +33,7 @@ Item {
 
             PropertyChanges {
                 target: headerLoader
-                sourceComponent: headerBarComponent
+                sourceComponent: altContextHeader
                 headerText: qsTr("New group")
                 contactsSearch: true
             }

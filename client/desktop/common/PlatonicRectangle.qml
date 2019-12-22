@@ -8,6 +8,7 @@ import "../SideBar" as SideBar
 import "qrc:/imports/Avatar"
 
 // Shared rectangle for displaying contact and conversation items in sidebar
+// conversations lists, search results, and contact selection autocompletion
 Rectangle {
     property alias conversationItemAvatar: conversationItemAvatar
     id: bgBox
@@ -22,14 +23,14 @@ Rectangle {
     AvatarMain {
         anchors.fill: parent
         id: conversationItemAvatar
-        iconColor: CmnCfg.avatarColors[boxColor]
+        backgroundColor: CmnCfg.avatarColors[boxColor]
         initials: boxTitle[0].toUpperCase()
         pfpPath: Utils.safeStringOrDefault(picture)
         anchors {
             margins: 6
         }
-        groupAvatar: groupPicture
-        avatarHeight: groupAvatar ? 40 : 44
+        isGroupAvatar: groupPicture
+        avatarDiameter: isGroupAvatar ? 40 : 44
     }
 
     states: [

@@ -36,12 +36,12 @@ Rectangle {
 
     color: CmnCfg.palette.white
     clip: true
-
     height: containerCol.height
 
     Imports.ButtonForm {
         id: attachmentsButton
         anchors.right: parent.right
+        anchors.rightMargin: CmnCfg.margin
         anchors.bottom: parent.bottom
         bottomPadding: CmnCfg.smallMargin * 0.5
         source: "qrc:/attach-icon.svg"
@@ -50,6 +50,7 @@ Rectangle {
     Imports.ButtonForm {
         id: emojiButton
         anchors.left: parent.left
+        anchors.leftMargin: CmnCfg.margin
         anchors.bottom: parent.bottom
         bottomPadding: CmnCfg.smallMargin * 0.5
         source: "qrc:/emoji-icon.svg"
@@ -71,8 +72,10 @@ Rectangle {
         bottomPadding: CmnCfg.smallMargin * 0.5
 
         Column {
-            width: parent.width
+            width: textWrapperRect.width
             spacing: CmnCfg.smallMargin
+            anchors.horizontalCenter: parent.horizontalCenter
+
             Loader {
                 id: replyLoader
                 property string opName: replyName
@@ -83,23 +86,33 @@ Rectangle {
                     startColor: CmnCfg.avatarColors[Herald.users.colorById(
                                                         replyUid)]
                 }
-                width: textWrapperRect.width
-                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.leftMargin: CmnCfg.smallMargin
+                anchors.rightMargin: CmnCfg.smallMargin
             }
 
             Loader {
                 id: attachmentLoader
                 active: ownedConversation.builder.hasMediaAttachment
                 height: item ? item.height : 0
-                sourceComponent: AttachmentsComponent {}
                 width: scrollView.width
+                sourceComponent: ImageAttachmentsComponent {}
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.leftMargin: CmnCfg.smallMargin
+                anchors.rightMargin: CmnCfg.smallMargin
             }
+
             Loader {
                 id: fileLoader
                 active: ownedConversation.builder.hasDocAttachment
                 height: item ? item.height : 0
                 sourceComponent: FileAttachmentsComponent {}
-                width: scrollView.width
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.leftMargin: CmnCfg.smallMargin
+                anchors.rightMargin: CmnCfg.smallMargin
             }
         }
 
@@ -114,6 +127,7 @@ Rectangle {
                 background: Rectangle {
                     color: CmnCfg.palette.white
                 }
+
                 //TODO: use system palette.
                 bottomPadding: CmnCfg.smallMargin * 0.5
                 selectionColor: CmnCfg.palette.highlightColor
@@ -125,6 +139,12 @@ Rectangle {
                 Keys.forwardTo: keysProxy
                 Keys.onEscapePressed: focus = false
                 onEditingFinished: convWindow.focus = true
+
+                // transfer focus to the compose field
+                Connections {
+                    target: ownedConversation.builder
+                    onOpIdChanged: chatText.forceActiveFocus()
+                }
             }
         }
     }

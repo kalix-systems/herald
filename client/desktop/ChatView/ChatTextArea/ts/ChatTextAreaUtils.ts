@@ -11,7 +11,11 @@ export function enterKeyHandler(
     return;
   }
 
-  if (target.text.trim().length <= 0) {
+  if (
+    target.text.trim().length === 0 &&
+    !builder.hasDocAttachment &&
+    !builder.hasMediaAttachment
+  ) {
     return;
   }
 

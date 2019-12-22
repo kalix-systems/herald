@@ -23,6 +23,7 @@ Component {
                 leftPadding: 12
                 color: CmnCfg.palette.white
                 placeholderText: qsTr("Enter username or display name")
+                width: parent.width - CmnCfg.largeMargin
 
                 Keys.onReturnPressed: {
                     JS.insertContact(text, Herald.users)

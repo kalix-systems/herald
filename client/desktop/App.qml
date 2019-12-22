@@ -14,7 +14,7 @@ Item {
     anchors.fill: parent.fill
 
     TopMenuBar {
-        Popups.ConfigPopup {
+        Popups.SettingsPopup {
             id: preferencesPopup
         }
     }
@@ -34,8 +34,8 @@ Item {
         id: avatarColorPicker
     }
 
-    Popups.ConfigPopup {
-        id: configPopup
+    Popups.SettingsPopup {
+        id: settingsPopup
     }
 
     Popups.ContextOptionsMenu {
@@ -75,10 +75,7 @@ Item {
                     anchors.leftMargin: CmnCfg.largeMargin
                     anchors.verticalCenter: parent.verticalCenter
                     text: qsTr("Herald")
-
-                    font.pixelSize: CmnCfg.headerSize
-                    font.family: CmnCfg.labelFont.name
-                    font.bold: true
+                    font: CmnCfg.headerBarFont
                     color: CmnCfg.palette.white
                 }
             }
