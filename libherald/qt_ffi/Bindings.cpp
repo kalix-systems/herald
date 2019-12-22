@@ -2036,13 +2036,13 @@ QVariant Messages::data(const QModelIndex &index, int role) const {
     case Qt::UserRole + 3:
       return QVariant::fromValue(authorProfilePicture(index.row()));
     case Qt::UserRole + 4:
-      return cleanNullQVariant(QVariant::fromValue(body(index.row())));
+      return QVariant::fromValue(body(index.row()));
     case Qt::UserRole + 5:
       return QVariant::fromValue(docAttachments(index.row()));
     case Qt::UserRole + 6:
       return expirationTime(index.row());
     case Qt::UserRole + 7:
-      return cleanNullQVariant(QVariant::fromValue(fullBody(index.row())));
+      return QVariant::fromValue(fullBody(index.row()));
     case Qt::UserRole + 8:
       return insertionTime(index.row());
     case Qt::UserRole + 9:
@@ -2058,7 +2058,7 @@ QVariant Messages::data(const QModelIndex &index, int role) const {
     case Qt::UserRole + 14:
       return cleanNullQVariant(QVariant::fromValue(opAuthor(index.row())));
     case Qt::UserRole + 15:
-      return cleanNullQVariant(QVariant::fromValue(opBody(index.row())));
+      return QVariant::fromValue(opBody(index.row()));
     case Qt::UserRole + 16:
       return opColor(index.row());
     case Qt::UserRole + 17:

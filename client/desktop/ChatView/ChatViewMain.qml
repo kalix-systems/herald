@@ -108,6 +108,8 @@ Page {
             bottom: parent.bottom
             margins: CmnCfg.margin
             bottomMargin: 0
+            leftMargin: 0
+            rightMargin: 0
         }
 
         keysProxy: Item {
