@@ -5,6 +5,6 @@ Menu {
 
     MenuItem {
         text: qsTr("Settings")
-        onTriggered: configPopup.show()
+        onTriggered: settingsPopup.show()
     }
 }

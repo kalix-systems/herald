@@ -14,7 +14,7 @@ Item {
     anchors.fill: parent.fill
 
     TopMenuBar {
-        Popups.ConfigPopup {
+        Popups.SettingsPopup {
             id: preferencesPopup
         }
     }
@@ -34,8 +34,8 @@ Item {
         id: avatarColorPicker
     }
 
-    Popups.ConfigPopup {
-        id: configPopup
+    Popups.SettingsPopup {
+        id: settingsPopup
     }
 
     Popups.ContextOptionsMenu {
