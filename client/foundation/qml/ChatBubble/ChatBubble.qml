@@ -9,6 +9,8 @@ import "../Avatar"
 Rectangle {
     id: bubbleRoot
 
+    signal attachmentsLoaded
+
     property real defaultWidth
     property bool elided: body.length !== messageModelData.fullBody.length
     property bool expanded: false
