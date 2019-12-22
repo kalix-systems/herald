@@ -136,25 +136,32 @@ impl super::Conversations {
         self.picture_inner(index)?
     }
 
-    pub(crate) fn set_picture_(
+    pub(crate) fn set_profile_picture_(
         &mut self,
-        index: usize,
-        picture: Option<String>,
-    ) -> bool {
+        index: u64,
+        picture_json: String,
+    ) {
+        let index = index as usize;
+
         if self.pairwise_inner(index).unwrap_or(false) {
-            return false;
+            return;
         }
 
-        let cid = none!(self.id(index), false);
+        let cid = none!(self.id(index));
+
+        let profile_picture = heraldcore::image_utils::ProfilePicture::from_json_string(
+            picture_json,
+        )
+        .and_then(|mut p| {
+            let stripped = crate::utils::strip_qrc(std::mem::take(&mut p.path))?;
+            p.path = stripped;
+            Some(p)
+        });
 
         // FIXME exception safety
-        let path = err!(
-            conversation::set_picture(&cid, picture.as_ref().map(|p| p.as_str())),
-            false
-        );
+        let path = err!(conversation::set_picture(&cid, profile_picture));
 
         self.set_picture_inner(index, path);
-        true
     }
 
     pub(crate) fn title_(

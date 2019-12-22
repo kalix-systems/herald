@@ -19,56 +19,43 @@ ToolBar {
         color: CmnCfg.palette.offBlack
     }
 
-    property alias headerText: headerText.text
+    HeaderAvatar {
+        anchors {
+            verticalCenter: parent.verticalCenter
+            left: parent.left
+            leftMargin: CmnCfg.smallMargin
+        }
+    }
 
-    RowLayout {
-
-        anchors.fill: parent
-        anchors.rightMargin: 8
-
-        Common.ConfigAvatar {}
-
-        Label {
-            id: headerText
-            text: qsTr("Conversations")
-            Layout.fillWidth: true
-            font {
-                pixelSize: CmnCfg.headerSize
-                family: CmnCfg.labelFont.name
-                bold: true
-            }
-            elide: Text.ElideRight
-            Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
-            color: CmnCfg.palette.white
+    Row {
+        anchors {
+            verticalCenter: parent.verticalCenter
+            right: parent.right
+            rightMargin: CmnCfg.smallMargin
         }
 
-        Row {
-            spacing: 12
-            Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
-            Imports.ButtonForm {
-                id: searchButton
-                property bool searchRegex: false
-                fill: CmnCfg.palette.lightGrey
-                // this is a vertical center offset
-                topPadding: 1
-                source: "qrc:/search-icon.svg"
-                // TODO : add back in regex logic once ui is known
-                onClicked: sideBarState.state = "globalSearch"
-            }
+        spacing: 12
+        Imports.ButtonForm {
+            id: searchButton
+            property bool searchRegex: false
+            fill: CmnCfg.palette.lightGrey
+            source: "qrc:/search-icon.svg"
+            // TODO : add back in regex logic once ui is known
+            onClicked: sideBarState.state = "globalSearch"
+        }
 
-            Imports.ButtonForm {
-                id: newMessageButton
-                source: "qrc:/compose-icon-white.svg"
-                fill: CmnCfg.palette.lightGrey
-                onClicked: convoMenu.open()
-            }
+        Imports.ButtonForm {
+            id: newMessageButton
+            source: "qrc:/plus-icon.svg"
+            fill: CmnCfg.palette.lightGrey
+            onClicked: convoMenu.open()
+        }
 
-            Imports.ButtonForm {
-                id: optionsButton
-                fill: CmnCfg.palette.lightGrey
-                source: "qrc:/options-icon.svg"
-                onClicked: contextOptionsMenu.open()
-            }
+        Imports.ButtonForm {
+            id: optionsButton
+            fill: CmnCfg.palette.lightGrey
+            source: "qrc:/options-icon.svg"
+            onClicked: contextOptionsMenu.open()
         }
     }
 }

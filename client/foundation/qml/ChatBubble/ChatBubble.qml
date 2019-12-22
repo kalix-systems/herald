@@ -9,10 +9,12 @@ import "../Avatar"
 Rectangle {
     id: bubbleRoot
 
+    signal attachmentsLoaded
+
     property real defaultWidth
     property bool elided: body.length !== messageModelData.fullBody.length
     property bool expanded: false
-    property bool outbound: parent.outbound
+    property bool outbound: author === Herald.config.configId
     property Item convContainer
     property var messageModelData
 
@@ -31,6 +33,9 @@ Rectangle {
 
     readonly property var replyId: messageModelData.opMsgId
     readonly property bool reply: messageModelData.replyType > 0
+
+    readonly property bool isHead: messageModelData.isHead
+    readonly property bool isTail: messageModelData.isTail
 
     readonly property real maxWidth: defaultWidth * 0.75
     property string friendlyTimestamp: Utils.friendlyTimestamp(
@@ -73,17 +78,17 @@ Rectangle {
         id: bubbleHighlight
         z: bubbleRoot.z + 1
     }
-    AvatarMain {
+
+    Avatar {
         id: avatar
-        iconColor: authorColor
+        color: authorColor
         initials: authorName[0].toUpperCase()
-        size: 36
-        avatarHeight: 36
+        diameter: 36
         visible: isHead ? true : false
         anchors {
             left: parent.left
             top: parent.top
-            margins: CmnCfg.margin
+            margins: CmnCfg.smallMargin
         }
 
         z: contentRoot.z + 1
@@ -122,11 +127,12 @@ Rectangle {
         // all messages are un-expanded on completion
         Component.onCompleted: bubbleRoot.expanded = false
 
-        spacing: CmnCfg.smallMargin / 2
+        spacing: CmnCfg.smallMargin
         topPadding: isHead ? CmnCfg.smallMargin : CmnCfg.smallMargin
         leftPadding: CmnCfg.smallMargin
         bottomPadding: isTail ? CmnCfg.margin : CmnCfg.smallMargin
-        ChatLabel {
+
+        BubbleLabel {
             id: authorLabel
             visible: isHead
         }

@@ -9,10 +9,10 @@ Row {
     spacing: CmnCfg.smallMargin
     property var firstImage
     property var secondImage
-    property var imageTappedCallback: function () {
+    property var imageClickedCallBack: function () {
         throw "undefined callback"
     }
-
+ onPositioningComplete: bubbleRoot.attachmentsLoaded()
     Rectangle {
         height: 150
         width: height
@@ -29,7 +29,7 @@ Row {
             fillMode: Image.PreserveAspectFit
             asynchronous: true
             MouseArea {
-                onClicked: imageTappedCallBack(parent.source)
+                onClicked: imageClickedCallBack(parent.source)
                 anchors.fill: parent
             }
         }
@@ -51,7 +51,7 @@ Row {
             anchors.centerIn: parent
             asynchronous: true
             MouseArea {
-                onClicked: imageTappedCallBack(parent.source)
+                onClicked: imageClickedCallBack(parent.source)
                 anchors.fill: parent
             }
         }

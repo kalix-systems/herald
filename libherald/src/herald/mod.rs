@@ -35,4 +35,6 @@ pub struct Herald {
     users_search: UsersSearch,
     utils: Utils,
     load_props: imp::LoadProps,
+
+    registration_failure_code: Option<shared::RegistrationFailureCode>,
 }

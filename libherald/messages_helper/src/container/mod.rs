@@ -5,11 +5,13 @@ use heraldcore::message::{
     Elider,
 };
 use im::vector::Vector;
+use message_cache as cache;
 use search::*;
 use std::collections::HashSet;
 use types::*;
 
-mod cache;
+const FLURRY_FUZZ: i64 = 5 * 60_000;
+
 pub mod handlers;
 pub use cache::{access, get, update};
 
@@ -104,7 +106,8 @@ impl Container {
         &self,
         mid: &MsgId,
     ) -> Option<String> {
-        access(mid, |m| crate::media_attachments_json(&m.attachments))?
+        access(mid, |m| m.attachments.clone())
+            .and_then(|attachments| crate::media_attachments_json(&attachments))
     }
 
     pub fn doc_attachments_data_json(
@@ -119,7 +122,8 @@ impl Container {
         &self,
         mid: &MsgId,
     ) -> Option<String> {
-        access(mid, |m| crate::doc_attachments_json(&m.attachments))?
+        access(mid, |m| m.attachments.clone())
+            .and_then(|attachments| crate::doc_attachments_json(&attachments))
     }
 
     pub fn last(&self) -> Option<&MessageMeta> {
@@ -239,9 +243,9 @@ impl Container {
     ) -> Option<String> {
         let mid = self.op_msg_id(index)?;
 
-        access(&mid, |m| {
-            m.body.as_ref().map(|b| self.op_body_elider.elided_body(b))
-        })?
+        access(&mid, |m| m.body.clone())
+            .flatten()
+            .map(|b| self.op_body_elider.elided_body(b))
     }
 
     pub fn op_insertion_time(
@@ -266,25 +270,26 @@ impl Container {
     ) -> Option<String> {
         let mid = self.op_msg_id(index)?;
 
-        let (first, len): (DocMeta, usize) = access(&mid, |m| -> Option<_> {
-            let docs = m.attachments.doc_attachments().ok()?;
+        let (first, len): (DocMeta, usize) =
+            access(&mid, |m| m.attachments.clone()).and_then(|attachments| {
+                let docs = attachments.doc_attachments().ok()?;
 
-            if docs.is_empty() {
-                return None;
-            }
+                if docs.is_empty() {
+                    return None;
+                }
 
-            let len = docs.len();
-            let first = docs.into_iter().next()?;
-            Some((first, len))
-        })??;
+                let len = docs.len();
+                let first = docs.into_iter().next()?;
 
-        Some(
-            json::object! {
-                "first" => first,
-                "count" => len,
-            }
-            .dump(),
+                (first, len).into()
+            })?;
+
+        json::object! (
+            "first" => first,
+            "count" => len,
         )
+        .dump()
+        .into()
     }
 
     pub fn op_media_attachments_json(
@@ -293,17 +298,18 @@ impl Container {
     ) -> Option<String> {
         let mid = self.op_msg_id(index)?;
 
-        let (first, len): (MediaMeta, usize) = access(&mid, |m| -> Option<_> {
-            let medias = m.attachments.media_attachments().ok()?;
+        let (first, len): (MediaMeta, usize) =
+            access(&mid, |m| m.attachments.clone()).and_then(|attachments| {
+                let media = attachments.media_attachments().ok()?;
 
-            if medias.is_empty() {
-                return None;
-            }
+                if media.is_empty() {
+                    return None;
+                }
 
-            let len = medias.len();
-            let first = medias.into_iter().next()?;
-            Some((first, len))
-        })??;
+                let len = media.len();
+                let first = media.into_iter().next()?;
+                Some((first, len))
+            })?;
 
         Some(
             json::object! {
@@ -328,6 +334,7 @@ impl Container {
         Some(())
     }
 
+    // FIXME make this incremental, long conversations with a large number of matches freeze the UI
     pub fn apply_search<D: FnMut(usize), N: FnMut()>(
         &mut self,
         search: &SearchState,
@@ -343,6 +350,8 @@ impl Container {
         let mut matches: Vec<Match> = Vec::new();
 
         for (ix, msg) in self.list.iter_mut().enumerate() {
+            let old_match_status = msg.match_status;
+
             let matched = access(&msg.msg_id, |m| m.matches(pattern))?;
 
             msg.match_status = if matched {
@@ -351,7 +360,9 @@ impl Container {
                 MatchStatus::NotMatched
             };
 
-            data_changed(ix);
+            if old_match_status != msg.match_status {
+                data_changed(ix);
+            }
 
             if !matched {
                 continue;
@@ -389,5 +400,18 @@ impl Container {
         }
 
         Some(())
+    }
+
+    pub fn same_flurry(
+        &self,
+        a_ix: usize,
+        b_ix: usize,
+    ) -> Option<bool> {
+        let flurry_info = |data: &MsgData| (data.author, data.time.insertion);
+
+        let (a_author, a_ts) = self.access_by_index(a_ix, flurry_info)?;
+        let (b_author, b_ts) = self.access_by_index(b_ix, flurry_info)?;
+
+        ((a_author == b_author) && a_ts.within(FLURRY_FUZZ, b_ts)).into()
     }
 }

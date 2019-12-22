@@ -74,6 +74,8 @@ pub enum UserUpdate {
     NewUser(heraldcore::user::User),
     /// A user request has been responded to
     ReqResp(UserId, bool),
+    /// Data has changed for this user
+    DataChanged(UserId),
 }
 
 impl From<UserUpdate> for crate::Update {

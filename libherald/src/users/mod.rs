@@ -174,22 +174,33 @@ impl Interface for Users {
     /// Returns bool indicating success.
     fn set_profile_picture(
         &mut self,
-        row_index: usize,
-        picture: Option<String>,
-    ) -> bool {
-        let uid = none!(self.list.get(row_index), false).id;
+        index: u64,
+        picture_json: String,
+    ) {
+        let index = index as usize;
 
-        let picture = picture.and_then(crate::utils::strip_qrc);
+        let uid = none!(self.list.get(index)).id;
 
-        // FIXME this is not exception safe
-        let path = err!(user::set_profile_picture(uid, picture), false);
+        spawn!({
+            let profile_picture = heraldcore::image_utils::ProfilePicture::from_json_string(
+                picture_json,
+            )
+            .and_then(|mut p| {
+                let stripped = crate::utils::strip_qrc(std::mem::take(&mut p.path))?;
+                p.path = stripped;
+                Some(p)
+            });
 
-        {
-            let mut lock = user_data().write();
-            let mut inner = none!(lock.get_mut(&uid), false);
-            inner.profile_picture = path;
-        }
-        true
+            let path = err!(user::set_profile_picture(uid, profile_picture));
+
+            {
+                let mut lock = user_data().write();
+                let mut inner = none!(lock.get_mut(&uid));
+                inner.profile_picture = path;
+            }
+
+            crate::push(UserUpdate::DataChanged(uid));
+        });
     }
 
     /// Returns user's color

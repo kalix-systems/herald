@@ -10,26 +10,38 @@ QtObject {
     ]
 
     // Title Fonts
-    property FontLoader labelFont: FontLoader {
-        source: "../Assets/Jura-Regular.ttf"
-    }
-    property FontLoader labelFontBold: FontLoader {
-        source: "../Assets/Jura-Bold.ttf"
+    property FontLoader cairo: FontLoader {
+        source: "../Assets/Cairo-Regular.ttf"
     }
 
+    // TODO something about this isn't working, Cairo neer shows up as bold
+    property FontLoader cairoDemiBold: FontLoader {
+        source: "../Assets/Cairo-DemiBold.ttf"
+    }
+
+    // TODO not just a chatbubble font, it's the default for the app UI,
+    // rename accordingly
     // explicit, chatbubble only font
     property FontLoader chatFont: FontLoader {
         source: "../Assets/IBMPlexSans-Regular.ttf"
     }
+
+    property FontLoader chatFontMedium: FontLoader {
+        source: "../Assets/IBMPlexSans-Medium.ttf"
+    }
+
     property FontLoader chatFontBold: FontLoader {
         source: "../Assets/IBMPlexSans-Bold.ttf"
     }
-    property FontLoader chatFontSemiBold: FontLoader {
-        source: "../Assets/IBMPlexSans-SemiBold.ttf"
+
+    property FontLoader chatFontDemiBold: FontLoader {
+        source: "../Assets/IBMPlexSans-DemiBold.ttf"
     }
+
     property FontLoader chatFontItalic: FontLoader {
         source: "../Assets/IBMPlexSans-Italic.ttf"
     }
+
     property FontLoader chatFontItalicBold: FontLoader {
         source: "../Assets/IBMPlexSans-BoldItalic.ttf"
     }

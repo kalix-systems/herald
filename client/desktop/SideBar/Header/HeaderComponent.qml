@@ -19,34 +19,45 @@ Component {
             color: CmnCfg.palette.offBlack
         }
 
-        RowLayout {
-            anchors.fill: parent
+        Row {
+            anchors {
+                left: parent.left
+                leftMargin: CmnCfg.smallMargin
+                 verticalCenter: parent.verticalCenter
+            }
+            spacing: CmnCfg.margin
 
-            Common.ConfigAvatar {}
+            HeaderAvatar {
+                anchors.verticalCenter: parent.verticalCenter
+            }
 
             Text {
                 id: text
                 text: headerLoader.headerText
-                font.pixelSize: CmnCfg.headerSize
-                font.family: CmnCfg.labelFont.name
-                font.bold: true
-                Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
+                font: CmnCfg.headerBarFont
                 color: CmnCfg.palette.white
+                anchors.verticalCenter: parent.verticalCenter
+                // top padding aligns headerText baseline with baseline of
+                // initial in user avatar to right
+                topPadding: 1
+            }
+        }
+
+
+        Imports.ButtonForm {
+            anchors {
+                verticalCenter: parent.verticalCenter
+                right: parent.right
+                rightMargin: CmnCfg.smallMargin
             }
 
-            Item {
-                Layout.fillWidth: true
-            }
 
-            Imports.ButtonForm {
-                id: xButton
-                fill: CmnCfg.palette.lightGrey
-                source: "qrc:/x-icon.svg"
-                scale: 0.8
-                onClicked: {
-                    sideBarState.state = ""
-                    Herald.conversationBuilder.clear()
-                }
+            id: xButton
+            fill: CmnCfg.palette.lightGrey
+            source: "qrc:/x-icon.svg"
+            onClicked: {
+                sideBarState.state = ""
+                Herald.conversationBuilder.clear()
             }
         }
     }

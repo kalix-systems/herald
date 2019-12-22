@@ -156,11 +156,6 @@ pub trait ConversationBuilderTrait {
 
     fn picture(&self) -> Option<&str>;
 
-    fn set_picture(
-        &mut self,
-        value: Option<String>,
-    );
-
     fn add_member(
         &mut self,
         user_id: String,
@@ -181,6 +176,11 @@ pub trait ConversationBuilderTrait {
         &mut self,
         index: u64,
     ) -> bool;
+
+    fn set_profile_picture(
+        &mut self,
+        profile_picture: String,
+    ) -> ();
 
     fn set_title(
         &mut self,
@@ -348,6 +348,22 @@ pub unsafe extern "C" fn conversation_builder_remove_member_by_index(
 }
 
 #[no_mangle]
+pub unsafe extern "C" fn conversation_builder_set_profile_picture(
+    ptr: *mut ConversationBuilder,
+    profile_picture_str: *const c_ushort,
+    profile_picture_len: c_int,
+) {
+    let obj = &mut *ptr;
+    let mut profile_picture = String::new();
+    set_string_from_utf16(
+        &mut profile_picture,
+        profile_picture_str,
+        profile_picture_len,
+    );
+    obj.set_profile_picture(profile_picture)
+}
+
+#[no_mangle]
 pub unsafe extern "C" fn conversation_builder_set_title(
     ptr: *mut ConversationBuilder,
     title_str: *const c_ushort,
@@ -371,24 +387,6 @@ pub unsafe extern "C" fn conversation_builder_picture_get(
         let str_: *const c_char = value.as_ptr() as (*const c_char);
         set(prop, str_, to_c_int(value.len()));
     }
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn conversation_builder_picture_set(
-    ptr: *mut ConversationBuilder,
-    value: *const c_ushort,
-    len: c_int,
-) {
-    let obj = &mut *ptr;
-    let mut s = String::new();
-    set_string_from_utf16(&mut s, value, len);
-    obj.set_picture(Some(s));
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn conversation_builder_picture_set_none(ptr: *mut ConversationBuilder) {
-    let obj = &mut *ptr;
-    obj.set_picture(None);
 }
 
 #[no_mangle]

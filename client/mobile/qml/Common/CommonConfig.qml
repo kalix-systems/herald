@@ -52,7 +52,7 @@ Item {
     property int theme: 0
 
     property FontLoader chatFont: metaTheme.chatFont
-    property FontLoader labelFont: metaTheme.labelFont
+    property FontLoader labelFont: metaTheme.cairo
 
     property QtObject iconSizes: QtObject {
         property int small: units.dp(16)

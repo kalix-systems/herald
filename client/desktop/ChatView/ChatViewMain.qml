@@ -50,7 +50,7 @@ Page {
 
         Component.onCompleted: forceActiveFocus()
         Keys.onPressed: KeyNav.convWindowKeyHandler(event, chatScrollBar,
-                                                    chatListView,
+                                                    convWindow,
                                                     ScrollBar.AlwaysOn,
                                                     ScrollBar.AsNeeded)
 
@@ -108,6 +108,8 @@ Page {
             bottom: parent.bottom
             topMargin: CmnCfg.margin
             bottomMargin: 0
+            leftMargin: 0
+            rightMargin: 0
         }
 
         keysProxy: Item {

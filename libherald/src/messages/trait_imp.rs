@@ -71,15 +71,15 @@ impl Interface for Messages {
     fn body(
         &self,
         index: usize,
-    ) -> Option<String> {
-        self.body_(index)
+    ) -> String {
+        self.body_(index).unwrap_or_default()
     }
 
     fn full_body(
         &self,
         index: usize,
-    ) -> Option<String> {
-        self.full_body_(index)
+    ) -> String {
+        self.full_body_(index).unwrap_or_default()
     }
 
     fn receipt_status(
@@ -167,8 +167,8 @@ impl Interface for Messages {
     fn op_body(
         &self,
         index: usize,
-    ) -> Option<String> {
-        self.op_body_(index)
+    ) -> String {
+        self.op_body_(index).unwrap_or_default()
     }
 
     fn insertion_time(

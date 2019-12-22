@@ -6,12 +6,12 @@ import LibHerald 1.0
 // profile image
 Item {
     // whether or not the AvatarIcon is square.
-    property bool groupAvatar: false
+    property bool isGroupAvatar: false
     // path to the profile picture, or the empty string
     property string pfpPath
     // the color with which to fill the icon if there is not profile picture
-    property color iconColor
-    property real size: CmnCfg.avatarSize
+    property color backgroundColor
+    property real size: CmnCfg.avatarDiameter
     // the label, must be one of the sibling components in this directory with the Label suffix
     // for example
     //```
@@ -26,31 +26,32 @@ Item {
     property Component labelComponent
     // the initials to display in the icon
     property string initials
-    readonly property real innerMargins: CmnCfg.smallMargin
+    readonly property real padding: CmnCfg.smallMargin
     property color textColor: CmnCfg.palette.iconFill
     property real topTextMargin: 3
     property real bottomTextMargin: 4
     //split this from size of avatarMain to allow for convolabel to take up the same space
     //regardless of whether avatar is square or round
-    property real avatarHeight: CmnCfg.avatarSize
+    property real avatarDiameter: CmnCfg.avatarDiameter
 
     height: size
     width: size
 
-    AvatarIcon {
-        id: avatarIcon
-        color: iconColor
+    Avatar {
+        id: avatar
+        color: backgroundColor
         textColor: parent.textColor
         initials: parent.initials
-        height: parent.avatarHeight
+        height: parent.avatarDiameter
         width: height
-        pfpUrl: pfpPath
+        pfpPath: pfpPath
         anchors {
             verticalCenter: parent.verticalCenter
             left: parent.left
-            leftMargin: groupAvatar ? 2 : 0
+            leftMargin: isGroupAvatar ? 2 : 0
         }
-        groupAvatar: parent.groupAvatar
+        diameter: avatarDiameter
+        isGroup: parent.isGroupAvatar
     }
 
     Loader {
@@ -60,7 +61,7 @@ Item {
             rightMargin: CmnCfg.margin / 2
             topMargin: topTextMargin
             bottomMargin: bottomTextMargin
-            left: avatarIcon.right
+            left: avatar.right
             right: parent.right
             top: parent.top
             bottom: parent.bottom

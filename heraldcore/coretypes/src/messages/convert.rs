@@ -27,6 +27,7 @@ impl TryFrom<String> for MessageBody {
         if s.is_empty() {
             return Err(EmptyMessageBody);
         }
+
         Ok(Self(s))
     }
 }
@@ -38,6 +39,7 @@ impl TryFrom<&str> for MessageBody {
         if s.is_empty() {
             return Err(EmptyMessageBody);
         }
+
         Ok(Self(s.to_owned()))
     }
 }

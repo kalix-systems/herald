@@ -1,4 +1,5 @@
 use super::*;
+use image_utils::ProfilePicture;
 use std::collections::HashSet;
 
 mod db;
@@ -11,7 +12,7 @@ pub struct ConversationBuilder {
     /// Conversation title
     pub title: Option<String>,
     /// Conversation picture
-    pub picture: Option<String>,
+    pub picture: Option<ProfilePicture>,
     /// Conversation color,
     pub color: Option<u32>,
     /// Indicates whether the conversation is muted
@@ -57,7 +58,7 @@ impl ConversationBuilder {
     /// Sets picture
     pub fn picture(
         &mut self,
-        picture: String,
+        picture: ProfilePicture,
     ) -> &mut Self {
         self.picture.replace(picture);
         self

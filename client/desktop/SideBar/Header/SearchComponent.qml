@@ -19,17 +19,19 @@ Component {
         background: Rectangle {
             color: CmnCfg.palette.offBlack
         }
+
         RowLayout {
-
             anchors.fill: parent
+            spacing: 0
 
-            Common.ConfigAvatar {}
+            HeaderAvatar {
+                Layout.leftMargin: CmnCfg.smallMargin
+            }
 
             Rectangle {
                 Layout.fillWidth: true
                 color: CmnCfg.palette.offBlack
                 height: parent.height
-                Layout.leftMargin: -12
 
                 TextArea {
                     id: searchText
@@ -51,20 +53,6 @@ Component {
                         if (event.key === Qt.Key_Return
                                 || event.key === Qt.Key_Tab) {
                             event.accepted = true
-                        }
-                    }
-
-                    Imports.ButtonForm {
-                        source: "qrc:/x-icon.svg"
-                        scale: 0.8
-                        fill: CmnCfg.palette.lightGrey
-                        anchors.right: parent.right
-                        anchors.rightMargin: CmnCfg.smallMargin / 2
-                        anchors.verticalCenter: parent.verticalCenter
-                        onClicked: {
-                            Herald.messageSearch.clearSearch()
-                            Herald.conversations.filter = ""
-                            sideBarState.state = ""
                         }
                     }
 
@@ -96,7 +84,21 @@ Component {
                     anchors.bottomMargin: CmnCfg.smallMargin
                     anchors.bottom: parent.bottom
                 }
+
             }
+
+            Imports.ButtonForm {
+                source: "qrc:/x-icon.svg"
+                fill: CmnCfg.palette.lightGrey
+                Layout.alignment: Qt.AlignRight
+                Layout.rightMargin: CmnCfg.smallMargin
+                onClicked: {
+                    Herald.messageSearch.clearSearch()
+                    Herald.conversations.filter = ""
+                    sideBarState.state = ""
+                }
+            }
+
         }
     }
 }

@@ -21,7 +21,7 @@ ListView {
     property NumberAnimation highlightAnimation: NumberAnimation {
         id: bubbleHighlightAnimation
         property: "opacity"
-        from: 1.0
+        from: 0.2
         to: 0.0
         duration: 600
         easing.type: Easing.InCubic
@@ -38,7 +38,6 @@ ListView {
     onFlickStarted: focus = true
 
     highlightFollowsCurrentItem: false
-    cacheBuffer: chatListView.height * 5
 
     ScrollBar.vertical: ScrollBar {
         id: chatScrollBarInner
@@ -55,6 +54,10 @@ ListView {
     boundsMovement: Flickable.StopAtBounds
     model: chatPage.ownedConversation
 
+    // this is set to a higher value in `Component.onCompleted`
+    // but is set to `0` here to improve initial load times
+    cacheBuffer: 0
+
     Component.onCompleted: {
         model.setElisionLineCount(38)
         model.setElisionCharCount(38 * 40)
@@ -65,6 +68,7 @@ ListView {
         // however 1.0 does not seem to be the actual bottom of the page.
         // ain't that Qt.
         chatScrollBarInner.setPosition(3.0)
+        cacheBuffer = chatListView.height * 5
     }
 
     FileDialog {
@@ -76,49 +80,43 @@ ListView {
         selectExisting: false
     }
 
-    // TODO delegate should be ChatBubble
-    delegate: Row {
-        id: chatRow
+    delegate: CB.ChatBubble {
+        id: bubbleActual
+        convContainer: chatListView
+        defaultWidth: chatListView.width
+        width: parent.width
+        messageModelData: model
 
         ListView.onAdd: {
-
             // made with the understanding that position goes from 0.0-1.0
             // however 1.0 does not seem to be the actual bottom of the page.
             // ain't that Qt.
             chatScrollBarInner.setPosition(3.0)
         }
 
-        // path to image file
-        property string proxyReceiptImage: Utils.receiptCodeSwitch(
-                                               receiptStatus)
-
-        readonly property bool outbound: author === Herald.config.configId
-
-        property alias highlight: bubbleActual.highlightItem
-
-        property bool elided: body.length !== fullBody.length
-
-        property var messageModelData: model
-
         anchors {
             left: parent.left
             right: parent.right
         }
 
-        bottomPadding: 0
-        topPadding: 0
+        ChatBubbleHover {
+            id: bubbleHoverHandler
+            download: bubbleActual.imageAttach || bubbleActual.docAttach
+            onEntered: bubbleActual.hoverHighlight = true
+            onExited: bubbleActual.hoverHighlight = false
+        }
 
-        CB.ChatBubble {
-            id: bubbleActual
-            convContainer: chatListView
-            defaultWidth: chatListView.width
-            messageModelData: chatRow.messageModelData
-
-            ChatBubbleHover {
-                id: bubbleHoverHandler
-                download: bubbleActual.imageAttach || bubbleActual.docAttach
-                onEntered: bubbleActual.hoverHighlight = true
-                onExited: bubbleActual.hoverHighlight = false
+        // Handles signals from ChatBubble attachment loaders to adjust view down
+        // once the layout has been fully calculated
+        Loader {
+            active: (parent.messageModelData.index === chatListView.count - 1)
+            sourceComponent: Component {
+                Connections {
+                    target: bubbleActual
+                    onAttachmentsLoaded: {
+                        chatListView.positionViewAtEnd()
+                    }
+                }
             }
         }
     }

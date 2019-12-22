@@ -32,11 +32,11 @@ Item {
         width: parent.width
         height: parent.height
         Label {
-            id: uid
+            id: name
             font {
-                bold: true
                 family: CmnCfg.chatFont.name
                 pixelSize: labelSize
+                weight: Font.Medium
             }
             Layout.alignment: Qt.AlignLeft | Qt.AlignTop
             Layout.preferredHeight: labelGrid.height * 0.25
@@ -50,7 +50,7 @@ Item {
             id: ts
             font {
                 family: CmnCfg.chatFont.name
-                pixelSize: labelSize
+                pixelSize: 11
             }
             text: lastTimestamp
             Layout.preferredHeight: labelGrid.height * 0.25

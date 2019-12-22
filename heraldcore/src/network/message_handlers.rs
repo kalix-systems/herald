@@ -40,7 +40,9 @@ pub(super) fn handle_cmessage(
                 Some(bytes) => {
                     let image_path = image_path();
                     fs::write(&image_path, bytes)?;
-                    Some(image_path.into_os_string().into_string()?)
+                    Some(image_utils::ProfilePicture::autocrop(
+                        image_path.into_os_string().into_string()?,
+                    ))
                 }
                 None => None,
             };
