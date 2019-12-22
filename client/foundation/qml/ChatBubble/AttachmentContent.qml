@@ -6,7 +6,6 @@ import QtGraphicalEffects 1.1
 
 Column {
     id: wrapperCol
-    onPositioningComplete: bubbleRoot.attachmentsLoaded()
 
     property real maxWidth: Math.min(contentRoot.maxWidth, 600)
     property var mediaParsed

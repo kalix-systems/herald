@@ -21,7 +21,7 @@ Row {
         fillMode: Image.PreserveAspectCrop
         asynchronous: true
         MouseArea {
-            onClicked: imageClickedCallBack(wrapperRow.source)
+            onClicked: wrapperRow.imageClickedCallBack(image.source)
             anchors.fill: parent
         }
     }
