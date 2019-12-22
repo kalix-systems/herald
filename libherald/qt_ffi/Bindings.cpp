@@ -2058,7 +2058,7 @@ QVariant Messages::data(const QModelIndex &index, int role) const {
     case Qt::UserRole + 14:
       return cleanNullQVariant(QVariant::fromValue(opAuthor(index.row())));
     case Qt::UserRole + 15:
-      return cleanNullQVariant(QVariant::fromValue(opBody(index.row())));
+      return QVariant::fromValue(opBody(index.row()));
     case Qt::UserRole + 16:
       return opColor(index.row());
     case Qt::UserRole + 17:

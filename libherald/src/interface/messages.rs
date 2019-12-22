@@ -438,7 +438,7 @@ pub trait MessagesTrait {
     fn op_body(
         &self,
         index: usize,
-    ) -> Option<String>;
+    ) -> String;
 
     fn op_color(
         &self,
@@ -1141,10 +1141,8 @@ pub unsafe extern "C" fn messages_data_op_body(
 ) {
     let obj = &*ptr;
     let data = obj.op_body(to_usize(row).unwrap_or(0));
-    if let Some(data) = data {
-        let str_: *const c_char = data.as_ptr() as (*const c_char);
-        set(d, str_, to_c_int(data.len()));
-    }
+    let str_: *const c_char = data.as_ptr() as *const c_char;
+    set(d, str_, to_c_int(data.len()));
 }
 
 #[no_mangle]

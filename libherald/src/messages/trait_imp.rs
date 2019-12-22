@@ -167,8 +167,8 @@ impl Interface for Messages {
     fn op_body(
         &self,
         index: usize,
-    ) -> Option<String> {
-        self.op_body_(index)
+    ) -> String {
+        self.op_body_(index).unwrap_or_default()
     }
 
     fn insertion_time(
