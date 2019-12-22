@@ -300,6 +300,7 @@ struct HeraldPtrBundle {
   void (*message_search_end_move_rows)(MessageSearch *);
   void (*message_search_begin_remove_rows)(MessageSearch *, int, int);
   void (*message_search_end_remove_rows)(MessageSearch *);
+  void (*herald_registration_failure_code_changed)(Herald *);
   Users *users;
   void (*users_filter_changed)(Users *);
   void (*users_filter_regex_changed)(Users *);
@@ -1039,6 +1040,8 @@ private:
   Q_PROPERTY(Errors *errors READ errors NOTIFY errorsChanged FINAL)
   Q_PROPERTY(MessageSearch *messageSearch READ messageSearch NOTIFY
                  messageSearchChanged FINAL)
+  Q_PROPERTY(QVariant registrationFailureCode READ registrationFailureCode
+                 NOTIFY registrationFailureCodeChanged FINAL)
   Q_PROPERTY(Users *users READ users NOTIFY usersChanged FINAL)
   Q_PROPERTY(
       UsersSearch *usersSearch READ usersSearch NOTIFY usersSearchChanged FINAL)
@@ -1061,6 +1064,7 @@ public:
   Errors *errors();
   const MessageSearch *messageSearch() const;
   MessageSearch *messageSearch();
+  QVariant registrationFailureCode() const;
   const Users *users() const;
   Users *users();
   const UsersSearch *usersSearch() const;
@@ -1113,6 +1117,7 @@ Q_SIGNALS:
   void conversationsChanged();
   void errorsChanged();
   void messageSearchChanged();
+  void registrationFailureCodeChanged();
   void usersChanged();
   void usersSearchChanged();
   void utilsChanged();

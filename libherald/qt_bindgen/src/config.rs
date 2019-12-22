@@ -62,6 +62,13 @@ fn herald() -> Object {
         connectionUp: Prop::new().simple(Bool),
         connectionPending: Prop::new().simple(Bool),
 
+        // Registration failure code
+        // UserIdTaken  => 0,
+        // KeyTaken     => 1,
+        // BadSignature => 2,
+        // Other        => 3,
+        registrationFailureCode: Prop::new().simple(QUint8).optional(),
+
         // object props
         config: Prop::new().object(config()),
         conversationBuilder: Prop::new().object(conversation_builder()),

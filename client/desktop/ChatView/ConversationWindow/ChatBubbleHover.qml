@@ -11,6 +11,7 @@ import QtQuick.Controls 2.3
 MouseArea {
     id: chatBubbleHitbox
     property bool download: false
+
     propagateComposedEvents: true
     hoverEnabled: true
     anchors.fill: bubbleActual
@@ -45,6 +46,7 @@ MouseArea {
                 source: "qrc:/reply-icon.svg"
                 z: CmnCfg.overlayZ
 
+                // changing the opId transfers focus to the compose field
                 onClicked: ownedConversation.builder.opId = msgId
             }
 

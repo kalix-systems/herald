@@ -90,13 +90,7 @@ impl Messages {
 
         let len = self.container.len();
 
-        let prev_state = if ix > 0 {
-            (self.is_tail(ix - 1), self.is_head(ix - 1))
-        } else {
-            (None, None)
-        };
-
-        let succ_state = (self.is_tail(ix), self.is_head(ix));
+        let (was_tail, was_head) = (self.is_tail(ix), self.is_head(ix));
 
         self.model.begin_remove_rows(ix, ix);
         let data = self.container.remove(ix);
@@ -108,16 +102,12 @@ impl Messages {
                 .set_dangling(replies, |ix| model.data_changed(ix, ix));
         }
 
-        if ix > 0 {
-            let prev_head = self.is_head(ix - 1);
+        if was_tail.unwrap_or(false) && (ix > 0) {
+            self.entry_changed(ix - 1);
+        }
 
-            if prev_state != (prev_head, self.is_tail(ix - 1)) {
-                self.entry_changed(ix - 1);
-            }
-
-            if ix + 1 < self.container.len() && succ_state != (prev_head, self.is_tail(ix + 1)) {
-                self.entry_changed(ix + 1);
-            }
+        if was_head.unwrap_or(false) && (ix < self.container.len()) {
+            self.entry_changed(ix);
         }
 
         if len == 1 {
