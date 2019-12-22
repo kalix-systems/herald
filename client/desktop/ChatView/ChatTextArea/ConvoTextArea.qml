@@ -36,7 +36,6 @@ Rectangle {
 
     color: CmnCfg.palette.white
     clip: true
-
     height: containerCol.height
 
     Imports.ButtonForm {
@@ -44,7 +43,7 @@ Rectangle {
         anchors.right: parent.right
         anchors.rightMargin: CmnCfg.margin
         anchors.bottom: parent.bottom
-        bottomPadding: CmnCfg.margin * 0.5
+        bottomPadding: CmnCfg.smallMargin * 0.5
         source: "qrc:/attach-icon.svg"
     }
 
@@ -53,7 +52,7 @@ Rectangle {
         anchors.left: parent.left
         anchors.leftMargin: CmnCfg.margin
         anchors.bottom: parent.bottom
-        bottomPadding: CmnCfg.margin * 0.5
+        bottomPadding: CmnCfg.smallMargin * 0.5
         source: "qrc:/emoji-icon.svg"
     }
 
