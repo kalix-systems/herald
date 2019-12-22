@@ -80,6 +80,14 @@ ListView {
         selectExisting: false
     }
 
+    FileDialog {
+        id: downloadFileChooser
+        selectFolder: true
+        folder: StandardPaths.writableLocation(StandardPaths.DesktopLocation)
+        onAccepted: ownedConversation.saveAllAttachments(index, fileUrl)
+        selectExisting: false
+    }
+
     delegate: CB.ChatBubble {
         id: bubbleActual
         convContainer: chatListView

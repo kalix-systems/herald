@@ -81,14 +81,6 @@ MouseArea {
                 source: "qrc:/download-icon.svg"
                 onClicked: downloadFileChooser.open()
             }
-            FileDialog {
-                id: downloadFileChooser
-                selectFolder: true
-                folder: StandardPaths.writableLocation(
-                            StandardPaths.DesktopLocation)
-                onAccepted: ownedConversation.saveAllAttachments(index, fileUrl)
-                selectExisting: false
-            }
 
             Imports.ButtonForm {
                 id: messageOptionsButton
