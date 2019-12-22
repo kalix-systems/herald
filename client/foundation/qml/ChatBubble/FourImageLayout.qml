@@ -8,10 +8,10 @@ Row {
     property var secondImage
     property var thirdImage
     property var fourthImage
-    property var imageTappedCallback: function () {
+    property var imageClickedCallBack: function () {
         throw "undefined callback"
     }
-
+    onPositioningComplete: bubbleRoot.attachmentsLoaded()
     height: 150
     spacing: CmnCfg.smallMargin
     Rectangle {
@@ -30,7 +30,7 @@ Row {
             mipmap: false
             asynchronous: true
             MouseArea {
-                onClicked: imageTappedCallBack(parent.source)
+                onClicked: imageClickedCallBack(parent.source)
                 anchors.fill: parent
             }
         }
@@ -54,7 +54,7 @@ Row {
                 mipmap: false
                 asynchronous: true
                 MouseArea {
-                    onClicked: imageTappedCallBack(parent.source)
+                    onClicked: imageClickedCallBack(parent.source)
                     anchors.fill: parent
                 }
             }
@@ -80,7 +80,7 @@ Row {
                     mipmap: false
                     asynchronous: true
                     MouseArea {
-                        onClicked: imageTappedCallBack(parent.source)
+                        onClicked: imageClickedCallBack(parent.source)
                         anchors.fill: parent
                     }
                 }
@@ -102,7 +102,7 @@ Row {
                     mipmap: false
                     asynchronous: true
                     MouseArea {
-                        onClicked: imageTappedCallBack(parent.source)
+                        onClicked: imageClickedCallBack(parent.source)
                         anchors.fill: parent
                     }
                 }

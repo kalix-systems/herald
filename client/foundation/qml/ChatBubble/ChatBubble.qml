@@ -9,6 +9,8 @@ import "../Avatar"
 Rectangle {
     id: bubbleRoot
 
+    signal attachmentsLoaded
+
     property real defaultWidth
     property bool elided: body.length !== messageModelData.fullBody.length
     property bool expanded: false
@@ -125,7 +127,7 @@ Rectangle {
         // all messages are un-expanded on completion
         Component.onCompleted: bubbleRoot.expanded = false
 
-        spacing: CmnCfg.smallMargin / 2
+        spacing: CmnCfg.smallMargin
         topPadding: isHead ? CmnCfg.smallMargin : CmnCfg.smallMargin
         leftPadding: CmnCfg.smallMargin
         bottomPadding: isTail ? CmnCfg.margin : CmnCfg.smallMargin

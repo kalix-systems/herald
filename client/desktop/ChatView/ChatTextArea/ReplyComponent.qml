@@ -13,7 +13,6 @@ Rectangle {
     color: CmnCfg.palette.lightGrey
     border.color: CmnCfg.palette.black
     border.width: 1
-    width: parent.width
     height: Math.max(wrapperRow.height + label.height, 20)
 
     Connections {

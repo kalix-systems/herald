@@ -21,7 +21,7 @@ ListView {
     property NumberAnimation highlightAnimation: NumberAnimation {
         id: bubbleHighlightAnimation
         property: "opacity"
-        from: 1.0
+        from: 0.2
         to: 0.0
         duration: 600
         easing.type: Easing.InCubic
@@ -104,6 +104,20 @@ ListView {
             download: bubbleActual.imageAttach || bubbleActual.docAttach
             onEntered: bubbleActual.hoverHighlight = true
             onExited: bubbleActual.hoverHighlight = false
+        }
+
+        // Handles signals from ChatBubble attachment loaders to adjust view down
+        // once the layout has been fully calculated
+        Loader {
+            active: (parent.messageModelData.index === chatListView.count - 1)
+            sourceComponent: Component {
+                Connections {
+                    target: bubbleActual
+                    onAttachmentsLoaded: {
+                        chatListView.positionViewAtEnd()
+                    }
+                }
+            }
         }
     }
 }

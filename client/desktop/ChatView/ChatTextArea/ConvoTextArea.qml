@@ -73,8 +73,10 @@ Rectangle {
         bottomPadding: CmnCfg.smallMargin * 0.5
 
         Column {
-            width: parent.width
+            width: textWrapperRect.width
             spacing: CmnCfg.smallMargin
+            anchors.horizontalCenter: parent.horizontalCenter
+
             Loader {
                 id: replyLoader
                 property string opName: replyName
@@ -85,23 +87,33 @@ Rectangle {
                     startColor: CmnCfg.avatarColors[Herald.users.colorById(
                                                         replyUid)]
                 }
-                width: textWrapperRect.width
-                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.leftMargin: CmnCfg.smallMargin
+                anchors.rightMargin: CmnCfg.smallMargin
             }
 
             Loader {
                 id: attachmentLoader
                 active: ownedConversation.builder.hasMediaAttachment
                 height: item ? item.height : 0
-                sourceComponent: ImageAttachmentsComponent {}
                 width: scrollView.width
+                sourceComponent: ImageAttachmentsComponent {}
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.leftMargin: CmnCfg.smallMargin
+                anchors.rightMargin: CmnCfg.smallMargin
             }
+
             Loader {
                 id: fileLoader
                 active: ownedConversation.builder.hasDocAttachment
                 height: item ? item.height : 0
                 sourceComponent: FileAttachmentsComponent {}
-                width: scrollView.width
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.leftMargin: CmnCfg.smallMargin
+                anchors.rightMargin: CmnCfg.smallMargin
             }
         }
 
