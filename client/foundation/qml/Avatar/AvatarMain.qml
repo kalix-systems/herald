@@ -26,7 +26,7 @@ Item {
     property Component labelComponent
     // the initials to display in the icon
     property string initials
-    readonly property real innerMargins: CmnCfg.smallMargin
+    readonly property real padding: CmnCfg.smallMargin
     property color textColor: CmnCfg.palette.iconFill
     property real topTextMargin: 3
     property real bottomTextMargin: 4
