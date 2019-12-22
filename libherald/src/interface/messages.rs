@@ -383,7 +383,7 @@ pub trait MessagesTrait {
     fn body(
         &self,
         index: usize,
-    ) -> Option<String>;
+    ) -> String;
 
     fn doc_attachments(
         &self,
@@ -398,7 +398,7 @@ pub trait MessagesTrait {
     fn full_body(
         &self,
         index: usize,
-    ) -> Option<String>;
+    ) -> String;
 
     fn insertion_time(
         &self,
@@ -1014,10 +1014,8 @@ pub unsafe extern "C" fn messages_data_body(
 ) {
     let obj = &*ptr;
     let data = obj.body(to_usize(row).unwrap_or(0));
-    if let Some(data) = data {
-        let str_: *const c_char = data.as_ptr() as (*const c_char);
-        set(d, str_, to_c_int(data.len()));
-    }
+    let str_: *const c_char = data.as_ptr() as *const c_char;
+    set(d, str_, to_c_int(data.len()));
 }
 
 #[no_mangle]
@@ -1051,10 +1049,8 @@ pub unsafe extern "C" fn messages_data_full_body(
 ) {
     let obj = &*ptr;
     let data = obj.full_body(to_usize(row).unwrap_or(0));
-    if let Some(data) = data {
-        let str_: *const c_char = data.as_ptr() as (*const c_char);
-        set(d, str_, to_c_int(data.len()));
-    }
+    let str_: *const c_char = data.as_ptr() as *const c_char;
+    set(d, str_, to_c_int(data.len()));
 }
 
 #[no_mangle]

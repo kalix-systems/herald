@@ -39,9 +39,6 @@
         <file>common/PlatonicRectangle.qml</file>
         <file>main.qml</file>
         <file>ChatView/js/KeyNavigation.mjs</file>
-        <file>ChatView/ChatTextArea/ts/ChatTextAreaUtils.d.ts</file>
-        <file>ChatView/ChatTextArea/ts/ChatTextAreaUtils.ts</file>
-        <file>ChatView/ChatTextArea/ts/ChatViewTypes.d.ts</file>
         <file>ChatView/ChatTextArea/AttachmentsComponent.qml</file>
         <file>ChatView/ChatTextArea/ConvoTextArea.qml</file>
         <file>ChatView/ChatTextArea/ReplyComponent.qml</file>

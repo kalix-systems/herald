@@ -103,7 +103,8 @@ declare class Messages {
 declare class MessageBuilder {
   isReply: boolean;
   body?: string;
-  isMediaMessage: boolean;
+  hasMediaAttachment: boolean;
+  hasDocAttachment: boolean;
   parseMarkdown: boolean;
 
   opId?: MsgId;

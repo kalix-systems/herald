@@ -240,9 +240,9 @@ fn messages() -> Object {
         // Author of the message
         author: ItemProp::new(QString).optional().get_by_value(),
         // Message body. Possibly truncated if the message is too long
-        body: ItemProp::new(QString).optional().get_by_value(),
+        body: ItemProp::new(QString).get_by_value(),
         // Full message body
-        fullBody: ItemProp::new(QString).optional().get_by_value(),
+        fullBody: ItemProp::new(QString).get_by_value(),
         // Time the message was saved locally
         insertionTime: ItemProp::new(Qint64).optional(),
         // Time the message arrived at the server (only valid for inbound messages)
