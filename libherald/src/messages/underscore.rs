@@ -241,8 +241,8 @@ impl Messages {
 
         let changed = err!(self
             .search
-            .set_pattern(pattern, || emit.search_pattern_changed()))
-        .changed();
+            .set_pattern(pattern, || emit.search_pattern_changed())
+            .map(messages_helper::search::SearchChanged::changed));
 
         if changed && self.search.active {
             let model = &mut self.model;
