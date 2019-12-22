@@ -8,7 +8,7 @@ Row {
     id: wrapperRow
     property var firstImage
     property var aspectRatio: firstImage.width / firstImage.height
-    property var imageTappedCallback: function () {
+    property var imageClickedCallBack: function () {
         throw "undefined callback"
     }
     onPositioningComplete: bubbleRoot.attachmentsLoaded()

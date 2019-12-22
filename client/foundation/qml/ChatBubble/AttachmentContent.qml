@@ -75,7 +75,7 @@ Column {
         id: oneImage
         OneImageLayout {
             firstImage: mediaParsed[0]
-            imageTappedCallback: wrapperCol.imageClickedCallBack
+            imageClickedCallBack: wrapperCol.imageClickedCallBack
         }
     }
 
@@ -84,7 +84,7 @@ Column {
         TwoImageLayout {
             firstImage: mediaParsed[0]
             secondImage: mediaParsed[1]
-            imageTappedCallback: wrapperCol.imageClickedCallBack
+            imageClickedCallBack: wrapperCol.imageClickedCallBack
         }
     }
 
@@ -94,7 +94,7 @@ Column {
             firstImage: mediaParsed[0]
             secondImage: mediaParsed[1]
             thirdImage: mediaParsed[2]
-            imageTappedCallback: wrapperCol.imageClickedCallBack
+            imageClickedCallBack: wrapperCol.imageClickedCallBack
         }
     }
 
@@ -105,7 +105,7 @@ Column {
             secondImage: mediaParsed[1]
             thirdImage: mediaParsed[2]
             fourthImage: mediaParsed[3]
-            imageTappedCallback: wrapperCol.imageClickedCallBack
+            imageClickedCallBack: wrapperCol.imageClickedCallBack
         }
     }
 
@@ -117,7 +117,7 @@ Column {
             thirdImage: mediaParsed[2]
             fourthImage: mediaParsed[3]
             count: mediaParsed.length - 4
-            imageTappedCallback: wrapperCol.imageClickedCallBack
+            imageClickedCallBack: wrapperCol.imageClickedCallBack
         }
     }
 }

@@ -9,7 +9,7 @@ Row {
     spacing: CmnCfg.smallMargin
     property var firstImage
     property var secondImage
-    property var imageTappedCallback: function () {
+    property var imageClickedCallBack: function () {
         throw "undefined callback"
     }
  onPositioningComplete: bubbleRoot.attachmentsLoaded()
