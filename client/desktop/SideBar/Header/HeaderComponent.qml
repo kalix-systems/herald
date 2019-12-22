@@ -34,9 +34,7 @@ Component {
             Text {
                 id: text
                 text: headerLoader.headerText
-                font.pixelSize: CmnCfg.headerSize
-                font.family: CmnCfg.labelFont.name
-                font.bold: true
+                font: CmnCfg.headerBarFont
                 color: CmnCfg.palette.white
                 anchors.verticalCenter: parent.verticalCenter
                 // top padding aligns headerText baseline with baseline of

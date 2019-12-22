@@ -75,10 +75,7 @@ Item {
                     anchors.leftMargin: CmnCfg.largeMargin
                     anchors.verticalCenter: parent.verticalCenter
                     text: qsTr("Herald")
-
-                    font.pixelSize: CmnCfg.headerSize
-                    font.family: CmnCfg.labelFont.name
-                    font.bold: true
+                    font: CmnCfg.headerBarFont
                     color: CmnCfg.palette.white
                 }
             }
