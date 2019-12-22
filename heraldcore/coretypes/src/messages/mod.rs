@@ -350,6 +350,7 @@ impl Elider {
         body: MessageBody,
     ) -> String {
         let graphemes = UnicodeSegmentation::graphemes(body.as_str(), true);
+
         let mut char_count = 0;
         let mut line_count = 0;
 
@@ -359,8 +360,7 @@ impl Elider {
             }
 
             char_count += 1;
-
-            line_count += s.lines().count();
+            line_count += s.lines().count().saturating_sub(1);
         }
 
         if char_count < self.char_count && line_count < self.line_count {
