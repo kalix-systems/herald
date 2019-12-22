@@ -38,7 +38,7 @@ Rectangle {
             anchors.verticalCenter: parent.verticalCenter
             initials: Utils.initialize(title)
             size: CmnCfg.units.dp(56)
-            avatarHeight: CmnCfg.units.dp(48)
+            avatarDiameter: CmnCfg.units.dp(48)
             topTextMargin: CmnCfg.units.dp(4)
             bottomTextMargin: CmnCfg.units.dp(16)
 

@@ -32,10 +32,10 @@
         <file>emoji-categories/sports.svg</file>
         <file>emoji-categories/symbols.svg</file>
         <file>emoji-categories/transport.svg</file>
-        <file>mini-timer-icons/mini-timer-empty-icon.svg</file>
-        <file>mini-timer-icons/mini-timer-full-icon.svg</file>
-        <file>mini-timer-icons/mini-timer-almost-empty-icon.svg</file>
-        <file>mini-timer-icons/mini-timer-almost-full-icon.svg</file>
+        <file>mini-timer-icons/empty.svg</file>
+        <file>mini-timer-icons/full.svg</file>
+        <file>mini-timer-icons/almost-empty.svg</file>
+        <file>mini-timer-icons/almost-full.svg</file>
         <file>timer-option-icons/1d.svg</file>
         <file>timer-option-icons/1h.svg</file>
         <file>timer-option-icons/1min.svg</file>
@@ -48,8 +48,6 @@
         <file>timer-option-icons/off.svg</file>
         <file>herald.icns</file>
         <file>attach-icon.svg</file>
-        <file>clear-photo-icon.svg</file>
-        <file>countdown-icon-temp.svg</file>
         <file>file-icon.svg</file>
         <file>download-icon.svg</file>
         <file>dropdown-arrow-icon.svg</file>

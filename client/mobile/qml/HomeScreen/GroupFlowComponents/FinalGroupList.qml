@@ -26,7 +26,7 @@ ListView {
             anchors.verticalCenter: parent.verticalCenter
             initials: Utils.initialize(Herald.users.nameById(memberId))
             size: CmnCfg.units.dp(36)
-            avatarHeight: CmnCfg.units.dp(36)
+            avatarDiameter: CmnCfg.units.dp(36)
 
             anchors {
                 right: parent.right

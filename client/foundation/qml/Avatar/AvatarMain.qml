@@ -6,7 +6,7 @@ import LibHerald 1.0
 // profile image
 Item {
     // whether or not the AvatarIcon is square.
-    property bool groupAvatar: false
+    property bool isGroupAvatar: false
     // path to the profile picture, or the empty string
     property string pfpPath
     // the color with which to fill the icon if there is not profile picture
@@ -32,7 +32,7 @@ Item {
     property real bottomTextMargin: 4
     //split this from size of avatarMain to allow for convolabel to take up the same space
     //regardless of whether avatar is square or round
-    property real avatarHeight: CmnCfg.avatarDiameter
+    property real avatarDiameter: CmnCfg.avatarDiameter
 
     height: size
     width: size
@@ -42,16 +42,16 @@ Item {
         color: backgroundColor
         textColor: parent.textColor
         initials: parent.initials
-        height: parent.avatarHeight
+        height: parent.avatarDiameter
         width: height
         pfpPath: pfpPath
         anchors {
             verticalCenter: parent.verticalCenter
             left: parent.left
-            leftMargin: groupAvatar ? 2 : 0
+            leftMargin: isGroupAvatar ? 2 : 0
         }
-        diameter: avatarHeight
-        isGroup: parent.groupAvatar
+        diameter: avatarDiameter
+        isGroup: parent.isGroupAvatar
     }
 
     Loader {

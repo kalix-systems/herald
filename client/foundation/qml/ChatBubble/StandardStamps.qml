@@ -13,7 +13,7 @@ Row {
 
     Button {
         id: clock
-        icon.source: expirationTime !== undefined ? "qrc:/countdown-icon-temp.svg" : ""
+        icon.source: expirationTime !== undefined ? "qrc:/mini-timer-icons/almost-full.svg" : ""
         icon.height: 16
         icon.width: 16
         icon.color: "grey"
