@@ -14,10 +14,11 @@ Column {
 
     spacing: 0
 
-    Component.onCompleted: JSON.parse(documentAttachments).forEach(
-                               function (doc) {
-                                   docModel.append(doc)
-                               })
+    Component.onCompleted: {
+        JSON.parse(documentAttachments).forEach(function (doc) {
+            docModel.append(doc)
+        })
+    }
 
     ListModel {
         id: docModel
