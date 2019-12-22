@@ -3,7 +3,6 @@ import QtQuick.Layouts 1.14
 import QtQuick 2.14
 import LibHerald 1.0
 import "../Common"
-import "../ConfigMenu"
 import "qrc:/imports/Avatar"
 import "qrc:/imports/js/utils.mjs" as Utils
 import Qt.labs.platform 1.1
@@ -16,11 +15,11 @@ RowLayout {
         Layout.leftMargin: CmnCfg.units.dp(12)
         spacing: CmnCfg.units.dp(16)
         AvatarMain {
-            iconColor: CmnCfg.palette.avatarColors[Herald.config.color]
+            backgroundColor: CmnCfg.palette.avatarColors[Herald.config.color]
             initials: Herald.config.name[0].toUpperCase()
             pfpPath: Utils.safeStringOrDefault(Herald.config.profilePicture, "")
             size: CmnCfg.units.dp(24)
-            avatarHeight: CmnCfg.units.dp(24)
+            avatarDiameter: CmnCfg.units.dp(24)
             Layout.alignment: Qt.AlignCenter
             Layout.leftMargin: CmnCfg.units.dp(12)
         }
