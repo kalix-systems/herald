@@ -4,7 +4,7 @@ import LibHerald 1.0
 import "./HomeScreen" as HomeScreen
 import "./NewContactView" as NewContactView
 import "./ChatView" as ChatView
-import "./ConfigMenu" as ConfigMenu
+import "./SettingsMenu" as SettingsMenu
 
 Item {
     id: appRoot
@@ -26,10 +26,10 @@ Item {
         id: cvMain
         HomeScreen.HomeScreenMain {}
     }
-    //TODO: Rename meEEEeeee!
+
     Component {
-        id: configMain
-        ConfigMenu.ConfigMenuMain {}
+        id: settingsMain
+        SettingsMenu.SettingsMenuMain {}
     }
 
     Component {

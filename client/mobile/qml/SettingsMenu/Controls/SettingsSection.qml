@@ -3,6 +3,7 @@ import QtQuick.Layouts 1.12
 import LibHerald 1.0
 import "../../Common" as Common
 
+// TODO this is dead code?
 ColumnLayout {
     id: contentCol
     property string title
