@@ -259,9 +259,6 @@ Popup {
 
         onPinchUpdated: {
 
-            dumb.x = pt.x
-            dumb.y = pt.y
-
             galleryPopup.imageScale += (pinch.scale - pinch.previousScale) * 1.2
             flickable.resizeContent(galleryPopup.width * constrainedZoom,
                                     galleryPopup.height * constrainedZoom,
