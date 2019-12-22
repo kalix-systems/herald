@@ -1,14 +1,13 @@
 <RCC>
     <qresource prefix="/imports">
         <file alias="/Assets/Cairo-Regular.ttf">../Assets/Cairo-Regular.ttf</file>
-        <file alias="/Assets/Cairo-SemiBold.ttf">../Assets/Cairo-SemiBold.ttf</file>
+        <file alias="/Assets/Cairo-DemiBold.ttf">../Assets/Cairo-DemiBold.ttf</file>
         <file alias="/Assets/IBMPlexSans-Bold.ttf">../Assets/IBMPlexSans-Bold.ttf</file>
         <file alias="/Assets/IBMPlexSans-BoldItalic.ttf">../Assets/IBMPlexSans-BoldItalic.ttf</file>
         <file alias="/Assets/IBMPlexSans-Italic.ttf">../Assets/IBMPlexSans-Italic.ttf</file>
-        <file alias="/Assets/IBMPlexSans-Light.ttf">../Assets/IBMPlexSans-Light.ttf</file>
         <file alias="/Assets/IBMPlexSans-Medium.ttf">../Assets/IBMPlexSans-Medium.ttf</file>
         <file alias="/Assets/IBMPlexSans-Regular.ttf">../Assets/IBMPlexSans-Regular.ttf</file>
-        <file alias="/Assets/IBMPlexSans-SemiBold.ttf">../Assets/IBMPlexSans-SemiBold.ttf</file>
+        <file alias="/Assets/IBMPlexSans-DemiBold.ttf">../Assets/IBMPlexSans-DemiBold.ttf</file>
         <file alias="/Assets/Jura-Bold.ttf">../Assets/Jura-Bold.ttf</file>
         <file alias="/Assets/Jura-Regular.ttf">../Assets/Jura-Regular.ttf</file>
         <file alias="/Assets/Monoid-Regular.ttf">../Assets/Monoid-Regular.ttf</file>

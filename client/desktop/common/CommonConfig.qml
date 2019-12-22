@@ -37,6 +37,7 @@ Item {
 
     property font headerBarFont: Qt.font({
         family: labelFont.name,
+        weight: Font.DemiBold,
         letterSpacing: 1,
         pixelSize: 16
     })
