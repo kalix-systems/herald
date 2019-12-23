@@ -212,6 +212,7 @@ impl KrpcClient<ChatProtocol> for Chatter {
         &self,
         push: Push,
     ) -> PushAck {
+        // dbg!(self.my_id, &push);
         match push {
             Push::Joined(u) => {
                 self.online.lock().await.insert(u);
@@ -405,7 +406,7 @@ mod ws_ {
     use super::*;
     use ws::*;
 
-    async fn start_server() -> (SocketAddr, Vec<u8>, impl TryFuture<Ok = (), Error = Error>) {
+    async fn start_server() -> (SocketAddr, Vec<u8>, impl Future<Output = ()>) {
         let (s_config, cert) = tls::configure_server().expect("failed to generate server config");
         let tls = s_config;
 
@@ -414,10 +415,10 @@ mod ws_ {
         let s_socket: SocketAddr = ([127u8, 0, 0, 1], s_port).into();
 
         let driver = {
-            serve_arc(server, s_socket, tls)
-                .await
-                .map(Ok)
-                .try_for_each(|f| f)
+            serve_arc(server, s_socket, tls).await.for_each(|f| {
+                tokio::spawn(f.unwrap_or_else(|e| panic!("connection closed: {}", e)));
+                ready(())
+            })
         };
         (s_socket, cert, driver)
     }
@@ -449,18 +450,17 @@ mod ws_ {
         let u2 = User(UQ::gen_new());
 
         let (sock, cert, driver) = start_server().await;
-        tokio::spawn(driver.unwrap_or_else(|e| panic!("server closed with error {}", e)));
+        tokio::spawn(driver);
 
         let c1 = start_client(u1, &sock, &cert).await;
-        dbg!();
+
+        time::delay_for(DELAY).await;
 
         let c2 = start_client(u2, &sock, &cert).await;
-        dbg!();
 
         time::delay_for(DELAY).await;
 
         let c1_were_online = c1.online.lock().await.clone();
-        dbg!();
 
         let c1_found_online = c1
             .req(Req::CheckOnline)
@@ -468,7 +468,6 @@ mod ws_ {
             .expect("c1 failed to check who was online")
             .await
             .expect("c1 failed to check who was online");
-        dbg!();
 
         let c1_send_res = c1
             .req(Req::Send("msg1".into()))
@@ -476,10 +475,8 @@ mod ws_ {
             .expect("c1 failed to send msg")
             .await
             .expect("c1 failed to send msg");
-        dbg!();
 
         let c2_were_online = c2.online.lock().await.clone();
-        dbg!();
 
         let c2_found_online = c2
             .req(Req::CheckOnline)
@@ -487,7 +484,6 @@ mod ws_ {
             .expect("c2 failed to check who was online")
             .await
             .expect("c2 failed to check who was online");
-        dbg!();
 
         let c2_send_res = c2
             .req(Req::Send("msg2".into()))
@@ -495,7 +491,6 @@ mod ws_ {
             .expect("c2 failed to send msg")
             .await
             .expect("c2 failed to send msg");
-        dbg!();
 
         assert_eq!(c1_were_online, c2_were_online);
         assert_eq!(c1_found_online, c2_found_online);
@@ -508,9 +503,7 @@ mod ws_ {
         time::delay_for(DELAY).await;
 
         let c1_log = c1.msgs.lock().await.clone();
-        dbg!();
         let c2_log = c2.msgs.lock().await.clone();
-        dbg!();
 
         assert_eq!(c1_log, c2_log);
         assert_eq!(c1_log, vec![(u1, "msg1".into()), (u2, "msg2".into())]);
