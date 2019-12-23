@@ -25,7 +25,7 @@ ScrollView {
             model: ownedConversation.builder.documentAttachments
             delegate: RowLayout {
                 clip: true
-                spacing: CmnCfg.smallMargin / 2
+                spacing: CmnCfg.microMargin
                 Imports.ButtonForm {
                     id: clearFile
                     source: "qrc:/x-icon.svg"

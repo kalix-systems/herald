@@ -19,7 +19,7 @@ Component {
             id: searchToolBar
             anchors.horizontalCenter: parent.horizontalCenter
 
-            spacing: CmnCfg.smallMargin / 2
+            spacing: CmnCfg.microMargin
 
             anchors {
                 leftMargin: CmnCfg.defaultMargin

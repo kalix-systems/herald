@@ -31,7 +31,7 @@ Rectangle {
         anchors.top: parent.top
         anchors.bottom: parent.bottom
 
-        width: CmnCfg.smallMargin / 2
+        width: CmnCfg.accentBarWidth
         color: opColor
         anchors.left: parent.left
     }

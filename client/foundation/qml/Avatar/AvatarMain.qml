@@ -58,7 +58,7 @@ Item {
         id: labelContent
         anchors {
             leftMargin: CmnCfg.defaultMargin
-            rightMargin: CmnCfg.defaultMargin / 2
+            rightMargin: CmnCfg.smallMargin
             topMargin: topTextMargin
             bottomMargin: bottomTextMargin
             left: avatar.right

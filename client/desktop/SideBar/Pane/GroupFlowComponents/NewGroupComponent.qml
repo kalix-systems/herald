@@ -59,7 +59,7 @@ Component {
         //create group button
         Imports.ButtonForm {
             anchors.top: groupSelectText.bottom
-            anchors.topMargin: CmnCfg.smallMargin / 2
+            anchors.topMargin: CmnCfg.smallMargin
             anchors.right: parent.right
             anchors.rightMargin: CmnCfg.megaMargin / 2
 

@@ -35,7 +35,7 @@ Component {
 
                 TextArea {
                     id: searchText
-                    height: CmnCfg.toolbarHeight - CmnCfg.smallMargin / 2
+                    height: CmnCfg.toolbarHeight - CmnCfg.microMargin
                     width: parent.width
                     placeholderText: headerLoader.searchPlaceholder
                     color: "white"

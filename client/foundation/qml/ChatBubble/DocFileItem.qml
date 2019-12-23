@@ -13,7 +13,7 @@ ListView {
     interactive: false
     width: contentItem.childrenRect.width + CmnCfg.smallMargin * 2
     height: 24 * Math.min(docParsed.length, 5)
-    spacing: CmnCfg.smallMargin / 2
+    spacing: CmnCfg.microMargin
     clip: true
 
     ScrollBar.vertical: ScrollBar {

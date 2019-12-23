@@ -100,7 +100,7 @@ Rectangle {
         anchors.top: parent.top
         anchors.bottom: parent.bottom
 
-        width: CmnCfg.smallMargin / 2
+        width: CmnCfg.accentBarWidth
         color: authorColor
         anchors.left: avatar.right
         anchors.leftMargin: CmnCfg.smallMargin
@@ -194,7 +194,7 @@ Rectangle {
 
         //media and file column loader
         Column {
-            spacing: CmnCfg.smallMargin
+            spacing: CmnCfg.defaultMargin
             Loader {
                 id: imageLoader
                 sourceComponent: imageAttach ? image : undefined

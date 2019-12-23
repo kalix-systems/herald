@@ -52,6 +52,10 @@ Item {
     readonly property int convoHeight: 56
     /// standard toolbar height
     readonly property int toolbarHeight: 40
+    /// width of chat bubble left accent bar
+    readonly property int accentBarWidth: 4
+
+
     /// standard popup height and width
     readonly property int popupWidth: 200
     readonly property int popupHeight: 250

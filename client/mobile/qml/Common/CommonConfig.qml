@@ -58,6 +58,9 @@ Item {
     /// standard avatar size
     readonly property int avatarSize: units.dp(56)
 
+    /// width of chat bubble left accent bar
+    readonly property int accentBarWidth: 4
+
     // TODO we aren't going to use more than 2-3 sizes for icons, remove this
     // enum once we settle on those sizes
     readonly property QtObject iconSizes: QtObject {
