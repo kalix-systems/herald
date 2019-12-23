@@ -1,5 +1,3 @@
-#![allow(warnings)]
-
 use anyhow::*;
 use async_trait::*;
 use futures::{future::*, stream::*};
@@ -98,7 +96,7 @@ impl KrpcServer<ChatProtocol> for Server {
 
     async fn init<Tx, Rx>(
         &self,
-        tx: &mut Tx,
+        _tx: &mut Tx,
         rx: &mut Rx,
     ) -> Result<Self::ConnInfo, Error>
     where

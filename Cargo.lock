@@ -674,6 +674,7 @@ dependencies = [
  "herald_common 0.1.0",
  "heraldcore 0.1.0",
  "im 14.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "json 0.12.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "location 0.1.0",
  "messages_helper 0.1.0",
  "notify-rust 3.6.3 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -850,6 +851,7 @@ version = "0.1.0"
 dependencies = [
  "hex 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "image 0.22.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "json 0.12.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "kcl 0.1.0",
  "platform_dirs 0.1.0",
 ]
@@ -1152,6 +1154,16 @@ version = "2.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
+name = "message_cache"
+version = "0.1.0"
+dependencies = [
+ "heraldcore 0.1.0",
+ "lru 0.4.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "once_cell 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "parking_lot 0.10.0 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
 name = "messages_helper"
 version = "0.1.0"
 dependencies = [
@@ -1162,6 +1174,7 @@ dependencies = [
  "im 14.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "json 0.12.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "lru 0.4.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "message_cache 0.1.0",
  "once_cell 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "parking_lot 0.10.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "search_pattern 0.1.0",
