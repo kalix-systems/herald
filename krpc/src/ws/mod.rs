@@ -4,7 +4,7 @@ use futures::{
     stream::{self, StreamExt, TryStreamExt},
 };
 use sharded_slab::*;
-use std::{cmp::min, sync::Arc};
+use std::{cmp::min, ops::Deref, sync::Arc};
 use tokio::sync::{mpsc::*, oneshot};
 use tokio_tungstenite::WebSocketStream;
 use tungstenite::{protocol::*, Message};
@@ -142,6 +142,31 @@ where
     Ok(())
 }
 
+macro_rules! serve_body {
+    ($server:expr, $socket:expr, $tls:expr) => {
+        stream::unfold(
+            tokio::net::TcpListener::bind($socket).await.ok(),
+            move |mlistener| {
+                let server = $server;
+                let tls = $tls;
+                async move {
+                    let mut listener = mlistener?;
+                    let (stream, _) = listener.accept().await.ok()?;
+                    let fut = async move {
+                        let stream = tls.accept(stream).await?;
+                        handle_conn::<P, S, tokio_rustls::server::TlsStream<tokio::net::TcpStream>>(
+                            server.deref(),
+                            stream,
+                        )
+                        .await
+                    };
+                    Some((fut, Some(listener)))
+                }
+            },
+        )
+    };
+}
+
 pub async fn serve<'a, P, S>(
     server: &'a S,
     socket: &'a SocketAddr,
@@ -152,23 +177,20 @@ where
     S: KrpcServer<P>,
     P::Push: Clone,
 {
-    stream::unfold(
-        tokio::net::TcpListener::bind(socket).await.ok(),
-        move |mlistener| {
-            async move {
-                let mut listener = mlistener?;
-                let (stream, _) = listener.accept().await.ok()?;
-                let fut = async move {
-                    let stream = tls.accept(stream).await?;
-                    handle_conn::<P, S, tokio_rustls::server::TlsStream<tokio::net::TcpStream>>(
-                        server, stream,
-                    )
-                    .await
-                };
-                Some((fut, Some(listener)))
-            }
-        },
-    )
+    serve_body!(server, socket, tls)
+}
+
+pub async fn serve_arc<P, S>(
+    server: Arc<S>,
+    socket: SocketAddr,
+    tls: tokio_rustls::TlsAcceptor,
+) -> impl Stream<Item = impl TryFuture<Ok = (), Error = Error>>
+where
+    P: Protocol,
+    S: KrpcServer<P>,
+    P::Push: Clone,
+{
+    serve_body!(server.clone(), socket, tls.clone())
 }
 
 struct PendingReq<Req, Res> {
