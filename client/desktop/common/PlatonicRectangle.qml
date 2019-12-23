@@ -19,9 +19,10 @@ Rectangle {
     property Component labelComponent
     property string picture
     property bool isGroupPicture: false
+    property bool isMessageResult: false
 
     property int topTextMargin: CmnCfg.smallMargin
-    property int bottomTextMargin: 14
+    property int bottomTextMargin: isMessageResult ? CmnCfg.smallMargin : CmnCfg.defaultMargin
 
 
     Avatar {

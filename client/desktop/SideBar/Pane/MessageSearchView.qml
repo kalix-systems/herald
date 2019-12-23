@@ -35,6 +35,7 @@ ListView {
             picture: Utils.safeStringOrDefault(messageData.conversationPicture,
                                                "")
             isGroupPicture: !messageData.conversationPairwise
+            isMessageResult: true
 
             MouseArea {
                 id: hoverHandler
