@@ -24,7 +24,7 @@ impl Conn {
     pub async fn get_pending(
         &mut self,
         of: sig::PublicKey,
-    ) -> Result<Vec<(Push, i64)>, Error> {
+    ) -> Res<Vec<(Push, i64)>> {
         let stmt = self
             .prepare_typed(sql!("get_pending"), types![BYTEA])
             .await?;
@@ -55,7 +55,7 @@ impl Conn {
         &mut self,
         of: sig::PublicKey,
         items: S,
-    ) -> Result<(), Error> {
+    ) -> Res<()> {
         let stmt = self
             .prepare_typed(sql!("expire_pending"), types![BYTEA, INT8])
             .await?;
@@ -86,7 +86,7 @@ impl Conn {
             timestamp,
             msg,
         }: &Push,
-    ) -> Result<PushedTo, Error> {
+    ) -> Res<PushedTo> {
         use Recip::*;
 
         match recip {
@@ -116,7 +116,7 @@ impl Conn {
         msg: &Bytes,
         tag: &PushTag,
         timestamp: &Time,
-    ) -> Result<PushedTo, Error> {
+    ) -> Res<PushedTo> {
         let tx = self.transaction().await?;
         let exists_stmt = tx
             .prepare_typed(sql!("device_exists"), types![BYTEA])
@@ -163,7 +163,7 @@ impl Conn {
         msg: &Bytes,
         tag: &PushTag,
         timestamp: &Time,
-    ) -> Result<PushedTo, Error> {
+    ) -> Res<PushedTo> {
         let tx = self.transaction().await?;
 
         let exists_stmt = tx.prepare_typed(sql!("user_exists"), types![TEXT]).await?;
@@ -228,7 +228,7 @@ impl Conn {
         msg: &Bytes,
         tag: &PushTag,
         timestamp: &Time,
-    ) -> Result<PushedTo, Error> {
+    ) -> Res<PushedTo> {
         let tx = self.transaction().await?;
 
         let exists_stmt = tx
@@ -300,7 +300,7 @@ impl Conn {
         msg: &Bytes,
         tag: &PushTag,
         timestamp: &Time,
-    ) -> Result<PushedTo, Error> {
+    ) -> Res<PushedTo> {
         let tx = self.transaction().await?;
 
         let push_stmt = tx
@@ -373,7 +373,7 @@ impl Conn {
         msg: &Bytes,
         tag: &PushTag,
         timestamp: &Time,
-    ) -> Result<PushedTo, Error> {
+    ) -> Res<PushedTo> {
         let tx = self.transaction().await?;
 
         let push_stmt = tx
@@ -444,7 +444,7 @@ impl Conn {
         msg: &Bytes,
         tag: &PushTag,
         timestamp: &Time,
-    ) -> Result<PushedTo, Error> {
+    ) -> Res<PushedTo> {
         let tx = self.transaction().await?;
 
         let push_stmt = tx

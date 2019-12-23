@@ -9,8 +9,9 @@ use tokio_postgres::{
     Client, Error as PgError, NoTls,
 };
 
-type Res<T> = Result<T, Error>;
+type Res<T> = std::result::Result<T, Error>;
 
+mod group_change;
 mod macros;
 mod pending;
 mod pool;
@@ -23,131 +24,23 @@ impl Conn {
     pub async fn user_of(
         &mut self,
         key: sig::PublicKey,
-    ) -> Result<Option<UserId>, Error> {
+    ) -> Res<Option<UserId>> {
         let stmt = self.prepare_typed(sql!("user_of"), types![BYTEA]).await?;
 
-        Ok(self
-            .query(&stmt, params![key.as_ref()])
-            .await?
-            .into_iter()
-            .next()
-            .and_then(|row: tokio_postgres::Row| -> Option<UserId> {
-                let uid_str: &str = row.get(0);
-                UserId::try_from(uid_str).ok()
-            }))
-    }
+        let rows = self.query(&stmt, params![key.as_ref()]).await?;
 
-    pub async fn add_to_group<Users: Stream<Item = UserId> + Send + Unpin>(
-        &mut self,
-        users: Users,
-        conv: ConversationId,
-    ) -> Result<add_to_group::Res, Error> {
-        let tx = self.transaction().await?;
-
-        let (insert_stmt, exists_stmt) = try_join!(
-            tx.prepare_typed(sql!("add_to_group"), types![BYTEA, TEXT]),
-            tx.prepare_typed(sql!("user_exists"), types![TEXT])
-        )?;
-
-        let res: Result<(), Res<add_to_group::Res>> = users
-            .map(Ok::<UserId, Res<add_to_group::Res>>)
-            .try_for_each_concurrent(10, |u| {
-                let tx = &tx;
-                let insert_stmt = &insert_stmt;
-                let exists_stmt = &exists_stmt;
-
-                async move {
-                    let uid_str: &str = u.as_str();
-
-                    if !tx
-                        .query_one(exists_stmt, params![uid_str])
-                        .await
-                        .map_err(Error::from)
-                        .map_err(Err)?
-                        .get::<_, bool>(0)
-                    {
-                        return Err(Ok(add_to_group::Res::MissingUser(u)));
-                    }
-
-                    tx.execute(insert_stmt, params![conv.as_slice(), uid_str])
-                        .await
-                        .map_err(Error::from)
-                        .map_err(Err)?;
-
-                    Ok(())
-                }
-            })
-            .await;
-
-        match res {
-            Err(v @ Ok(add_to_group::Res::MissingUser(_))) => return v,
-            Err(Err(e)) => return Err(e.into()),
-            _ => {}
+        let first = match rows.into_iter().next() {
+            Some(first) => first,
+            None => return Ok(None),
         };
 
-        tx.commit().await?;
-
-        Ok(add_to_group::Res::Success)
-    }
-
-    pub async fn leave_group<Convs: Stream<Item = ConversationId> + Send>(
-        &mut self,
-        user: UserId,
-        groups: Convs,
-    ) -> Result<leave_groups::Res, Error> {
-        let leave_stmt = self
-            .prepare_typed(sql!("leave_group"), types![TEXT, BYTEA])
-            .await?;
-
-        let exists_stmt = self
-            .prepare_typed(sql!("group_exists"), types![BYTEA])
-            .await?;
-
-        let uid_str: &str = user.as_str();
-
-        let res: Result<(), Result<leave_groups::Res, Error>> = groups
-            .map(Ok::<ConversationId, Result<leave_groups::Res, Error>>)
-            .try_for_each_concurrent(10, |cid| {
-                let conn = &self;
-                let exists_stmt = &exists_stmt;
-                let leave_stmt = &leave_stmt;
-
-                async move {
-                    let cid_slice: &[u8] = cid.as_slice();
-
-                    if !conn
-                        .query_one(exists_stmt, params![cid_slice])
-                        .await
-                        .map_err(Error::from)
-                        .map_err(Err)?
-                        .get::<_, bool>(0)
-                    {
-                        return Err(Ok(leave_groups::Res::Missing(cid)));
-                    }
-
-                    conn.execute(leave_stmt, params![uid_str])
-                        .await
-                        .map_err(Error::from)
-                        .map_err(Err)?;
-
-                    Ok(())
-                }
-            })
-            .await;
-
-        match res {
-            Err(v @ Ok(leave_groups::Res::Missing(_))) => return v,
-            Err(Err(e)) => return Err(e.into()),
-            _ => {}
-        };
-
-        Ok(leave_groups::Res::Success)
+        Ok(UserId::try_from(first.get::<_, &str>("user_id")).ok())
     }
 
     pub async fn new_user(
         &mut self,
         init: Signed<UserId>,
-    ) -> Result<register::Res, Error> {
+    ) -> Res<register::Res> {
         let (user_id, meta) = init.split();
 
         let tx = self.transaction().await?;
@@ -192,13 +85,13 @@ impl Conn {
 }
 
 impl Conn {
-    pub async fn setup(&mut self) -> Result<(), Error> {
+    pub async fn setup(&mut self) -> Res<()> {
         // create
         self.batch_execute(include_str!("../schema/up.sql")).await?;
         Ok(())
     }
 
-    pub async fn reset_all(&mut self) -> Result<(), Error> {
+    pub async fn reset_all(&mut self) -> Res<()> {
         let tx = self.transaction().await?;
 
         // drop
@@ -211,6 +104,7 @@ impl Conn {
     }
 }
 
+// helper function for using query_raw methods
 fn slice_iter<'a>(
     s: &'a [&'a (dyn ToSql + Sync)]
 ) -> impl ExactSizeIterator<Item = &'a dyn ToSql> + 'a {
@@ -218,4 +112,48 @@ fn slice_iter<'a>(
 }
 
 #[cfg(test)]
-pub(crate) mod tests;
+pub(crate) mod tests {
+    use super::*;
+    use serial_test_derive::serial;
+    use std::convert::TryInto;
+    use womp::*;
+
+    #[macro_export]
+    macro_rules! w {
+        ($maybe_val: expr) => {
+            $maybe_val.expect(womp!())
+        };
+    }
+
+    #[macro_export]
+    macro_rules! wa {
+        ($maybe_fut: expr) => {
+            w!($maybe_fut.await)
+        };
+    }
+
+    pub(crate) async fn get_client() -> Result<Conn, Error> {
+        let pool = Pool::new();
+        let mut client = pool.get().await?;
+        client.reset_all().await?;
+        Ok(client)
+    }
+
+    #[tokio::test]
+    #[serial]
+    async fn new_user_and_user_of() {
+        let mut client = wa!(get_client());
+
+        let uid: UserId = w!("a".try_into());
+        let kp = sig::KeyPair::gen_new();
+        let pk = *kp.public_key();
+
+        let init = kp.sign(uid);
+
+        assert!(wa!(client.user_of(pk)).is_none());
+
+        assert_eq!(wa!(client.new_user(init)), register::Res::Success);
+
+        assert_eq!(wa!(client.user_of(pk)), Some(uid));
+    }
+}

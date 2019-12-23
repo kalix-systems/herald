@@ -3,5 +3,5 @@ SELECT
 FROM
     userkeys
 WHERE
-    user_id = $1
+    key = $1
 LIMIT 1

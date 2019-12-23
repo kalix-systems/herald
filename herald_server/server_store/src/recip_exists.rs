@@ -124,7 +124,7 @@ impl Conn {
     pub(crate) async fn many_recips_exist(
         &mut self,
         many: Recips,
-    ) -> Result<bool, Error> {
+    ) -> Res<bool> {
         use Recips::*;
 
         match many {

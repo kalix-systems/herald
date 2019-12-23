@@ -1,5 +1,5 @@
 CREATE TABLE userkeys (
-    user_id   CHAR(32) NOT NULL,
+    user_id   TEXT     NOT NULL,
     key       BYTEA    NOT NULL PRIMARY KEY
 );
 
@@ -47,7 +47,7 @@ CREATE TABLE prekeys (
 CREATE INDEX prekey_signer ON prekeys(signing_key);
 
 CREATE TABLE conversation_members (
-    conversation_id   BYTEA     NOT NULL,
-    user_id           CHAR(32)  NOT NULL,
+    conversation_id   BYTEA  NOT NULL,
+    user_id           TEXT   NOT NULL,
     PRIMARY KEY(conversation_id, user_id)
 );
