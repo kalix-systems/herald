@@ -35,7 +35,7 @@ where
 
                 Ok(())
             }
-                .unwrap_or_else(|e: Error| eprintln!("{}", e))
+            .unwrap_or_else(|e: Error| eprintln!("{}", e))
         })
         .boxed();
 
@@ -55,7 +55,7 @@ where
 
                 Ok(())
             }
-                .unwrap_or_else(|e: Error| eprintln!("{}", e))
+            .unwrap_or_else(|e: Error| eprintln!("{}", e))
         })
         .boxed();
 
@@ -96,7 +96,7 @@ where
                 .map_ok(drop)
                 .await
             }
-                .unwrap_or_else(|e| eprintln!("{}", e)),
+            .unwrap_or_else(|e| eprintln!("{}", e)),
         );
         future::ready(())
     });
@@ -138,7 +138,7 @@ where
                 .map_ok(drop)
                 .await
             }
-                .unwrap_or_else(|e| eprintln!("{}", e))
+            .unwrap_or_else(|e| eprintln!("{}", e))
         });
         future::ready(())
     });
@@ -218,7 +218,7 @@ impl<P: Protocol, K: KrpcClient<P>> Client<P, K> {
 
                     Ok(())
                 }
-                    .unwrap_or_else(|e: Error| eprintln!("{}", e))
+                .unwrap_or_else(|e: Error| eprintln!("{}", e))
             })
         });
 

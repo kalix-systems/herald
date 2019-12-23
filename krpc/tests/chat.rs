@@ -1,3 +1,6 @@
+#![allow(warnings)]
+
+use anyhow::*;
 use async_trait::*;
 use futures::future::*;
 use kcl::random::UQ;
@@ -5,11 +8,13 @@ use krpc::*;
 use kson::prelude::*;
 use std::{
     collections::{HashMap, HashSet},
+    iter,
     net::SocketAddr,
     sync::Arc,
     time::Duration,
 };
 use tokio::{
+    prelude::*,
     sync::{
         mpsc::{
             unbounded_channel as unbounded, UnboundedReceiver as Receiver,
@@ -77,27 +82,38 @@ impl Protocol for ChatProtocol {
     type Res = Res;
     type Push = Push;
     type PushAck = ();
-}
-
-#[async_trait]
-impl KrpcServer<ChatProtocol> for Server {
-    type ConnInfo = User;
 
     const MAX_CONCURRENT_REQS: usize = 10;
     const MAX_CONCURRENT_PUSHES: usize = 10;
 
     const MAX_REQ_SIZE: usize = 4096;
     const MAX_ACK_SIZE: usize = 4096;
+    const MAX_PUSH_SIZE: usize = 4096;
+    const MAX_RESP_SIZE: usize = 4096;
+}
 
-    async fn init(
+#[async_trait]
+impl KrpcServer<ChatProtocol> for Server {
+    type ConnInfo = User;
+
+    async fn init<Tx, Rx>(
         &self,
-        mut tx: quinn::SendStream,
-        rx: quinn::RecvStream,
-    ) -> Result<Self::ConnInfo, KrpcError> {
-        let u_bytes = rx.read_to_end(128).await?;
-        let u = kson::from_bytes(u_bytes.into())?;
+        tx: &mut Tx,
+        rx: &mut Rx,
+    ) -> Result<Self::ConnInfo, Error>
+    where
+        Tx: AsyncWrite + Send + Unpin,
+        Rx: AsyncRead + Send + Unpin,
+    {
+        let mut buf = [0u8];
+        rx.read_exact(&mut buf).await?;
+        let len = u8::from_le_bytes(buf);
+        assert!(len <= 128);
 
-        tx.finish().await?;
+        let mut buf = vec![0u8; len as usize];
+        rx.read_exact(&mut buf).await?;
+        let u = kson::from_bytes(buf.into())?;
+
         Ok(u)
     }
 
@@ -153,7 +169,6 @@ impl KrpcServer<ChatProtocol> for Server {
     async fn on_close(
         &self,
         user: Self::ConnInfo,
-        _: quinn::Connection,
     ) {
         self.sessions.lock().await.remove(&user);
     }
@@ -167,23 +182,24 @@ struct Chatter {
 
 #[async_trait]
 impl KrpcClient<ChatProtocol> for Chatter {
-    const MAX_CONCURRENT_REQS: usize = 10;
-    const MAX_CONCURRENT_PUSHES: usize = 10;
-
-    const MAX_PUSH_SIZE: usize = 4096;
-    const MAX_RESP_SIZE: usize = 4096;
-
     type InitInfo = User;
 
-    async fn init(
+    async fn init<Tx: AsyncWrite + Send + Unpin, Rx: AsyncRead + Send + Unpin>(
         info: Self::InitInfo,
-        mut tx: quinn::SendStream,
-        _rx: quinn::RecvStream,
-    ) -> Result<Self, KrpcError> {
-        tx.write_all(&kson::to_vec(&info)).await?;
-        tx.finish().await?;
+        tx: &mut Tx,
+        _rx: &mut Rx,
+    ) -> Result<Self, Error> {
+        dbg!();
+        let bytes = kson::to_vec(&info);
+        dbg!();
+        let len = bytes.len() as u8;
+        dbg!();
+        tx.write_all(&len.to_le_bytes()).await?;
+        dbg!();
+        tx.write_all(&bytes).await?;
+        dbg!();
 
-        let online = [info].iter().copied().collect();
+        let online = iter::once(info).collect();
 
         Ok(Chatter {
             my_id: info,
@@ -213,7 +229,7 @@ impl KrpcClient<ChatProtocol> for Chatter {
         &self,
         req: &Req,
         res: &Res,
-    ) -> Result<(), KrpcError> {
+    ) -> Result<(), Error> {
         match (req, res) {
             (Req::CheckOnline, Res::Users(s)) => {
                 let mut online = self.online.lock().await;
@@ -236,104 +252,109 @@ impl KrpcClient<ChatProtocol> for Chatter {
 
 const DELAY: Duration = Duration::from_millis(10);
 
-#[tokio::test(threaded_scheduler)]
-async fn ping_pong() {
-    kcl::init();
+mod quic_ {
+    use super::*;
+    use quic::*;
 
-    let u1 = User(UQ::gen_new());
-    let u2 = User(UQ::gen_new());
+    fn start_server() -> (SocketAddr, Vec<u8>, impl Future<Output = ()>) {
+        let e_config = quinn_proto::EndpointConfig::default();
+        let (s_config, cert) = tls::configure_server().expect("failed to generate server config");
 
-    let (sock, cert, driver) = start_server();
-    tokio::spawn(driver);
+        let server = Arc::new(Server::default());
+        let s_port = portpicker::pick_unused_port().expect("failed to pick port");
+        let s_socket: SocketAddr = ([127u8, 0, 0, 1], s_port).into();
 
-    let c1 = start_client(u1, &sock, &cert).await;
-    dbg!();
+        let driver = async move {
+            serve_arc(server, e_config, s_config, &s_socket)
+                .unwrap_or_else(|e| panic!("Server error: {}", e))
+                .await
+        };
+        (s_socket, cert, driver)
+    }
 
-    let c2 = start_client(u2, &sock, &cert).await;
-    dbg!();
+    async fn start_client(
+        info: <Chatter as KrpcClient<ChatProtocol>>::InitInfo,
+        s_socket: &SocketAddr,
+        cert: &[u8],
+    ) -> Client<ChatProtocol, Chatter> {
+        let e_config = quinn_proto::EndpointConfig::default();
 
-    time::delay_for(DELAY).await;
+        let c_config = tls::configure_client(&[cert]).expect("failed to generate client config");
+        // let c_config = tls::configure_client(&[]).expect("failed to generate client config");
+        let c_port = portpicker::pick_unused_port().expect("failed to pick client port");
+        let c_socket = ([127u8, 0, 0, 1], c_port).into();
 
-    let c1_were_online = c1.online.lock().await.clone();
-    dbg!();
-
-    let c1_found_online = c1
-        .req(&Req::CheckOnline)
-        .await
-        .expect("c1 failed to check who was online");
-    dbg!();
-
-    let c1_send_res = c1
-        .req(&Req::Send("msg1".into()))
-        .await
-        .expect("c1 failed to send msg");
-    dbg!();
-
-    let c2_were_online = c2.online.lock().await.clone();
-    dbg!();
-
-    let c2_found_online = c2
-        .req(&Req::CheckOnline)
-        .await
-        .expect("c2 failed to check who was online");
-    dbg!();
-
-    let c2_send_res = c2
-        .req(&Req::Send("msg2".into()))
-        .await
-        .expect("c2 failed to send msg");
-    dbg!();
-
-    assert_eq!(c1_were_online, c2_were_online);
-    assert_eq!(c1_found_online, c2_found_online);
-    assert_eq!(c1_send_res, c2_send_res);
-
-    assert_eq!(c1_were_online, [u1, u2].iter().copied().collect());
-    assert_eq!(c1_found_online, Res::Users(c1_were_online));
-    assert_eq!(c1_send_res, Res::Success);
-
-    time::delay_for(DELAY).await;
-
-    let c1_log = c1.msgs.lock().await.clone();
-    dbg!();
-    let c2_log = c2.msgs.lock().await.clone();
-    dbg!();
-
-    assert_eq!(c1_log, c2_log);
-    assert_eq!(c1_log, vec![(u1, "msg1".into()), (u2, "msg2".into())]);
-}
-
-async fn start_client(
-    info: <Chatter as KrpcClient<ChatProtocol>>::InitInfo,
-    s_socket: &SocketAddr,
-    cert: &[u8],
-) -> Client<ChatProtocol, Chatter> {
-    let e_config = quinn_proto::EndpointConfig::default();
-
-    let c_config = tls::configure_client(&[cert]).expect("failed to generate client config");
-    // let c_config = tls::configure_client(&[]).expect("failed to generate client config");
-    let c_port = portpicker::pick_unused_port().expect("failed to pick client port");
-    let c_socket = ([127u8, 0, 0, 1], c_port).into();
-
-    Client::connect(info, e_config, c_config, &c_socket, s_socket, "localhost")
-        .await
-        .expect("failed to connect client")
-}
-
-fn start_server() -> (SocketAddr, Vec<u8>, impl Future<Output = ()>) {
-    let e_config = quinn_proto::EndpointConfig::default();
-    let (s_config, cert) = tls::configure_server().expect("failed to generate server config");
-
-    let server = Arc::new(Server::default());
-    let s_port = portpicker::pick_unused_port().expect("failed to pick port");
-    let s_socket: SocketAddr = ([127u8, 0, 0, 1], s_port).into();
-
-    let driver = async move {
-        krpc::serve_arc(server, e_config, s_config, &s_socket)
-            .unwrap_or_else(|e| panic!("Server error: {}", e))
+        Client::connect(info, e_config, c_config, &c_socket, s_socket, "localhost")
             .await
-    };
-    (s_socket, cert, driver)
+            .expect("failed to connect client")
+    }
+
+    #[tokio::test(threaded_scheduler)]
+    async fn ping_pong() {
+        kcl::init();
+
+        let u1 = User(UQ::gen_new());
+        let u2 = User(UQ::gen_new());
+
+        let (sock, cert, driver) = start_server();
+        tokio::spawn(driver);
+
+        let c1 = start_client(u1, &sock, &cert).await;
+        dbg!();
+
+        let c2 = start_client(u2, &sock, &cert).await;
+        dbg!();
+
+        time::delay_for(DELAY).await;
+
+        let c1_were_online = c1.online.lock().await.clone();
+        dbg!();
+
+        let c1_found_online = c1
+            .req(&Req::CheckOnline)
+            .await
+            .expect("c1 failed to check who was online");
+        dbg!();
+
+        let c1_send_res = c1
+            .req(&Req::Send("msg1".into()))
+            .await
+            .expect("c1 failed to send msg");
+        dbg!();
+
+        let c2_were_online = c2.online.lock().await.clone();
+        dbg!();
+
+        let c2_found_online = c2
+            .req(&Req::CheckOnline)
+            .await
+            .expect("c2 failed to check who was online");
+        dbg!();
+
+        let c2_send_res = c2
+            .req(&Req::Send("msg2".into()))
+            .await
+            .expect("c2 failed to send msg");
+        dbg!();
+
+        assert_eq!(c1_were_online, c2_were_online);
+        assert_eq!(c1_found_online, c2_found_online);
+        assert_eq!(c1_send_res, c2_send_res);
+
+        assert_eq!(c1_were_online, [u1, u2].iter().copied().collect());
+        assert_eq!(c1_found_online, Res::Users(c1_were_online));
+        assert_eq!(c1_send_res, Res::Success);
+
+        time::delay_for(DELAY).await;
+
+        let c1_log = c1.msgs.lock().await.clone();
+        dbg!();
+        let c2_log = c2.msgs.lock().await.clone();
+        dbg!();
+
+        assert_eq!(c1_log, c2_log);
+        assert_eq!(c1_log, vec![(u1, "msg1".into()), (u2, "msg2".into())]);
+    }
 }
 
 /// Shamelessly copied from the quinn examples

@@ -34,7 +34,7 @@ pub trait Protocol {
 pub trait KrpcServer<P: Protocol>: Sync {
     type ConnInfo: Debug + Send + Sync;
 
-    async fn init<Tx: AsyncWrite + Unpin, Rx: AsyncRead + Unpin>(
+    async fn init<Tx: AsyncWrite + Send + Unpin, Rx: AsyncRead + Send + Unpin>(
         &self,
         tx: &mut Tx,
         rx: &mut Rx,
@@ -68,7 +68,7 @@ pub trait KrpcServer<P: Protocol>: Sync {
 pub trait KrpcClient<P: Protocol>: Send + Sync + Sized + 'static {
     type InitInfo: Send + Sized;
 
-    async fn init<Tx: AsyncWrite + Unpin, Rx: AsyncRead + Unpin>(
+    async fn init<Tx: AsyncWrite + Send + Unpin, Rx: AsyncRead + Send + Unpin>(
         info: Self::InitInfo,
         tx: &mut Tx,
         rx: &mut Rx,

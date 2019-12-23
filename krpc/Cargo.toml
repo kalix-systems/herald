@@ -56,7 +56,7 @@ optional = true
 
 [features]
 default = ["quic", "ws"]
-quic = ["quinn","quinn-proto"]
+quic = ["quinn","quinn-proto", "tokio/rt-threaded"]
 ws-sync = ["tungstenite", "rustls", "webpki"]
 ws = ["ws-sync", "tokio-tungstenite", "tokio-rustls", "tokio/io-util", "tokio/sync"]
 
