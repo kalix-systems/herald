@@ -224,4 +224,50 @@ mod tests {
         let c_kp = sig::KeyPair::gen_new();
         assert!(!wa!(client.one_key_exists(c_kp.public_key())));
     }
+
+    #[tokio::test]
+    #[serial]
+    async fn groups() {
+        use futures::stream::iter;
+
+        let mut client = wa!(get_client());
+        wa!(client.reset_all());
+
+        let a_uid: UserId = "a".try_into().expect(womp!());
+        let a_kp = sig::KeyPair::gen_new();
+        let a_init = a_kp.sign(a_uid);
+        wa!(client.new_user(a_init));
+
+        let b_uid: UserId = "b".try_into().expect(womp!());
+
+        let b_kp = sig::KeyPair::gen_new();
+        let b_init = b_kp.sign(b_uid);
+        wa!(client.new_user(b_init));
+
+        let c_uid: UserId = "c".try_into().expect(womp!());
+
+        let c_kp = sig::KeyPair::gen_new();
+        let c_init = c_kp.sign(c_uid);
+        wa!(client.new_user(c_init));
+
+        let cid1 = ConversationId::gen_new();
+
+        let uids = vec![a_uid, b_uid, c_uid];
+
+        assert_eq!(
+            wa!(client.add_to_group(iter(uids.clone()), cid1)),
+            add_to_group::Res::Success
+        );
+
+        assert!(wa!(client.one_group_exists(&cid1)));
+
+        let cid2 = ConversationId::gen_new();
+
+        assert_eq!(
+            wa!(client.add_to_group(iter(uids.clone()), cid2)),
+            add_to_group::Res::Success
+        );
+
+        assert!(wa!(client.many_groups_exist(vec![cid1, cid2])));
+    }
 }

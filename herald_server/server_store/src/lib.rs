@@ -1,4 +1,3 @@
-use async_trait::*;
 use futures::{try_join, FutureExt, Stream, StreamExt, TryStreamExt};
 use herald_common::*;
 use parking_lot::Mutex;
@@ -15,9 +14,7 @@ type Res<T> = Result<T, Error>;
 mod imp;
 mod macros;
 mod pool;
-mod trait_def;
 pub use pool::*;
-pub use trait_def::ServerStore;
 
 pub enum PushedTo {
     PushedTo {
@@ -37,9 +34,8 @@ pub struct PrekeyReplace {
     pub old: Option<Prekey>,
 }
 
-#[async_trait]
-impl ServerStore for Conn {
-    async fn get_sigchain(
+impl Conn {
+    pub async fn get_sigchain(
         &mut self,
         user: UserId,
     ) -> Res<Option<sig::SigChain>> {
@@ -121,7 +117,7 @@ impl ServerStore for Conn {
         Ok(Some(sig::SigChain { initial, sig_chain }))
     }
 
-    async fn recip_exists(
+    pub async fn recip_exists(
         &mut self,
         recip: Recip,
     ) -> Res<bool> {
@@ -133,7 +129,7 @@ impl ServerStore for Conn {
         }
     }
 
-    async fn add_to_sigchain(
+    pub async fn add_to_sigchain(
         &mut self,
         new: Signed<sig::SigUpdate>,
     ) -> Result<PKIResponse, Error> {
@@ -239,7 +235,7 @@ impl ServerStore for Conn {
         Ok(PKIResponse::Success)
     }
 
-    async fn user_of(
+    pub async fn user_of(
         &mut self,
         key: sig::PublicKey,
     ) -> Result<Option<UserId>, Error> {
@@ -256,7 +252,7 @@ impl ServerStore for Conn {
             }))
     }
 
-    async fn new_prekeys<Keys: Stream<Item = PrekeyReplace> + Send>(
+    pub async fn new_prekeys<Keys: Stream<Item = PrekeyReplace> + Send>(
         &mut self,
         keys: Keys,
     ) -> Result<new_prekeys::Res, Error> {
@@ -283,7 +279,7 @@ impl ServerStore for Conn {
         unimplemented!()
     }
 
-    async fn get_random_prekeys<Keys: Stream<Item = sig::PublicKey> + Send>(
+    pub async fn get_random_prekeys<Keys: Stream<Item = sig::PublicKey> + Send>(
         &mut self,
         keys: Keys,
     ) -> Res<Vec<TaggedPrekey>> {
@@ -323,7 +319,7 @@ impl ServerStore for Conn {
         Ok(prekeys.into_inner())
     }
 
-    async fn add_to_group<Users: Stream<Item = UserId> + Send + Unpin>(
+    pub async fn add_to_group<Users: Stream<Item = UserId> + Send + Unpin>(
         &mut self,
         users: Users,
         conv: ConversationId,
@@ -376,7 +372,7 @@ impl ServerStore for Conn {
         Ok(add_to_group::Res::Success)
     }
 
-    async fn leave_group<Convs: Stream<Item = ConversationId> + Send>(
+    pub async fn leave_group<Convs: Stream<Item = ConversationId> + Send>(
         &mut self,
         user: UserId,
         groups: Convs,
@@ -432,7 +428,7 @@ impl ServerStore for Conn {
 
     // should be done transactionally, returns Missing(r) for the first missing recip r
     // only adds to pending when it finds all devices
-    async fn add_to_pending_and_get_valid_devs(
+    pub async fn add_to_pending_and_get_valid_devs(
         &mut self,
         recip: &Recip,
         msg: &Push,
@@ -460,7 +456,7 @@ impl ServerStore for Conn {
         }
     }
 
-    async fn get_pending(
+    pub async fn get_pending(
         &mut self,
         of: sig::PublicKey,
     ) -> Result<Vec<(Push, i64)>, Error> {
@@ -482,7 +478,7 @@ impl ServerStore for Conn {
         Ok(out)
     }
 
-    async fn del_pending<S: Stream<Item = i64> + Send>(
+    pub async fn del_pending<S: Stream<Item = i64> + Send>(
         &mut self,
         of: sig::PublicKey,
         items: S,
@@ -506,7 +502,7 @@ impl ServerStore for Conn {
             .await
     }
 
-    async fn new_user(
+    pub async fn new_user(
         &mut self,
         init: Signed<UserId>,
     ) -> Result<register::Res, Error> {

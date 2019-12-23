@@ -14,6 +14,7 @@ impl Conn {
         msg: &Push,
     ) -> Result<PushedTo, Error> {
         let tx = self.transaction().await?;
+
         let exists_stmt = tx
             .prepare_typed(sql!("group_exists"), types![BYTEA])
             .await?;
@@ -377,4 +378,30 @@ impl Conn {
             push_id: push_row_id,
         })
     }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use serial_test_derive::serial;
+    use std::convert::TryInto;
+    use womp::*;
+
+    macro_rules! w {
+        ($maybe_val: expr) => {
+            $maybe_val.expect(womp!())
+        };
+    }
+
+    macro_rules! wa {
+        ($maybe_fut: expr) => {
+            w!($maybe_fut.await)
+        };
+    }
+
+    use crate::tests::get_client;
+
+    #[tokio::test]
+    #[serial]
+    async fn test_defaults() {}
 }
