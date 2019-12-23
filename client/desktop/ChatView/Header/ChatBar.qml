@@ -34,7 +34,7 @@ ToolBar {
 
         anchors {
             fill: parent
-            leftMargin: CmnCfg.margin
+            leftMargin: CmnCfg.defaultMargin
             rightMargin: CmnCfg.smallMargin
         }
 
@@ -47,7 +47,7 @@ ToolBar {
             pfpPath: Utils.safeStringOrDefault(conversationItem.picture, "")
             isGroup: !conversationItem.pairwise
             anchors {
-                margins: CmnCfg.margin
+                margins: CmnCfg.defaultMargin
             }
         }
 
@@ -72,7 +72,7 @@ ToolBar {
 
         Row {
             id: optionsRow
-            spacing: CmnCfg.margin
+            spacing: CmnCfg.defaultMargin
             Layout.alignment: Qt.AlignRight
             height: parent.height
 

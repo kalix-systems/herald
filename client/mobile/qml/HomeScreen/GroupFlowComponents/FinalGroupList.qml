@@ -45,7 +45,7 @@ ListView {
         IconButton {
             id: xIcon
             anchors.right: parent.right
-            anchors.rightMargin: CmnCfg.margin / 2
+            anchors.rightMargin: CmnCfg.defaultMargin / 2
             anchors.verticalCenter: parent.verticalCenter
             imageSource: "qrc:/x-icon.svg"
             tapCallback: function () {

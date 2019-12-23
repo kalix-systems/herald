@@ -45,7 +45,7 @@ Window {
                 font.weight: Font.DemiBold
                 anchors.verticalCenter: parent.verticalCenter
                 elide: Label.ElideRight
-                leftPadding: CmnCfg.margin
+                leftPadding: CmnCfg.defaultMargin
             }
 
             Rectangle {
@@ -105,7 +105,7 @@ Window {
                             font.weight: Font.DemiBold
                             anchors.verticalCenter: parent.verticalCenter
                             anchors.left: parent.left
-                            anchors.leftMargin: CmnCfg.margin
+                            anchors.leftMargin: CmnCfg.defaultMargin
                         }
                         MouseArea {
                             id: hover

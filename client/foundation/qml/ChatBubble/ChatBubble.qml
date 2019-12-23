@@ -130,7 +130,7 @@ Rectangle {
         spacing: CmnCfg.smallMargin
         topPadding: isHead ? CmnCfg.smallMargin : CmnCfg.smallMargin
         leftPadding: CmnCfg.smallMargin
-        bottomPadding: isTail ? CmnCfg.margin : CmnCfg.smallMargin
+        bottomPadding: isTail ? CmnCfg.defaultMargin : CmnCfg.smallMargin
 
         BubbleLabel {
             id: authorLabel

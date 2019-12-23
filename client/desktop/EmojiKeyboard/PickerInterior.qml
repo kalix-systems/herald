@@ -69,7 +69,7 @@ Item {
         ComboBox {
             id: menu
             anchors.right: parent.right
-            anchors.margins: CmnCfg.margin
+            anchors.margins: CmnCfg.defaultMargin
             anchors.verticalCenter: taBox.verticalCenter
             height: 24
             width: 24

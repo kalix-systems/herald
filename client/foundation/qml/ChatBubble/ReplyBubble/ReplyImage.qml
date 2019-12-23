@@ -41,7 +41,7 @@ Rectangle {
         spacing: CmnCfg.smallMargin
         anchors.left: accent.right
         topPadding: CmnCfg.smallMargin
-        bottomPadding: CmnCfg.margin
+        bottomPadding: CmnCfg.defaultMargin
         leftPadding: CmnCfg.smallMargin
 
         Item {

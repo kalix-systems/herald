@@ -34,7 +34,7 @@ Rectangle {
         id: replyWrapperCol
         spacing: CmnCfg.smallMargin
         topPadding: CmnCfg.smallMargin
-        bottomPadding: CmnCfg.margin
+        bottomPadding: CmnCfg.defaultMargin
         leftPadding: CmnCfg.smallMargin
         anchors.left: accent.right
 

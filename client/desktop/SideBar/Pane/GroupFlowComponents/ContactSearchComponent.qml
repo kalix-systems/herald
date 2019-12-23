@@ -15,7 +15,7 @@ Column {
         leftPadding: 12
         color: CmnCfg.palette.white
         placeholderText: qsTr("Add members")
-        width: parent.width - CmnCfg.largeMargin
+        width: parent.width - CmnCfg.megaMargin
         onTextChanged: {
             Herald.usersSearch.filter = groupSelectText.text
             contactPopup.popup.open()
@@ -24,7 +24,7 @@ Column {
 
     Rectangle {
         height: 1
-        width: parent.width - CmnCfg.largeMargin
+        width: parent.width - CmnCfg.megaMargin
         anchors.horizontalCenter: parent.horizontalCenter
         color: CmnCfg.palette.lightGrey
     }
@@ -32,7 +32,7 @@ Column {
     ComboBox {
         id: contactPopup
         model: Herald.usersSearch
-        width: parent.width - CmnCfg.largeMargin
+        width: parent.width - CmnCfg.megaMargin
         anchors.horizontalCenter: parent.horizontalCenter
         height: CmnCfg.smallMargin / 2
 

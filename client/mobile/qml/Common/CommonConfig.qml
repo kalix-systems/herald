@@ -12,49 +12,55 @@ Item {
     }
 
     readonly property alias units: units
+
+    // TODO shouldn't use rounded corners, get rid of this eventually
     /// edge rounding for all rectangles that use the radius property
     readonly property real radius: units.largeSpacing
-    /// standard margin size used to interior objects
-    readonly property real margin: units.largeSpacing
-    /// standard half margin
+
+
+    // MARGINS & SPACING
+
+    /// standard small margin
     readonly property real smallMargin: units.dp(8)
-    /// standard half padding unit
-    readonly property real smallPadding: units.smallSpacing
-    /// standard padding unit
-    readonly property real padding: units.smallSpacing
-    /// standard toolbar height
-    readonly property real toolbarHeight: units.dp(40)
+    /// standard margin size used to interior objects
+    readonly property real defaultMargin: units.largeSpacing
+
+
+    // TODO shouldn't use spacers
     /// gap used for tool bars, avatar margins, etc
     readonly property real smallSpacer: units.dp(8)
     /// gap used for larger spacings in tool bars.
     readonly property real largeSpacer: units.dp(12)
 
+
+    // FONTS
+
     /// size of labels a
-    property real labelSize: units.dp(20)
+    readonly property real labelSize: units.dp(20)
     /// standard chat text size
-    property real chatTextSize: units.dp(18)
+    readonly property real chatTextSize: units.dp(18)
     /// Chat preview size
-    property real chatPreviewSize: units.dp(18)
+    readonly property real chatPreviewSize: units.dp(18)
     /// standard header size
-    property real headerTextSize: units.dp(18)
+    readonly property real headerTextSize: units.dp(18)
     /// standard button text size
-    property real buttonTextSize: units.dp(17)
+    readonly property real buttonTextSize: units.dp(17)
 
-    /// standard z values
-    property int overlayZ: 10
-    property int topZ: 9
-    property int middleZ: 5
-    property int bottomZ: 1
-    property int underlayZ: -1
+    readonly property FontLoader chatFont: metaTheme.chatFont
+    readonly property FontLoader labelFont: metaTheme.cairo
+
+
+    // STANDARD COMPONENT SIZES
+
+    /// standard toolbar height
+    readonly property real toolbarHeight: units.dp(40)
+
     /// standard avatar size
-    property int avatarSize: units.dp(56)
-    /// user settable cfg
-    property int theme: 0
+    readonly property int avatarSize: units.dp(56)
 
-    property FontLoader chatFont: metaTheme.chatFont
-    property FontLoader labelFont: metaTheme.cairo
-
-    property QtObject iconSizes: QtObject {
+    // TODO we aren't going to use more than 2-3 sizes for icons, remove this
+    // enum once we settle on those sizes
+    readonly property QtObject iconSizes: QtObject {
         property int small: units.dp(16)
         property int smallMedium: units.dp(24)
         property int medium: units.dp(32)
@@ -62,6 +68,19 @@ Item {
         property int huge: units.dp(64)
         property int enormous: units.dp(164)
     }
+
+
+    // MISC
+
+    /// standard z values
+    readonly property int overlayZ: 10
+    readonly property int topZ: 9
+    readonly property int middleZ: 5
+    readonly property int bottomZ: 1
+    readonly property int underlayZ: -1
+
+    /// user settable cfg
+    readonly property int theme: 0
 
     /// emoji skin color
     Settings {
@@ -73,6 +92,6 @@ Item {
         id: metaTheme
     }
     /// palette :
-    property QtObject palette: metaTheme.themes[theme]
-    property var avatarColors: palette.avatarColors
+    readonly property QtObject palette: metaTheme.themes[theme]
+    readonly property var avatarColors: palette.avatarColors
 }

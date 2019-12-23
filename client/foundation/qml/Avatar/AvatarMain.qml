@@ -57,8 +57,8 @@ Item {
     Loader {
         id: labelContent
         anchors {
-            leftMargin: CmnCfg.margin
-            rightMargin: CmnCfg.margin / 2
+            leftMargin: CmnCfg.defaultMargin
+            rightMargin: CmnCfg.defaultMargin / 2
             topMargin: topTextMargin
             bottomMargin: bottomTextMargin
             left: avatar.right

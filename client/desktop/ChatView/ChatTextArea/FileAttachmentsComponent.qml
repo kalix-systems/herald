@@ -17,9 +17,9 @@ ScrollView {
     Row {
         id: wrapperRow
         height: 24
-        Layout.margins: CmnCfg.mediumMargin
+        Layout.margins: CmnCfg.largeMargin
         width: parent.width
-        spacing: CmnCfg.mediumMargin
+        spacing: CmnCfg.largeMargin
         Repeater {
             id: fileRepeater
             model: ownedConversation.builder.documentAttachments

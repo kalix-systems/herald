@@ -22,8 +22,8 @@ Component {
             spacing: CmnCfg.smallMargin / 2
 
             anchors {
-                leftMargin: CmnCfg.margin
-                rightMargin: CmnCfg.margin
+                leftMargin: CmnCfg.defaultMargin
+                rightMargin: CmnCfg.defaultMargin
             }
 
             //main search component

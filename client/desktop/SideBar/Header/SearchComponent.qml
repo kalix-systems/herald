@@ -72,7 +72,7 @@ Component {
                 }
 
                 Rectangle {
-                    width: searchText.width - CmnCfg.mediumMargin
+                    width: searchText.width - CmnCfg.largeMargin
                     color: "white"
                     height: 1
                     anchors.horizontalCenter: parent.horizontalCenter

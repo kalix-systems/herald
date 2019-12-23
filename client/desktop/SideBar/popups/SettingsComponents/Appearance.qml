@@ -13,7 +13,7 @@ ColumnLayout {
         StandardLabel {
             text: qsTr("Theme")
             color: "black"
-            Layout.leftMargin: CmnCfg.margin
+            Layout.leftMargin: CmnCfg.defaultMargin
             font.pixelSize: CmnCfg.chatTextSize
         }
 
@@ -40,7 +40,7 @@ ColumnLayout {
     }
 
     RowLayout {
-        Layout.leftMargin: CmnCfg.margin
+        Layout.leftMargin: CmnCfg.defaultMargin
 
         Button {
             text: qsTr("Change display name")
@@ -51,14 +51,14 @@ ColumnLayout {
         StandardLabel {
             color: "black"
             text: qsTr("Current display name: ") + (Herald.config.name)
-            Layout.leftMargin: CmnCfg.margin
+            Layout.leftMargin: CmnCfg.defaultMargin
             font.pixelSize: CmnCfg.chatTextSize
         }
     }
 
     ColumnLayout {
         id: submissionCol
-        Layout.leftMargin: CmnCfg.margin
+        Layout.leftMargin: CmnCfg.defaultMargin
         visible: false
 
         TextArea {
@@ -109,7 +109,7 @@ ColumnLayout {
     }
 
     RowLayout {
-        Layout.leftMargin: CmnCfg.margin
+        Layout.leftMargin: CmnCfg.defaultMargin
         Button {
             text: qsTr("Select profile picture")
             onClicked: cfgPfp.open()

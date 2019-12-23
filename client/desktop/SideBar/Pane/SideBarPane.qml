@@ -17,7 +17,7 @@ Flickable {
 
     ScrollBar.vertical: ScrollBar {
         policy: ScrollBar.AsNeeded
-        width: CmnCfg.padding
+        width: CmnCfg.smallMargin
     }
 
     //column to load content, components are inside instead of being declared separately because

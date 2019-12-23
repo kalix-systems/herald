@@ -24,7 +24,7 @@ Component {
                 leftMargin: CmnCfg.smallMargin
                  verticalCenter: parent.verticalCenter
             }
-            spacing: CmnCfg.margin
+            spacing: CmnCfg.defaultMargin
 
             HeaderAvatar {
                 anchors.verticalCenter: parent.verticalCenter
