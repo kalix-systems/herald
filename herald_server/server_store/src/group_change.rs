@@ -1,4 +1,5 @@
 use super::*;
+
 impl Conn {
     pub async fn add_to_group<Users: Stream<Item = UserId> + Send + Unpin>(
         &mut self,
@@ -53,18 +54,17 @@ impl Conn {
         Ok(add_to_group::Res::Success)
     }
 
-    pub async fn leave_group<Convs: Stream<Item = ConversationId> + Send>(
+    pub async fn leave_groups<Convs: Stream<Item = ConversationId> + Send>(
         &mut self,
         user: UserId,
         groups: Convs,
     ) -> Res<leave_groups::Res> {
-        let leave_stmt = self
-            .prepare_typed(sql!("leave_group"), types![TEXT, BYTEA])
-            .await?;
+        let conn = &self;
 
-        let exists_stmt = self
-            .prepare_typed(sql!("group_exists"), types![BYTEA])
-            .await?;
+        let (leave_stmt, exists_stmt) = try_join!(
+            conn.prepare_typed(sql!("leave_group"), types![TEXT, BYTEA]),
+            conn.prepare_typed(sql!("group_exists"), types![BYTEA])
+        )?;
 
         let uid_str: &str = user.as_str();
 
@@ -88,7 +88,7 @@ impl Conn {
                         return Err(Ok(leave_groups::Res::Missing(cid)));
                     }
 
-                    conn.execute(leave_stmt, params![uid_str])
+                    conn.execute(leave_stmt, params![uid_str, cid.as_slice()])
                         .await
                         .map_err(Error::from)
                         .map_err(Err)?;
@@ -105,5 +105,53 @@ impl Conn {
         };
 
         Ok(leave_groups::Res::Success)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::{tests::get_client, w, wa};
+    use futures::stream::iter;
+    use serial_test_derive::serial;
+    use std::convert::TryInto;
+    use womp::*;
+
+    #[tokio::test]
+    #[serial]
+    async fn add_and_leave() {
+        let mut client = wa!(get_client());
+
+        let uid: UserId = w!("a".try_into());
+        let kp = sig::KeyPair::gen_new();
+        let init = kp.sign(uid);
+
+        let cid = ConversationId::gen_new();
+
+        match wa!(client.add_to_group(iter(vec![uid]), cid)) {
+            add_to_group::Res::MissingUser(missing) => {
+                assert_eq!(missing, uid);
+            }
+            _ => panic!(),
+        };
+
+        wa!(client.new_user(init));
+
+        match wa!(client.leave_groups(uid, iter(vec![cid]))) {
+            leave_groups::Res::Missing(missing) => {
+                assert_eq!(missing, cid);
+            }
+            _ => panic!(),
+        };
+
+        match wa!(client.add_to_group(iter(vec![uid]), cid)) {
+            add_to_group::Res::Success => {}
+            _ => panic!(),
+        };
+
+        match wa!(client.leave_groups(uid, iter(vec![cid]))) {
+            leave_groups::Res::Success => {}
+            _ => panic!(),
+        };
     }
 }
