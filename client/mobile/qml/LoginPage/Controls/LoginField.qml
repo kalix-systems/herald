@@ -11,6 +11,5 @@ TextField {
 
     background: Rectangle {
         color: "#FFFFFF"
-        radius: CmnCfg.radius
     }
 }
