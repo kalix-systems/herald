@@ -10,7 +10,7 @@ impl ConversationBuilder {
         let Self {
             conversation_id,
             title,
-            picture,
+            mut picture,
             color,
             muted,
             pairwise,
@@ -31,9 +31,10 @@ impl ConversationBuilder {
         let expiration_period = expiration_period
             .unwrap_or_else(|| crate::config::db::preferred_expiration(tx).unwrap_or_default());
 
-        let picture = match picture.as_ref() {
+        let picture = match picture.take() {
             Some(picture) => {
-                let path: std::path::PathBuf = crate::image_utils::update_picture(picture, None)?;
+                let path: std::path::PathBuf =
+                    crate::image_utils::update_picture(picture, None::<&str>)?;
                 path.into_os_string().into_string().ok()
             }
             None => None,

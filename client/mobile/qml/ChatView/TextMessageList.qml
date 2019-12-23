@@ -8,9 +8,13 @@ import "qrc:/imports/js/utils.mjs" as Utils
 ListView {
     id: chatListView
     property Messages messageListModel
-
+    spacing: 0
     highlightFollowsCurrentItem: false
-    cacheBuffer: chatListView.height * 3
+
+    // this is set to a higher value in `Component.onCompleted`
+    // but is set to `0` here to improve initial load times
+    cacheBuffer: 0
+    Component.onCompleted: cacheBuffer = chatListView.height * 5
 
     ScrollBar.vertical: ScrollBar {
         id: chatScrollBarInner
@@ -22,45 +26,25 @@ ListView {
         minimumSize: 0.1
     }
 
-    spacing: CmnCfg.margin
     model: messageListModel
+
+    // TODO: Delegate should just be the ChatBubble
     delegate: Column {
         id: containerCol
-        readonly property string proxyBody: body
+        spacing: 0
 
         // no receipt images for now
-        property string proxyReceiptImage
-
-        readonly property color userColor: CmnCfg.avatarColors[Herald.users.colorById(
-                                                                   author)]
-        readonly property string timestamp: Utils.friendlyTimestamp(
-                                                insertionTime)
-
-        readonly property string authName: Herald.users.nameById(author)
         readonly property bool outbound: author === Herald.config.configId
         readonly property bool elided: body.length !== fullBody.length
         property var messageModelData: model
 
-        anchors {
-            right: outbound ? parent.right : undefined
-            left: !outbound ? parent.left : undefined
-            rightMargin: CmnCfg.margin * 2.0
-            leftMargin: CmnCfg.margin * 2.0
-        }
+        anchors.left: parent.left
+        anchors.right: parent.right
+        bottomPadding: 0
+        topPadding: 0
 
-        //        Component {
-        //            id: std
-        //            CB.StandardBubble {
-        //                body: proxyBody
-        //                friendlyTimestamp: timestamp
-        //                authorName: authName
-        //                receiptImage: proxyReceiptImage
-        //                authorColor: userColor
-        //                elided: containerCol.elided
-        //            }
-        //        }
         CB.ChatBubble {
-            defaultWidth: chatListView.width * 0.66
+            defaultWidth: chatListView.width
             messageModelData: containerCol.messageModelData
             convContainer: parent
         }

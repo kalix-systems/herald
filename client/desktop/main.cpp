@@ -30,17 +30,6 @@ int main(int argc, char* argv[])
         return state;
       });
 
-  qmlRegisterSingletonType<ReplyWidthCalc>(
-      "LibHerald", 1, 0, "ReplyWidthCalc",
-      [](QQmlEngine* engine, QJSEngine* scriptEngine) {
-        Q_UNUSED(engine);
-        Q_UNUSED(scriptEngine);
-
-        ReplyWidthCalc* rw_calc = new ReplyWidthCalc();
-
-        return rw_calc;
-      });
-
   qmlRegisterAnonymousType<Users>("LibHerald", 1);
   qmlRegisterAnonymousType<Config>("LibHerald", 1);
   qmlRegisterAnonymousType<Utils>("LibHerald", 1);

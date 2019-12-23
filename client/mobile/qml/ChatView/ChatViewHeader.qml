@@ -18,8 +18,8 @@ ToolBar {
     RowLayout {
         anchors {
             fill: parent
-            rightMargin: CmnCfg.margin
-            leftMargin: CmnCfg.margin
+            rightMargin: CmnCfg.defaultMargin
+            leftMargin: CmnCfg.defaultMargin
         }
 
         IconButton {
@@ -38,7 +38,7 @@ ToolBar {
             Label {
                 text: title
                 font {
-                    pointSize: CmnCfg.chatPreviewSize
+                    pixelSize: CmnCfg.headerTextSize
                     family: CmnCfg.labelFont.name
                     bold: true
                 }

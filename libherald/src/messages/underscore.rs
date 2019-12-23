@@ -84,12 +84,9 @@ impl Messages {
         }
 
         // other cases
-        let (msg, succ) = (
-            self.container.msg_data(index)?,
-            self.container.msg_data(index + 1)?,
-        );
-
-        Some(!msg.same_flurry(&succ))
+        self.container
+            .same_flurry(index, index + 1)
+            .map(std::ops::Not::not)
     }
 
     pub(crate) fn is_head_(
@@ -106,12 +103,9 @@ impl Messages {
         }
 
         // other cases
-        let (msg, prev) = (
-            self.container.msg_data(index)?,
-            self.container.msg_data(index - 1)?,
-        );
-
-        Some(!msg.same_flurry(&prev))
+        self.container
+            .same_flurry(index, index - 1)
+            .map(std::ops::Not::not)
     }
 
     pub(crate) fn clear_conversation_history_(&mut self) -> bool {
@@ -247,8 +241,8 @@ impl Messages {
 
         let changed = err!(self
             .search
-            .set_pattern(pattern, || emit.search_pattern_changed()))
-        .changed();
+            .set_pattern(pattern, || emit.search_pattern_changed())
+            .map(messages_helper::search::SearchChanged::changed));
 
         if changed && self.search.active {
             let model = &mut self.model;
@@ -324,6 +318,30 @@ impl Messages {
             .access_by_index(index, |data| data.author.to_string())
     }
 
+    pub(crate) fn author_color_(
+        &self,
+        index: usize,
+    ) -> Option<u32> {
+        let uid = self.container.access_by_index(index, |data| data.author)?;
+        crate::users::shared::color(&uid)
+    }
+
+    pub(crate) fn author_name_(
+        &self,
+        index: usize,
+    ) -> Option<ffi::UserId> {
+        let uid = self.container.access_by_index(index, |data| data.author)?;
+        crate::users::shared::name(&uid)
+    }
+
+    pub(crate) fn author_profile_picture_(
+        &self,
+        index: usize,
+    ) -> Option<String> {
+        let uid = self.container.access_by_index(index, |data| data.author)?;
+        crate::users::shared::profile_picture(&uid)
+    }
+
     pub(crate) fn body_(
         &self,
         index: usize,
@@ -332,16 +350,15 @@ impl Messages {
         let pattern = &self.search.pattern;
         let match_status = self.container.get(index).as_ref()?.match_status;
 
-        self.container.access_by_index(index, |data| {
-            if match_status.is_match() {
-                Some(messages_helper::search::highlight_message(
-                    pattern.as_ref()?,
-                    data.body.as_ref()?,
-                ))
-            } else {
-                Some(elider.elided_body(data.body.as_ref()?))
-            }
-        })?
+        let body = self
+            .container
+            .access_by_index(index, |data| data.body.clone())?;
+
+        if match_status.is_match() {
+            messages_helper::search::highlight_message(pattern.as_ref()?, body.as_ref()?).into()
+        } else {
+            elider.elided_body(body?).into()
+        }
     }
 
     pub(crate) fn full_body_(
@@ -419,6 +436,22 @@ impl Messages {
             .as_ref()
             .map(UserId::as_str)
             .map(str::to_string)
+    }
+
+    pub(crate) fn op_color_(
+        &self,
+        index: usize,
+    ) -> Option<u32> {
+        let uid = self.container.op_author(index)?;
+        crate::users::shared::color(&uid)
+    }
+
+    pub(crate) fn op_name_(
+        &self,
+        index: usize,
+    ) -> Option<String> {
+        let uid = self.container.op_author(index)?;
+        crate::users::shared::name(&uid)
     }
 
     pub(crate) fn op_doc_attachments_(

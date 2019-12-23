@@ -140,8 +140,14 @@ fn set_prof_pic() {
 
     let test_picture = "test_resources/maryland.png";
 
-    super::db::set_picture(&conn, &conv_id, Some(&test_picture))
-        .expect(womp!("failed to set picture"));
+    super::db::set_picture(
+        &conn,
+        &conv_id,
+        Some(image_utils::ProfilePicture::autocrop(
+            test_picture.to_owned(),
+        )),
+    )
+    .expect(womp!("failed to set picture"));
 
     std::fs::remove_dir_all(pictures_dir()).expect(womp!());
 }

@@ -5,7 +5,6 @@ import LibHerald 1.0
 import "../../Common"
 
 ToolBar {
-    id: configHeader
     height: CmnCfg.toolbarHeight
     background: Rectangle {
         color: CmnCfg.palette.offBlack
@@ -15,8 +14,8 @@ ToolBar {
 
         anchors {
             fill: parent
-            rightMargin: CmnCfg.margin
-            leftMargin: CmnCfg.margin
+            rightMargin: CmnCfg.defaultMargin
+            leftMargin: CmnCfg.defaultMargin
         }
 
         IconButton {
@@ -33,7 +32,7 @@ ToolBar {
             text: qsTr("New Contact")
             Layout.alignment: Qt.AlignCenter
             Layout.fillWidth: true
-            font.pointSize: CmnCfg.chatPreviewSize
+            font.pixelSize: CmnCfg.chatPreviewSize
             font.family: CmnCfg.labelFont.name
             color: CmnCfg.palette.iconFill
         }

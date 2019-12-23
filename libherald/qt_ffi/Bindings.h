@@ -18,7 +18,6 @@ class Members;
 class MessageBuilder;
 class MessageSearch;
 class Messages;
-class ReplyWidthCalc;
 class Users;
 class UsersSearch;
 class Utils;
@@ -35,7 +34,6 @@ using MembersPtrBundle = struct MembersPtrBundle;
 using MessageBuilderPtrBundle = struct MessageBuilderPtrBundle;
 using MessageSearchPtrBundle = struct MessageSearchPtrBundle;
 using MessagesPtrBundle = struct MessagesPtrBundle;
-using ReplyWidthCalcPtrBundle = struct ReplyWidthCalcPtrBundle;
 using UsersPtrBundle = struct UsersPtrBundle;
 using UsersSearchPtrBundle = struct UsersSearchPtrBundle;
 using UtilsPtrBundle = struct UtilsPtrBundle;
@@ -302,6 +300,7 @@ struct HeraldPtrBundle {
   void (*message_search_end_move_rows)(MessageSearch *);
   void (*message_search_begin_remove_rows)(MessageSearch *, int, int);
   void (*message_search_end_remove_rows)(MessageSearch *);
+  void (*herald_registration_failure_code_changed)(Herald *);
   Users *users;
   void (*users_filter_changed)(Users *);
   void (*users_filter_regex_changed)(Users *);
@@ -547,9 +546,6 @@ struct MessagesPtrBundle {
   void (*messages_begin_remove_rows)(Messages *, int, int);
   void (*messages_end_remove_rows)(Messages *);
 };
-struct ReplyWidthCalcPtrBundle {
-  ReplyWidthCalc *reply_width_calc;
-};
 struct UsersPtrBundle {
   Users *users;
   void (*users_filter_changed)(Users *);
@@ -602,7 +598,6 @@ class Config : public QObject {
   friend class MessageBuilder;
   friend class MessageSearch;
   friend class Messages;
-  friend class ReplyWidthCalc;
   friend class Users;
   friend class UsersSearch;
   friend class Utils;
@@ -622,8 +617,8 @@ private:
                  ntsConversationIdChanged FINAL)
   Q_PROPERTY(quint8 preferredExpiration READ preferredExpiration WRITE
                  setPreferredExpiration NOTIFY preferredExpirationChanged FINAL)
-  Q_PROPERTY(QString profilePicture READ profilePicture WRITE setProfilePicture
-                 NOTIFY profilePictureChanged FINAL)
+  Q_PROPERTY(QString profilePicture READ profilePicture NOTIFY
+                 profilePictureChanged FINAL)
   explicit Config(bool owned, QObject *parent);
 
 public:
@@ -640,7 +635,7 @@ public:
   quint8 preferredExpiration() const;
   void setPreferredExpiration(quint8 v);
   QString profilePicture() const;
-  void setProfilePicture(const QString &v);
+  Q_INVOKABLE void setProfilePicture(const QString &profile_picture);
 Q_SIGNALS:
   void colorChanged();
   void colorschemeChanged();
@@ -663,7 +658,6 @@ class ConversationBuilder : public QAbstractItemModel {
   friend class MessageBuilder;
   friend class MessageSearch;
   friend class Messages;
-  friend class ReplyWidthCalc;
   friend class Users;
   friend class UsersSearch;
   friend class Utils;
@@ -674,21 +668,20 @@ public:
 private:
   Private *m_d;
   bool m_ownsPrivate;
-  Q_PROPERTY(
-      QString picture READ picture WRITE setPicture NOTIFY pictureChanged FINAL)
+  Q_PROPERTY(QString picture READ picture NOTIFY pictureChanged FINAL)
   explicit ConversationBuilder(bool owned, QObject *parent);
 
 public:
   explicit ConversationBuilder(QObject *parent = nullptr);
   ~ConversationBuilder() override;
   QString picture() const;
-  void setPicture(const QString &v);
   Q_INVOKABLE bool addMember(const QString &user_id);
   Q_INVOKABLE void clear();
   Q_INVOKABLE void finalize();
   Q_INVOKABLE void removeLast();
   Q_INVOKABLE bool removeMemberById(const QString &user_id);
   Q_INVOKABLE bool removeMemberByIndex(quint64 index);
+  Q_INVOKABLE void setProfilePicture(const QString &profile_picture);
   Q_INVOKABLE void setTitle(const QString &title);
   int columnCount(const QModelIndex &parent = QModelIndex()) const override;
   QVariant data(const QModelIndex &index,
@@ -715,7 +708,10 @@ public:
   removeRows(int row, int count,
              const QModelIndex &parent = QModelIndex()) override;
 
+  Q_INVOKABLE quint32 memberColor(int row) const;
   Q_INVOKABLE QString memberId(int row) const;
+  Q_INVOKABLE QString memberName(int row) const;
+  Q_INVOKABLE QString memberProfilePicture(int row) const;
 
 Q_SIGNALS:
   // new data is ready to be made available to the model with fetchMore()
@@ -741,7 +737,6 @@ class ConversationContent : public QAbstractItemModel {
   friend class MessageBuilder;
   friend class MessageSearch;
   friend class Messages;
-  friend class ReplyWidthCalc;
   friend class Users;
   friend class UsersSearch;
   friend class Utils;
@@ -820,7 +815,6 @@ class Conversations : public QAbstractItemModel {
   friend class MessageBuilder;
   friend class MessageSearch;
   friend class Messages;
-  friend class ReplyWidthCalc;
   friend class Users;
   friend class UsersSearch;
   friend class Utils;
@@ -847,6 +841,8 @@ public:
   Q_INVOKABLE void clearFilter();
   Q_INVOKABLE qint64 indexById(const QByteArray &conversation_id) const;
   Q_INVOKABLE bool removeConversation(quint64 row_index);
+  Q_INVOKABLE void setProfilePicture(quint64 index,
+                                     const QString &profile_picture);
   Q_INVOKABLE bool toggleFilterRegex();
   int columnCount(const QModelIndex &parent = QModelIndex()) const override;
   QVariant data(const QModelIndex &index,
@@ -885,7 +881,6 @@ public:
   Q_INVOKABLE bool setMuted(int row, bool value);
   Q_INVOKABLE bool pairwise(int row) const;
   Q_INVOKABLE QString picture(int row) const;
-  Q_INVOKABLE bool setPicture(int row, const QString &value);
   Q_INVOKABLE QString title(int row) const;
   Q_INVOKABLE bool setTitle(int row, const QString &value);
 
@@ -914,7 +909,6 @@ class DocumentAttachments : public QAbstractItemModel {
   friend class MessageBuilder;
   friend class MessageSearch;
   friend class Messages;
-  friend class ReplyWidthCalc;
   friend class Users;
   friend class UsersSearch;
   friend class Utils;
@@ -981,7 +975,6 @@ class Errors : public QObject {
   friend class MessageBuilder;
   friend class MessageSearch;
   friend class Messages;
-  friend class ReplyWidthCalc;
   friend class Users;
   friend class UsersSearch;
   friend class Utils;
@@ -1016,7 +1009,6 @@ class Herald : public QAbstractItemModel {
   friend class MessageBuilder;
   friend class MessageSearch;
   friend class Messages;
-  friend class ReplyWidthCalc;
   friend class Users;
   friend class UsersSearch;
   friend class Utils;
@@ -1048,6 +1040,8 @@ private:
   Q_PROPERTY(Errors *errors READ errors NOTIFY errorsChanged FINAL)
   Q_PROPERTY(MessageSearch *messageSearch READ messageSearch NOTIFY
                  messageSearchChanged FINAL)
+  Q_PROPERTY(QVariant registrationFailureCode READ registrationFailureCode
+                 NOTIFY registrationFailureCodeChanged FINAL)
   Q_PROPERTY(Users *users READ users NOTIFY usersChanged FINAL)
   Q_PROPERTY(
       UsersSearch *usersSearch READ usersSearch NOTIFY usersSearchChanged FINAL)
@@ -1070,6 +1064,7 @@ public:
   Errors *errors();
   const MessageSearch *messageSearch() const;
   MessageSearch *messageSearch();
+  QVariant registrationFailureCode() const;
   const Users *users() const;
   Users *users();
   const UsersSearch *usersSearch() const;
@@ -1122,6 +1117,7 @@ Q_SIGNALS:
   void conversationsChanged();
   void errorsChanged();
   void messageSearchChanged();
+  void registrationFailureCodeChanged();
   void usersChanged();
   void usersSearchChanged();
   void utilsChanged();
@@ -1139,7 +1135,6 @@ class MediaAttachments : public QAbstractItemModel {
   friend class MessageBuilder;
   friend class MessageSearch;
   friend class Messages;
-  friend class ReplyWidthCalc;
   friend class Users;
   friend class UsersSearch;
   friend class Utils;
@@ -1205,7 +1200,6 @@ class Members : public QAbstractItemModel {
   friend class MessageBuilder;
   friend class MessageSearch;
   friend class Messages;
-  friend class ReplyWidthCalc;
   friend class Users;
   friend class UsersSearch;
   friend class Utils;
@@ -1290,7 +1284,6 @@ class MessageBuilder : public QAbstractItemModel {
   friend class Members;
   friend class MessageSearch;
   friend class Messages;
-  friend class ReplyWidthCalc;
   friend class Users;
   friend class UsersSearch;
   friend class Utils;
@@ -1411,7 +1404,6 @@ class MessageSearch : public QAbstractItemModel {
   friend class Members;
   friend class MessageBuilder;
   friend class Messages;
-  friend class ReplyWidthCalc;
   friend class Users;
   friend class UsersSearch;
   friend class Utils;
@@ -1498,7 +1490,6 @@ class Messages : public QAbstractItemModel {
   friend class Members;
   friend class MessageBuilder;
   friend class MessageSearch;
-  friend class ReplyWidthCalc;
   friend class Users;
   friend class UsersSearch;
   friend class Utils;
@@ -1584,6 +1575,9 @@ public:
              const QModelIndex &parent = QModelIndex()) override;
 
   Q_INVOKABLE QString author(int row) const;
+  Q_INVOKABLE QVariant authorColor(int row) const;
+  Q_INVOKABLE QString authorName(int row) const;
+  Q_INVOKABLE QString authorProfilePicture(int row) const;
   Q_INVOKABLE QString body(int row) const;
   Q_INVOKABLE QString docAttachments(int row) const;
   Q_INVOKABLE QVariant expirationTime(int row) const;
@@ -1596,11 +1590,13 @@ public:
   Q_INVOKABLE QByteArray msgId(int row) const;
   Q_INVOKABLE QString opAuthor(int row) const;
   Q_INVOKABLE QString opBody(int row) const;
+  Q_INVOKABLE QVariant opColor(int row) const;
   Q_INVOKABLE QString opDocAttachments(int row) const;
   Q_INVOKABLE QVariant opExpirationTime(int row) const;
   Q_INVOKABLE QVariant opInsertionTime(int row) const;
   Q_INVOKABLE QString opMediaAttachments(int row) const;
   Q_INVOKABLE QByteArray opMsgId(int row) const;
+  Q_INVOKABLE QString opName(int row) const;
   Q_INVOKABLE QVariant receiptStatus(int row) const;
   Q_INVOKABLE QVariant replyType(int row) const;
   Q_INVOKABLE QVariant serverTime(int row) const;
@@ -1626,59 +1622,6 @@ Q_SIGNALS:
   void searchPatternChanged();
   void searchRegexChanged();
 };
-class ReplyWidthCalc : public QObject {
-  Q_OBJECT
-  friend class Config;
-  friend class ConversationBuilder;
-  friend class ConversationContent;
-  friend class Conversations;
-  friend class DocumentAttachments;
-  friend class Errors;
-  friend class Herald;
-  friend class MediaAttachments;
-  friend class Members;
-  friend class MessageBuilder;
-  friend class MessageSearch;
-  friend class Messages;
-  friend class Users;
-  friend class UsersSearch;
-  friend class Utils;
-
-public:
-  class Private;
-
-private:
-  Private *m_d;
-  bool m_ownsPrivate;
-  explicit ReplyWidthCalc(bool owned, QObject *parent);
-
-public:
-  explicit ReplyWidthCalc(QObject *parent = nullptr);
-  ~ReplyWidthCalc() override;
-  Q_INVOKABLE double doc(double bubble_max_width, double message_label_width,
-                         double message_body_width, double stamp_width,
-                         double reply_label_width, double reply_body_width,
-                         double reply_ts_width,
-                         double reply_file_clip_width) const;
-  Q_INVOKABLE double hybrid(double bubble_max_width, double message_label_width,
-                            double message_body_width, double stamp_width,
-                            double reply_label_width, double reply_body_width,
-                            double reply_ts_width,
-                            double reply_file_clip_width) const;
-  Q_INVOKABLE double image(double bubble_max_width, double message_label_width,
-                           double message_body_width, double stamp_width,
-                           double reply_label_width, double reply_body_width,
-                           double reply_ts_width) const;
-  Q_INVOKABLE double text(double bubble_max_width, double message_label_width,
-                          double message_body_width, double stamp_width,
-                          double reply_label_width, double reply_body_width,
-                          double reply_ts_width) const;
-  Q_INVOKABLE double unknown(double bubble_max_width,
-                             double message_label_width,
-                             double message_body_width,
-                             double unknown_body_width) const;
-Q_SIGNALS:
-};
 class Users : public QAbstractItemModel {
   Q_OBJECT
   friend class Config;
@@ -1693,7 +1636,6 @@ class Users : public QAbstractItemModel {
   friend class MessageBuilder;
   friend class MessageSearch;
   friend class Messages;
-  friend class ReplyWidthCalc;
   friend class UsersSearch;
   friend class Utils;
 
@@ -1721,6 +1663,8 @@ public:
   Q_INVOKABLE quint32 colorById(const QString &id) const;
   Q_INVOKABLE QString nameById(const QString &id) const;
   Q_INVOKABLE QString profilePictureById(const QString &id) const;
+  Q_INVOKABLE void setProfilePicture(quint64 index,
+                                     const QString &profile_picture);
   Q_INVOKABLE bool toggleFilterRegex();
   int columnCount(const QModelIndex &parent = QModelIndex()) const override;
   QVariant data(const QModelIndex &index,
@@ -1756,7 +1700,6 @@ public:
   Q_INVOKABLE bool setName(int row, const QString &value);
   Q_INVOKABLE QByteArray pairwiseConversationId(int row) const;
   Q_INVOKABLE QString profilePicture(int row) const;
-  Q_INVOKABLE bool setProfilePicture(int row, const QString &value);
   Q_INVOKABLE quint8 status(int row) const;
   Q_INVOKABLE bool setStatus(int row, quint8 value);
   Q_INVOKABLE QString userId(int row) const;
@@ -1787,7 +1730,6 @@ class UsersSearch : public QAbstractItemModel {
   friend class MessageBuilder;
   friend class MessageSearch;
   friend class Messages;
-  friend class ReplyWidthCalc;
   friend class Users;
   friend class Utils;
 
@@ -1868,7 +1810,6 @@ class Utils : public QObject {
   friend class MessageBuilder;
   friend class MessageSearch;
   friend class Messages;
-  friend class ReplyWidthCalc;
   friend class Users;
   friend class UsersSearch;
 
@@ -1885,6 +1826,7 @@ public:
   ~Utils() override;
   Q_INVOKABLE bool compareByteArray(const QByteArray &bs1,
                                     const QByteArray &bs2) const;
+  Q_INVOKABLE QString imageDimensions(const QString &path) const;
   Q_INVOKABLE bool isValidRandId(const QByteArray &bs) const;
   Q_INVOKABLE bool saveFile(const QString &fpath,
                             const QString &target_path) const;

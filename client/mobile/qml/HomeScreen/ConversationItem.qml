@@ -34,11 +34,13 @@ Rectangle {
 
         AvatarMain {
             id: avatar
-            iconColor: CmnCfg.avatarColors[colorCode]
+            backgroundColor: CmnCfg.avatarColors[colorCode]
             anchors.verticalCenter: parent.verticalCenter
             initials: Utils.initialize(title)
-            size: CmnCfg.units.dp(36)
-            avatarHeight: CmnCfg.units.dp(36)
+            size: CmnCfg.units.dp(56)
+            avatarDiameter: CmnCfg.units.dp(48)
+            topTextMargin: CmnCfg.units.dp(4)
+            bottomTextMargin: CmnCfg.units.dp(16)
 
             anchors {
                 right: parent.right
@@ -52,6 +54,7 @@ Rectangle {
                                                                   convContent.messages.lastTime)
                 lastReceipt: convContent.messages.lastStatus
                              === undefined ? 0 : convContent.messages.lastStatus
+                labelSize: CmnCfg.labelSize
             }
         }
     }
@@ -89,11 +92,8 @@ Rectangle {
             from: 0.2
             to: 0
         }
-        onRunningChanged: {
-            if (!!!running) {
-                mainView.push(ownedChatView)
-            }
-        }
+        onRunningChanged: if (!running)
+                              mainView.push(ownedChatView)
     }
 
     Component {

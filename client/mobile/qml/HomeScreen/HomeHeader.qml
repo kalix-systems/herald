@@ -3,7 +3,7 @@ import QtQuick.Layouts 1.12
 import QtQuick 2.12
 import LibHerald 1.0
 import "../Common"
-import "../ConfigMenu"
+import "../SettingsMenu"
 import "qrc:/imports/Avatar"
 import "qrc:/imports/js/utils.mjs" as Utils
 import Qt.labs.platform 1.0
@@ -24,13 +24,13 @@ ToolBar {
             Layout.alignment: Qt.AlignLeft
             Layout.leftMargin: CmnCfg.units.dp(12)
             spacing: CmnCfg.units.dp(16)
-            AvatarMain {
-                iconColor: CmnCfg.palette.avatarColors[Herald.config.color]
+
+            Avatar {
+                color: CmnCfg.palette.avatarColors[Herald.config.color]
                 initials: Herald.config.name[0].toUpperCase()
                 pfpPath: Utils.safeStringOrDefault(
                              Herald.config.profilePicture, "")
-                size: CmnCfg.units.dp(24)
-                avatarHeight: CmnCfg.units.dp(24)
+                diameter: CmnCfg.units.dp(24)
                 Layout.alignment: Qt.AlignCenter
                 Layout.leftMargin: CmnCfg.units.dp(12)
             }
@@ -39,7 +39,7 @@ ToolBar {
                 id: stateLabel
                 text: qsTr("Conversations")
                 font {
-                    pointSize: CmnCfg.chatPreviewSize
+                    pixelSize: CmnCfg.headerTextSize
                     family: CmnCfg.labelFont.name
                     bold: true
                 }
@@ -64,7 +64,7 @@ ToolBar {
                 color: CmnCfg.palette.iconFill
                 imageSource: "qrc:/options-icon.svg"
                 tapCallback: function () {
-                    mainView.push(configMain)
+                    mainView.push(settingsMain)
                 }
             }
         }

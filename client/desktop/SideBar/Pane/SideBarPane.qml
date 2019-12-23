@@ -17,7 +17,7 @@ Flickable {
 
     ScrollBar.vertical: ScrollBar {
         policy: ScrollBar.AsNeeded
-        width: CmnCfg.padding
+        width: CmnCfg.smallMargin
     }
 
     //column to load content, components are inside instead of being declared separately because
@@ -25,12 +25,14 @@ Flickable {
     Column {
         id: wrapperCol
         width: parent.width
+
         Text {
             text: qsTr("Conversations")
             anchors.left: parent.left
             anchors.leftMargin: CmnCfg.smallMargin
             topPadding: CmnCfg.smallMargin
             font.bold: true
+            font.family: CmnCfg.chatFont.name
             color: CmnCfg.palette.lightGrey
             visible: sideBarState.state === "globalSearch"
         }
@@ -52,6 +54,7 @@ Flickable {
             anchors.leftMargin: CmnCfg.smallMargin
             topPadding: CmnCfg.smallMargin
             font.bold: true
+            font.family: CmnCfg.chatFont.name
             color: CmnCfg.palette.lightGrey
             visible: sideBarState.state === "globalSearch"
         }

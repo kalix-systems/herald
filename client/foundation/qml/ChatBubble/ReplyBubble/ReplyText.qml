@@ -9,38 +9,42 @@ import "../"
 // Components that depend on dynamic scope
 import "dyn"
 
-Page {
+Rectangle {
     id: replyWrapper
+    property color opColor: CmnCfg.avatarColors[messageModelData.opColor]
 
-    property color opColor: CmnCfg.avatarColors[Herald.users.colorById(
-                                                    messageModelData.opAuthor)]
     property string replyBody: messageModelData.opBody
-    padding: CmnCfg.smallMargin
+    color: CmnCfg.palette.medGrey
+    width: bubbleRoot.maxWidth
+    height: replyWrapperCol.height
 
-    background: ReplyBackground {}
+    ReplyMouseArea {}
 
-    header: ReplyLabel {
-        id: replyLabel
+    Rectangle {
+        id: accent
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
+
+        width: CmnCfg.accentBarWidth
+        color: opColor
+        anchors.left: parent.left
     }
-
-    contentHeight: replyWrapperCol.height
-    contentWidth: imageAttach ? 300 : ReplyWidthCalc.text(
-                                    bubbleRoot.maxWidth,
-                                    contentRoot.unameWidth, messageBody.width,
-                                    contentRoot.messageStamps.width,
-                                    replyLabel.opNameWidth,
-                                    replyElidedBody.width, replyTimeInfo.width)
 
     Column {
         id: replyWrapperCol
         spacing: CmnCfg.smallMargin
-        ReplyElidedBody {
-            id: replyElidedBody
-            maximumWidth: bubbleRoot.maxWidth // - CmnCfg.smallMargin * 2
+        topPadding: CmnCfg.smallMargin
+        bottomPadding: CmnCfg.defaultMargin
+        leftPadding: CmnCfg.smallMargin
+        anchors.left: accent.right
+
+        ReplyLabel {
+            id: replyLabel
         }
 
-        ReplyTimeInfo {
-            id: replyTimeInfo
+        ReplyElidedBody {
+            id: replyElidedBody
+            maximumWidth: bubbleRoot.maxWidth - CmnCfg.smallMargin * 3 // - CmnCfg.smallMargin * 2
         }
     }
 }

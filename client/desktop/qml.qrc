@@ -10,8 +10,8 @@
         <file>EmojiKeyboard/EmojiPicker.qml</file>
         <file>EmojiKeyboard/PickerInterior.qml</file>
         <file>RegistrationPage.qml</file>
-        <file>SideBar/Header/ContextBar.qml</file>
-        <file>SideBar/Header/HeaderComponent.qml</file>
+        <file>SideBar/Header/ConversationsHeader.qml</file>
+        <file>SideBar/Header/AltContextHeader.qml</file>
         <file>SideBar/Header/SearchComponent.qml</file>
         <file>SideBar/Pane/ContactFlowComponents/NewContactComponent.qml</file>
         <file>SideBar/Pane/ContactView.qml</file>
@@ -26,15 +26,14 @@
         <file>SideBar/SideBarState.qml</file>
         <file>SideBar/js/ContactView.mjs</file>
         <file>SideBar/popups/ColorPicker.qml</file>
-        <file>SideBar/popups/ConfigPopup.qml</file>
+        <file>SideBar/popups/SettingsPopup.qml</file>
         <file>SideBar/popups/ContextOptionsMenu.qml</file>
         <file>SideBar/popups/NewMessagePopup.qml</file>
-        <file>SideBar/popups/js/ConfigPopupSubmission.mjs</file>
         <file>SideBar/popups/js/ContactClickedPopup.mjs</file>
         <file>SideBar/popups/js/NewContactDialogue.mjs</file>
         <file>TopMenuBar.qml</file>
         <file>common/CommonConfig.qml</file>
-        <file>common/ConfigAvatar.qml</file>
+        <file>SideBar/Header/HeaderAvatar.qml</file>
         <file>common/Divider.qml</file>
         <file>common/EmojiJson.js</file>
         <file>common/PlatonicRectangle.qml</file>
@@ -43,7 +42,7 @@
         <file>ChatView/ChatTextArea/ts/ChatTextAreaUtils.d.ts</file>
         <file>ChatView/ChatTextArea/ts/ChatTextAreaUtils.ts</file>
         <file>ChatView/ChatTextArea/ts/ChatViewTypes.d.ts</file>
-        <file>ChatView/ChatTextArea/AttachmentsComponent.qml</file>
+        <file>ChatView/ChatTextArea/ImageAttachmentsComponent.qml</file>
         <file>ChatView/ChatTextArea/ConvoTextArea.qml</file>
         <file>ChatView/ChatTextArea/ReplyComponent.qml</file>
         <file>ChatView/ConversationWindow/ChatBubbleHover.qml</file>
@@ -53,18 +52,20 @@
         <file>ChatView/Header/ChatBar.qml</file>
         <file>ChatView/ChatTextArea/js/ChatTextAreaUtils.mjs</file>
         <file>ChatView/Popups/ImageViewerPopup.qml</file>
-        <file>SideBar/popups/ConfigComponents/ConfigListItem.qml</file>
-        <file>SideBar/popups/ConfigComponents/Notifications.qml</file>
-        <file>SideBar/popups/ConfigComponents/Appearance.qml</file>
-        <file>SideBar/popups/ConfigComponents/Privacy.qml</file>
-        <file>SideBar/popups/ConfigComponents/Advanced.qml</file>
-        <file>SideBar/popups/ConfigComponents/Storage.qml</file>
-        <file>SideBar/popups/ConfigComponents/Feedback.qml</file>
-        <file>SideBar/popups/ConfigComponents/ConfSwitch.qml</file>
-        <file>SideBar/popups/ConfigComponents/ConfRadio.qml</file>
+        <file>SideBar/popups/SettingsComponents/SettingsListItem.qml</file>
+        <file>SideBar/popups/SettingsComponents/Notifications.qml</file>
+        <file>SideBar/popups/SettingsComponents/Appearance.qml</file>
+        <file>SideBar/popups/SettingsComponents/Privacy.qml</file>
+        <file>SideBar/popups/SettingsComponents/Advanced.qml</file>
+        <file>SideBar/popups/SettingsComponents/Storage.qml</file>
+        <file>SideBar/popups/SettingsComponents/Feedback.qml</file>
+        <file>SideBar/popups/SettingsComponents/ConfSwitch.qml</file>
+        <file>SideBar/popups/SettingsComponents/ConfRadio.qml</file>
         <file>ChatView/ChatTextArea/FileAttachmentsComponent.qml</file>
         <file>ChatView/ChatTextArea/FileClip.qml</file>
         <file>ChatView/Popups/GalleryView.qml</file>
         <file>ChatView/Popups/ImageClipRow.qml</file>
+        <file>SideBar/popups/ImageCropPopup.qml</file>
+        <file>SideBar/popups/js/SettingsPopupSubmission.mjs</file>
     </qresource>
 </RCC>

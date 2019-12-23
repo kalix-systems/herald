@@ -3,8 +3,24 @@ use crossbeam_channel::*;
 use once_cell::sync::OnceCell;
 use parking_lot::Mutex;
 
+#[repr(u8)]
+#[derive(Clone, Copy)]
+pub enum RegistrationFailureCode {
+    UserIdTaken = 0,
+    KeyTaken = 1,
+    BadSignature = 2,
+    Other = 3,
+}
+
+impl Into<Update> for RegistrationFailureCode {
+    fn into(self) -> Update {
+        Update::RegistrationFailed(self)
+    }
+}
+
 pub enum Update {
     RegistrationSuccess,
+    RegistrationFailed(RegistrationFailureCode),
     Conv(crate::conversations::shared::ConvUpdate),
     User(crate::users::shared::UserUpdate),
     Conf(crate::config::ConfUpdate),
@@ -77,6 +93,10 @@ impl super::Herald {
                 RegistrationSuccess => {
                     self.load_props.setup();
                     self.emit.config_init_changed();
+                }
+                RegistrationFailed(code) => {
+                    self.registration_failure_code.replace(code);
+                    self.emit.registration_failure_code_changed();
                 }
                 Conv(update) => {
                     self.load_props.conversations.handle_update(update);

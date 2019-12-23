@@ -9,7 +9,7 @@ Column {
 
     Button {
         id: button
-        height: CmnCfg.units.dp(36)
+        height: CmnCfg.units.dp(48)
         width: height
 
         Label {
@@ -19,9 +19,9 @@ Column {
             anchors.rightMargin: CmnCfg.units.dp(16)
             text: qsTr("New contact")
             font.pointSize: 12
+            padding: CmnCfg.units.dp(4)
             background: Rectangle {
                 anchors.fill: parent
-                anchors.margins: -CmnCfg.units.dp(3)
                 color: CmnCfg.palette.lightGrey
             }
         }
@@ -45,8 +45,7 @@ Column {
     }
 
     Button {
-
-        height: CmnCfg.units.dp(36)
+        height: CmnCfg.units.dp(48)
         width: height
         Label {
             anchors.right: parent.left
@@ -54,6 +53,7 @@ Column {
             anchors.rightMargin: CmnCfg.units.dp(16)
             text: qsTr("New group")
             font.pointSize: 12
+            padding: CmnCfg.units.dp(4)
             background: Rectangle {
                 anchors.fill: parent
                 anchors.margins: -CmnCfg.units.dp(3)
@@ -90,14 +90,14 @@ Column {
             anchors.rightMargin: CmnCfg.units.dp(16)
             text: qsTr("New conversation")
             font.pointSize: 12
+            padding: CmnCfg.units.dp(4)
             background: Rectangle {
                 anchors.fill: parent
-                anchors.margins: -CmnCfg.units.dp(3)
                 color: CmnCfg.palette.lightGrey
             }
         }
 
-        height: CmnCfg.units.dp(48)
+        height: CmnCfg.units.dp(54)
         width: height
 
         icon.source: "qrc:/pencil-icon-black.svg"

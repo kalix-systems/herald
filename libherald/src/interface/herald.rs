@@ -7,6 +7,7 @@ pub struct HeraldEmitter {
     pub(super) config_init_changed: fn(*mut HeraldQObject),
     pub(super) connection_pending_changed: fn(*mut HeraldQObject),
     pub(super) connection_up_changed: fn(*mut HeraldQObject),
+    pub(super) registration_failure_code_changed: fn(*mut HeraldQObject),
     pub(super) new_data_ready: fn(*mut HeraldQObject),
 }
 
@@ -23,6 +24,7 @@ impl HeraldEmitter {
             config_init_changed: self.config_init_changed,
             connection_pending_changed: self.connection_pending_changed,
             connection_up_changed: self.connection_up_changed,
+            registration_failure_code_changed: self.registration_failure_code_changed,
             new_data_ready: self.new_data_ready,
         }
     }
@@ -54,6 +56,14 @@ impl HeraldEmitter {
 
         if !ptr.is_null() {
             (self.connection_up_changed)(ptr);
+        }
+    }
+
+    pub fn registration_failure_code_changed(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+
+        if !ptr.is_null() {
+            (self.registration_failure_code_changed)(ptr);
         }
     }
 
@@ -208,6 +218,8 @@ pub trait HeraldTrait {
 
     fn message_search_mut(&mut self) -> &mut MessageSearch;
 
+    fn registration_failure_code(&self) -> Option<u8>;
+
     fn users(&self) -> &Users;
 
     fn users_mut(&mut self) -> &mut Users;
@@ -334,6 +346,7 @@ pub unsafe fn herald_new_inner(ptr_bundle: *mut HeraldPtrBundle) -> Herald {
         message_search_end_move_rows,
         message_search_begin_remove_rows,
         message_search_end_remove_rows,
+        herald_registration_failure_code_changed,
         users,
         users_filter_changed,
         users_filter_regex_changed,
@@ -505,6 +518,7 @@ pub unsafe fn herald_new_inner(ptr_bundle: *mut HeraldPtrBundle) -> Herald {
         config_init_changed: herald_config_init_changed,
         connection_pending_changed: herald_connection_pending_changed,
         connection_up_changed: herald_connection_up_changed,
+        registration_failure_code_changed: herald_registration_failure_code_changed,
         new_data_ready: herald_new_data_ready,
     };
     let model = HeraldList {
@@ -619,6 +633,20 @@ pub unsafe extern "C" fn herald_errors_get(ptr: *mut Herald) -> *mut Errors {
 #[no_mangle]
 pub unsafe extern "C" fn herald_message_search_get(ptr: *mut Herald) -> *mut MessageSearch {
     (&mut *ptr).message_search_mut()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn herald_registration_failure_code_get(ptr: *const Herald) -> COption<u8> {
+    match (&*ptr).registration_failure_code() {
+        Some(value) => COption {
+            data: value,
+            some: true,
+        },
+        None => COption {
+            data: u8::default(),
+            some: false,
+        },
+    }
 }
 
 #[no_mangle]
@@ -745,6 +773,7 @@ pub struct HeraldPtrBundle {
     message_search_end_move_rows: fn(*mut MessageSearchQObject),
     message_search_begin_remove_rows: fn(*mut MessageSearchQObject, usize, usize),
     message_search_end_remove_rows: fn(*mut MessageSearchQObject),
+    herald_registration_failure_code_changed: fn(*mut HeraldQObject),
     users: *mut UsersQObject,
     users_filter_changed: fn(*mut UsersQObject),
     users_filter_regex_changed: fn(*mut UsersQObject),

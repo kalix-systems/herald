@@ -12,9 +12,8 @@ import "dyn"
 
 Page {
     id: replyWrapper
+    property color opColor: CmnCfg.avatarColors[messageModelData.opColor]
 
-    property color opColor: CmnCfg.avatarColors[Herald.users.colorById(
-                                                    messageModelData.opAuthor)]
     property string replyBody: messageModelData.opBody
     property int fileCount
 
@@ -31,13 +30,7 @@ Page {
     }
 
     contentHeight: replyWrapperCol.implicitHeight
-    contentWidth: imageAttach ? 300 : ReplyWidthCalc.doc(
-                                    bubbleRoot.maxWidth,
-                                    contentRoot.unameWidth, messageBody.width,
-                                    contentRoot.messageStamps.width,
-                                    replyLabel.opNameWidth,
-                                    replyElidedBody.width,
-                                    replyTimeInfo.width, replyFileClip.width)
+    contentWidth: bubbleRoot.maxWidth * 0.8
     Column {
         id: replyWrapperCol
         spacing: CmnCfg.smallMargin

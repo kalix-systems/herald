@@ -71,8 +71,13 @@ fn complicated_add_get_set_config() {
 
     let test_picture = "test_resources/maryland.png";
 
-    db::set_profile_picture(&conn, Some(test_picture.to_string()))
-        .expect(womp!("failed to set picture"));
+    db::set_profile_picture(
+        &conn,
+        Some(image_utils::ProfilePicture::autocrop(
+            test_picture.to_string(),
+        )),
+    )
+    .expect(womp!("failed to set picture"));
 
     std::fs::remove_dir_all(pictures_dir()).expect(womp!());
 }

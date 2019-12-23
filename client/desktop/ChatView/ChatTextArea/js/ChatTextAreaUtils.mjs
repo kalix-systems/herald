@@ -4,7 +4,9 @@ export function enterKeyHandler(event, target, builder, messageModel, textAreaFo
         target.cursorPosition = target.text.length;
         return;
     }
-    if (target.text.trim().length <= 0) {
+    if (target.text.trim().length === 0 &&
+        !builder.hasDocAttachment &&
+        !builder.hasMediaAttachment) {
         return;
     }
     // clear before positional reset

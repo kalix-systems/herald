@@ -2,36 +2,59 @@ import LibHerald 1.0
 import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
+import "../../../js/utils.mjs" as Utils
 
-Label {
-    id: replyLabel
-    readonly property real opNameWidth: opNameTM.width
-    text: opNameTM.elidedText
-    font.weight: Font.Bold
-    font.family: CmnCfg.chatFont.name
+Row {
+    spacing: CmnCfg.microMargin
 
-    padding: CmnCfg.smallMargin / 4
-    color: CmnCfg.palette.white
-    leftPadding: CmnCfg.smallMargin / 2
-    horizontalAlignment: Text.AlignLeft
-
-    background: Rectangle {
-        color: opColor
-        border.color: Qt.darker(color, 1.5)
-        border.width: 1
-    }
-
-    TextMetrics {
-        id: opNameTM
-        text: Herald.users.nameById(messageModelData.opAuthor)
+    Label {
+        id: replyLabel
+        readonly property real opNameWidth: opNameTM.width
+        text: opNameTM.elidedText
         font.weight: Font.Bold
         font.family: CmnCfg.chatFont.name
-        elideWidth: {
-            if (imageAttach) {
-                return 300
+        padding: 0
+        color: opColor
+        horizontalAlignment: Text.AlignLeft
+
+        TextMetrics {
+            id: opNameTM
+            text: messageModelData.opName
+            font.weight: Font.Bold
+            font.family: CmnCfg.chatFont.name
+            elideWidth: {
+                if (imageAttach) {
+                    return 300
+                }
+                bubbleRoot.maxWidth
             }
-            bubbleRoot.maxWidth
+            elide: Text.ElideRight
         }
-        elide: Text.ElideRight
+    }
+
+    Connections {
+        target: appRoot.globalTimer
+        onRefreshTime: replyTs.text = Utils.friendlyTimestamp(
+                           messageModelData.opInsertionTime)
+    }
+
+    Label {
+        id: replyTs
+
+        font.pixelSize: 11
+        text: Utils.friendlyTimestamp(messageModelData.opInsertionTime)
+        color: CmnCfg.palette.darkGrey
+        anchors.verticalCenter: replyLabel.verticalCenter
+    }
+
+    Button {
+        id: clock
+        icon.source: "qrc:/mini-timer-icons/almost-full.svg"
+        icon.height: 16
+        icon.width: 16
+        icon.color: "grey"
+        padding: 0
+        background: Item {}
+        anchors.verticalCenter: replyTs.verticalCenter
     }
 }

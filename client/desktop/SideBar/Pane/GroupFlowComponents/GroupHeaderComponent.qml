@@ -8,6 +8,7 @@ import QtQuick.Dialogs 1.3
 import QtMultimedia 5.13
 import QtGraphicalEffects 1.0
 
+//TODO: RENAME this file to ImageSelector or something.
 Rectangle {
     id: topRect
     anchors.top: parent.top
@@ -19,9 +20,9 @@ Rectangle {
     Row {
         height: 42
         anchors.top: parent.top
-        anchors.topMargin: CmnCfg.largeMargin
+        anchors.topMargin: CmnCfg.megaMargin
         anchors.horizontalCenter: parent.horizontalCenter
-        spacing: CmnCfg.largeMargin
+        spacing: CmnCfg.megaMargin
         Rectangle {
             width: 42
             height: width
@@ -37,6 +38,7 @@ Rectangle {
                     source: imageSource
                     anchors.fill: parent
                     fillMode: Image.PreserveAspectCrop
+                    asynchronous: true
 
                     ColorOverlay {
                         id: overlay

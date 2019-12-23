@@ -12,9 +12,11 @@ import "../common" as Common
 import "Popups" as Popups
 
 Page {
-    id: chatPane
+    id: chatPage
 
+    //TODO: rename this to something sane
     property var conversationItem
+    //TODO: rename to something sane and not a shadow
     property Messages ownedConversation
 
     background: Rectangle {
@@ -35,7 +37,7 @@ Page {
         color: CmnCfg.palette.borderColor
         z: messageBar.z
     }
-
+    //TODO: Rename to MessagesView
     ConvoWindow.ConversationWindow {
         id: convWindow
         focus: true
@@ -48,15 +50,14 @@ Page {
 
         Component.onCompleted: forceActiveFocus()
         Keys.onPressed: KeyNav.convWindowKeyHandler(event, chatScrollBar,
-                                                    chatListView,
+                                                    convWindow,
                                                     ScrollBar.AlwaysOn,
                                                     ScrollBar.AsNeeded)
-
 
         Connections {
             target: conversationList
             onMessagePositionRequested: {
-                const msg_idx = chatPane.ownedConversation.indexById(
+                const msg_idx = chatPage.ownedConversation.indexById(
                                   requestedMsgId)
 
                 // early return on out of bounds
@@ -105,8 +106,10 @@ Page {
             left: parent.left
             right: parent.right
             bottom: parent.bottom
-            margins: CmnCfg.margin
+            topMargin: CmnCfg.defaultMargin
             bottomMargin: 0
+            leftMargin: 0
+            rightMargin: 0
         }
 
         keysProxy: Item {

@@ -39,7 +39,7 @@ Column {
         width: parent.width
         anchors.horizontalCenter: parent.horizontalCenter
         height: CmnCfg.units.dp(6)
-        leftPadding: CmnCfg.margin
+        leftPadding: CmnCfg.defaultMargin
 
         background: Rectangle {
             visible: false
@@ -60,11 +60,11 @@ Column {
 
             AvatarMain {
                 id: avatar
-                iconColor: CmnCfg.palette.avatarColors[contactData.color]
+                backgroundColor: CmnCfg.palette.avatarColors[contactData.color]
                 anchors.verticalCenter: parent.verticalCenter
                 initials: Utils.initialize(contactData.name)
-                size: CmnCfg.units.dp(36)
-                avatarHeight: CmnCfg.units.dp(36)
+                size: CmnCfg.units.dp(48)
+                avatarDiameter: CmnCfg.units.dp(48)
 
                 anchors {
                     right: parent.right
@@ -74,8 +74,7 @@ Column {
 
                 labelComponent: ConversationLabel {
                     contactName: contactData.name
-                    labelColor: CmnCfg.palette.offBlack
-                    labelSize: 14
+                    labelColor: CmnCfg.palette.black
                     lastBody: "@" + contactData.userId
                 }
             }

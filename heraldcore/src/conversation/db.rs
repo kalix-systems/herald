@@ -120,7 +120,7 @@ pub(crate) fn expiration_period(
     )))
 }
 
-/// Gets expiration period for a conversation
+/// Gets picture for a conversation
 pub(crate) fn picture(
     conn: &rusqlite::Connection,
     conversation_id: &ConversationId,
@@ -178,13 +178,13 @@ pub(crate) fn set_title(
 pub(crate) fn set_picture(
     conn: &rusqlite::Connection,
     conversation_id: &ConversationId,
-    picture: Option<&str>,
+    picture: Option<image_utils::ProfilePicture>,
 ) -> Result<Option<String>, HErr> {
     let old_picture = self::picture(&conn, conversation_id)?;
 
     let path = match picture {
-        Some(path) => Some(
-            image_utils::update_picture(path, old_picture.as_ref().map(String::as_str))?
+        Some(picture) => Some(
+            image_utils::update_picture(picture, old_picture.as_ref().map(String::as_str))?
                 .into_os_string()
                 .into_string()?,
         ),

@@ -50,6 +50,23 @@ impl UtilsTrait for Utils {
         true
     }
 
+    fn image_dimensions(
+        &self,
+        path: String,
+    ) -> String {
+        let path = none!(strip_qrc(path), "".to_owned());
+        let (width, height) = err!(
+            heraldcore::image_utils::image_dimensions(path),
+            "".to_owned()
+        );
+
+        (json::object! {
+            "width" => width,
+            "height" => height,
+        })
+        .dump()
+    }
+
     fn emit(&mut self) -> &mut UtilsEmitter {
         &mut self.emit
     }

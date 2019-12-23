@@ -5,16 +5,15 @@ import LibHerald 1.0
 
 Row {
     // spacing: 2
-    Label {
-        id: timestamp
-        font.pixelSize: 10
-        text: friendlyTimestamp
-        color: CmnCfg.palette.darkGrey
-    }
+    anchors.right: parent.right
+    anchors.bottom: parent.bottom
+    anchors.margins: CmnCfg.smallMargin
+    anchors.bottomMargin: CmnCfg.defaultMargin
+    visible: isTail
 
     Button {
         id: clock
-        icon.source: expirationTime !== undefined ? "qrc:/countdown-icon-temp.svg" : ""
+        icon.source: expirationTime !== undefined ? "qrc:/mini-timer-icons/almost-full.svg" : ""
         icon.height: 16
         icon.width: 16
         icon.color: "grey"

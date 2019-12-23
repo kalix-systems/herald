@@ -21,12 +21,12 @@ ListView {
 
         AvatarMain {
             id: contactAvatar
-            iconColor: CmnCfg.palette.avatarColors[Herald.users.colorById(
+            backgroundColor: CmnCfg.palette.avatarColors[Herald.users.colorById(
                                                        memberId)]
             anchors.verticalCenter: parent.verticalCenter
             initials: Utils.initialize(Herald.users.nameById(memberId))
             size: CmnCfg.units.dp(36)
-            avatarHeight: CmnCfg.units.dp(36)
+            avatarDiameter: CmnCfg.units.dp(36)
 
             anchors {
                 right: parent.right
@@ -45,7 +45,7 @@ ListView {
         IconButton {
             id: xIcon
             anchors.right: parent.right
-            anchors.rightMargin: CmnCfg.margin / 2
+            anchors.rightMargin: CmnCfg.defaultMargin / 2
             anchors.verticalCenter: parent.verticalCenter
             imageSource: "qrc:/x-icon.svg"
             tapCallback: function () {

@@ -10,11 +10,11 @@ import "./js/utils.js" as JS
 // Components that depend on dynamic scope
 import "dyn"
 
-Page {
+// TODO: describe each of these components with a comment above the first line
+Rectangle {
     id: replyWrapper
 
-    property color opColor: CmnCfg.avatarColors[Herald.users.colorById(
-                                                    messageModelData.opAuthor)]
+    property color opColor: CmnCfg.avatarColors[messageModelData.opColor]
     property string replyBody: messageModelData.opBody
     property int fileCount
     readonly property real imageSize: 80
@@ -26,31 +26,38 @@ Page {
         JS.parseMedia(messageModelData, imageClip)
     }
 
-    padding: CmnCfg.smallMargin
+    Rectangle {
+        id: accent
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
 
-    background: ReplyBackground {}
-
-    header: ReplyLabel {
-        id: replyLabel
+        width: CmnCfg.accentBarWidth
+        color: opColor
+        anchors.left: parent.left
     }
-    contentHeight: wrapRow.implicitHeight
-    contentWidth: wrapRow.implicitWidth
+
+    ReplyMouseArea {}
+
+    height: wrapRow.height
+    width: bubbleRoot.maxWidth
+    color: CmnCfg.palette.medGrey
 
     Row {
         id: wrapRow
         spacing: CmnCfg.smallMargin
+        anchors.left: accent.right
+        topPadding: CmnCfg.smallMargin
+        bottomPadding: CmnCfg.defaultMargin
+        leftPadding: CmnCfg.smallMargin
 
         Column {
             id: replyWrapperCol
+            ReplyLabel {
+                id: replyLabel
+            }
             spacing: CmnCfg.smallMargin
 
-            width: imageAttach ? (300 - imageClip.width) : ReplyWidthCalc.hybrid(
-                                     bubbleRoot.maxWidth,
-                                     contentRoot.unameWidth, messageBody.width,
-                                     contentRoot.messageStamps.width,
-                                     replyLabel.opNameWidth,
-                                     replyElidedBody.width,
-                                     replyTimeInfo.width, replyFileClip.width)
+            width: bubbleRoot.maxWidth - imageClip.width - CmnCfg.smallMargin * 3
             ReplyFileClip {
                 id: replyFileClip
                 constraint: imageSize
@@ -60,12 +67,8 @@ Page {
 
             ReplyElidedBody {
                 id: replyElidedBody
-                elideConstraint: imageSize
-                maximumWidth: bubbleRoot.maxWidth - imageSize
-            }
 
-            ReplyTimeInfo {
-                id: replyTimeInfo
+                maximumWidth: bubbleRoot.maxWidth * 0.8 - imageSize
             }
         }
 

@@ -50,6 +50,15 @@ impl Users {
                     println!("PLACEHOLDER: {} did not accept your user request", uid);
                 }
             }
+            UserUpdate::DataChanged(id) => {
+                let user = User { id, matched: false };
+                let pos = match self.list.binary_search(&user) {
+                    Ok(pos) => pos,
+                    Err(_) => return,
+                };
+
+                self.model.data_changed(pos, pos);
+            }
         }
     }
 }

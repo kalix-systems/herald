@@ -22,7 +22,7 @@ Item {
     property string lastAuthor
     property color labelColor
     property color secondaryLabelColor: CmnCfg.palette.offBlack
-    property int labelSize
+    property real labelSize
 
     // labeling constants
     GridLayout {
@@ -32,11 +32,11 @@ Item {
         width: parent.width
         height: parent.height
         Label {
-            id: uid
+            id: name
             font {
-                bold: true
                 family: CmnCfg.chatFont.name
                 pixelSize: labelSize
+                weight: Font.Medium
             }
             Layout.alignment: Qt.AlignLeft | Qt.AlignTop
             Layout.preferredHeight: labelGrid.height * 0.25

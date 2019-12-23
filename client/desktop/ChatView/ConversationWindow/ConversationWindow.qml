@@ -1,17 +1,19 @@
-import QtQuick.Controls 2.13
+import QtQuick.Controls 2.14
 import QtQuick.Layouts 1.12
-import QtQuick 2.13
+import QtQuick 2.14
 import LibHerald 1.0
 import "qrc:/imports/ChatBubble" as CB
 import "qrc:/imports/Avatar"
 import "." as CVUtils
 import "qrc:/imports/js/utils.mjs" as Utils
 import "../../SideBar/js/ContactView.mjs" as CUtils
+import Qt.labs.platform 1.1
+import QtQuick.Dialogs 1.3
+import QtGraphicalEffects 1.0
 
 ListView {
     id: chatListView
     property alias chatScrollBar: chatScrollBarInner
-    property alias chatListView: chatListView
 
     //this should be in here and not in the bubble because conversation window
     //needs access to it, add a separate animation to mobile
@@ -19,19 +21,16 @@ ListView {
     property NumberAnimation highlightAnimation: NumberAnimation {
         id: bubbleHighlightAnimation
         property: "opacity"
-        from: 1.0
+        from: 0.2
         to: 0.0
         duration: 600
         easing.type: Easing.InCubic
     }
+    spacing: 0
 
     // disable these, we're handling them differently
     keyNavigationEnabled: false
     keyNavigationWraps: false
-
-    // TODO this only clips because of highlight rectangles, figure out a way to
-    // not use clip
-    clip: true
 
     maximumFlickVelocity: 1500
     flickDeceleration: chatListView.height * 10
@@ -39,13 +38,10 @@ ListView {
     onFlickStarted: focus = true
 
     highlightFollowsCurrentItem: false
-    cacheBuffer: chatListView.height * 5
-
-    Layout.maximumWidth: parent.width
 
     ScrollBar.vertical: ScrollBar {
         id: chatScrollBarInner
-        width: CmnCfg.padding
+        width: CmnCfg.smallMargin
 
         policy: ScrollBar.AsNeeded
         hoverEnabled: true
@@ -56,8 +52,11 @@ ListView {
 
     boundsBehavior: ListView.StopAtBounds
     boundsMovement: Flickable.StopAtBounds
+    model: chatPage.ownedConversation
 
-    model: chatPane.ownedConversation
+    // this is set to a higher value in `Component.onCompleted`
+    // but is set to `0` here to improve initial load times
+    cacheBuffer: 0
 
     Component.onCompleted: {
         model.setElisionLineCount(38)
@@ -65,73 +64,67 @@ ListView {
         model.setElisionCharsPerLine(40)
         positionViewAtEnd()
 
-        // heuristic overshoot
-        chatScrollBarInner.setPosition(2)
+        // made with the understanding that position goes from 0.0-1.0
+        // however 1.0 does not seem to be the actual bottom of the page.
+        // ain't that Qt.
+        chatScrollBarInner.setPosition(3.0)
+        cacheBuffer = chatListView.height * 5
     }
 
-    Connections {
-        target: model
-        onRowsInserted: {
-            chatListView.contentY = chatListView.contentHeight
+    FileDialog {
+        id: attachmentDownloader
+        property string filePath
+        selectFolder: true
+        folder: StandardPaths.writableLocation(StandardPaths.DesktopLocation)
+        onAccepted: Herald.utils.saveFile(filePath, fileUrl)
+        selectExisting: false
+    }
+
+    FileDialog {
+        id: downloadFileChooser
+        selectFolder: true
+        folder: StandardPaths.writableLocation(StandardPaths.DesktopLocation)
+        onAccepted: ownedConversation.saveAllAttachments(index, fileUrl)
+        selectExisting: false
+    }
+
+    delegate: CB.ChatBubble {
+        id: bubbleActual
+        convContainer: chatListView
+        defaultWidth: chatListView.width
+        width: parent.width
+        messageModelData: model
+
+        ListView.onAdd: {
+            // made with the understanding that position goes from 0.0-1.0
+            // however 1.0 does not seem to be the actual bottom of the page.
+            // ain't that Qt.
+            chatScrollBarInner.setPosition(3.0)
         }
-    }
 
-    delegate: Row {
-        id: chatRow
-        readonly property string proxyBody: body
-        property string proxyReceiptImage: Utils.receiptCodeSwitch(
-                                               receiptStatus)
-        readonly property color userColor: CmnCfg.avatarColors[Herald.users.colorById(
-                                                                   author)]
-        readonly property string timestamp: Utils.friendlyTimestamp(
-                                                insertionTime)
-
-        readonly property bool outbound: author === Herald.config.configId
-
-        readonly property string authName: outbound ? Herald.config.name : Herald.users.nameById(
-                                                          author)
-        readonly property string pfpUrl: outbound ? Herald.config.profilePicture : Herald.users.profilePictureById(
-                                                        author)
-        property alias highlight: bubbleActual.highlightItem
-        property bool elided: body.length !== fullBody.length
-
-        property var messageModelData: model
         anchors {
-            right: outbound ? parent.right : undefined
-            left: !outbound ? parent.left : undefined
-            rightMargin: CmnCfg.margin
-            leftMargin: CmnCfg.smallMargin
-        }
-        layoutDirection: outbound ? Qt.RightToLeft : Qt.LeftToRight
-
-        spacing: CmnCfg.margin
-        bottomPadding: isTail ? CmnCfg.mediumMargin / 2 : CmnCfg.smallMargin / 2
-        topPadding: isHead ? CmnCfg.mediumMargin / 2 : CmnCfg.smallMargin / 2
-
-        AvatarMain {
-            iconColor: userColor
-            initials: authName[0].toUpperCase()
-            size: 28
-            opacity: isTail ? 1 : 0
-            anchors {
-                bottom: parent.bottom
-                margins: CmnCfg.margin
-                bottomMargin: parent.bottomPadding
-            }
-
-            z: 10
-            pfpPath: parent.pfpUrl
-            avatarHeight: 28
+            left: parent.left
+            right: parent.right
         }
 
-        CB.ChatBubble {
-            id: bubbleActual
-            convContainer: chatListView
-            defaultWidth: chatListView.width * 0.66
-            messageModelData: chatRow.messageModelData
+        ChatBubbleHover {
+            id: bubbleHoverHandler
+            download: bubbleActual.imageAttach || bubbleActual.docAttach
+            onEntered: bubbleActual.hoverHighlight = true
+            onExited: bubbleActual.hoverHighlight = false
+        }
 
-            ChatBubbleHover {
-                download: bubbleActual.imageAttach || bubbleActual.docAttach
+        // Handles signals from ChatBubble attachment loaders to adjust view down
+        // once the layout has been fully calculated
+        Loader {
+            active: (parent.messageModelData.index === chatListView.count - 1)
+            sourceComponent: Component {
+                Connections {
+                    target: bubbleActual
+                    onAttachmentsLoaded: {
+                        chatListView.positionViewAtEnd()
+                    }
+                }
             }
         }
     }

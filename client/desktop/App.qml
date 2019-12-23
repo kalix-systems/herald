@@ -14,7 +14,7 @@ Item {
     anchors.fill: parent.fill
 
     TopMenuBar {
-        Popups.ConfigPopup {
+        Popups.SettingsPopup {
             id: preferencesPopup
         }
     }
@@ -34,8 +34,8 @@ Item {
         id: avatarColorPicker
     }
 
-    Popups.ConfigPopup {
-        id: configPopup
+    Popups.SettingsPopup {
+        id: settingsPopup
     }
 
     Popups.ContextOptionsMenu {
@@ -46,6 +46,10 @@ Item {
         id: convoMenu
     }
 
+    Popups.ImageCropPopup {
+        id: imageCrop
+    }
+    // TODO: move into seperate file
     Component {
         id: splash
 
@@ -68,13 +72,10 @@ Item {
 
                 Text {
                     anchors.left: parent.left
-                    anchors.leftMargin: CmnCfg.largeMargin
+                    anchors.leftMargin: CmnCfg.megaMargin
                     anchors.verticalCenter: parent.verticalCenter
                     text: qsTr("Herald")
-
-                    font.pixelSize: CmnCfg.headerSize
-                    font.family: CmnCfg.labelFont.name
-                    font.bold: true
+                    font: CmnCfg.headerBarFont
                     color: CmnCfg.palette.white
                 }
             }
@@ -101,6 +102,7 @@ Item {
             sourceComponent: splash
         }
 
+        // TODO: combine these two rectangles and figure out width
         handle: Item {
             id: handle
             implicitWidth: 1

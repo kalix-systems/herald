@@ -15,8 +15,8 @@ pub enum SearchChanged {
 }
 
 impl SearchChanged {
-    pub fn changed(&self) -> bool {
-        self == &SearchChanged::Changed
+    pub fn changed(self) -> bool {
+        self == SearchChanged::Changed
     }
 }
 

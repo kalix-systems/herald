@@ -56,13 +56,13 @@ pub fn conversation_members(
 pub fn set_profile_picture(
     conn: &rusqlite::Connection,
     id: UserId,
-    profile_picture: Option<String>,
+    profile_picture: Option<image_utils::ProfilePicture>,
 ) -> Result<Option<String>, HErr> {
     let old_path = self::profile_picture(conn, id)?;
 
     let profile_picture = match profile_picture {
-        Some(path) => {
-            let path_string = image_utils::update_picture(path, old_path)?
+        Some(picture) => {
+            let path_string = image_utils::update_picture(picture, old_path)?
                 .into_os_string()
                 .into_string()?;
             Some(path_string)

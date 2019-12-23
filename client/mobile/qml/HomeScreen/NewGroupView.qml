@@ -43,7 +43,7 @@ Page {
                     id: stateLabel
                     text: qsTr("New group")
                     font {
-                        pointSize: CmnCfg.chatPreviewSize
+                        pixelSize: CmnCfg.chatPreviewSize
                         family: CmnCfg.labelFont.name
                     }
                     anchors.verticalCenter: parent.verticalCenter
@@ -75,7 +75,7 @@ Page {
 
     Button {
         anchors.top: groupSelectText.bottom
-        anchors.topMargin: CmnCfg.margin / 2
+        anchors.topMargin: CmnCfg.defaultMargin / 2
         anchors.right: parent.right
         anchors.rightMargin: CmnCfg.units.dp(28)
 
@@ -101,10 +101,9 @@ Page {
                     Herald.conversationBuilder.setTitle(topRect.groupTitle)
                 }
 
-                if (topRect.profPic !== "") {
-                    Herald.conversationBuilder.picture = topRect.profPic
-                }
-
+                //TODO: impl for setting prof pic once file dialog exists
+                //                if (topRect.profPic !== "") {
+                //                }
                 Herald.conversationBuilder.finalize()
                 mainView.pop()
             }

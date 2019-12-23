@@ -30,6 +30,7 @@ Page {
         TextMessageList {
             messageListModel: ownedMessages
             width: parent.width
+            anchors.top: parent.top
         }
 
         anchors {

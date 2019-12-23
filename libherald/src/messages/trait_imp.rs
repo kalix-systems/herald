@@ -47,18 +47,39 @@ impl Interface for Messages {
         self.author_(index)
     }
 
+    fn author_color(
+        &self,
+        index: usize,
+    ) -> Option<u32> {
+        self.author_color_(index)
+    }
+
+    fn author_name(
+        &self,
+        index: usize,
+    ) -> Option<ffi::UserId> {
+        self.author_name_(index)
+    }
+
+    fn author_profile_picture(
+        &self,
+        index: usize,
+    ) -> String {
+        self.author_profile_picture_(index).unwrap_or_default()
+    }
+
     fn body(
         &self,
         index: usize,
-    ) -> Option<String> {
-        self.body_(index)
+    ) -> String {
+        self.body_(index).unwrap_or_default()
     }
 
     fn full_body(
         &self,
         index: usize,
-    ) -> Option<String> {
-        self.full_body_(index)
+    ) -> String {
+        self.full_body_(index).unwrap_or_default()
     }
 
     fn receipt_status(
@@ -146,8 +167,8 @@ impl Interface for Messages {
     fn op_body(
         &self,
         index: usize,
-    ) -> Option<String> {
-        self.op_body_(index)
+    ) -> String {
+        self.op_body_(index).unwrap_or_default()
     }
 
     fn insertion_time(
@@ -226,6 +247,20 @@ impl Interface for Messages {
         index: usize,
     ) -> String {
         self.op_doc_attachments_(index).unwrap_or_default()
+    }
+
+    fn op_color(
+        &self,
+        index: usize,
+    ) -> Option<u32> {
+        self.op_color_(index)
+    }
+
+    fn op_name(
+        &self,
+        index: usize,
+    ) -> Option<String> {
+        self.op_name_(index)
     }
 
     fn msg_id(

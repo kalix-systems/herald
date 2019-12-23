@@ -19,11 +19,11 @@ Component {
             id: searchToolBar
             anchors.horizontalCenter: parent.horizontalCenter
 
-            spacing: CmnCfg.smallMargin / 2
+            spacing: CmnCfg.microMargin
 
             anchors {
-                leftMargin: CmnCfg.margin
-                rightMargin: CmnCfg.margin
+                leftMargin: CmnCfg.defaultMargin
+                rightMargin: CmnCfg.defaultMargin
             }
 
             //main search component
@@ -43,9 +43,9 @@ Component {
 
             Imports.ButtonForm {
                 id: back
-                source: "qrc:/up-chevron-icon-white.svg"
-                Layout.alignment: Qt.AlignVCenter
+                source: "qrc:/up-chevron-icon.svg"
                 fill: CmnCfg.palette.lightGrey
+                Layout.alignment: Qt.AlignVCenter
                 enabled: searchToolBar.state === "searchActiveState"
                 opacity: enabled ? 1 : 0.5
                 onClicked: convWindow.positionViewAtIndex(
@@ -55,9 +55,9 @@ Component {
 
             Imports.ButtonForm {
                 id: forward
-                source: "qrc:/down-chevron-icon-white.svg"
-                Layout.alignment: Qt.AlignVCenter
+                source: "qrc:/down-chevron-icon.svg"
                 fill: CmnCfg.palette.lightGrey
+                Layout.alignment: Qt.AlignVCenter
                 enabled: searchToolBar.state === "searchActiveState"
                 opacity: enabled ? 1 : 0.5
 

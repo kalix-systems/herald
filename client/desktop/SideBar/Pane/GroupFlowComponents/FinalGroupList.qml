@@ -22,10 +22,9 @@ ListView {
         Common.PlatonicRectangle {
             color: CmnCfg.palette.offBlack
             id: memberRectangle
-            boxColor: Herald.users.colorById(memberId)
-            boxTitle: Herald.users.nameById(memberId)
-            picture: Utils.safeStringOrDefault(Herald.users.profilePictureById(
-                                                   memberId), "")
+            boxColor: memberColor
+            boxTitle: memberName
+            picture: memberProfilePicture
 
             //no hover state
             states: []
@@ -35,7 +34,7 @@ ListView {
             }
 
             labelComponent: Av.ConversationLabel {
-                contactName: Herald.users.nameById(memberId)
+                contactName: memberName
                 labelColor: CmnCfg.palette.white
                 labelSize: 14
                 lastBody: "@" + memberId
@@ -44,7 +43,7 @@ ListView {
             Imports.ButtonForm {
                 id: xIcon
                 anchors.right: parent.right
-                anchors.rightMargin: CmnCfg.largeMargin / 2
+                anchors.rightMargin: CmnCfg.megaMargin / 2
                 anchors.verticalCenter: parent.verticalCenter
                 source: "qrc:/x-icon.svg"
                 fill: CmnCfg.palette.lightGrey

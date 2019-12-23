@@ -21,18 +21,23 @@ Page {
 
     property alias sideBarState: sideBarState
 
+    // TODO: RENAME the PANE to sideBarContent
+    Pane.SideBarPane {
+        id: sideBarPane
+    }
+
     background: Rectangle {
         color: CmnCfg.palette.offBlack
     }
 
-    ///--- SearchBar for contacts, add contact button
     header: Loader {
         id: headerLoader
+
         property string searchPlaceholder: ""
         property bool contactsSearch: false
         property string headerText: ""
 
-        sourceComponent: Header.ContextBar {
+        sourceComponent: Header.ConversationsHeader {
             id: contextBarComponent
         }
 
@@ -41,15 +46,15 @@ Page {
             color: CmnCfg.palette.lightGrey
             width: parent.width + 1
         }
-    }
 
-    //component loaded into header depending on sidebar state
-    Header.HeaderComponent {
-        id: headerBarComponent
-    }
+        //component loaded into header depending on sidebar state
+        Header.AltContextHeader {
+            id: altContextHeader
+        }
 
-    Header.SearchComponent {
-        id: searchBarComponent
+        Header.SearchComponent {
+            id: searchBarComponent
+        }
     }
 
     GroupFlow.NewGroupComponent {

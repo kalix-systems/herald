@@ -13,7 +13,6 @@ Rectangle {
     color: CmnCfg.palette.lightGrey
     border.color: CmnCfg.palette.black
     border.width: 1
-    width: parent.width
     height: Math.max(wrapperRow.height + label.height, 20)
 
     Connections {
@@ -29,8 +28,8 @@ Rectangle {
         width: parent.width
         font.family: CmnCfg.chatFont.name
         font.weight: Font.Bold
-        padding: CmnCfg.smallMargin / 4
-        leftPadding: CmnCfg.smallMargin / 2
+        padding: 2
+        leftPadding: CmnCfg.microMargin
 
         color: CmnCfg.palette.white
         text: Herald.users.nameById(ownedConversation.builder.opAuthor)
@@ -113,12 +112,6 @@ Rectangle {
             id: textCol
             width: parent.width - imageClipLoader.width - CmnCfg.smallMargin * 2
             spacing: CmnCfg.smallMargin
-            TextMetrics {
-                id: opTextMetrics
-                text: ownedConversation.builder.opBody
-                elideWidth: (wrapper.width - CmnCfg.smallMargin) * 2
-                elide: Text.ElideRight
-            }
 
             Loader {
                 id: fileClipLoader
@@ -131,6 +124,14 @@ Rectangle {
             }
 
             TextEdit {
+
+                TextMetrics {
+                    id: opTextMetrics
+                    text: ownedConversation.builder.opBody
+                    elideWidth: (wrapper.width - CmnCfg.smallMargin) * 2
+                    elide: Text.ElideRight
+                }
+
                 text: opTextMetrics.elidedText
                 Layout.rightMargin: CmnCfg.smallMargin
                 Layout.alignment: Qt.AlignLeft
