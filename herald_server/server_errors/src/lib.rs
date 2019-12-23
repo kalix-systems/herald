@@ -11,9 +11,8 @@ pub enum Error {
     PgError(#[from] tokio_postgres::Error),
     #[error("Timeout: {0}")]
     TimedOut(#[from] tokio::time::Elapsed),
-    #[error("Krpc: {0}")]
-    Krpc(#[from] krpc::KrpcError),
-
+    //#[error("Krpc: {0}")]
+    //Krpc(#[from] krpc::KrpcError),
     #[error("Invalid signature")]
     InvalidSig,
     #[error("Invalid key")]
