@@ -722,15 +722,17 @@ mod tests {
         let cid1 = ConversationId::gen_new();
         let cid2 = ConversationId::gen_new();
 
-        let uids = vec![a_uid, b_uid, c_uid];
+        let uids1 = vec![a_uid];
+        let uids2 = vec![b_uid, c_uid];
+
         let cids = vec![cid1, cid2];
 
         let recip = Recip::Many(Recips::Groups(cids.clone()));
 
         assert!(wa!(client.add_to_pending_and_get_valid_devs(&recip, &push)).is_missing());
 
-        wa!(client.add_to_group(iter(uids.clone()), cid1));
-        wa!(client.add_to_group(iter(uids.clone()), cid2));
+        wa!(client.add_to_group(iter(uids1.clone()), cid1));
+        wa!(client.add_to_group(iter(uids2.clone()), cid2));
 
         let keys = [a_kp, b_kp, c_kp]
             .iter()
