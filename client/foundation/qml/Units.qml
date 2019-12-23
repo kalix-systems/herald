@@ -1,3 +1,4 @@
+
 /*
  *   Copyright 2015 Marco Martin <mart@kde.org>
  *
@@ -26,17 +27,6 @@ import QtQuick.Window 2.13
  */
 QtObject {
 
-    /**
-     * The fundamental unit of space that should be used for sizes, expressed in pixels.
-     * Given the screen has an accurate DPI settings, it corresponds to a width of
-     * the capital letter M
-     */
-    property int gridUnit: fontMetrics.height
-
-    function gu(dips) {
-        return gridUnit * dips
-    }
-
 
     /**
      * The ratio between physical and device-independent pixels. This value does not depend on the \
@@ -44,6 +34,7 @@ QtObject {
      * use theme.mSize(theme.defaultFont), units.smallSpacing and units.largeSpacing.
      * The devicePixelRatio follows the definition of "device independent pixel" by Microsoft.
      */
+
     //readonly property real devicePixelRatio: Screen.devicePixelRatio
     // 25.4 = mm per in
     // 160 =
@@ -72,22 +63,22 @@ QtObject {
      * metrics used by the default font
      */
     // TODO decide whether to use this vs defining rounding behavior ourselves
-//    property variant fontMetrics: TextMetrics {
-//        text: "M"
-//        function roundedIconSize(size) {
-//            if (size < 16) {
-//                return size
-//            } else if (size < 22) {
-//                return 16
-//            } else if (size < 32) {
-//                return 22
-//            } else if (size < 48) {
-//                return 32
-//            } else if (size < 64) {
-//                return 48
-//            } else {
-//                return size
-//            }
-//        }
-//    }
+    //    property variant fontMetrics: TextMetrics {
+    //        text: "M"
+    //        function roundedIconSize(size) {
+    //            if (size < 16) {
+    //                return size
+    //            } else if (size < 22) {
+    //                return 16
+    //            } else if (size < 32) {
+    //                return 22
+    //            } else if (size < 48) {
+    //                return 32
+    //            } else if (size < 64) {
+    //                return 48
+    //            } else {
+    //                return size
+    //            }
+    //        }
+    //    }
 }
