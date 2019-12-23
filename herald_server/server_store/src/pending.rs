@@ -34,10 +34,18 @@ impl Conn {
         let mut out = Vec::with_capacity(rows.len());
 
         for row in rows {
-            let push: &[u8] = row.get("push_data");
+            let push_data: &[u8] = row.get("push_data");
+            let push_ts: i64 = row.get("push_ts");
+            let push_tag: &[u8] = row.get("push_tag");
             let push_id: i64 = row.get("push_id");
 
-            out.push((kson::from_slice(push)?, push_id));
+            let push = Push {
+                tag: kson::from_slice(push_tag)?,
+                msg: Bytes::copy_from_slice(push_data),
+                timestamp: Time::from(push_ts),
+            };
+
+            out.push((push, push_id));
         }
 
         Ok(out)
@@ -52,6 +60,7 @@ impl Conn {
             .prepare_typed(sql!("expire_pending"), types![BYTEA, INT8])
             .await?;
 
+        // TODO clear dangling pushes
         items
             .map(Ok::<i64, Error>)
             .try_for_each_concurrent(10, |index| {
@@ -295,7 +304,7 @@ impl Conn {
         let tx = self.transaction().await?;
 
         let push_stmt = tx
-            .prepare_typed(sql!("add_push"), types![BYTEA, INT8])
+            .prepare_typed(sql!("add_push"), types![BYTEA, BYTEA, INT8])
             .await?;
 
         let push_row_id: i64 = tx
@@ -310,7 +319,7 @@ impl Conn {
 
         let (keys_stmt, pending_stmt, exists_stmt) = try_join!(
             tx.prepare_typed(sql!("conversation_member_keys"), types![BYTEA]),
-            tx.prepare_typed(sql!("add_pending"), types![BYTEA, BYTEA, INT8]),
+            tx.prepare_typed(sql!("add_pending"), types![BYTEA, INT8]),
             tx.prepare_typed(sql!("group_exists"), types![BYTEA])
         )?;
 
@@ -320,6 +329,7 @@ impl Conn {
             let exists_stmt = &exists_stmt;
             let pushed_to = &pushed_to;
             let tx = &tx;
+
             if !tx
                 .query_one(exists_stmt, params![cid.as_slice()])
                 .await?
@@ -485,6 +495,7 @@ mod tests {
     use super::*;
     use crate::tests::get_client;
     use crate::{w, wa};
+    use futures::stream::iter;
     use serial_test_derive::serial;
     use std::convert::TryInto;
     use womp::*;
@@ -494,6 +505,39 @@ mod tests {
             msg: Bytes::from_static(b"test"),
             timestamp: Time::now(),
             tag: PushTag::Device,
+        }
+    }
+
+    fn same_devs(
+        a: &[sig::PublicKey],
+        b: &[sig::PublicKey],
+    ) {
+        use std::collections::BTreeSet;
+        let set = |keys: &[sig::PublicKey]| keys.iter().copied().collect::<BTreeSet<_>>();
+
+        assert_eq!(set(a), set(b));
+    }
+
+    async fn check_pending(
+        client: &mut Conn,
+        push: &Push,
+        devs: Vec<sig::PublicKey>,
+    ) {
+        for k in devs {
+            let pending = wa!(client.get_pending(k));
+            assert_eq!(pending.len(), 1);
+            let pending = pending
+                .into_iter()
+                .map(|(p, ix)| {
+                    assert_eq!(&p, push);
+                    ix
+                })
+                .collect::<Vec<_>>();
+
+            wa!(client.del_pending(k, iter(pending)));
+
+            let pending = wa!(client.get_pending(k));
+            assert!(pending.is_empty());
         }
     }
 
@@ -513,12 +557,15 @@ mod tests {
         let a_init = a_kp.sign(a_uid);
         wa!(client.new_user(a_init));
 
-        match wa!(client.add_to_pending_and_get_valid_devs(&recip, &push)) {
+        let devs = match wa!(client.add_to_pending_and_get_valid_devs(&recip, &push)) {
             PushedTo::PushedTo { devs, .. } => {
-                assert_eq!(devs, vec![*a_kp.public_key()]);
+                assert_eq!(&devs, &[*a_kp.public_key()]);
+                devs
             }
             _ => panic!(),
-        }
+        };
+
+        check_pending(&mut client, &push, devs).await;
     }
 
     #[tokio::test]
@@ -537,12 +584,15 @@ mod tests {
         let a_init = a_kp.sign(a_uid);
         wa!(client.new_user(a_init));
 
-        match wa!(client.add_to_pending_and_get_valid_devs(&recip, &push)) {
+        let devs = match wa!(client.add_to_pending_and_get_valid_devs(&recip, &push)) {
             PushedTo::PushedTo { devs, .. } => {
-                assert_eq!(devs, vec![*a_kp.public_key()]);
+                assert_eq!(&devs, &[*a_kp.public_key()]);
+                devs
             }
             _ => panic!(),
-        }
+        };
+
+        check_pending(&mut client, &push, devs).await;
     }
 
     #[tokio::test]
@@ -565,12 +615,15 @@ mod tests {
         wa!(client.new_user(a_init));
         wa!(client.add_to_group(futures::stream::iter(vec![a_uid]), cid));
 
-        match wa!(client.add_to_pending_and_get_valid_devs(&recip, &push)) {
+        let devs = match wa!(client.add_to_pending_and_get_valid_devs(&recip, &push)) {
             PushedTo::PushedTo { devs, .. } => {
-                assert_eq!(devs, vec![*a_kp.public_key()]);
+                assert_eq!(&devs, &[*a_kp.public_key()]);
+                devs
             }
             _ => panic!(),
-        }
+        };
+
+        check_pending(&mut client, &push, devs).await;
     }
 
     #[tokio::test]
@@ -596,12 +649,15 @@ mod tests {
         wa!(client.new_user(a_init));
         wa!(client.new_user(b_init));
 
-        match wa!(client.add_to_pending_and_get_valid_devs(&recip, &push)) {
+        let devs = match wa!(client.add_to_pending_and_get_valid_devs(&recip, &push)) {
             PushedTo::PushedTo { devs, .. } => {
-                assert_eq!(devs, keys);
+                same_devs(&devs, &keys);
+                devs
             }
             _ => panic!(),
-        }
+        };
+
+        check_pending(&mut client, &push, devs).await;
     }
 
     #[tokio::test]
@@ -618,7 +674,9 @@ mod tests {
         let b_kp = sig::KeyPair::gen_new();
         let b_init = b_kp.sign(b_uid);
 
-        let keys = vec![*a_kp.public_key(), *b_kp.public_key()];
+        let keys = vec![*a_kp.public_key(), *b_kp.public_key()]
+            .into_iter()
+            .collect::<Vec<_>>();
         let users = vec![a_uid, b_uid];
         let recip = Recip::Many(Recips::Users(users.clone()));
 
@@ -627,12 +685,14 @@ mod tests {
         wa!(client.new_user(a_init));
         wa!(client.new_user(b_init));
 
-        match wa!(client.add_to_pending_and_get_valid_devs(&recip, &push)) {
+        let devs = match wa!(client.add_to_pending_and_get_valid_devs(&recip, &push)) {
             PushedTo::PushedTo { devs, .. } => {
-                assert_eq!(devs, keys);
+                same_devs(&devs, &keys);
+                devs
             }
             _ => panic!(),
-        }
+        };
+        check_pending(&mut client, &push, devs).await;
     }
 
     #[tokio::test]
@@ -663,24 +723,28 @@ mod tests {
         let cid2 = ConversationId::gen_new();
 
         let uids = vec![a_uid, b_uid, c_uid];
+        let cids = vec![cid1, cid2];
 
-        let keys = [a_kp, b_kp, c_kp]
-            .iter()
-            .map(|k| *k.public_key())
-            .collect::<Vec<_>>();
-
-        let recip = Recip::Many(Recips::Keys(keys.clone()));
+        let recip = Recip::Many(Recips::Groups(cids.clone()));
 
         assert!(wa!(client.add_to_pending_and_get_valid_devs(&recip, &push)).is_missing());
 
         wa!(client.add_to_group(iter(uids.clone()), cid1));
         wa!(client.add_to_group(iter(uids.clone()), cid2));
 
-        match wa!(client.add_to_pending_and_get_valid_devs(&recip, &push)) {
+        let keys = [a_kp, b_kp, c_kp]
+            .iter()
+            .map(|k| *k.public_key())
+            .collect::<Vec<_>>();
+
+        let devs = match wa!(client.add_to_pending_and_get_valid_devs(&recip, &push)) {
             PushedTo::PushedTo { devs, .. } => {
-                assert_eq!(devs, keys);
+                same_devs(&devs, &keys);
+                devs
             }
             _ => panic!(),
-        }
+        };
+
+        check_pending(&mut client, &push, devs).await;
     }
 }

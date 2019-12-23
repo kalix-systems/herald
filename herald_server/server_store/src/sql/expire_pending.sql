@@ -1,15 +1,5 @@
 DELETE FROM
-  pushes
+  pending
 WHERE
-  push_id
-IN (
-  SELECT
-    pending.push_id
-  FROM
-    pending INNER JOIN pushes ON pending.push_id = pushes.push_id
-  WHERE
-    pending.key = $1
-  ORDER BY
-    push_ts ASC, push_id ASC
-  LIMIT {limit}
-)
+  key = $1 and
+  push_id = $2
