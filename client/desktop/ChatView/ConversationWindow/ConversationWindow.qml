@@ -41,7 +41,7 @@ ListView {
 
     ScrollBar.vertical: ScrollBar {
         id: chatScrollBarInner
-        width: CmnCfg.padding
+        width: CmnCfg.smallMargin
 
         policy: ScrollBar.AsNeeded
         hoverEnabled: true

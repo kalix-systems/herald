@@ -41,7 +41,7 @@ Rectangle {
     Imports.ButtonForm {
         id: attachmentsButton
         anchors.right: parent.right
-        anchors.rightMargin: CmnCfg.margin
+        anchors.rightMargin: CmnCfg.defaultMargin
         anchors.bottom: parent.bottom
         bottomPadding: CmnCfg.smallMargin * 0.5
         source: "qrc:/attach-icon.svg"
@@ -50,7 +50,7 @@ Rectangle {
     Imports.ButtonForm {
         id: emojiButton
         anchors.left: parent.left
-        anchors.leftMargin: CmnCfg.margin
+        anchors.leftMargin: CmnCfg.defaultMargin
         anchors.bottom: parent.bottom
         bottomPadding: CmnCfg.smallMargin * 0.5
         source: "qrc:/emoji-icon.svg"

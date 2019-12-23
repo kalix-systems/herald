@@ -14,8 +14,8 @@ ToolBar {
 
         anchors {
             fill: parent
-            rightMargin: CmnCfg.margin
-            leftMargin: CmnCfg.margin
+            rightMargin: CmnCfg.defaultMargin
+            leftMargin: CmnCfg.defaultMargin
         }
 
         IconButton {

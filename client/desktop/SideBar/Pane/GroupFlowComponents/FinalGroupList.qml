@@ -43,7 +43,7 @@ ListView {
             Imports.ButtonForm {
                 id: xIcon
                 anchors.right: parent.right
-                anchors.rightMargin: CmnCfg.largeMargin / 2
+                anchors.rightMargin: CmnCfg.megaMargin / 2
                 anchors.verticalCenter: parent.verticalCenter
                 source: "qrc:/x-icon.svg"
                 fill: CmnCfg.palette.lightGrey

@@ -8,7 +8,7 @@ Row {
     anchors.right: parent.right
     anchors.bottom: parent.bottom
     anchors.margins: CmnCfg.smallMargin
-    anchors.bottomMargin: CmnCfg.margin
+    anchors.bottomMargin: CmnCfg.defaultMargin
     visible: isTail
 
     Button {

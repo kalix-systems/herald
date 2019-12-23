@@ -19,9 +19,9 @@ Column {
             anchors.rightMargin: CmnCfg.units.dp(16)
             text: qsTr("New contact")
             font.pointSize: 12
+            padding: CmnCfg.units.dp(4)
             background: Rectangle {
                 anchors.fill: parent
-                anchors.margins: -CmnCfg.units.dp(3)
                 color: CmnCfg.palette.lightGrey
             }
         }
@@ -53,6 +53,7 @@ Column {
             anchors.rightMargin: CmnCfg.units.dp(16)
             text: qsTr("New group")
             font.pointSize: 12
+            padding: CmnCfg.units.dp(4)
             background: Rectangle {
                 anchors.fill: parent
                 anchors.margins: -CmnCfg.units.dp(3)
@@ -89,9 +90,9 @@ Column {
             anchors.rightMargin: CmnCfg.units.dp(16)
             text: qsTr("New conversation")
             font.pointSize: 12
+            padding: CmnCfg.units.dp(4)
             background: Rectangle {
                 anchors.fill: parent
-                anchors.margins: -CmnCfg.units.dp(3)
                 color: CmnCfg.palette.lightGrey
             }
         }

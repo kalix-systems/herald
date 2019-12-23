@@ -8,7 +8,7 @@ Page {
 
     ColumnLayout {
         anchors.fill: parent
-        spacing: CmnCfg.margin
+        spacing: CmnCfg.defaultMargin
         anchors.leftMargin: parent.width * 0.1
 
         Label {

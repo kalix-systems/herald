@@ -15,7 +15,7 @@ ScrollView {
     Row {
         id: wrapperRow
         height: 100
-        Layout.margins: CmnCfg.mediumMargin
+        Layout.margins: CmnCfg.largeMargin
         width: parent.width
         spacing: 5
         Repeater {

@@ -28,14 +28,14 @@ Component {
             leftPadding: 12
             color: CmnCfg.palette.white
             placeholderText: "Group title"
-            width: parent.width - CmnCfg.largeMargin
+            width: parent.width - CmnCfg.megaMargin
         }
 
         Rectangle {
             id: divider
             anchors.top: titleText.bottom
             height: 1
-            width: parent.width - CmnCfg.largeMargin
+            width: parent.width - CmnCfg.megaMargin
             anchors.horizontalCenter: parent.horizontalCenter
             color: CmnCfg.palette.lightGrey
         }
@@ -59,9 +59,9 @@ Component {
         //create group button
         Imports.ButtonForm {
             anchors.top: groupSelectText.bottom
-            anchors.topMargin: CmnCfg.smallMargin / 2
+            anchors.topMargin: CmnCfg.smallMargin
             anchors.right: parent.right
-            anchors.rightMargin: CmnCfg.largeMargin / 2
+            anchors.rightMargin: CmnCfg.megaMargin / 2
 
             width: 60
             height: 30

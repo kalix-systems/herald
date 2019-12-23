@@ -5,7 +5,7 @@ import LibHerald 1.0
 Column {
     property string headerText
     property Component settingsContent
-    leftPadding: CmnCfg.margin
+    leftPadding: CmnCfg.defaultMargin
     anchors {
         right: parent.right
         left: parent.left

@@ -58,6 +58,7 @@ ListView {
                         // TODO change when we make font defaults make sense
                         pixelSize: 14
                     }
+                    // TODO negative margin--handle better in Platonic Rectangle
                     Layout.topMargin: labelGrid.rows > 2 ? -CmnCfg.smallMargin : 0
                     Layout.alignment: Qt.AlignLeft | Qt.AlignTop
                     Layout.preferredHeight: labelGrid.height * 0.25
@@ -96,6 +97,7 @@ ListView {
                         //TODO: Magic number erasure
                         pixelSize: 13
                     }
+                    // TODO negative margin--handle better in Platonic Rectangle
                     Layout.topMargin: labelGrid.rows > 2 ? -CmnCfg.smallMargin : 0
                     elide: "ElideRight"
                     text: if (messageData.beforeFirstMatch.length === 0) {

@@ -23,7 +23,7 @@ Component {
                 leftPadding: 12
                 color: CmnCfg.palette.white
                 placeholderText: qsTr("Enter username or display name")
-                width: parent.width - CmnCfg.largeMargin
+                width: parent.width - CmnCfg.megaMargin
 
                 Keys.onReturnPressed: {
                     JS.insertContact(text, Herald.users)
@@ -36,7 +36,7 @@ Component {
             id: divider
             anchors.top: titleText.bottom
             height: 1
-            width: parent.width - CmnCfg.largeMargin
+            width: parent.width - CmnCfg.megaMargin
             anchors.horizontalCenter: parent.horizontalCenter
             color: CmnCfg.palette.white
         }
@@ -44,7 +44,7 @@ Component {
         Rectangle {
             id: bigDivider
             anchors.top: divider.bottom
-            anchors.topMargin: CmnCfg.margin
+            anchors.topMargin: CmnCfg.defaultMargin
             height: 1
             width: parent.width
             color: CmnCfg.palette.white

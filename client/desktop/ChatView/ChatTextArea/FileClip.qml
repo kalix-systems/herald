@@ -11,7 +11,7 @@ Row {
     property alias fileSize: fileSize.text
     property real constraint: 0
     height: fileIcon.height
-    spacing: CmnCfg.smallMargin / 2
+    spacing: CmnCfg.microMargin
 
     Image {
         id: fileIcon

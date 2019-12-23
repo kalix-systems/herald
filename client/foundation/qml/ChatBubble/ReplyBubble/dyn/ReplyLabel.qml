@@ -5,7 +5,7 @@ import QtQuick.Layouts 1.12
 import "../../../js/utils.mjs" as Utils
 
 Row {
-    spacing: CmnCfg.smallMargin / 2
+    spacing: CmnCfg.microMargin
 
     Label {
         id: replyLabel

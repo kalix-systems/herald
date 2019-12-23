@@ -72,7 +72,7 @@ Item {
 
                 Text {
                     anchors.left: parent.left
-                    anchors.leftMargin: CmnCfg.largeMargin
+                    anchors.leftMargin: CmnCfg.megaMargin
                     anchors.verticalCenter: parent.verticalCenter
                     text: qsTr("Herald")
                     font: CmnCfg.headerBarFont

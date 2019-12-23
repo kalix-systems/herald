@@ -43,7 +43,7 @@ Rectangle {
 
     Row {
         anchors.fill: parent
-        spacing: CmnCfg.margin
+        spacing: CmnCfg.defaultMargin
         Label {
             text: currentItem
             anchors.verticalCenter: parent.verticalCenter

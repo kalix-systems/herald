@@ -38,7 +38,7 @@ Page {
 
     Button {
         anchors.top: groupSelectText.bottom
-        anchors.topMargin: CmnCfg.margin / 2
+        anchors.topMargin: CmnCfg.defaultMargin / 2
         anchors.right: parent.right
         anchors.rightMargin: CmnCfg.units.dp(28)
 

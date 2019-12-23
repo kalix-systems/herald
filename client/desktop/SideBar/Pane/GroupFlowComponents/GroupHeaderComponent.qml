@@ -20,9 +20,9 @@ Rectangle {
     Row {
         height: 42
         anchors.top: parent.top
-        anchors.topMargin: CmnCfg.largeMargin
+        anchors.topMargin: CmnCfg.megaMargin
         anchors.horizontalCenter: parent.horizontalCenter
-        spacing: CmnCfg.largeMargin
+        spacing: CmnCfg.megaMargin
         Rectangle {
             width: 42
             height: width

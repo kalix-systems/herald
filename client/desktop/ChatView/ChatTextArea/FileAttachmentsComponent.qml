@@ -17,15 +17,15 @@ ScrollView {
     Row {
         id: wrapperRow
         height: 24
-        Layout.margins: CmnCfg.mediumMargin
+        Layout.margins: CmnCfg.largeMargin
         width: parent.width
-        spacing: CmnCfg.mediumMargin
+        spacing: CmnCfg.largeMargin
         Repeater {
             id: fileRepeater
             model: ownedConversation.builder.documentAttachments
             delegate: RowLayout {
                 clip: true
-                spacing: CmnCfg.smallMargin / 2
+                spacing: CmnCfg.microMargin
                 Imports.ButtonForm {
                     id: clearFile
                     source: "qrc:/x-icon.svg"

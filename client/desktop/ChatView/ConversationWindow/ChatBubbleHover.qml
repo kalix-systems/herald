@@ -38,14 +38,14 @@ MouseArea {
 
         Row {
             id: buttonRow
-            spacing: CmnCfg.margin
+            spacing: CmnCfg.defaultMargin
             rightPadding: CmnCfg.smallMargin
 
             Imports.ButtonForm {
                 id: replyButton
                 visible: chatBubbleHitbox.containsMouse
                 anchors {
-                    margins: CmnCfg.margin
+                    margins: CmnCfg.defaultMargin
                 }
                 source: "qrc:/reply-icon.svg"
                 z: CmnCfg.overlayZ
@@ -66,7 +66,7 @@ MouseArea {
             //            }
             //            visible: chatBubbleHitbox.containsMouse
             //            display: AbstractButton.TextOnly
-            //            anchors.margins: CmnCfg.margin
+            //            anchors.margins: CmnCfg.defaultMargin
             //            spacing: 0
             //            padding: 0
             //        }
@@ -74,7 +74,7 @@ MouseArea {
                 id: downloadButton
                 visible: chatBubbleHitbox.containsMouse && download
                 anchors {
-                    margins: visible ? CmnCfg.margin : 0
+                    margins: visible ? CmnCfg.defaultMargin : 0
                 }
                 z: CmnCfg.overlayZ
                 icon.width: visible ? 22 : 0
@@ -87,7 +87,7 @@ MouseArea {
                 visible: chatBubbleHitbox.containsMouse
 
                 anchors {
-                    margins: CmnCfg.margin
+                    margins: CmnCfg.defaultMargin
                 }
                 source: "qrc:/options-icon.svg"
                 z: CmnCfg.overlayZ

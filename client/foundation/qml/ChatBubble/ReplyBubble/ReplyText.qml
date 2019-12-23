@@ -25,7 +25,7 @@ Rectangle {
         anchors.top: parent.top
         anchors.bottom: parent.bottom
 
-        width: CmnCfg.smallMargin / 2
+        width: CmnCfg.accentBarWidth
         color: opColor
         anchors.left: parent.left
     }
@@ -34,7 +34,7 @@ Rectangle {
         id: replyWrapperCol
         spacing: CmnCfg.smallMargin
         topPadding: CmnCfg.smallMargin
-        bottomPadding: CmnCfg.margin
+        bottomPadding: CmnCfg.defaultMargin
         leftPadding: CmnCfg.smallMargin
         anchors.left: accent.right
 

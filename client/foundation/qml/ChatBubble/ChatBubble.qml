@@ -100,7 +100,7 @@ Rectangle {
         anchors.top: parent.top
         anchors.bottom: parent.bottom
 
-        width: CmnCfg.smallMargin / 2
+        width: CmnCfg.accentBarWidth
         color: authorColor
         anchors.left: avatar.right
         anchors.leftMargin: CmnCfg.smallMargin
@@ -130,7 +130,7 @@ Rectangle {
         spacing: CmnCfg.smallMargin
         topPadding: isHead ? CmnCfg.smallMargin : CmnCfg.smallMargin
         leftPadding: CmnCfg.smallMargin
-        bottomPadding: isTail ? CmnCfg.margin : CmnCfg.smallMargin
+        bottomPadding: isTail ? CmnCfg.defaultMargin : CmnCfg.smallMargin
 
         BubbleLabel {
             id: authorLabel
@@ -194,7 +194,7 @@ Rectangle {
 
         //media and file column loader
         Column {
-            spacing: CmnCfg.smallMargin
+            spacing: CmnCfg.defaultMargin
             Loader {
                 id: imageLoader
                 sourceComponent: imageAttach ? image : undefined

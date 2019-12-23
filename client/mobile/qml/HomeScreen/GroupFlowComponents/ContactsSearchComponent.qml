@@ -39,7 +39,7 @@ Column {
         width: parent.width
         anchors.horizontalCenter: parent.horizontalCenter
         height: CmnCfg.units.dp(6)
-        leftPadding: CmnCfg.margin
+        leftPadding: CmnCfg.defaultMargin
 
         background: Rectangle {
             visible: false

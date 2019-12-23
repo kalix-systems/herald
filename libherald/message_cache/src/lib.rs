@@ -10,48 +10,22 @@ const CAPACITY: usize = 1024;
 const NUM_SHARDS: usize = 32;
 const CACHE_SIZE: usize = CAPACITY / NUM_SHARDS;
 
+struct Shard(Mutex<LruCache<MsgId, MsgData>>);
+
+impl Default for Shard {
+    fn default() -> Self {
+        Self(Mutex::new(LruCache::new(CACHE_SIZE)))
+    }
+}
+
 pub struct Cache {
-    inner: [Mutex<LruCache<MsgId, MsgData>>; NUM_SHARDS],
+    inner: [Shard; NUM_SHARDS],
 }
 
 impl Cache {
     fn new() -> Self {
-        let m = || Mutex::new(LruCache::new(CACHE_SIZE));
         Self {
-            inner: [
-                m(),
-                m(),
-                m(),
-                m(),
-                m(),
-                m(),
-                m(),
-                m(),
-                m(),
-                m(),
-                m(),
-                m(),
-                m(),
-                m(),
-                m(),
-                m(),
-                m(),
-                m(),
-                m(),
-                m(),
-                m(),
-                m(),
-                m(),
-                m(),
-                m(),
-                m(),
-                m(),
-                m(),
-                m(),
-                m(),
-                m(),
-                m(),
-            ],
+            inner: Default::default(),
         }
     }
 
@@ -75,7 +49,7 @@ pub fn cache() -> &'static Cache {
 pub fn get(mid: &MsgId) -> Option<MsgData> {
     let cache = cache();
     let ix = cache.bucket(mid);
-    let maybe = cache.inner[ix].lock().get(mid).cloned();
+    let maybe = cache.inner[ix].0.lock().get(mid).cloned();
 
     match maybe {
         data @ Some(_) => data,
@@ -89,7 +63,7 @@ pub fn insert(
 ) {
     let cache = cache();
     let ix = cache.bucket(&mid);
-    cache.inner[ix].lock().put(mid, data);
+    cache.inner[ix].0.lock().put(mid, data);
 }
 
 pub fn access<T, F: FnOnce(&MsgData) -> T>(
@@ -99,7 +73,7 @@ pub fn access<T, F: FnOnce(&MsgData) -> T>(
     let cache = cache();
     let ix = cache.bucket(&mid);
 
-    if let Some(data) = cache.inner[ix].lock().get(mid).as_ref() {
+    if let Some(data) = cache.inner[ix].0.lock().get(mid).as_ref() {
         return Some(f(data));
     }
 
@@ -115,14 +89,14 @@ pub fn update<T, F: FnOnce(&mut MsgData) -> T>(
     let cache = cache();
     let ix = cache.bucket(&mid);
 
-    f(cache.inner[ix].lock().get_mut(mid)?).into()
+    f(cache.inner[ix].0.lock().get_mut(mid)?).into()
 }
 
 pub fn remove(mid: &MsgId) -> Option<MsgData> {
     let cache = cache();
     let ix = cache.bucket(&mid);
 
-    cache.inner[ix].lock().pop(mid)
+    cache.inner[ix].0.lock().pop(mid)
 }
 
 fn db_data(mid: &MsgId) -> Option<MsgData> {

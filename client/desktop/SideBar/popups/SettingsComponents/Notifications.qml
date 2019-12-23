@@ -12,7 +12,7 @@ GridLayout {
     StandardLabel {
         text: qsTr("Notifications Enabled")
         color: "black"
-        Layout.leftMargin: CmnCfg.margin
+        Layout.leftMargin: CmnCfg.defaultMargin
         font.pixelSize: CmnCfg.chatTextSize
     }
 
@@ -30,7 +30,7 @@ GridLayout {
     StandardLabel {
         text: qsTr("Silent")
         color: "black"
-        Layout.leftMargin: CmnCfg.margin
+        Layout.leftMargin: CmnCfg.defaultMargin
         font.pixelSize: CmnCfg.chatTextSize
     }
 
@@ -48,7 +48,7 @@ GridLayout {
     StandardLabel {
         text: qsTr("Show author in notification")
         color: "black"
-        Layout.leftMargin: CmnCfg.margin
+        Layout.leftMargin: CmnCfg.defaultMargin
         font.pixelSize: CmnCfg.chatTextSize
     }
 
@@ -66,7 +66,7 @@ GridLayout {
     StandardLabel {
         text: qsTr("Show message body in notification")
         color: CmnCfg.palette.black
-        Layout.leftMargin: CmnCfg.margin
+        Layout.leftMargin: CmnCfg.defaultMargin
         font.pixelSize: CmnCfg.chatTextSize
     }
 

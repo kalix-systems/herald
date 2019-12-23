@@ -15,7 +15,7 @@ Page {
     Connections {
         target: Qt.inputMethod
         onKeyboardRectangleChanged: {
-            chatPage.height = root.height - Qt.inputMethod.keyboardRectangle.height
+
         }
     }
 
