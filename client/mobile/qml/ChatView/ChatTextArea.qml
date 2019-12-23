@@ -17,7 +17,7 @@ RowLayout {
         Layout.fillWidth: true
         Layout.alignment: Qt.AlignBottom
         placeholderText: qsTr("Send a message") + "..."
-        wrapMode: "WrapAtWordBoundaryOrAnywhere"
+        wrapMode: TextArea.WrapAtWordBoundaryOrAnywhere
         color: CmnCfg.palette.black
         selectionColor: CmnCfg.palette.highlightColor
         font {

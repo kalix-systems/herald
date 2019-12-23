@@ -34,7 +34,7 @@ ToolBar {
 
     Component {
         id: confHeader
-        ConfigHeader {}
+        SettingsHeader {}
     }
 
     Component {

@@ -5,9 +5,19 @@ import LibHerald 1.0
 import "../Common" as Common
 
 Page {
+    id: chatPage
     //swappable message model, set by the appstate
     property Messages ownedMessages
     property string headerTitle
+
+    anchors.top: root.top
+
+    Connections {
+        target: Qt.inputMethod
+        onKeyboardRectangleChanged: {
+            chatPage.height = root.height - Qt.inputMethod.keyboardRectangle.height
+        }
+    }
 
     background: Rectangle {
         color: CmnCfg.palette.white
