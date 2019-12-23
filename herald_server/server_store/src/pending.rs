@@ -1,7 +1,106 @@
 use super::*;
 use crate::slice_iter;
 
+#[derive(Debug, PartialEq)]
+pub enum PushedTo {
+    PushedTo {
+        devs: Vec<sig::PublicKey>,
+        push_id: i64,
+    },
+    Missing(SingleRecip),
+}
+
+#[cfg(test)]
+impl PushedTo {
+    fn is_missing(&self) -> bool {
+        match self {
+            PushedTo::Missing(_) => true,
+            _ => false,
+        }
+    }
+}
+
 impl Conn {
+    pub async fn get_pending(
+        &mut self,
+        of: sig::PublicKey,
+    ) -> Result<Vec<(Push, i64)>, Error> {
+        let stmt = self
+            .prepare_typed(sql!("get_pending"), types![BYTEA])
+            .await?;
+
+        let rows = self.query(&stmt, params![of.as_ref()]).await?;
+
+        let mut out = Vec::with_capacity(rows.len());
+
+        for row in rows {
+            let push: &[u8] = row.get("push_data");
+            let push_id: i64 = row.get("push_id");
+
+            out.push((kson::from_slice(push)?, push_id));
+        }
+
+        Ok(out)
+    }
+
+    pub async fn del_pending<S: Stream<Item = i64> + Send>(
+        &mut self,
+        of: sig::PublicKey,
+        items: S,
+    ) -> Result<(), Error> {
+        let stmt = self
+            .prepare_typed(sql!("expire_pending"), types![BYTEA, INT8])
+            .await?;
+
+        items
+            .map(Ok::<i64, Error>)
+            .try_for_each_concurrent(10, |index| {
+                let conn = &self;
+                let stmt = &stmt;
+                let of = &of;
+
+                async move {
+                    conn.execute(stmt, params![of.as_ref(), index]).await?;
+                    Ok(())
+                }
+            })
+            .await
+    }
+
+    // should be done transactionally, returns Missing(r) for the first missing recip r
+    // only adds to pending when it finds all devices
+    pub async fn add_to_pending_and_get_valid_devs(
+        &mut self,
+        recip: &Recip,
+        Push {
+            tag,
+            timestamp,
+            msg,
+        }: &Push,
+    ) -> Result<PushedTo, Error> {
+        use Recip::*;
+
+        match recip {
+            One(single) => {
+                use SingleRecip::*;
+                match single {
+                    Group(cid) => self.one_group(cid, msg, tag, timestamp).await,
+                    User(uid) => self.one_user(uid, msg, tag, timestamp).await,
+                    Key(key) => self.one_key(key, msg, tag, timestamp).await,
+                }
+            }
+            Many(recips) => {
+                use Recips::*;
+
+                match recips {
+                    Groups(cids) => self.many_groups(cids, msg, tag, timestamp).await,
+                    Users(uids) => self.many_users(uids, msg, tag, timestamp).await,
+                    Keys(keys) => self.many_keys(keys, msg, tag, timestamp).await,
+                }
+            }
+        }
+    }
+
     pub(crate) async fn one_key(
         &mut self,
         key: &sig::PublicKey,
@@ -415,7 +514,7 @@ mod tests {
         wa!(client.new_user(a_init));
 
         match wa!(client.add_to_pending_and_get_valid_devs(&recip, &push)) {
-            add_to_pending::PushedTo::PushedTo { devs, .. } => {
+            PushedTo::PushedTo { devs, .. } => {
                 assert_eq!(devs, vec![*a_kp.public_key()]);
             }
             _ => panic!(),
@@ -439,7 +538,7 @@ mod tests {
         wa!(client.new_user(a_init));
 
         match wa!(client.add_to_pending_and_get_valid_devs(&recip, &push)) {
-            add_to_pending::PushedTo::PushedTo { devs, .. } => {
+            PushedTo::PushedTo { devs, .. } => {
                 assert_eq!(devs, vec![*a_kp.public_key()]);
             }
             _ => panic!(),
@@ -467,7 +566,7 @@ mod tests {
         wa!(client.add_to_group(futures::stream::iter(vec![a_uid]), cid));
 
         match wa!(client.add_to_pending_and_get_valid_devs(&recip, &push)) {
-            add_to_pending::PushedTo::PushedTo { devs, .. } => {
+            PushedTo::PushedTo { devs, .. } => {
                 assert_eq!(devs, vec![*a_kp.public_key()]);
             }
             _ => panic!(),
@@ -495,7 +594,7 @@ mod tests {
         wa!(client.add_to_group(futures::stream::iter(vec![a_uid]), cid));
 
         match wa!(client.add_to_pending_and_get_valid_devs(&recip, &push)) {
-            add_to_pending::PushedTo::PushedTo { devs, .. } => {
+            PushedTo::PushedTo { devs, .. } => {
                 assert_eq!(devs, vec![*a_kp.public_key()]);
             }
             _ => panic!(),

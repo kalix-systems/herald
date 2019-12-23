@@ -1,6 +1,18 @@
 use super::*;
 
 impl Conn {
+    pub async fn recip_exists(
+        &mut self,
+        recip: Recip,
+    ) -> Res<bool> {
+        use Recip::*;
+
+        match recip {
+            One(single) => self.one_recip_exists(single).await,
+            Many(recips) => self.many_recips_exist(recips).await,
+        }
+    }
+
     async fn one_group_exists(
         &mut self,
         cid: &ConversationId,
@@ -157,21 +169,14 @@ mod tests {
         let mut client = wa!(get_client());
 
         let a_uid: UserId = "a".try_into().expect(womp!());
-
         let a_kp = sig::KeyPair::gen_new();
-
         let a_init = a_kp.sign(a_uid);
-
         assert_eq!(wa!(client.new_user(a_init)), register::Res::Success);
-
         assert!(wa!(client.one_user_exists(&a_uid)));
 
         let b_uid: UserId = "b".try_into().expect(womp!());
-
         let b_kp = sig::KeyPair::gen_new();
-
         let b_init = b_kp.sign(b_uid);
-
         assert_eq!(wa!(client.new_user(b_init)), register::Res::Success);
 
         assert!(wa!(client.many_users_exist(vec![a_uid, b_uid])));
