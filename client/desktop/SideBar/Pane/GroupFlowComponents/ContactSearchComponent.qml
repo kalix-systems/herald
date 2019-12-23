@@ -67,7 +67,7 @@ Column {
                 labelComponent: Av.ConversationLabel {
                     contactName: contactData.name
                     labelColor: CmnCfg.palette.white
-                    labelSize: 14
+                    labelFontSize: 14
                     lastBody: "@" + contactData.userId
                 }
                 states: []

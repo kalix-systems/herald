@@ -54,7 +54,7 @@ Rectangle {
                                                                   convContent.messages.lastTime)
                 lastReceipt: convContent.messages.lastStatus
                              === undefined ? 0 : convContent.messages.lastStatus
-                labelSize: CmnCfg.labelSize
+                labelFontSize: CmnCfg.labelSize
             }
         }
     }

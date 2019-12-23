@@ -5,6 +5,7 @@ import LibHerald 1.0
 // TODO Avatar should not include any elements aside from the user or group's
 // profile image
 Item {
+
     // whether or not the AvatarIcon is square.
     property bool isGroupAvatar: false
     // path to the profile picture, or the empty string

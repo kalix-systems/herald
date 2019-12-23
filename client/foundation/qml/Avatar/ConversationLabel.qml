@@ -10,6 +10,9 @@ import "qrc:/imports/js/utils.mjs" as JS
 // TODO:
 // move the property translation functions into
 // some common js directory , receipt urls are not numbers, nor are timestamps
+
+// TODO this should probably be called something to reflect that it's also used
+// for contacts, not just conversations
 Item {
     // the group name or displayName of the conversation
     property string contactName
@@ -20,9 +23,9 @@ Item {
     // the value of the latest read receipt according to the ReceiptStatus enum
     property int lastReceipt: 0
     property string lastAuthor
-    property color labelColor
+    property color labelColor: CmnCfg.palette.black
     property color secondaryLabelColor: CmnCfg.palette.offBlack
-    property real labelSize
+    property real labelFontSize
 
     // labeling constants
     GridLayout {
@@ -31,11 +34,12 @@ Item {
         columns: 2
         width: parent.width
         height: parent.height
+
         Label {
             id: name
             font {
                 family: CmnCfg.chatFont.name
-                pixelSize: labelSize
+                pixelSize: labelFontSize
                 weight: Font.Medium
             }
             Layout.alignment: Qt.AlignLeft | Qt.AlignTop
