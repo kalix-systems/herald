@@ -383,7 +383,7 @@ impl Conn {
         let (keys_stmt, pending_stmt, exists_stmt) = try_join!(
             tx.prepare_typed(sql!("valid_user_keys"), types![TEXT]),
             tx.prepare_typed(sql!("add_pending"), types![BYTEA, INT8]),
-            tx.prepare_typed(sql!("user_exists"), types![BYTEA]),
+            tx.prepare_typed(sql!("user_exists"), types![TEXT]),
         )?;
 
         // TODO: process concurrently?
@@ -606,9 +606,81 @@ mod tests {
 
     #[tokio::test]
     #[serial]
-    async fn many_users() {}
+    async fn many_users() {
+        let mut client = wa!(get_client());
+        let push = push();
+
+        let a_uid = w!("a".try_into());
+        let a_kp = sig::KeyPair::gen_new();
+        let a_init = a_kp.sign(a_uid);
+
+        let b_uid: UserId = "b".try_into().expect(womp!());
+        let b_kp = sig::KeyPair::gen_new();
+        let b_init = b_kp.sign(b_uid);
+
+        let keys = vec![*a_kp.public_key(), *b_kp.public_key()];
+        let users = vec![a_uid, b_uid];
+        let recip = Recip::Many(Recips::Users(users.clone()));
+
+        assert!(wa!(client.add_to_pending_and_get_valid_devs(&recip, &push)).is_missing());
+
+        wa!(client.new_user(a_init));
+        wa!(client.new_user(b_init));
+
+        match wa!(client.add_to_pending_and_get_valid_devs(&recip, &push)) {
+            PushedTo::PushedTo { devs, .. } => {
+                assert_eq!(devs, keys);
+            }
+            _ => panic!(),
+        }
+    }
 
     #[tokio::test]
     #[serial]
-    async fn many_groups() {}
+    async fn many_groups() {
+        use futures::stream::iter;
+        let mut client = wa!(get_client());
+        let push = push();
+
+        let a_uid: UserId = "a".try_into().expect(womp!());
+        let a_kp = sig::KeyPair::gen_new();
+        let a_init = a_kp.sign(a_uid);
+        wa!(client.new_user(a_init));
+
+        let b_uid: UserId = "b".try_into().expect(womp!());
+
+        let b_kp = sig::KeyPair::gen_new();
+        let b_init = b_kp.sign(b_uid);
+        wa!(client.new_user(b_init));
+
+        let c_uid: UserId = "c".try_into().expect(womp!());
+
+        let c_kp = sig::KeyPair::gen_new();
+        let c_init = c_kp.sign(c_uid);
+        wa!(client.new_user(c_init));
+
+        let cid1 = ConversationId::gen_new();
+        let cid2 = ConversationId::gen_new();
+
+        let uids = vec![a_uid, b_uid, c_uid];
+
+        let keys = [a_kp, b_kp, c_kp]
+            .iter()
+            .map(|k| *k.public_key())
+            .collect::<Vec<_>>();
+
+        let recip = Recip::Many(Recips::Keys(keys.clone()));
+
+        assert!(wa!(client.add_to_pending_and_get_valid_devs(&recip, &push)).is_missing());
+
+        wa!(client.add_to_group(iter(uids.clone()), cid1));
+        wa!(client.add_to_group(iter(uids.clone()), cid2));
+
+        match wa!(client.add_to_pending_and_get_valid_devs(&recip, &push)) {
+            PushedTo::PushedTo { devs, .. } => {
+                assert_eq!(devs, keys);
+            }
+            _ => panic!(),
+        }
+    }
 }
