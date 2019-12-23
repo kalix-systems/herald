@@ -10,6 +10,9 @@ import "qrc:/imports/js/utils.mjs" as JS
 // TODO:
 // move the property translation functions into
 // some common js directory , receipt urls are not numbers, nor are timestamps
+
+// TODO this should probably be called something to reflect that it's also used
+// for contacts, not just conversations
 Item {
     // the group name or displayName of the conversation
     property string contactName
@@ -31,6 +34,7 @@ Item {
         columns: 2
         width: parent.width
         height: parent.height
+
         Label {
             id: name
             font {

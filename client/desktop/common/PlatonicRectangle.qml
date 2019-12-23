@@ -20,6 +20,10 @@ Rectangle {
     property string picture
     property bool isGroupPicture: false
 
+    property int topTextMargin: CmnCfg.smallMargin
+    property int bottomTextMargin: 14
+
+
     Avatar {
         id: itemAvatar
         anchors {
@@ -34,12 +38,11 @@ Rectangle {
         diameter: isGroupPicture ? 40 : 44
     }
 
-    // TODO positioning on this label is a mess
     Loader {
         id: conversationItemLabel
         anchors {
             leftMargin: CmnCfg.defaultMargin
-            rightMargin: CmnCfg.smallMargin
+            rightMargin: CmnCfg.defaultMargin
             topMargin: topTextMargin
             bottomMargin: bottomTextMargin
             left: itemAvatar.right
