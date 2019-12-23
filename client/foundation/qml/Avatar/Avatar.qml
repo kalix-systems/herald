@@ -15,7 +15,7 @@ Item {
     property string initials
 
     height: diameter
-    width: height
+    width:  height
 
     Loader {
         id: iconLoader

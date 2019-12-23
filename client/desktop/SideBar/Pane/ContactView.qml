@@ -32,8 +32,7 @@ ListView {
 
             labelComponent: Av.ConversationLabel {
                 contactName: contactData.name
-                labelColor: CmnCfg.palette.black
-                labelSize: 14
+                labelFontSize: 14
                 lastBody: "@" + contactData.userId
             }
 

@@ -71,7 +71,7 @@ ListView {
             boxTitle: title
             boxColor: conversationData.color
             picture: Utils.safeStringOrDefault(conversationData.picture, "")
-            groupPicture: !conversationData.pairwise
+            isGroupPicture: !conversationData.pairwise
             labelComponent: Av.ConversationLabel {
                 contactName: title
                 lastBody: !convContent.messages.isEmpty ? lastAuthor + ": "
@@ -83,7 +83,7 @@ ListView {
                             !== "" ? CmnCfg.palette.black : CmnCfg.palette.lightGrey
                 secondaryLabelColor: convoRectangle.state
                                      !== "" ? CmnCfg.palette.offBlack : CmnCfg.palette.medGrey
-                labelSize: 14
+                labelFontSize: 14
             }
 
             MouseArea {

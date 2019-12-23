@@ -10,27 +10,44 @@ import "qrc:/imports/Avatar"
 // Shared rectangle for displaying contact and conversation items in sidebar
 // conversations lists, search results, and contact selection autocompletion
 Rectangle {
-    property alias conversationItemAvatar: conversationItemAvatar
+    property alias conversationItemAvatar: itemAvatar
     id: bgBox
     color: CmnCfg.palette.offBlack
     anchors.fill: parent
     property string boxTitle
     property int boxColor
-    property alias labelComponent: conversationItemAvatar.labelComponent
+    property Component labelComponent
     property string picture
-    property bool groupPicture: false
+    property bool isGroupPicture: false
 
-    AvatarMain {
-        anchors.fill: parent
-        id: conversationItemAvatar
-        backgroundColor: CmnCfg.avatarColors[boxColor]
+    Avatar {
+        id: itemAvatar
+        anchors {
+            left: parent.left
+            verticalCenter: parent.verticalCenter
+            leftMargin: CmnCfg.smallMargin
+        }
+        color: CmnCfg.avatarColors[boxColor]
         initials: boxTitle[0].toUpperCase()
         pfpPath: Utils.safeStringOrDefault(picture)
+        isGroup: isGroupPicture
+        diameter: isGroupPicture ? 40 : 44
+    }
+
+    // TODO positioning on this label is a mess
+    Loader {
+        id: conversationItemLabel
         anchors {
-            margins: 6
+            leftMargin: CmnCfg.defaultMargin
+            rightMargin: CmnCfg.smallMargin
+            topMargin: topTextMargin
+            bottomMargin: bottomTextMargin
+            left: itemAvatar.right
+            right: parent.right
+            top: parent.top
+            bottom: parent.bottom
         }
-        isGroupAvatar: groupPicture
-        avatarDiameter: isGroupAvatar ? 40 : 44
+        sourceComponent: bgBox.labelComponent
     }
 
     states: [

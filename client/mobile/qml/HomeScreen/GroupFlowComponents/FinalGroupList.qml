@@ -37,7 +37,7 @@ ListView {
             labelComponent: ConversationLabel {
                 contactName: Herald.users.nameById(memberId)
                 labelColor: CmnCfg.palette.offBlack
-                labelSize: 14
+                labelFontSize: 14
                 lastBody: "@" + memberId
             }
         }
