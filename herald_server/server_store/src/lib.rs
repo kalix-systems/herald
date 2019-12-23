@@ -19,25 +19,6 @@ mod recip_exists;
 mod sigchain;
 pub use pool::*;
 
-#[derive(Debug, PartialEq)]
-pub enum PushedTo {
-    PushedTo {
-        devs: Vec<sig::PublicKey>,
-        push_id: i64,
-    },
-    Missing(SingleRecip),
-}
-
-#[cfg(test)]
-impl PushedTo {
-    fn is_missing(&self) -> bool {
-        match self {
-            PushedTo::Missing(_) => true,
-            _ => false,
-        }
-    }
-}
-
 impl Conn {
     pub async fn user_of(
         &mut self,

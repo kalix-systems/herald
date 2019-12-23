@@ -582,20 +582,23 @@ mod tests {
 
         let a_uid = w!("a".try_into());
         let a_kp = sig::KeyPair::gen_new();
-        let cid = ConversationId::gen_new();
+        let a_init = a_kp.sign(a_uid);
 
-        let recip = Recip::One(SingleRecip::Group(cid));
+        let b_uid: UserId = "b".try_into().expect(womp!());
+        let b_kp = sig::KeyPair::gen_new();
+        let b_init = b_kp.sign(b_uid);
+
+        let keys = vec![*a_kp.public_key(), *b_kp.public_key()];
+        let recip = Recip::Many(Recips::Keys(keys.clone()));
 
         assert!(wa!(client.add_to_pending_and_get_valid_devs(&recip, &push)).is_missing());
 
-        let a_init = a_kp.sign(a_uid);
-
         wa!(client.new_user(a_init));
-        wa!(client.add_to_group(futures::stream::iter(vec![a_uid]), cid));
+        wa!(client.new_user(b_init));
 
         match wa!(client.add_to_pending_and_get_valid_devs(&recip, &push)) {
             PushedTo::PushedTo { devs, .. } => {
-                assert_eq!(devs, vec![*a_kp.public_key()]);
+                assert_eq!(devs, keys);
             }
             _ => panic!(),
         }
