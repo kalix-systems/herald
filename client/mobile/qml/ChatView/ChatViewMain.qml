@@ -10,7 +10,7 @@ Page {
     property Messages ownedMessages
     property string headerTitle
 
-    anchors.top: root.top
+    anchors.bottom: root.bottom
 
     Connections {
         target: Qt.inputMethod
