@@ -1,11 +1,5 @@
 use super::*;
 
-macro_rules! sql {
-    ($path: literal) => {
-        include_str!(concat!("../sql/", $path, ".sql"))
-    };
-}
-
 impl Conn {
     async fn one_group_exists(
         &mut self,
@@ -132,21 +126,10 @@ impl Conn {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::{w, wa};
     use serial_test_derive::serial;
     use std::convert::TryInto;
     use womp::*;
-
-    macro_rules! w {
-        ($maybe_val: expr) => {
-            $maybe_val.expect(womp!())
-        };
-    }
-
-    macro_rules! wa {
-        ($maybe_fut: expr) => {
-            w!($maybe_fut.await)
-        };
-    }
 
     use crate::tests::get_client;
 
@@ -154,7 +137,6 @@ mod tests {
     #[serial]
     async fn test_defaults() {
         let mut client = wa!(get_client());
-        wa!(client.reset_all());
 
         let kp = sig::KeyPair::gen_new();
         assert!(!wa!(client.one_key_exists(kp.public_key())));
@@ -173,7 +155,6 @@ mod tests {
     #[serial]
     async fn users() {
         let mut client = wa!(get_client());
-        wa!(client.reset_all());
 
         let a_uid: UserId = "a".try_into().expect(womp!());
 
@@ -203,7 +184,6 @@ mod tests {
     #[serial]
     async fn keys() {
         let mut client = wa!(get_client());
-        wa!(client.reset_all());
 
         let a_uid: UserId = "a".try_into().expect(womp!());
         let a_kp = sig::KeyPair::gen_new();
@@ -229,9 +209,7 @@ mod tests {
     #[serial]
     async fn groups() {
         use futures::stream::iter;
-
         let mut client = wa!(get_client());
-        wa!(client.reset_all());
 
         let a_uid: UserId = "a".try_into().expect(womp!());
         let a_kp = sig::KeyPair::gen_new();

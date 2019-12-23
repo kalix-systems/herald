@@ -11,17 +11,29 @@ use tokio_postgres::{
 
 type Res<T> = Result<T, Error>;
 
-mod imp;
+mod add_to_pending;
 mod macros;
 mod pool;
+mod recip_exists;
 pub use pool::*;
 
+#[derive(Debug, PartialEq)]
 pub enum PushedTo {
     PushedTo {
         devs: Vec<sig::PublicKey>,
         push_id: i64,
     },
     Missing(SingleRecip),
+}
+
+#[cfg(test)]
+impl PushedTo {
+    fn is_missing(&self) -> bool {
+        match self {
+            PushedTo::Missing(_) => true,
+            _ => false,
+        }
+    }
 }
 
 pub struct TaggedPrekey {
@@ -431,7 +443,11 @@ impl Conn {
     pub async fn add_to_pending_and_get_valid_devs(
         &mut self,
         recip: &Recip,
-        msg: &Push,
+        Push {
+            tag,
+            timestamp,
+            msg,
+        }: &Push,
     ) -> Result<PushedTo, Error> {
         use Recip::*;
 
@@ -439,18 +455,18 @@ impl Conn {
             One(single) => {
                 use SingleRecip::*;
                 match single {
-                    Group(cid) => self.one_group(cid, msg).await,
-                    User(uid) => self.one_user(uid, msg).await,
-                    Key(key) => self.one_key(key, msg).await,
+                    Group(cid) => self.one_group(cid, msg, tag, timestamp).await,
+                    User(uid) => self.one_user(uid, msg, tag, timestamp).await,
+                    Key(key) => self.one_key(key, msg, tag, timestamp).await,
                 }
             }
             Many(recips) => {
                 use Recips::*;
 
                 match recips {
-                    Groups(cids) => self.many_groups(cids, msg).await,
-                    Users(uids) => self.many_users(uids, msg).await,
-                    Keys(keys) => self.many_keys(keys, msg).await,
+                    Groups(cids) => self.many_groups(cids, msg, tag, timestamp).await,
+                    Users(uids) => self.many_users(uids, msg, tag, timestamp).await,
+                    Keys(keys) => self.many_keys(keys, msg, tag, timestamp).await,
                 }
             }
         }

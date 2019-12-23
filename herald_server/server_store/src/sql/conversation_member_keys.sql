@@ -1,8 +1,10 @@
 SELECT
-    userkeys.user_id
+    userkeys.key
 FROM
     conversation_members
-INNER JOIN ON
+INNER JOIN
+    userkeys
+ON
     conversation_members.user_id = userkeys.user_id
 WHERE
     conversation_members.conversation_id = $1

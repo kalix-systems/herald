@@ -3,11 +3,11 @@ select
 from
     key_creations
 inner join
-    user_keys
+    userkeys
 on
     key_creations.key = userkeys.key
 where
-    user_keys.user_id <> $1 and
+    userkeys.user_id = $1 and
     key_creations.key not in (
         select
             key_deprecations.key

@@ -19,7 +19,9 @@ macro_rules! wa {
 
 pub(crate) async fn get_client() -> Result<Conn, Error> {
     let pool = Pool::new();
-    pool.get().await
+    let mut client = pool.get().await?;
+    client.reset_all().await?;
+    Ok(client)
 }
 
 //#[tokio::test]
