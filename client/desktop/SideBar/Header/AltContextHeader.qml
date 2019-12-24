@@ -43,7 +43,7 @@ Component {
         }
 
 
-        Imports.ButtonForm {
+        Imports.IconButton {
             anchors {
                 verticalCenter: parent.verticalCenter
                 right: parent.right

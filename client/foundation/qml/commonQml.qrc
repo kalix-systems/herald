@@ -14,7 +14,7 @@
         <file alias="/Assets/Monoid-Regular.ttf">../Assets/Monoid-Regular.ttf</file>
         <file>Entity/Avatar.qml</file>
         <file>Entity/ConversationLabel.qml</file>
-        <file>ButtonForm.qml</file>
+        <file>IconButton.qml</file>
         <file>ChatBubble/AttachmentContent.qml</file>
         <file>ChatBubble/ChatBubble.qml</file>
         <file>ChatBubble/Highlight.qml</file>
@@ -42,6 +42,7 @@
         <file>ChatBubble/StandardTextEdit.qml</file>
         <file>ChatBubble/ThreeImageLayout.qml</file>
         <file>ChatBubble/TwoImageLayout.qml</file>
+        <file>NewGroupFlow/GroupImageSelector.qml</file>
         <file>StandardCombo.qml</file>
         <file>StandardLabel.qml</file>
         <file>TimerOptions.qml</file>

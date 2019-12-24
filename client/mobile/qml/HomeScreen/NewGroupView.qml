@@ -8,6 +8,7 @@ import "../Common"
 import QtGraphicalEffects 1.0
 import Qt.labs.platform 1.0
 import "qrc:/imports/Entity"
+import "qrc:/imports/NewGroupFlow"
 import "qrc:/imports/js/utils.mjs" as Utils
 import "GroupFlowComponents"
 
@@ -30,7 +31,7 @@ Page {
                 Layout.alignment: Qt.AlignLeft
                 Layout.leftMargin: CmnCfg.units.dp(12)
                 spacing: CmnCfg.units.dp(16)
-                IconButton {
+                AnimIconButton {
                     id: backButton
                     color: CmnCfg.palette.iconFill
                     imageSource: "qrc:/back-arrow-icon.svg"
@@ -57,55 +58,99 @@ Page {
         color: CmnCfg.palette.white
     }
 
-    GroupHeaderComponent {
-        id: topRect
-    }
-
-    Rectangle {
-        anchors.top: topRect.bottom
-        id: bigDivider
-        height: 1
-        width: parent.width
-        color: CmnCfg.palette.black
-    }
-
-    ContactsSearchComponent {
-        id: groupSelectText
-    }
-
-    Button {
-        anchors.top: groupSelectText.bottom
-        anchors.topMargin: CmnCfg.defaultMargin / 2
+    ColumnLayout {
+        anchors.left: parent.left
         anchors.right: parent.right
-        anchors.rightMargin: CmnCfg.units.dp(28)
+        anchors.top: parent.top
+        anchors.topMargin: CmnCfg.units.dp(40)
 
-        width: CmnCfg.units.dp(60)
-        height: CmnCfg.units.dp(30)
+        GroupImageSelector {
+            id: imageSelector
+            // TODO uncomment and test once we display group avatar photos
+            // in the mobile UI to make sure this is working; also check
+            // commented out section of TapHandler function below
+            //imageSource: groupPane.profPicSource
+            backgroundColor: CmnCfg.palette.black
 
-        background: Rectangle {
-            anchors.fill: parent
-            color: CmnCfg.palette.offBlack
+            Layout.alignment: Qt.AlignTop | Qt.AlignHCenter
         }
 
-        Text {
-            text: qsTr("CREATE")
-            anchors.centerIn: parent
-            color: CmnCfg.palette.white
-            font.family: CmnCfg.labelFont.name
+        // TODO wrap this textarea+rectangle in a rectangle to get rid of
+        // ColumnLayout's added margin
+        TextArea {
+            id: titleText
+            placeholderText: qsTr("Group title")
+            leftPadding: 0
+            Layout.fillWidth: parent
+            Layout.leftMargin: CmnCfg.megaMargin
+            Layout.rightMargin: CmnCfg.megaMargin
         }
-        TapHandler {
-            onTapped: {
-                if (topRect.groupTitle === "") {
-                    Herald.conversationBuilder.setTitle(qsTr("Untitled Group"))
-                } else {
-                    Herald.conversationBuilder.setTitle(topRect.groupTitle)
+
+        Rectangle {
+            id: divider
+            height: 1
+            color: "black"
+            Layout.fillWidth: parent
+            Layout.leftMargin: CmnCfg.megaMargin
+            Layout.rightMargin: CmnCfg.megaMargin
+        }
+
+        //TODO: This doesn't do anything yet
+        CheckBox {
+            topPadding: CmnCfg.units.dp(12)
+            text: qsTr("Enable channels")
+            font.family: CmnCfg.chatFont.name
+            checked: false
+            indicator.width: CmnCfg.units.dp(18)
+            indicator.height: CmnCfg.units.dp(18)
+            Layout.leftMargin: CmnCfg.megaMargin
+        }
+
+        Rectangle {
+            //anchors.top: topRect.bottom
+            id: bigDivider
+            height: 1
+            width: parent.width
+            color: CmnCfg.palette.black
+        }
+
+        ContactsSearchComponent {
+            id: groupSelectText
+
+            Layout.alignment: Qt.AlignHCenter
+        }
+
+        Button {
+            Layout.preferredWidth: CmnCfg.units.dp(80)
+            Layout.preferredHeight: CmnCfg.units.dp(40)
+            Layout.alignment: Qt.AlignRight
+            Layout.rightMargin: CmnCfg.megaMargin
+
+            background: Rectangle {
+                anchors.fill: parent
+                color: CmnCfg.palette.offBlack
+            }
+
+            Text {
+                text: qsTr("CREATE")
+                anchors.centerIn: parent
+                color: CmnCfg.palette.white
+                font.family: CmnCfg.labelFont.name
+            }
+            TapHandler {
+                onTapped: {
+                    if (titleText.text === "") {
+                        Herald.conversationBuilder.setTitle(qsTr("Untitled Group"))
+                    } else {
+                        Herald.conversationBuilder.setTitle(titleText.text)
+                    }
+
+                    //TODO: impl for setting prof pic once file dialog exists
+                    //                if (topRect.profPic !== "") {
+                    //                }
+                    Herald.conversationBuilder.finalize()
+                    mainView.pop()
                 }
-
-                //TODO: impl for setting prof pic once file dialog exists
-                //                if (topRect.profPic !== "") {
-                //                }
-                Herald.conversationBuilder.finalize()
-                mainView.pop()
             }
         }
     }

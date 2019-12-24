@@ -82,7 +82,7 @@ Component {
 
             }
 
-            Imports.ButtonForm {
+            Imports.IconButton {
                 source: "qrc:/x-icon.svg"
                 fill: CmnCfg.palette.lightGrey
                 Layout.alignment: Qt.AlignRight

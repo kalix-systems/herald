@@ -35,13 +35,13 @@ RowLayout {
         Layout.bottomMargin: CmnCfg.units.dp(6)
         spacing: CmnCfg.units.dp(12)
 
-        IconButton {
+        AnimIconButton {
             Layout.alignment: Qt.AlignRight
             color: CmnCfg.palette.black
             imageSource: "qrc:/camera-icon.svg"
         }
 
-        IconButton {
+        AnimIconButton {
             Layout.alignment: Qt.AlignRight
             color: CmnCfg.palette.black
             tapCallback: send ? function () {

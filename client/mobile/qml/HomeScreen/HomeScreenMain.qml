@@ -64,7 +64,7 @@ Page {
 
     Component {
         id: fab
-        FloatingActionButtons {}
+        ExpandedComposeButtons {}
     }
 
     Component {

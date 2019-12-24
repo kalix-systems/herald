@@ -41,7 +41,7 @@ Component {
                 Layout.leftMargin: -20
             }
 
-            Imports.ButtonForm {
+            Imports.IconButton {
                 id: back
                 source: "qrc:/up-chevron-icon.svg"
                 fill: CmnCfg.palette.lightGrey
@@ -53,7 +53,7 @@ Component {
                                ListView.Center)
             }
 
-            Imports.ButtonForm {
+            Imports.IconButton {
                 id: forward
                 source: "qrc:/down-chevron-icon.svg"
                 fill: CmnCfg.palette.lightGrey
@@ -66,7 +66,7 @@ Component {
                                ListView.Center)
             }
 
-            Imports.ButtonForm {
+            Imports.IconButton {
                 source: "qrc:/x-icon.svg"
                 Layout.alignment: Qt.AlignVCenter
                 fill: CmnCfg.palette.lightGrey

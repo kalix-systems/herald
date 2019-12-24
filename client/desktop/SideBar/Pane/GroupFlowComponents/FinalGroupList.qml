@@ -40,7 +40,7 @@ ListView {
                 lastBody: "@" + memberId
             }
 
-            Imports.ButtonForm {
+            Imports.IconButton {
                 id: xIcon
                 anchors.right: parent.right
                 anchors.rightMargin: CmnCfg.megaMargin / 2

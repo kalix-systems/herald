@@ -11,12 +11,9 @@ import "qrc:/imports/Entity"
 import "qrc:/imports/js/utils.mjs" as Utils
 
 Column {
-
     topPadding: CmnCfg.units.dp(24)
     Component.onCompleted: Herald.usersSearch.refresh()
     width: mainView.width - CmnCfg.megaMargin * 2
-    anchors.top: bigDivider.bottom
-    anchors.horizontalCenter: parent.horizontalCenter
 
     TextArea {
         id: groupSelectText

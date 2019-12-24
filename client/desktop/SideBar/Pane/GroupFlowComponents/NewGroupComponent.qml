@@ -57,7 +57,7 @@ Component {
         }
 
         //create group button
-        Imports.ButtonForm {
+        Imports.IconButton {
             anchors.top: groupSelectText.bottom
             anchors.topMargin: CmnCfg.smallMargin
             anchors.right: parent.right

@@ -76,7 +76,7 @@ ToolBar {
             Layout.alignment: Qt.AlignRight
             height: parent.height
 
-            Imports.ButtonForm {
+            Imports.IconButton {
                 id: searchButton
                 source: "qrc:/search-icon.svg"
                 fill: CmnCfg.palette.lightGrey
@@ -84,7 +84,7 @@ ToolBar {
                 onClicked: chatToolBar.state = "searchState"
             }
 
-            Imports.ButtonForm {
+            Imports.IconButton {
                 id: timerButton
                 source: timerMenu.chosenTimer
                 fill: "transparent"
@@ -97,7 +97,7 @@ ToolBar {
                 conversationItem: chatToolBar.conversationItem
             }
 
-            Imports.ButtonForm {
+            Imports.IconButton {
                 id: convOptionsButton
                 source: "qrc:/options-icon.svg"
                 fill: CmnCfg.palette.lightGrey

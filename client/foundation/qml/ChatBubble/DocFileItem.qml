@@ -27,7 +27,7 @@ ListView {
 
         onPositioningComplete: bubbleRoot.attachmentsLoaded()
 
-        ButtonForm {
+        IconButton {
             id: downloadIcon
             icon.source: "qrc:/file-download-icon.svg"
             icon.height: 20

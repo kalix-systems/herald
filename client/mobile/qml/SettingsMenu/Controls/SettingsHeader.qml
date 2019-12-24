@@ -17,7 +17,7 @@ ToolBar {
             leftMargin: CmnCfg.defaultMargin
         }
 
-        IconButton {
+        AnimIconButton {
             id: drawerButton
             Layout.alignment: Qt.AlignLeft
             color: CmnCfg.palette.iconFill

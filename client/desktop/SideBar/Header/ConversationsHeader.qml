@@ -35,7 +35,7 @@ ToolBar {
         }
 
         spacing: 12
-        Imports.ButtonForm {
+        Imports.IconButton {
             id: searchButton
             property bool searchRegex: false
             fill: CmnCfg.palette.lightGrey
@@ -44,14 +44,14 @@ ToolBar {
             onClicked: sideBarState.state = "globalSearch"
         }
 
-        Imports.ButtonForm {
+        Imports.IconButton {
             id: newMessageButton
             source: "qrc:/plus-icon.svg"
             fill: CmnCfg.palette.lightGrey
             onClicked: convoMenu.open()
         }
 
-        Imports.ButtonForm {
+        Imports.IconButton {
             id: optionsButton
             fill: CmnCfg.palette.lightGrey
             source: "qrc:/options-icon.svg"
