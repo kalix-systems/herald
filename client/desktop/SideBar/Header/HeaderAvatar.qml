@@ -13,7 +13,7 @@ Avatar {
     color: CmnCfg.palette.avatarColors[Herald.config.color]
     initials: Herald.config.name[0].toUpperCase()
     pfpPath: Utils.safeStringOrDefault(Herald.config.profilePicture, "")
-    diameter: 28
+    size: 28
 
 
     // TODO onclicked this should open identity switcher, once that exists;

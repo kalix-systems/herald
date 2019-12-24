@@ -23,6 +23,7 @@ Item {
     // the value of the latest read receipt according to the ReceiptStatus enum
     property int lastReceipt: 0
     property string lastAuthor
+
     property color labelColor: CmnCfg.palette.black
     property color secondaryLabelColor: CmnCfg.palette.offBlack
     property int labelFontSize: CmnCfg.entityLabelSize

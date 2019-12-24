@@ -36,7 +36,6 @@ Rectangle {
         initials: boxTitle[0].toUpperCase()
         pfpPath: Utils.safeStringOrDefault(picture)
         isGroup: isGroupPicture
-        diameter: isGroupPicture ? 40 : 44
     }
 
     Loader {

@@ -6,7 +6,7 @@ import "qrc:/imports/js/utils.mjs" as Utils
 import "../ChatView" as ChatView
 
 /// Displays an entity (user or group) avatar, name, and optional extra
-/// information (username or message snippet).
+/// information (username or message snippet, timestamp, read receipt).
 Rectangle {
     id: entityItem
 
@@ -28,7 +28,7 @@ Rectangle {
     property bool isGroup: false
 
     color: CmnCfg.palette.white
-    height: itemAvatar.diameter + 2 * CmnCfg.smallMargin
+    height: itemAvatar.size + 2 * CmnCfg.smallMargin
 
     anchors {
         left: parent.left
@@ -44,7 +44,7 @@ Rectangle {
         pfpPath: entityItem.pfpPath
         color: entityItem.color
         initials: Utils.initialize(entityName)
-        diameter: CmnCfg.units.dp(48)
+        size: CmnCfg.units.dp(48)
         isGroup: entityItem.isGroup
     }
 

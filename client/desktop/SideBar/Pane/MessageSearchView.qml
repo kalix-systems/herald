@@ -46,6 +46,8 @@ ListView {
                                messageData.conversation, messageData.msgId)
             }
 
+            // TODO spacing is awkward
+            // TODO possible to handle this case in ConversationLabel?
             labelComponent: GridLayout {
                 id: labelGrid
                 rows: bodyText.lineCount > 1 ? 3 : 2

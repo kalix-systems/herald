@@ -30,7 +30,7 @@ ToolBar {
                 initials: Herald.config.name[0].toUpperCase()
                 pfpPath: Utils.safeStringOrDefault(
                              Herald.config.profilePicture, "")
-                diameter: CmnCfg.identityAvatarDiameter
+                size: CmnCfg.identityAvatarDiameter
                 Layout.alignment: Qt.AlignCenter
                 Layout.leftMargin: CmnCfg.units.dp(12)
             }
