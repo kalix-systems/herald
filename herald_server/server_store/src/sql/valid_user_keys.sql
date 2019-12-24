@@ -1,16 +1,18 @@
-select
-    key_creations.key
+select distinct
+    sigchain.key
 from
-    key_creations
+    sigchain
 inner join
     userkeys
 on
-    key_creations.key = userkeys.key
+    sigchain.key = userkeys.key
 where
     userkeys.user_id = $1 and
-    key_creations.key not in (
+    sigchain.key not in (
         select
-            key_deprecations.key
+            sigchain.key
         from
-            key_deprecations
+            sigchain
+        where
+            sigchain.is_creation = false
     );

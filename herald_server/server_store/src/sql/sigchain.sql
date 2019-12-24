@@ -5,7 +5,8 @@ SELECT
     outer_signed_by,
     outer_signature,
     outer_ts,
-    update_id
+    update_id,
+    is_creation
 FROM
     sigchain
 INNER JOIN
@@ -15,4 +16,4 @@ ON
 WHERE
     userkeys.user_id = $1
 ORDER BY
-    sigchain.update_id ASC, sigchain.ts ASC
+    sigchain.update_id ASC, sigchain.outer_ts ASC, sigchain.inner_ts ASC

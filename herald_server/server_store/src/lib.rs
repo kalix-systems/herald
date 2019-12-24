@@ -1,3 +1,5 @@
+#![recursion_limit = "256"]
+
 use futures::{try_join, FutureExt, Stream, StreamExt, TryStreamExt};
 use herald_common::*;
 use parking_lot::Mutex;
