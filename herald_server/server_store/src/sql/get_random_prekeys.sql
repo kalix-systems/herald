@@ -1,6 +1,12 @@
 SELECT
-    sealed_key
+    key,
+    slot,
+    signed_by,
+    signature,
+    ts
 FROM
     prekeys
 WHERE
-    signing_key = $1
+    signed_by = $1
+ORDER BY RANDOM()
+LIMIT 1

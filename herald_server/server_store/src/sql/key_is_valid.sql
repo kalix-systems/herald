@@ -12,7 +12,7 @@ SELECT EXISTS (
         FROM
             sigchain
         WHERE
-            is_creation <> false
+            is_creation = false
     )
   LIMIT 1
 )

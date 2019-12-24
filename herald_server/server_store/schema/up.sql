@@ -37,11 +37,17 @@ CREATE TABLE pending (
 );
 
 CREATE TABLE prekeys (
-    sealed_key    BYTEA   NOT NULL,
-    signing_key   BYTEA   NOT NULL
+    key        BYTEA     NOT NULL,
+    slot       SMALLINT  NOT NULL,
+    signed_by  BYTEA     NOT NULL,
+    signature  BYTEA     NOT NULL,
+    ts         BIGINT    NOT NULL,
+
+
+    PRIMARY KEY(key, signed_by)
 );
 
-CREATE INDEX prekey_signer ON prekeys(signing_key);
+CREATE INDEX prekey_signer ON prekeys(signed_by);
 
 CREATE TABLE conversation_members (
     conversation_id   BYTEA  NOT NULL,

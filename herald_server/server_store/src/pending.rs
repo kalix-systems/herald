@@ -461,6 +461,7 @@ impl Conn {
             )
             .await?
             .get(0);
+
         let (pending_stmt, exists_stmt) = try_join!(
             tx.prepare_typed(sql!("add_pending"), types![BYTEA, INT8]),
             tx.prepare_typed(sql!("device_exists"), types![BYTEA])

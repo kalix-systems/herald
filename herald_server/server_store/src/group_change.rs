@@ -44,7 +44,7 @@ impl Conn {
             .await;
 
         match res {
-            Err(v @ Ok(add_to_group::Res::MissingUser(_))) => return v,
+            Err(v @ Ok(_)) => return v,
             Err(Err(e)) => return Err(e.into()),
             _ => {}
         };

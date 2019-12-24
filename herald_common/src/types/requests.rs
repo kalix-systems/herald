@@ -51,7 +51,15 @@ pub mod new_prekeys {
     use super::*;
 
     pub type Req = Vec<(Signed<Prekey>, Option<Prekey>)>;
-    pub type Res = Vec<PKIResponse>;
+
+    #[derive(Ser, De, Debug, Clone, Copy, PartialEq, Eq)]
+    pub enum Res {
+        Success,
+        BadSig(SigValid, Prekey),
+        Redundant(Prekey),
+        DeadKey(Prekey),
+        NoSlotAvailable(Prekey),
+    }
 }
 
 pub mod get_prekeys {
