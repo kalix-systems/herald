@@ -79,13 +79,13 @@ impl Messages {
         }
 
         // Case where message is last message in conversation
-        if index == self.container.len().saturating_sub(1) {
+        if index == 0 {
             return Some(true);
         }
 
         // other cases
         self.container
-            .same_flurry(index, index + 1)
+            .same_flurry(index, index - 1)
             .map(std::ops::Not::not)
     }
 
@@ -98,13 +98,13 @@ impl Messages {
         }
 
         // Case where message is first message in conversation
-        if index == 0 {
+        if index + 1 == self.container.len() {
             return Some(true);
         }
 
         // other cases
         self.container
-            .same_flurry(index, index - 1)
+            .same_flurry(index, index + 1)
             .map(std::ops::Not::not)
     }
 

@@ -4,8 +4,8 @@ use heraldcore::message::{
     attachments::{DocMeta, MediaMeta},
     Elider,
 };
-use im::vector::Vector;
 use message_cache as cache;
+use revec::Revec;
 use search::*;
 use std::collections::HashSet;
 use types::*;
@@ -16,22 +16,21 @@ pub mod handlers;
 pub use cache::{access, get, update};
 
 #[derive(Default)]
-/// A container type for messages backed by an RRB-tree vector
-/// and a hash map.
+/// Container type for messages
 pub struct Container {
-    pub list: Vector<MessageMeta>,
+    pub list: Revec<MessageMeta>,
     last: Option<MsgData>,
     op_body_elider: Elider,
 }
 
 impl Container {
     pub fn new(
-        list: Vector<MessageMeta>,
+        list: Vec<MessageMeta>,
         last: Option<MsgData>,
     ) -> Self {
         Self {
             last,
-            list,
+            list: list.into(),
             op_body_elider: Elider {
                 line_count: 3,
                 char_per_line: 60,
@@ -152,11 +151,8 @@ impl Container {
         ix: usize,
     ) -> Option<MsgData> {
         let old_len = self.len();
-        if ix >= old_len {
-            return None;
-        }
 
-        let msg = self.list.remove(ix);
+        let msg = self.list.remove(ix)?;
         let data = cache::remove(&msg.msg_id);
 
         if ix + 1 == old_len {
@@ -177,12 +173,11 @@ impl Container {
     }
 
     #[must_use]
-    pub fn insert(
+    pub fn insert_ord(
         &mut self,
-        ix: usize,
         msg: MessageMeta,
         data: MsgData,
-    ) -> Option<()> {
+    ) -> usize {
         let old_len = self.list.len();
         let mid = msg.msg_id;
 
@@ -192,7 +187,7 @@ impl Container {
             });
         }
 
-        self.list.insert(ix, msg);
+        let ix = self.list.insert_ord(msg);
         cache::insert(mid, data);
 
         if ix == old_len {
@@ -202,7 +197,7 @@ impl Container {
                 .and_then(|MessageMeta { ref msg_id, .. }| cache::get(msg_id));
         }
 
-        Some(())
+        ix
     }
 
     fn msg_id(
