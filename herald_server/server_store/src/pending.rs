@@ -60,7 +60,6 @@ impl Conn {
             .prepare_typed(sql!("expire_pending"), types![BYTEA, INT8])
             .await?;
 
-        // TODO clear dangling pushes
         items
             .map(Ok::<i64, Error>)
             .try_for_each_concurrent(10, |index| {
@@ -73,7 +72,11 @@ impl Conn {
                     Ok(())
                 }
             })
-            .await
+            .await?;
+
+        self.execute(sql!("del_dangling_pushes"), params![]).await?;
+
+        Ok(())
     }
 
     // should be done transactionally, returns Missing(r) for the first missing recip r
