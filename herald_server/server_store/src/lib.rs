@@ -20,6 +20,7 @@ mod pool;
 mod prekeys;
 mod recip_exists;
 mod sigchain;
+pub use pending::PushedTo;
 pub use pool::*;
 pub use prekeys::{PrekeyReplace, TaggedPrekey};
 
