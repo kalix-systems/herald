@@ -7,7 +7,7 @@ TextField {
 
     placeholderText: qsTr("Enter Username") + "..."
 
-    width: CmnCfg.units.gu(15)
+    width: parent.width - 2 * CmnCfg.megaMargin
 
     background: Rectangle {
         color: "#FFFFFF"

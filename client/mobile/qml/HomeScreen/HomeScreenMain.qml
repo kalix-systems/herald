@@ -27,6 +27,7 @@ Page {
     Loader {
         id: listViewLoader
         anchors.fill: parent
+        anchors.topMargin: CmnCfg.smallMargin
         sourceComponent: ListView {
             id: cvListView
             clip: true

@@ -2,11 +2,12 @@ import QtQuick 2.0
 import QtQuick.Controls 2.12
 import LibHerald 1.0
 
+// TODO this is a FloatingActionButton, rename this and FABs.qml accordingly
 Button {
     property string iconSource: ""
     property color iconColor: CmnCfg.palette.iconFill
 
-    height: CmnCfg.units.dp(56)
+    height: CmnCfg.fabDiameter
     width: height
 
     icon.source: iconSource
