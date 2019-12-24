@@ -21,6 +21,7 @@ mod prekeys;
 mod recip_exists;
 mod sigchain;
 pub use pool::*;
+pub use prekeys::{PrekeyReplace, TaggedPrekey};
 
 impl Conn {
     pub async fn user_of(
