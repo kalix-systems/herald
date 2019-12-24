@@ -2,8 +2,9 @@ SELECT EXISTS (
   SELECT
     1
   FROM
-    key_creations
+    sigchain
   WHERE
-    key_creations.key = $1 AND
+    sigchain.key = $1 AND
+    sigchain.is_creation = true
   LIMIT 1
 )

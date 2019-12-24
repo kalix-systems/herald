@@ -2,8 +2,9 @@ SELECT EXISTS (
   SELECT
     1
   FROM
-    key_deprecations
+    sigchain
   WHERE
-    key_deprecations.key = $1 AND
+    sigchain.key = $1 AND
+    sigchain.is_creation = false
   LIMIT 1
 )

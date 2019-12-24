@@ -24,7 +24,7 @@ impl Conn {
     pub async fn get_pending(
         &mut self,
         of: sig::PublicKey,
-    ) -> Result<Vec<(Push, i64)>, Error> {
+    ) -> Res<Vec<(Push, i64)>> {
         let stmt = self
             .prepare_typed(sql!("get_pending"), types![BYTEA])
             .await?;
@@ -55,12 +55,11 @@ impl Conn {
         &mut self,
         of: sig::PublicKey,
         items: S,
-    ) -> Result<(), Error> {
+    ) -> Res<()> {
         let stmt = self
             .prepare_typed(sql!("expire_pending"), types![BYTEA, INT8])
             .await?;
 
-        // TODO clear dangling pushes
         items
             .map(Ok::<i64, Error>)
             .try_for_each_concurrent(10, |index| {
@@ -73,7 +72,11 @@ impl Conn {
                     Ok(())
                 }
             })
-            .await
+            .await?;
+
+        self.execute(sql!("del_dangling_pushes"), params![]).await?;
+
+        Ok(())
     }
 
     // should be done transactionally, returns Missing(r) for the first missing recip r
@@ -86,7 +89,7 @@ impl Conn {
             timestamp,
             msg,
         }: &Push,
-    ) -> Result<PushedTo, Error> {
+    ) -> Res<PushedTo> {
         use Recip::*;
 
         match recip {
@@ -116,7 +119,7 @@ impl Conn {
         msg: &Bytes,
         tag: &PushTag,
         timestamp: &Time,
-    ) -> Result<PushedTo, Error> {
+    ) -> Res<PushedTo> {
         let tx = self.transaction().await?;
         let exists_stmt = tx
             .prepare_typed(sql!("device_exists"), types![BYTEA])
@@ -163,7 +166,7 @@ impl Conn {
         msg: &Bytes,
         tag: &PushTag,
         timestamp: &Time,
-    ) -> Result<PushedTo, Error> {
+    ) -> Res<PushedTo> {
         let tx = self.transaction().await?;
 
         let exists_stmt = tx.prepare_typed(sql!("user_exists"), types![TEXT]).await?;
@@ -228,7 +231,7 @@ impl Conn {
         msg: &Bytes,
         tag: &PushTag,
         timestamp: &Time,
-    ) -> Result<PushedTo, Error> {
+    ) -> Res<PushedTo> {
         let tx = self.transaction().await?;
 
         let exists_stmt = tx
@@ -300,7 +303,7 @@ impl Conn {
         msg: &Bytes,
         tag: &PushTag,
         timestamp: &Time,
-    ) -> Result<PushedTo, Error> {
+    ) -> Res<PushedTo> {
         let tx = self.transaction().await?;
 
         let push_stmt = tx
@@ -373,7 +376,7 @@ impl Conn {
         msg: &Bytes,
         tag: &PushTag,
         timestamp: &Time,
-    ) -> Result<PushedTo, Error> {
+    ) -> Res<PushedTo> {
         let tx = self.transaction().await?;
 
         let push_stmt = tx
@@ -444,7 +447,7 @@ impl Conn {
         msg: &Bytes,
         tag: &PushTag,
         timestamp: &Time,
-    ) -> Result<PushedTo, Error> {
+    ) -> Res<PushedTo> {
         let tx = self.transaction().await?;
 
         let push_stmt = tx
@@ -458,6 +461,7 @@ impl Conn {
             )
             .await?
             .get(0);
+
         let (pending_stmt, exists_stmt) = try_join!(
             tx.prepare_typed(sql!("add_pending"), types![BYTEA, INT8]),
             tx.prepare_typed(sql!("device_exists"), types![BYTEA])
@@ -722,15 +726,17 @@ mod tests {
         let cid1 = ConversationId::gen_new();
         let cid2 = ConversationId::gen_new();
 
-        let uids = vec![a_uid, b_uid, c_uid];
+        let uids1 = vec![a_uid];
+        let uids2 = vec![b_uid, c_uid];
+
         let cids = vec![cid1, cid2];
 
         let recip = Recip::Many(Recips::Groups(cids.clone()));
 
         assert!(wa!(client.add_to_pending_and_get_valid_devs(&recip, &push)).is_missing());
 
-        wa!(client.add_to_group(iter(uids.clone()), cid1));
-        wa!(client.add_to_group(iter(uids.clone()), cid2));
+        wa!(client.add_to_group(iter(uids1.clone()), cid1));
+        wa!(client.add_to_group(iter(uids2.clone()), cid2));
 
         let keys = [a_kp, b_kp, c_kp]
             .iter()
