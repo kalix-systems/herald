@@ -178,7 +178,6 @@ impl Container {
         msg: MessageMeta,
         data: MsgData,
     ) -> usize {
-        let old_len = self.list.len();
         let mid = msg.msg_id;
 
         if let ReplyId::Known(op) = &data.op {
@@ -190,10 +189,10 @@ impl Container {
         let ix = self.list.insert_ord(msg);
         cache::insert(mid, data);
 
-        if ix == old_len {
+        if ix == 0 {
             self.last = self
                 .list
-                .last()
+                .front()
                 .and_then(|MessageMeta { ref msg_id, .. }| cache::get(msg_id));
         }
 

@@ -103,17 +103,5 @@ ListView {
             onEntered: bubbleActual.hoverHighlight = true
             onExited: bubbleActual.hoverHighlight = false
         }
-
-        // Handles signals from ChatBubble attachment loaders to adjust view down
-        // once the layout has been fully calculated
-        Loader {
-            active: (parent.messageModelData.index === chatListView.count - 1)
-            sourceComponent: Component {
-                Connections {
-                    target: bubbleActual
-                    onAttachmentsLoaded: chatScrollBarInner.setPosition(1.0)
-                }
-            }
-        }
     }
 }

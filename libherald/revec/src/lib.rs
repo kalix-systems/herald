@@ -60,6 +60,10 @@ impl<T: Clone> Revec<T> {
         self.0.front()
     }
 
+    pub fn front(&self) -> Option<&T> {
+        self.0.last()
+    }
+
     pub fn len(&self) -> usize {
         self.0.len()
     }

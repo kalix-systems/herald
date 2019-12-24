@@ -1,5 +1,4 @@
 use super::*;
-use crate::interface::MessagesTrait as Interface;
 use crate::push;
 use heraldcore::{errors::HErr, message::Message as Msg, NE};
 use messages_helper::search::Match;
@@ -90,8 +89,6 @@ impl Messages {
 
         let len = self.container.len();
 
-        let (was_tail, was_head) = (self.is_tail(ix), self.is_head(ix));
-
         self.model.begin_remove_rows(ix, ix);
         let data = self.container.remove(ix);
         self.model.end_remove_rows();
@@ -102,19 +99,19 @@ impl Messages {
                 .set_dangling(replies, |ix| model.data_changed(ix, ix));
         }
 
-        if was_tail.unwrap_or(false) && (ix > 0) {
+        if ix > 0 {
             self.entry_changed(ix - 1);
         }
 
-        if was_head.unwrap_or(false) && (ix < self.container.len()) {
-            self.entry_changed(ix);
+        if ix + 1 < self.container.len() {
+            self.entry_changed(ix + 1);
         }
 
         if len == 1 {
             self.emit.is_empty_changed();
         }
 
-        if ix + 1 == len {
+        if ix == 0 {
             self.emit_last_changed();
         }
     }
@@ -145,7 +142,7 @@ impl Messages {
             );
         }
 
-        if ix + 1 == self.container.len() {
+        if ix == 0 {
             self.emit_last_changed();
         }
 

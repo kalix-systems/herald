@@ -13,8 +13,6 @@ Row {
         throw "undefined callback"
     }
 
-    onPositioningComplete: bubbleRoot.attachmentsLoaded()
-
     Image {
         id: image
         sourceSize.width: aspectRatio < 1 ? 300 * aspectRatio : 300

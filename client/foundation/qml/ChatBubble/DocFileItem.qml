@@ -25,8 +25,6 @@ ListView {
     delegate: Row {
         spacing: CmnCfg.smallMargin / 2
 
-        onPositioningComplete: bubbleRoot.attachmentsLoaded()
-
         ButtonForm {
             id: downloadIcon
             icon.source: "qrc:/file-download-icon.svg"
