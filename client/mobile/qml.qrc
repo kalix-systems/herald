@@ -9,6 +9,7 @@
         <file>qml/LoginPage/Registration.qml</file>
         <file>qml/Common/CommonConfig.qml</file>
         <file>qml/Common/Divider.qml</file>
+        <file>qml/Common/EntityBlock.qml</file>
         <file>qml/Common/IconButton.qml</file>
         <file>qml/SearchView/SearchViewHeader.qml</file>
         <file>qml/SearchView/SearchViewMain.qml</file>

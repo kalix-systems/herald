@@ -3,7 +3,7 @@ import QtQuick.Layouts 1.12
 import QtQuick 2.14
 import LibHerald 1.0
 import "qrc:/imports/ChatBubble" as CB
-import "qrc:/imports/Avatar"
+import "qrc:/imports/Entity"
 import "." as CVUtils
 import "qrc:/imports/js/utils.mjs" as Utils
 import "../../SideBar/js/ContactView.mjs" as CUtils

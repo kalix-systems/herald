@@ -4,7 +4,7 @@ import QtQuick 2.12
 import LibHerald 1.0
 import "../Common"
 import "../SettingsMenu"
-import "qrc:/imports/Avatar"
+import "qrc:/imports/Entity"
 import "qrc:/imports/js/utils.mjs" as Utils
 import Qt.labs.platform 1.0
 
@@ -30,7 +30,7 @@ ToolBar {
                 initials: Herald.config.name[0].toUpperCase()
                 pfpPath: Utils.safeStringOrDefault(
                              Herald.config.profilePicture, "")
-                diameter: CmnCfg.identityAvatarDiameter
+                size: CmnCfg.identityAvatarDiameter
                 Layout.alignment: Qt.AlignCenter
                 Layout.leftMargin: CmnCfg.units.dp(12)
             }

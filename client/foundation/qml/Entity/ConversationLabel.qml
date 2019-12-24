@@ -23,9 +23,11 @@ Item {
     // the value of the latest read receipt according to the ReceiptStatus enum
     property int lastReceipt: 0
     property string lastAuthor
+
     property color labelColor: CmnCfg.palette.black
     property color secondaryLabelColor: CmnCfg.palette.offBlack
-    property real labelFontSize
+    property int labelFontSize: CmnCfg.entityLabelSize
+    property int subLabelFontSize: CmnCfg.entitySubLabelSize
 
     // labeling constants
     GridLayout {
@@ -66,7 +68,7 @@ Item {
             id: bodyText
             font {
                 family: CmnCfg.chatFont.name
-                pixelSize: 13
+                pixelSize: subLabelFontSize
             }
             elide: "ElideRight"
             text: lastBody

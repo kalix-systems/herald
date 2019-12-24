@@ -7,7 +7,7 @@ import "./Controls"
 import "../Common"
 import QtGraphicalEffects 1.0
 import Qt.labs.platform 1.0
-import "qrc:/imports/Avatar"
+import "qrc:/imports/Entity"
 import "qrc:/imports/js/utils.mjs" as Utils
 import "GroupFlowComponents"
 
@@ -15,6 +15,39 @@ Page {
     id: newGroupView
     height: mainView.height
 
+
+        background: Rectangle {
+            color: CmnCfg.palette.offBlack
+        }
+
+        RowLayout {
+            anchors.fill: parent
+            Row {
+                Layout.alignment: Qt.AlignLeft
+                Layout.leftMargin: CmnCfg.units.dp(12)
+                spacing: CmnCfg.units.dp(16)
+                IconButton {
+                    id: backButton
+                    color: CmnCfg.palette.iconFill
+                    imageSource: "qrc:/back-arrow-icon.svg"
+                    tapCallback: function () {
+                        mainView.pop(null)
+                    }
+                }
+
+                Label {
+                    id: stateLabel
+                    text: qsTr("New group")
+                    font {
+                        pixelSize: CmnCfg.headerTextSize
+                        family: CmnCfg.labelFont.name
+                    }
+                    anchors.verticalCenter: parent.verticalCenter
+                    color: CmnCfg.palette.iconFill
+                }
+            }
+        }
+    }
 
     background: Rectangle {
         color: CmnCfg.palette.white

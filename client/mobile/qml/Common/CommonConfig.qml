@@ -37,14 +37,16 @@ Item {
 
     // FONTS
 
-    /// size of labels a
-    readonly property real labelSize: units.dp(20)
-    /// standard chat text size
-    readonly property real chatTextSize: units.dp(18)
-    /// Chat preview size
-    readonly property real chatPreviewSize: units.dp(18)
     /// standard header size
     readonly property real headerTextSize: units.dp(18)
+    /// size of labels
+    readonly property real labelSize: units.dp(18)
+    /// standard chat text size
+    readonly property real chatTextSize: units.dp(16)
+    /// size for contact/group name labels in lists
+    readonly property int entityLabelSize: units.dp(18)
+    /// size for contact/group name labels in lists
+    readonly property int entitySubLabelSize: units.dp(17)
     /// standard button text size
     readonly property real buttonTextSize: units.dp(17)
 
