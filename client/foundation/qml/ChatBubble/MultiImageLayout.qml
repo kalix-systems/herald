@@ -10,7 +10,7 @@ Row {
     property var thirdImage
     property var fourthImage
     property int count
-    property var imageTappedCallback: function () {
+    property var imageClickedCallBack: function () {
         throw "undefined callback"
     }
     onPositioningComplete: bubbleRoot.attachmentsLoaded()

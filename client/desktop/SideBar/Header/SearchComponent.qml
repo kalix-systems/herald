@@ -7,7 +7,7 @@ import "../popups/js/NewContactDialogue.mjs" as JS
 import "../../SideBar" as SBUtils
 import QtGraphicalEffects 1.0
 import Qt.labs.platform 1.0
-import "qrc:/imports/Avatar"
+import "qrc:/imports/Entity"
 import "qrc:/imports" as Imports
 import "qrc:/imports/js/utils.mjs" as Utils
 
@@ -35,18 +35,13 @@ Component {
 
                 TextArea {
                     id: searchText
-                    height: CmnCfg.toolbarHeight - CmnCfg.smallMargin / 2
+                    height: CmnCfg.toolbarHeight - CmnCfg.microMargin
                     width: parent.width
                     placeholderText: headerLoader.searchPlaceholder
                     color: "white"
                     verticalAlignment: TextEdit.AlignVCenter
                     anchors.top: parent.top
                     anchors.topMargin: CmnCfg.smallMargin / 4
-
-                    background: Rectangle {
-                        color: CmnCfg.palette.offBlack
-                        anchors.fill: parent
-                    }
 
                     Keys.onPressed: {
                         // this makes sure that returns and tabs are not evaluated
@@ -77,7 +72,7 @@ Component {
                 }
 
                 Rectangle {
-                    width: searchText.width - CmnCfg.mediumMargin
+                    width: searchText.width - CmnCfg.largeMargin
                     color: "white"
                     height: 1
                     anchors.horizontalCenter: parent.horizontalCenter

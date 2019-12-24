@@ -6,18 +6,18 @@ import "../../../common" as CMN
 import "qrc:/imports"
 
 ColumnLayout {
-    spacing: CmnCfg.margin
+    spacing: CmnCfg.defaultMargin
 
     Item {
-        height: CmnCfg.margin
+        height: CmnCfg.defaultMargin
         width: 1
     }
 
     StandardLabel {
         text: qsTr("Open help center")
         color: "#0066cc"
-        Layout.leftMargin: CmnCfg.margin
-        font.pixelSize: 14
+        Layout.leftMargin: CmnCfg.defaultMargin
+        font.pixelSize: CmnCfg.chatTextSize
     }
 
     Rectangle {
@@ -29,8 +29,8 @@ ColumnLayout {
     StandardLabel {
         text: qsTr("Report an issue")
         color: "#0066cc"
-        Layout.leftMargin: CmnCfg.margin
-        font.pixelSize: 14
+        Layout.leftMargin: CmnCfg.defaultMargin
+        font.pixelSize: CmnCfg.chatTextSize
     }
 
     Rectangle {

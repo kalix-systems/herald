@@ -11,8 +11,8 @@ ToolButton {
     property string imageSource: ""
     property color color: CmnCfg.palette.iconMatte
 
-    property size iconSize: Qt.size(CmnCfg.iconSizes.smallMedium,
-                                    CmnCfg.iconSizes.smallMedium)
+    property size iconSize: Qt.size(CmnCfg.iconSize,
+                                    CmnCfg.iconSize)
     background: Rectangle {
         id: splash
         color: CmnCfg.palette.iconMatte

@@ -4,7 +4,7 @@ import QtQuick.Controls 2.13
 import LibHerald 1.0
 import "./ReplyBubble"
 import "../js/utils.mjs" as Utils
-import "../Avatar"
+import "../Entity"
 
 Rectangle {
     id: bubbleRoot
@@ -78,17 +78,17 @@ Rectangle {
         id: bubbleHighlight
         z: bubbleRoot.z + 1
     }
-    AvatarMain {
+
+    Avatar {
         id: avatar
-        backgroundColor: authorColor
+        color: authorColor
         initials: authorName[0].toUpperCase()
         size: 36
-        avatarHeight: 36
         visible: isHead ? true : false
         anchors {
             left: parent.left
             top: parent.top
-            margins: CmnCfg.margin
+            margins: CmnCfg.smallMargin
         }
 
         z: contentRoot.z + 1
@@ -100,7 +100,7 @@ Rectangle {
         anchors.top: parent.top
         anchors.bottom: parent.bottom
 
-        width: CmnCfg.smallMargin / 2
+        width: CmnCfg.accentBarWidth
         color: authorColor
         anchors.left: avatar.right
         anchors.leftMargin: CmnCfg.smallMargin
@@ -130,8 +130,9 @@ Rectangle {
         spacing: CmnCfg.smallMargin
         topPadding: isHead ? CmnCfg.smallMargin : CmnCfg.smallMargin
         leftPadding: CmnCfg.smallMargin
-        bottomPadding: isTail ? CmnCfg.margin : CmnCfg.smallMargin
-        ChatLabel {
+        bottomPadding: isTail ? CmnCfg.defaultMargin : CmnCfg.smallMargin
+
+        BubbleLabel {
             id: authorLabel
             visible: isHead
         }
@@ -193,7 +194,7 @@ Rectangle {
 
         //media and file column loader
         Column {
-            spacing: CmnCfg.smallMargin
+            spacing: CmnCfg.defaultMargin
             Loader {
                 id: imageLoader
                 sourceComponent: imageAttach ? image : undefined

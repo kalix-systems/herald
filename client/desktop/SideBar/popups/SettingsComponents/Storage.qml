@@ -6,11 +6,11 @@ import "../../../common" as CMN
 import "qrc:/imports"
 
 ColumnLayout {
-    spacing: CmnCfg.margin
+    spacing: CmnCfg.defaultMargin
     RowLayout {
         Layout.fillWidth: true
-        Layout.leftMargin: CmnCfg.margin
-        Layout.topMargin: CmnCfg.margin
+        Layout.leftMargin: CmnCfg.defaultMargin
+        Layout.topMargin: CmnCfg.defaultMargin
         Button {
             Layout.alignment: Qt.AlignCenter
             text: qsTr("Export Backup")
@@ -19,13 +19,13 @@ ColumnLayout {
         StandardLabel {
             text: qsTr("Last Backup Was : ") + "Never"
             color: "black"
-            Layout.leftMargin: CmnCfg.margin
-            font.pixelSize: 14
+            Layout.leftMargin: CmnCfg.defaultMargin
+            font.pixelSize: CmnCfg.chatTextSize
         }
     }
 
     Button {
-        Layout.leftMargin: CmnCfg.margin
+        Layout.leftMargin: CmnCfg.defaultMargin
         text: qsTr("Restore From Backup")
     }
 

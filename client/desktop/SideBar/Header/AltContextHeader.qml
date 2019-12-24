@@ -6,14 +6,13 @@ import "../../common" as Common
 import "qrc:/imports/js/utils.mjs" as Utils
 import "qrc:/imports" as Imports
 import "../../SideBar" as SideBar
-import "qrc:/imports/Avatar"
+import "qrc:/imports/Entity"
 import "../popups" as Popups
 import QtGraphicalEffects 1.0
 
 //header component loaded during new group & new contact flow
 Component {
     ToolBar {
-        id: headerBarComponent
         height: CmnCfg.toolbarHeight + 1
         background: Rectangle {
             color: CmnCfg.palette.offBlack
@@ -25,7 +24,7 @@ Component {
                 leftMargin: CmnCfg.smallMargin
                  verticalCenter: parent.verticalCenter
             }
-            spacing: CmnCfg.margin
+            spacing: CmnCfg.defaultMargin
 
             HeaderAvatar {
                 anchors.verticalCenter: parent.verticalCenter

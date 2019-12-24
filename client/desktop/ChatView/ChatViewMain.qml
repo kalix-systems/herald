@@ -106,7 +106,7 @@ Page {
             left: parent.left
             right: parent.right
             bottom: parent.bottom
-            margins: CmnCfg.margin
+            topMargin: CmnCfg.defaultMargin
             bottomMargin: 0
             leftMargin: 0
             rightMargin: 0

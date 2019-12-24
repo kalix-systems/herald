@@ -13,8 +13,8 @@ ColumnLayout {
         StandardLabel {
             text: qsTr("Default message expiration time: ") + expirationMenu.currentSelection
             color: "black"
-            Layout.leftMargin: CmnCfg.margin
-            font.pixelSize: 14
+            Layout.leftMargin: CmnCfg.defaultMargin
+            font.pixelSize: CmnCfg.chatTextSize
         }
 
         ButtonForm {

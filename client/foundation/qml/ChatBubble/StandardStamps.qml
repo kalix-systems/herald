@@ -8,12 +8,12 @@ Row {
     anchors.right: parent.right
     anchors.bottom: parent.bottom
     anchors.margins: CmnCfg.smallMargin
-    anchors.bottomMargin: CmnCfg.margin
+    anchors.bottomMargin: CmnCfg.defaultMargin
     visible: isTail
 
     Button {
         id: clock
-        icon.source: expirationTime !== undefined ? "qrc:/countdown-icon-temp.svg" : ""
+        icon.source: expirationTime !== undefined ? "qrc:/mini-timer-icons/almost-full.svg" : ""
         icon.height: 16
         icon.width: 16
         icon.color: "grey"

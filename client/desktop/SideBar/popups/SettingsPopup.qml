@@ -36,20 +36,16 @@ Window {
             color: CmnCfg.palette.offBlack
             height: CmnCfg.toolbarHeight
 
-            //TODO: excise this row
-            Row {
-                leftPadding: CmnCfg.margin
-                anchors.fill: parent
-                Label {
-                    id: label
-                    text: qsTr("Settings")
-                    color: CmnCfg.palette.white
-                    font.pixelSize: CmnCfg.headerSize
-                    font.family: CmnCfg.labelFont.name
-                    font.bold: true
-                    anchors.verticalCenter: parent.verticalCenter
-                    elide: Label.ElideRight
-                }
+            Label {
+                id: label
+                text: qsTr("Settings")
+                color: CmnCfg.palette.white
+                font.pixelSize: CmnCfg.headerSize
+                font.family: CmnCfg.labelFont.name
+                font.weight: Font.DemiBold
+                anchors.verticalCenter: parent.verticalCenter
+                elide: Label.ElideRight
+                leftPadding: CmnCfg.defaultMargin
             }
 
             Rectangle {
@@ -87,6 +83,7 @@ Window {
         RowLayout {
             anchors.fill: parent
             spacing: 0
+
             Rectangle {
                 id: headersRect
                 Layout.preferredWidth: 250
@@ -95,6 +92,8 @@ Window {
 
                 ListView {
                     anchors.fill: parent
+                    // align with first header in right pane ListView
+                    anchors.topMargin: 2
                     model: settingsModel
                     delegate: Rectangle {
                         height: 40
@@ -103,10 +102,10 @@ Window {
                         StandardLabel {
                             text: name
                             font.family: CmnCfg.labelFont.name
-                            font.bold: true
+                            font.weight: Font.DemiBold
                             anchors.verticalCenter: parent.verticalCenter
                             anchors.left: parent.left
-                            anchors.leftMargin: CmnCfg.margin
+                            anchors.leftMargin: CmnCfg.defaultMargin
                         }
                         MouseArea {
                             id: hover
@@ -125,10 +124,11 @@ Window {
                 Layout.fillHeight: true
                 contentHeight: col.height
                 boundsBehavior: Flickable.StopAtBounds
+
                 Column {
                     id: col
                     spacing: CmnCfg.smallMargin
-                    topPadding: CmnCfg.margin
+                    topPadding: CmnCfg.smallMargin
                     anchors.right: parent.right
                     anchors.left: parent.left
                     SetsComps.SettingsListItem {

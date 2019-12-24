@@ -1,62 +1,46 @@
 import QtQuick 2.13
 import QtQuick.Controls 2.13
 import LibHerald 1.0
-import "qrc:/imports/Avatar"
+import "qrc:/imports/Entity"
 import "qrc:/imports/js/utils.mjs" as Utils
 import "../ChatView" as ChatView
+import "../Common" as Common
 
 Rectangle {
     id: contactItem
 
     // the index corresponding to the visual color of this GroupBox
     property int colorCode: 0
-    property string proxyTitle: title
     property ConversationContent convContent: null
 
-    height: CmnCfg.avatarSize
+    // proxyTitle necessary for passing conversation title to ChatViewMain
+    property string proxyTitle: title
+
+    height: entityBlock.height
     color: CmnCfg.palette.white
 
     // prevent animation spill over
     clip: true
+
     // fill parent width
     anchors {
         left: parent.left
         right: parent.right
     }
 
-    Rectangle {
+    Common.EntityBlock {
+        id: entityBlock
+        anchors.leftMargin: CmnCfg.smallMargin
+        anchors.rightMargin: CmnCfg.smallMargin
 
-        anchors {
-            fill: parent
-            rightMargin: CmnCfg.units.dp(12)
-            leftMargin: CmnCfg.units.dp(12)
-        }
-
-        AvatarMain {
-            id: avatar
-            backgroundColor: CmnCfg.avatarColors[colorCode]
-            anchors.verticalCenter: parent.verticalCenter
-            initials: Utils.initialize(title)
-            size: CmnCfg.units.dp(56)
-            avatarHeight: CmnCfg.units.dp(48)
-            topTextMargin: CmnCfg.units.dp(4)
-            bottomTextMargin: CmnCfg.units.dp(16)
-
-            anchors {
-                right: parent.right
-                left: parent.left
-            }
-
-            labelComponent: ConversationLabel {
-                contactName: title
-                lastBody: convContent.messages.lastBody
-                lastTimestamp: convContent.messages.isEmpty ? "" : Utils.friendlyTimestamp(
-                                                                  convContent.messages.lastTime)
-                lastReceipt: convContent.messages.lastStatus
-                             === undefined ? 0 : convContent.messages.lastStatus
-                labelSize: CmnCfg.labelSize
-            }
-        }
+        entityName: proxyTitle
+        subLabelText: convContent.messages.lastBody
+        timestamp: convContent.messages.isEmpty ? "" : Utils.friendlyTimestamp(
+                                                      convContent.messages.lastTime)
+        lastReceipt: convContent.messages.lastStatus
+                     === undefined ? 0 : convContent.messages.lastStatus
+        color: CmnCfg.avatarColors[contactItem.colorCode]
+        // TODO pfpPath
     }
 
     // background item which gets manipulated

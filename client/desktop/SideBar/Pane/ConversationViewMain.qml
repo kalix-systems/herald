@@ -3,7 +3,7 @@ import LibHerald 1.0
 import QtQuick.Controls 2.13
 import QtQuick.Dialogs 1.3
 import "qrc:/common" as Common
-import "qrc:/imports/Avatar" as Av
+import "qrc:/imports/Entity" as Av
 import "qrc:/imports/js/utils.mjs" as Utils
 import "../../ChatView" as CV
 import ".././js/ContactView.mjs" as JS
@@ -71,7 +71,7 @@ ListView {
             boxTitle: title
             boxColor: conversationData.color
             picture: Utils.safeStringOrDefault(conversationData.picture, "")
-            groupPicture: !conversationData.pairwise
+            isGroupPicture: !conversationData.pairwise
             labelComponent: Av.ConversationLabel {
                 contactName: title
                 lastBody: !convContent.messages.isEmpty ? lastAuthor + ": "
@@ -83,7 +83,7 @@ ListView {
                             !== "" ? CmnCfg.palette.black : CmnCfg.palette.lightGrey
                 secondaryLabelColor: convoRectangle.state
                                      !== "" ? CmnCfg.palette.offBlack : CmnCfg.palette.medGrey
-                labelSize: 14
+                labelFontSize: CmnCfg.entityLabelSize
             }
 
             MouseArea {

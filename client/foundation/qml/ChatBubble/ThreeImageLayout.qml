@@ -11,7 +11,7 @@ Row {
     property var firstImage
     property var secondImage
     property var thirdImage
-    property var imageTappedCallback: function () {
+    property var imageClickedCallBack: function () {
         throw "undefined callback"
     }
 

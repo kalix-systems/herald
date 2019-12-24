@@ -14,9 +14,12 @@ QtObject {
         source: "../Assets/Cairo-Regular.ttf"
     }
 
-    // TODO something about this isn't working, Cairo neer shows up as bold
     property FontLoader cairoDemiBold: FontLoader {
         source: "../Assets/Cairo-DemiBold.ttf"
+    }
+
+    property FontLoader cairoBold: FontLoader {
+        source: "../Assets/Cairo-Bold.ttf"
     }
 
     // TODO not just a chatbubble font, it's the default for the app UI,

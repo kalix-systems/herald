@@ -5,31 +5,52 @@ import QtQuick.Dialogs 1.3
 import "../common" as Common
 import "qrc:/imports/js/utils.mjs" as Utils
 import "../SideBar" as SideBar
-import "qrc:/imports/Avatar"
+import "qrc:/imports/Entity"
 
 // Shared rectangle for displaying contact and conversation items in sidebar
+// conversations lists, search results, and contact selection autocompletion
 Rectangle {
-    property alias conversationItemAvatar: conversationItemAvatar
+    property alias conversationItemAvatar: itemAvatar
     id: bgBox
     color: CmnCfg.palette.offBlack
     anchors.fill: parent
     property string boxTitle
     property int boxColor
-    property alias labelComponent: conversationItemAvatar.labelComponent
+    property Component labelComponent
     property string picture
-    property bool groupPicture: false
+    property bool isGroupPicture: false
+    property bool isMessageResult: false
 
-    AvatarMain {
-        anchors.fill: parent
-        id: conversationItemAvatar
-        backgroundColor: CmnCfg.avatarColors[boxColor]
+    property int topTextMargin: CmnCfg.smallMargin
+    property int bottomTextMargin: isMessageResult ? CmnCfg.smallMargin : CmnCfg.defaultMargin
+
+
+    Avatar {
+        id: itemAvatar
+        anchors {
+            left: parent.left
+            verticalCenter: parent.verticalCenter
+            leftMargin: CmnCfg.smallMargin
+        }
+        color: CmnCfg.avatarColors[boxColor]
         initials: boxTitle[0].toUpperCase()
         pfpPath: Utils.safeStringOrDefault(picture)
+        isGroup: isGroupPicture
+    }
+
+    Loader {
+        id: conversationItemLabel
         anchors {
-            margins: 6
+            leftMargin: CmnCfg.defaultMargin
+            rightMargin: CmnCfg.defaultMargin
+            topMargin: topTextMargin
+            bottomMargin: bottomTextMargin
+            left: itemAvatar.right
+            right: parent.right
+            top: parent.top
+            bottom: parent.bottom
         }
-        groupAvatar: groupPicture
-        avatarHeight: groupAvatar ? 40 : 44
+        sourceComponent: bgBox.labelComponent
     }
 
     states: [

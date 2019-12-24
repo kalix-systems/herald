@@ -3,7 +3,7 @@ import QtQuick.Controls 2.13
 import LibHerald 1.0
 import QtQuick.Layouts 1.12
 import "../../../common" as Common
-import "qrc:/imports/Avatar" as Av
+import "qrc:/imports/Entity" as Av
 import "qrc:/imports/js/utils.mjs" as Utils
 import QtQml 2.13
 
@@ -15,6 +15,7 @@ Column {
         leftPadding: 12
         color: CmnCfg.palette.white
         placeholderText: qsTr("Add members")
+        width: parent.width - CmnCfg.megaMargin
         onTextChanged: {
             Herald.usersSearch.filter = groupSelectText.text
             contactPopup.popup.open()
@@ -23,7 +24,7 @@ Column {
 
     Rectangle {
         height: 1
-        width: parent.width - CmnCfg.largeMargin
+        width: parent.width - CmnCfg.megaMargin
         anchors.horizontalCenter: parent.horizontalCenter
         color: CmnCfg.palette.lightGrey
     }
@@ -31,7 +32,7 @@ Column {
     ComboBox {
         id: contactPopup
         model: Herald.usersSearch
-        width: parent.width - CmnCfg.largeMargin
+        width: parent.width - CmnCfg.megaMargin
         anchors.horizontalCenter: parent.horizontalCenter
         height: CmnCfg.smallMargin / 2
 
@@ -66,7 +67,7 @@ Column {
                 labelComponent: Av.ConversationLabel {
                     contactName: contactData.name
                     labelColor: CmnCfg.palette.white
-                    labelSize: 14
+                    labelFontSize: 14
                     lastBody: "@" + contactData.userId
                 }
                 states: []

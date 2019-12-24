@@ -4,7 +4,7 @@ import QtQuick.Layouts 1.12
 import LibHerald 1.0
 
 Row {
-    spacing: CmnCfg.smallMargin / 2
+    spacing: CmnCfg.microMargin
     Label {
         id: authorLabel
         text: authorNameTM.elidedText
@@ -36,7 +36,7 @@ Row {
 
     Button {
         id: clock
-        icon.source: expirationTime !== undefined ? "qrc:/countdown-icon-temp.svg" : ""
+        icon.source: expirationTime !== undefined ? "qrc:/mini-timer-icons/almost-full.svg" : ""
         icon.height: 16
         icon.width: 16
         icon.color: "grey"

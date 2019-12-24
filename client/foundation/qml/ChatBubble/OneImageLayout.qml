@@ -9,7 +9,7 @@ Row {
     height: image.height
     property var firstImage
     property var aspectRatio: firstImage.width / firstImage.height
-    property var imageTappedCallback: function () {
+    property var imageClickedCallBack: function () {
         throw "undefined callback"
     }
 
@@ -24,7 +24,7 @@ Row {
         asynchronous: true
 
         MouseArea {
-            onClicked: imageClickedCallBack(wrapperRow.source)
+            onClicked: wrapperRow.imageClickedCallBack(image.source)
             anchors.fill: parent
         }
     }

@@ -19,11 +19,11 @@ Component {
             id: searchToolBar
             anchors.horizontalCenter: parent.horizontalCenter
 
-            spacing: CmnCfg.smallMargin / 2
+            spacing: CmnCfg.microMargin
 
             anchors {
-                leftMargin: CmnCfg.margin
-                rightMargin: CmnCfg.margin
+                leftMargin: CmnCfg.defaultMargin
+                rightMargin: CmnCfg.defaultMargin
             }
 
             //main search component

@@ -6,25 +6,32 @@ import QtGraphicalEffects 1.0
 Item {
     id: wrapperItem
 
-    property string pfpUrl
-    property bool groupAvatar: false
+    property bool isGroup: false
+    property string pfpPath
+
     property color color
+    property real size: CmnCfg.avatarSize
     property color textColor: CmnCfg.palette.iconFill
     property string initials
-    property real avatarHeight: parent.avatarHeight
+
+    // group avatars ar 4px smaller and have extra horizontal margin
+    property int groupSize: size - 4
+
+    height: size
+    width:  height
 
     Loader {
         id: iconLoader
-        sourceComponent: pfpUrl === "" ? textAvatar : imageAvatar
+        sourceComponent: pfpPath === "" ? textAvatar : imageAvatar
         anchors.fill: parent
     }
 
     Component {
         id: textAvatar
         Rectangle {
-            height: parent.height
+            height: isGroup ? groupSize : size
             width: height
-            radius: groupAvatar ? 0 : width
+            radius: isGroup ? 0 : width
             color: wrapperItem.color
             Text {
                 text: initials
@@ -41,12 +48,12 @@ Item {
         id: imageAvatar
         Rectangle {
             color: CmnCfg.palette.offBlack
-            height: parent.height
+            height: isGroup ? groupSize : size
             width: height
-            radius: groupAvatar ? 0 : width
+            radius: isGroup ? 0 : width
             id: mask
             Image {
-                source: JS.safeToQrcURI(pfpUrl)
+                source: JS.safeToQrcURI(pfpPath)
                 anchors.fill: mask
                 layer.enabled: true
                 layer.effect: OpacityMask {

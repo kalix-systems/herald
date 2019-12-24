@@ -18,8 +18,8 @@ ToolBar {
     RowLayout {
         anchors {
             fill: parent
-            rightMargin: CmnCfg.margin
-            leftMargin: CmnCfg.margin
+            rightMargin: CmnCfg.defaultMargin
+            leftMargin: CmnCfg.defaultMargin
         }
 
         IconButton {
@@ -40,7 +40,7 @@ ToolBar {
                 font {
                     pixelSize: CmnCfg.headerTextSize
                     family: CmnCfg.labelFont.name
-                    bold: true
+                    weight: Font.DemiBold
                 }
 
                 anchors.verticalCenter: parent.verticalCenter

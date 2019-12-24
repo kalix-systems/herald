@@ -10,7 +10,7 @@ TextEdit {
     color: CmnCfg.palette.offBlack
     Layout.leftMargin: CmnCfg.smallMargin
     Layout.rightMargin: CmnCfg.smallMargin
-    Layout.bottomMargin: CmnCfg.smallPadding
+    Layout.bottomMargin: CmnCfg.smallMargin
     selectByMouse: false
     selectByKeyboard: false
     readOnly: true

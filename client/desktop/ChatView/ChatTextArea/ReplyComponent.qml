@@ -28,8 +28,8 @@ Rectangle {
         width: parent.width
         font.family: CmnCfg.chatFont.name
         font.weight: Font.Bold
-        padding: CmnCfg.smallMargin / 4
-        leftPadding: CmnCfg.smallMargin / 2
+        padding: 2
+        leftPadding: CmnCfg.microMargin
 
         color: CmnCfg.palette.white
         text: Herald.users.nameById(ownedConversation.builder.opAuthor)

@@ -3,7 +3,7 @@ import QtQuick.Layouts 1.12
 import QtQuick 2.14
 import LibHerald 1.0
 import "qrc:/imports/ChatBubble" as CB
-import "qrc:/imports/Avatar"
+import "qrc:/imports/Entity"
 import "." as CVUtils
 import "qrc:/imports/js/utils.mjs" as Utils
 import "../../SideBar/js/ContactView.mjs" as CUtils
@@ -41,7 +41,7 @@ ListView {
 
     ScrollBar.vertical: ScrollBar {
         id: chatScrollBarInner
-        width: CmnCfg.padding
+        width: CmnCfg.smallMargin
 
         policy: ScrollBar.AsNeeded
         hoverEnabled: true
@@ -78,6 +78,14 @@ ListView {
         selectFolder: true
         folder: StandardPaths.writableLocation(StandardPaths.DesktopLocation)
         onAccepted: Herald.utils.saveFile(filePath, fileUrl)
+        selectExisting: false
+    }
+
+    FileDialog {
+        id: downloadFileChooser
+        selectFolder: true
+        folder: StandardPaths.writableLocation(StandardPaths.DesktopLocation)
+        onAccepted: ownedConversation.saveAllAttachments(index, fileUrl)
         selectExisting: false
     }
 

@@ -7,7 +7,7 @@ import "./Controls"
 import "../Common"
 import QtGraphicalEffects 1.0
 import Qt.labs.platform 1.0
-import "qrc:/imports/Avatar"
+import "qrc:/imports/Entity"
 import "qrc:/imports/js/utils.mjs" as Utils
 import "GroupFlowComponents"
 
@@ -43,7 +43,7 @@ Page {
                     id: stateLabel
                     text: qsTr("New group")
                     font {
-                        pixelSize: CmnCfg.chatPreviewSize
+                        pixelSize: CmnCfg.headerTextSize
                         family: CmnCfg.labelFont.name
                     }
                     anchors.verticalCenter: parent.verticalCenter
@@ -75,7 +75,7 @@ Page {
 
     Button {
         anchors.top: groupSelectText.bottom
-        anchors.topMargin: CmnCfg.margin / 2
+        anchors.topMargin: CmnCfg.defaultMargin / 2
         anchors.right: parent.right
         anchors.rightMargin: CmnCfg.units.dp(28)
 
