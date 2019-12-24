@@ -62,9 +62,15 @@ Page {
         onSelected: {
             if (!risen) {
                 risen = true
-
+                print("current csv height: ", chatScrollView.height,
+                      " cta height : ", chatTextArea.height,
+                      "keyb rect dims: w: ",
+                      Qt.inputMethod.keyboardRectangle.width, " h: ",
+                      Qt.inputMethod.keyboardRectangle.height, " x:",
+                      Qt.inputMethod.keyboardRectangle.x, "y: ",
+                      Qt.inputMethod.keyboardRectangle.y)
                 chatScrollView.height = chatScrollView.height
-                        - Qt.inputMethod.keyboardRectangle.height
+                        - Qt.inputMethod.keyboardRectangle.height - chatTextArea.height - 1
                 select()
             }
         }
