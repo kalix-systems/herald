@@ -88,7 +88,7 @@ Rectangle {
                        }
     }
 
-    Imports.ButtonForm {
+    Imports.IconButton {
         id: exitButton
         anchors {
             right: parent.right

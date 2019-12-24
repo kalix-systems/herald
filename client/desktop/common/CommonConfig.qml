@@ -18,6 +18,7 @@ Item {
     /// edge rounding for all rectangles that use the radius property
     readonly property int radius: 10
 
+
     // MARGINS & SPACING
 
     /// standard margin size used to interior objects
@@ -27,16 +28,25 @@ Item {
     readonly property int largeMargin: 16
     readonly property int megaMargin: 24
 
+
     // FONTS
     readonly property FontLoader chatFont: metaTheme.chatFont
     readonly property FontLoader labelFont: metaTheme.cairo
 
+    // default font for basic UI text
+    readonly property font defaultFont: Qt.font({
+        family: chatFont.name,
+        pixelSize: 14
+    })
+
+    // default font for text in top bar headers
     readonly property font headerBarFont: Qt.font({
         family: labelFont.name,
         weight: Font.DemiBold,
         letterSpacing: 1,
         pixelSize: 16
     })
+
 
     /// standard chat text size
     readonly property int chatTextSize: 12

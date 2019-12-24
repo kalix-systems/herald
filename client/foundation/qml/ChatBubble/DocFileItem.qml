@@ -25,7 +25,7 @@ ListView {
     delegate: Row {
         spacing: CmnCfg.smallMargin / 2
 
-        ButtonForm {
+        IconButton {
             id: downloadIcon
             icon.source: "qrc:/file-download-icon.svg"
             icon.height: 20

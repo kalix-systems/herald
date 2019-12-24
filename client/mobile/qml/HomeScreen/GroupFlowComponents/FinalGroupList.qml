@@ -28,7 +28,7 @@ ListView {
             // TODO pfpPath
         }
 
-        IconButton {
+        AnimIconButton {
             id: xIcon
             anchors.right: parent.right
             anchors.rightMargin: CmnCfg.defaultMargin / 2

@@ -4,13 +4,13 @@ import QtQuick.Layouts 1.12
 import QtQuick.Dialogs 1.3
 import LibHerald 1.0
 import "../../../common" as CMN
-import "qrc:/imports"
+import "qrc:/imports" as Imports
 
 ColumnLayout {
 
     RowLayout {
         Layout.fillWidth: true
-        StandardLabel {
+        Imports.StandardLabel {
             text: qsTr("Theme")
             color: "black"
             Layout.leftMargin: CmnCfg.defaultMargin
@@ -48,7 +48,7 @@ ColumnLayout {
             Keys.onEscapePressed: submissionCol.visible = false
         }
 
-        StandardLabel {
+        Imports.StandardLabel {
             color: "black"
             text: qsTr("Current display name: ") + (Herald.config.name)
             Layout.leftMargin: CmnCfg.defaultMargin
@@ -61,12 +61,11 @@ ColumnLayout {
         Layout.leftMargin: CmnCfg.defaultMargin
         visible: false
 
-        TextArea {
+        Imports.BorderedTextField {
             id: displayNameArea
-            placeholderText: qsTr("Enter New Display Name...")
-            background: Rectangle {
-                color: CmnCfg.palette.lightGrey
-            }
+            placeholderText: qsTr("Enter new display name")
+            color: CmnCfg.palette.black
+            borderColor: CmnCfg.palette.black
         }
 
         Button {

@@ -41,7 +41,7 @@ MouseArea {
             spacing: CmnCfg.defaultMargin
             rightPadding: CmnCfg.smallMargin
 
-            Imports.ButtonForm {
+            Imports.IconButton {
                 id: replyButton
                 visible: chatBubbleHitbox.containsMouse
                 anchors {
@@ -70,7 +70,7 @@ MouseArea {
             //            spacing: 0
             //            padding: 0
             //        }
-            Imports.ButtonForm {
+            Imports.IconButton {
                 id: downloadButton
                 visible: chatBubbleHitbox.containsMouse && download
                 anchors {
@@ -82,7 +82,7 @@ MouseArea {
                 onClicked: downloadFileChooser.open()
             }
 
-            Imports.ButtonForm {
+            Imports.IconButton {
                 id: messageOptionsButton
                 visible: chatBubbleHitbox.containsMouse
 

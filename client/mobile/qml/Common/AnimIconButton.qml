@@ -3,6 +3,7 @@ import QtQuick 2.12
 import QtQuick.Layouts 1.12
 import LibHerald 1.0
 
+// TODO this should use IconButton in foundation
 ToolButton {
 
     property var tapCallback: function anon() {

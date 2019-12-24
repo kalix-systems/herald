@@ -8,31 +8,25 @@ import "../../Common"
 import QtGraphicalEffects 1.0
 import Qt.labs.platform 1.0
 import "qrc:/imports/Entity"
+import "qrc:/imports" as Imports
 import "qrc:/imports/js/utils.mjs" as Utils
 
 Column {
-
     topPadding: CmnCfg.units.dp(24)
     Component.onCompleted: Herald.usersSearch.refresh()
     width: mainView.width - CmnCfg.megaMargin * 2
-    anchors.top: bigDivider.bottom
-    anchors.horizontalCenter: parent.horizontalCenter
 
-    TextArea {
+    Imports.BorderedTextField {
         id: groupSelectText
-        leftPadding: 0
         placeholderText: qsTr("Add members")
         onTextChanged: {
             Herald.usersSearch.filter = groupSelectText.text
             contactPopup.popup.open()
         }
-    }
-
-    Rectangle {
-        id: groupSelectTextUnderline
-        height: 1
-        width: parent.width
-        color: "black"
+        anchors.left: parent.left
+        anchors.right: parent.right
+        color: CmnCfg.palette.black
+        borderColor: CmnCfg.palette.black
     }
 
     ComboBox {

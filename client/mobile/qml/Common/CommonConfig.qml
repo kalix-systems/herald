@@ -53,6 +53,12 @@ Item {
     readonly property FontLoader chatFont: metaTheme.chatFont
     readonly property FontLoader labelFont: metaTheme.cairo
 
+    // default font for basic UI text
+    readonly property font defaultFont: Qt.font({
+        family: chatFont.name,
+        pixelSize: units.dp(17)
+    })
+
 
     // STANDARD COMPONENT SIZES
 

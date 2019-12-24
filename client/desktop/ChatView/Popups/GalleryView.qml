@@ -61,7 +61,7 @@ Popup {
         height: 30
         spacing: CmnCfg.smallMargin
 
-        ButtonForm {
+        IconButton {
             id: xIcon
             source: "qrc:/x-icon.svg"
             icon.height: 30
@@ -74,7 +74,7 @@ Popup {
             }
         }
 
-        ButtonForm {
+        IconButton {
             id: download
             source: "qrc:/download-icon.svg"
             fill: CmnCfg.palette.white
@@ -116,7 +116,7 @@ Popup {
         height: 30
         spacing: CmnCfg.smallMargin
 
-        ButtonForm {
+        IconButton {
             id: zoomIn
             source: "qrc:/plus-icon.svg"
             action: zoomAction
@@ -127,7 +127,7 @@ Popup {
             opacity: enabled ? 1.0 : 0.5
             z: galleryPopup.z + 1
         }
-        ButtonForm {
+        IconButton {
             id: zoomOut
             source: "qrc:/minus-icon.svg"
             action: zoomOutAction
@@ -140,7 +140,7 @@ Popup {
         }
     }
 
-    ButtonForm {
+    IconButton {
         id: next
         z: galleryPopup.z + 1
         icon.height: 30
@@ -158,7 +158,7 @@ Popup {
         }
     }
 
-    ButtonForm {
+    IconButton {
         id: back
         z: galleryPopup.z + 1
         icon.height: 30

@@ -12,9 +12,10 @@
         <file alias="/Assets/Jura-Bold.ttf">../Assets/Jura-Bold.ttf</file>
         <file alias="/Assets/Jura-Regular.ttf">../Assets/Jura-Regular.ttf</file>
         <file alias="/Assets/Monoid-Regular.ttf">../Assets/Monoid-Regular.ttf</file>
+        <file>BorderedTextField.qml</file>
         <file>Entity/Avatar.qml</file>
         <file>Entity/ConversationLabel.qml</file>
-        <file>ButtonForm.qml</file>
+        <file>IconButton.qml</file>
         <file>ChatBubble/AttachmentContent.qml</file>
         <file>ChatBubble/ChatBubble.qml</file>
         <file>ChatBubble/Highlight.qml</file>
@@ -42,6 +43,7 @@
         <file>ChatBubble/StandardTextEdit.qml</file>
         <file>ChatBubble/ThreeImageLayout.qml</file>
         <file>ChatBubble/TwoImageLayout.qml</file>
+        <file>NewGroupFlow/GroupImageSelector.qml</file>
         <file>StandardCombo.qml</file>
         <file>StandardLabel.qml</file>
         <file>TimerOptions.qml</file>
@@ -57,4 +59,5 @@
         <file>themes/SolarizedLight.qml</file>
         <file>ChatBubble/ReplyBubble/dyn/ReplyBackground.qml</file>
     </qresource>
+
 </RCC>
