@@ -7,7 +7,7 @@ import "../popups/js/NewContactDialogue.mjs" as JS
 import "../../SideBar" as SBUtils
 import QtGraphicalEffects 1.0
 import Qt.labs.platform 1.0
-import "qrc:/imports/Avatar"
+import "qrc:/imports/Entity"
 import "qrc:/imports" as Imports
 import "qrc:/imports/js/utils.mjs" as Utils
 

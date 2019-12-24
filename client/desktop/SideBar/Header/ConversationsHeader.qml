@@ -7,7 +7,7 @@ import "../../common" as Common
 import "qrc:/imports/js/utils.mjs" as Utils
 import "qrc:/imports" as Imports
 import "../../SideBar" as SideBar
-import "qrc:/imports/Avatar"
+import "qrc:/imports/Entity"
 import QtGraphicalEffects 1.0
 import Qt.labs.platform 1.0
 

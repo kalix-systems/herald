@@ -1,7 +1,7 @@
 import QtQuick 2.13
 import QtQuick.Controls 2.13
 import LibHerald 1.0
-import "qrc:/imports/Avatar"
+import "qrc:/imports/Entity"
 import "qrc:/imports/js/utils.mjs" as Utils
 import "../ChatView" as ChatView
 import "../Common" as Common
@@ -11,69 +11,37 @@ Rectangle {
 
     // the index corresponding to the visual color of this GroupBox
     property int colorCode: 0
-    //property string proxyTitle: title
     property ConversationContent convContent: null
 
-    property real topTextMargin: 2
-    property real bottomTextMargin: 6
+    // proxyTitle necessary for passing conversation title to ChatViewMain
+    property string proxyTitle: title
 
-    height: CmnCfg.avatarSize
+    height: entityBlock.height
     color: CmnCfg.palette.white
 
     // prevent animation spill over
     clip: true
+
     // fill parent width
     anchors {
         left: parent.left
         right: parent.right
-        //fill: parent
     }
 
     Common.EntityBlock {
-        entityName: title
-         subLabelText: convContent.messages.lastBody
-         timestamp: convContent.messages.isEmpty ? "" : Utils.friendlyTimestamp(
-                                                       convContent.messages.lastTime)
+        id: entityBlock
+        anchors.leftMargin: CmnCfg.smallMargin
+        anchors.rightMargin: CmnCfg.smallMargin
+
+        entityName: proxyTitle
+        subLabelText: convContent.messages.lastBody
+        timestamp: convContent.messages.isEmpty ? "" : Utils.friendlyTimestamp(
+                                                      convContent.messages.lastTime)
         lastReceipt: convContent.messages.lastStatus
                      === undefined ? 0 : convContent.messages.lastStatus
         color: CmnCfg.avatarColors[contactItem.colorCode]
+        // TODO pfpPath
     }
-
-//    Avatar {
-//        id: itemAvatar
-//        anchors {
-//            left: parent.left
-//            verticalCenter: parent.verticalCenter
-//            leftMargin: CmnCfg.smallMargin
-//        }
-//        color: CmnCfg.avatarColors[colorCode]
-//        initials: Utils.initialize(title)
-//        diameter: CmnCfg.units.dp(48)
-//        isGroup: false
-//        // TODO pfpPath
-//    }
-
-//    ConversationLabel {
-//        anchors {
-//            left: itemAvatar.right
-//            right: parent.right
-//            top: parent.top
-//            bottom: parent.bottom
-//            leftMargin: CmnCfg.defaultMargin
-//            rightMargin: CmnCfg.defaultMargin
-//            topMargin: topTextMargin
-//            bottomMargin: bottomTextMargin
-
-//        }
-
-//        contactName: title
-//        lastBody: convContent.messages.lastBody
-//        lastTimestamp: convContent.messages.isEmpty ? "" : Utils.friendlyTimestamp(
-//                                                          convContent.messages.lastTime)
-//        lastReceipt: convContent.messages.lastStatus
-//                     === undefined ? 0 : convContent.messages.lastStatus
-//        labelFontSize: CmnCfg.labelSize
-//    }
 
     // background item which gets manipulated
     // during the on tap animation

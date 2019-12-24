@@ -7,16 +7,17 @@ import "./../Controls"
 import "../../Common"
 import QtGraphicalEffects 1.0
 import Qt.labs.platform 1.0
-import "qrc:/imports/Avatar"
+import "qrc:/imports/Entity"
 import "qrc:/imports/js/utils.mjs" as Utils
 
 Column {
 
     topPadding: CmnCfg.units.dp(24)
     Component.onCompleted: Herald.usersSearch.refresh()
-    width: mainView.width - CmnCfg.units.dp(56)
+    width: mainView.width - CmnCfg.megaMargin * 2
     anchors.top: bigDivider.bottom
     anchors.horizontalCenter: parent.horizontalCenter
+
     TextArea {
         id: groupSelectText
         leftPadding: 0
@@ -28,6 +29,7 @@ Column {
     }
 
     Rectangle {
+        id: groupSelectTextUnderline
         height: 1
         width: parent.width
         color: "black"
@@ -38,7 +40,7 @@ Column {
         model: Herald.usersSearch
         width: parent.width
         anchors.horizontalCenter: parent.horizontalCenter
-        height: CmnCfg.units.dp(6)
+        height: 1
         leftPadding: CmnCfg.defaultMargin
 
         background: Rectangle {
@@ -50,7 +52,7 @@ Column {
         }
         delegate: Rectangle {
             property var contactData: model
-            height: visible ? CmnCfg.units.dp(48) : 0
+            height: visible ? entityBlock.height : 0 //CmnCfg.units.dp(48) : 0
             width: parent.width
             visible: matched && contactData.userId !== Herald.config.configId
             anchors {
@@ -58,25 +60,15 @@ Column {
                 leftMargin: CmnCfg.units.dp(12)
             }
 
-            AvatarMain {
-                id: avatar
-                backgroundColor: CmnCfg.palette.avatarColors[contactData.color]
-                anchors.verticalCenter: parent.verticalCenter
-                initials: Utils.initialize(contactData.name)
-                size: CmnCfg.units.dp(48)
-                avatarDiameter: CmnCfg.units.dp(48)
+            EntityBlock {
+                id: entityBlock
+                entityName: contactData.name
+                subLabelText: '@' + contactData.userId
+                color: CmnCfg.avatarColors[contactData.color]
+                // TODO pfpPath
 
-                anchors {
-                    right: parent.right
-                    left: parent.left
-                    leftMargin: CmnCfg.units.dp(12)
-                }
-
-                labelComponent: ConversationLabel {
-                    contactName: contactData.name
-                    labelColor: CmnCfg.palette.black
-                    lastBody: "@" + contactData.userId
-                }
+                anchors.leftMargin: CmnCfg.smallMargin
+                anchors.rightMargin: CmnCfg.smallMargin
             }
 
             TapHandler {

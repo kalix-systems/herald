@@ -42,6 +42,10 @@ Item {
     readonly property int chatTextSize: 12
     /// standard header size
     readonly property int headerSize: 16
+    /// size for contact/group name labels in lists
+    readonly property int entityLabelSize: 14
+    /// size for contact/group name labels in lists
+    readonly property int entitySubLabelSize: 13
 
 
     // STANDARD COMPONENT SIZES

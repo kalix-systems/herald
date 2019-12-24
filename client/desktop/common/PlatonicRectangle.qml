@@ -5,7 +5,7 @@ import QtQuick.Dialogs 1.3
 import "../common" as Common
 import "qrc:/imports/js/utils.mjs" as Utils
 import "../SideBar" as SideBar
-import "qrc:/imports/Avatar"
+import "qrc:/imports/Entity"
 
 // Shared rectangle for displaying contact and conversation items in sidebar
 // conversations lists, search results, and contact selection autocompletion

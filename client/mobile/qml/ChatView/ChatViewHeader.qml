@@ -40,7 +40,7 @@ ToolBar {
                 font {
                     pixelSize: CmnCfg.headerTextSize
                     family: CmnCfg.labelFont.name
-                    bold: true
+                    weight: Font.DemiBold
                 }
 
                 anchors.verticalCenter: parent.verticalCenter

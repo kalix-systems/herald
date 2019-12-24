@@ -5,7 +5,7 @@ import QtQuick.Layouts 1.12
 import "../../common" as Common
 import QtGraphicalEffects 1.0
 import Qt.labs.platform 1.0
-import "qrc:/imports/Avatar"
+import "qrc:/imports/Entity"
 import "qrc:/imports/js/utils.mjs" as Utils
 
 Avatar {

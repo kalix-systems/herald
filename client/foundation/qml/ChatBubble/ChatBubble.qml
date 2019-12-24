@@ -4,7 +4,7 @@ import QtQuick.Controls 2.13
 import LibHerald 1.0
 import "./ReplyBubble"
 import "../js/utils.mjs" as Utils
-import "../Avatar"
+import "../Entity"
 
 Rectangle {
     id: bubbleRoot

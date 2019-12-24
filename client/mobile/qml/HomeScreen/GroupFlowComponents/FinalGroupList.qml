@@ -7,7 +7,7 @@ import "./../Controls"
 import "../../Common"
 import QtGraphicalEffects 1.0
 import Qt.labs.platform 1.0
-import "qrc:/imports/Avatar"
+import "qrc:/imports/Entity"
 import "qrc:/imports/js/utils.mjs" as Utils
 
 ListView {
@@ -16,30 +16,16 @@ ListView {
     model: Herald.conversationBuilder
 
     delegate: Rectangle {
-        height: CmnCfg.units.dp(48)
+        height: entityBlock.height
         width: parent.width
 
-        AvatarMain {
-            id: contactAvatar
-            backgroundColor: CmnCfg.palette.avatarColors[Herald.users.colorById(
-                                                       memberId)]
-            anchors.verticalCenter: parent.verticalCenter
-            initials: Utils.initialize(Herald.users.nameById(memberId))
-            size: CmnCfg.units.dp(36)
-            avatarDiameter: CmnCfg.units.dp(36)
-
-            anchors {
-                right: parent.right
-                left: parent.left
-                leftMargin: CmnCfg.units.dp(12)
-            }
-
-            labelComponent: ConversationLabel {
-                contactName: Herald.users.nameById(memberId)
-                labelColor: CmnCfg.palette.offBlack
-                labelFontSize: 14
-                lastBody: "@" + memberId
-            }
+        EntityBlock {
+            id: entityBlock
+            entityName: Herald.users.nameById(memberId)
+            subLabelText: '@' + memberId
+            color: CmnCfg.palette.avatarColors[Herald.users.colorById(
+                                                   memberId)]
+            // TODO pfpPath
         }
 
         IconButton {

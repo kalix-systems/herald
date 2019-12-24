@@ -5,7 +5,7 @@ import LibHerald 1.0
 import QtQuick.Dialogs 1.3
 import Qt.labs.platform 1.0
 import "qrc:/imports" as Imports
-import "qrc:/imports/Avatar"
+import "qrc:/imports/Entity"
 import "qrc:/imports/js/utils.mjs" as Utils
 import "../../common" as Common
 

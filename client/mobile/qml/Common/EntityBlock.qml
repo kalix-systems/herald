@@ -1,15 +1,17 @@
 import QtQuick 2.13
 import QtQuick.Controls 2.13
 import LibHerald 1.0
-import "qrc:/imports/Avatar"
+import "qrc:/imports/Entity"
 import "qrc:/imports/js/utils.mjs" as Utils
 import "../ChatView" as ChatView
 
 /// Displays an entity (user or group) avatar, name, and optional extra
-/// information (username or message snippet)
+/// information (username or message snippet).
 Rectangle {
     id: entityItem
 
+    // path to the user's profile picture, if one is set
+    property string pfpPath
     // the name of the entity, displayed as the top label
     property string entityName: ''
     // the lower line(s) of text to display under the entity name
@@ -21,18 +23,16 @@ Rectangle {
     // the index corresponding to the visual color of this entity
     property string color
 
-    property real topTextMargin: 4
-    property real bottomTextMargin: 3
+    property real topTextMargin: CmnCfg.units.dp(8)
+    property real bottomTextMargin: CmnCfg.units.dp(16)
     property bool isGroup: false
 
-    //height: CmnCfg.avatarSize + topTextMargin + bottomTextMargin
     color: CmnCfg.palette.white
+    height: itemAvatar.diameter + 2 * CmnCfg.smallMargin
 
-    // fill parent width
     anchors {
-        //left: parent.left
-        //right: parent.right
-        fill: parent
+        left: parent.left
+        right: parent.right
     }
 
     Avatar {
@@ -40,13 +40,12 @@ Rectangle {
         anchors {
             left: parent.left
             verticalCenter: parent.verticalCenter
-            leftMargin: CmnCfg.smallMargin
         }
+        pfpPath: entityItem.pfpPath
         color: entityItem.color
-        initials: Utils.initialize(title)
+        initials: Utils.initialize(entityName)
         diameter: CmnCfg.units.dp(48)
         isGroup: entityItem.isGroup
-        // TODO pfpPath
     }
 
     ConversationLabel {
@@ -56,7 +55,6 @@ Rectangle {
             top: parent.top
             bottom: parent.bottom
             leftMargin: CmnCfg.defaultMargin
-            rightMargin: CmnCfg.defaultMargin
             topMargin: topTextMargin
             bottomMargin: bottomTextMargin
 
