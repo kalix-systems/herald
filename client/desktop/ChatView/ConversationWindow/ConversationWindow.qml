@@ -67,7 +67,6 @@ ListView {
         model.setElisionCharCount(38 * 40)
         model.setElisionCharsPerLine(40)
 
-        chatScrollBarInner.setPosition(1.0)
         cacheBuffer = chatListView.height * 5
     }
 
