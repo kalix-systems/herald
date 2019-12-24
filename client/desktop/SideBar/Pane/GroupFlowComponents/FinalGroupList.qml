@@ -10,8 +10,14 @@ import QtQml 2.13
 
 ListView {
     height: contentHeight
-    width: parent.width
+    //width: parent.width
     model: Herald.conversationBuilder
+
+    anchors {
+        left: parent.left
+        right: parent.right
+        leftMargin: CmnCfg.microMargin
+    }
 
     delegate: Item {
         id: memberItem
@@ -20,8 +26,8 @@ ListView {
         width: parent.width
 
         Common.PlatonicRectangle {
-            color: CmnCfg.palette.offBlack
             id: memberRectangle
+            color: CmnCfg.palette.offBlack
             boxColor: memberColor
             boxTitle: memberName
             picture: memberProfilePicture
