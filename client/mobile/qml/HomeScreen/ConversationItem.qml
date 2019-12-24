@@ -4,14 +4,18 @@ import LibHerald 1.0
 import "qrc:/imports/Avatar"
 import "qrc:/imports/js/utils.mjs" as Utils
 import "../ChatView" as ChatView
+import "../Common" as Common
 
 Rectangle {
     id: contactItem
 
     // the index corresponding to the visual color of this GroupBox
     property int colorCode: 0
-    property string proxyTitle: title
+    //property string proxyTitle: title
     property ConversationContent convContent: null
+
+    property real topTextMargin: 2
+    property real bottomTextMargin: 6
 
     height: CmnCfg.avatarSize
     color: CmnCfg.palette.white
@@ -22,42 +26,54 @@ Rectangle {
     anchors {
         left: parent.left
         right: parent.right
+        //fill: parent
     }
 
-    Rectangle {
-
-        anchors {
-            fill: parent
-            rightMargin: CmnCfg.units.dp(12)
-            leftMargin: CmnCfg.units.dp(12)
-        }
-
-        AvatarMain {
-            id: avatar
-            backgroundColor: CmnCfg.avatarColors[colorCode]
-            anchors.verticalCenter: parent.verticalCenter
-            initials: Utils.initialize(title)
-            size: CmnCfg.units.dp(56)
-            avatarDiameter: CmnCfg.units.dp(48)
-            topTextMargin: CmnCfg.units.dp(4)
-            bottomTextMargin: CmnCfg.units.dp(16)
-
-            anchors {
-                right: parent.right
-                left: parent.left
-            }
-
-            labelComponent: ConversationLabel {
-                contactName: title
-                lastBody: convContent.messages.lastBody
-                lastTimestamp: convContent.messages.isEmpty ? "" : Utils.friendlyTimestamp(
-                                                                  convContent.messages.lastTime)
-                lastReceipt: convContent.messages.lastStatus
-                             === undefined ? 0 : convContent.messages.lastStatus
-                labelFontSize: CmnCfg.labelSize
-            }
-        }
+    Common.EntityBlock {
+        entityName: title
+         subLabelText: convContent.messages.lastBody
+         timestamp: convContent.messages.isEmpty ? "" : Utils.friendlyTimestamp(
+                                                       convContent.messages.lastTime)
+        lastReceipt: convContent.messages.lastStatus
+                     === undefined ? 0 : convContent.messages.lastStatus
+        color: CmnCfg.avatarColors[contactItem.colorCode]
     }
+
+//    Avatar {
+//        id: itemAvatar
+//        anchors {
+//            left: parent.left
+//            verticalCenter: parent.verticalCenter
+//            leftMargin: CmnCfg.smallMargin
+//        }
+//        color: CmnCfg.avatarColors[colorCode]
+//        initials: Utils.initialize(title)
+//        diameter: CmnCfg.units.dp(48)
+//        isGroup: false
+//        // TODO pfpPath
+//    }
+
+//    ConversationLabel {
+//        anchors {
+//            left: itemAvatar.right
+//            right: parent.right
+//            top: parent.top
+//            bottom: parent.bottom
+//            leftMargin: CmnCfg.defaultMargin
+//            rightMargin: CmnCfg.defaultMargin
+//            topMargin: topTextMargin
+//            bottomMargin: bottomTextMargin
+
+//        }
+
+//        contactName: title
+//        lastBody: convContent.messages.lastBody
+//        lastTimestamp: convContent.messages.isEmpty ? "" : Utils.friendlyTimestamp(
+//                                                          convContent.messages.lastTime)
+//        lastReceipt: convContent.messages.lastStatus
+//                     === undefined ? 0 : convContent.messages.lastStatus
+//        labelFontSize: CmnCfg.labelSize
+//    }
 
     // background item which gets manipulated
     // during the on tap animation
