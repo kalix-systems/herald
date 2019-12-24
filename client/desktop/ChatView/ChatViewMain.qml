@@ -66,7 +66,7 @@ Page {
 
                 convWindow.positionViewAtIndex(msg_idx, ListView.Center)
                 convWindow.highlightAnimation.target = convWindow.itemAtIndex(
-                            msg_idx).highlight
+                            msg_idx).highlightItem
                 convWindow.highlightAnimation.start()
             }
         }

@@ -53,6 +53,9 @@ ListView {
     boundsBehavior: ListView.StopAtBounds
     boundsMovement: Flickable.StopAtBounds
     model: chatPage.ownedConversation
+
+    // Note: we load the list view from the bottom up to make
+    // scroll behavior more predictable
     verticalLayoutDirection: ListView.VerticalBottomToTop
 
     // this is set to a higher value in `Component.onCompleted`
@@ -64,11 +67,6 @@ ListView {
         model.setElisionCharCount(38 * 40)
         model.setElisionCharsPerLine(40)
 
-        chatListView.positionViewAtEnd()
-        // made with the understanding that position goes from 0.0-1.0
-        // however 1.0 does not seem to be the actual bottom of the page.
-        // ain't that Qt.
-        chatScrollBarInner.setPosition(3.0)
         chatScrollBarInner.setPosition(1.0)
         cacheBuffer = chatListView.height * 5
     }
@@ -97,12 +95,7 @@ ListView {
         width: parent.width
         messageModelData: model
 
-        ListView.onAdd: {
-            // made with the understanding that position goes from 0.0-1.0
-            // however 1.0 does not seem to be the actual bottom of the page.
-            // ain't that Qt.
-            chatScrollBarInner.setPosition(1.0)
-        }
+        ListView.onAdd: chatScrollBarInner.setPosition(1.0)
 
         ChatBubbleHover {
             id: bubbleHoverHandler
@@ -118,9 +111,7 @@ ListView {
             sourceComponent: Component {
                 Connections {
                     target: bubbleActual
-                    onAttachmentsLoaded: {
-                        chatScrollBarInner.setPosition(1.0)
-                    }
+                    onAttachmentsLoaded: chatScrollBarInner.setPosition(1.0)
                 }
             }
         }
