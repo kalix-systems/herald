@@ -32,7 +32,7 @@ ListView {
                                searchConversationId)
 
             // early return on out of bounds
-            if (conv_idx < 0)
+            if ((conv_idx < 0) || (conv_idx >= conversationList.count))
                 return
 
             conversationList.currentIndex = conv_idx
