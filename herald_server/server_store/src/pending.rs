@@ -96,18 +96,18 @@ impl Conn {
             One(single) => {
                 use SingleRecip::*;
                 match single {
-                    Group(cid) => self.one_group(cid, msg, tag, timestamp).await,
-                    User(uid) => self.one_user(uid, msg, tag, timestamp).await,
-                    Key(key) => self.one_key(key, msg, tag, timestamp).await,
+                    Group(cid) => self.one_group(cid, msg, *tag, *timestamp).await,
+                    User(uid) => self.one_user(uid, msg, *tag, *timestamp).await,
+                    Key(key) => self.one_key(key, msg, *tag, *timestamp).await,
                 }
             }
             Many(recips) => {
                 use Recips::*;
 
                 match recips {
-                    Groups(cids) => self.many_groups(cids, msg, tag, timestamp).await,
-                    Users(uids) => self.many_users(uids, msg, tag, timestamp).await,
-                    Keys(keys) => self.many_keys(keys, msg, tag, timestamp).await,
+                    Groups(cids) => self.many_groups(cids, msg, *tag, *timestamp).await,
+                    Users(uids) => self.many_users(uids, msg, *tag, *timestamp).await,
+                    Keys(keys) => self.many_keys(keys, msg, *tag, *timestamp).await,
                 }
             }
         }
@@ -117,8 +117,8 @@ impl Conn {
         &mut self,
         key: &sig::PublicKey,
         msg: &Bytes,
-        tag: &PushTag,
-        timestamp: &Time,
+        tag: PushTag,
+        timestamp: Time,
     ) -> Res<PushedTo> {
         let tx = self.transaction().await?;
         let exists_stmt = tx
@@ -140,7 +140,7 @@ impl Conn {
         let push_row_id: i64 = tx
             .query_one(
                 &push_stmt,
-                params![msg.as_ref(), kson::to_vec(tag), timestamp.as_i64()],
+                params![msg.as_ref(), kson::to_vec(&tag), timestamp.as_i64()],
             )
             .await?
             .get(0);
@@ -164,8 +164,8 @@ impl Conn {
         &mut self,
         uid: &UserId,
         msg: &Bytes,
-        tag: &PushTag,
-        timestamp: &Time,
+        tag: PushTag,
+        timestamp: Time,
     ) -> Res<PushedTo> {
         let tx = self.transaction().await?;
 
@@ -186,7 +186,7 @@ impl Conn {
         let push_row_id: i64 = tx
             .query_one(
                 &push_stmt,
-                params![msg.as_ref(), kson::to_vec(tag), timestamp.as_i64()],
+                params![msg.as_ref(), kson::to_vec(&tag), timestamp.as_i64()],
             )
             .await?
             .get(0);
@@ -229,8 +229,8 @@ impl Conn {
         &mut self,
         cid: &ConversationId,
         msg: &Bytes,
-        tag: &PushTag,
-        timestamp: &Time,
+        tag: PushTag,
+        timestamp: Time,
     ) -> Res<PushedTo> {
         let tx = self.transaction().await?;
 
@@ -253,7 +253,7 @@ impl Conn {
         let push_row_id = tx
             .query_one(
                 &push_stmt,
-                params![msg.as_ref(), kson::to_vec(tag), timestamp.as_i64()],
+                params![msg.as_ref(), kson::to_vec(&tag), timestamp.as_i64()],
             )
             .await?
             .get(0);
@@ -301,8 +301,8 @@ impl Conn {
         &mut self,
         cids: &[ConversationId],
         msg: &Bytes,
-        tag: &PushTag,
-        timestamp: &Time,
+        tag: PushTag,
+        timestamp: Time,
     ) -> Res<PushedTo> {
         let tx = self.transaction().await?;
 
@@ -313,7 +313,7 @@ impl Conn {
         let push_row_id: i64 = tx
             .query_one(
                 &push_stmt,
-                params![msg.as_ref(), kson::to_vec(tag), timestamp.as_i64()],
+                params![msg.as_ref(), kson::to_vec(&tag), timestamp.as_i64()],
             )
             .await?
             .get(0);
@@ -374,8 +374,8 @@ impl Conn {
         &mut self,
         uids: &[UserId],
         msg: &Bytes,
-        tag: &PushTag,
-        timestamp: &Time,
+        tag: PushTag,
+        timestamp: Time,
     ) -> Res<PushedTo> {
         let tx = self.transaction().await?;
 
@@ -386,7 +386,7 @@ impl Conn {
         let push_row_id: i64 = tx
             .query_one(
                 &push_stmt,
-                params![msg.as_ref(), kson::to_vec(tag), timestamp.as_i64()],
+                params![msg.as_ref(), kson::to_vec(&tag), timestamp.as_i64()],
             )
             .await?
             .get(0);
@@ -445,8 +445,8 @@ impl Conn {
         &mut self,
         keys: &[sig::PublicKey],
         msg: &Bytes,
-        tag: &PushTag,
-        timestamp: &Time,
+        tag: PushTag,
+        timestamp: Time,
     ) -> Res<PushedTo> {
         let tx = self.transaction().await?;
 
@@ -457,7 +457,7 @@ impl Conn {
         let push_row_id: i64 = tx
             .query_one(
                 &push_stmt,
-                params![msg.as_ref(), kson::to_vec(tag), timestamp.as_i64()],
+                params![msg.as_ref(), kson::to_vec(&tag), timestamp.as_i64()],
             )
             .await?
             .get(0);

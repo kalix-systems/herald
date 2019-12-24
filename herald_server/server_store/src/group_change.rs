@@ -45,7 +45,7 @@ impl Conn {
 
         match res {
             Err(v @ Ok(_)) => return v,
-            Err(Err(e)) => return Err(e.into()),
+            Err(Err(e)) => return Err(e),
             _ => {}
         };
 
@@ -100,7 +100,7 @@ impl Conn {
 
         match res {
             Err(v @ Ok(leave_groups::Res::Missing(_))) => return v,
-            Err(Err(e)) => return Err(e.into()),
+            Err(Err(e)) => return Err(e),
             _ => {}
         };
 
