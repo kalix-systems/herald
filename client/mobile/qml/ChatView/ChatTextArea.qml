@@ -7,6 +7,12 @@ import "../Common"
 RowLayout {
     id: chatRowLayout
     readonly property real textareaHeight: CmnCfg.units.dp(24)
+
+    readonly property var select: function () {
+        cta.forceActiveFocus()
+    }
+
+    signal selected
     property bool send: cta.text.length > 0
     width: parent.width
     spacing: 0
@@ -16,13 +22,18 @@ RowLayout {
         height: chatRowLayout.textareaHeight
         Layout.fillWidth: true
         Layout.alignment: Qt.AlignBottom
-        placeholderText: qsTr("Send a message") + "..."
+        placeholderText: qsTr("Send a message...")
         wrapMode: TextArea.WrapAtWordBoundaryOrAnywhere
         color: CmnCfg.palette.black
         selectionColor: CmnCfg.palette.highlightColor
         font {
             pixelSize: CmnCfg.chatTextSize
             family: CmnCfg.chatFont.name
+        }
+        MouseArea {
+            z: cta.z + 1
+            anchors.fill: parent
+            onPressed: selected()
         }
     }
 

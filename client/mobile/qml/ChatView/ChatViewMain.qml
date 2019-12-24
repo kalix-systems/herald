@@ -10,15 +10,6 @@ Page {
     property Messages ownedMessages
     property string headerTitle
 
-    anchors.bottom: root.bottom
-
-    Connections {
-        target: Qt.inputMethod
-        onKeyboardRectangleChanged: {
-
-        }
-    }
-
     background: Rectangle {
         color: CmnCfg.palette.white
     }
@@ -27,8 +18,16 @@ Page {
         id: chatScrollView
         clip: true
         contentWidth: parent.width
+        height: chatPage.height - chatTextArea.height
         topPadding: CmnCfg.smallMargin
         bottomPadding: CmnCfg.smallMargin
+
+        anchors {
+            top: parent.top
+            right: parent.right
+            left: parent.left
+        }
+
         ScrollBar.vertical: ScrollBar {
             id: scrollControl
         }
@@ -37,13 +36,6 @@ Page {
             messageListModel: ownedMessages
             width: parent.width
             anchors.top: parent.top
-        }
-
-        anchors {
-            top: parent.top
-            right: parent.right
-            left: parent.left
-            bottom: chatTextArea.top
         }
 
         Connections {
@@ -61,10 +53,38 @@ Page {
 
     ChatTextArea {
         id: chatTextArea
+        property bool risen: false
         anchors {
-            bottom: parent.bottom
             right: parent.right
             left: parent.left
+            top: chatScrollView.bottom
+        }
+        onSelected: {
+            if (!risen) {
+                risen = true
+
+                chatScrollView.height = chatScrollView.height
+                        - Qt.inputMethod.keyboardRectangle.height
+                select()
+            }
+        }
+        Connections {
+            target: Qt.inputMethod
+            onVisibleChanged: {
+
+                if (!Qt.inputMethod.visible && chatTextArea.risen) {
+                    chatTextArea.risen = false
+                    chatScrollView.height = chatPage.height - chatTextArea.height
+                }
+            }
+            onKeyboardRectangleChanged: {
+                print(Qt.inputMethod.keyboardRectangle.height,
+                      Qt.inputMethod.visible, chatTextArea.risen)
+                if (!Qt.inputMethod.visible && chatTextArea.risen) {
+                    chatTextArea.risen = false
+                    chatScrollView.height = chatPage.height - chatTextArea.height
+                }
+            }
         }
     }
 }
