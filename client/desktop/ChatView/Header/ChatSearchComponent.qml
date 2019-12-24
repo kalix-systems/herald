@@ -12,7 +12,7 @@ Component {
     id: searchBarComponent
 
     Column {
-        //wrapper column to position textarea and underline
+        //wrapper column to position text field and underline
         anchors.right: parent.right
         RowLayout {
 
@@ -27,7 +27,11 @@ Component {
             }
 
             //main search component
-            SearchTextArea {}
+            SearchTextField {
+                Layout.alignment: Qt.AlignTop
+                Layout.maximumWidth: 300
+                Layout.minimumWidth: 200
+            }
 
             Text {
                 id: indexText
@@ -84,8 +88,8 @@ Component {
 
         Rectangle {
             height: 1
-            width: searchToolBar.width - CmnCfg.smallMargin
-            anchors.horizontalCenter: parent.horizontalCenter
+            width: searchToolBar.width - CmnCfg.microMargin
+            anchors.left: parent.left
             color: "white"
         }
 

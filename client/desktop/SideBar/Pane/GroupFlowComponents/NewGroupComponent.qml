@@ -21,29 +21,22 @@ Component {
             id: topRect
         }
 
-
-        TextArea {
+        Imports.BorderedTextField {
             id: titleText
-            anchors.top: topRect.bottom
-            leftPadding: 12
+            anchors {
+                top: topRect.bottom
+                topMargin: CmnCfg.megaMargin
+                horizontalCenter: parent.horizontalCenter
+            }
             color: CmnCfg.palette.white
             placeholderText: "Group title"
             width: parent.width - CmnCfg.megaMargin
         }
 
         Rectangle {
-            id: divider
-            anchors.top: titleText.bottom
-            height: 1
-            width: parent.width - CmnCfg.megaMargin
-            anchors.horizontalCenter: parent.horizontalCenter
-            color: CmnCfg.palette.lightGrey
-        }
-
-        Rectangle {
             id: bigDivider
-            anchors.top: divider.bottom
-            anchors.topMargin: 20
+            anchors.top: titleText.bottom
+            anchors.topMargin: CmnCfg.megaMargin
             height: 1
             width: parent.width
             color: CmnCfg.palette.lightGrey

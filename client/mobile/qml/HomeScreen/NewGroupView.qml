@@ -7,6 +7,7 @@ import "./Controls"
 import "../Common"
 import QtGraphicalEffects 1.0
 import Qt.labs.platform 1.0
+import "qrc:/imports" as Imports
 import "qrc:/imports/Entity"
 import "qrc:/imports/NewGroupFlow"
 import "qrc:/imports/js/utils.mjs" as Utils
@@ -75,24 +76,14 @@ Page {
             Layout.alignment: Qt.AlignTop | Qt.AlignHCenter
         }
 
-        // TODO wrap this textarea+rectangle in a rectangle to get rid of
-        // ColumnLayout's added margin
-        TextArea {
-            id: titleText
+        Imports.BorderedTextField {
             placeholderText: qsTr("Group title")
-            leftPadding: 0
+            color: CmnCfg.palette.black
+            borderColor: CmnCfg.palette.black
             Layout.fillWidth: parent
             Layout.leftMargin: CmnCfg.megaMargin
             Layout.rightMargin: CmnCfg.megaMargin
-        }
 
-        Rectangle {
-            id: divider
-            height: 1
-            color: "black"
-            Layout.fillWidth: parent
-            Layout.leftMargin: CmnCfg.megaMargin
-            Layout.rightMargin: CmnCfg.megaMargin
         }
 
         //TODO: This doesn't do anything yet
