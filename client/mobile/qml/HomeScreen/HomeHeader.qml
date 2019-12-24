@@ -22,15 +22,15 @@ ToolBar {
         anchors.fill: parent
         Row {
             Layout.alignment: Qt.AlignLeft
-            Layout.leftMargin: CmnCfg.units.dp(12)
-            spacing: CmnCfg.units.dp(16)
+            Layout.leftMargin: CmnCfg.defaultMargin
+            spacing: CmnCfg.largeMargin
 
             Avatar {
                 color: CmnCfg.palette.avatarColors[Herald.config.color]
                 initials: Herald.config.name[0].toUpperCase()
                 pfpPath: Utils.safeStringOrDefault(
                              Herald.config.profilePicture, "")
-                diameter: CmnCfg.units.dp(24)
+                diameter: CmnCfg.identityAvatarDiameter
                 Layout.alignment: Qt.AlignCenter
                 Layout.leftMargin: CmnCfg.units.dp(12)
             }
@@ -41,7 +41,7 @@ ToolBar {
                 font {
                     pixelSize: CmnCfg.headerTextSize
                     family: CmnCfg.labelFont.name
-                    bold: true
+                    weight: Font.DemiBold
                 }
                 anchors.verticalCenter: parent.verticalCenter
                 color: CmnCfg.palette.iconFill
