@@ -60,32 +60,17 @@ Page {
             top: chatScrollView.bottom
         }
         onSelected: {
-            if (!risen) {
+            if (!risen && Qt.platform.os == "ios") {
                 risen = true
-                print("current csv height: ", chatScrollView.height,
-                      " cta height : ", chatTextArea.height,
-                      "keyb rect dims: w: ",
-                      Qt.inputMethod.keyboardRectangle.width, " h: ",
-                      Qt.inputMethod.keyboardRectangle.height, " x:",
-                      Qt.inputMethod.keyboardRectangle.x, "y: ",
-                      Qt.inputMethod.keyboardRectangle.y)
                 chatScrollView.height = chatScrollView.height
-                        - Qt.inputMethod.keyboardRectangle.height - chatTextArea.height - 1
+                        - Qt.inputMethod.keyboardRectangle.height - chatTextArea.height
                 select()
             }
         }
+
         Connections {
             target: Qt.inputMethod
             onVisibleChanged: {
-
-                if (!Qt.inputMethod.visible && chatTextArea.risen) {
-                    chatTextArea.risen = false
-                    chatScrollView.height = chatPage.height - chatTextArea.height
-                }
-            }
-            onKeyboardRectangleChanged: {
-                print(Qt.inputMethod.keyboardRectangle.height,
-                      Qt.inputMethod.visible, chatTextArea.risen)
                 if (!Qt.inputMethod.visible && chatTextArea.risen) {
                     chatTextArea.risen = false
                     chatScrollView.height = chatPage.height - chatTextArea.height

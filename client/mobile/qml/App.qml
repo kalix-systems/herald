@@ -35,9 +35,9 @@ Page {
     }
 
     Component {
-         SettingsMenu.SettingsMenuMain {
+        SettingsMenu.SettingsMenuMain {
             readonly property string stateName: "config"
-         }
+        }
     }
 
     Component {
