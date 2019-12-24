@@ -16,6 +16,10 @@ ListView {
     cacheBuffer: 0
     Component.onCompleted: cacheBuffer = chatListView.height * 5
 
+    // Note: we load the list view from the bottom up to make
+    // scroll behavior more predictable
+    verticalLayoutDirection: ListView.BottomToTop
+
     ScrollBar.vertical: ScrollBar {
         id: chatScrollBarInner
         width: CmnCfg.smallSpacer

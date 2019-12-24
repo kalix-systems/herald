@@ -4,9 +4,7 @@ pub use messages_helper::{container::*, types::*};
 
 pub(super) fn fill(cid: ConversationId) {
     spawn!({
-        let list: Vector<MessageMeta> = err!(conversation::conversation_message_meta(&cid))
-            .into_iter()
-            .collect();
+        let list: Vec<MessageMeta> = err!(conversation::conversation_message_meta(&cid));
 
         let last = match list.last().as_ref() {
             Some(MessageMeta { ref msg_id, .. }) => {

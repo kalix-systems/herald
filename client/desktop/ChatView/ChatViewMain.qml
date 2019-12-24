@@ -61,12 +61,12 @@ Page {
                                   requestedMsgId)
 
                 // early return on out of bounds
-                if (msg_idx < 0)
+                if ((msg_idx < 0) || (msg_idx >= convWindow.count))
                     return
 
                 convWindow.positionViewAtIndex(msg_idx, ListView.Center)
                 convWindow.highlightAnimation.target = convWindow.itemAtIndex(
-                            msg_idx).highlight
+                            msg_idx).highlightItem
                 convWindow.highlightAnimation.start()
             }
         }

@@ -777,7 +777,7 @@ dependencies = [
  "crossbeam-channel 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "herald_common 0.1.0",
  "heraldcore 0.1.0",
- "im 14.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "im 14.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "json 0.12.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "location 0.1.0",
  "messages_helper 0.1.0",
@@ -965,7 +965,7 @@ dependencies = [
 
 [[package]]
 name = "im"
-version = "14.0.0"
+version = "14.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "bitmaps 2.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -1270,12 +1270,13 @@ dependencies = [
  "coretypes 0.1.0",
  "herald_common 0.1.0",
  "heraldcore 0.1.0",
- "im 14.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "im 14.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "json 0.12.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "lru 0.4.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "message_cache 0.1.0",
  "once_cell 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "parking_lot 0.10.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "revec 0.1.0",
  "search_pattern 0.1.0",
 ]
 
@@ -1931,6 +1932,13 @@ version = "0.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "winapi 0.3.8 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "revec"
+version = "0.1.0"
+dependencies = [
+ "im 14.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -2893,7 +2901,7 @@ dependencies = [
 "checksum hyper 0.13.0-alpha.4 (registry+https://github.com/rust-lang/crates.io-index)" = "2d05aa523087ac0b9d8b93dd80d5d482a697308ed3b0dca7b0667511a7fa7cdc"
 "checksum idna 0.1.5 (registry+https://github.com/rust-lang/crates.io-index)" = "38f09e0f0b1fb55fdee1f17470ad800da77af5186a1a76c026b679358b7e844e"
 "checksum idna 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)" = "02e2673c30ee86b5b96a9cb52ad15718aa1f966f5ab9ad54a8b95d5ca33120a9"
-"checksum im 14.0.0 (registry+https://github.com/rust-lang/crates.io-index)" = "a1f9b6540e530defef7f2df4ed330d45b739b10450548c74a9913f63ea1acc6b"
+"checksum im 14.1.0 (registry+https://github.com/rust-lang/crates.io-index)" = "b047368c60cde48aa2b2e2fa4794eec965526749b60b55f8cec1bad926e7f6e9"
 "checksum image 0.22.3 (registry+https://github.com/rust-lang/crates.io-index)" = "7b4be8aaefbe7545dc42ae925afb55a0098f226a3fe5ef721872806f44f57826"
 "checksum indexmap 1.3.0 (registry+https://github.com/rust-lang/crates.io-index)" = "712d7b3ea5827fcb9d4fda14bf4da5f136f0db2ae9c8f4bd4e2d1c6fde4e6db2"
 "checksum inflate 0.4.5 (registry+https://github.com/rust-lang/crates.io-index)" = "1cdb29978cc5797bd8dcc8e5bf7de604891df2a8dc576973d71a281e916db2ff"

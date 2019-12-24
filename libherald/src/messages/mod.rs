@@ -6,7 +6,6 @@ use crate::{
 };
 use herald_common::UserId;
 use heraldcore::{conversation, errors::HErr, message::MessageReceiptStatus, types::*};
-use im::vector::Vector;
 use messages_helper::search::SearchState;
 use search_pattern::SearchPattern;
 
