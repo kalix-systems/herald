@@ -23,8 +23,9 @@ RowLayout {
             id: stateLabel
             text: qsTr("New Contact")
             font {
-                pixelSize: CmnCfg.chatPreviewSize
+                pixelSize: CmnCfg.labelSize
                 family: CmnCfg.labelFont.name
+                bold: true
             }
             anchors.verticalCenter: parent.verticalCenter
             color: CmnCfg.palette.iconFill

@@ -23,8 +23,9 @@ RowLayout {
             id: stateLabel
             text: qsTr("New Group")
             font {
-                pixelSize: CmnCfg.chatPreviewSize
                 family: CmnCfg.labelFont.name
+                bold: true
+                pixelSize: CmnCfg.labelSize
             }
             anchors.verticalCenter: parent.verticalCenter
             color: CmnCfg.palette.iconFill

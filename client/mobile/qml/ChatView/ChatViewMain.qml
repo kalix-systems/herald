@@ -59,12 +59,15 @@ Page {
             left: parent.left
             top: chatScrollView.bottom
         }
+
         onSelected: {
             if (!risen && Qt.platform.os == "ios") {
                 risen = true
                 chatScrollView.height = chatScrollView.height
                         - Qt.inputMethod.keyboardRectangle.height - chatTextArea.height
-                select()
+                chatTextArea.select()
+            } else {
+                chatTextArea.select()
             }
         }
 
