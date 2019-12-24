@@ -4,6 +4,7 @@ use futures::{future::*, stream::*};
 use kcl::random::UQ;
 use krpc::*;
 use kson::prelude::*;
+use kson_channel::*;
 use std::{
     collections::{HashMap, HashSet},
     iter,
@@ -96,23 +97,14 @@ impl KrpcServer<ChatProtocol> for Server {
 
     async fn init<Tx, Rx>(
         &self,
-        _tx: &mut Tx,
-        rx: &mut Rx,
+        _tx: &mut Framed<Tx>,
+        rx: &mut Framed<Rx>,
     ) -> Result<Self::ConnInfo, Error>
     where
         Tx: AsyncWrite + Send + Unpin,
         Rx: AsyncRead + Send + Unpin,
     {
-        let mut buf = [0u8];
-        rx.read_exact(&mut buf).await?;
-        let len = u8::from_le_bytes(buf);
-        assert!(len <= 128);
-
-        let mut buf = vec![0u8; len as usize];
-        rx.read_exact(&mut buf).await?;
-        let u = kson::from_bytes(buf.into())?;
-
-        Ok(u)
+        Ok(rx.read().await?)
     }
 
     type Pushes = Receiver<Push>;
@@ -184,18 +176,10 @@ impl KrpcClient<ChatProtocol> for Chatter {
 
     async fn init<Tx: AsyncWrite + Send + Unpin, Rx: AsyncRead + Send + Unpin>(
         info: Self::InitInfo,
-        tx: &mut Tx,
-        _rx: &mut Rx,
+        tx: &mut Framed<Tx>,
+        _rx: &mut Framed<Rx>,
     ) -> Result<Self, Error> {
-        dbg!();
-        let bytes = kson::to_vec(&info);
-        dbg!();
-        let len = bytes.len() as u8;
-        dbg!();
-        tx.write_all(&len.to_le_bytes()).await?;
-        dbg!();
-        tx.write_all(&bytes).await?;
-        dbg!();
+        tx.write(&info).await?;
 
         let online = iter::once(info).collect();
 

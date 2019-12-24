@@ -8,9 +8,6 @@ use std::convert::TryFrom;
 mod requests;
 pub use requests::*;
 
-mod packets;
-pub use packets::*;
-
 mod pushes;
 pub use pushes::*;
 

@@ -5,6 +5,7 @@ use futures::{
     stream::{Stream, StreamExt},
 };
 use kson::prelude::*;
+use kson_channel::*;
 use std::{cmp::max, fmt::Debug, net::SocketAddr};
 use tokio::prelude::*;
 
@@ -36,8 +37,8 @@ pub trait KrpcServer<P: Protocol>: Sync {
 
     async fn init<Tx: AsyncWrite + Send + Unpin, Rx: AsyncRead + Send + Unpin>(
         &self,
-        tx: &mut Tx,
-        rx: &mut Rx,
+        tx: &mut Framed<Tx>,
+        rx: &mut Framed<Rx>,
     ) -> Result<Self::ConnInfo, Error>;
 
     type Pushes: Stream<Item = P::Push> + Send + Unpin;
@@ -70,8 +71,8 @@ pub trait KrpcClient<P: Protocol>: Send + Sync + Sized + 'static {
 
     async fn init<Tx: AsyncWrite + Send + Unpin, Rx: AsyncRead + Send + Unpin>(
         info: Self::InitInfo,
-        tx: &mut Tx,
-        rx: &mut Rx,
+        tx: &mut Framed<Tx>,
+        rx: &mut Framed<Rx>,
     ) -> Result<Self, Error>;
 
     async fn handle_push(

@@ -10,11 +10,13 @@ where
     S: KrpcServer<P>,
     P: Protocol,
 {
-    let (mut handshake_tx, mut handshake_rx) = incoming
+    let (tx, rx) = incoming
         .next()
         .await
         .ok_or_else(|| anyhow!("didn't receive handshake stream: {}", loc!()))??;
 
+    let mut handshake_tx = Framed::new(tx);
+    let mut handshake_rx = Framed::new(rx);
     let cinfo = server.init(&mut handshake_tx, &mut handshake_rx).await?;
 
     let send_pushes = server
@@ -196,8 +198,9 @@ impl<P: Protocol, K: KrpcClient<P>> Client<P, K> {
 
         tokio::spawn(driver.unwrap_or_else(|e| eprintln!("{}", e)));
 
-        let (mut handshake_tx, mut handshake_rx) = connection.open_bi().await?;
-
+        let (tx, rx) = connection.open_bi().await?;
+        let mut handshake_tx = Framed::new(tx);
+        let mut handshake_rx = Framed::new(rx);
         let inner = Arc::new(K::init(info, &mut handshake_tx, &mut handshake_rx).await?);
 
         tokio::spawn({

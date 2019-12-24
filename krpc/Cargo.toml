@@ -21,6 +21,9 @@ features = ["rt-core"]
 [dependencies.kson]
 path = "../kson"
 
+[dependencies.kson_channel]
+path = "../kson_channel"
+
 [dependencies.location]
 path = "../location"
 

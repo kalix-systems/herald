@@ -31,7 +31,7 @@ impl std::fmt::Display for ConnectionClosed {
         &self,
         fmt: &mut std::fmt::Formatter,
     ) -> std::fmt::Result {
-        self.0.fmt(fmt)
+        write!(fmt, "Connection closed with frame: {:?}", self.0)
     }
 }
 
@@ -49,8 +49,9 @@ where
     P::Push: Clone,
     Conn: AsyncRead + AsyncWrite + Unpin + Send,
 {
-    let (mut rx, mut tx) = tokio::io::split(conn);
+    let (mut rx, mut tx) = Framed::new(conn).split();
     let cinfo = server.init(&mut tx, &mut rx).await?;
+    let conn = Framed::unsplit(rx, tx).into_inner();
 
     let ws_config = WebSocketConfig {
         max_send_queue: Some(max(P::MAX_CONCURRENT_PUSHES, P::MAX_CONCURRENT_REQS)),
@@ -58,7 +59,6 @@ where
         max_frame_size: Some(min(16 * 1024 * 1024, 9 + P::max_item_size())),
     };
 
-    let conn = rx.unsplit(tx);
     let ws = WebSocketStream::from_raw_socket(conn, Role::Server, Some(ws_config)).await;
     let (wtx, wrx) = ws.split();
 
@@ -238,9 +238,9 @@ where
     ) -> Result<Self, Error> {
         let tcp = tokio::net::TcpStream::connect(server_sock).await?;
         let tls = connector.connect(server_name, tcp).await?;
-        let (mut rx, mut tx) = tokio::io::split(tls);
+        let (mut rx, mut tx) = Framed::new(tls).split();
         let inner = K::init(info, &mut tx, &mut rx).await?;
-        let tls = rx.unsplit(tx);
+        let tls = Framed::unsplit(rx, tx).into_inner();
 
         let ws_config = WebSocketConfig {
             max_send_queue: Some(max(P::MAX_CONCURRENT_PUSHES, P::MAX_CONCURRENT_REQS)),
