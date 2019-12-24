@@ -150,15 +150,13 @@ impl Container {
         &mut self,
         ix: usize,
     ) -> Option<MsgData> {
-        let old_len = self.len();
-
         let msg = self.list.remove(ix)?;
         let data = cache::remove(&msg.msg_id);
 
-        if ix + 1 == old_len {
+        if ix == 0 {
             self.last = self
                 .list
-                .last()
+                .front()
                 .and_then(|MessageMeta { ref msg_id, .. }| cache::get(msg_id));
         }
 
