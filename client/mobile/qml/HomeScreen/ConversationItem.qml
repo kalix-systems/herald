@@ -6,15 +6,18 @@ import "qrc:/imports/js/utils.mjs" as Utils
 import "../ChatView" as ChatView
 import "../Common" as Common
 
+// Layout & tap behavior for a conversation item in conversation list view
 Rectangle {
     id: contactItem
 
+    property string convoTitle
     // the index corresponding to the visual color of this GroupBox
     property int colorCode: 0
+    // path to the conversation's avatar image
+    property string imageSource: ''
+    property bool isGroup: false
+    // asdf
     property ConversationContent convContent: null
-
-    // proxyTitle necessary for passing conversation title to ChatViewMain
-    property string proxyTitle: title
 
     height: entityBlock.height
     color: CmnCfg.palette.white
@@ -33,14 +36,15 @@ Rectangle {
         anchors.leftMargin: CmnCfg.smallMargin
         anchors.rightMargin: CmnCfg.smallMargin
 
-        entityName: proxyTitle
+        entityName: convoTitle
         subLabelText: convContent.messages.lastBody
         timestamp: convContent.messages.isEmpty ? "" : Utils.friendlyTimestamp(
                                                       convContent.messages.lastTime)
         lastReceipt: convContent.messages.lastStatus
                      === undefined ? 0 : convContent.messages.lastStatus
         color: CmnCfg.avatarColors[contactItem.colorCode]
-        // TODO pfpPath
+        isGroup: contactItem.isGroup
+        pfpPath: imageSource
     }
 
     // background item which gets manipulated
@@ -84,7 +88,7 @@ Rectangle {
         id: ownedChatView
         ChatView.ChatViewMain {
             ownedMessages: contactItem.convContent.messages
-            headerTitle: proxyTitle
+            headerTitle: convoTitle
         }
     }
 

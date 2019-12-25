@@ -5,6 +5,7 @@ import LibHerald 1.0
 // Includes CVFLoatingButton. ListItem, and Header
 import "./Controls"
 import "../Common" as Common
+import "qrc:/imports/js/utils.mjs" as Utils
 import QtGraphicalEffects 1.0
 
 // The home page of the entire application
@@ -27,23 +28,21 @@ Page {
     Loader {
         id: listViewLoader
         anchors.fill: parent
-        //anchors.topMargin: CmnCfg.smallMargin
         sourceComponent: ListView {
             id: cvListView
             clip: true
             boundsBehavior: ListView.StopAtBounds
             anchors.fill: parent
             model: Herald.conversations
-            // TODO: give delegate a reference to the model to avoid "proxy" everywhere
             delegate: ConversationItem {
-                readonly property var conversationIdProxy: conversationId
-                readonly property int colorProxy: model.color
-                readonly property ConversationContent ownedConversationContent: ConversationContent {
-                    conversationId: conversationIdProxy
+                convoTitle: title
+                colorCode: model.color
+                imageSource: Utils.safeStringOrDefault(
+                                 model.picture, "")
+                isGroup: !model.pairwise
+                convContent: ConversationContent {
+                    conversationId: model.conversationId
                 }
-                convContent: ownedConversationContent
-
-                colorCode: colorProxy
             }
         }
     }

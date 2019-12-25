@@ -28,7 +28,7 @@ Rectangle {
         NewGroupFlow.GroupImageSelector {
             id: imageSelector
             imageSource: topRect.profPic
-            backgroundColor: CmnCfg.palette.white
+            color: CmnCfg.palette.white
         }
     }
 }

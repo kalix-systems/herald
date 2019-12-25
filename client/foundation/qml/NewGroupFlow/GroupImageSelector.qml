@@ -8,7 +8,8 @@ import "qrc:/imports/"
 Rectangle {
     id: imageSelector
     property alias imageSource: groupImageLoader.imageSource
-    property color backgroundColor
+    property alias iconColor: cameraIcon.fill
+    color: CmnCfg.palette.lightGrey
     width: CmnCfg.avatarSize
     height: width
 
@@ -60,10 +61,12 @@ Rectangle {
         }
     }
 
+    // TODO entire rectangle should be a click target, not just icon
     IconButton {
+        id: cameraIcon
         anchors.centerIn: parent
         source: "qrc:/camera-icon.svg"
-        fill: CmnCfg.palette.offBlack
+        fill: CmnCfg.palette.black
         onClicked: groupPicDialogue.open()
     }
 
