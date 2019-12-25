@@ -10,7 +10,7 @@ import "./js/utils.js" as JS
 // Components that depend on dynamic scope
 import "dyn"
 
-Page {
+Rectangle {
     id: replyWrapper
     property color opColor: CmnCfg.avatarColors[messageModelData.opColor]
 
@@ -21,19 +21,33 @@ Page {
                                replyFileClip.nameMetrics, messageModelData,
                                replyFileClip.fileSize, replyWrapper)
 
-    padding: CmnCfg.smallMargin
+    height: replyWrapperCol.height
+    width: bubbleRoot.maxWidth
+    color: CmnCfg.palette.medGrey
 
-    background: ReplyBackground {}
+    Rectangle {
+        id: accent
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
 
-    header: ReplyLabel {
-        id: replyLabel
+        width: CmnCfg.accentBarWidth
+        color: opColor
+        anchors.left: parent.left
     }
 
-    contentHeight: replyWrapperCol.implicitHeight
-    contentWidth: bubbleRoot.maxWidth * 0.8
+    ReplyMouseArea {}
+
     Column {
         id: replyWrapperCol
         spacing: CmnCfg.smallMargin
+        anchors.left: accent.right
+        topPadding: CmnCfg.smallMargin
+        bottomPadding: CmnCfg.defaultMargin
+        leftPadding: CmnCfg.smallMargin
+
+        ReplyLabel {
+            id: replyLabel
+        }
 
         ReplyFileClip {
             id: replyFileClip
@@ -43,10 +57,6 @@ Page {
         ReplyElidedBody {
             id: replyElidedBody
             maximumWidth: bubbleRoot.maxWidth
-        }
-
-        ReplyTimeInfo {
-            id: replyTimeInfo
         }
     }
 }
