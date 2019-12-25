@@ -41,11 +41,11 @@ Rectangle {
             left: parent.left
             verticalCenter: parent.verticalCenter
         }
-        pfpPath: entityItem.pfpPath
         color: entityItem.color
         initials: Utils.initialize(entityName)
         size: CmnCfg.units.dp(48)
         isGroup: entityItem.isGroup
+        pfpPath: entityItem.pfpPath
     }
 
     ConversationLabel {
@@ -66,5 +66,4 @@ Rectangle {
         lastReceipt: entityItem.lastReceipt
         labelFontSize: CmnCfg.labelSize
     }
-
 }
