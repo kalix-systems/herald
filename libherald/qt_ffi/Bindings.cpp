@@ -2192,6 +2192,7 @@ bool messages_clear_conversation_history(Messages::Private *);
 void messages_clear_search(Messages::Private *);
 bool messages_delete_message(Messages::Private *, quint64);
 qint64 messages_index_by_id(const Messages::Private *, const char *, int);
+void messages_mark_read(Messages::Private *, quint64);
 qint64 messages_next_search_match(Messages::Private *);
 qint64 messages_prev_search_match(Messages::Private *);
 bool messages_save_all_attachments(const Messages::Private *, quint64,
@@ -4222,6 +4223,9 @@ bool Messages::deleteMessage(quint64 row_index) {
 }
 qint64 Messages::indexById(const QByteArray &msg_id) const {
   return messages_index_by_id(m_d, msg_id.data(), msg_id.size());
+}
+void Messages::markRead(quint64 index) {
+  return messages_mark_read(m_d, index);
 }
 qint64 Messages::nextSearchMatch() { return messages_next_search_match(m_d); }
 qint64 Messages::prevSearchMatch() { return messages_prev_search_match(m_d); }

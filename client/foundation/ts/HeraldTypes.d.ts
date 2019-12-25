@@ -29,13 +29,11 @@ declare const enum ExpirationPeriod {
 
 declare const enum MessageReceiptStatus {
   /// Not acknowledged
-  NoAck = 0,
+  Nil = 0,
   /// Received by user
   Received = 1,
   /// Read by the recipient
-  Read = 2,
-  /// The user has read receipts turned off
-  AckTerminal = 3
+  Read = 2
 }
 
 declare const enum RegistrationFailureCode {

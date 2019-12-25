@@ -23,7 +23,7 @@ pub enum ConversationMessage {
     /// A normal message.
     Msg(Msg),
     /// An acknowledgement of a normal message.
-    Ack(Ack),
+    Receipt(Receipt),
     /// An update to the conversation settings
     Settings(conversation::settings::SettingsUpdate),
 }
@@ -87,7 +87,7 @@ pub struct Message {
 
 #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
 /// An acknowledgement that a message was received.
-pub struct Ack {
+pub struct Receipt {
     /// The message id.
     pub of: MsgId,
     /// The receipt status of the message.
