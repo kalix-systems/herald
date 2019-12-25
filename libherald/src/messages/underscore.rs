@@ -6,7 +6,7 @@ use crate::{
 };
 use heraldcore::{
     config, conversation,
-    message::{self, MessageBody, MessageReceiptStatus},
+    message::{self, MessageBody, MessageReceiptStatus, MsgData},
 };
 use messages_helper::search::SearchState;
 
