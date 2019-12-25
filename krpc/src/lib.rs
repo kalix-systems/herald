@@ -5,7 +5,7 @@ use futures::{
     stream::{Stream, StreamExt},
 };
 use kson::prelude::*;
-use kson_channel::*;
+pub use kson_channel::*;
 use std::{cmp::max, fmt::Debug, net::SocketAddr};
 use tokio::prelude::*;
 

@@ -104,7 +104,7 @@ impl KrpcServer<ChatProtocol> for Server {
         Tx: AsyncWrite + Send + Unpin,
         Rx: AsyncRead + Send + Unpin,
     {
-        Ok(rx.read().await?)
+        Ok(rx.read_de().await?)
     }
 
     type Pushes = Receiver<Push>;
@@ -179,7 +179,7 @@ impl KrpcClient<ChatProtocol> for Chatter {
         tx: &mut Framed<Tx>,
         _rx: &mut Framed<Rx>,
     ) -> Result<Self, Error> {
-        tx.write(&info).await?;
+        tx.write_ser(&info).await?;
 
         let online = iter::once(info).collect();
 

@@ -1,8 +1,9 @@
 use kson::prelude::*;
-// use std::time::Duration;
+use std::ops::{Deref, DerefMut};
 use thiserror::Error;
-// use tokio::{prelude::*, time::*};
 use tokio::prelude::*;
+
+// use tokio::{prelude::*, time::*};
 
 // mod packets;
 // use packets::*;
@@ -21,6 +22,19 @@ pub struct Framed<S> {
     inner: S,
     // dur: Duration,
     // packet_size: usize,
+}
+
+impl<S> Deref for Framed<S> {
+    type Target = S;
+    fn deref(&self) -> &S {
+        &self.inner
+    }
+}
+
+impl<S> DerefMut for Framed<S> {
+    fn deref_mut(&mut self) -> &mut S {
+        &mut self.inner
+    }
 }
 
 impl<S> Framed<S> {
@@ -62,15 +76,35 @@ impl<S: AsyncRead + AsyncWrite> Framed<S> {
     }
 }
 
-impl<S: AsyncWrite + Unpin> Framed<S> {
-    async fn write_u32(
-        &mut self,
-        u: u32,
-    ) -> Result<(), FramedError> {
-        self.inner.write_all(&u.to_le_bytes()).await?;
-        Ok(())
-    }
+macro_rules! read_write_u {
+    ($read_name:ident, $write_name:ident, $ty:ident, $len:expr) => {
+        impl<S: AsyncWrite + Unpin> Framed<S> {
+            pub async fn $write_name(
+                &mut self,
+                u: $ty,
+            ) -> Result<(), FramedError> {
+                self.inner.write_all(&u.to_le_bytes()).await?;
+                Ok(())
+            }
+        }
 
+        impl<S: AsyncRead + Unpin> Framed<S> {
+            pub async fn $read_name(&mut self) -> Result<$ty, FramedError> {
+                let mut buf = [0u8; $len];
+                self.inner.read_exact(&mut buf).await?;
+                Ok($ty::from_le_bytes(buf))
+            }
+        }
+    };
+}
+
+read_write_u!(read_u8, write_u8, u8, 1);
+read_write_u!(read_u16, write_u16, u16, 2);
+read_write_u!(read_u32, write_u32, u32, 4);
+read_write_u!(read_u64, write_u64, u64, 8);
+read_write_u!(read_u128, write_u128, u128, 16);
+
+impl<S: AsyncWrite + Unpin> Framed<S> {
     // async fn write_u32_timed(
     //     &mut self,
     //     u: u32,
@@ -78,7 +112,7 @@ impl<S: AsyncWrite + Unpin> Framed<S> {
     //     timeout(self.dur, self.write_u32(u)).await?
     // }
 
-    pub async fn write<T>(
+    pub async fn write_ser<T>(
         &mut self,
         t: &T,
     ) -> Result<(), FramedError>
@@ -103,17 +137,11 @@ impl<S: AsyncWrite + Unpin> Framed<S> {
 }
 
 impl<S: AsyncRead + Unpin> Framed<S> {
-    async fn read_u32(&mut self) -> Result<u32, FramedError> {
-        let mut buf = [0u8; 4];
-        self.inner.read_exact(&mut buf).await?;
-        Ok(u32::from_le_bytes(buf))
-    }
-
     // async fn read_u32_timed(&mut self) -> Result<u32, FramedError> {
     //     timeout(self.dur, self.read_u32()).await?
     // }
 
-    pub async fn read<T>(&mut self) -> Result<T, FramedError>
+    pub async fn read_de<T>(&mut self) -> Result<T, FramedError>
     where
         T: De,
     {

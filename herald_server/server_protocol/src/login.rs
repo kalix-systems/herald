@@ -1,39 +1,70 @@
 use super::*;
+use herald_common::protocol::auth::*;
+use krpc::*;
 
-pub async fn login(
-    active: &ActiveSessions,
-    store: &mut Conn,
-    wtx: &mut WTx,
-    rrx: &mut Receiver<Vec<u8>>,
-) -> Result<GlobalId, Error> {
-    use herald_common::login::*;
-
-    let bytes = UQ::gen_new();
-
-    let g: GlobalId = read_msg::<SignAs>(rrx).await?.0;
-
-    if !store.key_is_valid(g.did).await? {
-        write_msg(&SignAsResponse::KeyDeprecated, wtx, rrx).await?;
-        return Err(LoginFailed);
-    } else if !store.user_exists(&g.uid).await? {
-        write_msg(&SignAsResponse::MissingUID, wtx, rrx).await?;
-        return Err(LoginFailed);
-    } else {
-        let res = SignAsResponse::Sign(bytes);
-        write_msg(&res, wtx, rrx).await?;
-    };
-
-    let s: sig::Signature = read_msg::<LoginToken>(rrx).await?.0;
-
-    if !g.did.verify(bytes.as_ref(), s) {
-        write_msg(&LoginTokenResponse::BadSig, wtx, rrx).await?;
-        Err(LoginFailed)
-    } else {
-        if let Some((_, sess)) = active.remove(&g.did) {
-            sess.interrupt().await;
+impl State {
+    pub async fn login_transition<Tx, Rx>(
+        &self,
+        login: LoginState,
+        tx: &mut Framed<Tx>,
+        rx: &mut Framed<Rx>,
+    ) -> Result<LoginState, anyhow::Error>
+    where
+        Tx: AsyncWrite + Unpin,
+        Rx: AsyncRead + Unpin,
+    {
+        // use login::{ClientEvent::*, ServeEvent::*};
+        use LoginState::*;
+        match login {
+            Accepted(g) => Ok(Accepted(g)),
+            Rejected => Err(anyhow!("login rejected")),
+            AwaitClaim => Ok(Challenge(rx.read_de().await?)),
+            Challenge(uid) => {
+                let challenge = UQ::gen_new();
+                tx.write_all(challenge.as_ref()).await?;
+                let sig: SigMeta = rx.read_de().await?;
+                let valid = sig.verify_sig(challenge.as_ref());
+                tx.write_ser(&valid).await?;
+                if valid == SigValid::Yes
+                    && self
+                        .new_connection()
+                        .await?
+                        .user_of(*sig.signed_by())
+                        .await?
+                        == Some(uid)
+                {
+                    Ok(Accepted(GlobalId {
+                        uid,
+                        did: *sig.signed_by(),
+                    }))
+                } else {
+                    Ok(Rejected)
+                }
+            }
         }
-
-        write_msg(&LoginTokenResponse::Success, wtx, rrx).await?;
-        Ok(g)
     }
 }
+// impl State {
+//     pub async fn auth_transition(
+//         &self,
+//         auth: AuthState,
+//         tx: &mut Framed<Tx>,
+//         rx: &mut Framed<Rx>,
+//     ) -> Result<AuthState, Error> {
+//     }
+// }
+// impl ServerState {
+//     pub async fn transition<Tx, Rx>(
+//         self,
+//         tx: &mut Framed<Tx>,
+//         rx: &mut Framed<Rx>,
+//     ) -> Result<Self, Error>
+//     where
+//         Tx: AsyncWrite + Unpin,
+//         Rx: AsyncRead + Unpin,
+//     {
+//         match self {
+//             AwaitMethod => match rx.read_u8().await? {},
+//         }
+//     }
+// }

@@ -11,8 +11,6 @@ pub enum Error {
     PgError(#[from] tokio_postgres::Error),
     #[error("Timeout: {0}")]
     TimedOut(#[from] tokio::time::Elapsed),
-    //#[error("Krpc: {0}")]
-    //Krpc(#[from] krpc::KrpcError),
     #[error("Invalid signature")]
     InvalidSig,
     #[error("Invalid key")]
@@ -22,7 +20,7 @@ pub enum Error {
     #[error("Login failed")]
     LoginFailed,
     #[error("Uncategorized error. Please downcast")]
-    Underscore(#[from] Box<dyn std::error::Error + Send + 'static>),
+    Underscore(#[from] Box<dyn std::error::Error + Send + Sync + 'static>),
 }
 
 pub use Error::*;
