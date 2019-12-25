@@ -91,7 +91,9 @@ MouseArea {
                 }
                 source: "qrc:/options-icon.svg"
                 z: CmnCfg.overlayZ
-                onClicked: messageOptionsMenu.open()
+                onClicked: {
+                    messageOptionsMenu.open()
+                }
             }
         }
     }

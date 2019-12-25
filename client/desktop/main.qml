@@ -41,6 +41,17 @@ ApplicationWindow {
     }
 
     Loader {
+        id: messageInfoLoader
+        anchors.fill: active ? parent : undefined
+        property var convoMembers
+        property var messageData
+        active: false
+        sourceComponent: CvPopups.MoreInfoPopup {
+            id: moreInfo
+        }
+    }
+
+    Loader {
         id: appLoader
         active: Herald.configInit
         anchors.fill: parent

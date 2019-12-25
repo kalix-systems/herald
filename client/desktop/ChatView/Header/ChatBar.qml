@@ -12,7 +12,7 @@ import "../../common" as Common
 ToolBar {
     id: chatToolBar
     property var conversationItem
-    property Messages ownedConversation: parent.ownedConversation
+    property var ownedConversation: parent.ownedConversation
 
     height: CmnCfg.toolbarHeight
     z: CmnCfg.middleZ
