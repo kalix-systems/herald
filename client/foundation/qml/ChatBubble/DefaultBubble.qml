@@ -6,13 +6,15 @@ import "./ReplyBubble"
 import "../js/utils.mjs" as Utils
 import "../Entity"
 
+//This is a default bubble that e.g. displays avatar, has default padding regardless of
+//isHead and isTail. It is used in the view for more info for a message
 Rectangle {
     id: bubbleRoot
 
     property real defaultWidth
     property bool elided: body.length !== messageModelData.fullBody.length
     property bool expanded: false
-    property bool outbound: author === Herald.config.configId
+    property bool outbound: messageModelData.author === Herald.config.configId
     property Item convContainer
     property var messageModelData
 
@@ -40,9 +42,10 @@ Rectangle {
     property string friendlyTimestamp: Utils.friendlyTimestamp(
                                            messageModelData.insertionTime)
 
-    property string timerIcon: expirationTime !== undefined ? Utils.timerIcon(
-                                                                  expirationTime,
-                                                                  insertionTime) : ""
+    property string timerIcon: messageModelData.expirationTime
+                               !== undefined ? Utils.timerIcon(
+                                                   messageModelData.expirationTime,
+                                                   messageModelData.insertionTime) : ""
     readonly property string receiptImage: outbound ? Utils.receiptCodeSwitch(
                                                           messageModelData.receiptStatus) : ""
     readonly property color authorColor: CmnCfg.avatarColors[messageModelData.authorColor]
@@ -50,16 +53,6 @@ Rectangle {
     readonly property string pfpUrl: messageModelData.authorProfilePicture
     property bool hoverHighlight: false
 
-    Connections {
-        target: appRoot.globalTimer
-        onRefreshTime: {
-            friendlyTimestamp = Utils.friendlyTimestamp(
-                        messageModelData.insertionTime)
-            timerIcon = (expirationTime !== undefined) ? (Utils.timerIcon(
-                                                              expirationTime,
-                                                              insertionTime)) : ""
-        }
-    }
     height: contentRoot.height
     width: defaultWidth
 
@@ -70,7 +63,6 @@ Rectangle {
         width: parent.width
         height: 1
         color: CmnCfg.palette.medGrey
-        visible: isHead
     }
 
     Rectangle {
@@ -79,7 +71,6 @@ Rectangle {
 
         height: 1
         color: CmnCfg.palette.medGrey
-        visible: isTail
     }
 
     Highlight {
@@ -92,7 +83,7 @@ Rectangle {
         color: authorColor
         initials: authorName[0].toUpperCase()
         size: 36
-        visible: isHead ? true : false
+
         anchors {
             left: parent.left
             top: parent.top
@@ -136,13 +127,12 @@ Rectangle {
         Component.onCompleted: bubbleRoot.expanded = false
 
         spacing: CmnCfg.smallMargin
-        topPadding: isHead ? CmnCfg.smallMargin : CmnCfg.smallMargin
+        topPadding: CmnCfg.smallMargin
         leftPadding: CmnCfg.smallMargin
-        bottomPadding: isTail ? CmnCfg.defaultMargin : CmnCfg.smallMargin
+        bottomPadding: CmnCfg.defaultMargin
 
         BubbleLabel {
             id: authorLabel
-            visible: isHead
         }
 
         //reply bubble loader
@@ -151,7 +141,7 @@ Rectangle {
                 if (!reply)
                     return undefined
 
-                if (replyType === 1) {
+                if (messageModelData.replyType === 1) {
                     return replyDanglingContent
                 }
 

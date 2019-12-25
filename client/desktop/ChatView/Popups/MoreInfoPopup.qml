@@ -15,17 +15,23 @@ Popup {
     id: moreInfoPopup
     property var convoMembers: parent.convoMembers
     property var messageData: parent.messageData
+    property var receiptData
 
     height: root.height
     width: root.width
     anchors.centerIn: parent
+    onClosed: messageInfoLoader.active = false
 
     background: Rectangle {
         id: background
         color: CmnCfg.palette.white
     }
 
-    CB.ChatBubble {
+    Component.onCompleted: {
+        receiptData = JSON.parse(moreInfoPopup.messageData.userReceipts)
+    }
+
+    CB.DefaultBubble {
         id: bubbleInfo
         convContainer: parent
         defaultWidth: parent.width
@@ -38,13 +44,14 @@ Popup {
         height: contentHeight
         width: parent.width
         anchors.top: bubbleInfo.bottom
+        anchors.topMargin: CmnCfg.smallMargin
         model: convoMembers
         highlightFollowsCurrentItem: false
         currentIndex: -1
         delegate: Item {
             height: visible ? CmnCfg.convoHeight : 0
             width: parent.width
-            visible: memberData.userId !== Herald.config.configId
+            visible: memberData.userId !== messageData.author
             property var memberData: model
             Common.PlatonicRectangle {
                 boxTitle: memberData.name
@@ -57,6 +64,20 @@ Popup {
                     labelColor: CmnCfg.palette.black
                     secondaryLabelColor: CmnCfg.palette.darkGrey
                     labelFontSize: CmnCfg.entityLabelSize
+                }
+
+                Button {
+                    id: receipt
+                    icon.source: Utils.receiptCodeSwitch(
+                                     receiptData[memberData.userId])
+                    icon.height: 16
+                    icon.width: 16
+                    icon.color: CmnCfg.palette.iconMatte
+                    padding: 0
+                    anchors.right: parent.right
+
+                    anchors.verticalCenter: parent.verticalCenter
+                    background: Item {}
                 }
                 MouseArea {
                     id: hoverHandler
