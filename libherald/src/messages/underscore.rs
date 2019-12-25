@@ -35,10 +35,16 @@ impl Messages {
         &self,
         index: usize,
     ) -> Option<u32> {
+        let local_id = self.local_id?;
+
         Some(
             self.container
                 .access_by_index(index, |data| {
-                    data.receipts.values().map(|r| *r as u32).max()
+                    data.receipts
+                        .iter()
+                        .filter(|(k, _)| k != &&local_id)
+                        .map(|(_, r)| *r as u32)
+                        .max()
                 })?
                 .unwrap_or(MessageReceiptStatus::Nil as u32),
         )
