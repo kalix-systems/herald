@@ -150,14 +150,14 @@ impl Messages {
         &self,
         index: usize,
     ) -> Option<String> {
-        self.container.doc_attachments_data_json(index)
+        self.container.doc_attachments_data_json(index, 1.into())
     }
 
     pub(crate) fn media_attachments_(
         &self,
         index: usize,
     ) -> Option<String> {
-        self.container.media_attachments_data_json(index)
+        self.container.media_attachments_data_json(index, 5.into())
     }
 
     pub(crate) fn op_body_(
