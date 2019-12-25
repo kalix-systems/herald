@@ -33,11 +33,11 @@ Row {
             replyTs.text = Utils.friendlyTimestamp(
                         messageModelData.opInsertionTime)
             clock.icon.source = messageModelData.opExpirationTime
-                    !== undefined ? Utils.timerIcon(opExpirationTime,
-                                                    opInsertionTime) : ""
+                    !== undefined ? Utils.timerIcon(
+                                        messageModelData.opExpirationTime,
+                                        messageModelData.opInsertionTime) : ""
         }
     }
-
     Label {
         id: replyTs
 
@@ -50,8 +50,9 @@ Row {
     Button {
         id: clock
         icon.source: messageModelData.opExpirationTime
-                     !== undefined ? Utils.timerIcon(opExpirationTime,
-                                                     opInsertionTime) : ""
+                     !== undefined ? Utils.timerIcon(
+                                         messageModelData.opExpirationTime,
+                                         messageModelData.opInsertionTime) : ""
 
         icon.height: 16
         icon.width: 16

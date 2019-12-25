@@ -52,10 +52,21 @@ Rectangle {
 
     readonly property string pfpUrl: messageModelData.authorProfilePicture
     property bool hoverHighlight: false
+    property bool moreInfo: true
 
     height: contentRoot.height
     width: defaultWidth
 
+    Connections {
+        target: appRoot.globalTimer
+        onRefreshTime: {
+            friendlyTimestamp = Utils.friendlyTimestamp(
+                        messageModelData.insertionTime)
+            timerIcon = (expirationTime !== undefined) ? (Utils.timerIcon(
+                                                              expirationTime,
+                                                              insertionTime)) : ""
+        }
+    }
     color: CmnCfg.palette.white
 
     Rectangle {
@@ -162,7 +173,9 @@ Rectangle {
             // reply bubble if there is doc file content
             Component {
                 id: replyHybridContent
-                ReplyHybrid {}
+                ReplyHybrid {
+                    mouseEnabled: false
+                }
             }
 
             // reply bubble if there is doc file content
@@ -174,19 +187,25 @@ Rectangle {
             // reply bubble if there is doc file content
             Component {
                 id: replyDocContent
-                ReplyDoc {}
+                ReplyDoc {
+                    mouseEnabled: false
+                }
             }
 
             // reply media bubble if there is media file content
             Component {
                 id: replyMediaContent
-                ReplyImage {}
+                ReplyImage {
+                    mouseEnabled: false
+                }
             }
 
             // reply bubble if there is no doc file content
             Component {
                 id: replyContent
-                ReplyText {}
+                ReplyText {
+                    mouseEnabled: false
+                }
             }
         }
 

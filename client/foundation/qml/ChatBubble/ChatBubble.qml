@@ -49,6 +49,7 @@ Rectangle {
 
     readonly property string pfpUrl: messageModelData.authorProfilePicture
     property bool hoverHighlight: false
+    property bool moreInfo: false
 
     Connections {
         target: appRoot.globalTimer
