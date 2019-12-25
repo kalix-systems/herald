@@ -3,6 +3,37 @@ use herald_common::protocol::auth::*;
 use krpc::*;
 
 impl State {
+    pub async fn auth_transition<Tx, Rx>(
+        &self,
+        state: AuthState,
+        tx: &mut Framed<Tx>,
+        rx: &mut Framed<Rx>,
+    ) -> Result<AuthState, anyhow::Error>
+    where
+        Tx: AsyncWrite + Unpin,
+        Rx: AsyncRead + Unpin,
+    {
+        use AuthState::*;
+        match state {
+            Done(g) => Ok(Done(g)),
+            Register(register) => match self.register_transition(register, tx, rx).await? {
+                RegisterState::Done(g) => Ok(Done(g)),
+                r => Ok(Register(r)),
+            },
+            Login(login) => match self.login_transition(login, tx, rx).await? {
+                LoginState::Done(g) => Ok(Done(g)),
+                l => Ok(Login(l)),
+            },
+            AwaitMethod => {
+                let method = rx.read_u8().await?;
+                match method {
+                    REGISTER => Ok(Register(RegisterState::CheckLoop)),
+                    LOGIN => Ok(Login(LoginState::AwaitClaim)),
+                    m => Err(anyhow!(format!("unknown method {}", m))),
+                }
+            }
+        }
+    }
     pub async fn login_transition<Tx, Rx>(
         &self,
         login: LoginState,
@@ -17,7 +48,7 @@ impl State {
         use LoginState::*;
 
         match login {
-            Accepted(g) => Ok(Accepted(g)),
+            Done(g) => Ok(Done(g)),
             Rejected => Err(anyhow!("login rejected")),
             AwaitClaim => {
                 let mut conn = self.new_connection().await?;
@@ -38,7 +69,7 @@ impl State {
                 tx.write_all(challenge.as_ref()).await?;
                 let sig = rx.read_de().await?;
                 if g.did.verify(challenge.as_ref(), sig) {
-                    Ok(Accepted(g))
+                    Ok(Done(g))
                 } else {
                     Ok(Rejected)
                 }

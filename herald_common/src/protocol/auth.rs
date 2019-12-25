@@ -40,8 +40,8 @@ pub mod register {
 pub enum LoginState {
     AwaitClaim,
     Challenge(GlobalId),
-    Accepted(GlobalId),
     Rejected,
+    Done(GlobalId),
 }
 
 pub mod login_types {
