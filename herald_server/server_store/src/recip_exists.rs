@@ -124,7 +124,7 @@ impl Conn {
     pub(crate) async fn many_recips_exist(
         &mut self,
         many: Recips,
-    ) -> Result<bool, Error> {
+    ) -> Res<bool> {
         use Recips::*;
 
         match many {
@@ -222,7 +222,6 @@ mod tests {
         wa!(client.new_user(a_init));
 
         let b_uid: UserId = "b".try_into().expect(womp!());
-
         let b_kp = sig::KeyPair::gen_new();
         let b_init = b_kp.sign(b_uid);
         wa!(client.new_user(b_init));

@@ -1,13 +1,14 @@
 SELECT
-    key_deprecations.key,
-    signed_by,
-    signature,
-    ts
+    sigchain.key,
+    outer_signed_by,
+    outer_signature,
+    outer_ts
 FROM
-    key_deprecations
+    sigchain
 INNER JOIN
     userkeys
 ON
-    key_deprecations.key = userkeys.key
+    sigchain.key = userkeys.key
 WHERE
-    userkeys.user_id = $1
+    userkeys.user_id = $1 AND
+    sigchain.is_creation = false

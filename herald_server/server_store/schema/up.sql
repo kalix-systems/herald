@@ -1,27 +1,24 @@
 CREATE TABLE userkeys (
-    user_id   CHAR(32) NOT NULL,
-    key       BYTEA    NOT NULL PRIMARY KEY
+    key       BYTEA    NOT NULL PRIMARY KEY,
+    user_id   TEXT     NOT NULL
 );
 
 CREATE INDEX user_id_ix ON userkeys(user_id);
 
-CREATE TABLE key_creations (
-    key               BYTEA     PRIMARY KEY,
-    inner_signature   BYTEA     NOT NULL,
-    inner_ts          BIGINT    NOT NULL,
+CREATE TABLE sigchain (
+    key               BYTEA     NOT NULL,
+    is_creation       BOOLEAN   NOT NULL,
+    update_id         BIGSERIAL NOT NULL,
 
-    signed_by         BYTEA,
-    signature         BYTEA,
-    ts                BIGINT
+    inner_signature   BYTEA,
+    inner_ts          BIGINT,
+
+    outer_signed_by   BYTEA,
+    outer_signature   BYTEA,
+    outer_ts          BIGINT,
+
+    PRIMARY KEY(key, is_creation)
 );
-
-CREATE TABLE key_deprecations (
-    key         BYTEA    PRIMARY KEY,
-    ts          BIGINT   NOT NULL,
-    signed_by   BYTEA    NOT NULL,
-    signature   BYTEA    NOT NULL
-);
-
 
 CREATE TABLE pushes (
     push_id     BIGSERIAL   PRIMARY   KEY,
@@ -40,14 +37,20 @@ CREATE TABLE pending (
 );
 
 CREATE TABLE prekeys (
-    sealed_key    BYTEA   NOT NULL,
-    signing_key   BYTEA   NOT NULL
+    key        BYTEA     NOT NULL,
+    slot       SMALLINT  NOT NULL,
+    signed_by  BYTEA     NOT NULL,
+    signature  BYTEA     NOT NULL,
+    ts         BIGINT    NOT NULL,
+
+
+    PRIMARY KEY(key, signed_by)
 );
 
-CREATE INDEX prekey_signer ON prekeys(signing_key);
+CREATE INDEX prekey_signer ON prekeys(signed_by);
 
 CREATE TABLE conversation_members (
-    conversation_id   BYTEA     NOT NULL,
-    user_id           CHAR(32)  NOT NULL,
+    conversation_id   BYTEA  NOT NULL,
+    user_id           TEXT   NOT NULL,
     PRIMARY KEY(conversation_id, user_id)
 );

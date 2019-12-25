@@ -43,6 +43,11 @@ impl Drop for Conn {
             }
         };
 
+        // don't add dead connections back to the pool
+        if conn.is_closed() {
+            return;
+        }
+
         drop(self.tx.send(conn))
     }
 }
