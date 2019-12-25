@@ -138,3 +138,20 @@ impl std::convert::TryFrom<i64> for MessageReceiptStatus {
         }
     }
 }
+
+impl TryFrom<Vec<Reaction>> for Reactions {
+    type Error = ();
+
+    fn try_from(mut reactions: Vec<Reaction>) -> Result<Self, Self::Error> {
+        let mid = match reactions.first() {
+            Some(first) => first.mid,
+            None => return Err(()),
+        };
+
+        reactions.sort_unstable_by(|a, b| a.time.cmp(&b.time));
+
+        let mut content = Vec::new();
+
+        Ok(Self { mid, content })
+    }
+}
