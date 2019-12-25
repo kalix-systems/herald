@@ -157,7 +157,7 @@ impl Messages {
         &self,
         index: usize,
     ) -> Option<String> {
-        self.container.media_attachments_data_json(index, 5.into())
+        self.container.media_attachments_data_json(index, 4.into())
     }
 
     pub(crate) fn full_media_attachments_(
