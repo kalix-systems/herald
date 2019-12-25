@@ -40,8 +40,15 @@ ApplicationWindow {
         }
     }
 
-    CvPopups.MoreInfoPopup {
-        id: moreInfo
+    Loader {
+        id: messageInfoLoader
+        anchors.fill: active ? parent : undefined
+        property var convoMembers
+        property var messageData
+        active: false
+        sourceComponent: CvPopups.MoreInfoPopup {
+            id: moreInfo
+        }
     }
 
     Loader {
