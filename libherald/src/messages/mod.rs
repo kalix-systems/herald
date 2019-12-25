@@ -15,8 +15,8 @@ use messages_helper::{container::Container, search::SearchState};
 use search_pattern::SearchPattern;
 
 mod helpers;
+pub(crate) mod imp;
 mod trait_imp;
-pub(crate) mod underscore;
 
 /// Implementation of `crate::interface::MessageBuilderTrait`.
 pub mod builder;
