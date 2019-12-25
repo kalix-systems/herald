@@ -6,3 +6,4 @@ export declare function safeToQrcURI(url: string): string;
 export declare function safeStringOrDefault(maybeString: unknown, fallback?: unknown): string;
 export declare function initialize(name: string): string;
 export declare function receiptCodeSwitch(receiptCode: MessageReceiptStatus): string;
+export declare function timerIcon(expireTime: number, insertTime: number): string;

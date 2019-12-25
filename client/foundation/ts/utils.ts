@@ -205,3 +205,12 @@ export function receiptCodeSwitch(receiptCode: MessageReceiptStatus): string {
       return "";
   }
 }
+
+export function timerIcon(expireTime: number, insertTime: number): string {
+	var timeNow = Date.now();
+	var proportion = (timeNow - insertTime) / (expireTime - insertTime);
+	if (proportion < 0.25) return "qrc:/mini-timer-icons/full.svg";
+	else if (proportion < 0.5) return "qrc:/mini-timer-icons/almost-full.svg";
+	else if (proportion < 0.75) return "qrc:/mini-timer-icons/almost-empty.svg";
+	else return "qrc:/mini-timer-icons/empty.svg";
+}
