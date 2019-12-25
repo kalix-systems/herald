@@ -189,7 +189,7 @@ export function initialize(name: string): string {
  * */
 export function receiptCodeSwitch(receiptCode: MessageReceiptStatus): string {
   switch (receiptCode) {
-    case MessageReceiptStatus.NoAck: {
+    case MessageReceiptStatus.Nil: {
       return "";
     }
     case MessageReceiptStatus.Received: {
@@ -198,19 +198,16 @@ export function receiptCodeSwitch(receiptCode: MessageReceiptStatus): string {
     case MessageReceiptStatus.Read: {
       return "qrc:/double-check-receipt-icon.svg";
     }
-    case MessageReceiptStatus.AckTerminal: {
-      return "qrc:/single-check-receipt-icon.svg";
-    }
     default:
       return "";
   }
 }
 
 export function timerIcon(expireTime: number, insertTime: number): string {
-	var timeNow = Date.now();
-	var proportion = (timeNow - insertTime) / (expireTime - insertTime);
-	if (proportion < 0.25) return "qrc:/mini-timer-icons/full.svg";
-	else if (proportion < 0.5) return "qrc:/mini-timer-icons/almost-full.svg";
-	else if (proportion < 0.75) return "qrc:/mini-timer-icons/almost-empty.svg";
-	else return "qrc:/mini-timer-icons/empty.svg";
+  var timeNow = Date.now();
+  var proportion = (timeNow - insertTime) / (expireTime - insertTime);
+  if (proportion < 0.25) return "qrc:/mini-timer-icons/full.svg";
+  else if (proportion < 0.5) return "qrc:/mini-timer-icons/almost-full.svg";
+  else if (proportion < 0.75) return "qrc:/mini-timer-icons/almost-empty.svg";
+  else return "qrc:/mini-timer-icons/empty.svg";
 }
