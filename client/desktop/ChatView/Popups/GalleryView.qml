@@ -152,6 +152,7 @@ Popup {
         fill: CmnCfg.palette.white
         opacity: enabled ? 1.0 : 0.5
         onClicked: {
+            galleryPopup.imageScale = 1.0
             galleryView.currentIndex += 1
             clipScroll.positionViewAtIndex(galleryView.currentIndex,
                                            ListView.Contain)
@@ -170,6 +171,7 @@ Popup {
         fill: CmnCfg.palette.white
         opacity: enabled ? 1.0 : 0.5
         onClicked: {
+            galleryPopup.imageScale = 1.0
             galleryView.currentIndex -= 1
             clipScroll.positionViewAtIndex(galleryView.currentIndex,
                                            ListView.Contain)
@@ -251,18 +253,17 @@ Popup {
         id: pinchArea
         anchors.fill: parent
 
-        property point pt: Qt.point(0, 0)
-
-        onPinchStarted: {
-            pt = pinch.center
-        }
+        property point pt
+        property real flickableStartX
+        property real flickableStartY
 
         onPinchUpdated: {
+            pt = Qt.point(flickable.contentWidth / 2,
+                          flickable.contentHeight / 2)
 
             galleryPopup.imageScale += (pinch.scale - pinch.previousScale) * 1.2
             flickable.resizeContent(galleryPopup.width * constrainedZoom,
-                                    galleryPopup.height * constrainedZoom,
-                                    Qt.point(0, 0))
+                                    galleryPopup.height * constrainedZoom, pt)
         }
 
         onPinchFinished: {
