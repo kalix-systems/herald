@@ -314,7 +314,9 @@ impl Container {
                 MatchStatus::NotMatched
             };
 
-            if old_match_status != msg.match_status {
+            if (old_match_status != msg.match_status)
+                || (old_match_status.is_match() && msg.match_status.is_match())
+            {
                 data_changed(ix);
             }
 
