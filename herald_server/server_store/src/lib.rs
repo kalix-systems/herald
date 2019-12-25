@@ -86,6 +86,20 @@ impl Conn {
 
         Ok(register::Res::Success)
     }
+
+    pub async fn key_is_valid(
+        &mut self,
+        key: sig::PublicKey,
+    ) -> Res<bool> {
+        let stmt = self
+            .prepare_typed(sql!("key_is_valid"), types![BYTEA])
+            .await?;
+
+        Ok(self
+            .query_one(&stmt, params![key.as_ref()])
+            .await?
+            .get::<_, bool>(0))
+    }
 }
 
 impl Conn {
@@ -159,5 +173,23 @@ pub(crate) mod tests {
         assert_eq!(wa!(client.new_user(init)), register::Res::Success);
 
         assert_eq!(wa!(client.user_of(pk)), Some(uid));
+    }
+
+    #[tokio::test]
+    #[serial]
+    async fn key_is_valid() {
+        let mut client = wa!(get_client());
+
+        let uid: UserId = w!("a".try_into());
+        let kp = sig::KeyPair::gen_new();
+        let pk = *kp.public_key();
+
+        let init = kp.sign(uid);
+
+        assert!(!wa!(client.key_is_valid(pk)));
+
+        assert_eq!(wa!(client.new_user(init)), register::Res::Success);
+
+        assert!(wa!(client.key_is_valid(pk)));
     }
 }
