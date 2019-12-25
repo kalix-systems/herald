@@ -263,9 +263,7 @@ impl Container {
     ) -> Option<String> {
         let mid = self.op_msg_id(index)?;
 
-        access(&mid, |m| m.attachments.clone())
-            .and_then(|attachments| attachments.doc_attachments(Some(1)).ok())
-            .map(|docs| json::JsonValue::from(docs).dump())
+        self.get_doc_attachments_data_json(&mid, Some(1))
     }
 
     pub fn op_media_attachments_json(
@@ -273,10 +271,7 @@ impl Container {
         index: usize,
     ) -> Option<String> {
         let mid = self.op_msg_id(index)?;
-
-        access(&mid, |m| m.attachments.clone())
-            .and_then(|attachments| attachments.media_attachments(Some(4)).ok())
-            .map(|media| json::JsonValue::from(media).dump())
+        self.get_media_attachments_data_json(&mid, Some(4))
     }
 
     pub fn clear_search<F: FnMut(usize)>(
