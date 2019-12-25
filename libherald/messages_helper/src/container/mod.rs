@@ -275,7 +275,7 @@ impl Container {
         let mid = self.op_msg_id(index)?;
 
         access(&mid, |m| m.attachments.clone())
-            .and_then(|attachments| attachments.media_attachments(Some(5)).ok())
+            .and_then(|attachments| attachments.media_attachments(Some(4)).ok())
             .map(|media| json::JsonValue::from(media).dump())
     }
 

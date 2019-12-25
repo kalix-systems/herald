@@ -109,11 +109,19 @@ impl Interface for Messages {
     ) -> String {
         self.doc_attachments_(index).unwrap_or_default()
     }
+
     fn media_attachments(
         &self,
         index: usize,
     ) -> String {
         self.media_attachments_(index).unwrap_or_default()
+    }
+
+    fn full_media_attachments(
+        &self,
+        index: usize,
+    ) -> String {
+        self.full_media_attachments_(index).unwrap_or_default()
     }
 
     fn delete_message(
