@@ -10,9 +10,10 @@ impl Messages {
         Some(
             self.container
                 .access_by_index(index, |data| {
+                    let author = data.author;
                     data.receipts
                         .iter()
-                        .filter(|(k, _)| k != &&local_id)
+                        .filter(|(k, _)| k != &&local_id && k != &&author)
                         .map(|(_, r)| *r as u32)
                         .max()
                 })?
