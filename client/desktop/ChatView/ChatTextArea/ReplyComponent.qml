@@ -55,9 +55,9 @@ Rectangle {
             break
         default:
             imageClipLoader.sourceComponent = imageClipComponent
-            imageClipLoader.item.imageSource = "file:" + media[0].path
-            imageClipLoader.item.count = media.length - 1
-            imageClipLoader.item.aspectRatio = media[0].width / media[0].height
+            imageClipLoader.item.imageSource = "file:" + media.items[0].path
+            imageClipLoader.item.count = media.num_more
+            imageClipLoader.item.aspectRatio = media.items[0].width / media.items[0].height
         }
     }
 
@@ -71,8 +71,9 @@ Rectangle {
             break
         default:
             fileClipLoader.sourceComponent = fileClipComponent
-            fileClipLoader.item.nameMetrics = doc[0].name
-            fileClipLoader.item.fileSize = Utils.friendlyFileSize(doc[0].size)
+            fileClipLoader.item.nameMetrics = doc.items[0].name
+            fileClipLoader.item.fileSize = Utils.friendlyFileSize(
+                        doc.items[0].size)
         }
     }
 
