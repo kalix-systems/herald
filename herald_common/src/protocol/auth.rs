@@ -15,7 +15,7 @@ pub enum AuthState {
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub enum RegisterState {
     CheckLoop,
-    Claim(Signed<UserId>),
+    Done(GlobalId),
 }
 
 pub mod register {
@@ -31,33 +31,35 @@ pub mod register {
     pub enum ServeEvent {
         Taken,
         Available,
-        Claimed,
-        Failed(PKIResponse),
+        Success,
+        BadSig(SigValid),
     }
 }
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub enum LoginState {
     AwaitClaim,
-    Challenge(UserId),
+    Challenge(GlobalId),
     Accepted(GlobalId),
     Rejected,
 }
 
-// pub mod login {
-//     use super::*;
+pub mod login_types {
+    use super::*;
 
-//     // #[derive(Ser, De, Debug, Clone, Copy, Eq, PartialEq)]
-//     // pub enum ClientEvent {
-//     //     Claim(UserId),
-//     //     Answer(SigMeta),
-//     // }
+    #[derive(Ser, De, Debug, Clone, Copy, PartialEq, Eq)]
+    pub enum ClaimResponse {
+        Challenge,
+        KeyInvalid,
+        MissingUID,
+    }
 
-//     // #[derive(Ser, De, Debug, Clone, Copy, Eq, PartialEq)]
-//     // pub enum ServeEvent {
-//     //     UnknownUID,
-//     //     UnknownKey,
-//     //     Challenge(UQ),
-//     //     Failed(SigValid),
-//     // }
-// }
+    // #[derive(Ser, De, Debug, Clone, Copy, PartialEq, Eq)]
+    // pub struct LoginToken(pub sig::Signature);
+
+    // #[derive(Ser, De, Debug, Clone, Copy, PartialEq, Eq)]
+    // pub enum LoginTokenResponse {
+    //     Success,
+    //     BadSig,
+    // }
+}

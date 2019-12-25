@@ -20,42 +20,6 @@ pub struct PushMeta {
     pub timestamp: Time,
 }
 
-pub mod register {
-    use super::*;
-
-    pub type Claim = Signed<UserId>;
-
-    #[derive(Ser, De, Debug, Clone, Copy, PartialEq, Eq)]
-    pub enum Res {
-        Success,
-        UserAlreadyClaimed,
-        BadSig,
-    }
-}
-pub mod login {
-    use super::*;
-
-    #[derive(Ser, De, Debug, Clone, Copy, PartialEq, Eq)]
-    pub struct SignAs(pub GlobalId);
-
-    #[derive(Ser, De, Debug, Clone, Copy, PartialEq, Eq)]
-    pub enum SignAsResponse {
-        Sign(UQ),
-        SessionExists,
-        KeyDeprecated,
-        MissingUID,
-    }
-
-    #[derive(Ser, De, Debug, Clone, Copy, PartialEq, Eq)]
-    pub struct LoginToken(pub sig::Signature);
-
-    #[derive(Ser, De, Debug, Clone, Copy, PartialEq, Eq)]
-    pub enum LoginTokenResponse {
-        Success,
-        BadSig,
-    }
-}
-
 pub mod catchup {
     use super::*;
 
