@@ -1601,6 +1601,7 @@ public:
   Q_INVOKABLE QVariant receiptStatus(int row) const;
   Q_INVOKABLE QVariant replyType(int row) const;
   Q_INVOKABLE QVariant serverTime(int row) const;
+  Q_INVOKABLE QString userReceipts(int row) const;
 
 Q_SIGNALS:
   // new data is ready to be made available to the model with fetchMore()

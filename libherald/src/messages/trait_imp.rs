@@ -345,4 +345,10 @@ impl Interface for Messages {
     ) -> bool {
         self.save_all_attachments_(index as usize, dest)
     }
+    fn user_receipts(
+        &self,
+        index: usize,
+    ) -> std::string::String {
+        self.user_receipts_(index).unwrap_or_default()
+    }
 }

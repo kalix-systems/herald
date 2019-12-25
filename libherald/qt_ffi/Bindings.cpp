@@ -1809,6 +1809,8 @@ void messages_data_op_name(const Messages::Private *, int, QString *,
 option_quint32 messages_data_receipt_status(const Messages::Private *, int);
 option_quint8 messages_data_reply_type(const Messages::Private *, int);
 option_qint64 messages_data_server_time(const Messages::Private *, int);
+void messages_data_user_receipts(const Messages::Private *, int, QString *,
+                                 qstring_set);
 void messages_sort(Messages::Private *, unsigned char column,
                    Qt::SortOrder order = Qt::AscendingOrder);
 int messages_row_count(const Messages::Private *);
@@ -2030,6 +2032,12 @@ QVariant Messages::serverTime(int row) const {
   return v;
 }
 
+QString Messages::userReceipts(int row) const {
+  QString s;
+  messages_data_user_receipts(m_d, row, &s, set_qstring);
+  return s;
+}
+
 QVariant Messages::data(const QModelIndex &index, int role) const {
   Q_ASSERT(rowCount(index.parent()) > index.row());
   switch (index.column()) {
@@ -2089,6 +2097,8 @@ QVariant Messages::data(const QModelIndex &index, int role) const {
       return replyType(index.row());
     case Qt::UserRole + 26:
       return serverTime(index.row());
+    case Qt::UserRole + 27:
+      return QVariant::fromValue(userReceipts(index.row()));
     }
     break;
   }
@@ -2134,6 +2144,7 @@ QHash<int, QByteArray> Messages::roleNames() const {
   names.insert(Qt::UserRole + 24, "receiptStatus");
   names.insert(Qt::UserRole + 25, "replyType");
   names.insert(Qt::UserRole + 26, "serverTime");
+  names.insert(Qt::UserRole + 27, "userReceipts");
   return names;
 }
 

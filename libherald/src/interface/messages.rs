@@ -494,6 +494,11 @@ pub trait MessagesTrait {
         &self,
         index: usize,
     ) -> Option<i64>;
+
+    fn user_receipts(
+        &self,
+        index: usize,
+    ) -> String;
 }
 
 #[no_mangle]
@@ -1271,6 +1276,19 @@ pub unsafe extern "C" fn messages_data_server_time(
 ) -> COption<i64> {
     let obj = &*ptr;
     obj.server_time(to_usize(row).unwrap_or(0)).into()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn messages_data_user_receipts(
+    ptr: *const Messages,
+    row: c_int,
+    d: *mut QString,
+    set: fn(*mut QString, *const c_char, len: c_int),
+) {
+    let obj = &*ptr;
+    let data = obj.user_receipts(to_usize(row).unwrap_or(0));
+    let str_: *const c_char = data.as_ptr() as *const c_char;
+    set(d, str_, to_c_int(data.len()));
 }
 
 #[derive(Clone, Copy)]

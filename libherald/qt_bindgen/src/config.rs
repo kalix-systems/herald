@@ -263,6 +263,7 @@ fn messages() -> Object {
         // Document attachments metadata, serialized as JSON
         docAttachments: ItemProp::new(QString).get_by_value(),
 
+        userReceipts: ItemProp::new(QString).get_by_value(),
         receiptStatus: ItemProp::new(QUint32).optional(),
         isHead: ItemProp::new(Bool).optional(),
         isTail: ItemProp::new(Bool).optional(),

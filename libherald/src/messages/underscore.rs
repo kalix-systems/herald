@@ -9,6 +9,8 @@ use heraldcore::{
     message::{self, MessageBody, MessageReceiptStatus},
 };
 use messages_helper::search::SearchState;
+
+use std::collections::HashMap;
 use std::convert::TryInto;
 
 impl Messages {
@@ -568,5 +570,18 @@ impl Messages {
 
         spawn!(err!(data.save_all_attachments(dest)), false);
         true
+    }
+
+    pub(crate) fn user_receipts_(
+        &self,
+        index: usize,
+    ) -> Option<String> {
+        let data = self.container.msg_data(index)?;
+        let hashmap: HashMap<&str, json::JsonValue> = data
+            .receipts
+            .iter()
+            .map(|(userid, receipt)| (userid.as_str(), json::JsonValue::from(*receipt as u32)))
+            .collect();
+        Some(json::JsonValue::from(hashmap).dump())
     }
 }
