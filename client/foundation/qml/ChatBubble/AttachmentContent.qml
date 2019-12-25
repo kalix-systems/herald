@@ -34,20 +34,24 @@ Column {
 
         wrapperCol.mediaParsed = JSON.parse(medAttachments)
 
-        switch (wrapperCol.mediaParsed.items.length) {
+        switch (wrapperCol.mediaParsed.num_more) {
         case 0:
-            break
-        case 1:
-            imageLoader.sourceComponent = oneImage
-            break
-        case 2:
-            imageLoader.sourceComponent = twoImage
-            break
-        case 3:
-            imageLoader.sourceComponent = threeImage
-            break
-        case 4:
-            imageLoader.sourceComponent = fourImage
+            switch (wrapperCol.mediaParsed.items.length) {
+            case 0:
+                break
+            case 1:
+                imageLoader.sourceComponent = oneImage
+                break
+            case 2:
+                imageLoader.sourceComponent = twoImage
+                break
+            case 3:
+                imageLoader.sourceComponent = threeImage
+                break
+            case 4:
+                imageLoader.sourceComponent = fourImage
+                break
+            }
             break
         default:
             imageLoader.sourceComponent = fiveImage

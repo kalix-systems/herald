@@ -56,7 +56,7 @@ Rectangle {
         default:
             imageClipLoader.sourceComponent = imageClipComponent
             imageClipLoader.item.imageSource = "file:" + media.items[0].path
-            imageClipLoader.item.count = media.num_more
+            imageClipLoader.item.count = media.items.length - 1
             imageClipLoader.item.aspectRatio = media.items[0].width / media.items[0].height
         }
     }
