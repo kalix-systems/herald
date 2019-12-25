@@ -34,8 +34,13 @@ Row {
 
     Connections {
         target: appRoot.globalTimer
-        onRefreshTime: replyTs.text = Utils.friendlyTimestamp(
-                           messageModelData.opInsertionTime)
+        onRefreshTime: {
+            replyTs.text = Utils.friendlyTimestamp(
+                        messageModelData.opInsertionTime)
+            clock.icon.source = messageModelData.opExpirationTime
+                    !== undefined ? Utils.timerIcon(opExpirationTime,
+                                                    opInsertionTime) : ""
+        }
     }
 
     Label {
@@ -49,7 +54,10 @@ Row {
 
     Button {
         id: clock
-        icon.source: "qrc:/mini-timer-icons/almost-full.svg"
+        icon.source: messageModelData.opExpirationTime
+                     !== undefined ? Utils.timerIcon(opExpirationTime,
+                                                     opInsertionTime) : ""
+
         icon.height: 16
         icon.width: 16
         icon.color: "grey"

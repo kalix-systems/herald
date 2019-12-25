@@ -486,7 +486,7 @@ impl Messages {
         &self,
         index: usize,
     ) -> Option<i64> {
-        Some(self.container.op_insertion_time(index)?.into())
+        Some(self.container.op_expiration_time(index)?.into())
     }
 
     pub(crate) fn msg_id_(
