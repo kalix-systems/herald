@@ -95,7 +95,6 @@ ListView {
         defaultWidth: chatListView.width
         width: parent.width
         messageModelData: model
-
         ListView.onAdd: chatScrollBarInner.setPosition(1.0)
 
         ChatBubbleHover {
@@ -104,5 +103,6 @@ ListView {
             onEntered: bubbleActual.hoverHighlight = true
             onExited: bubbleActual.hoverHighlight = false
         }
+        Component.onCompleted: ownedConversation.markRead(index)
     }
 }
