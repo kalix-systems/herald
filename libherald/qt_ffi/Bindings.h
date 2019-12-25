@@ -1582,6 +1582,7 @@ public:
   Q_INVOKABLE QString docAttachments(int row) const;
   Q_INVOKABLE QVariant expirationTime(int row) const;
   Q_INVOKABLE QString fullBody(int row) const;
+  Q_INVOKABLE QString fullMediaAttachments(int row) const;
   Q_INVOKABLE QVariant insertionTime(int row) const;
   Q_INVOKABLE QVariant isHead(int row) const;
   Q_INVOKABLE QVariant isTail(int row) const;

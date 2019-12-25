@@ -14,15 +14,16 @@ function jumpHandler(replyId, ownedConversation, convWindow) {
 
 function parseDocs(nameMetrics, modelData, fileSize) {
     const doc = JSON.parse(modelData.opDocAttachments)
-    nameMetrics.text = doc.first.name
-    fileSize.text = Utils.friendlyFileSize(doc.first.size)
-    return doc.count - 1
+    nameMetrics.text = doc.items[0].name
+    fileSize.text = Utils.friendlyFileSize(doc.items[0].size)
+    return doc.num_more
 }
 
 function parseMedia(modelData, imageClip) {
     const media = JSON.parse(modelData.opMediaAttachments)
 
-    imageClip.imageSource = "file:" + media.first.path
-    imageClip.count = media.count - 1
-    imageClip.aspectRatio = media.first.width / media.first.height
+    imageClip.imageSource = "file:" + media.items[0].path
+    imageClip.count = (media.num_more === 0) ? media.items.length - 1 : media.num_more
+                                               + media.items.length - 1
+    imageClip.aspectRatio = media.items[0].width / media.items[0].height
 }

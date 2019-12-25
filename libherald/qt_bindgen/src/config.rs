@@ -258,6 +258,8 @@ fn messages() -> Object {
 
         // Media attachments metadata, serialized as JSON
         mediaAttachments: ItemProp::new(QString).get_by_value(),
+        // Full media attachments metadata, serialized as JSON
+        fullMediaAttachments: ItemProp::new(QString).get_by_value(),
         // Document attachments metadata, serialized as JSON
         docAttachments: ItemProp::new(QString).get_by_value(),
 

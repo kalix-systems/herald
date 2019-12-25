@@ -25,6 +25,7 @@ Rectangle {
     readonly property string authorName: messageModelData.authorName
 
     readonly property string medAttachments: messageModelData.mediaAttachments
+    readonly property string fullMedAttachments: messageModelData.fullMediaAttachments
     readonly property string documentAttachments: messageModelData.docAttachments
     readonly property bool imageAttach: medAttachments.length !== 0
     readonly property bool docAttach: documentAttachments.length !== 0

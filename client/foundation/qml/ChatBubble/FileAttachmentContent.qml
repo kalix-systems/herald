@@ -10,12 +10,12 @@ Column {
     id: wrapperCol
 
     property real maxWidth: Math.min(contentRoot.maxWidth, 600)
-    property var docParsed: JSON.parse(documentAttachments)
+    property var docParsed: JSON.parse(documentAttachments).items
 
     spacing: 0
 
     Component.onCompleted: {
-        JSON.parse(documentAttachments).forEach(function (doc) {
+        JSON.parse(documentAttachments).items.forEach(function (doc) {
             docModel.append(doc)
         })
     }

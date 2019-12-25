@@ -12,14 +12,14 @@ Column {
     // callback triggered whenever an image is tapped
     // TODO: Rename this it is nonsense
     property var imageClickedCallBack: function (source) {
-        let currentIndex = mediaParsed.findIndex(function (object) {
+        let currentIndex = mediaParsed.items.findIndex(function (object) {
             if (object === undefined || object === null) {
                 return false
             }
 
             return String("file:" + object.path) === String(source)
         })
-        galleryLoader.imageAttachments = mediaParsed
+        galleryLoader.imageAttachments = JSON.parse(fullMedAttachments).items
         galleryLoader.currentIndex = currentIndex
         galleryLoader.active = true
         galleryLoader.item.open()
@@ -34,20 +34,24 @@ Column {
 
         wrapperCol.mediaParsed = JSON.parse(medAttachments)
 
-        switch (wrapperCol.mediaParsed.length) {
+        switch (wrapperCol.mediaParsed.num_more) {
         case 0:
-            break
-        case 1:
-            imageLoader.sourceComponent = oneImage
-            break
-        case 2:
-            imageLoader.sourceComponent = twoImage
-            break
-        case 3:
-            imageLoader.sourceComponent = threeImage
-            break
-        case 4:
-            imageLoader.sourceComponent = fourImage
+            switch (wrapperCol.mediaParsed.items.length) {
+            case 0:
+                break
+            case 1:
+                imageLoader.sourceComponent = oneImage
+                break
+            case 2:
+                imageLoader.sourceComponent = twoImage
+                break
+            case 3:
+                imageLoader.sourceComponent = threeImage
+                break
+            case 4:
+                imageLoader.sourceComponent = fourImage
+                break
+            }
             break
         default:
             imageLoader.sourceComponent = fiveImage
@@ -73,7 +77,7 @@ Column {
     Component {
         id: oneImage
         OneImageLayout {
-            firstImage: mediaParsed[0]
+            firstImage: mediaParsed.items[0]
             imageClickedCallBack: wrapperCol.imageClickedCallBack
         }
     }
@@ -81,8 +85,8 @@ Column {
     Component {
         id: twoImage
         TwoImageLayout {
-            firstImage: mediaParsed[0]
-            secondImage: mediaParsed[1]
+            firstImage: mediaParsed.items[0]
+            secondImage: mediaParsed.items[1]
             imageClickedCallBack: wrapperCol.imageClickedCallBack
         }
     }
@@ -90,9 +94,9 @@ Column {
     Component {
         id: threeImage
         ThreeImageLayout {
-            firstImage: mediaParsed[0]
-            secondImage: mediaParsed[1]
-            thirdImage: mediaParsed[2]
+            firstImage: mediaParsed.items[0]
+            secondImage: mediaParsed.items[1]
+            thirdImage: mediaParsed.items[2]
             imageClickedCallBack: wrapperCol.imageClickedCallBack
         }
     }
@@ -100,10 +104,10 @@ Column {
     Component {
         id: fourImage
         FourImageLayout {
-            firstImage: mediaParsed[0]
-            secondImage: mediaParsed[1]
-            thirdImage: mediaParsed[2]
-            fourthImage: mediaParsed[3]
+            firstImage: mediaParsed.items[0]
+            secondImage: mediaParsed.items[1]
+            thirdImage: mediaParsed.items[2]
+            fourthImage: mediaParsed.items[3]
             imageClickedCallBack: wrapperCol.imageClickedCallBack
         }
     }
@@ -111,11 +115,11 @@ Column {
     Component {
         id: fiveImage
         MultiImageLayout {
-            firstImage: mediaParsed[0]
-            secondImage: mediaParsed[1]
-            thirdImage: mediaParsed[2]
-            fourthImage: mediaParsed[3]
-            count: mediaParsed.length - 4
+            firstImage: mediaParsed.items[0]
+            secondImage: mediaParsed.items[1]
+            thirdImage: mediaParsed.items[2]
+            fourthImage: mediaParsed.items[3]
+            count: mediaParsed.num_more
             imageClickedCallBack: wrapperCol.imageClickedCallBack
         }
     }

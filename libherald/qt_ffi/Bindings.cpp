@@ -1781,6 +1781,8 @@ void messages_data_doc_attachments(const Messages::Private *, int, QString *,
 option_qint64 messages_data_expiration_time(const Messages::Private *, int);
 void messages_data_full_body(const Messages::Private *, int, QString *,
                              qstring_set);
+void messages_data_full_media_attachments(const Messages::Private *, int,
+                                          QString *, qstring_set);
 option_qint64 messages_data_insertion_time(const Messages::Private *, int);
 option_bool messages_data_is_head(const Messages::Private *, int);
 option_bool messages_data_is_tail(const Messages::Private *, int);
@@ -1914,6 +1916,12 @@ QString Messages::fullBody(int row) const {
   return s;
 }
 
+QString Messages::fullMediaAttachments(int row) const {
+  QString s;
+  messages_data_full_media_attachments(m_d, row, &s, set_qstring);
+  return s;
+}
+
 QVariant Messages::insertionTime(int row) const {
   QVariant v;
   v = messages_data_insertion_time(m_d, row);
@@ -2044,40 +2052,42 @@ QVariant Messages::data(const QModelIndex &index, int role) const {
     case Qt::UserRole + 7:
       return QVariant::fromValue(fullBody(index.row()));
     case Qt::UserRole + 8:
-      return insertionTime(index.row());
+      return QVariant::fromValue(fullMediaAttachments(index.row()));
     case Qt::UserRole + 9:
-      return isHead(index.row());
+      return insertionTime(index.row());
     case Qt::UserRole + 10:
-      return isTail(index.row());
+      return isHead(index.row());
     case Qt::UserRole + 11:
-      return matchStatus(index.row());
+      return isTail(index.row());
     case Qt::UserRole + 12:
-      return QVariant::fromValue(mediaAttachments(index.row()));
+      return matchStatus(index.row());
     case Qt::UserRole + 13:
-      return cleanNullQVariant(QVariant::fromValue(msgId(index.row())));
+      return QVariant::fromValue(mediaAttachments(index.row()));
     case Qt::UserRole + 14:
-      return cleanNullQVariant(QVariant::fromValue(opAuthor(index.row())));
+      return cleanNullQVariant(QVariant::fromValue(msgId(index.row())));
     case Qt::UserRole + 15:
-      return QVariant::fromValue(opBody(index.row()));
+      return cleanNullQVariant(QVariant::fromValue(opAuthor(index.row())));
     case Qt::UserRole + 16:
-      return opColor(index.row());
+      return QVariant::fromValue(opBody(index.row()));
     case Qt::UserRole + 17:
-      return QVariant::fromValue(opDocAttachments(index.row()));
+      return opColor(index.row());
     case Qt::UserRole + 18:
-      return opExpirationTime(index.row());
+      return QVariant::fromValue(opDocAttachments(index.row()));
     case Qt::UserRole + 19:
-      return opInsertionTime(index.row());
+      return opExpirationTime(index.row());
     case Qt::UserRole + 20:
-      return QVariant::fromValue(opMediaAttachments(index.row()));
+      return opInsertionTime(index.row());
     case Qt::UserRole + 21:
-      return cleanNullQVariant(QVariant::fromValue(opMsgId(index.row())));
+      return QVariant::fromValue(opMediaAttachments(index.row()));
     case Qt::UserRole + 22:
-      return cleanNullQVariant(QVariant::fromValue(opName(index.row())));
+      return cleanNullQVariant(QVariant::fromValue(opMsgId(index.row())));
     case Qt::UserRole + 23:
-      return receiptStatus(index.row());
+      return cleanNullQVariant(QVariant::fromValue(opName(index.row())));
     case Qt::UserRole + 24:
-      return replyType(index.row());
+      return receiptStatus(index.row());
     case Qt::UserRole + 25:
+      return replyType(index.row());
+    case Qt::UserRole + 26:
       return serverTime(index.row());
     }
     break;
@@ -2105,24 +2115,25 @@ QHash<int, QByteArray> Messages::roleNames() const {
   names.insert(Qt::UserRole + 5, "docAttachments");
   names.insert(Qt::UserRole + 6, "expirationTime");
   names.insert(Qt::UserRole + 7, "fullBody");
-  names.insert(Qt::UserRole + 8, "insertionTime");
-  names.insert(Qt::UserRole + 9, "isHead");
-  names.insert(Qt::UserRole + 10, "isTail");
-  names.insert(Qt::UserRole + 11, "matchStatus");
-  names.insert(Qt::UserRole + 12, "mediaAttachments");
-  names.insert(Qt::UserRole + 13, "msgId");
-  names.insert(Qt::UserRole + 14, "opAuthor");
-  names.insert(Qt::UserRole + 15, "opBody");
-  names.insert(Qt::UserRole + 16, "opColor");
-  names.insert(Qt::UserRole + 17, "opDocAttachments");
-  names.insert(Qt::UserRole + 18, "opExpirationTime");
-  names.insert(Qt::UserRole + 19, "opInsertionTime");
-  names.insert(Qt::UserRole + 20, "opMediaAttachments");
-  names.insert(Qt::UserRole + 21, "opMsgId");
-  names.insert(Qt::UserRole + 22, "opName");
-  names.insert(Qt::UserRole + 23, "receiptStatus");
-  names.insert(Qt::UserRole + 24, "replyType");
-  names.insert(Qt::UserRole + 25, "serverTime");
+  names.insert(Qt::UserRole + 8, "fullMediaAttachments");
+  names.insert(Qt::UserRole + 9, "insertionTime");
+  names.insert(Qt::UserRole + 10, "isHead");
+  names.insert(Qt::UserRole + 11, "isTail");
+  names.insert(Qt::UserRole + 12, "matchStatus");
+  names.insert(Qt::UserRole + 13, "mediaAttachments");
+  names.insert(Qt::UserRole + 14, "msgId");
+  names.insert(Qt::UserRole + 15, "opAuthor");
+  names.insert(Qt::UserRole + 16, "opBody");
+  names.insert(Qt::UserRole + 17, "opColor");
+  names.insert(Qt::UserRole + 18, "opDocAttachments");
+  names.insert(Qt::UserRole + 19, "opExpirationTime");
+  names.insert(Qt::UserRole + 20, "opInsertionTime");
+  names.insert(Qt::UserRole + 21, "opMediaAttachments");
+  names.insert(Qt::UserRole + 22, "opMsgId");
+  names.insert(Qt::UserRole + 23, "opName");
+  names.insert(Qt::UserRole + 24, "receiptStatus");
+  names.insert(Qt::UserRole + 25, "replyType");
+  names.insert(Qt::UserRole + 26, "serverTime");
   return names;
 }
 
