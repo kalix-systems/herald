@@ -576,12 +576,13 @@ impl Messages {
         &self,
         index: usize,
     ) -> Option<String> {
-        let data = self.container.msg_data(index)?;
-        let hashmap: HashMap<&str, json::JsonValue> = data
-            .receipts
-            .iter()
-            .map(|(userid, receipt)| (userid.as_str(), json::JsonValue::from(*receipt as u32)))
-            .collect();
-        Some(json::JsonValue::from(hashmap).dump())
+        let receipts = self
+            .container
+            .access_by_index(index, |data| data.receipts.clone())?
+            .into_iter()
+            .map(|(userid, receipt)| (userid.to_string(), json::JsonValue::from(receipt as u32)))
+            .collect::<HashMap<String, json::JsonValue>>();
+
+        json::JsonValue::from(receipts).dump().into()
     }
 }
