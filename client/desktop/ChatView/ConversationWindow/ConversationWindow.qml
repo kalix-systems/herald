@@ -97,9 +97,6 @@ ListView {
         messageModelData: model
 
         ListView.onAdd: chatScrollBarInner.setPosition(1.0)
-        Component.onCompleted: {
-            print(messageModelData.userReceipts)
-        }
 
         ChatBubbleHover {
             id: bubbleHoverHandler

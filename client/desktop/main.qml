@@ -40,6 +40,10 @@ ApplicationWindow {
         }
     }
 
+    CvPopups.MoreInfoPopup {
+        id: moreInfo
+    }
+
     Loader {
         id: appLoader
         active: Herald.configInit

@@ -13,5 +13,10 @@ Menu {
     }
     MenuItem {
         text: qsTr("More Info") + "..."
+        onTriggered: {
+            moreInfo.convoMembers = conversationMembers
+            moreInfo.messageData = messageModelData
+            moreInfo.open()
+        }
     }
 }

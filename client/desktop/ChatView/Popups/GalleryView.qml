@@ -19,12 +19,7 @@ Popup {
     width: root.width
     anchors.centerIn: parent
 
-    onWidthChanged: {
 
-    }
-    onHeightChanged: {
-
-    }
 
     enter: Transition {
 
