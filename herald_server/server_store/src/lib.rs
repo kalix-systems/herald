@@ -100,6 +100,21 @@ impl Conn {
             .await?
             .get::<_, bool>(0))
     }
+
+    pub async fn key_is_valid_for_user(
+        &mut self,
+        key: &sig::PublicKey,
+        user: &UserId,
+    ) -> Res<bool> {
+        let stmt = self
+            .prepare_typed(sql!("key_is_valid_for_user"), types![TEXT, BYTEA])
+            .await?;
+
+        Ok(self
+            .query_one(&stmt, params![user.as_str(), key.as_ref()])
+            .await?
+            .get::<_, bool>(0))
+    }
 }
 
 impl Conn {
@@ -191,5 +206,27 @@ pub(crate) mod tests {
         assert_eq!(wa!(client.new_user(init)), register::Res::Success);
 
         assert!(wa!(client.key_is_valid(pk)));
+    }
+
+    #[tokio::test]
+    #[serial]
+    async fn key_is_valid_for_user() {
+        let mut client = wa!(get_client());
+
+        let uid: UserId = w!("a".try_into());
+
+        let other_uid: UserId = w!("b".try_into());
+
+        let kp = sig::KeyPair::gen_new();
+        let pk = *kp.public_key();
+
+        let init = kp.sign(uid);
+
+        assert!(!wa!(client.key_is_valid_for_user(&pk, &uid)));
+
+        assert_eq!(wa!(client.new_user(init)), register::Res::Success);
+
+        assert!(!wa!(client.key_is_valid_for_user(&pk, &other_uid)));
+        assert!(wa!(client.key_is_valid_for_user(&pk, &uid)));
     }
 }
