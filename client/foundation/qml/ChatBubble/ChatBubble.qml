@@ -52,11 +52,12 @@ Rectangle {
 
     Connections {
         target: appRoot.globalTimer
-        onRefreshTime: { friendlyTimestamp = Utils.friendlyTimestamp(
-                           messageModelData.insertionTime)
-            timerIcon = Utils.timerIcon(
-                        expirationTime,
-                        insertionTime)
+        onRefreshTime: {
+            friendlyTimestamp = Utils.friendlyTimestamp(
+                        messageModelData.insertionTime)
+            timerIcon = (expirationTime !== undefined) ? (Utils.timerIcon(
+                                                              expirationTime,
+                                                              insertionTime)) : ""
         }
     }
     height: contentRoot.height
