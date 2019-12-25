@@ -13,8 +13,15 @@ use messages_helper::search::SearchState;
 use std::collections::HashMap;
 use std::convert::TryInto;
 
+mod attachments;
+mod author;
+mod body;
+mod flurry;
+mod last;
 mod op;
+mod receipts;
 mod search;
+mod time;
 
 impl Messages {
     pub(crate) fn new_(
@@ -34,42 +41,11 @@ impl Messages {
         }
     }
 
-    pub(crate) fn receipt_status_(
+    pub(crate) fn msg_id_(
         &self,
         index: usize,
-    ) -> Option<u32> {
-        let local_id = self.local_id?;
-
-        Some(
-            self.container
-                .access_by_index(index, |data| {
-                    data.receipts
-                        .iter()
-                        .filter(|(k, _)| k != &&local_id)
-                        .map(|(_, r)| *r as u32)
-                        .max()
-                })?
-                .unwrap_or(MessageReceiptStatus::Nil as u32),
-        )
-    }
-
-    pub(crate) fn last_author_(&self) -> Option<ffi::UserIdRef> {
-        let last = self.container.last_msg()?;
-
-        if last.author == self.local_id? {
-            Some("You")
-        } else {
-            Some(last.author.as_str())
-        }
-    }
-
-    pub(crate) fn last_status_(&self) -> Option<u32> {
-        self.container
-            .last_msg()?
-            .receipts
-            .values()
-            .max()
-            .map(|status| *status as u32)
+    ) -> Option<ffi::MsgIdRef> {
+        Some(self.container.msg_id(index)?.as_slice())
     }
 
     pub(crate) fn index_by_id_(
@@ -79,60 +55,6 @@ impl Messages {
         let msg_id = err!(msg_id.try_into(), -1);
 
         none!(self.container.index_by_id(msg_id), -1) as i64
-    }
-
-    pub(crate) fn is_tail_(
-        &self,
-        index: usize,
-    ) -> Option<bool> {
-        if self.container.is_empty() {
-            return None;
-        }
-
-        // Case where message is last message in conversation
-        if index == 0 {
-            return Some(true);
-        }
-
-        // other cases
-        self.container
-            .same_flurry(index, index - 1)
-            .map(std::ops::Not::not)
-    }
-
-    pub(crate) fn is_head_(
-        &self,
-        index: usize,
-    ) -> Option<bool> {
-        if self.container.is_empty() {
-            return None;
-        }
-
-        // Case where message is first message in conversation
-        if index + 1 == self.container.len() {
-            return Some(true);
-        }
-
-        // other cases
-        self.container
-            .same_flurry(index, index + 1)
-            .map(std::ops::Not::not)
-    }
-
-    pub(crate) fn clear_conversation_history_(&mut self) -> bool {
-        let id = none!(self.conversation_id, false);
-
-        spawn!(conversation::delete_conversation(&id), false);
-
-        self.clear_search();
-        self.model
-            .begin_remove_rows(0, self.container.len().saturating_sub(1));
-        self.container = Default::default();
-        self.model.end_remove_rows();
-
-        self.emit_last_changed();
-        self.emit.is_empty_changed();
-        true
     }
 
     pub(crate) fn delete_message_(
@@ -149,154 +71,8 @@ impl Messages {
         true
     }
 
-    pub(crate) fn doc_attachments_(
-        &self,
-        index: usize,
-    ) -> Option<String> {
-        self.container.doc_attachments_data_json(index, None)
-    }
-
-    pub(crate) fn media_attachments_(
-        &self,
-        index: usize,
-    ) -> Option<String> {
-        self.container.media_attachments_data_json(index, 4.into())
-    }
-
-    pub(crate) fn full_media_attachments_(
-        &self,
-        index: usize,
-    ) -> Option<String> {
-        self.container.media_attachments_data_json(index, None)
-    }
-
     pub(crate) fn is_empty_(&self) -> bool {
         self.container.is_empty()
-    }
-
-    pub(crate) fn last_body_(&self) -> Option<&str> {
-        Some(self.container.last_msg()?.body.as_ref()?.as_str())
-    }
-
-    pub(crate) fn last_time_(&self) -> Option<i64> {
-        Some(self.container.last_msg()?.time.insertion.into())
-    }
-
-    pub(crate) fn author_(
-        &self,
-        index: usize,
-    ) -> Option<ffi::UserId> {
-        self.container
-            .access_by_index(index, |data| data.author.to_string())
-    }
-
-    pub(crate) fn author_color_(
-        &self,
-        index: usize,
-    ) -> Option<u32> {
-        let uid = self.container.access_by_index(index, |data| data.author)?;
-        crate::users::shared::color(&uid)
-    }
-
-    pub(crate) fn author_name_(
-        &self,
-        index: usize,
-    ) -> Option<ffi::UserId> {
-        let uid = self.container.access_by_index(index, |data| data.author)?;
-        crate::users::shared::name(&uid)
-    }
-
-    pub(crate) fn author_profile_picture_(
-        &self,
-        index: usize,
-    ) -> Option<String> {
-        let uid = self.container.access_by_index(index, |data| data.author)?;
-        crate::users::shared::profile_picture(&uid)
-    }
-
-    pub(crate) fn body_(
-        &self,
-        index: usize,
-    ) -> Option<String> {
-        let elider = &self.elider;
-        let pattern = &self.search.pattern;
-        let match_status = self.container.get(index).as_ref()?.match_status;
-
-        let body = self
-            .container
-            .access_by_index(index, |data| data.body.clone())?;
-
-        if match_status.is_match() {
-            messages_helper::search::highlight_message(pattern.as_ref()?, body.as_ref()?).into()
-        } else {
-            elider.elided_body(body?).into()
-        }
-    }
-
-    pub(crate) fn full_body_(
-        &self,
-        index: usize,
-    ) -> Option<String> {
-        let pattern = &self.search.pattern;
-        let match_status = self.container.get(index).as_ref()?.match_status;
-
-        self.container.access_by_index(index, |data| {
-            if match_status.is_match() {
-                Some(messages_helper::search::highlight_message(
-                    pattern.as_ref()?,
-                    data.body.as_ref()?,
-                ))
-            } else {
-                data.body.as_ref().map(MessageBody::to_string)
-            }
-        })?
-    }
-
-    pub(crate) fn insertion_time_(
-        &self,
-        index: usize,
-    ) -> Option<i64> {
-        Some(self.container.get(index)?.insertion_time.into())
-    }
-
-    pub(crate) fn expiration_time_(
-        &self,
-        index: usize,
-    ) -> Option<i64> {
-        self.container.access_by_index(index, |data| {
-            data.time.expiration.map(herald_common::Time::into)
-        })?
-    }
-
-    pub(crate) fn server_time_(
-        &self,
-        index: usize,
-    ) -> Option<i64> {
-        self.container.access_by_index(index, |data| {
-            data.time.server.map(herald_common::Time::into)
-        })?
-    }
-
-    pub(crate) fn reply_type_(
-        &self,
-        index: usize,
-    ) -> Option<u8> {
-        Some(self.container.op_reply_type(index)? as u8)
-    }
-
-    pub(crate) fn builder_(&self) -> &MessageBuilder {
-        &self.builder
-    }
-
-    pub(crate) fn builder_mut_(&mut self) -> &mut MessageBuilder {
-        &mut self.builder
-    }
-
-    pub(crate) fn msg_id_(
-        &self,
-        index: usize,
-    ) -> Option<ffi::MsgIdRef> {
-        Some(self.container.get(index)?.msg_id.as_slice())
     }
 
     pub(crate) fn emit_(&mut self) -> &mut Emitter {
@@ -307,96 +83,11 @@ impl Messages {
         self.container.len()
     }
 
-    pub(crate) fn match_status_(
-        &self,
-        index: usize,
-    ) -> Option<u8> {
-        Some(self.container.list.get(index)?.match_status as u8)
+    pub(crate) fn builder_(&self) -> &MessageBuilder {
+        &self.builder
     }
 
-    pub(crate) fn set_elision_line_count_(
-        &mut self,
-        line_count: u8,
-    ) {
-        self.elider.set_line_count(line_count as usize);
-    }
-
-    pub(crate) fn set_elision_char_count_(
-        &mut self,
-        char_count: u16,
-    ) {
-        self.elider.set_char_count(char_count as usize);
-    }
-
-    pub(crate) fn set_elision_chars_per_line_(
-        &mut self,
-        chars_per_line: u8,
-    ) {
-        self.elider.set_char_per_line(chars_per_line as usize);
-    }
-
-    pub(crate) fn save_all_attachments_(
-        &self,
-        index: usize,
-        dest: String,
-    ) -> bool {
-        let dest = none!(crate::utils::strip_qrc(dest), false);
-        let data = none!(self.container.access_by_index(index, MsgData::clone), false);
-
-        spawn!(err!(data.save_all_attachments(dest)), false);
-        true
-    }
-
-    pub(crate) fn user_receipts_(
-        &self,
-        index: usize,
-    ) -> Option<String> {
-        let receipts = self
-            .container
-            .access_by_index(index, |data| data.receipts.clone())?
-            .into_iter()
-            .filter(|(u, _)| Some(u) != self.local_id.as_ref())
-            .map(|(userid, receipt)| (userid.to_string(), json::JsonValue::from(receipt as u32)))
-            .collect::<HashMap<String, json::JsonValue>>();
-
-        json::JsonValue::from(receipts).dump().into()
-    }
-
-    pub(crate) fn mark_read_(
-        &mut self,
-        index: u64,
-    ) {
-        let index = index as usize;
-
-        let local_id = none!(self.local_id);
-        let msg_id = *none!(self.container.msg_id(index));
-        let cid = none!(self.conversation_id);
-
-        let updated = none!(self.container.update_by_index(index, |data| {
-            let status = data.receipts.entry(local_id).or_default();
-
-            match *status {
-                MessageReceiptStatus::Read => false,
-                _ => {
-                    *status = MessageReceiptStatus::Read;
-                    true
-                }
-            }
-        }));
-
-        if !updated {
-            return;
-        }
-
-        self.model.data_changed(index, index);
-
-        spawn!({
-            err!(heraldcore::message::add_receipt(
-                msg_id,
-                local_id,
-                MessageReceiptStatus::Read
-            ));
-            err!(heraldcore::network::send_read_receipt(cid, msg_id));
-        });
+    pub(crate) fn builder_mut_(&mut self) -> &mut MessageBuilder {
+        &mut self.builder
     }
 }

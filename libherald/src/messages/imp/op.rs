@@ -69,4 +69,11 @@ impl Messages {
     ) -> Option<i64> {
         Some(self.container.op_expiration_time(index)?.into())
     }
+
+    pub(crate) fn reply_type_(
+        &self,
+        index: usize,
+    ) -> Option<u8> {
+        Some(self.container.op_reply_type(index)? as u8)
+    }
 }

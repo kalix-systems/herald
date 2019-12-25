@@ -1,6 +1,13 @@
 use super::*;
 
 impl Messages {
+    pub(crate) fn match_status_(
+        &self,
+        index: usize,
+    ) -> Option<u8> {
+        Some(self.container.list.get(index)?.match_status as u8)
+    }
+
     pub(crate) fn search_pattern_(&self) -> &str {
         self.search
             .pattern
