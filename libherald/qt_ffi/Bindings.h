@@ -1541,6 +1541,7 @@ public:
   Q_INVOKABLE void clearSearch();
   Q_INVOKABLE bool deleteMessage(quint64 row_index);
   Q_INVOKABLE qint64 indexById(const QByteArray &msg_id) const;
+  Q_INVOKABLE void markRead(quint64 index);
   Q_INVOKABLE qint64 nextSearchMatch();
   Q_INVOKABLE qint64 prevSearchMatch();
   Q_INVOKABLE bool saveAllAttachments(quint64 index, const QString &dest) const;

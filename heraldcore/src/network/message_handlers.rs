@@ -90,11 +90,11 @@ pub(super) fn handle_cmessage(
             }
             ev.replies.push((cid, form_ack(mid)?));
         }
-        Ack(ack) => {
-            let cmessages::Ack {
+        Receipt(receipt) => {
+            let cmessages::Receipt {
                 of: msg_id,
                 stat: status,
-            } = ack;
+            } = receipt;
 
             crate::message::add_receipt(msg_id, uid, status)?;
             ev.notifications
@@ -148,7 +148,7 @@ pub(super) fn handle_dmessage(
 }
 
 fn form_ack(mid: MsgId) -> Result<ConversationMessage, HErr> {
-    Ok(ConversationMessage::Ack(cmessages::Ack {
+    Ok(ConversationMessage::Receipt(cmessages::Receipt {
         of: mid,
         stat: MessageReceiptStatus::Received,
     }))

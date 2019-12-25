@@ -154,7 +154,7 @@ export function initialize(name) {
  * */
 export function receiptCodeSwitch(receiptCode) {
     switch (receiptCode) {
-        case 0 /* NoAck */: {
+        case 0 /* Nil */: {
             return "";
         }
         case 1 /* Received */: {
@@ -162,9 +162,6 @@ export function receiptCodeSwitch(receiptCode) {
         }
         case 2 /* Read */: {
             return "qrc:/double-check-receipt-icon.svg";
-        }
-        case 3 /* AckTerminal */: {
-            return "qrc:/single-check-receipt-icon.svg";
         }
         default:
             return "";

@@ -80,11 +80,11 @@ impl Container {
         access(&mid, f)
     }
 
-    pub fn update_by_index<T, F: FnOnce(&mut MsgData)>(
+    pub fn update_by_index<T, F: FnOnce(&mut MsgData) -> T>(
         &self,
         index: usize,
         f: F,
-    ) -> Option<()> {
+    ) -> Option<T> {
         let mid = self.msg_id(index)?;
 
         update(&mid, f)
@@ -198,7 +198,7 @@ impl Container {
         ix
     }
 
-    fn msg_id(
+    pub fn msg_id(
         &self,
         index: usize,
     ) -> Option<&MsgId> {

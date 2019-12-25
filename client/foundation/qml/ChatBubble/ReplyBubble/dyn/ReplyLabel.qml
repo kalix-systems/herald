@@ -22,12 +22,7 @@ Row {
             text: messageModelData.opName
             font.weight: Font.Bold
             font.family: CmnCfg.chatFont.name
-            elideWidth: {
-                if (imageAttach) {
-                    return 300
-                }
-                bubbleRoot.maxWidth
-            }
+            elideWidth: imageAttach ? 300 : bubbleRoot.maxWidth
             elide: Text.ElideRight
         }
     }
