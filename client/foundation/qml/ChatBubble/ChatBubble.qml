@@ -39,6 +39,10 @@ Rectangle {
     readonly property real maxWidth: defaultWidth * 0.75
     property string friendlyTimestamp: Utils.friendlyTimestamp(
                                            messageModelData.insertionTime)
+
+    property string timerIcon: expirationTime !== undefined ? Utils.timerIcon(
+                                                                  expirationTime,
+                                                                  insertionTime) : ""
     readonly property string receiptImage: Utils.receiptCodeSwitch(
                                                messageModelData.receiptStatus)
     readonly property color authorColor: CmnCfg.avatarColors[messageModelData.authorColor]
@@ -48,8 +52,12 @@ Rectangle {
 
     Connections {
         target: appRoot.globalTimer
-        onRefreshTime: friendlyTimestamp = Utils.friendlyTimestamp(
+        onRefreshTime: { friendlyTimestamp = Utils.friendlyTimestamp(
                            messageModelData.insertionTime)
+            timerIcon = Utils.timerIcon(
+                        expirationTime,
+                        insertionTime)
+        }
     }
     height: contentRoot.height
     width: defaultWidth
