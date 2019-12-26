@@ -72,14 +72,7 @@ ListView {
         cacheBuffer = chatListView.height * 5
     }
 
-    FileDialog {
-        id: attachmentDownloader
-        property string filePath
-        selectFolder: true
-        folder: StandardPaths.writableLocation(StandardPaths.DesktopLocation)
-        onAccepted: Herald.utils.saveFile(filePath, fileUrl)
-        selectExisting: false
-    }
+
 
     FileDialog {
         id: downloadFileChooser

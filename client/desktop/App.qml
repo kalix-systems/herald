@@ -7,6 +7,8 @@ import "SideBar/popups" as Popups
 import "./SideBar"
 import "."
 import "ChatView/Popups" as CvPopups
+import Qt.labs.platform 1.1
+import QtQuick.Dialogs 1.3
 
 Item {
     id: appRoot
@@ -18,6 +20,15 @@ Item {
         Popups.SettingsPopup {
             id: preferencesPopup
         }
+    }
+
+    FileDialog {
+        id: attachmentDownloader
+        property string filePath
+        selectFolder: true
+        folder: StandardPaths.writableLocation(StandardPaths.DesktopLocation)
+        onAccepted: Herald.utils.saveFile(filePath, fileUrl)
+        selectExisting: false
     }
 
     readonly property alias globalTimer: globalTimer
