@@ -62,9 +62,10 @@ Rectangle {
         onRefreshTime: {
             friendlyTimestamp = Utils.friendlyTimestamp(
                         messageModelData.insertionTime)
-            timerIcon = (expirationTime !== undefined) ? (Utils.timerIcon(
-                                                              expirationTime,
-                                                              insertionTime)) : ""
+            timerIcon = (messageModelData.expirationTime
+                         !== undefined) ? (Utils.timerIcon(
+                                               messageModelData.expirationTime,
+                                               messageModelData.insertionTime)) : ""
         }
     }
     color: CmnCfg.palette.white

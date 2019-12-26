@@ -6,6 +6,7 @@ import LibHerald 1.0
 import "SideBar/popups" as Popups
 import "./SideBar"
 import "."
+import "ChatView/Popups" as CvPopups
 
 Item {
     id: appRoot
@@ -46,6 +47,16 @@ Item {
         id: convoMenu
     }
 
+    Loader {
+        id: messageInfoLoader
+        anchors.fill: active ? parent : undefined
+        property var convoMembers
+        property var messageData
+        active: false
+        sourceComponent: CvPopups.MoreInfoPopup {
+            id: moreInfo
+        }
+    }
 
     Popups.ImageCropPopup {
         id: imageCrop

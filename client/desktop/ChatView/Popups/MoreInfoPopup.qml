@@ -75,6 +75,7 @@ Popup {
                     icon.color: CmnCfg.palette.iconMatte
                     padding: 0
                     anchors.right: parent.right
+                    anchors.rightMargin: CmnCfg.smallMargin
 
                     anchors.verticalCenter: parent.verticalCenter
                     background: Item {}
