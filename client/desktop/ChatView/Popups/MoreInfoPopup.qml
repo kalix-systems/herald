@@ -102,7 +102,7 @@ Popup {
                     boxColor: messageData.authorColor
                     picture: Utils.safeStringOrDefault(
                                  messageData.authorProfilePicture, "")
-                    color: CmnCfg.palette.lightGrey
+                    color: CmnCfg.palette.white
                     labelComponent: Av.ConversationLabel {
                         contactName: messageData.authorName
                         lastBody: "@" + messageData.author
@@ -157,7 +157,7 @@ Popup {
                 currentIndex: -1
                 delegate: Item {
                     height: visible ? CmnCfg.convoHeight : 0
-                    width: parent.width
+                    width: 250
                     visible: memberData.userId !== messageData.author
                     property var memberData: model
                     Common.PlatonicRectangle {
@@ -166,7 +166,7 @@ Popup {
                         picture: Utils.safeStringOrDefault(memberData.picture,
                                                            "")
                         property MouseArea hoverHandler
-                        color: CmnCfg.palette.lightGrey
+                        color: CmnCfg.palette.white
                         labelComponent: Av.ConversationLabel {
                             contactName: memberData.name
                             lastBody: "@" + memberData.userId
@@ -176,6 +176,7 @@ Popup {
                         }
 
                         Button {
+                            anchors.right: parent.right
                             id: receipt
                             icon.source: Utils.receiptCodeSwitch(
                                              receiptData[memberData.userId])
@@ -183,8 +184,6 @@ Popup {
                             icon.width: 16
                             icon.color: CmnCfg.palette.iconMatte
                             padding: 0
-                            anchors.right: parent.right
-                            anchors.rightMargin: CmnCfg.smallMargin
 
                             anchors.verticalCenter: parent.verticalCenter
                             background: Item {}
