@@ -42,6 +42,20 @@ Item {
         onTriggered: refreshTime()
     }
 
+    Loader {
+        id: messageInfoLoader
+        width: active ? chatView.width : 0
+        height: active ? chatView.height : 0
+        anchors.top: active ? parent.top : undefined
+        anchors.right: active ? parent.right : undefined
+        property var convoMembers
+        property var messageData
+        active: false
+        sourceComponent: CvPopups.MoreInfoPopup {
+            id: moreInfo
+        }
+    }
+
     Popups.ColorPicker {
         id: avatarColorPicker
     }
@@ -56,17 +70,6 @@ Item {
 
     Popups.NewMessagePopup {
         id: convoMenu
-    }
-
-    Loader {
-        id: messageInfoLoader
-        anchors.fill: active ? parent : undefined
-        property var convoMembers
-        property var messageData
-        active: false
-        sourceComponent: CvPopups.MoreInfoPopup {
-            id: moreInfo
-        }
     }
 
     Popups.ImageCropPopup {

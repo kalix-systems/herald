@@ -17,8 +17,8 @@ Popup {
     property var messageData: parent.messageData
     property var receiptData
 
-    height: root.height
-    width: root.width
+    height: parent.height
+    width: parent.width
     anchors.centerIn: parent
     onClosed: messageInfoLoader.active = false
 
