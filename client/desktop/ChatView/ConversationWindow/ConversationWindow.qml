@@ -95,7 +95,6 @@ ListView {
             onExited: bubbleActual.hoverHighlight = false
         }
         Component.onCompleted: {
-            print(root.active)
             if (root.active)
                 ownedConversation.markRead(index)
         }
