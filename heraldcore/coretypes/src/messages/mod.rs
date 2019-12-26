@@ -68,14 +68,38 @@ pub type ReactContent = String;
 /// reactionaries
 #[derive(Clone, Debug)]
 pub struct TaggedReact {
-    content: ReactContent,
-    reactionaries: Vec<UserId>,
+    pub content: ReactContent,
+    pub reactionaries: Vec<UserId>,
 }
 
 /// A collection of message reactions
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct Reactions {
     pub content: Vec<TaggedReact>,
+}
+
+impl Reactions {
+    pub fn add(
+        &mut self,
+        react: ReactContent,
+        reactionary: UserId,
+    ) {
+        match self
+            .content
+            .iter()
+            .position(|tagged| tagged.content == react)
+        {
+            Some(ix) => {
+                if let Some(tagged) = self.content.get_mut(ix) {
+                    tagged.reactionaries.push(reactionary);
+                }
+            }
+            None => self.content.push(TaggedReact {
+                content: react,
+                reactionaries: vec![reactionary],
+            }),
+        };
+    }
 }
 
 #[derive(Clone, Copy, Debug, Ser, De, Eq, PartialEq, Hash)]

@@ -1806,6 +1806,8 @@ void messages_data_op_msg_id(const Messages::Private *, int, QByteArray *,
                              qbytearray_set);
 void messages_data_op_name(const Messages::Private *, int, QString *,
                            qstring_set);
+void messages_data_reactions(const Messages::Private *, int, QString *,
+                             qstring_set);
 option_quint32 messages_data_receipt_status(const Messages::Private *, int);
 option_quint8 messages_data_reply_type(const Messages::Private *, int);
 option_qint64 messages_data_server_time(const Messages::Private *, int);
@@ -2014,6 +2016,12 @@ QString Messages::opName(int row) const {
   return s;
 }
 
+QString Messages::reactions(int row) const {
+  QString s;
+  messages_data_reactions(m_d, row, &s, set_qstring);
+  return s;
+}
+
 QVariant Messages::receiptStatus(int row) const {
   QVariant v;
   v = messages_data_receipt_status(m_d, row);
@@ -2092,12 +2100,14 @@ QVariant Messages::data(const QModelIndex &index, int role) const {
     case Qt::UserRole + 23:
       return cleanNullQVariant(QVariant::fromValue(opName(index.row())));
     case Qt::UserRole + 24:
-      return receiptStatus(index.row());
+      return QVariant::fromValue(reactions(index.row()));
     case Qt::UserRole + 25:
-      return replyType(index.row());
+      return receiptStatus(index.row());
     case Qt::UserRole + 26:
-      return serverTime(index.row());
+      return replyType(index.row());
     case Qt::UserRole + 27:
+      return serverTime(index.row());
+    case Qt::UserRole + 28:
       return QVariant::fromValue(userReceipts(index.row()));
     }
     break;
@@ -2141,10 +2151,11 @@ QHash<int, QByteArray> Messages::roleNames() const {
   names.insert(Qt::UserRole + 21, "opMediaAttachments");
   names.insert(Qt::UserRole + 22, "opMsgId");
   names.insert(Qt::UserRole + 23, "opName");
-  names.insert(Qt::UserRole + 24, "receiptStatus");
-  names.insert(Qt::UserRole + 25, "replyType");
-  names.insert(Qt::UserRole + 26, "serverTime");
-  names.insert(Qt::UserRole + 27, "userReceipts");
+  names.insert(Qt::UserRole + 24, "reactions");
+  names.insert(Qt::UserRole + 25, "receiptStatus");
+  names.insert(Qt::UserRole + 26, "replyType");
+  names.insert(Qt::UserRole + 27, "serverTime");
+  names.insert(Qt::UserRole + 28, "userReceipts");
   return names;
 }
 
@@ -2188,6 +2199,7 @@ void messages_search_pattern_set(Messages::Private *, const ushort *str,
                                  int len);
 bool messages_search_regex_get(const Messages::Private *);
 void messages_search_regex_set(Messages::Private *, bool);
+void messages_add_reaction(Messages::Private *, quint64, const ushort *, int);
 bool messages_clear_conversation_history(Messages::Private *);
 void messages_clear_search(Messages::Private *);
 bool messages_delete_message(Messages::Private *, quint64);
@@ -4214,6 +4226,9 @@ void Messages::setSearchPattern(const QString &v) {
 
 bool Messages::searchRegex() const { return messages_search_regex_get(m_d); }
 void Messages::setSearchRegex(bool v) { messages_search_regex_set(m_d, v); }
+void Messages::addReaction(quint64 index, const QString &content) {
+  return messages_add_reaction(m_d, index, content.utf16(), content.size());
+}
 bool Messages::clearConversationHistory() {
   return messages_clear_conversation_history(m_d);
 }

@@ -186,3 +186,23 @@ impl Reactions {
         Some(Self { content })
     }
 }
+
+impl From<TaggedReact> for json::JsonValue {
+    fn from(
+        TaggedReact {
+            content,
+            reactionaries,
+        }: TaggedReact
+    ) -> json::JsonValue {
+        json::object! {
+           "content" => content,
+           "reactionaries" => reactionaries.into_iter().map(|u| u.to_string()).collect::<Vec<String>>()
+        }
+    }
+}
+
+impl From<Reactions> for json::JsonValue {
+    fn from(Reactions { content }: Reactions) -> json::JsonValue {
+        content.into()
+    }
+}

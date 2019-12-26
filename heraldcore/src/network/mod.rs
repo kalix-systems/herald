@@ -42,6 +42,17 @@ pub enum Notification {
     NewMsg(Box<message::Message>),
     /// A message has been received.
     MsgReceipt(message::MessageReceipt),
+    /// A message reaction has been received
+    Reaction {
+        /// Conversation id
+        cid: ConversationId,
+        /// Message being reacted to
+        msg_id: MsgId,
+        /// The user that reacted
+        reactionary: UserId,
+        /// The content of the react
+        content: message::ReactContent,
+    },
     /// A new user has been added
     NewUser(Box<(coretypes::user::User, ConversationMeta)>),
     /// A new conversation has been added

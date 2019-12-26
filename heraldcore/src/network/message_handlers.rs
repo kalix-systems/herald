@@ -110,6 +110,12 @@ pub(super) fn handle_cmessage(
             msg_id,
         }) => {
             crate::message::add_reaction(&msg_id, &uid, &react_content)?;
+            ev.notifications.push(Notification::Reaction {
+                cid,
+                msg_id,
+                reactionary: uid,
+                content: react_content,
+            });
         }
         Settings(update) => {
             conversation::settings::apply(&update, &cid)?;

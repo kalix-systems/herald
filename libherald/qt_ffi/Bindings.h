@@ -1537,6 +1537,7 @@ public:
   void setSearchPattern(const QString &v);
   bool searchRegex() const;
   void setSearchRegex(bool v);
+  Q_INVOKABLE void addReaction(quint64 index, const QString &content);
   Q_INVOKABLE bool clearConversationHistory();
   Q_INVOKABLE void clearSearch();
   Q_INVOKABLE bool deleteMessage(quint64 row_index);
@@ -1599,6 +1600,7 @@ public:
   Q_INVOKABLE QString opMediaAttachments(int row) const;
   Q_INVOKABLE QByteArray opMsgId(int row) const;
   Q_INVOKABLE QString opName(int row) const;
+  Q_INVOKABLE QString reactions(int row) const;
   Q_INVOKABLE QVariant receiptStatus(int row) const;
   Q_INVOKABLE QVariant replyType(int row) const;
   Q_INVOKABLE QVariant serverTime(int row) const;

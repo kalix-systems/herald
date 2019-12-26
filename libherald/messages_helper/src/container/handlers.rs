@@ -77,4 +77,33 @@ impl Container {
 
         Some(())
     }
+
+    pub fn handle_reaction<F: FnMut(usize)>(
+        &self,
+        mid: MsgId,
+        reactionary: UserId,
+        reaction: heraldcore::message::ReactContent,
+        mut data_changed: F,
+    ) -> Option<()> {
+        update(&mid, move |data| {
+            if data.reactions.is_none() {
+                data.reactions = Default::default();
+            }
+
+            if let Some(r) = data.reactions.as_mut() {
+                r.add(reaction, reactionary);
+            }
+        })?;
+
+        let ix = self
+            .list
+            .iter()
+            // search backwards,
+            // it's probably very recent
+            .rposition(|m| m.msg_id == mid)?;
+
+        data_changed(ix);
+
+        Some(())
+    }
 }
