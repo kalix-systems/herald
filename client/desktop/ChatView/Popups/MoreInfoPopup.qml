@@ -27,6 +27,20 @@ Popup {
         color: CmnCfg.palette.white
     }
 
+    function userTime(timestamp) {
+        var d = new Date(timestamp)
+        var year = d.getFullYear()
+        var month = ("0" + (d.getMonth() + 1)).slice(-2)
+        var day = ("0" + d.getDate()).slice(-2)
+        var hour = d.getHours()
+        var min = ("0" + d.getMinutes()).slice(-2)
+        var sec = ("0" + d.getSeconds()).slice(-2)
+
+        var time = year + "-" + month + "-" + day + " " + hour + ":" + min + ":" + sec
+
+        return time
+    }
+
     Component.onCompleted: {
         receiptData = JSON.parse(moreInfoPopup.messageData.userReceipts)
     }
@@ -39,11 +53,72 @@ Popup {
         messageModelData: moreInfoPopup.messageData
         anchors.top: parent.top
     }
+    Label {
+        id: senderHeader
+        anchors.top: bubbleInfo.bottom
+        anchors.topMargin: CmnCfg.smallMargin
+        anchors.left: bubbleInfo.left
+        text: "From:"
+        font.family: CmnCfg.chatFont.name
+        font.weight: Font.DemiBold
+        color: CmnCfg.palette.black
+    }
+
+    Item {
+        id: author
+        anchors.top: senderHeader.bottom
+        anchors.topMargin: CmnCfg.smallMargin
+        anchors.left: senderHeader.left
+        height: CmnCfg.convoHeight
+        width: parent.width
+        Common.PlatonicRectangle {
+
+            boxTitle: messageData.authorName
+            boxColor: messageData.authorColor
+            picture: Utils.safeStringOrDefault(
+                         messageData.authorProfilePicture, "")
+            color: CmnCfg.palette.lightGrey
+            labelComponent: Av.ConversationLabel {
+                contactName: messageData.authorName
+                lastBody: "@" + messageData.author
+                labelColor: CmnCfg.palette.black
+                secondaryLabelColor: CmnCfg.palette.darkGrey
+                labelFontSize: CmnCfg.entityLabelSize
+            }
+            MouseArea {
+                id: hoverHandler
+            }
+
+            states: []
+        }
+    }
+
+    Label {
+        id: timeInfo
+        anchors.top: author.bottom
+        anchors.topMargin: CmnCfg.smallMargin
+        anchors.left: author.left
+        text: "At: " + userTime(messageData.insertionTime)
+        font.family: CmnCfg.chatFont.name
+        font.weight: Font.DemiBold
+        color: CmnCfg.palette.black
+    }
+
+    Label {
+        id: recHeader
+        anchors.top: timeInfo.bottom
+        anchors.topMargin: CmnCfg.smallMargin
+        anchors.left: timeInfo.left
+        text: "To:"
+        font.family: CmnCfg.chatFont.name
+        font.weight: Font.DemiBold
+        color: CmnCfg.palette.black
+    }
 
     ListView {
         height: contentHeight
         width: parent.width
-        anchors.top: bubbleInfo.bottom
+        anchors.top: recHeader.bottom
         anchors.topMargin: CmnCfg.smallMargin
         model: convoMembers
         highlightFollowsCurrentItem: false
