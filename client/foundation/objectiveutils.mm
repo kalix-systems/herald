@@ -1,6 +1,7 @@
 #include "objectiveutils.h"
 #include <QWidget>
 #include <QColor>
+#import <UserNotifications/UserNotifications.h>
 #import <Foundation/Foundation.h>
 
 ObjectiveUtils::ObjectiveUtils(){
@@ -8,7 +9,6 @@ ObjectiveUtils::ObjectiveUtils(){
 
 #ifdef Q_OS_IOS
 #import <UIKit/UIKit.h>
-#import <UserNotifications/UserNotifications.h>
 
 void ObjectiveUtils::set_status_bar_color(QColor color) {
        UIApplication *app =  [UIApplication sharedApplication];
