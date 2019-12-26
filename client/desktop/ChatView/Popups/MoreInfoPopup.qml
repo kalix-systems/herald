@@ -46,12 +46,17 @@ Popup {
             anchors.horizontalCenter: parent.horizontalCenter
             spacing: CmnCfg.smallMargin
             topPadding: CmnCfg.smallMargin
-            CB.DefaultBubble {
-                id: bubbleInfo
-                convContainer: parent
-                defaultWidth: parent.width
+
+            Label {
+                id: header
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.left: senderHeader.left
+                text: "Message info"
+                font.family: CmnCfg.chatFont.name
+                font.weight: Font.DemiBold
+                color: CmnCfg.palette.black
                 width: parent.width
-                messageModelData: moreInfoPopup.messageData
+                font.pixelSize: CmnCfg.headerSize
 
                 IconButton {
                     anchors.right: parent.right
@@ -67,6 +72,13 @@ Popup {
                         moreInfoPopup.close()
                     }
                 }
+            }
+            CB.DefaultBubble {
+                id: bubbleInfo
+                convContainer: parent
+                defaultWidth: parent.width
+                width: parent.width
+                messageModelData: moreInfoPopup.messageData
             }
             Label {
                 id: senderHeader
