@@ -107,7 +107,19 @@ Popup {
             Label {
                 id: timeInfo
                 anchors.left: author.left
-                text: "At: " + Utils.userTime(messageData.insertionTime)
+                text: "Sent at: " + Utils.userTime(messageData.insertionTime)
+                font.family: CmnCfg.chatFont.name
+                font.weight: Font.DemiBold
+                color: CmnCfg.palette.black
+            }
+
+            Label {
+                id: expireInfo
+                anchors.left: timeInfo.left
+                visible: messageData.expirationTime !== undefined
+                text: messageData.expirationTime
+                      !== undefined ? "Expires at: " + Utils.userTime(
+                                          messageData.expirationTime) : ""
                 font.family: CmnCfg.chatFont.name
                 font.weight: Font.DemiBold
                 color: CmnCfg.palette.black
