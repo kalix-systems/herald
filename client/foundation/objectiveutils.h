@@ -12,6 +12,7 @@ public:
   ObjectiveUtils();
 #ifdef Q_OS_IOS
   Q_INVOKABLE static void set_status_bar_color(QColor color);
+  Q_INVOKABLE static void request_notifications();
 #endif
 };
 
