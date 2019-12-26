@@ -42,6 +42,7 @@ ListView {
                 hoverEnabled: true
                 z: CmnCfg.overlayZ
                 anchors.fill: parent
+
                 onClicked: messageSearchList.messageClicked(
                                messageData.conversation, messageData.msgId)
             }

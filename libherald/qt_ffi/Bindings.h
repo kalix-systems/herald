@@ -1541,6 +1541,7 @@ public:
   Q_INVOKABLE void clearSearch();
   Q_INVOKABLE bool deleteMessage(quint64 row_index);
   Q_INVOKABLE qint64 indexById(const QByteArray &msg_id) const;
+  Q_INVOKABLE void markRead(quint64 index);
   Q_INVOKABLE qint64 nextSearchMatch();
   Q_INVOKABLE qint64 prevSearchMatch();
   Q_INVOKABLE bool saveAllAttachments(quint64 index, const QString &dest) const;
@@ -1582,6 +1583,7 @@ public:
   Q_INVOKABLE QString docAttachments(int row) const;
   Q_INVOKABLE QVariant expirationTime(int row) const;
   Q_INVOKABLE QString fullBody(int row) const;
+  Q_INVOKABLE QString fullMediaAttachments(int row) const;
   Q_INVOKABLE QVariant insertionTime(int row) const;
   Q_INVOKABLE QVariant isHead(int row) const;
   Q_INVOKABLE QVariant isTail(int row) const;
@@ -1600,6 +1602,7 @@ public:
   Q_INVOKABLE QVariant receiptStatus(int row) const;
   Q_INVOKABLE QVariant replyType(int row) const;
   Q_INVOKABLE QVariant serverTime(int row) const;
+  Q_INVOKABLE QString userReceipts(int row) const;
 
 Q_SIGNALS:
   // new data is ready to be made available to the model with fetchMore()

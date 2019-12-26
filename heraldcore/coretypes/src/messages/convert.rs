@@ -116,10 +116,9 @@ impl TryFrom<u8> for MessageReceiptStatus {
 
     fn try_from(n: u8) -> Result<Self, Self::Error> {
         match n {
-            0 => Ok(Self::NoAck),
+            0 => Ok(Self::Nil),
             1 => Ok(Self::Received),
             2 => Ok(Self::Read),
-            3 => Ok(Self::AckTerminal),
             i => Err(i),
         }
     }
@@ -130,10 +129,9 @@ impl std::convert::TryFrom<i64> for MessageReceiptStatus {
 
     fn try_from(n: i64) -> Result<Self, Error> {
         match n {
-            0 => Ok(Self::NoAck),
+            0 => Ok(Self::Nil),
             1 => Ok(Self::Received),
             2 => Ok(Self::Read),
-            3 => Ok(Self::AckTerminal),
             i => Err(Error::ReceiptStatus(i)),
         }
     }

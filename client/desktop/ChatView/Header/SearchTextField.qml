@@ -8,65 +8,80 @@ import "../../common" as Common
 import "qrc:/imports" as Imports
 import "../js/SearchHandler.mjs" as SearchUtils
 
-TextField {
-    id: searchText
-    height: CmnCfg.toolbarHeight
-
-    placeholderText: "Search conversation"
-    font.pixelSize: 14
-    color: CmnCfg.palette.white
-    leftPadding: 0
-    bottomPadding: 2
-
-    background: Rectangle {
-        anchors.fill: parent
-        color: 'transparent'
+ScrollView {
+    clip: true
+    ScrollBar.horizontal: ScrollBar {
+        size: 0
+        contentItem: Rectangle {
+            color: "transparent"
+        }
     }
 
-    Keys.onReturnPressed: {
-        const backwards = (event.modifiers & Qt.ShiftModifier)
-        //don't allow enter key to affect textfield
-        event.accepted = true
+    TextArea {
+        id: searchText
+        height: CmnCfg.toolbarHeight
 
-        ownedConversation.searchActive = true
+        placeholderText: "Search conversation"
+        font.pixelSize: 14
+        color: CmnCfg.palette.white
+        leftPadding: 0
+        bottomPadding: 0
+        selectByMouse: true
 
-        const x = convWindow.chatScrollBar.position
-        const y = convWindow.chatScrollBar.size
+        background: Rectangle {
+            anchors.fill: parent
+            color: 'transparent'
+        }
 
-        //key navigation handling
-        if (ownedConversation.searchNumMatches > 0) {
+        verticalAlignment: TextEdit.AlignTop
+        //verticalAlignment: TextEdit.AlignVCenter
+        //Layout.alignment: Qt.AlignTop | Qt.AlignLeft
+
+        Keys.onReturnPressed: {
+            const backwards = (event.modifiers & Qt.ShiftModifier)
+            //don't allow enter key to affect textfield
+            event.accepted = true
+
+            ownedConversation.searchActive = true
+
+            const x = convWindow.chatScrollBar.position
+            const y = convWindow.chatScrollBar.size
+
+            //key navigation handling
+            if (ownedConversation.searchNumMatches > 0) {
+                ownedConversation.setSearchHint(x, y)
+                searchToolBar.state = "searchActiveState"
+
+                if (backwards) {
+                    convWindow.positionViewAtIndex(
+                                ownedConversation.prevSearchMatch(),
+                                ListView.Center)
+                } else {
+                    convWindow.positionViewAtIndex(
+                                ownedConversation.nextSearchMatch(),
+                                ListView.Center)
+                }
+            }
+        }
+
+        onTextChanged: {
+            ownedConversation.searchActive = true
+            ownedConversation.searchPattern = searchText.text
+
+            const x = convWindow.chatScrollBar.position
+            const y = convWindow.chatScrollBar.size
+
             ownedConversation.setSearchHint(x, y)
-            searchToolBar.state = "searchActiveState"
 
-            if (backwards) {
+            if (ownedConversation.searchNumMatches > 0) {
+                searchToolBar.state = "searchActiveState"
                 convWindow.positionViewAtIndex(
                             ownedConversation.prevSearchMatch(),
                             ListView.Center)
             } else {
-                convWindow.positionViewAtIndex(
-                            ownedConversation.nextSearchMatch(),
-                            ListView.Center)
+                //clear state to disable buttons
+                searchToolBar.state = ""
             }
-        }
-    }
-
-    onTextChanged: {
-        ownedConversation.searchActive = true
-        ownedConversation.searchPattern = searchText.text
-
-        const x = convWindow.chatScrollBar.position
-        const y = convWindow.chatScrollBar.size
-
-        ownedConversation.setSearchHint(x, y)
-
-        if (ownedConversation.searchNumMatches > 0) {
-            searchToolBar.state = "searchActiveState"
-            convWindow.positionViewAtIndex(
-                        ownedConversation.prevSearchMatch(),
-                        ListView.Center)
-        } else {
-            //clear state to disable buttons
-            searchToolBar.state = ""
         }
     }
 }

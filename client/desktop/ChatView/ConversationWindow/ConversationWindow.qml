@@ -67,19 +67,12 @@ ListView {
         model.setElisionCharCount(38 * 40)
         model.setElisionCharsPerLine(40)
 
-        chatScrollBarInner.setPosition(1)
+        chatScrollBarInner.setPosition(1.0)
 
         cacheBuffer = chatListView.height * 5
     }
 
-    FileDialog {
-        id: attachmentDownloader
-        property string filePath
-        selectFolder: true
-        folder: StandardPaths.writableLocation(StandardPaths.DesktopLocation)
-        onAccepted: Herald.utils.saveFile(filePath, fileUrl)
-        selectExisting: false
-    }
+
 
     FileDialog {
         id: downloadFileChooser
@@ -95,7 +88,6 @@ ListView {
         defaultWidth: chatListView.width
         width: parent.width
         messageModelData: model
-
         ListView.onAdd: chatScrollBarInner.setPosition(1.0)
 
         ChatBubbleHover {
@@ -104,5 +96,6 @@ ListView {
             onEntered: bubbleActual.hoverHighlight = true
             onExited: bubbleActual.hoverHighlight = false
         }
+        Component.onCompleted: ownedConversation.markRead(index)
     }
 }

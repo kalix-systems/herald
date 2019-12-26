@@ -3,15 +3,14 @@ import QtQuick.Layouts 1.12
 import QtQuick 2.12
 import LibHerald 1.0
 // Includes CVFLoatingButton. ListItem, and Header
-import "./Controls"
-import "../Common"
+import "../Controls"
+import "../../Common"
 import QtGraphicalEffects 1.0
 import Qt.labs.platform 1.0
 import "qrc:/imports" as Imports
 import "qrc:/imports/Entity"
 import "qrc:/imports/NewGroupFlow"
 import "qrc:/imports/js/utils.mjs" as Utils
-import "GroupFlowComponents"
 
 Page {
     id: newGroupView
@@ -71,14 +70,12 @@ Page {
             // in the mobile UI to make sure this is working; also check
             // commented out section of TapHandler function below
             //imageSource: groupPane.profPicSource
-            color: CmnCfg.palette.black
-            iconColor: CmnCfg.palette.lightGrey
+            backgroundColor: CmnCfg.palette.black
 
             Layout.alignment: Qt.AlignTop | Qt.AlignHCenter
         }
 
         Imports.BorderedTextField {
-            id: titleText
             placeholderText: qsTr("Group title")
             color: CmnCfg.palette.black
             borderColor: CmnCfg.palette.black
@@ -138,29 +135,13 @@ Page {
                         Herald.conversationBuilder.setTitle(titleText.text)
                     }
 
-                    if (imageSelector.imageSource !== "") {
-                        var parsed = JSON.parse(Herald.utils.imageDimensions(
-                                                    imageSelector.imageSource))
-
-                        const picture = {
-                            'width': Math.round(parsed.width),
-                            'height': Math.round(parsed.height),
-                            'x': 0,
-                            'y': 0,
-                            'path': imageSelector.imageSource
-                        }
-
-                        Herald.conversationBuilder.setProfilePicture(
-                                    JSON.stringify(picture))
-                    }
-
+                    //TODO: impl for setting prof pic once file dialog exists
+                    //                if (topRect.profPic !== "") {
+                    //                }
                     Herald.conversationBuilder.finalize()
                     mainView.pop()
                 }
             }
         }
     }
-
-    Component.onCompleted: Herald.usersSearch.refresh()
-    Component.onDestruction: Herald.conversationBuilder.clear()
 }

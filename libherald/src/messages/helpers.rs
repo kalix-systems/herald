@@ -1,7 +1,9 @@
 use super::*;
 use crate::push;
+use crate::{content_push, spawn};
 use heraldcore::{errors::HErr, message::Message as Msg, NE};
 use messages_helper::search::Match;
+pub use messages_helper::{container::*, types::*};
 
 impl Messages {
     pub(super) fn emit_last_changed(&mut self) {
@@ -183,6 +185,21 @@ impl Messages {
         self.conversation_id = Some(id);
         self.builder.set_conversation_id(id);
 
-        container::fill(id);
+        spawn!({
+            let list: Vec<MessageMeta> = err!(conversation::conversation_message_meta(&id));
+
+            let last = match list.last().as_ref() {
+                Some(MessageMeta { ref msg_id, .. }) => {
+                    let msg = err!(heraldcore::message::get_message(msg_id));
+                    Some(heraldcore::message::split_msg(msg).1)
+                }
+                None => None,
+            };
+
+            err!(content_push(
+                id,
+                MsgUpdate::Container(Box::new(Container::new(list, last)))
+            ));
+        });
     }
 }

@@ -28,9 +28,10 @@ Component {
 
             //main search component
             SearchTextField {
-                Layout.alignment: Qt.AlignTop
+                //TODO: proper width calculation
                 Layout.maximumWidth: 300
                 Layout.minimumWidth: 200
+                Layout.alignment: Qt.AlignLeft | Qt.AlignTop
             }
 
             Text {

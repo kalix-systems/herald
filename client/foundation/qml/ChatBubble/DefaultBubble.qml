@@ -6,13 +6,15 @@ import "./ReplyBubble"
 import "../js/utils.mjs" as Utils
 import "../Entity"
 
+//This is a default bubble that e.g. displays avatar, has default padding regardless of
+//isHead and isTail. It is used in the view for more info for a message
 Rectangle {
     id: bubbleRoot
 
     property real defaultWidth
     property bool elided: body.length !== messageModelData.fullBody.length
     property bool expanded: false
-    property bool outbound: author === Herald.config.configId
+    property bool outbound: messageModelData.author === Herald.config.configId
     property Item convContainer
     property var messageModelData
 
@@ -40,30 +42,32 @@ Rectangle {
     property string friendlyTimestamp: Utils.friendlyTimestamp(
                                            messageModelData.insertionTime)
 
-    property string timerIcon: expirationTime !== undefined ? Utils.timerIcon(
-                                                                  expirationTime,
-                                                                  insertionTime) : ""
+    property string timerIcon: messageModelData.expirationTime
+                               !== undefined ? Utils.timerIcon(
+                                                   messageModelData.expirationTime,
+                                                   messageModelData.insertionTime) : ""
     readonly property string receiptImage: outbound ? Utils.receiptCodeSwitch(
                                                           messageModelData.receiptStatus) : ""
     readonly property color authorColor: CmnCfg.avatarColors[messageModelData.authorColor]
 
     readonly property string pfpUrl: messageModelData.authorProfilePicture
     property bool hoverHighlight: false
-    property bool moreInfo: false
+    property bool moreInfo: true
+
+    height: contentRoot.height
+    width: defaultWidth
 
     Connections {
         target: appRoot.globalTimer
         onRefreshTime: {
             friendlyTimestamp = Utils.friendlyTimestamp(
                         messageModelData.insertionTime)
-            timerIcon = (expirationTime !== undefined) ? (Utils.timerIcon(
-                                                              expirationTime,
-                                                              insertionTime)) : ""
+            timerIcon = (messageModelData.expirationTime
+                         !== undefined) ? (Utils.timerIcon(
+                                               messageModelData.expirationTime,
+                                               messageModelData.insertionTime)) : ""
         }
     }
-    height: contentRoot.height
-    width: defaultWidth
-
     color: CmnCfg.palette.white
 
     Rectangle {
@@ -71,7 +75,6 @@ Rectangle {
         width: parent.width
         height: 1
         color: CmnCfg.palette.medGrey
-        visible: isHead
     }
 
     Rectangle {
@@ -80,7 +83,6 @@ Rectangle {
 
         height: 1
         color: CmnCfg.palette.medGrey
-        visible: isTail
     }
 
     Highlight {
@@ -93,7 +95,7 @@ Rectangle {
         color: authorColor
         initials: authorName[0].toUpperCase()
         size: 36
-        visible: isHead ? true : false
+
         anchors {
             left: parent.left
             top: parent.top
@@ -137,13 +139,12 @@ Rectangle {
         Component.onCompleted: bubbleRoot.expanded = false
 
         spacing: CmnCfg.smallMargin
-        topPadding: isHead ? CmnCfg.smallMargin : CmnCfg.smallMargin
+        topPadding: CmnCfg.smallMargin
         leftPadding: CmnCfg.smallMargin
-        bottomPadding: isTail ? CmnCfg.defaultMargin : CmnCfg.smallMargin
+        bottomPadding: CmnCfg.defaultMargin
 
         BubbleLabel {
             id: authorLabel
-            visible: isHead
         }
 
         //reply bubble loader
@@ -152,7 +153,7 @@ Rectangle {
                 if (!reply)
                     return undefined
 
-                if (replyType === 1) {
+                if (messageModelData.replyType === 1) {
                     return replyDanglingContent
                 }
 
@@ -173,7 +174,9 @@ Rectangle {
             // reply bubble if there is doc file content
             Component {
                 id: replyHybridContent
-                ReplyHybrid {}
+                ReplyHybrid {
+                    mouseEnabled: false
+                }
             }
 
             // reply bubble if there is doc file content
@@ -185,19 +188,25 @@ Rectangle {
             // reply bubble if there is doc file content
             Component {
                 id: replyDocContent
-                ReplyDoc {}
+                ReplyDoc {
+                    mouseEnabled: false
+                }
             }
 
             // reply media bubble if there is media file content
             Component {
                 id: replyMediaContent
-                ReplyImage {}
+                ReplyImage {
+                    mouseEnabled: false
+                }
             }
 
             // reply bubble if there is no doc file content
             Component {
                 id: replyContent
-                ReplyText {}
+                ReplyText {
+                    mouseEnabled: false
+                }
             }
         }
 

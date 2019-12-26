@@ -58,6 +58,9 @@
         <file>themes/SolarizedDark.qml</file>
         <file>themes/SolarizedLight.qml</file>
         <file>ChatBubble/ReplyBubble/dyn/ReplyBackground.qml</file>
+        <file>ChatBubble/DefaultBubble.qml</file>
     </qresource>
-
+    <qresource prefix="/">
+        <file>ChatBubble/DefaultBubble.qml</file>
+    </qresource>
 </RCC>

@@ -1,9 +1,6 @@
 use crate::*;
 use herald_common::{Time, UserId};
-use heraldcore::message::{
-    attachments::{DocMeta, MediaMeta},
-    Elider,
-};
+use heraldcore::message::Elider;
 use message_cache as cache;
 use revec::Revec;
 use search::*;
@@ -83,11 +80,11 @@ impl Container {
         access(&mid, f)
     }
 
-    pub fn update_by_index<T, F: FnOnce(&mut MsgData)>(
+    pub fn update_by_index<T, F: FnOnce(&mut MsgData) -> T>(
         &self,
         index: usize,
         f: F,
-    ) -> Option<()> {
+    ) -> Option<T> {
         let mid = self.msg_id(index)?;
 
         update(&mid, f)
@@ -96,33 +93,37 @@ impl Container {
     pub fn media_attachments_data_json(
         &self,
         index: usize,
+        limit: Option<usize>,
     ) -> Option<String> {
         let mid = self.list.get(index)?.msg_id;
-        self.get_media_attachments_data_json(&mid)
+        self.get_media_attachments_data_json(&mid, limit)
     }
 
     pub fn get_media_attachments_data_json(
         &self,
         mid: &MsgId,
+        limit: Option<usize>,
     ) -> Option<String> {
         access(mid, |m| m.attachments.clone())
-            .and_then(|attachments| crate::media_attachments_json(&attachments))
+            .and_then(|attachments| crate::media_attachments_json(&attachments, limit))
     }
 
     pub fn doc_attachments_data_json(
         &self,
         index: usize,
+        limit: Option<usize>,
     ) -> Option<String> {
         let mid = self.list.get(index)?.msg_id;
-        self.get_doc_attachments_data_json(&mid)
+        self.get_doc_attachments_data_json(&mid, limit)
     }
 
     pub fn get_doc_attachments_data_json(
         &self,
         mid: &MsgId,
+        limit: Option<usize>,
     ) -> Option<String> {
         access(mid, |m| m.attachments.clone())
-            .and_then(|attachments| crate::doc_attachments_json(&attachments))
+            .and_then(|attachments| crate::doc_attachments_json(&attachments, limit))
     }
 
     pub fn last(&self) -> Option<&MessageMeta> {
@@ -197,7 +198,7 @@ impl Container {
         ix
     }
 
-    fn msg_id(
+    pub fn msg_id(
         &self,
         index: usize,
     ) -> Option<&MsgId> {
@@ -262,26 +263,7 @@ impl Container {
     ) -> Option<String> {
         let mid = self.op_msg_id(index)?;
 
-        let (first, len): (DocMeta, usize) =
-            access(&mid, |m| m.attachments.clone()).and_then(|attachments| {
-                let docs = attachments.doc_attachments().ok()?;
-
-                if docs.is_empty() {
-                    return None;
-                }
-
-                let len = docs.len();
-                let first = docs.into_iter().next()?;
-
-                (first, len).into()
-            })?;
-
-        json::object! (
-            "first" => first,
-            "count" => len,
-        )
-        .dump()
-        .into()
+        self.get_doc_attachments_data_json(&mid, Some(1))
     }
 
     pub fn op_media_attachments_json(
@@ -289,27 +271,7 @@ impl Container {
         index: usize,
     ) -> Option<String> {
         let mid = self.op_msg_id(index)?;
-
-        let (first, len): (MediaMeta, usize) =
-            access(&mid, |m| m.attachments.clone()).and_then(|attachments| {
-                let media = attachments.media_attachments().ok()?;
-
-                if media.is_empty() {
-                    return None;
-                }
-
-                let len = media.len();
-                let first = media.into_iter().next()?;
-                Some((first, len))
-            })?;
-
-        Some(
-            json::object! {
-                "first" => first,
-                "count" => len,
-            }
-            .dump(),
-        )
+        self.get_media_attachments_data_json(&mid, Some(4))
     }
 
     pub fn clear_search<F: FnMut(usize)>(
@@ -352,7 +314,9 @@ impl Container {
                 MatchStatus::NotMatched
             };
 
-            if old_match_status != msg.match_status {
+            if (old_match_status != msg.match_status)
+                || (old_match_status.is_match() && msg.match_status.is_match())
+            {
                 data_changed(ix);
             }
 

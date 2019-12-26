@@ -189,7 +189,7 @@ export function initialize(name: string): string {
  * */
 export function receiptCodeSwitch(receiptCode: MessageReceiptStatus): string {
   switch (receiptCode) {
-    case MessageReceiptStatus.NoAck: {
+    case MessageReceiptStatus.Nil: {
       return "";
     }
     case MessageReceiptStatus.Received: {
@@ -198,10 +198,30 @@ export function receiptCodeSwitch(receiptCode: MessageReceiptStatus): string {
     case MessageReceiptStatus.Read: {
       return "qrc:/double-check-receipt-icon.svg";
     }
-    case MessageReceiptStatus.AckTerminal: {
-      return "qrc:/single-check-receipt-icon.svg";
-    }
     default:
       return "";
   }
 }
+
+export function timerIcon(expireTime: number, insertTime: number): string {
+  var timeNow = Date.now();
+  var proportion = (timeNow - insertTime) / (expireTime - insertTime);
+  if (proportion < 0.25) return "qrc:/mini-timer-icons/full.svg";
+  else if (proportion < 0.5) return "qrc:/mini-timer-icons/almost-full.svg";
+  else if (proportion < 0.75) return "qrc:/mini-timer-icons/almost-empty.svg";
+  else return "qrc:/mini-timer-icons/empty.svg";
+}
+
+export function userTime(timestamp: number): string {
+        var d = new Date(timestamp)
+        var year = d.getFullYear()
+        var month = ("0" + (d.getMonth() + 1)).slice(-2)
+        var day = ("0" + d.getDate()).slice(-2)
+        var hour = d.getHours()
+        var min = ("0" + d.getMinutes()).slice(-2)
+        var sec = ("0" + d.getSeconds()).slice(-2)
+
+        var time = year + "-" + month + "-" + day + " " + hour + ":" + min + ":" + sec
+
+        return time
+    }
