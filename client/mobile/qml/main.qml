@@ -1,9 +1,9 @@
 import QtQuick 2.13
 import QtQuick.Controls 2.12
 import Qt.labs.platform 1.1
-import LibHerald 1.0
 import "qrc:/imports/errors"
 import "./LoginPage" as LoginPage
+import LibHerald 1.0
 
 ApplicationWindow {
     id: root
