@@ -127,6 +127,21 @@ pub(crate) fn send_normal_message(
     send_cmessage(cid, &ConversationMessage::Msg(msg))
 }
 
+/// Sends a reaction
+pub fn send_reaction(
+    cid: ConversationId,
+    msg_id: MsgId,
+    react_content: crate::message::ReactContent,
+) -> Result<(), HErr> {
+    send_cmessage(
+        cid,
+        &ConversationMessage::Reaction(cmessages::Reaction {
+            msg_id,
+            react_content,
+        }),
+    )
+}
+
 pub(crate) fn send_conversation_settings_update(
     cid: ConversationId,
     update: settings::SettingsUpdate,

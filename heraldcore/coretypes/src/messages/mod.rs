@@ -52,7 +52,7 @@ pub struct MessageReceipt {
 }
 
 /// An isolated message reaction
-#[derive(Clone, Debug)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Reaction {
     /// The reactionary
     pub reactionary: UserId,

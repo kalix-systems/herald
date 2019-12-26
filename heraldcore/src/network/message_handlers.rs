@@ -105,6 +105,12 @@ pub(super) fn handle_cmessage(
                     status,
                 }));
         }
+        Reaction(cmessages::Reaction {
+            react_content,
+            msg_id,
+        }) => {
+            crate::message::add_reaction(&msg_id, &uid, &react_content)?;
+        }
         Settings(update) => {
             conversation::settings::apply(&update, &cid)?;
 

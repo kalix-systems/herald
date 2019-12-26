@@ -43,7 +43,7 @@ CREATE TABLE IF NOT EXISTS message_reactions (
   -- text of the reacts
   react_content TEXT NOT NULL,
   -- time react was received
-  insertion_ts TEXT NOT NULL,
+  insertion_ts INTEGER NOT NULL,
   FOREIGN KEY(msg_id) REFERENCES messages(msg_id) ON DELETE CASCADE
 );
 
