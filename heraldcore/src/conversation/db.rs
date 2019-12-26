@@ -30,6 +30,7 @@ pub(crate) fn conversation_messages(
             let receipts = crate::message::db::get_receipts(conn, &message_id)?;
             let replies = crate::message::db::replies(conn, &message_id)?;
             let attachments = crate::message::attachments::db::get(conn, &message_id)?;
+            let reactions = crate::message::db::reactions(conn, &message_id)?;
 
             let time = MessageTime {
                 insertion: row.get("insertion_ts")?,
@@ -53,6 +54,7 @@ pub(crate) fn conversation_messages(
                 attachments,
                 receipts,
                 replies,
+                reactions,
             })
         },
     ));

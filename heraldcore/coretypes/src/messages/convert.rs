@@ -1,4 +1,5 @@
 use super::*;
+use herald_common::Time;
 use std::convert::TryFrom;
 
 impl From<Option<MsgId>> for ReplyId {
@@ -137,19 +138,51 @@ impl std::convert::TryFrom<i64> for MessageReceiptStatus {
     }
 }
 
-impl TryFrom<Vec<Reaction>> for Reactions {
-    type Error = ();
+impl Reactions {
+    pub fn from_vec(reactions: Vec<Reaction>) -> Option<Self> {
+        if reactions.is_empty() {
+            return None;
+        }
 
-    fn try_from(mut reactions: Vec<Reaction>) -> Result<Self, Self::Error> {
-        let mid = match reactions.first() {
-            Some(first) => first.mid,
-            None => return Err(()),
-        };
+        let mut buckets = HashMap::<ReactContent, Vec<(Time, UserId)>>::new();
 
-        reactions.sort_unstable_by(|a, b| a.time.cmp(&b.time));
+        for Reaction {
+            reactionary,
+            react_content,
+            time,
+        } in reactions
+        {
+            buckets
+                .entry(react_content)
+                .or_default()
+                .push((time, reactionary));
+        }
 
-        let mut content = Vec::new();
+        let mut content = buckets.into_iter().collect::<Vec<_>>();
 
-        Ok(Self { mid, content })
+        content.sort_unstable_by(|(_, a), (_, b)| {
+            a.iter()
+                .map(|(t, _)| t)
+                .min()
+                .copied()
+                .unwrap_or_else(|| Time::from(std::i64::MIN))
+                .cmp(
+                    &b.iter()
+                        .map(|(t, _)| t)
+                        .min()
+                        .copied()
+                        .unwrap_or_else(|| Time::from(std::i64::MIN)),
+                )
+        });
+
+        let content = content
+            .into_iter()
+            .map(|(content, v)| TaggedReact {
+                content,
+                reactionaries: v.into_iter().map(|(_, u)| u).collect(),
+            })
+            .collect();
+
+        Some(Self { content })
     }
 }

@@ -33,7 +33,7 @@ pub struct Message {
     /// Messages that replied to this message
     pub replies: HashSet<MsgId>,
     /// Reactions to this message
-    pub reactions: HashSet<MsgId>,
+    pub reactions: Option<Reactions>,
     /// Attachment metadata
     pub attachments: AttachmentMeta,
 }
@@ -54,10 +54,6 @@ pub struct MessageReceipt {
 /// An isolated message reaction
 #[derive(Clone, Debug)]
 pub struct Reaction {
-    /// The message id the reaction is associated with
-    pub mid: MsgId,
-    /// The conversation id the original message is associated with
-    pub cid: ConversationId,
     /// The reactionary
     pub reactionary: UserId,
     /// The text of the receipt
@@ -79,7 +75,6 @@ pub struct TaggedReact {
 /// A collection of message reactions
 #[derive(Clone, Debug)]
 pub struct Reactions {
-    pub mid: MsgId,
     pub content: Vec<TaggedReact>,
 }
 
@@ -222,6 +217,7 @@ pub struct MsgData {
     pub attachments: crate::attachments::AttachmentMeta,
     pub send_status: MessageSendStatus,
     pub replies: HashSet<MsgId>,
+    pub reactions: Option<Reactions>,
 }
 
 #[repr(u8)]
@@ -281,6 +277,7 @@ pub fn split_msg(msg: Message) -> (MessageMeta, MsgData) {
         receipts,
         attachments,
         send_status,
+        reactions,
         replies,
         ..
     } = msg;
@@ -294,6 +291,7 @@ pub fn split_msg(msg: Message) -> (MessageMeta, MsgData) {
         time,
         send_status,
         replies,
+        reactions,
     };
 
     let message = MessageMeta {

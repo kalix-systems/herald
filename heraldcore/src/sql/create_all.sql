@@ -35,13 +35,15 @@ CREATE TABLE IF NOT EXISTS read_receipts (
 
 CREATE INDEX IF NOT EXISTS msg_id_receipt_ix ON read_receipts(msg_id);
 
-CREATE TABLE IF NOT EXISTS message_reacts (
+CREATE TABLE IF NOT EXISTS message_reactions (
   -- message id reacts is associated with
   msg_id BLOB NOT NULL,
   -- user id of the user that sent the reacts
-  user_id TEXT NOT NULL,
+  reactionary TEXT NOT NULL,
   -- text of the reacts
   react_content TEXT NOT NULL,
+  -- time react was received
+  insertion_ts TEXT NOT NULL,
   FOREIGN KEY(msg_id) REFERENCES messages(msg_id) ON DELETE CASCADE
 );
 
