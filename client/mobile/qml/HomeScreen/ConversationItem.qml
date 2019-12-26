@@ -1,62 +1,50 @@
 import QtQuick 2.13
 import QtQuick.Controls 2.13
 import LibHerald 1.0
-import "qrc:/imports/Avatar"
+import "qrc:/imports/Entity"
 import "qrc:/imports/js/utils.mjs" as Utils
 import "../ChatView" as ChatView
+import "../Common" as Common
 
+// Layout & tap behavior for a conversation item in conversation list view
 Rectangle {
     id: contactItem
 
+    property string convoTitle
     // the index corresponding to the visual color of this GroupBox
     property int colorCode: 0
-    property string proxyTitle: title
+    // path to the conversation's avatar image
+    property string imageSource: ''
+    property bool isGroup: false
+    // asdf
     property ConversationContent convContent: null
 
-    height: CmnCfg.avatarSize
+    height: entityBlock.height
     color: CmnCfg.palette.white
 
     // prevent animation spill over
     clip: true
+
     // fill parent width
     anchors {
         left: parent.left
         right: parent.right
     }
 
-    Rectangle {
+    Common.EntityBlock {
+        id: entityBlock
+        anchors.leftMargin: CmnCfg.smallMargin
+        anchors.rightMargin: CmnCfg.smallMargin
 
-        anchors {
-            fill: parent
-            rightMargin: CmnCfg.units.dp(12)
-            leftMargin: CmnCfg.units.dp(12)
-        }
-
-        AvatarMain {
-            id: avatar
-            backgroundColor: CmnCfg.avatarColors[colorCode]
-            anchors.verticalCenter: parent.verticalCenter
-            initials: Utils.initialize(title)
-            size: CmnCfg.units.dp(56)
-            avatarDiameter: CmnCfg.units.dp(48)
-            topTextMargin: CmnCfg.units.dp(4)
-            bottomTextMargin: CmnCfg.units.dp(16)
-
-            anchors {
-                right: parent.right
-                left: parent.left
-            }
-
-            labelComponent: ConversationLabel {
-                contactName: title
-                lastBody: convContent.messages.lastBody
-                lastTimestamp: convContent.messages.isEmpty ? "" : Utils.friendlyTimestamp(
-                                                                  convContent.messages.lastTime)
-                lastReceipt: convContent.messages.lastStatus
-                             === undefined ? 0 : convContent.messages.lastStatus
-                labelFontSize: CmnCfg.labelSize
-            }
-        }
+        entityName: convoTitle
+        subLabelText: convContent.messages.lastBody
+        timestamp: convContent.messages.isEmpty ? "" : Utils.friendlyTimestamp(
+                                                      convContent.messages.lastTime)
+        lastReceipt: convContent.messages.lastStatus
+                     === undefined ? 0 : convContent.messages.lastStatus
+        color: CmnCfg.avatarColors[contactItem.colorCode]
+        isGroup: contactItem.isGroup
+        pfpPath: imageSource
     }
 
     // background item which gets manipulated
@@ -100,7 +88,7 @@ Rectangle {
         id: ownedChatView
         ChatView.ChatViewMain {
             ownedMessages: contactItem.convContent.messages
-            headerTitle: proxyTitle
+            headerTitle: convoTitle
         }
     }
 

@@ -8,10 +8,10 @@ export function convWindowKeyHandler(event, chatScrollBar, chatListView, alwaysO
             chatListView.contentY -= chatListView.height;
             break;
         case Qt.Key_Home:
-            toBeginning(chatScrollBar);
+            toBeginning(chatListView);
             break;
         case Qt.Key_End:
-            toEnd(chatScrollBar);
+            toEnd(chatListView);
             break;
         case Qt.Key_Up:
             moveUp(chatScrollBar);
@@ -21,10 +21,10 @@ export function convWindowKeyHandler(event, chatScrollBar, chatListView, alwaysO
             break;
         case Qt.Key_G:
             if (event.modifiers & Qt.ShiftModifier) {
-                toEnd(chatScrollBar);
+                toEnd(chatListView);
             }
             else {
-                toBeginning(chatScrollBar);
+                toBeginning(chatListView);
             }
             break;
         case Qt.Key_J:
@@ -50,9 +50,9 @@ function moveDown(chatScrollBar) {
 function moveUp(chatScrollBar) {
     chatScrollBar.decrease();
 }
-function toEnd(chatScrollBar) {
-    chatScrollBar.position = 1;
+function toEnd(chatListView) {
+    chatListView.positionViewAtBeginning();
 }
-function toBeginning(chatScrollBar) {
-    chatScrollBar.position = 0;
+function toBeginning(chatListView) {
+    chatListView.positionViewAtEnd();
 }

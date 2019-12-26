@@ -18,6 +18,8 @@ Rectangle {
     property string replyBody: messageModelData.opBody
     property int fileCount
     readonly property real imageSize: 80
+    property alias mouseEnabled: mouseArea.enabled
+
 
     Component.onCompleted: {
         replyWrapper.fileCount = JS.parseDocs(replyFileClip.nameMetrics,
@@ -36,7 +38,7 @@ Rectangle {
         anchors.left: parent.left
     }
 
-    ReplyMouseArea {}
+    ReplyMouseArea { id: mouseArea}
 
     height: wrapRow.height
     width: bubbleRoot.maxWidth

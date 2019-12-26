@@ -165,13 +165,17 @@ pub enum MessageSendStatus {
 /// Receipt status of a message
 pub enum MessageReceiptStatus {
     /// Not acknowledged
-    NoAck = 0,
+    Nil = 0,
     /// Received by user
     Received = 1,
     /// Read by the recipient
     Read = 2,
-    /// The user has read receipts turned off
-    AckTerminal = 3,
+}
+
+impl Default for MessageReceiptStatus {
+    fn default() -> Self {
+        MessageReceiptStatus::Nil
+    }
 }
 
 #[derive(Clone, Debug)]

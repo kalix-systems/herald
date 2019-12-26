@@ -6,7 +6,7 @@ import "../../common" as Common
 import "qrc:/imports/js/utils.mjs" as Utils
 import "qrc:/imports" as Imports
 import "../../SideBar" as SideBar
-import "qrc:/imports/Avatar"
+import "qrc:/imports/Entity"
 import "../popups" as Popups
 import QtGraphicalEffects 1.0
 
@@ -43,7 +43,7 @@ Component {
         }
 
 
-        Imports.ButtonForm {
+        Imports.IconButton {
             anchors {
                 verticalCenter: parent.verticalCenter
                 right: parent.right

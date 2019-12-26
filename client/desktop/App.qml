@@ -6,6 +6,9 @@ import LibHerald 1.0
 import "SideBar/popups" as Popups
 import "./SideBar"
 import "."
+import "ChatView/Popups" as CvPopups
+import Qt.labs.platform 1.1
+import QtQuick.Dialogs 1.3
 
 Item {
     id: appRoot
@@ -19,6 +22,15 @@ Item {
         }
     }
 
+    FileDialog {
+        id: attachmentDownloader
+        property string filePath
+        selectFolder: true
+        folder: StandardPaths.writableLocation(StandardPaths.DesktopLocation)
+        onAccepted: Herald.utils.saveFile(filePath, fileUrl)
+        selectExisting: false
+    }
+
     readonly property alias globalTimer: globalTimer
     Timer {
         id: globalTimer
@@ -28,6 +40,21 @@ Item {
         running: true
         repeat: true
         onTriggered: refreshTime()
+    }
+
+    Loader {
+        id: messageInfoLoader
+        width: active ? chatView.width : 0
+        height: active ? chatView.height : 0
+        anchors.top: active ? parent.top : undefined
+        anchors.right: active ? parent.right : undefined
+        property var convoMembers
+        property var messageData
+        property var ownedMessages
+        active: false
+        sourceComponent: CvPopups.MoreInfoPopup {
+            id: moreInfo
+        }
     }
 
     Popups.ColorPicker {

@@ -171,20 +171,29 @@ impl AttachmentMeta {
         Ok(out)
     }
 
-    pub fn media_attachments(&self) -> Result<Vec<MediaMeta>, Error> {
-        let mut out = Vec::with_capacity(self.0.len());
+    pub fn media_attachments(
+        &self,
+        limit: Option<usize>,
+    ) -> Result<Media, Error> {
+        let mut items = Vec::with_capacity(limit.unwrap_or(8));
 
-        for p in self.0.iter() {
-            let mut path = attachments_dir();
+        let mut limit = limit.unwrap_or(std::usize::MAX);
+        let mut num_more = 0;
 
-            path.push(p);
+        let base = attachments_dir();
 
+        for path in self.0.iter().map(|p| base.join(p)) {
             for entry in read_dir(path).map_err(|e| Error::Read(e, loc!()))? {
                 let entry: std::fs::DirEntry = entry.map_err(|e| Error::Read(e, loc!()))?;
 
                 let file = entry.path();
 
                 if is_media(&file) {
+                    if limit == 0 {
+                        num_more += 1;
+                        continue;
+                    }
+
                     let name = entry
                         .file_name()
                         .into_string()
@@ -198,52 +207,64 @@ impl AttachmentMeta {
                     let (width, height) =
                         image_utils::image_dimensions(&path).map_err(Error::Image)?;
 
-                    out.push(MediaMeta {
+                    items.push(MediaMeta {
                         width,
                         height,
                         name,
                         path,
                     });
+
+                    limit -= 1;
                 }
             }
         }
 
-        Ok(out)
+        Ok(Media { items, num_more })
     }
 
-    pub fn doc_attachments(&self) -> Result<Vec<DocMeta>, Error> {
-        let mut out = Vec::with_capacity(self.0.len());
+    pub fn doc_attachments(
+        &self,
+        limit: Option<usize>,
+    ) -> Result<Docs, Error> {
+        let mut items = Vec::with_capacity(limit.unwrap_or(8));
 
-        for p in self.0.iter() {
-            let mut path = attachments_dir();
+        let mut limit = limit.unwrap_or(std::usize::MAX);
+        let mut num_more = 0;
 
-            path.push(p);
-
+        let base = attachments_dir();
+        for path in self.0.iter().map(|p| base.join(p)) {
             for entry in read_dir(path).map_err(|e| Error::Read(e, loc!()))? {
                 let entry: std::fs::DirEntry = entry.map_err(|e| Error::Read(e, loc!()))?;
 
                 let file = entry.path();
 
                 if !is_media(&file) {
+                    if limit == 0 {
+                        num_more += 1;
+                        continue;
+                    }
+
                     let size = entry.metadata().map_err(|e| Error::Read(e, loc!()))?.len();
                     let name = entry
                         .file_name()
                         .into_string()
                         .map_err(Error::NonUnicodePath)?;
 
-                    out.push(DocMeta {
+                    items.push(DocMeta {
                         path: file
                             .into_os_string()
                             .into_string()
                             .map_err(Error::NonUnicodePath)?,
                         name,
                         size,
-                    })
+                    });
+
+                    limit -= 1;
                 }
             }
         }
 
-        Ok(out)
+        Ok(Docs { items, num_more })
     }
 
     /// Indicicates whether `AttachmentMeta` is empty.
@@ -277,16 +298,32 @@ pub struct MediaMeta {
     pub height: u32,
 }
 
+pub struct Media {
+    pub items: Vec<MediaMeta>,
+    pub num_more: usize,
+}
+
+pub struct Docs {
+    pub items: Vec<DocMeta>,
+    pub num_more: usize,
+}
+
+pub struct DocMeta {
+    pub path: String,
+    pub name: String,
+    pub size: u64,
+}
+
 impl From<MediaMeta> for json::JsonValue {
     fn from(meta: MediaMeta) -> json::JsonValue {
+        use json::object;
+
         let MediaMeta {
             path,
             width,
             height,
             name,
         } = meta;
-
-        use json::object;
 
         object! {
             "path" => path,
@@ -297,10 +334,28 @@ impl From<MediaMeta> for json::JsonValue {
     }
 }
 
-pub struct DocMeta {
-    pub path: String,
-    pub name: String,
-    pub size: u64,
+impl From<Docs> for json::JsonValue {
+    fn from(docs: Docs) -> json::JsonValue {
+        use json::object;
+        let Docs { items, num_more } = docs;
+
+        object! {
+            "items" => items,
+            "num_more" => num_more,
+        }
+    }
+}
+
+impl From<Media> for json::JsonValue {
+    fn from(media: Media) -> json::JsonValue {
+        use json::object;
+        let Media { items, num_more } = media;
+
+        object! {
+            "items" => items,
+            "num_more" => num_more,
+        }
+    }
 }
 
 impl From<DocMeta> for json::JsonValue {

@@ -18,6 +18,7 @@ Item {
     /// edge rounding for all rectangles that use the radius property
     readonly property int radius: 10
 
+
     // MARGINS & SPACING
 
     /// standard margin size used to interior objects
@@ -27,10 +28,18 @@ Item {
     readonly property int largeMargin: 16
     readonly property int megaMargin: 24
 
+
     // FONTS
     readonly property FontLoader chatFont: metaTheme.chatFont
     readonly property FontLoader labelFont: metaTheme.cairo
 
+    // default font for basic UI text
+    readonly property font defaultFont: Qt.font({
+        family: chatFont.name,
+        pixelSize: 14
+    })
+
+    // default font for text in top bar headers
     readonly property font headerBarFont: Qt.font({
         family: labelFont.name,
         weight: Font.DemiBold,
@@ -38,16 +47,21 @@ Item {
         pixelSize: 16
     })
 
+
     /// standard chat text size
     readonly property int chatTextSize: 12
     /// standard header size
     readonly property int headerSize: 16
+    /// size for contact/group name labels in lists
+    readonly property int entityLabelSize: 14
+    /// size for contact/group name labels in lists
+    readonly property int entitySubLabelSize: 13
 
 
     // STANDARD COMPONENT SIZES
 
     /// standard avatar size
-    readonly property int avatarDiameter: 44
+    readonly property int avatarSize: 44
     /// standard conversation/contact height
     readonly property int convoHeight: 56
     /// standard toolbar height

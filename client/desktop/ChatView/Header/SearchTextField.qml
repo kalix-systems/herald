@@ -5,32 +5,38 @@ import QtQuick.Layouts 1.12
 import QtQuick.Controls.Styles 1.4
 import QtQuick.Controls.Styles 1.0
 import "../../common" as Common
+import "qrc:/imports" as Imports
 import "../js/SearchHandler.mjs" as SearchUtils
 
 ScrollView {
-    //TODO: proper width calculation
-    Layout.maximumWidth: 300
-    Layout.minimumWidth: 200
-    Layout.alignment: Qt.AlignLeft
     clip: true
+    ScrollBar.horizontal: ScrollBar {
+        policy: ScrollBar.AlwaysOff
+    }
+
     TextArea {
         id: searchText
         height: CmnCfg.toolbarHeight
 
-        placeholderText: "Search conversation..."
+        placeholderText: "Search conversation"
         font.pixelSize: 14
-        color: "white"
+        color: CmnCfg.palette.white
+        leftPadding: 0
+        bottomPadding: 0
+        selectByMouse: true
+
         background: Rectangle {
             anchors.fill: parent
-            color: CmnCfg.palette.offBlack
+            color: 'transparent'
         }
 
-        verticalAlignment: TextEdit.AlignVCenter
-        Layout.alignment: Qt.AlignLeft
+        verticalAlignment: TextEdit.AlignTop
+        //verticalAlignment: TextEdit.AlignVCenter
+        //Layout.alignment: Qt.AlignTop | Qt.AlignLeft
 
         Keys.onReturnPressed: {
             const backwards = (event.modifiers & Qt.ShiftModifier)
-            //don't allow enter key to affect textarea
+            //don't allow enter key to affect textfield
             event.accepted = true
 
             ownedConversation.searchActive = true

@@ -10,11 +10,14 @@ Item {
     property string pfpPath
 
     property color color
-    property real diameter: CmnCfg.avatarDiameter
+    property real size: CmnCfg.avatarSize
     property color textColor: CmnCfg.palette.iconFill
     property string initials
 
-    height: diameter
+    // group avatars ar 4px smaller and have extra horizontal margin
+    property int groupSize: size - 4
+
+    height: size
     width:  height
 
     Loader {
@@ -26,7 +29,7 @@ Item {
     Component {
         id: textAvatar
         Rectangle {
-            height: parent.height
+            height: isGroup ? groupSize : size
             width: height
             radius: isGroup ? 0 : width
             color: wrapperItem.color
@@ -45,7 +48,7 @@ Item {
         id: imageAvatar
         Rectangle {
             color: CmnCfg.palette.offBlack
-            height: parent.height
+            height: isGroup ? groupSize : size
             width: height
             radius: isGroup ? 0 : width
             id: mask

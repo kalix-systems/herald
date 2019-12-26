@@ -49,7 +49,7 @@ ScrollView {
                         smooth: true
                     }
 
-                    Imports.ButtonForm {
+                    Imports.IconButton {
                         id: clearPhoto
                         source: "qrc:/x-icon.svg"
                         anchors.centerIn: parent

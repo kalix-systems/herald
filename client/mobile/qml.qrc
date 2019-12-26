@@ -9,7 +9,8 @@
         <file>qml/LoginPage/Registration.qml</file>
         <file>qml/Common/CommonConfig.qml</file>
         <file>qml/Common/Divider.qml</file>
-        <file>qml/Common/IconButton.qml</file>
+        <file>qml/Common/EntityBlock.qml</file>
+        <file>qml/Common/AnimIconButton.qml</file>
         <file>qml/SearchView/SearchViewHeader.qml</file>
         <file>qml/SearchView/SearchViewMain.qml</file>
         <file>qml/LoginPage/Controls/LoginButton.qml</file>
@@ -29,10 +30,9 @@
         <file>qml/HomeScreen/ConversationItem.qml</file>
         <file>qml/HomeScreen/HomeHeader.qml</file>
         <file>qml/HomeScreen/HomeScreenMain.qml</file>
-        <file>qml/HomeScreen/Controls/FloatingActionButtons.qml</file>
+        <file>qml/HomeScreen/Controls/ExpandedComposeButtons.qml</file>
         <file>qml/HomeScreen/NewGroupView.qml</file>
         <file>qml/HomeScreen/GroupFlowComponents/ContactsSearchComponent.qml</file>
         <file>qml/HomeScreen/GroupFlowComponents/FinalGroupList.qml</file>
-        <file>qml/HomeScreen/GroupFlowComponents/GroupHeaderComponent.qml</file>
     </qresource>
 </RCC>

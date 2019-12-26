@@ -3,7 +3,7 @@ import LibHerald 1.0
 import QtQuick.Controls 2.13
 import QtQuick.Dialogs 1.3
 import "qrc:/common" as Common
-import "qrc:/imports/Avatar" as Av
+import "qrc:/imports/Entity" as Av
 import "qrc:/imports/js/utils.mjs" as Utils
 import "../../ChatView" as CV
 import ".././js/ContactView.mjs" as JS
@@ -32,7 +32,7 @@ ListView {
                                searchConversationId)
 
             // early return on out of bounds
-            if (conv_idx < 0)
+            if ((conv_idx < 0) || (conv_idx >= conversationList.count))
                 return
 
             conversationList.currentIndex = conv_idx
@@ -59,6 +59,7 @@ ListView {
                 id: cvMain
                 conversationItem: conversationData
                 ownedConversation: convContent.messages
+                conversationMembers: convContent.members
             }
         }
 
@@ -83,7 +84,7 @@ ListView {
                             !== "" ? CmnCfg.palette.black : CmnCfg.palette.lightGrey
                 secondaryLabelColor: convoRectangle.state
                                      !== "" ? CmnCfg.palette.offBlack : CmnCfg.palette.medGrey
-                labelFontSize: 14
+                labelFontSize: CmnCfg.entityLabelSize
             }
 
             MouseArea {

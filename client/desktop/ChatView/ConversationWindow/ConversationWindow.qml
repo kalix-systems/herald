@@ -3,7 +3,7 @@ import QtQuick.Layouts 1.12
 import QtQuick 2.14
 import LibHerald 1.0
 import "qrc:/imports/ChatBubble" as CB
-import "qrc:/imports/Avatar"
+import "qrc:/imports/Entity"
 import "." as CVUtils
 import "qrc:/imports/js/utils.mjs" as Utils
 import "../../SideBar/js/ContactView.mjs" as CUtils
@@ -21,9 +21,9 @@ ListView {
     property NumberAnimation highlightAnimation: NumberAnimation {
         id: bubbleHighlightAnimation
         property: "opacity"
-        from: 0.2
+        from: 0.4
         to: 0.0
-        duration: 600
+        duration: 800
         easing.type: Easing.InCubic
     }
     spacing: 0
@@ -54,6 +54,10 @@ ListView {
     boundsMovement: Flickable.StopAtBounds
     model: chatPage.ownedConversation
 
+    // Note: we load the list view from the bottom up to make
+    // scroll behavior more predictable
+    verticalLayoutDirection: ListView.VerticalBottomToTop
+
     // this is set to a higher value in `Component.onCompleted`
     // but is set to `0` here to improve initial load times
     cacheBuffer: 0
@@ -62,22 +66,10 @@ ListView {
         model.setElisionLineCount(38)
         model.setElisionCharCount(38 * 40)
         model.setElisionCharsPerLine(40)
-        positionViewAtEnd()
 
-        // made with the understanding that position goes from 0.0-1.0
-        // however 1.0 does not seem to be the actual bottom of the page.
-        // ain't that Qt.
-        chatScrollBarInner.setPosition(3.0)
+        chatScrollBarInner.setPosition(1.0)
+
         cacheBuffer = chatListView.height * 5
-    }
-
-    FileDialog {
-        id: attachmentDownloader
-        property string filePath
-        selectFolder: true
-        folder: StandardPaths.writableLocation(StandardPaths.DesktopLocation)
-        onAccepted: Herald.utils.saveFile(filePath, fileUrl)
-        selectExisting: false
     }
 
     FileDialog {
@@ -94,38 +86,24 @@ ListView {
         defaultWidth: chatListView.width
         width: parent.width
         messageModelData: model
-
-        ListView.onAdd: {
-            // made with the understanding that position goes from 0.0-1.0
-            // however 1.0 does not seem to be the actual bottom of the page.
-            // ain't that Qt.
-            chatScrollBarInner.setPosition(3.0)
-        }
-
-        anchors {
-            left: parent.left
-            right: parent.right
-        }
+        ListView.onAdd: chatScrollBarInner.setPosition(1.0)
 
         ChatBubbleHover {
             id: bubbleHoverHandler
             download: bubbleActual.imageAttach || bubbleActual.docAttach
-            onEntered: bubbleActual.hoverHighlight = true
-            onExited: bubbleActual.hoverHighlight = false
-        }
-
-        // Handles signals from ChatBubble attachment loaders to adjust view down
-        // once the layout has been fully calculated
-        Loader {
-            active: (parent.messageModelData.index === chatListView.count - 1)
-            sourceComponent: Component {
-                Connections {
-                    target: bubbleActual
-                    onAttachmentsLoaded: {
-                        chatListView.positionViewAtEnd()
-                    }
-                }
+            onEntered: {
+                bubbleActual.hoverHighlight = true
+                bubbleActual.expireInfo.visible = false
             }
+            onExited: {
+                bubbleActual.hoverHighlight = false
+                if (isHead)
+                    bubbleActual.expireInfo.visible = true
+            }
+        }
+        Component.onCompleted: {
+            if (root.active)
+                ownedConversation.markRead(index)
         }
     }
 }

@@ -12,7 +12,7 @@ Component {
     id: searchBarComponent
 
     Column {
-        //wrapper column to position textarea and underline
+        //wrapper column to position text field and underline
         anchors.right: parent.right
         RowLayout {
 
@@ -27,7 +27,12 @@ Component {
             }
 
             //main search component
-            SearchTextArea {}
+            SearchTextField {
+                //TODO: proper width calculation
+                Layout.maximumWidth: 300
+                Layout.minimumWidth: 200
+                Layout.alignment: Qt.AlignLeft | Qt.AlignTop
+            }
 
             Text {
                 id: indexText
@@ -41,7 +46,7 @@ Component {
                 Layout.leftMargin: -20
             }
 
-            Imports.ButtonForm {
+            Imports.IconButton {
                 id: back
                 source: "qrc:/up-chevron-icon.svg"
                 fill: CmnCfg.palette.lightGrey
@@ -53,7 +58,7 @@ Component {
                                ListView.Center)
             }
 
-            Imports.ButtonForm {
+            Imports.IconButton {
                 id: forward
                 source: "qrc:/down-chevron-icon.svg"
                 fill: CmnCfg.palette.lightGrey
@@ -66,7 +71,7 @@ Component {
                                ListView.Center)
             }
 
-            Imports.ButtonForm {
+            Imports.IconButton {
                 source: "qrc:/x-icon.svg"
                 Layout.alignment: Qt.AlignVCenter
                 fill: CmnCfg.palette.lightGrey
@@ -84,8 +89,8 @@ Component {
 
         Rectangle {
             height: 1
-            width: searchToolBar.width - CmnCfg.smallMargin
-            anchors.horizontalCenter: parent.horizontalCenter
+            width: searchToolBar.width - CmnCfg.microMargin
+            anchors.left: parent.left
             color: "white"
         }
 

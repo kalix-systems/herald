@@ -9,24 +9,23 @@ import "../"
 // Components that depend on dynamic scope
 import "dyn"
 
-Pane {
+Rectangle {
     id: replyWrapper
 
-    background: ReplyBackground {
-        clickEnabled: false
-    }
-    padding: CmnCfg.smallMargin
+    color: CmnCfg.palette.offBlack
 
-    contentHeight: unknownBody.height
-    contentWidth: bubbleRoot.maxWidth * 0.8
-    RowLayout {
+    height: wrapperRow.height
+    width: bubbleRoot.maxWidth
+    Row {
+        id: wrapperRow
+        padding: CmnCfg.smallMargin
         Text {
             id: unknownBody
-            Layout.maximumWidth: bubbleRoot.maxWidth * 0.8
+            width: bubbleRoot.maxWidth * 0.8
             font.family: CmnCfg.chatFont.name
-            color: CmnCfg.palette.black
+            color: CmnCfg.palette.white
             textFormat: TextEdit.AutoText
-            text: qsTr("Original message not found")
+            text: qsTr("REDACTED")
         }
     }
 }

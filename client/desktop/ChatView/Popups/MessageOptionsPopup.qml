@@ -12,10 +12,17 @@ Menu {
     signal infoPrompt
 
     MenuItem {
-        text: qsTr("Delete Message")
-        onTriggered: ownedConversation.deleteMessage(index)
+        text: qsTr("More Info") + "..."
+        onTriggered: {
+            messageInfoLoader.convoMembers = conversationMembers
+            messageInfoLoader.messageData = bubbleActual.messageModelData
+            messageInfoLoader.ownedMessages = ownedConversation
+            messageInfoLoader.active = true
+            messageInfoLoader.item.open()
+        }
     }
     MenuItem {
-        text: qsTr("More Info") + "..."
+        text: qsTr("Delete Message")
+        onTriggered: ownedConversation.deleteMessage(index)
     }
 }
