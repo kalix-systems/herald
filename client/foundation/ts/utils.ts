@@ -211,3 +211,17 @@ export function timerIcon(expireTime: number, insertTime: number): string {
   else if (proportion < 0.75) return "qrc:/mini-timer-icons/almost-empty.svg";
   else return "qrc:/mini-timer-icons/empty.svg";
 }
+
+export function userTime(timestamp: number): string {
+        var d = new Date(timestamp)
+        var year = d.getFullYear()
+        var month = ("0" + (d.getMonth() + 1)).slice(-2)
+        var day = ("0" + d.getDate()).slice(-2)
+        var hour = d.getHours()
+        var min = ("0" + d.getMinutes()).slice(-2)
+        var sec = ("0" + d.getSeconds()).slice(-2)
+
+        var time = year + "-" + month + "-" + day + " " + hour + ":" + min + ":" + sec
+
+        return time
+    }

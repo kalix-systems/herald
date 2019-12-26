@@ -27,20 +27,6 @@ Popup {
         color: CmnCfg.palette.white
     }
 
-    function userTime(timestamp) {
-        var d = new Date(timestamp)
-        var year = d.getFullYear()
-        var month = ("0" + (d.getMonth() + 1)).slice(-2)
-        var day = ("0" + d.getDate()).slice(-2)
-        var hour = d.getHours()
-        var min = ("0" + d.getMinutes()).slice(-2)
-        var sec = ("0" + d.getSeconds()).slice(-2)
-
-        var time = year + "-" + month + "-" + day + " " + hour + ":" + min + ":" + sec
-
-        return time
-    }
-
     Component.onCompleted: {
         receiptData = JSON.parse(moreInfoPopup.messageData.userReceipts)
     }
@@ -52,6 +38,22 @@ Popup {
         width: parent.width
         messageModelData: moreInfoPopup.messageData
         anchors.top: parent.top
+
+        IconButton {
+            anchors.top: parent.top
+            anchors.right: parent.right
+            anchors.margins: CmnCfg.microMargin
+            id: xIcon
+            source: "qrc:/x-icon.svg"
+            icon.height: 26
+            icon.width: 26
+            fill: CmnCfg.palette.black
+            z: parent.z + 1
+            onClicked: {
+                messageInfoLoader.active = false
+                moreInfoPopup.close()
+            }
+        }
     }
     Label {
         id: senderHeader
@@ -98,7 +100,7 @@ Popup {
         anchors.top: author.bottom
         anchors.topMargin: CmnCfg.smallMargin
         anchors.left: author.left
-        text: "At: " + userTime(messageData.insertionTime)
+        text: "At: " + Utils.userTime(messageData.insertionTime)
         font.family: CmnCfg.chatFont.name
         font.weight: Font.DemiBold
         color: CmnCfg.palette.black

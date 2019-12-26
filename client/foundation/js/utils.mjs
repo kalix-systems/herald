@@ -179,3 +179,14 @@ export function timerIcon(expireTime, insertTime) {
     else
         return "qrc:/mini-timer-icons/empty.svg";
 }
+export function userTime(timestamp) {
+    var d = new Date(timestamp);
+    var year = d.getFullYear();
+    var month = ("0" + (d.getMonth() + 1)).slice(-2);
+    var day = ("0" + d.getDate()).slice(-2);
+    var hour = d.getHours();
+    var min = ("0" + d.getMinutes()).slice(-2);
+    var sec = ("0" + d.getSeconds()).slice(-2);
+    var time = year + "-" + month + "-" + day + " " + hour + ":" + min + ":" + sec;
+    return time;
+}
