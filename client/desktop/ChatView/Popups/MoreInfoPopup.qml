@@ -17,6 +17,7 @@ Popup {
     property var messageData: parent.messageData
     property var receiptData
     property var ownedMessages: parent.ownedMessages
+    property var outbound: messageData.author === Herald.config.configId
 
     height: chatView.height
     width: chatView.width
@@ -121,10 +122,23 @@ Popup {
             Label {
                 id: timeInfo
                 anchors.left: author.left
-                text: "Sent at: " + Utils.userTime(messageData.insertionTime)
+                text: outbound ? "Sent at: " + Utils.userTime(
+                                     messageData.insertionTime) : "Sent at: " + Utils.userTime(
+                                     messageData.serverTime)
                 font.family: CmnCfg.chatFont.name
                 font.weight: Font.DemiBold
                 color: CmnCfg.palette.black
+            }
+
+            Label {
+                id: receiveInfo
+                anchors.left: author.left
+                text: "Received at: " + Utils.userTime(
+                          messageData.insertionTime)
+                font.family: CmnCfg.chatFont.name
+                font.weight: Font.DemiBold
+                color: CmnCfg.palette.black
+                visible: !outbound
             }
 
             Label {

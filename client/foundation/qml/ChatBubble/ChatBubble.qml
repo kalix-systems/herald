@@ -37,8 +37,9 @@ Rectangle {
     readonly property bool isTail: messageModelData.isTail
 
     readonly property real maxWidth: defaultWidth * 0.75
-    property string friendlyTimestamp: Utils.friendlyTimestamp(
-                                           messageModelData.insertionTime)
+    property string friendlyTimestamp: outbound ? Utils.friendlyTimestamp(
+                                                      messageModelData.insertionTime) : Utils.friendlyTimestamp(
+                                                      messageModelData.serverTime)
 
     property string timerIcon: expirationTime !== undefined ? Utils.timerIcon(
                                                                   expirationTime,
