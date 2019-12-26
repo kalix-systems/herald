@@ -1809,6 +1809,8 @@ void messages_data_op_name(const Messages::Private *, int, QString *,
 option_quint32 messages_data_receipt_status(const Messages::Private *, int);
 option_quint8 messages_data_reply_type(const Messages::Private *, int);
 option_qint64 messages_data_server_time(const Messages::Private *, int);
+void messages_data_user_receipts(const Messages::Private *, int, QString *,
+                                 qstring_set);
 void messages_sort(Messages::Private *, unsigned char column,
                    Qt::SortOrder order = Qt::AscendingOrder);
 int messages_row_count(const Messages::Private *);
@@ -2030,6 +2032,12 @@ QVariant Messages::serverTime(int row) const {
   return v;
 }
 
+QString Messages::userReceipts(int row) const {
+  QString s;
+  messages_data_user_receipts(m_d, row, &s, set_qstring);
+  return s;
+}
+
 QVariant Messages::data(const QModelIndex &index, int role) const {
   Q_ASSERT(rowCount(index.parent()) > index.row());
   switch (index.column()) {
@@ -2089,6 +2097,8 @@ QVariant Messages::data(const QModelIndex &index, int role) const {
       return replyType(index.row());
     case Qt::UserRole + 26:
       return serverTime(index.row());
+    case Qt::UserRole + 27:
+      return QVariant::fromValue(userReceipts(index.row()));
     }
     break;
   }
@@ -2134,6 +2144,7 @@ QHash<int, QByteArray> Messages::roleNames() const {
   names.insert(Qt::UserRole + 24, "receiptStatus");
   names.insert(Qt::UserRole + 25, "replyType");
   names.insert(Qt::UserRole + 26, "serverTime");
+  names.insert(Qt::UserRole + 27, "userReceipts");
   return names;
 }
 
@@ -2181,6 +2192,7 @@ bool messages_clear_conversation_history(Messages::Private *);
 void messages_clear_search(Messages::Private *);
 bool messages_delete_message(Messages::Private *, quint64);
 qint64 messages_index_by_id(const Messages::Private *, const char *, int);
+void messages_mark_read(Messages::Private *, quint64);
 qint64 messages_next_search_match(Messages::Private *);
 qint64 messages_prev_search_match(Messages::Private *);
 bool messages_save_all_attachments(const Messages::Private *, quint64,
@@ -4211,6 +4223,9 @@ bool Messages::deleteMessage(quint64 row_index) {
 }
 qint64 Messages::indexById(const QByteArray &msg_id) const {
   return messages_index_by_id(m_d, msg_id.data(), msg_id.size());
+}
+void Messages::markRead(quint64 index) {
+  return messages_mark_read(m_d, index);
 }
 qint64 Messages::nextSearchMatch() { return messages_next_search_match(m_d); }
 qint64 Messages::prevSearchMatch() { return messages_prev_search_match(m_d); }

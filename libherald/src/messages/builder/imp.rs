@@ -1,5 +1,5 @@
 use super::*;
-use crate::messages::MsgData;
+use heraldcore::message::MsgData;
 
 impl MessageBuilder {
     pub(super) fn clear_reply_(&mut self) -> OpChanged {

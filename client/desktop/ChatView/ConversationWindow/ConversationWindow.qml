@@ -21,9 +21,9 @@ ListView {
     property NumberAnimation highlightAnimation: NumberAnimation {
         id: bubbleHighlightAnimation
         property: "opacity"
-        from: 0.2
+        from: 0.4
         to: 0.0
-        duration: 600
+        duration: 800
         easing.type: Easing.InCubic
     }
     spacing: 0
@@ -73,15 +73,6 @@ ListView {
     }
 
     FileDialog {
-        id: attachmentDownloader
-        property string filePath
-        selectFolder: true
-        folder: StandardPaths.writableLocation(StandardPaths.DesktopLocation)
-        onAccepted: Herald.utils.saveFile(filePath, fileUrl)
-        selectExisting: false
-    }
-
-    FileDialog {
         id: downloadFileChooser
         selectFolder: true
         folder: StandardPaths.writableLocation(StandardPaths.DesktopLocation)
@@ -95,7 +86,6 @@ ListView {
         defaultWidth: chatListView.width
         width: parent.width
         messageModelData: model
-
         ListView.onAdd: chatScrollBarInner.setPosition(1.0)
 
         ChatBubbleHover {
@@ -103,6 +93,10 @@ ListView {
             download: bubbleActual.imageAttach || bubbleActual.docAttach
             onEntered: bubbleActual.hoverHighlight = true
             onExited: bubbleActual.hoverHighlight = false
+        }
+        Component.onCompleted: {
+            if (root.active)
+                ownedConversation.markRead(index)
         }
     }
 }

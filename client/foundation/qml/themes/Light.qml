@@ -10,7 +10,7 @@ QtObject {
     //    readonly property color secondaryTextColor: "#676C6F"
     //    readonly property color activeTextColor: "light blue"
     //    readonly property color visitedColor: "purple"
-    //    readonly property color alertTextColor: "red"
+
     readonly property color iconFill: "white"
     readonly property color iconMatte: "black"
     readonly property color borderColor: "black"
@@ -23,6 +23,7 @@ QtObject {
     property color highlightColor: "lightsteelblue"
     property color highlightedTextColor: "white"
     property color backgroundColor: "white"
+    readonly property color alertColor: "#C9404B"
 
     property color iconPressedFill: Qt.darker(iconFill, 1.4)
     property color iconPressedMatte: Qt.lighter(iconMatte, 1.4)

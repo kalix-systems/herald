@@ -55,6 +55,7 @@ Page {
 
     ChatTextArea {
         id: chatTextArea
+        chatName: headerTitle
         anchors {
             bottom: parent.bottom
             right: parent.right

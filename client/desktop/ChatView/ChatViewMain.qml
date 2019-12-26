@@ -17,7 +17,8 @@ Page {
     //TODO: rename this to something sane
     property var conversationItem
     //TODO: rename to something sane and not a shadow
-    property Messages ownedConversation
+    property var ownedConversation
+    property var conversationMembers
 
     background: Rectangle {
         color: CmnCfg.palette.white

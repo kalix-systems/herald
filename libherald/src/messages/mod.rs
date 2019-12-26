@@ -5,15 +5,18 @@ use crate::{
     toasts::new_msg_toast,
 };
 use herald_common::UserId;
-use heraldcore::{conversation, errors::HErr, message::MessageReceiptStatus, types::*};
-use messages_helper::search::SearchState;
+use heraldcore::{
+    conversation,
+    errors::HErr,
+    message::{Elider, MessageReceiptStatus},
+    types::*,
+};
+use messages_helper::{container::Container, search::SearchState};
 use search_pattern::SearchPattern;
 
-mod container;
-use container::*;
-mod imp;
+mod helpers;
+pub(crate) mod imp;
 mod trait_imp;
-pub(crate) mod underscore;
 
 /// Implementation of `crate::interface::MessageBuilderTrait`.
 pub mod builder;

@@ -24,6 +24,7 @@ Rectangle {
     height: replyWrapperCol.height
     width: bubbleRoot.maxWidth
     color: CmnCfg.palette.medGrey
+    property alias mouseEnabled: mouseArea.enabled
 
     Rectangle {
         id: accent
@@ -35,7 +36,8 @@ Rectangle {
         anchors.left: parent.left
     }
 
-    ReplyMouseArea {}
+    ReplyMouseArea {
+    id: mouseArea }
 
     Column {
         id: replyWrapperCol

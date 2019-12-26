@@ -93,6 +93,20 @@ pub fn register(
     Ok(res)
 }
 
+/// Sends a message read receipt
+pub fn send_read_receipt(
+    cid: ConversationId,
+    msg_id: MsgId,
+) -> Result<(), HErr> {
+    send_cmessage(
+        cid,
+        &ConversationMessage::Receipt(cmessages::Receipt {
+            of: msg_id,
+            stat: MessageReceiptStatus::Read,
+        }),
+    )
+}
+
 /// Sends a user request to `uid` with a proposed conversation id `cid`.
 pub fn send_user_req(
     uid: UserId,

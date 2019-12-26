@@ -298,6 +298,11 @@ pub trait MessagesTrait {
         msg_id: &[u8],
     ) -> i64;
 
+    fn mark_read(
+        &mut self,
+        index: u64,
+    ) -> ();
+
     fn next_search_match(&mut self) -> i64;
 
     fn prev_search_match(&mut self) -> i64;
@@ -494,6 +499,11 @@ pub trait MessagesTrait {
         &self,
         index: usize,
     ) -> Option<i64>;
+
+    fn user_receipts(
+        &self,
+        index: usize,
+    ) -> String;
 }
 
 #[no_mangle]
@@ -720,6 +730,15 @@ pub unsafe extern "C" fn messages_index_by_id(
     let obj = &*ptr;
     let msg_id = { qba_slice!(msg_id_str, msg_id_len) };
     obj.index_by_id(msg_id)
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn messages_mark_read(
+    ptr: *mut Messages,
+    index: u64,
+) {
+    let obj = &mut *ptr;
+    obj.mark_read(index)
 }
 
 #[no_mangle]
@@ -1271,6 +1290,19 @@ pub unsafe extern "C" fn messages_data_server_time(
 ) -> COption<i64> {
     let obj = &*ptr;
     obj.server_time(to_usize(row).unwrap_or(0)).into()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn messages_data_user_receipts(
+    ptr: *const Messages,
+    row: c_int,
+    d: *mut QString,
+    set: fn(*mut QString, *const c_char, len: c_int),
+) {
+    let obj = &*ptr;
+    let data = obj.user_receipts(to_usize(row).unwrap_or(0));
+    let str_: *const c_char = data.as_ptr() as *const c_char;
+    set(d, str_, to_c_int(data.len()));
 }
 
 #[derive(Clone, Copy)]

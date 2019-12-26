@@ -56,7 +56,8 @@ pub fn get_message_receipts(msg_id: &MsgId) -> Result<HashMap<UserId, MessageRec
     Ok(db::get_receipts(&db, msg_id)?)
 }
 
-pub(crate) fn add_receipt(
+/// Adds a message receipt
+pub fn add_receipt(
     msg_id: MsgId,
     recip: UserId,
     receipt_status: MessageReceiptStatus,

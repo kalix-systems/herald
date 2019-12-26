@@ -67,5 +67,6 @@
         <file>ChatView/Popups/ImageClipRow.qml</file>
         <file>SideBar/popups/ImageCropPopup.qml</file>
         <file>SideBar/popups/js/SettingsPopupSubmission.mjs</file>
+        <file>ChatView/Popups/MoreInfoPopup.qml</file>
     </qresource>
 </RCC>
