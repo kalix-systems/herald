@@ -37,8 +37,9 @@ Rectangle {
     readonly property bool isTail: messageModelData.isTail
 
     readonly property real maxWidth: defaultWidth * 0.75
-    property string friendlyTimestamp: Utils.friendlyTimestamp(
-                                           messageModelData.insertionTime)
+    property string friendlyTimestamp: outbound ? Utils.friendlyTimestamp(
+                                                      messageModelData.insertionTime) : Utils.friendlyTimestamp(
+                                                      messageModelData.serverTime)
 
     property string timerIcon: expirationTime !== undefined ? Utils.timerIcon(
                                                                   expirationTime,
@@ -50,6 +51,7 @@ Rectangle {
     readonly property string pfpUrl: messageModelData.authorProfilePicture
     property bool hoverHighlight: false
     property bool moreInfo: false
+    property alias expireInfo: expireInfo
 
     Connections {
         target: appRoot.globalTimer
@@ -59,6 +61,10 @@ Rectangle {
             timerIcon = (expirationTime !== undefined) ? (Utils.timerIcon(
                                                               expirationTime,
                                                               insertionTime)) : ""
+            expireInfo.expireTime = (expirationTime
+                                     !== undefined) ? (Utils.expireTimeShort(
+                                                           expirationTime,
+                                                           insertionTime)) : ""
         }
     }
     height: contentRoot.height
@@ -129,6 +135,11 @@ Rectangle {
         background: Item {}
     }
 
+    BubbleExpireInfo {
+        id: expireInfo
+        visible: isHead
+    }
+
     Column {
         z: highlight.z + 1
         id: contentRoot
@@ -142,8 +153,9 @@ Rectangle {
         bottomPadding: isTail ? CmnCfg.defaultMargin : CmnCfg.smallMargin
 
         BubbleLabel {
-            id: authorLabel
             visible: isHead
+
+            id: authorLabel
         }
 
         //reply bubble loader

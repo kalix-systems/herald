@@ -11,10 +11,7 @@ import "../js/SearchHandler.mjs" as SearchUtils
 ScrollView {
     clip: true
     ScrollBar.horizontal: ScrollBar {
-        size: 0
-        contentItem: Rectangle {
-            color: "transparent"
-        }
+        policy: ScrollBar.AlwaysOff
     }
 
     TextArea {

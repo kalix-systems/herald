@@ -21,9 +21,9 @@ ListView {
     property NumberAnimation highlightAnimation: NumberAnimation {
         id: bubbleHighlightAnimation
         property: "opacity"
-        from: 0.2
+        from: 0.4
         to: 0.0
-        duration: 600
+        duration: 800
         easing.type: Easing.InCubic
     }
     spacing: 0
@@ -72,8 +72,6 @@ ListView {
         cacheBuffer = chatListView.height * 5
     }
 
-
-
     FileDialog {
         id: downloadFileChooser
         selectFolder: true
@@ -93,9 +91,19 @@ ListView {
         ChatBubbleHover {
             id: bubbleHoverHandler
             download: bubbleActual.imageAttach || bubbleActual.docAttach
-            onEntered: bubbleActual.hoverHighlight = true
-            onExited: bubbleActual.hoverHighlight = false
+            onEntered: {
+                bubbleActual.hoverHighlight = true
+                bubbleActual.expireInfo.visible = false
+            }
+            onExited: {
+                bubbleActual.hoverHighlight = false
+                if (isHead)
+                    bubbleActual.expireInfo.visible = true
+            }
         }
-        Component.onCompleted: ownedConversation.markRead(index)
+        Component.onCompleted: {
+            if (root.active)
+                ownedConversation.markRead(index)
+        }
     }
 }

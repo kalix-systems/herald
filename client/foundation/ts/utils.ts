@@ -92,6 +92,47 @@ export function friendlyTimestamp(msEpochTime: number): string {
   return months[monthNum] + " " + dateNum + " " + dt.getFullYear();
 }
 
+export function expireTimeShort(expireTime: number, insertTime: number): string {
+  const secondsPerMinute = 60;
+  const secondsPerHour = 3600;
+  const secondsPerDay = 3600 * 24;
+  const secondsPerWeek = 3600 * 24 * 7;
+  const secondsPerMonth = 3600 * 24 * 7 * 4
+  //using 7 * 4 * 12 instead of 365 because we want to not allow e.g. 13MO as a return
+  const secondsPerYear = 3600 * 24 * 7 * 4 * 12;
+
+  const currentTime = Date.now()
+
+  const diff = Math.round((expireTime - currentTime) / 1000);
+
+  if (diff < 0) return "";
+
+  if (diff < secondsPerMinute) return diff + " SEC";
+
+  if (diff < secondsPerHour) {
+    return Math.round(diff / secondsPerMinute) + " MIN";
+  }
+
+  if (diff < secondsPerDay) {
+    return Math.round(diff / secondsPerHour) + " HR";
+  }
+
+  if (diff < secondsPerWeek) {
+    return Math.round(diff / secondsPerDay) + " D"
+  }
+
+  if (diff < secondsPerMonth) {
+
+    return Math.round(diff / secondsPerWeek) + " WK"
+  }
+  if (diff < secondsPerYear) {
+    return Math.round(diff / secondsPerMonth) + " MO"
+  }
+  return Math.round(diff / secondsPerYear) + " Y"
+
+
+}
+
 function isBoolean(maybeBool: unknown): boolean {
   return typeof maybeBool === "boolean";
 }
