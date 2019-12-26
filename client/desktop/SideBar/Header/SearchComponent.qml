@@ -31,6 +31,7 @@ Component {
             Imports.BorderedTextField {
                 id: searchText
                 placeholderText: headerLoader.searchPlaceholder
+                selectByMouse: true
 
                 Layout.alignment: Qt.AlignBottom | Qt.AlignHCenter
                 Layout.fillWidth: true
