@@ -19,8 +19,6 @@ Popup {
     width: root.width
     anchors.centerIn: parent
 
-
-
     enter: Transition {
 
         NumberAnimation {
