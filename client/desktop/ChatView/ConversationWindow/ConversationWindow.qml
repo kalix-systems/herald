@@ -93,12 +93,12 @@ ListView {
             download: bubbleActual.imageAttach || bubbleActual.docAttach
             onEntered: {
                 bubbleActual.hoverHighlight = true
-                bubbleActual.clock.visible = false
+                bubbleActual.expireInfo.visible = false
             }
             onExited: {
                 bubbleActual.hoverHighlight = false
                 if (isHead)
-                    bubbleActual.clock.visible = true
+                    bubbleActual.expireInfo.visible = true
             }
         }
         Component.onCompleted: {

@@ -66,6 +66,11 @@ Rectangle {
                          !== undefined) ? (Utils.timerIcon(
                                                messageModelData.expirationTime,
                                                messageModelData.insertionTime)) : ""
+
+            expireInfo.expireTime = (messageModelData.expirationTime
+                                     !== undefined) ? (Utils.expireTimeShort(
+                                                           messageModelData.expirationTime,
+                                                           messageModelData.insertionTime)) : ""
         }
     }
     color: CmnCfg.palette.white
@@ -117,18 +122,8 @@ Rectangle {
         anchors.leftMargin: CmnCfg.smallMargin
     }
 
-    Button {
-        id: clock
-        anchors.right: parent.right
-        anchors.top: parent.top
-        anchors.topMargin: CmnCfg.smallMargin
-        anchors.rightMargin: CmnCfg.defaultMargin
-        icon.source: timerIcon
-        icon.height: 16
-        icon.width: 16
-        icon.color: "grey"
-        padding: 0
-        background: Item {}
+    BubbleExpireInfo {
+        id: expireInfo
     }
 
     Button {

@@ -51,7 +51,7 @@ Rectangle {
     readonly property string pfpUrl: messageModelData.authorProfilePicture
     property bool hoverHighlight: false
     property bool moreInfo: false
-    property alias clock: clock
+    property alias expireInfo: expireInfo
 
     Connections {
         target: appRoot.globalTimer
@@ -61,6 +61,10 @@ Rectangle {
             timerIcon = (expirationTime !== undefined) ? (Utils.timerIcon(
                                                               expirationTime,
                                                               insertionTime)) : ""
+            expireInfo.expireTime = (expirationTime
+                                     !== undefined) ? (Utils.expireTimeShort(
+                                                           expirationTime,
+                                                           insertionTime)) : ""
         }
     }
     height: contentRoot.height
@@ -131,19 +135,9 @@ Rectangle {
         background: Item {}
     }
 
-    Button {
-        id: clock
+    BubbleExpireInfo {
+        id: expireInfo
         visible: isHead
-        anchors.right: parent.right
-        anchors.top: parent.top
-        anchors.topMargin: CmnCfg.smallMargin
-        anchors.rightMargin: CmnCfg.defaultMargin
-        icon.source: timerIcon
-        icon.height: 16
-        icon.width: 16
-        icon.color: "grey"
-        padding: 0
-        background: Item {}
     }
 
     Column {
