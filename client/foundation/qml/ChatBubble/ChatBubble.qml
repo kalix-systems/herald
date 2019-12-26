@@ -51,6 +51,7 @@ Rectangle {
     readonly property string pfpUrl: messageModelData.authorProfilePicture
     property bool hoverHighlight: false
     property bool moreInfo: false
+    property alias clock: clock
 
     Connections {
         target: appRoot.globalTimer
@@ -130,6 +131,21 @@ Rectangle {
         background: Item {}
     }
 
+    Button {
+        id: clock
+        visible: isHead
+        anchors.right: parent.right
+        anchors.top: parent.top
+        anchors.topMargin: CmnCfg.smallMargin
+        anchors.rightMargin: CmnCfg.defaultMargin
+        icon.source: timerIcon
+        icon.height: 16
+        icon.width: 16
+        icon.color: "grey"
+        padding: 0
+        background: Item {}
+    }
+
     Column {
         z: highlight.z + 1
         id: contentRoot
@@ -143,8 +159,9 @@ Rectangle {
         bottomPadding: isTail ? CmnCfg.defaultMargin : CmnCfg.smallMargin
 
         BubbleLabel {
-            id: authorLabel
             visible: isHead
+
+            id: authorLabel
         }
 
         //reply bubble loader

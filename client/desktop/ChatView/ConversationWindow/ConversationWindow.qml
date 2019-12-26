@@ -91,8 +91,15 @@ ListView {
         ChatBubbleHover {
             id: bubbleHoverHandler
             download: bubbleActual.imageAttach || bubbleActual.docAttach
-            onEntered: bubbleActual.hoverHighlight = true
-            onExited: bubbleActual.hoverHighlight = false
+            onEntered: {
+                bubbleActual.hoverHighlight = true
+                bubbleActual.clock.visible = false
+            }
+            onExited: {
+                bubbleActual.hoverHighlight = false
+                if (isHead)
+                    bubbleActual.clock.visible = true
+            }
         }
         Component.onCompleted: {
             if (root.active)

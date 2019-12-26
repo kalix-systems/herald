@@ -118,6 +118,20 @@ Rectangle {
     }
 
     Button {
+        id: clock
+        anchors.right: parent.right
+        anchors.top: parent.top
+        anchors.topMargin: CmnCfg.smallMargin
+        anchors.rightMargin: CmnCfg.defaultMargin
+        icon.source: timerIcon
+        icon.height: 16
+        icon.width: 16
+        icon.color: "grey"
+        padding: 0
+        background: Item {}
+    }
+
+    Button {
         id: receipt
         anchors.right: parent.right
         anchors.bottom: parent.bottom
