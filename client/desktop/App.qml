@@ -50,6 +50,7 @@ Item {
         anchors.right: active ? parent.right : undefined
         property var convoMembers
         property var messageData
+        property var ownedMessages
         active: false
         sourceComponent: CvPopups.MoreInfoPopup {
             id: moreInfo

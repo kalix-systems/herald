@@ -16,6 +16,7 @@ Popup {
     property var convoMembers: parent.convoMembers
     property var messageData: parent.messageData
     property var receiptData
+    property var ownedMessages: parent.ownedMessages
 
     height: chatView.height
     width: chatView.width
@@ -46,6 +47,7 @@ Popup {
             anchors.horizontalCenter: parent.horizontalCenter
             spacing: CmnCfg.smallMargin
             topPadding: CmnCfg.smallMargin
+            bottomPadding: CmnCfg.smallMargin
 
             Label {
                 id: header
@@ -190,6 +192,25 @@ Popup {
 
                         states: []
                     }
+                }
+            }
+            ToolButton {
+                anchors.horizontalCenter: parent.horizontalCenter
+                contentItem: Text {
+                    text: qsTr("DELETE MESSAGE")
+                    color: CmnCfg.palette.white
+                    font.pixelSize: CmnCfg.headerSize
+                    font.family: CmnCfg.chatFont.name
+                }
+
+                background: Rectangle {
+                    color: CmnCfg.palette.alertColor
+                }
+                onClicked: {
+                    moreInfoPopup.close()
+                    messageInfoLoader.active = false
+                    ownedMessages.deleteMessage(ownedMessages.indexById(
+                                                    messageData.msgId))
                 }
             }
         }
