@@ -1,6 +1,4 @@
 use super::*;
-use herald_common::protocol::auth::*;
-use krpc::*;
 
 impl State {
     pub async fn auth_transition<Tx, Rx>(
@@ -16,14 +14,14 @@ impl State {
         use AuthState::*;
         match state {
             Done(g) => Ok(Done(g)),
-            Register(register) => match self.register_transition(register, tx, rx).await? {
-                RegisterState::Done(g) => Ok(Done(g)),
-                r => Ok(Register(r)),
-            },
-            Login(login) => match self.login_transition(login, tx, rx).await? {
-                LoginState::Done(g) => Ok(Done(g)),
-                l => Ok(Login(l)),
-            },
+            Register(register) => Ok(match self.register_transition(register, tx, rx).await? {
+                RegisterState::Done(g) => Done(g),
+                r => Register(r),
+            }),
+            Login(login) => Ok(match self.login_transition(login, tx, rx).await? {
+                LoginState::Done(g) => Done(g),
+                l => Login(l),
+            }),
             AwaitMethod => {
                 let method = rx.read_u8().await?;
                 match method {
@@ -34,6 +32,7 @@ impl State {
             }
         }
     }
+
     pub async fn login_transition<Tx, Rx>(
         &self,
         login: LoginState,
@@ -128,27 +127,3 @@ impl State {
         }
     }
 }
-// impl State {
-//     pub async fn auth_transition(
-//         &self,
-//         auth: AuthState,
-//         tx: &mut Framed<Tx>,
-//         rx: &mut Framed<Rx>,
-//     ) -> Result<AuthState, Error> {
-//     }
-// }
-// impl ServerState {
-//     pub async fn transition<Tx, Rx>(
-//         self,
-//         tx: &mut Framed<Tx>,
-//         rx: &mut Framed<Rx>,
-//     ) -> Result<Self, Error>
-//     where
-//         Tx: AsyncWrite + Unpin,
-//         Rx: AsyncRead + Unpin,
-//     {
-//         match self {
-//             AwaitMethod => match rx.read_u8().await? {},
-//         }
-//     }
-// }

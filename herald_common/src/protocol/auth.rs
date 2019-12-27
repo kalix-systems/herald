@@ -53,13 +53,4 @@ pub mod login_types {
         KeyInvalid,
         MissingUID,
     }
-
-    // #[derive(Ser, De, Debug, Clone, Copy, PartialEq, Eq)]
-    // pub struct LoginToken(pub sig::Signature);
-
-    // #[derive(Ser, De, Debug, Clone, Copy, PartialEq, Eq)]
-    // pub enum LoginTokenResponse {
-    //     Success,
-    //     BadSig,
-    // }
 }

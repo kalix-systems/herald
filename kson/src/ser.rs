@@ -1,5 +1,6 @@
 use super::{utils::*, *};
 use bytes::Bytes;
+use std::marker::PhantomData;
 
 #[derive(Default)]
 pub struct Serializer(pub Vec<u8>);
@@ -323,6 +324,37 @@ trivial_ser!(Bytes, write_bytes);
 trivial_ser!(str, write_string);
 trivial_ser!(String, write_string);
 
+#[derive(Copy, Clone)]
+pub struct KsonIterator<'a, I, J>
+where
+    I: 'a,
+    J: 'a,
+{
+    inner: I,
+    phantom: PhantomData<&'a J>,
+}
+
+impl<'a, I, J> KsonIterator<'a, I, J> {
+    pub fn new(i: I) -> Self {
+        KsonIterator {
+            inner: i,
+            phantom: PhantomData,
+        }
+    }
+}
+
+impl<'a, J, I: Iterator<Item = &'a J>> Ser for KsonIterator<'a, I, J>
+where
+    I: ExactSizeIterator + Clone,
+    J: Ser,
+{
+    fn ser(
+        &self,
+        s: &mut Serializer,
+    ) {
+        s.write_vec(self.inner.clone());
+    }
+}
 mod __impls {
     use super::*;
 
@@ -541,6 +573,4 @@ mod __impls {
         tuple_ser!(11, A, B, C, D, E, F, G, H, I, J, K);
         tuple_ser!(12, A, B, C, D, E, F, G, H, I, J, K, L);
     }
-
-    mod __sys {}
 }
