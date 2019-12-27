@@ -26,6 +26,7 @@ Row {
                             }).length === 1
             }
             MouseArea {
+                enabled: !bubbleRoot.moreInfo
                 anchors.fill: parent
                 hoverEnabled: true
                 onClicked: {
@@ -38,7 +39,7 @@ Row {
                                 bubbleActual.bubbleIndex,
                                 emojiModel[index]["content"])
                 }
-                cursorShape: Qt.PointingHandCursor
+                cursorShape: bubbleRoot.moreInfo ? Qt.ArrowCursor : Qt.PointingHandCursor
             }
 
             padding: outboundReact ? CmnCfg.microMargin / 2 : 0
@@ -52,8 +53,6 @@ Row {
                 }
                 Label {
                     id: numLabel
-                    // anchors.left: parent.contentItem.right
-                    // anchors.leftMargin: CmnCfg.microMargin / 2
                     text: emojiModel[index]["reactionaries"].length
                     font.family: CmnCfg.chatFont.name
                     color: CmnCfg.palette.offBlack

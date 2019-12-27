@@ -35,15 +35,4 @@ Row {
         anchors.bottom: authorLabel.bottom
     }
 
-//    Button {
-//        id: clock
-//        icon.source: timerIcon
-//        icon.height: 16
-//        icon.width: 16
-//        icon.color: "grey"
-//        padding: 0
-//        anchors.margins: 0
-//        background: Item {}
-//        anchors.verticalCenter: timestamp.verticalCenter
-//    }
 }

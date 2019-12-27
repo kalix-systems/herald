@@ -37,6 +37,7 @@ Rectangle {
 
     readonly property bool isHead: messageModelData.isHead
     readonly property bool isTail: messageModelData.isTail
+    readonly property bool hasReactions: messageModelData.reactions.length > 0
 
     readonly property real maxWidth: defaultWidth * 0.75
     property string friendlyTimestamp: Utils.friendlyTimestamp(
@@ -252,5 +253,10 @@ Rectangle {
         }
 
         ElideHandler {}
+        Loader {
+            active: hasReactions
+
+            sourceComponent: BubbleReacts {}
+        }
     }
 }
