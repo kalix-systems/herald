@@ -52,7 +52,7 @@ RowLayout {
             color: CmnCfg.palette.iconFill
             imageSource: "qrc:/options-icon.svg"
             tapCallback: function () {
-                mainView.push(configMain)
+                mainView.push(settingsMain)
             }
         }
     }
