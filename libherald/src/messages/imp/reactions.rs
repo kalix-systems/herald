@@ -60,7 +60,7 @@ impl Messages {
 
         let mid = none!(self.container.msg_id(index).copied());
 
-        spawn!(err!(heraldcore::message::add_reaction(
+        spawn!(err!(heraldcore::message::remove_reaction(
             &mid, &local_id, &content
         )));
     }
