@@ -345,12 +345,11 @@ fn add_delete_reaction() {
     //make sure adding the same react from the same userdoes not get registered
     db::add_reaction(&conn, &mid, &author.id, ":)".try_into().expect(womp!()))
         .expect(womp!("failed to add react"));
-    let reacts = db::reactions(&conn, &mid).unwrap().unwrap();
+    let reacts = db::reactions(&conn, &mid).unwrap().expect(womp!());
     assert_eq!(reacts.content[0].content, ":)");
     assert_eq!(reacts.content.len(), 1);
-
-    db::remove_reaction(&conn, &mid, &author.id, ":)".try_into().expect(womp!()))
-        .expect(womp!("failed to delete react"));
+    assert_eq!(reacts.content[0].reactionaries[0], author.id);
+    db::remove_reaction(&conn, &mid, &author.id, ":)").expect(womp!("failed to delete react"));
 
     let reacts = db::reactions(&conn, &mid).expect(womp!());
     assert!(reacts.is_none());
