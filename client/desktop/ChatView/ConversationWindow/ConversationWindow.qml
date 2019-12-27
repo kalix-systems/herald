@@ -90,6 +90,7 @@ ListView {
         width: parent.width
         messageModelData: model
         ListView.onAdd: chatScrollBarInner.setPosition(1.0)
+        bubbleIndex: index
 
         ChatBubbleHover {
             id: bubbleHoverHandler
@@ -99,6 +100,10 @@ ListView {
                 bubbleActual.expireInfo.visible = false
             }
             onExited: {
+                if (reactPopup.active == true) {
+                    bubbleActual.hoverHighlight = true
+                }
+
                 bubbleActual.hoverHighlight = false
                 if (isHead)
                     bubbleActual.expireInfo.visible = true
@@ -110,10 +115,16 @@ ListView {
             width: reactPopup.width
             height: reactPopup.height
             x: chatListView.width - width
-            onClosed: reactPopup.active = false
+            onClosed: {
+                reactPopup.active = false
+            }
+            onOpened: {
+                bubbleActual.hoverHighlight = true
+            }
+
             y: {
                 if (bubbleActual.y - chatListView.contentY > height) {
-                    return -height //return bubbleActual.y - chatListView.contentY - height
+                    return -height
                 }
                 return CmnCfg.largeMargin * 2
             }
@@ -138,7 +149,6 @@ ListView {
 
         //TODO: this doesn't actually produce the desired behavior
         Component.onCompleted: {
-            print(ownedConversation.reactions(index))
             if (root.active) {
                 ownedConversation.markRead(index)
             }

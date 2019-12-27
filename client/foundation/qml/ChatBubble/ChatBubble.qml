@@ -52,6 +52,7 @@ Rectangle {
     property bool hoverHighlight: false
     property bool moreInfo: false
     property alias expireInfo: expireInfo
+    property int bubbleIndex
 
     Connections {
         target: appRoot.globalTimer
@@ -246,5 +247,11 @@ Rectangle {
         }
 
         ElideHandler {}
+
+        Loader {
+            active: messageModelData.reactions.length > 0
+
+            sourceComponent: BubbleReacts {}
+        }
     }
 }

@@ -4,11 +4,8 @@ import QtQuick 2.12
 import LibHerald 1.0
 import "../Common" as Common
 import "qrc:/imports" as Imports
-import "Controls"
 
 Page {
-
-    header: NewContactHeader {}
 
     ColumnLayout {
         anchors.fill: parent

@@ -14,7 +14,7 @@ Column {
         text: headerText
         font.family: CmnCfg.labelFont.name
         font.weight: Font.DemiBold
-        font.pixelSize: CmnCfg.headerSize
+        font.pixelSize: CmnCfg.headerFontSize
     }
     Loader {
         anchors {

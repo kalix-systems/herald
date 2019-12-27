@@ -160,9 +160,9 @@ pub(crate) fn set_muted(
     conversation_id: &ConversationId,
     muted: bool,
 ) -> Result<(), HErr> {
-    w!(conn.execute(
+    w!(conn.execute_named(
         include_str!("sql/update_muted.sql"),
-        params![muted, conversation_id],
+        named_params!["@muted": muted, "@conversation_id": conversation_id],
     ));
     Ok(())
 }
@@ -174,7 +174,7 @@ pub(crate) fn set_status(
     status: Status,
 ) -> Result<(), HErr> {
     w!(conn.execute(
-        include_str!("sql/update_muted.sql"),
+        include_str!("sql/update_status.sql"),
         params![status, conversation_id],
     ));
     Ok(())
