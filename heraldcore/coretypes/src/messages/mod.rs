@@ -83,7 +83,7 @@ impl Reactions {
         &mut self,
         react: ReactContent,
         reactionary: UserId,
-    ) {
+    ) -> bool {
         match self
             .content
             .iter()
@@ -93,21 +93,26 @@ impl Reactions {
                 if let Some(tagged) = self.content.get_mut(ix) {
                     if !tagged.reactionaries.contains(&reactionary) {
                         tagged.reactionaries.push(reactionary);
+                        return true;
                     }
                 }
+                false
             }
-            None => self.content.push(TaggedReact {
-                content: react,
-                reactionaries: vec![reactionary],
-            }),
-        };
+            None => {
+                self.content.push(TaggedReact {
+                    content: react,
+                    reactionaries: vec![reactionary],
+                });
+                true
+            }
+        }
     }
 
     pub fn remove(
         &mut self,
         react: ReactContent,
         reactionary: UserId,
-    ) {
+    ) -> bool {
         if let Some(ix) = self
             .content
             .iter()
@@ -117,9 +122,11 @@ impl Reactions {
                 if let Some(position) = tagged.reactionaries.iter().position(|u| u == &reactionary)
                 {
                     tagged.reactionaries.remove(position);
+                    return true;
                 }
             }
         };
+        false
     }
 }
 
