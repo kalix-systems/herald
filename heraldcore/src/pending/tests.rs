@@ -14,12 +14,12 @@ fn add_get_delete() {
     builder.conversation_id(conv_id);
     builder.add_db(&mut conn).expect(womp!());
 
-    let msg = types::cmessages::Ack {
+    let msg = types::cmessages::Receipt {
         of: [1; 32].into(),
-        stat: MessageReceiptStatus::NoAck,
+        stat: MessageReceiptStatus::Nil,
     };
 
-    let body = ConversationMessage::Ack(msg);
+    let body = ConversationMessage::Receipt(msg);
 
     db::add_to_pending(&conn, conv_id, &body).expect(womp!());
     let pending = db::get_pending(&conn).expect(womp!());

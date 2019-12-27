@@ -46,6 +46,19 @@ impl NotifHandler {
                     }
                 ));
             }
+            Reaction {
+                msg_id,
+                reactionary,
+                content,
+                cid,
+            } => err!(content_push(
+                cid,
+                MsgUpdate::Reaction {
+                    msg_id,
+                    reactionary,
+                    content
+                }
+            )),
             NewUser(update) => {
                 let (user, meta) = *update;
                 // add user

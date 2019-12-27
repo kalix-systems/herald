@@ -255,6 +255,8 @@ fn messages() -> Object {
         authorColor: ItemProp::new(QUint32).optional(),
         // User name
         authorName: ItemProp::new(QString).optional().get_by_value(),
+        // Message reactions
+        reactions: ItemProp::new(QString).get_by_value(),
 
         // Media attachments metadata, serialized as JSON
         mediaAttachments: ItemProp::new(QString).get_by_value(),
@@ -304,6 +306,7 @@ fn messages() -> Object {
         mut setElisionLineCount(line_count: QUint8) => Void,
         mut setElisionCharCount(char_count: QUint16) => Void,
         mut setElisionCharsPerLine(chars_per_line: QUint8) => Void,
+        mut addReaction(index: QUint64, content: QString) => Void,
         const indexById(msg_id: QByteArray) => Qint64,
         const saveAllAttachments(index: QUint64, dest: QString) => Bool,
     };
