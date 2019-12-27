@@ -8,9 +8,10 @@ impl Messages {
     ) {
         let index = index as usize;
         let local_id = none!(self.local_id);
+
         none!(self.container.update_by_index(index, |data| {
             if data.reactions.is_none() {
-                data.reactions = Default::default();
+                data.reactions.replace(Default::default());
             }
 
             if let Some(ref mut r) = data.reactions {
@@ -31,7 +32,7 @@ impl Messages {
 
         none!(self.container.update_by_index(index, |data| {
             if data.reactions.is_none() {
-                data.reactions = Default::default();
+                data.reactions.replace(Default::default());
             }
 
             if let Some(ref mut r) = data.reactions {
@@ -48,6 +49,7 @@ impl Messages {
     ) -> Option<String> {
         self.container
             .access_by_index(index, |data| data.reactions.clone())
+            .flatten()
             .map(json::JsonValue::from)
             .as_ref()
             .map(json::JsonValue::dump)

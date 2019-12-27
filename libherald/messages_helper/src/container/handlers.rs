@@ -88,7 +88,7 @@ impl Container {
     ) -> Option<()> {
         update(&mid, move |data| {
             if data.reactions.is_none() {
-                data.reactions = Default::default();
+                data.reactions.replace(Default::default());
             }
 
             if let Some(r) = data.reactions.as_mut() {
