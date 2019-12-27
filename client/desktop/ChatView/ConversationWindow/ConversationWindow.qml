@@ -100,6 +100,10 @@ ListView {
                 bubbleActual.expireInfo.visible = false
             }
             onExited: {
+                if (reactPopup.active == true) {
+                    bubbleActual.hoverHighlight = true
+                }
+
                 bubbleActual.hoverHighlight = false
                 if (isHead)
                     bubbleActual.expireInfo.visible = true
@@ -111,7 +115,13 @@ ListView {
             width: reactPopup.width
             height: reactPopup.height
             x: chatListView.width - width
-            onClosed: reactPopup.active = false
+            onClosed: {
+                reactPopup.active = false
+            }
+            onOpened: {
+                bubbleActual.hoverHighlight = true
+            }
+
             y: {
                 if (bubbleActual.y - chatListView.contentY > height) {
                     return -height

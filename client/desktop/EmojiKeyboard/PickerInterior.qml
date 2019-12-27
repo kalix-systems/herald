@@ -163,8 +163,10 @@ Item {
                             sourceComponent: Grid {
                                 id: emojiGrid
                                 columns: 10
-                                spacing: 7
+                                spacing: 10
                                 width: listView.width
+                                horizontalItemAlignment: Grid.AlignHCenter
+                                verticalItemAlignment: Grid.AlignVCenter
                                 Repeater {
                                     id: self
                                     model: modelData.List
