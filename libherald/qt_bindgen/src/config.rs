@@ -130,7 +130,8 @@ fn conversations() -> Object {
        expirationPeriod: ItemProp::new(QUint8).write(),
        matched: matched_item_prop(),
        picture: picture_item_prop().get_by_value(),
-       color: color_item_prop().write()
+       color: color_item_prop().write(),
+       status: ItemProp::new(QUint8).write()
     };
 
     let funcs = functions! {
@@ -307,6 +308,7 @@ fn messages() -> Object {
         mut setElisionCharCount(char_count: QUint16) => Void,
         mut setElisionCharsPerLine(chars_per_line: QUint8) => Void,
         mut addReaction(index: QUint64, content: QString) => Void,
+        mut removeReaction(index: QUint64, content: QString) => Void,
         const indexById(msg_id: QByteArray) => Qint64,
         const saveAllAttachments(index: QUint64, dest: QString) => Bool,
     };

@@ -58,5 +58,6 @@
         <file>down-chevron-icon.svg</file>
         <file>up-chevron-icon.svg</file>
         <file>regex-search-icon.svg</file>
+        <file>lenny-icon.svg</file>
     </qresource>
 </RCC>

@@ -313,6 +313,12 @@ pub trait MessagesTrait {
 
     fn prev_search_match(&mut self) -> i64;
 
+    fn remove_reaction(
+        &mut self,
+        index: u64,
+        content: String,
+    ) -> ();
+
     fn save_all_attachments(
         &self,
         index: u64,
@@ -775,6 +781,19 @@ pub unsafe extern "C" fn messages_next_search_match(ptr: *mut Messages) -> i64 {
 pub unsafe extern "C" fn messages_prev_search_match(ptr: *mut Messages) -> i64 {
     let obj = &mut *ptr;
     obj.prev_search_match()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn messages_remove_reaction(
+    ptr: *mut Messages,
+    index: u64,
+    content_str: *const c_ushort,
+    content_len: c_int,
+) {
+    let obj = &mut *ptr;
+    let mut content = String::new();
+    set_string_from_utf16(&mut content, content_str, content_len);
+    obj.remove_reaction(index, content)
 }
 
 #[no_mangle]

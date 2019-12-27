@@ -83,15 +83,20 @@ impl Container {
         mid: MsgId,
         reactionary: UserId,
         reaction: heraldcore::message::ReactContent,
+        remove: bool,
         mut data_changed: F,
     ) -> Option<()> {
         update(&mid, move |data| {
             if data.reactions.is_none() {
-                data.reactions = Default::default();
+                data.reactions.replace(Default::default());
             }
 
             if let Some(r) = data.reactions.as_mut() {
-                r.add(reaction, reactionary);
+                if remove {
+                    r.remove(reaction, reactionary);
+                } else {
+                    r.add(reaction, reactionary);
+                }
             }
         })?;
 

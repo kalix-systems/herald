@@ -7,7 +7,8 @@ INSERT INTO
     pairwise,
     muted,
     last_active_ts,
-    expiration_period
+    expiration_period,
+    status
   )
 VALUES(
   @conversation_id,
@@ -17,5 +18,6 @@ VALUES(
   @pairwise,
   @muted,
   @last_active_ts,
-  @expiration_period
+  @expiration_period,
+  @status
 )

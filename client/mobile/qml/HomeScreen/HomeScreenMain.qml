@@ -13,11 +13,6 @@ import QtGraphicalEffects 1.0
 Page {
     id: cvMainView
 
-    header: Loader {
-        id: headerLoader
-        sourceComponent: HomeHeader {}
-    }
-
     background: Rectangle {
         color: CmnCfg.palette.white
     }
@@ -37,8 +32,7 @@ Page {
             delegate: ConversationItem {
                 convoTitle: title
                 colorCode: model.color
-                imageSource: Utils.safeStringOrDefault(
-                                 model.picture, "")
+                imageSource: Utils.safeStringOrDefault(model.picture, "")
                 isGroup: !model.pairwise
                 convContent: ConversationContent {
                     conversationId: model.conversationId

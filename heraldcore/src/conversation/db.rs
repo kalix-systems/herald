@@ -163,6 +163,19 @@ pub(crate) fn set_muted(
     Ok(())
 }
 
+/// Sets archive status of a conversation
+pub(crate) fn set_status(
+    conn: &rusqlite::Connection,
+    conversation_id: &ConversationId,
+    status: Status,
+) -> Result<(), HErr> {
+    w!(conn.execute(
+        include_str!("sql/update_muted.sql"),
+        params![status, conversation_id],
+    ));
+    Ok(())
+}
+
 /// Sets title for a conversation
 pub(crate) fn set_title(
     conn: &rusqlite::Connection,
@@ -255,5 +268,6 @@ fn from_db(row: &rusqlite::Row) -> Result<ConversationMeta, rusqlite::Error> {
         pairwise: row.get("pairwise")?,
         last_active: row.get("last_active_ts")?,
         expiration_period: row.get("expiration_period")?,
+        status: row.get("status")?,
     })
 }

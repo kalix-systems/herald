@@ -96,11 +96,21 @@ pub struct Receipt {
     pub stat: MessageReceiptStatus,
 }
 
-/// An isolated message reaction
+/// A message reaction
 #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
-pub struct Reaction {
-    /// The message being reacted to
-    pub msg_id: MsgId,
-    /// The text of the receipt
-    pub react_content: ReactContent,
+pub enum Reaction {
+    /// Add a react
+    Add {
+        /// The message being reacted to
+        msg_id: MsgId,
+        /// The text of the receipt
+        react_content: ReactContent,
+    },
+    /// Remove a react
+    Remove {
+        /// The message being reacted to
+        msg_id: MsgId,
+        /// The text of the receipt
+        react_content: ReactContent,
+    },
 }

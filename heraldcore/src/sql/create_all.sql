@@ -167,5 +167,7 @@ CREATE TABLE IF NOT EXISTS conversations (
   -- Duration in milliseconds until a message in this conversation expires.
   expiration_period INTEGER DEFAULT NULL,
   -- Time of last important activity
-  last_active_ts INTEGER NOT NULL
+  last_active_ts INTEGER NOT NULL,
+  -- conversation status
+  status BLOB NOT NULL
 );
