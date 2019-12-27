@@ -1,5 +1,5 @@
 import QtQuick 2.12
-import QtQuick.Dialogs 1.3
+import Qt.labs.platform 1.1
 import QtGraphicalEffects 1.0
 import LibHerald 1.0
 // Includes CVFLoatingButton. ListItem, and Header
@@ -74,9 +74,8 @@ Rectangle {
         id: groupPicDialogue
         folder: shortcuts.home
         nameFilters: ["Image File (*.jpg *.png *.jpeg)"]
-        selectedNameFilter: "Image File"
 
-        onSelectionAccepted: {
+        onCurrentFileChanged: {
             groupImageLoader.active = true
             groupImageLoader.imageSource = fileUrl
         }

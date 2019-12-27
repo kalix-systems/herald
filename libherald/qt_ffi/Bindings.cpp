@@ -2199,7 +2199,8 @@ void messages_search_pattern_set(Messages::Private *, const ushort *str,
                                  int len);
 bool messages_search_regex_get(const Messages::Private *);
 void messages_search_regex_set(Messages::Private *, bool);
-void messages_add_reaction(Messages::Private *, quint64, const ushort *, int);
+void messages_add_reaction(Messages::Private *, const char *, int,
+                           const ushort *, int);
 bool messages_clear_conversation_history(Messages::Private *);
 void messages_clear_search(Messages::Private *);
 bool messages_delete_message(Messages::Private *, quint64);
@@ -2207,6 +2208,8 @@ qint64 messages_index_by_id(const Messages::Private *, const char *, int);
 void messages_mark_read(Messages::Private *, quint64);
 qint64 messages_next_search_match(Messages::Private *);
 qint64 messages_prev_search_match(Messages::Private *);
+void messages_remove_reaction(Messages::Private *, const char *, int,
+                              const ushort *, int);
 bool messages_save_all_attachments(const Messages::Private *, quint64,
                                    const ushort *, int);
 void messages_set_elision_char_count(Messages::Private *, quint16);
@@ -4226,8 +4229,9 @@ void Messages::setSearchPattern(const QString &v) {
 
 bool Messages::searchRegex() const { return messages_search_regex_get(m_d); }
 void Messages::setSearchRegex(bool v) { messages_search_regex_set(m_d, v); }
-void Messages::addReaction(quint64 index, const QString &content) {
-  return messages_add_reaction(m_d, index, content.utf16(), content.size());
+void Messages::addReaction(const QByteArray &msg_id, const QString &content) {
+  return messages_add_reaction(m_d, msg_id.data(), msg_id.size(),
+                               content.utf16(), content.size());
 }
 bool Messages::clearConversationHistory() {
   return messages_clear_conversation_history(m_d);
@@ -4244,6 +4248,11 @@ void Messages::markRead(quint64 index) {
 }
 qint64 Messages::nextSearchMatch() { return messages_next_search_match(m_d); }
 qint64 Messages::prevSearchMatch() { return messages_prev_search_match(m_d); }
+void Messages::removeReaction(const QByteArray &msg_id,
+                              const QString &content) {
+  return messages_remove_reaction(m_d, msg_id.data(), msg_id.size(),
+                                  content.utf16(), content.size());
+}
 bool Messages::saveAllAttachments(quint64 index, const QString &dest) const {
   return messages_save_all_attachments(m_d, index, dest.utf16(), dest.size());
 }

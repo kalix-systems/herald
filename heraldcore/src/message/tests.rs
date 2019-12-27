@@ -86,11 +86,16 @@ fn reaction() {
     assert!(db::reactions(&conn, &msg_id).expect(womp!()).is_none());
 
     db::add_reaction(&conn, &msg_id, &receiver.id, "++").expect(womp!());
+
     let reactions = db::reactions(&conn, &msg_id)
         .expect(womp!())
         .expect(womp!());
-
     assert_eq!(reactions.content.len(), 1);
+
+    db::remove_reaction(&conn, &msg_id, &receiver.id, "++").expect(womp!());
+
+    let reactions = db::reactions(&conn, &msg_id).expect(womp!());
+    assert!(reactions.is_none());
 }
 
 #[test]

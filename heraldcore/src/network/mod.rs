@@ -52,6 +52,8 @@ pub enum Notification {
         reactionary: UserId,
         /// The content of the react
         content: message::ReactContent,
+        /// Is this reaction update an addition or a removal?
+        remove: bool,
     },
     /// A new user has been added
     NewUser(Box<(coretypes::user::User, ConversationMeta)>),
@@ -146,13 +148,27 @@ pub fn send_reaction(
 ) -> Result<(), HErr> {
     send_cmessage(
         cid,
-        &ConversationMessage::Reaction(cmessages::Reaction {
+        &ConversationMessage::Reaction(cmessages::Reaction::Add {
             msg_id,
             react_content,
         }),
     )
 }
 
+/// Sends a reaction removal update
+pub fn send_reaction_removal(
+    cid: ConversationId,
+    msg_id: MsgId,
+    react_content: crate::message::ReactContent,
+) -> Result<(), HErr> {
+    send_cmessage(
+        cid,
+        &ConversationMessage::Reaction(cmessages::Reaction::Remove {
+            msg_id,
+            react_content,
+        }),
+    )
+}
 pub(crate) fn send_conversation_settings_update(
     cid: ConversationId,
     update: settings::SettingsUpdate,

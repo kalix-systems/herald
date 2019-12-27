@@ -286,7 +286,7 @@ pub trait MessagesTrait {
 
     fn add_reaction(
         &mut self,
-        index: u64,
+        msg_id: &[u8],
         content: String,
     ) -> ();
 
@@ -312,6 +312,12 @@ pub trait MessagesTrait {
     fn next_search_match(&mut self) -> i64;
 
     fn prev_search_match(&mut self) -> i64;
+
+    fn remove_reaction(
+        &mut self,
+        msg_id: &[u8],
+        content: String,
+    ) -> ();
 
     fn save_all_attachments(
         &self,
@@ -714,14 +720,16 @@ pub unsafe extern "C" fn messages_free(ptr: *mut Messages) {
 #[no_mangle]
 pub unsafe extern "C" fn messages_add_reaction(
     ptr: *mut Messages,
-    index: u64,
+    msg_id_str: *const c_char,
+    msg_id_len: c_int,
     content_str: *const c_ushort,
     content_len: c_int,
 ) {
     let obj = &mut *ptr;
+    let msg_id = { qba_slice!(msg_id_str, msg_id_len) };
     let mut content = String::new();
     set_string_from_utf16(&mut content, content_str, content_len);
-    obj.add_reaction(index, content)
+    obj.add_reaction(msg_id, content)
 }
 
 #[no_mangle]
@@ -775,6 +783,21 @@ pub unsafe extern "C" fn messages_next_search_match(ptr: *mut Messages) -> i64 {
 pub unsafe extern "C" fn messages_prev_search_match(ptr: *mut Messages) -> i64 {
     let obj = &mut *ptr;
     obj.prev_search_match()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn messages_remove_reaction(
+    ptr: *mut Messages,
+    msg_id_str: *const c_char,
+    msg_id_len: c_int,
+    content_str: *const c_ushort,
+    content_len: c_int,
+) {
+    let obj = &mut *ptr;
+    let msg_id = { qba_slice!(msg_id_str, msg_id_len) };
+    let mut content = String::new();
+    set_string_from_utf16(&mut content, content_str, content_len);
+    obj.remove_reaction(msg_id, content)
 }
 
 #[no_mangle]
