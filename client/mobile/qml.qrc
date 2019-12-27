@@ -20,19 +20,24 @@
         <file>qml/SettingsMenu/Controls/SettingsHeader.qml</file>
         <file>qml/SettingsMenu/Controls/SettingsSection.qml</file>
         <file>qml/NewContactView/NewContactViewMain.qml</file>
-        <file>qml/NewContactView/Controls/NewContactHeader.qml</file>
         <file>qml/App.qml</file>
         <file>qml/ChatView/TextMessageList.qml</file>
-        <file>qml/ChatView/ChatViewHeader.qml</file>
         <file>qml/ChatView/ChatTextArea.qml</file>
         <file>qml/HomeScreen/Controls/ComposeButton.qml</file>
         <file>qml/HomeScreen/Controls/CVToolButton.qml</file>
         <file>qml/HomeScreen/ConversationItem.qml</file>
-        <file>qml/HomeScreen/HomeHeader.qml</file>
         <file>qml/HomeScreen/HomeScreenMain.qml</file>
         <file>qml/HomeScreen/Controls/ExpandedComposeButtons.qml</file>
         <file>qml/HomeScreen/NewGroupView.qml</file>
         <file>qml/HomeScreen/GroupFlowComponents/ContactsSearchComponent.qml</file>
         <file>qml/HomeScreen/GroupFlowComponents/FinalGroupList.qml</file>
+        <file>qml/HomeScreen/GroupFlowComponents/GroupHeaderComponent.qml</file>
+        <file>qml/Headers/ChatHeader.qml</file>
+        <file>qml/Headers/SettingsHeader.qml</file>
+        <file>qml/Headers/HeadersMain.qml</file>
+        <file>qml/Headers/HomeHeader.qml</file>
+        <file>qml/Headers/Transitions.qml</file>
+        <file>qml/Headers/NewContactHeader.qml</file>
+        <file>qml/Headers/NewGroupHeader.qml</file>
     </qresource>
 </RCC>

@@ -71,10 +71,15 @@ CONFIG(iphoneos, iphoneos|iphonesimulator)  {
 
     LIBS += $${PWD}/../../target/aarch64-apple-ios/$${RUST_BUILD_TYPE}/libherald.a \
         -l sqlite3
+    ENABLE_BITCODE = NO
     HEADERS += $$PWD/objectiveutils.h
     SOURCES += $$PWD/objectiveutils.mm
 }
 
+#iphoneos {
+#   Q_ENABLE_BITCODE.name = ENABLE_BITCODE
+#   Q_ENABLE_BITCODE.value = NO
+#   QMAKE_MAC_XCODE_SETTINGS += Q_ENABLE_BITCODE
 
 
 
