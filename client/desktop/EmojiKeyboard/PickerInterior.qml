@@ -140,6 +140,9 @@ Item {
             clip: true
             ScrollBar.vertical: ScrollBar {}
             contentHeight: innerCol.height
+
+            maximumFlickVelocity: 700
+            flickDeceleration: emojiList.height * 10
             Column {
                 id: innerCol
                 Repeater {
