@@ -25,8 +25,7 @@ RowLayout {
         text: qsTr("Settings")
         Layout.alignment: Qt.AlignCenter
         Layout.fillWidth: true
-        font.pixelSize: CmnCfg.headerTextSize
-        font.family: CmnCfg.chatFont.name
+        font: CmnCfg.headerFont
         color: CmnCfg.palette.iconFill
     }
 }

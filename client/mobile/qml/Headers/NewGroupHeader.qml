@@ -22,11 +22,7 @@ RowLayout {
         Label {
             id: stateLabel
             text: qsTr("New Group")
-            font {
-                family: CmnCfg.labelFont.name
-                bold: true
-                pixelSize: CmnCfg.labelSize
-            }
+            font: CmnCfg.headerFont
             anchors.verticalCenter: parent.verticalCenter
             color: CmnCfg.palette.iconFill
         }
