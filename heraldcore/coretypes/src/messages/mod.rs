@@ -66,7 +66,7 @@ pub type ReactContent = String;
 
 /// A `ReactContent` with an ordered list of
 /// reactionaries
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq, Ord, PartialOrd)]
 pub struct TaggedReact {
     pub content: ReactContent,
     pub reactionaries: Vec<UserId>,
@@ -91,7 +91,9 @@ impl Reactions {
         {
             Some(ix) => {
                 if let Some(tagged) = self.content.get_mut(ix) {
-                    tagged.reactionaries.push(reactionary);
+                    if !tagged.reactionaries.contains(&reactionary) {
+                        tagged.reactionaries.push(reactionary);
+                    }
                 }
             }
             None => self.content.push(TaggedReact {
