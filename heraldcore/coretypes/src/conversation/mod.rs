@@ -28,6 +28,8 @@ pub struct ConversationMeta {
     pub last_active: Time,
     /// Time until message expiration
     pub expiration_period: ExpirationPeriod,
+    /// Conversation status
+    pub status: Status,
 }
 
 impl ConversationMeta {
@@ -139,6 +141,34 @@ impl FromSql for ExpirationPeriod {
 }
 
 impl ToSql for ExpirationPeriod {
+    fn to_sql(&self) -> Result<types::ToSqlOutput, rusqlite::Error> {
+        use types::*;
+
+        Ok(ToSqlOutput::Owned(Value::Blob(kson::to_vec(self))))
+    }
+}
+
+#[repr(u8)]
+#[derive(Clone, Copy, Debug, Ser, De, Eq, PartialEq, Hash)]
+pub enum Status {
+    Active = 0,
+    Archived = 1,
+}
+
+impl Default for Status {
+    fn default() -> Self {
+        Status::Active
+    }
+}
+
+impl FromSql for Status {
+    fn column_result(value: types::ValueRef) -> FromSqlResult<Self> {
+        kson::from_slice(value.as_blob().map_err(|_| FromSqlError::InvalidType)?)
+            .map_err(|_| FromSqlError::InvalidType)
+    }
+}
+
+impl ToSql for Status {
     fn to_sql(&self) -> Result<types::ToSqlOutput, rusqlite::Error> {
         use types::*;
 
