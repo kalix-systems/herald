@@ -8,7 +8,6 @@ Loader {
     clip: true
     active: false
     property bool isReactPopup: false
-    property int currentIndex
     sourceComponent: EK.EmojiPicker {
         id: emojiPicker
         z: exit.z + 2
@@ -18,8 +17,7 @@ Loader {
                 if (!isReactPopup) {
                     JS.appendToTextArea(emoji, chatTextArea.chatText)
                 } else {
-                    print(currentIndex, emoji)
-                    ownedConversation.addReaction(currentIndex, emoji)
+                    ownedConversation.addReaction(index, emoji)
                 }
             })
         }

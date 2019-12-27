@@ -17,39 +17,6 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: check
-
-  end_to_end:
-    name: e2e
-    runs-on: ubuntu-latest
-    steps:
-      - run: sudo apt-get update
-      - run: sudo apt-get install libdbus-glib-1-dev libgl1-mesa-dev libx11-6 libx11-xcb1 libxcb1
-      - uses: actions/checkout@v1
-      - name: Start postgres instance
-        run: docker-compose -f herald_server/docker-compose.yml up -d
-      - uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          override: true
-      - name: Setup database tables
-        run: cargo run --release --bin setup_db
-      - name: Run server
-        uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: --release --manifest-path=herald_server/Cargo.toml
-      - run:  ./target/release/herald_server &
-      - uses: Mercotui/install-qt-dev-action@v0.1.1
-        with:
-          packages: 'qt.qt5.5124.gcc_64'
-      - uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: --release --manifest-path=libherald/Cargo.toml
-      - run: echo "127.0.0.1:8080" > heraldcore.conf && export HERALDCORE_CONF=heraldcore.conf
-      - run: mkdir build && cd build && /Qt/5.12.4/gcc_64/bin/qmake ../client/tests/libherald/libherald.pro && make && ./libherald
-
   test:
     name: Test
     runs-on: ubuntu-latest

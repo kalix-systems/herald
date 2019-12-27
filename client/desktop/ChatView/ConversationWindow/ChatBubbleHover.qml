@@ -36,7 +36,6 @@ MouseArea {
             topMargin: CmnCfg.smallMargin
         }
 
-
         Row {
             id: buttonRow
             spacing: CmnCfg.defaultMargin
@@ -69,8 +68,8 @@ MouseArea {
                 icon.width: visible ? 24 : 0
                 source: "qrc:/lenny-icon.svg"
                 onClicked: {
-                    reactPopup.currentIndex = index
                     reactPopup.active = true
+                    emojiMenu.open()
                 }
             }
 

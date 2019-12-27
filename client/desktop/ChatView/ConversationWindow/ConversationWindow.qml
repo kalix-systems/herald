@@ -28,7 +28,6 @@ ListView {
         easing.type: Easing.InCubic
     }
     spacing: 0
-    height: contentHeight
 
     // disable these, we're handling them differently
     keyNavigationEnabled: false
@@ -71,27 +70,9 @@ ListView {
 
         chatScrollBarInner.setPosition(1.0)
         cacheBuffer = chatListView.height * 5
-    }
-
-    MouseArea {
-        anchors.fill: parent
-        propagateComposedEvents: true
-        onClicked: {
-            reactPopup.active = false
-            mouse.accepted = false
+        if (chatListView.count === 0) {
+            chatListView.height = chatListView.contentHeight
         }
-
-        onPressed: {
-            reactPopup.active = false
-            mouse.accepted = false
-        }
-        onReleased: {
-            reactPopup.active = false
-            mouse.accepted = false
-        }
-        onDoubleClicked: mouse.accepted = false
-        onPositionChanged: mouse.accepted = false
-        onPressAndHold: mouse.accepted = false
     }
 
     FileDialog {
@@ -100,34 +81,6 @@ ListView {
         folder: StandardPaths.writableLocation(StandardPaths.DesktopLocation)
         onAccepted: ownedConversation.saveAllAttachments(index, fileUrl)
         selectExisting: false
-    }
-
-    Popups.EmojiPopup {
-        id: reactPopup
-
-        isReactPopup: true
-        x: parent.width - width
-
-        z: convWindow.z + 1000
-
-        y: {
-            if (!active)
-                return 0
-
-            if ((chatListView.itemAtIndex(
-                     currentIndex).y - chatListView.contentY) > height) {
-                return chatListView.itemAtIndex(
-                            currentIndex).y - chatListView.contentY - height
-            }
-
-            return chatListView.itemAtIndex(
-                        currentIndex).y - chatListView.contentY + chatListView.itemAtIndex(
-                        currentIndex).height
-        }
-        anchors {
-            right: parent.right
-            margins: CmnCfg.smallMargin
-        }
     }
 
     delegate: CB.ChatBubble {
@@ -146,16 +99,41 @@ ListView {
                 bubbleActual.expireInfo.visible = false
             }
             onExited: {
-                //if (reactPopup.active && reactPopup.c)
                 bubbleActual.hoverHighlight = false
                 if (isHead)
                     bubbleActual.expireInfo.visible = true
             }
         }
 
+        Popup {
+            id: emojiMenu
+            width: reactPopup.width
+            height: reactPopup.height
+            x: chatListView.width - width
+            onClosed: reactPopup.active = false
+            y: {
+                if (bubbleActual.y - chatListView.contentY > height) {
+                    return -height //return bubbleActual.y - chatListView.contentY - height
+                }
+                return CmnCfg.largeMargin * 2
+            }
+
+            Popups.EmojiPopup {
+                id: reactPopup
+                anchors.centerIn: parent
+                isReactPopup: true
+                x: chatListView.width - width
+
+                z: convWindow.z + 1000
+
+                anchors {
+                    margins: CmnCfg.smallMargin
+                }
+            }
+        }
+
         //TODO: this doesn't actually produce the desired behavior
         Component.onCompleted: {
-            print(bubbleActual.reactions)
             if (root.active)
                 ownedConversation.markRead(index)
         }
