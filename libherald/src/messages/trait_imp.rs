@@ -368,6 +368,14 @@ impl Interface for Messages {
         self.add_reaction_(index, content)
     }
 
+    fn remove_reaction(
+        &mut self,
+        index: u64,
+        content: String,
+    ) {
+        self.remove_reaction_(index, content)
+    }
+
     fn reactions(
         &self,
         index: usize,

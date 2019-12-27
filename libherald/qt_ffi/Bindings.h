@@ -1545,6 +1545,7 @@ public:
   Q_INVOKABLE void markRead(quint64 index);
   Q_INVOKABLE qint64 nextSearchMatch();
   Q_INVOKABLE qint64 prevSearchMatch();
+  Q_INVOKABLE void removeReaction(quint64 index, const QString &content);
   Q_INVOKABLE bool saveAllAttachments(quint64 index, const QString &dest) const;
   Q_INVOKABLE void setElisionCharCount(quint16 char_count);
   Q_INVOKABLE void setElisionCharsPerLine(quint8 chars_per_line);
