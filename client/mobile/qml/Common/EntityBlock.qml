@@ -64,6 +64,6 @@ Rectangle {
         lastBody: subLabelText
         lastTimestamp: timestamp
         lastReceipt: entityItem.lastReceipt
-        labelFontSize: CmnCfg.labelSize
+        labelFontSize: CmnCfg.labelFontSize
     }
 }

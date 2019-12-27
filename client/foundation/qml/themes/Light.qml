@@ -11,6 +11,8 @@ QtObject {
     //    readonly property color activeTextColor: "light blue"
     //    readonly property color visitedColor: "purple"
 
+    // TODO "iconFill" is used for font colors a bunch (at least in mobile),
+    // rename something to indicate it's a default color for both icon & text
     readonly property color iconFill: "white"
     readonly property color iconMatte: "black"
     readonly property color borderColor: "black"

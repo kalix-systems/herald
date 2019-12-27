@@ -31,7 +31,7 @@ ToolBar {
             text: qsTr("Settings")
             Layout.alignment: Qt.AlignCenter
             Layout.fillWidth: true
-            font.pixelSize: CmnCfg.headerTextSize
+            font.pixelSize: CmnCfg.headerFontSize
             font.family: CmnCfg.chatFont.name
             color: CmnCfg.palette.iconFill
         }
