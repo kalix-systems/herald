@@ -306,8 +306,8 @@ fn messages() -> Object {
         mut setElisionLineCount(line_count: QUint8) => Void,
         mut setElisionCharCount(char_count: QUint16) => Void,
         mut setElisionCharsPerLine(chars_per_line: QUint8) => Void,
-        mut addReaction(msg_id: QByteArray, content: QString) => Void,
-        mut removeReaction(msg_id: QByteArray, content: QString) => Void,
+        mut addReaction(index: QUint64, content: QString) => Void,
+        mut removeReaction(index: QUint64, content: QString) => Void,
         const indexById(msg_id: QByteArray) => Qint64,
         const saveAllAttachments(index: QUint64, dest: QString) => Bool,
     };

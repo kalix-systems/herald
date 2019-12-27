@@ -362,18 +362,18 @@ impl Interface for Messages {
 
     fn add_reaction(
         &mut self,
-        msg_id: ffi::MsgIdRef,
+        index: u64,
         content: String,
     ) {
-        self.add_reaction_(msg_id, content)
+        self.add_reaction_(index, content)
     }
 
     fn remove_reaction(
         &mut self,
-        msg_id: ffi::MsgIdRef,
+        index: u64,
         content: String,
     ) {
-        self.remove_reaction_(msg_id, content)
+        self.remove_reaction_(index, content)
     }
 
     fn reactions(
