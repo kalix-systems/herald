@@ -67,7 +67,9 @@ impl Messages {
             err!(heraldcore::message::remove_reaction(
                 &mid, &local_id, &content
             ));
-            err!(heraldcore::network::send_reaction(cid, mid, content));
+            err!(heraldcore::network::send_reaction_removal(
+                cid, mid, content
+            ));
         });
     }
 
