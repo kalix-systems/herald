@@ -7,6 +7,11 @@ import "../Common"
 RowLayout {
     id: chatRowLayout
     readonly property real textareaHeight: CmnCfg.units.dp(24)
+
+    readonly property var select: function () {
+        cta.forceActiveFocus()
+    }
+
     property bool send: cta.text.length > 0
     property string chatName: 'conversation'
     width: parent.width
@@ -16,7 +21,7 @@ RowLayout {
         id: cta
         height: chatRowLayout.textareaHeight
         placeholderText: qsTr('Message ' + chatRowLayout.chatName)
-        wrapMode: "WrapAtWordBoundaryOrAnywhere"
+        wrapMode: TextArea.WrapAtWordBoundaryOrAnywhere
         color: CmnCfg.palette.black
         selectionColor: CmnCfg.palette.highlightColor
         font {
@@ -25,6 +30,13 @@ RowLayout {
         }
         Layout.fillWidth: true
         Layout.alignment: Qt.AlignVCenter
+        Keys.onPressed: {
+
+            if ((event.key === Qt.Key_Backspace || event.key === Qt.Key_Delete)
+                    && cta.text.length === 0) {
+                Qt.inputMethod.hide()
+            }
+        }
     }
 
     Grid {
