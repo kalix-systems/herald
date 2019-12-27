@@ -10,6 +10,7 @@ import "../../SideBar/js/ContactView.mjs" as CUtils
 import Qt.labs.platform 1.1
 import QtQuick.Dialogs 1.3
 import QtGraphicalEffects 1.0
+import "../Popups" as Popups
 
 ListView {
     id: chatListView
@@ -72,12 +73,61 @@ ListView {
         cacheBuffer = chatListView.height * 5
     }
 
+    MouseArea {
+        anchors.fill: parent
+        propagateComposedEvents: true
+        onClicked: {
+            reactPopup.active = false
+            mouse.accepted = false
+        }
+
+        onPressed: {
+            reactPopup.active = false
+            mouse.accepted = false
+        }
+        onReleased: {
+            reactPopup.active = false
+            mouse.accepted = false
+        }
+        onDoubleClicked: mouse.accepted = false
+        onPositionChanged: mouse.accepted = false
+        onPressAndHold: mouse.accepted = false
+    }
+
     FileDialog {
         id: downloadFileChooser
         selectFolder: true
         folder: StandardPaths.writableLocation(StandardPaths.DesktopLocation)
         onAccepted: ownedConversation.saveAllAttachments(index, fileUrl)
         selectExisting: false
+    }
+
+    Popups.EmojiPopup {
+        id: reactPopup
+
+        isReactPopup: true
+        x: parent.width - width
+
+        z: convWindow.z + 1000
+
+        y: {
+            if (!active)
+                return 0
+
+            if ((chatListView.itemAtIndex(
+                     currentIndex).y - chatListView.contentY) > height) {
+                return chatListView.itemAtIndex(
+                            currentIndex).y - chatListView.contentY - height
+            }
+
+            return chatListView.itemAtIndex(
+                        currentIndex).y - chatListView.contentY + chatListView.itemAtIndex(
+                        currentIndex).height
+        }
+        anchors {
+            right: parent.right
+            margins: CmnCfg.smallMargin
+        }
     }
 
     delegate: CB.ChatBubble {
@@ -96,12 +146,16 @@ ListView {
                 bubbleActual.expireInfo.visible = false
             }
             onExited: {
+                //if (reactPopup.active && reactPopup.c)
                 bubbleActual.hoverHighlight = false
                 if (isHead)
                     bubbleActual.expireInfo.visible = true
             }
         }
+
+        //TODO: this doesn't actually produce the desired behavior
         Component.onCompleted: {
+            print(bubbleActual.reactions)
             if (root.active)
                 ownedConversation.markRead(index)
         }
