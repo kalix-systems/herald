@@ -81,7 +81,14 @@ pub enum ExpirationPeriod {
     OneYear = 9,
 }
 
+#[cfg(test)]
+// To make expiration easier to test,
+// we speed up time by a factor of 60.
+const MIN_SECS: u64 = 1;
+
+#[cfg(not(test))]
 const MIN_SECS: u64 = 60;
+
 const THIRTY_MIN_SECS: u64 = MIN_SECS * 30;
 const HOUR_SECS: u64 = MIN_SECS * 60;
 const TWELVE_HOUR_SECS: u64 = HOUR_SECS * 12;
