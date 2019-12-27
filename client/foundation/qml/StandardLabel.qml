@@ -5,6 +5,6 @@ import LibHerald 1.0
 // we've been calling "labels" elsewhere--make name or usage make more sense
 Label {
     font.family: CmnCfg.chatFont.name
-    font.pixelSize: CmnCfg.headerSize
+    font.pixelSize: CmnCfg.headerFontSize
     color: CmnCfg.palette.white
 }
