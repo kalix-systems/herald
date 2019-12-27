@@ -125,6 +125,10 @@ ListView {
                 x: chatListView.width - width
 
                 z: convWindow.z + 1000
+                onActiveChanged: {
+                    if (!active)
+                        emojiMenu.close()
+                }
 
                 anchors {
                     margins: CmnCfg.smallMargin
@@ -134,8 +138,10 @@ ListView {
 
         //TODO: this doesn't actually produce the desired behavior
         Component.onCompleted: {
-            if (root.active)
+            print(ownedConversation.reactions(index))
+            if (root.active) {
                 ownedConversation.markRead(index)
+            }
         }
     }
 }
