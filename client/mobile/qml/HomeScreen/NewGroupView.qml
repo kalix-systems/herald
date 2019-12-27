@@ -7,7 +7,9 @@ import "./Controls"
 import "../Common"
 import QtGraphicalEffects 1.0
 import Qt.labs.platform 1.0
+import "qrc:/imports" as Imports
 import "qrc:/imports/Entity"
+import "qrc:/imports/NewGroupFlow"
 import "qrc:/imports/js/utils.mjs" as Utils
 import "GroupFlowComponents"
 
@@ -19,18 +21,23 @@ Page {
         color: CmnCfg.palette.white
     }
 
-    RowLayout {
-        anchors.fill: parent
-        Row {
-            Layout.alignment: Qt.AlignLeft
-            Layout.leftMargin: CmnCfg.units.dp(12)
-            spacing: CmnCfg.units.dp(16)
-            IconButton {
-                id: backButton
-                color: CmnCfg.palette.iconFill
-                imageSource: "qrc:/back-arrow-icon.svg"
-                tapCallback: function () {
-                    mainView.pop(null)
+        background: Rectangle {
+            color: CmnCfg.palette.offBlack
+        }
+
+        RowLayout {
+            anchors.fill: parent
+            Row {
+                Layout.alignment: Qt.AlignLeft
+                Layout.leftMargin: CmnCfg.units.dp(12)
+                spacing: CmnCfg.units.dp(16)
+                AnimIconButton {
+                    id: backButton
+                    color: CmnCfg.palette.iconFill
+                    imageSource: "qrc:/back-arrow-icon.svg"
+                    tapCallback: function () {
+                        mainView.pop(null)
+                    }
                 }
             }
 
@@ -47,56 +54,112 @@ Page {
         }
     }
 
-    GroupHeaderComponent {
-        id: topRect
+    background: Rectangle {
+        color: CmnCfg.palette.white
     }
 
-    Rectangle {
-        anchors.top: topRect.bottom
-        id: bigDivider
-        height: 1
-        width: parent.width
-        color: CmnCfg.palette.black
-    }
-
-    ContactsSearchComponent {
-        id: groupSelectText
-    }
-
-    Button {
-        anchors.top: groupSelectText.bottom
-        anchors.topMargin: CmnCfg.defaultMargin / 2
+    ColumnLayout {
+        anchors.left: parent.left
         anchors.right: parent.right
-        anchors.rightMargin: CmnCfg.units.dp(28)
+        anchors.top: parent.top
+        anchors.topMargin: CmnCfg.units.dp(40)
 
-        width: CmnCfg.units.dp(60)
-        height: CmnCfg.units.dp(30)
+        GroupImageSelector {
+            id: imageSelector
+            // TODO uncomment and test once we display group avatar photos
+            // in the mobile UI to make sure this is working; also check
+            // commented out section of TapHandler function below
+            //imageSource: groupPane.profPicSource
+            color: CmnCfg.palette.black
+            iconColor: CmnCfg.palette.lightGrey
 
-        background: Rectangle {
-            anchors.fill: parent
-            color: CmnCfg.palette.offBlack
+            Layout.alignment: Qt.AlignTop | Qt.AlignHCenter
         }
 
-        Text {
-            text: qsTr("CREATE")
-            anchors.centerIn: parent
-            color: CmnCfg.palette.white
-            font.family: CmnCfg.labelFont.name
+        Imports.BorderedTextField {
+            id: titleText
+            placeholderText: qsTr("Group title")
+            color: CmnCfg.palette.black
+            borderColor: CmnCfg.palette.black
+            Layout.fillWidth: parent
+            Layout.leftMargin: CmnCfg.megaMargin
+            Layout.rightMargin: CmnCfg.megaMargin
+
         }
-        TapHandler {
-            onTapped: {
-                if (topRect.groupTitle === "") {
-                    Herald.conversationBuilder.setTitle(qsTr("Untitled Group"))
-                } else {
-                    Herald.conversationBuilder.setTitle(topRect.groupTitle)
+
+        //TODO: This doesn't do anything yet
+        CheckBox {
+            topPadding: CmnCfg.units.dp(12)
+            text: qsTr("Enable channels")
+            font.family: CmnCfg.chatFont.name
+            checked: false
+            indicator.width: CmnCfg.units.dp(18)
+            indicator.height: CmnCfg.units.dp(18)
+            Layout.leftMargin: CmnCfg.megaMargin
+        }
+
+        Rectangle {
+            //anchors.top: topRect.bottom
+            id: bigDivider
+            height: 1
+            width: parent.width
+            color: CmnCfg.palette.black
+        }
+
+        ContactsSearchComponent {
+            id: groupSelectText
+
+            Layout.alignment: Qt.AlignHCenter
+        }
+
+        Button {
+            Layout.preferredWidth: CmnCfg.units.dp(80)
+            Layout.preferredHeight: CmnCfg.units.dp(40)
+            Layout.alignment: Qt.AlignRight
+            Layout.rightMargin: CmnCfg.megaMargin
+
+            background: Rectangle {
+                anchors.fill: parent
+                color: CmnCfg.palette.offBlack
+            }
+
+            Text {
+                text: qsTr("CREATE")
+                anchors.centerIn: parent
+                color: CmnCfg.palette.white
+                font.family: CmnCfg.labelFont.name
+            }
+            TapHandler {
+                onTapped: {
+                    if (titleText.text === "") {
+                        Herald.conversationBuilder.setTitle(qsTr("Untitled Group"))
+                    } else {
+                        Herald.conversationBuilder.setTitle(titleText.text)
+                    }
+
+                    if (imageSelector.imageSource !== "") {
+                        var parsed = JSON.parse(Herald.utils.imageDimensions(
+                                                    imageSelector.imageSource))
+
+                        const picture = {
+                            'width': Math.round(parsed.width),
+                            'height': Math.round(parsed.height),
+                            'x': 0,
+                            'y': 0,
+                            'path': imageSelector.imageSource
+                        }
+
+                        Herald.conversationBuilder.setProfilePicture(
+                                    JSON.stringify(picture))
+                    }
+
+                    Herald.conversationBuilder.finalize()
+                    mainView.pop()
                 }
-
-                //TODO: impl for setting prof pic once file dialog exists
-                //                if (topRect.profPic !== "") {
-                //                }
-                Herald.conversationBuilder.finalize()
-                mainView.pop()
             }
         }
     }
+
+    Component.onCompleted: Herald.usersSearch.refresh()
+    Component.onDestruction: Herald.conversationBuilder.clear()
 }

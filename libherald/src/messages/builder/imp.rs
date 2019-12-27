@@ -1,5 +1,5 @@
 use super::*;
-use crate::messages::MsgData;
+use heraldcore::message::MsgData;
 
 impl MessageBuilder {
     pub(super) fn clear_reply_(&mut self) -> OpChanged {
@@ -78,8 +78,10 @@ pub(super) struct Reply {
 
 impl Reply {
     pub(super) fn from_msg_data(data: &MsgData) -> Reply {
-        let doc_attachments_json = messages_helper::doc_attachments_json(&data.attachments);
-        let media_attachments_json = messages_helper::media_attachments_json(&data.attachments);
+        let doc_attachments_json =
+            messages_helper::doc_attachments_json(&data.attachments, Some(1));
+        let media_attachments_json =
+            messages_helper::media_attachments_json(&data.attachments, Some(5));
 
         Reply {
             time: data.time.insertion,

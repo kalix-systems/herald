@@ -41,13 +41,13 @@ RowLayout {
         Layout.rightMargin: CmnCfg.units.dp(12)
         spacing: CmnCfg.units.dp(12)
 
-        IconButton {
+        AnimIconButton {
             id: searchButton
             color: CmnCfg.palette.iconFill
             imageSource: "qrc:/search-icon.svg"
         }
 
-        IconButton {
+        AnimIconButton {
             id: optionsButton
             color: CmnCfg.palette.iconFill
             imageSource: "qrc:/options-icon.svg"

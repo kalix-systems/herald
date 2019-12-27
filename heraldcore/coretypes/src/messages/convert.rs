@@ -1,4 +1,5 @@
 use super::*;
+use herald_common::Time;
 use std::convert::TryFrom;
 
 impl From<Option<MsgId>> for ReplyId {
@@ -116,10 +117,9 @@ impl TryFrom<u8> for MessageReceiptStatus {
 
     fn try_from(n: u8) -> Result<Self, Self::Error> {
         match n {
-            0 => Ok(Self::NoAck),
+            0 => Ok(Self::Nil),
             1 => Ok(Self::Received),
             2 => Ok(Self::Read),
-            3 => Ok(Self::AckTerminal),
             i => Err(i),
         }
     }
@@ -130,11 +130,79 @@ impl std::convert::TryFrom<i64> for MessageReceiptStatus {
 
     fn try_from(n: i64) -> Result<Self, Error> {
         match n {
-            0 => Ok(Self::NoAck),
+            0 => Ok(Self::Nil),
             1 => Ok(Self::Received),
             2 => Ok(Self::Read),
-            3 => Ok(Self::AckTerminal),
             i => Err(Error::ReceiptStatus(i)),
         }
+    }
+}
+
+impl Reactions {
+    pub fn from_vec(reactions: Vec<Reaction>) -> Option<Self> {
+        if reactions.is_empty() {
+            return None;
+        }
+
+        let mut buckets = HashMap::<ReactContent, Vec<(Time, UserId)>>::new();
+
+        for Reaction {
+            reactionary,
+            react_content,
+            time,
+        } in reactions
+        {
+            buckets
+                .entry(react_content)
+                .or_default()
+                .push((time, reactionary));
+        }
+
+        let mut content = buckets.into_iter().collect::<Vec<_>>();
+
+        content.sort_unstable_by(|(_, a), (_, b)| {
+            a.iter()
+                .map(|(t, _)| t)
+                .min()
+                .copied()
+                .unwrap_or_else(|| Time::from(std::i64::MIN))
+                .cmp(
+                    &b.iter()
+                        .map(|(t, _)| t)
+                        .min()
+                        .copied()
+                        .unwrap_or_else(|| Time::from(std::i64::MIN)),
+                )
+        });
+
+        let content = content
+            .into_iter()
+            .map(|(content, v)| TaggedReact {
+                content,
+                reactionaries: v.into_iter().map(|(_, u)| u).collect(),
+            })
+            .collect();
+
+        Some(Self { content })
+    }
+}
+
+impl From<TaggedReact> for json::JsonValue {
+    fn from(
+        TaggedReact {
+            content,
+            reactionaries,
+        }: TaggedReact
+    ) -> json::JsonValue {
+        json::object! {
+           "content" => content,
+           "reactionaries" => reactionaries.into_iter().map(|u| u.to_string()).collect::<Vec<String>>()
+        }
+    }
+}
+
+impl From<Reactions> for json::JsonValue {
+    fn from(Reactions { content }: Reactions) -> json::JsonValue {
+        content.into()
     }
 }

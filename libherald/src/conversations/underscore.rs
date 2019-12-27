@@ -1,7 +1,7 @@
 use crate::interface::{ConversationsEmitter, ConversationsList};
 use crate::{err, ffi, none, spawn};
 use heraldcore::{
-    conversation::{self, ExpirationPeriod},
+    conversation::{self, ExpirationPeriod, Status},
     types::ConversationId,
 };
 use im::Vector;
@@ -318,5 +318,28 @@ impl super::Conversations {
             .position(|super::Conversation { id, .. }| id == &conversation_id)
             .map(|n| n as i64)
             .unwrap_or(-1)
+    }
+
+    pub(crate) fn status_(
+        &self,
+        index: usize,
+    ) -> u8 {
+        self.status_inner(index).unwrap_or_default() as u8
+    }
+
+    pub(crate) fn set_status_(
+        &mut self,
+        index: usize,
+        status: u8,
+    ) -> bool {
+        let status = none!(Status::from_u8(status), false);
+        let cid = none!(self.id(index), false);
+        none!(self.set_status_inner(index, status), false);
+
+        spawn!(
+            err!(heraldcore::conversation::set_status(&cid, status)),
+            false
+        );
+        true
     }
 }

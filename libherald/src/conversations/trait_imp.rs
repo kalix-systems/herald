@@ -162,4 +162,19 @@ impl ConversationsTrait for Conversations {
     ) -> i64 {
         self.index_by_id_(cid)
     }
+
+    fn set_status(
+        &mut self,
+        index: usize,
+        status: u8,
+    ) -> bool {
+        self.set_status_(index, status)
+    }
+
+    fn status(
+        &self,
+        index: usize,
+    ) -> u8 {
+        self.status_(index) as u8
+    }
 }

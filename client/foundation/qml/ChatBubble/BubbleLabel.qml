@@ -2,6 +2,7 @@ import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
 import LibHerald 1.0
+import "../js/utils.mjs" as Utils
 
 Row {
     spacing: CmnCfg.microMargin
@@ -34,15 +35,15 @@ Row {
         anchors.bottom: authorLabel.bottom
     }
 
-    Button {
-        id: clock
-        icon.source: expirationTime !== undefined ? "qrc:/mini-timer-icons/almost-full.svg" : ""
-        icon.height: 16
-        icon.width: 16
-        icon.color: "grey"
-        padding: 0
-        anchors.margins: 0
-        background: Item {}
-        anchors.verticalCenter: timestamp.verticalCenter
-    }
+//    Button {
+//        id: clock
+//        icon.source: timerIcon
+//        icon.height: 16
+//        icon.width: 16
+//        icon.color: "grey"
+//        padding: 0
+//        anchors.margins: 0
+//        background: Item {}
+//        anchors.verticalCenter: timestamp.verticalCenter
+//    }
 }

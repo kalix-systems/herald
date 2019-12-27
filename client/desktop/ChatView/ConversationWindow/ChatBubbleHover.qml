@@ -41,7 +41,7 @@ MouseArea {
             spacing: CmnCfg.defaultMargin
             rightPadding: CmnCfg.smallMargin
 
-            Imports.ButtonForm {
+            Imports.IconButton {
                 id: replyButton
                 visible: chatBubbleHitbox.containsMouse
                 anchors {
@@ -58,19 +58,22 @@ MouseArea {
                 id: messageOptionsMenu
             }
 
-            //        ToolButton {
-            //            text: qsTr("( ͡° ͜ʖ ͡°)")
-            //            indicator: Item {
-            //                width: 0
-            //                height: 0
-            //            }
-            //            visible: chatBubbleHitbox.containsMouse
-            //            display: AbstractButton.TextOnly
-            //            anchors.margins: CmnCfg.defaultMargin
-            //            spacing: 0
-            //            padding: 0
-            //        }
-            Imports.ButtonForm {
+            Imports.IconButton {
+                id: reactButton
+                visible: chatBubbleHitbox.containsMouse
+                anchors {
+                    margins: visible ? CmnCfg.defaultMargin : 0
+                }
+                z: CmnCfg.overlayZ
+                icon.width: visible ? 24 : 0
+                source: "qrc:/lenny-icon.svg"
+                onClicked: {
+                    reactPopup.active = true
+                    emojiMenu.open()
+                }
+            }
+
+            Imports.IconButton {
                 id: downloadButton
                 visible: chatBubbleHitbox.containsMouse && download
                 anchors {
@@ -82,7 +85,7 @@ MouseArea {
                 onClicked: downloadFileChooser.open()
             }
 
-            Imports.ButtonForm {
+            Imports.IconButton {
                 id: messageOptionsButton
                 visible: chatBubbleHitbox.containsMouse
 
@@ -91,7 +94,9 @@ MouseArea {
                 }
                 source: "qrc:/options-icon.svg"
                 z: CmnCfg.overlayZ
-                onClicked: messageOptionsMenu.open()
+                onClicked: {
+                    messageOptionsMenu.open()
+                }
             }
         }
     }

@@ -1,11 +1,8 @@
 use crate::*;
 use herald_common::{Time, UserId};
-use heraldcore::message::{
-    attachments::{DocMeta, MediaMeta},
-    Elider,
-};
-use im::vector::Vector;
+use heraldcore::message::Elider;
 use message_cache as cache;
+use revec::Revec;
 use search::*;
 use std::collections::HashSet;
 use types::*;
@@ -16,22 +13,21 @@ pub mod handlers;
 pub use cache::{access, get, update};
 
 #[derive(Default)]
-/// A container type for messages backed by an RRB-tree vector
-/// and a hash map.
+/// Container type for messages
 pub struct Container {
-    pub list: Vector<MessageMeta>,
+    pub list: Revec<MessageMeta>,
     last: Option<MsgData>,
     op_body_elider: Elider,
 }
 
 impl Container {
     pub fn new(
-        list: Vector<MessageMeta>,
+        list: Vec<MessageMeta>,
         last: Option<MsgData>,
     ) -> Self {
         Self {
             last,
-            list,
+            list: list.into(),
             op_body_elider: Elider {
                 line_count: 3,
                 char_per_line: 60,
@@ -84,11 +80,11 @@ impl Container {
         access(&mid, f)
     }
 
-    pub fn update_by_index<T, F: FnOnce(&mut MsgData)>(
+    pub fn update_by_index<T, F: FnOnce(&mut MsgData) -> T>(
         &self,
         index: usize,
         f: F,
-    ) -> Option<()> {
+    ) -> Option<T> {
         let mid = self.msg_id(index)?;
 
         update(&mid, f)
@@ -97,33 +93,37 @@ impl Container {
     pub fn media_attachments_data_json(
         &self,
         index: usize,
+        limit: Option<usize>,
     ) -> Option<String> {
         let mid = self.list.get(index)?.msg_id;
-        self.get_media_attachments_data_json(&mid)
+        self.get_media_attachments_data_json(&mid, limit)
     }
 
     pub fn get_media_attachments_data_json(
         &self,
         mid: &MsgId,
+        limit: Option<usize>,
     ) -> Option<String> {
         access(mid, |m| m.attachments.clone())
-            .and_then(|attachments| crate::media_attachments_json(&attachments))
+            .and_then(|attachments| crate::media_attachments_json(&attachments, limit))
     }
 
     pub fn doc_attachments_data_json(
         &self,
         index: usize,
+        limit: Option<usize>,
     ) -> Option<String> {
         let mid = self.list.get(index)?.msg_id;
-        self.get_doc_attachments_data_json(&mid)
+        self.get_doc_attachments_data_json(&mid, limit)
     }
 
     pub fn get_doc_attachments_data_json(
         &self,
         mid: &MsgId,
+        limit: Option<usize>,
     ) -> Option<String> {
         access(mid, |m| m.attachments.clone())
-            .and_then(|attachments| crate::doc_attachments_json(&attachments))
+            .and_then(|attachments| crate::doc_attachments_json(&attachments, limit))
     }
 
     pub fn last(&self) -> Option<&MessageMeta> {
@@ -151,18 +151,13 @@ impl Container {
         &mut self,
         ix: usize,
     ) -> Option<MsgData> {
-        let old_len = self.len();
-        if ix >= old_len {
-            return None;
-        }
-
-        let msg = self.list.remove(ix);
+        let msg = self.list.remove(ix)?;
         let data = cache::remove(&msg.msg_id);
 
-        if ix + 1 == old_len {
+        if ix == 0 {
             self.last = self
                 .list
-                .last()
+                .front()
                 .and_then(|MessageMeta { ref msg_id, .. }| cache::get(msg_id));
         }
 
@@ -177,13 +172,11 @@ impl Container {
     }
 
     #[must_use]
-    pub fn insert(
+    pub fn insert_ord(
         &mut self,
-        ix: usize,
         msg: MessageMeta,
         data: MsgData,
-    ) -> Option<()> {
-        let old_len = self.list.len();
+    ) -> usize {
         let mid = msg.msg_id;
 
         if let ReplyId::Known(op) = &data.op {
@@ -192,20 +185,20 @@ impl Container {
             });
         }
 
-        self.list.insert(ix, msg);
+        let ix = self.list.insert_ord(msg);
         cache::insert(mid, data);
 
-        if ix == old_len {
+        if ix == 0 {
             self.last = self
                 .list
-                .last()
+                .front()
                 .and_then(|MessageMeta { ref msg_id, .. }| cache::get(msg_id));
         }
 
-        Some(())
+        ix
     }
 
-    fn msg_id(
+    pub fn msg_id(
         &self,
         index: usize,
     ) -> Option<&MsgId> {
@@ -270,26 +263,7 @@ impl Container {
     ) -> Option<String> {
         let mid = self.op_msg_id(index)?;
 
-        let (first, len): (DocMeta, usize) =
-            access(&mid, |m| m.attachments.clone()).and_then(|attachments| {
-                let docs = attachments.doc_attachments().ok()?;
-
-                if docs.is_empty() {
-                    return None;
-                }
-
-                let len = docs.len();
-                let first = docs.into_iter().next()?;
-
-                (first, len).into()
-            })?;
-
-        json::object! (
-            "first" => first,
-            "count" => len,
-        )
-        .dump()
-        .into()
+        self.get_doc_attachments_data_json(&mid, Some(1))
     }
 
     pub fn op_media_attachments_json(
@@ -297,27 +271,7 @@ impl Container {
         index: usize,
     ) -> Option<String> {
         let mid = self.op_msg_id(index)?;
-
-        let (first, len): (MediaMeta, usize) =
-            access(&mid, |m| m.attachments.clone()).and_then(|attachments| {
-                let media = attachments.media_attachments().ok()?;
-
-                if media.is_empty() {
-                    return None;
-                }
-
-                let len = media.len();
-                let first = media.into_iter().next()?;
-                Some((first, len))
-            })?;
-
-        Some(
-            json::object! {
-                "first" => first,
-                "count" => len,
-            }
-            .dump(),
-        )
+        self.get_media_attachments_data_json(&mid, Some(4))
     }
 
     pub fn clear_search<F: FnMut(usize)>(
@@ -360,7 +314,9 @@ impl Container {
                 MatchStatus::NotMatched
             };
 
-            if old_match_status != msg.match_status {
+            if (old_match_status != msg.match_status)
+                || (old_match_status.is_match() && msg.match_status.is_match())
+            {
                 data_changed(ix);
             }
 

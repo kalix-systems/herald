@@ -10,6 +10,7 @@ import "../../SideBar/js/ContactView.mjs" as CUtils
 import Qt.labs.platform 1.1
 import QtQuick.Dialogs 1.3
 import QtGraphicalEffects 1.0
+import "../Popups" as Popups
 
 ListView {
     id: chatListView
@@ -21,9 +22,9 @@ ListView {
     property NumberAnimation highlightAnimation: NumberAnimation {
         id: bubbleHighlightAnimation
         property: "opacity"
-        from: 0.2
+        from: 0.4
         to: 0.0
-        duration: 600
+        duration: 800
         easing.type: Easing.InCubic
     }
     spacing: 0
@@ -54,6 +55,10 @@ ListView {
     boundsMovement: Flickable.StopAtBounds
     model: chatPage.ownedConversation
 
+    // Note: we load the list view from the bottom up to make
+    // scroll behavior more predictable
+    verticalLayoutDirection: ListView.VerticalBottomToTop
+
     // this is set to a higher value in `Component.onCompleted`
     // but is set to `0` here to improve initial load times
     cacheBuffer: 0
@@ -62,22 +67,12 @@ ListView {
         model.setElisionLineCount(38)
         model.setElisionCharCount(38 * 40)
         model.setElisionCharsPerLine(40)
-        positionViewAtEnd()
 
-        // made with the understanding that position goes from 0.0-1.0
-        // however 1.0 does not seem to be the actual bottom of the page.
-        // ain't that Qt.
-        chatScrollBarInner.setPosition(3.0)
+        chatScrollBarInner.setPosition(1.0)
         cacheBuffer = chatListView.height * 5
-    }
-
-    FileDialog {
-        id: attachmentDownloader
-        property string filePath
-        selectFolder: true
-        folder: StandardPaths.writableLocation(StandardPaths.DesktopLocation)
-        onAccepted: Herald.utils.saveFile(filePath, fileUrl)
-        selectExisting: false
+        if (chatListView.count === 0) {
+            chatListView.height = chatListView.contentHeight
+        }
     }
 
     FileDialog {
@@ -94,37 +89,58 @@ ListView {
         defaultWidth: chatListView.width
         width: parent.width
         messageModelData: model
-
-        ListView.onAdd: {
-            // made with the understanding that position goes from 0.0-1.0
-            // however 1.0 does not seem to be the actual bottom of the page.
-            // ain't that Qt.
-            chatScrollBarInner.setPosition(3.0)
-        }
-
-        anchors {
-            left: parent.left
-            right: parent.right
-        }
+        ListView.onAdd: chatScrollBarInner.setPosition(1.0)
 
         ChatBubbleHover {
             id: bubbleHoverHandler
             download: bubbleActual.imageAttach || bubbleActual.docAttach
-            onEntered: bubbleActual.hoverHighlight = true
-            onExited: bubbleActual.hoverHighlight = false
+            onEntered: {
+                bubbleActual.hoverHighlight = true
+                bubbleActual.expireInfo.visible = false
+            }
+            onExited: {
+                bubbleActual.hoverHighlight = false
+                if (isHead)
+                    bubbleActual.expireInfo.visible = true
+            }
         }
 
-        // Handles signals from ChatBubble attachment loaders to adjust view down
-        // once the layout has been fully calculated
-        Loader {
-            active: (parent.messageModelData.index === chatListView.count - 1)
-            sourceComponent: Component {
-                Connections {
-                    target: bubbleActual
-                    onAttachmentsLoaded: {
-                        chatListView.positionViewAtEnd()
-                    }
+        Popup {
+            id: emojiMenu
+            width: reactPopup.width
+            height: reactPopup.height
+            x: chatListView.width - width
+            onClosed: reactPopup.active = false
+            y: {
+                if (bubbleActual.y - chatListView.contentY > height) {
+                    return -height //return bubbleActual.y - chatListView.contentY - height
                 }
+                return CmnCfg.largeMargin * 2
+            }
+
+            Popups.EmojiPopup {
+                id: reactPopup
+                anchors.centerIn: parent
+                isReactPopup: true
+                x: chatListView.width - width
+
+                z: convWindow.z + 1000
+                onActiveChanged: {
+                    if (!active)
+                        emojiMenu.close()
+                }
+
+                anchors {
+                    margins: CmnCfg.smallMargin
+                }
+            }
+        }
+
+        //TODO: this doesn't actually produce the desired behavior
+        Component.onCompleted: {
+            print(ownedConversation.reactions(index))
+            if (root.active) {
+                ownedConversation.markRead(index)
             }
         }
     }

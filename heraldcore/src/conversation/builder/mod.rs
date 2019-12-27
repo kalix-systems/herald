@@ -21,6 +21,8 @@ pub struct ConversationBuilder {
     pub pairwise: Option<bool>,
     /// The default period that passes before a message expires
     pub expiration_period: Option<ExpirationPeriod>,
+    /// Status
+    pub status: Option<Status>,
     /// Members to be added to the conversation
     members: Vec<UserId>,
     member_set: HashSet<UserId>,
@@ -97,6 +99,15 @@ impl ConversationBuilder {
         expiration_period: ExpirationPeriod,
     ) -> &mut Self {
         self.expiration_period.replace(expiration_period);
+        self
+    }
+
+    /// Sets expiration period
+    pub fn status(
+        &mut self,
+        status: Status,
+    ) -> &mut Self {
+        self.status.replace(status);
         self
     }
 

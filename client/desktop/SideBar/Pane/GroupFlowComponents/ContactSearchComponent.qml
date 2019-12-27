@@ -3,30 +3,24 @@ import QtQuick.Controls 2.13
 import LibHerald 1.0
 import QtQuick.Layouts 1.12
 import "../../../common" as Common
-import "qrc:/imports/Entity" as Av
+import "qrc:/imports" as Imports
+import "qrc:/imports/Entity" as Entity
 import "qrc:/imports/js/utils.mjs" as Utils
 import QtQml 2.13
 
 Column {
     width: parent.width
 
-    TextArea {
+    Imports.BorderedTextField {
         id: groupSelectText
-        leftPadding: 12
+        anchors.horizontalCenter: parent.horizontalCenter
+        width: parent.width - CmnCfg.megaMargin
         color: CmnCfg.palette.white
         placeholderText: qsTr("Add members")
-        width: parent.width - CmnCfg.megaMargin
         onTextChanged: {
             Herald.usersSearch.filter = groupSelectText.text
             contactPopup.popup.open()
         }
-    }
-
-    Rectangle {
-        height: 1
-        width: parent.width - CmnCfg.megaMargin
-        anchors.horizontalCenter: parent.horizontalCenter
-        color: CmnCfg.palette.lightGrey
     }
 
     ComboBox {
@@ -34,7 +28,7 @@ Column {
         model: Herald.usersSearch
         width: parent.width - CmnCfg.megaMargin
         anchors.horizontalCenter: parent.horizontalCenter
-        height: CmnCfg.smallMargin / 2
+        height: 1
 
         //this and indicator are invisible, we don't want the combo box
         //controls to be visible
@@ -64,7 +58,7 @@ Column {
                 picture: Utils.safeStringOrDefault(contactData.profilePicture,
                                                    "")
 
-                labelComponent: Av.ConversationLabel {
+                labelComponent: Entity.ConversationLabel {
                     contactName: contactData.name
                     labelColor: CmnCfg.palette.white
                     labelFontSize: 14

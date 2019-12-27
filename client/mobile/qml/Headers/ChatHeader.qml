@@ -12,7 +12,7 @@ RowLayout {
         leftMargin: CmnCfg.margin
     }
 
-    IconButton {
+    AnimIconButton {
         id: backButton
         Layout.alignment: Qt.AlignLeft
         color: CmnCfg.palette.iconFill
@@ -38,7 +38,7 @@ RowLayout {
         }
     }
 
-    IconButton {
+    AnimIconButton {
         id: searchButton
         Layout.alignment: Qt.AlignRight
         color: CmnCfg.palette.iconFill

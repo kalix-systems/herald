@@ -41,7 +41,7 @@ int main(int argc, char* argv[])
 
   qmlRegisterType<ConversationContent>("LibHerald", 1, 0,
                                        "ConversationContent");
-  qmlRegisterType<Messages>("LibHerald", 1, 0, "Messages");
+  qmlRegisterAnonymousType<Messages>("LibHerald", 1);
   qmlRegisterAnonymousType<Members>("LibHerald", 1);
   qmlRegisterAnonymousType<MessageBuilder>("LibHerald", 1);
   qmlRegisterAnonymousType<MediaAttachments>("LibHerald", 1);

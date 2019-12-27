@@ -65,6 +65,40 @@ fn message_meta() {
 }
 
 #[test]
+fn reaction() {
+    let mut conn = Database::in_memory_with_config().expect(womp!());
+
+    let receiver = crate::user::db::test_user(&mut conn, "receiver");
+
+    let conv = receiver.pairwise_conversation;
+
+    let mut builder = InboundMessageBuilder::default();
+    let msg_id = [0; 32].into();
+    builder
+        .id(msg_id)
+        .author(receiver.id)
+        .conversation_id(conv)
+        .timestamp(Time::now())
+        .body("hi".try_into().expect(womp!()));
+
+    builder.store_db(&mut conn).expect(womp!()).expect(womp!());
+
+    assert!(db::reactions(&conn, &msg_id).expect(womp!()).is_none());
+
+    db::add_reaction(&conn, &msg_id, &receiver.id, "++").expect(womp!());
+
+    let reactions = db::reactions(&conn, &msg_id)
+        .expect(womp!())
+        .expect(womp!());
+    assert_eq!(reactions.content.len(), 1);
+
+    db::remove_reaction(&conn, &msg_id, &receiver.id, "++").expect(womp!());
+
+    let reactions = db::reactions(&conn, &msg_id).expect(womp!());
+    assert!(reactions.is_none());
+}
+
+#[test]
 fn message_data() {
     let mut conn = Database::in_memory_with_config().expect(womp!());
 

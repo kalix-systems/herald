@@ -3,7 +3,7 @@ use coretypes::{
     attachments::Attachment,
     conversation,
     ids::*,
-    messages::{MessageBody, MessageReceiptStatus},
+    messages::{MessageBody, MessageReceiptStatus, ReactContent},
 };
 use herald_common::*;
 
@@ -23,7 +23,9 @@ pub enum ConversationMessage {
     /// A normal message.
     Msg(Msg),
     /// An acknowledgement of a normal message.
-    Ack(Ack),
+    Receipt(Receipt),
+    /// A message reaction
+    Reaction(Reaction),
     /// An update to the conversation settings
     Settings(conversation::settings::SettingsUpdate),
 }
@@ -87,9 +89,28 @@ pub struct Message {
 
 #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
 /// An acknowledgement that a message was received.
-pub struct Ack {
+pub struct Receipt {
     /// The message id.
     pub of: MsgId,
     /// The receipt status of the message.
     pub stat: MessageReceiptStatus,
+}
+
+/// A message reaction
+#[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
+pub enum Reaction {
+    /// Add a react
+    Add {
+        /// The message being reacted to
+        msg_id: MsgId,
+        /// The text of the receipt
+        react_content: ReactContent,
+    },
+    /// Remove a react
+    Remove {
+        /// The message being reacted to
+        msg_id: MsgId,
+        /// The text of the receipt
+        react_content: ReactContent,
+    },
 }

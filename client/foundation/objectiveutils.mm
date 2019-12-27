@@ -1,6 +1,7 @@
 #include "objectiveutils.h"
 #include <QWidget>
 #include <QColor>
+#import <UserNotifications/UserNotifications.h>
 #import <Foundation/Foundation.h>
 
 ObjectiveUtils::ObjectiveUtils(){
@@ -8,6 +9,7 @@ ObjectiveUtils::ObjectiveUtils(){
 
 #ifdef Q_OS_IOS
 #import <UIKit/UIKit.h>
+
 void ObjectiveUtils::set_status_bar_color(QColor color) {
        UIApplication *app =  [UIApplication sharedApplication];
        app.windows.firstObject.rootViewController.view.backgroundColor
@@ -15,8 +17,13 @@ void ObjectiveUtils::set_status_bar_color(QColor color) {
 
 }
 
-void ObjectiveUtils::send_notification(QString content) {
-
+void ObjectiveUtils::request_notifications()
+{
+  UNUserNotificationCenter* center = [UNUserNotificationCenter currentNotificationCenter];
+  [center requestAuthorizationWithOptions:
+              (UNAuthorizationOptionAlert +
+          UNAuthorizationOptionSound)
+                        completionHandler:^(BOOL granted, NSError * _Nullable error) {
+                        }];
 }
-
 #endif

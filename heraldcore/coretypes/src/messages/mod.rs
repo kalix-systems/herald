@@ -32,6 +32,8 @@ pub struct Message {
     pub receipts: HashMap<UserId, MessageReceiptStatus>,
     /// Messages that replied to this message
     pub replies: HashSet<MsgId>,
+    /// Reactions to this message
+    pub reactions: Option<Reactions>,
     /// Attachment metadata
     pub attachments: AttachmentMeta,
 }
@@ -39,7 +41,7 @@ pub struct Message {
 /// An isolated message receipt.
 #[derive(Clone, Copy, Debug)]
 pub struct MessageReceipt {
-    /// The message id
+    /// The message id the receipt is associated with
     pub msg_id: MsgId,
     /// The conversation id the original message is associated with
     pub cid: ConversationId,
@@ -49,9 +51,79 @@ pub struct MessageReceipt {
     pub status: MessageReceiptStatus,
 }
 
+/// An isolated message reaction
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Reaction {
+    /// The reactionary
+    pub reactionary: UserId,
+    /// The text of the receipt
+    pub react_content: ReactContent,
+    /// The time the react arrived at the client
+    pub time: Time,
+}
+
+pub type ReactContent = String;
+
+/// A `ReactContent` with an ordered list of
+/// reactionaries
+#[derive(Clone, Debug)]
+pub struct TaggedReact {
+    pub content: ReactContent,
+    pub reactionaries: Vec<UserId>,
+}
+
+/// A collection of message reactions
+#[derive(Clone, Debug, Default)]
+pub struct Reactions {
+    pub content: Vec<TaggedReact>,
+}
+
+impl Reactions {
+    pub fn add(
+        &mut self,
+        react: ReactContent,
+        reactionary: UserId,
+    ) {
+        match self
+            .content
+            .iter()
+            .position(|tagged| tagged.content == react)
+        {
+            Some(ix) => {
+                if let Some(tagged) = self.content.get_mut(ix) {
+                    tagged.reactionaries.push(reactionary);
+                }
+            }
+            None => self.content.push(TaggedReact {
+                content: react,
+                reactionaries: vec![reactionary],
+            }),
+        };
+    }
+
+    pub fn remove(
+        &mut self,
+        react: ReactContent,
+        reactionary: UserId,
+    ) {
+        if let Some(ix) = self
+            .content
+            .iter()
+            .position(|tagged| tagged.content == react)
+        {
+            if let Some(tagged) = self.content.get_mut(ix) {
+                if let Some(position) = tagged.reactionaries.iter().position(|u| u == &reactionary)
+                {
+                    tagged.reactionaries.remove(position);
+                }
+            }
+        };
+    }
+}
+
 #[derive(Clone, Copy, Debug, Ser, De, Eq, PartialEq, Hash)]
 /// In order to support expiring messages, it is necessary to indicate
-/// that a message is a reply without necessarily knowing
+/// that a message is a reply without necessarily knowing the message
 pub enum ReplyId {
     /// Not a reply
     None,
@@ -165,13 +237,17 @@ pub enum MessageSendStatus {
 /// Receipt status of a message
 pub enum MessageReceiptStatus {
     /// Not acknowledged
-    NoAck = 0,
+    Nil = 0,
     /// Received by user
     Received = 1,
     /// Read by the recipient
     Read = 2,
-    /// The user has read receipts turned off
-    AckTerminal = 3,
+}
+
+impl Default for MessageReceiptStatus {
+    fn default() -> Self {
+        MessageReceiptStatus::Nil
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -184,6 +260,7 @@ pub struct MsgData {
     pub attachments: crate::attachments::AttachmentMeta,
     pub send_status: MessageSendStatus,
     pub replies: HashSet<MsgId>,
+    pub reactions: Option<Reactions>,
 }
 
 #[repr(u8)]
@@ -243,6 +320,7 @@ pub fn split_msg(msg: Message) -> (MessageMeta, MsgData) {
         receipts,
         attachments,
         send_status,
+        reactions,
         replies,
         ..
     } = msg;
@@ -256,6 +334,7 @@ pub fn split_msg(msg: Message) -> (MessageMeta, MsgData) {
         time,
         send_status,
         replies,
+        reactions,
     };
 
     let message = MessageMeta {

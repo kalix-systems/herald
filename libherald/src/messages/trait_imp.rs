@@ -109,11 +109,19 @@ impl Interface for Messages {
     ) -> String {
         self.doc_attachments_(index).unwrap_or_default()
     }
+
     fn media_attachments(
         &self,
         index: usize,
     ) -> String {
         self.media_attachments_(index).unwrap_or_default()
+    }
+
+    fn full_media_attachments(
+        &self,
+        index: usize,
+    ) -> String {
+        self.full_media_attachments_(index).unwrap_or_default()
     }
 
     fn delete_message(
@@ -336,5 +344,42 @@ impl Interface for Messages {
         dest: String,
     ) -> bool {
         self.save_all_attachments_(index as usize, dest)
+    }
+
+    fn user_receipts(
+        &self,
+        index: usize,
+    ) -> String {
+        self.user_receipts_(index).unwrap_or_default()
+    }
+
+    fn mark_read(
+        &mut self,
+        index: u64,
+    ) {
+        self.mark_read_(index)
+    }
+
+    fn add_reaction(
+        &mut self,
+        index: u64,
+        content: String,
+    ) {
+        self.add_reaction_(index, content)
+    }
+
+    fn remove_reaction(
+        &mut self,
+        index: u64,
+        content: String,
+    ) {
+        self.remove_reaction_(index, content)
+    }
+
+    fn reactions(
+        &self,
+        index: usize,
+    ) -> String {
+        self.reactions_(index).unwrap_or_default()
     }
 }

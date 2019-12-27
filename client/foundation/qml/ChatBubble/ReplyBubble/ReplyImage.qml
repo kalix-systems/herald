@@ -17,6 +17,8 @@ Rectangle {
     readonly property real imageSize: 80
     property string replyBody: messageModelData.opBody
     property color opColor: CmnCfg.avatarColors[messageModelData.opColor]
+    property alias mouseEnabled: mouseArea.enabled
+
 
     Component.onCompleted: JS.parseMedia(messageModelData, imageClip)
 
@@ -24,7 +26,7 @@ Rectangle {
     width: bubbleRoot.maxWidth
     height: wrapRow.height
 
-    ReplyMouseArea {}
+    ReplyMouseArea { id: mouseArea}
 
     Rectangle {
         id: accent

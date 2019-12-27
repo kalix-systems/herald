@@ -48,11 +48,12 @@
         <file>ChatView/ConversationWindow/ChatBubbleHover.qml</file>
         <file>ChatView/ConversationWindow/ConversationWindow.qml</file>
         <file>ChatView/Header/ChatSearchComponent.qml</file>
-        <file>ChatView/Header/SearchTextArea.qml</file>
+        <file>ChatView/Header/SearchTextField.qml</file>
         <file>ChatView/Header/ChatBar.qml</file>
         <file>ChatView/ChatTextArea/js/ChatTextAreaUtils.mjs</file>
         <file>ChatView/Popups/ImageViewerPopup.qml</file>
         <file>SideBar/popups/SettingsComponents/SettingsListItem.qml</file>
+        <file>SideBar/popups/SettingsComponents/Profile.qml</file>
         <file>SideBar/popups/SettingsComponents/Notifications.qml</file>
         <file>SideBar/popups/SettingsComponents/Appearance.qml</file>
         <file>SideBar/popups/SettingsComponents/Privacy.qml</file>
@@ -67,5 +68,6 @@
         <file>ChatView/Popups/ImageClipRow.qml</file>
         <file>SideBar/popups/ImageCropPopup.qml</file>
         <file>SideBar/popups/js/SettingsPopupSubmission.mjs</file>
+        <file>ChatView/Popups/MoreInfoPopup.qml</file>
     </qresource>
 </RCC>

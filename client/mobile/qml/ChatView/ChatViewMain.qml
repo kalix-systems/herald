@@ -53,6 +53,7 @@ Page {
 
     ChatTextArea {
         id: chatTextArea
+        chatName: headerTitle
         property bool risen: false
         anchors {
             right: parent.right

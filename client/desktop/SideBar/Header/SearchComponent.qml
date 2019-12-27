@@ -28,61 +28,46 @@ Component {
                 Layout.leftMargin: CmnCfg.smallMargin
             }
 
-            Rectangle {
+            Imports.BorderedTextField {
+                id: searchText
+                placeholderText: headerLoader.searchPlaceholder
+                selectByMouse: true
+
+                Layout.alignment: Qt.AlignBottom | Qt.AlignHCenter
                 Layout.fillWidth: true
-                color: CmnCfg.palette.offBlack
-                height: parent.height
+                Layout.bottomMargin: CmnCfg.smallMargin
+                Layout.leftMargin: CmnCfg.smallMargin
+                Layout.rightMargin: CmnCfg.smallMargin
 
-                TextArea {
-                    id: searchText
-                    height: CmnCfg.toolbarHeight - CmnCfg.microMargin
-                    width: parent.width
-                    placeholderText: headerLoader.searchPlaceholder
-                    color: "white"
-                    verticalAlignment: TextEdit.AlignVCenter
-                    anchors.top: parent.top
-                    anchors.topMargin: CmnCfg.smallMargin / 4
-
-                    Keys.onPressed: {
-                        // this makes sure that returns and tabs are not evaluated
-                        if (event.key === Qt.Key_Return
-                                || event.key === Qt.Key_Tab) {
-                            event.accepted = true
-                        }
-                    }
-
-                    onTextChanged: {
-                        if (contactsSearch) {
-                            Qt.callLater(function (text) {
-                                Herald.users.filter = text
-                            }, searchText.text)
-                        } else {
-                            Qt.callLater(function (text) {
-                                Herald.conversations.filter = text
-                                Herald.messageSearch.searchPattern = text
-                            }, searchText.text)
-                        }
-                    }
-
-                    Component.onDestruction: {
-                        Herald.users.clearFilter()
-                        Herald.conversations.clearFilter()
-                        Herald.messageSearch.clearSearch()
+                Keys.onPressed: {
+                    // this makes sure that returns and tabs are not evaluated
+                    if (event.key === Qt.Key_Return
+                            || event.key === Qt.Key_Tab) {
+                        event.accepted = true
                     }
                 }
 
-                Rectangle {
-                    width: searchText.width - CmnCfg.largeMargin
-                    color: "white"
-                    height: 1
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    anchors.bottomMargin: CmnCfg.smallMargin
-                    anchors.bottom: parent.bottom
+                onTextChanged: {
+                    if (contactsSearch) {
+                        Qt.callLater(function (text) {
+                            Herald.users.filter = text
+                        }, searchText.text)
+                    } else {
+                        Qt.callLater(function (text) {
+                            Herald.conversations.filter = text
+                            Herald.messageSearch.searchPattern = text
+                        }, searchText.text)
+                    }
                 }
 
+                Component.onDestruction: {
+                    Herald.users.clearFilter()
+                    Herald.conversations.clearFilter()
+                    Herald.messageSearch.clearSearch()
+                }
             }
 
-            Imports.ButtonForm {
+            Imports.IconButton {
                 source: "qrc:/x-icon.svg"
                 fill: CmnCfg.palette.lightGrey
                 Layout.alignment: Qt.AlignRight

@@ -38,7 +38,7 @@ Rectangle {
     clip: true
     height: containerCol.height
 
-    Imports.ButtonForm {
+    Imports.IconButton {
         id: attachmentsButton
         anchors.right: parent.right
         anchors.rightMargin: CmnCfg.defaultMargin
@@ -47,7 +47,7 @@ Rectangle {
         source: "qrc:/attach-icon.svg"
     }
 
-    Imports.ButtonForm {
+    Imports.IconButton {
         id: emojiButton
         anchors.left: parent.left
         anchors.leftMargin: CmnCfg.defaultMargin

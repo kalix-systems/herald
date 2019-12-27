@@ -1,0 +1,67 @@
+use super::*;
+
+impl Messages {
+    pub(crate) fn add_reaction_(
+        &mut self,
+        index: u64,
+        content: String,
+    ) {
+        let index = index as usize;
+        let local_id = none!(self.local_id);
+
+        none!(self.container.update_by_index(index, |data| {
+            if data.reactions.is_none() {
+                data.reactions.replace(Default::default());
+            }
+
+            if let Some(ref mut r) = data.reactions {
+                r.add((&content).clone(), local_id);
+            }
+        }));
+        self.model.data_changed(index, index);
+
+        let mid = none!(self.container.msg_id(index).copied());
+
+        spawn!(err!(heraldcore::message::add_reaction(
+            &mid, &local_id, &content
+        )));
+    }
+
+    pub(crate) fn remove_reaction_(
+        &mut self,
+        index: u64,
+        content: String,
+    ) {
+        let index = index as usize;
+        let local_id = none!(self.local_id);
+
+        none!(self.container.update_by_index(index, |data| {
+            if data.reactions.is_none() {
+                data.reactions.replace(Default::default());
+            }
+
+            if let Some(ref mut r) = data.reactions {
+                r.remove((&content).clone(), local_id);
+            }
+        }));
+
+        self.model.data_changed(index, index);
+
+        let mid = none!(self.container.msg_id(index).copied());
+        spawn!(err!(heraldcore::message::add_reaction(
+            &mid, &local_id, &content
+        )));
+    }
+
+    pub(crate) fn reactions_(
+        &self,
+        index: usize,
+    ) -> Option<String> {
+        self.container
+            .access_by_index(index, |data| data.reactions.clone())
+            .flatten()
+            .map(json::JsonValue::from)
+            .as_ref()
+            .map(json::JsonValue::dump)
+    }
+}
