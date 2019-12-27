@@ -105,7 +105,7 @@ pub(super) fn handle_cmessage(
                     status,
                 }));
         }
-        Reaction(cmessages::Reaction {
+        Reaction(cmessages::Reaction::Add {
             react_content,
             msg_id,
         }) => {
@@ -115,6 +115,20 @@ pub(super) fn handle_cmessage(
                 msg_id,
                 reactionary: uid,
                 content: react_content,
+                remove: false,
+            });
+        }
+        Reaction(cmessages::Reaction::Remove {
+            react_content,
+            msg_id,
+        }) => {
+            crate::message::add_reaction(&msg_id, &uid, &react_content)?;
+            ev.notifications.push(Notification::Reaction {
+                cid,
+                msg_id,
+                reactionary: uid,
+                content: react_content,
+                remove: true,
             });
         }
         Settings(update) => {

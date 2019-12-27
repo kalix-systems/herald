@@ -100,6 +100,25 @@ impl Reactions {
             }),
         };
     }
+
+    pub fn remove(
+        &mut self,
+        react: ReactContent,
+        reactionary: UserId,
+    ) {
+        if let Some(ix) = self
+            .content
+            .iter()
+            .position(|tagged| tagged.content == react)
+        {
+            if let Some(tagged) = self.content.get_mut(ix) {
+                if let Some(position) = tagged.reactionaries.iter().position(|u| u == &reactionary)
+                {
+                    tagged.reactionaries.remove(position);
+                }
+            }
+        };
+    }
 }
 
 #[derive(Clone, Copy, Debug, Ser, De, Eq, PartialEq, Hash)]

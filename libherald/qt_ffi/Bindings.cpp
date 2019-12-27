@@ -2207,6 +2207,8 @@ qint64 messages_index_by_id(const Messages::Private *, const char *, int);
 void messages_mark_read(Messages::Private *, quint64);
 qint64 messages_next_search_match(Messages::Private *);
 qint64 messages_prev_search_match(Messages::Private *);
+void messages_remove_reaction(Messages::Private *, quint64, const ushort *,
+                              int);
 bool messages_save_all_attachments(const Messages::Private *, quint64,
                                    const ushort *, int);
 void messages_set_elision_char_count(Messages::Private *, quint16);
@@ -4244,6 +4246,9 @@ void Messages::markRead(quint64 index) {
 }
 qint64 Messages::nextSearchMatch() { return messages_next_search_match(m_d); }
 qint64 Messages::prevSearchMatch() { return messages_prev_search_match(m_d); }
+void Messages::removeReaction(quint64 index, const QString &content) {
+  return messages_remove_reaction(m_d, index, content.utf16(), content.size());
+}
 bool Messages::saveAllAttachments(quint64 index, const QString &dest) const {
   return messages_save_all_attachments(m_d, index, dest.utf16(), dest.size());
 }

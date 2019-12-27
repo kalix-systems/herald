@@ -51,12 +51,14 @@ impl NotifHandler {
                 reactionary,
                 content,
                 cid,
+                remove,
             } => err!(content_push(
                 cid,
                 MsgUpdate::Reaction {
                     msg_id,
                     reactionary,
-                    content
+                    content,
+                    remove
                 }
             )),
             NewUser(update) => {
