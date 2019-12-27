@@ -28,6 +28,7 @@ Component {
 
             HeaderAvatar {
                 anchors.verticalCenter: parent.verticalCenter
+                visible: sideBar.sideBarState.state !== "archivedState"
             }
 
             Text {

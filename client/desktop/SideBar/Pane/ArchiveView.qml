@@ -43,7 +43,7 @@ ListView {
                 acceptedButtons: Qt.RightButton
                 onClicked: {
                     if (mouse.button == Qt.RightButton) {
-                        convOptionsMenu.open()
+                        unarchiveMenu.open()
                     }
                 }
             }
@@ -53,6 +53,7 @@ ListView {
             id: unarchiveMenu
             MenuItem {
                 text: "Unarchive conversation"
+                onTriggered: conversationData.status = 0
             }
         }
     }

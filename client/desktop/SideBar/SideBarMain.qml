@@ -68,7 +68,9 @@ Page {
     Component {
 
         id: archiveViewComponent
-        Pane.ArchiveView {}
+        Pane.ArchiveView {
+            model: Herald.conversations
+        }
     }
 
     SideBarState {

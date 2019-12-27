@@ -64,7 +64,7 @@ ListView {
             }
         }
 
-        //visible: conversationData.matched && conversationData.status !==
+        visible: conversationData.matched && conversationData.status !== 1
         height: visible ? CmnCfg.convoHeight : 0
         width: parent.width
 

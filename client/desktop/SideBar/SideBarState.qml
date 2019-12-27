@@ -61,6 +61,12 @@ Item {
             }
 
             PropertyChanges {
+                target: headerLoader
+                sourceComponent: altContextHeader
+                headerText: qsTr("Archive")
+            }
+
+            PropertyChanges {
                 target: sideBarPane.sideBarBodyLoader
                 sourceComponent: archiveViewComponent
             }
