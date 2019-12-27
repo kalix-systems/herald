@@ -340,8 +340,7 @@ fn add_delete_reaction() {
 
     builder.store_db(&mut conn).expect(womp!());
 
-    db::add_reaction(&conn, &mid, &author.id, ":)".try_into().expect(womp!()))
-        .expect(womp!("failed to add react"));
+    db::add_reaction(&conn, &mid, &author.id, ":)").expect(womp!("failed to add react"));
 
     //make sure adding the same react from the same userdoes not get registered
     db::add_reaction(&conn, &mid, &author.id, ":)".try_into().expect(womp!()))
