@@ -8,6 +8,7 @@ import "qrc:/imports/js/utils.mjs" as Utils
 import "../../ChatView" as CV
 import ".././js/ContactView.mjs" as JS
 import "../popups" as Popups
+import Qt.labs.platform 1.1
 
 /// --- displays a list of conversations
 /// TODO: fix bounds bounds behavior
@@ -63,39 +64,37 @@ ListView {
             }
         }
 
-        visible: conversationData.matched
+        //visible: conversationData.matched && conversationData.status !==
         height: visible ? CmnCfg.convoHeight : 0
         width: parent.width
 
-        Common.PlatonicRectangle {
-            id: convoRectangle
-            boxTitle: title
-            boxColor: conversationData.color
-            picture: Utils.safeStringOrDefault(conversationData.picture, "")
-            isGroupPicture: !conversationData.pairwise
-            labelComponent: Av.ConversationLabel {
-                contactName: title
-                lastBody: !convContent.messages.isEmpty ? lastAuthor + ": "
-                                                          + convContent.messages.lastBody : ""
-                lastAuthor: outbound ? qsTr("You") : convContent.messages.lastAuthor
-                lastTimestamp: !convContent.messages.isEmpty ? Utils.friendlyTimestamp(
-                                                                   convContent.messages.lastTime) : ""
-                labelColor: convoRectangle.state
-                            !== "" ? CmnCfg.palette.black : CmnCfg.palette.lightGrey
-                secondaryLabelColor: convoRectangle.state
-                                     !== "" ? CmnCfg.palette.offBlack : CmnCfg.palette.medGrey
-                labelFontSize: CmnCfg.entityLabelSize
-            }
-
+        ConversationRectangle {
             MouseArea {
                 id: hoverHandler
                 hoverEnabled: true
                 z: CmnCfg.overlayZ
                 anchors.fill: parent
+                acceptedButtons: Qt.LeftButton | Qt.RightButton
                 onClicked: {
-                    chatView.sourceComponent = childChatView
-                    conversationList.currentIndex = index
+                    if (mouse.button == Qt.RightButton) {
+                        convOptionsMenu.open()
+                    } else {
+                        chatView.sourceComponent = childChatView
+                        conversationList.currentIndex = index
+                    }
                 }
+            }
+        }
+
+        Menu {
+            id: convOptionsMenu
+            MenuItem {
+                text: "Mute notifications"
+            }
+
+            MenuItem {
+                text: "Archive"
+                onTriggered: conversationData.status = 1
             }
         }
     }

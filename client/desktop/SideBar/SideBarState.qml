@@ -52,6 +52,18 @@ Item {
                 target: sideBarPane.messageSearchLoader
                 searchModel: Herald.messageSearch
             }
+        },
+
+        State {
+            name: "archivedState"
+            PropertyChanges {
+                target: headerLoader
+            }
+
+            PropertyChanges {
+                target: sideBarPane.sideBarBodyLoader
+                sourceComponent: archiveViewComponent
+            }
         }
     ]
 }

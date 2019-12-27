@@ -65,6 +65,12 @@ Page {
         id: newContactComponent
     }
 
+    Component {
+
+        id: archiveViewComponent
+        Pane.ArchiveView {}
+    }
+
     SideBarState {
         id: sideBarState
         anchors.fill: parent

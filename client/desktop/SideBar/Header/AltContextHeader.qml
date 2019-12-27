@@ -22,7 +22,7 @@ Component {
             anchors {
                 left: parent.left
                 leftMargin: CmnCfg.smallMargin
-                 verticalCenter: parent.verticalCenter
+                verticalCenter: parent.verticalCenter
             }
             spacing: CmnCfg.defaultMargin
 
@@ -42,14 +42,12 @@ Component {
             }
         }
 
-
         Imports.IconButton {
             anchors {
                 verticalCenter: parent.verticalCenter
                 right: parent.right
                 rightMargin: CmnCfg.smallMargin
             }
-
 
             id: xButton
             fill: CmnCfg.palette.lightGrey
