@@ -40,7 +40,7 @@ Window {
                 id: label
                 text: qsTr("General settings")
                 color: CmnCfg.palette.white
-                font.pixelSize: CmnCfg.headerSize
+                font.pixelSize: CmnCfg.headerFontSize
                 font.family: CmnCfg.labelFont.name
                 font.weight: Font.DemiBold
                 anchors.verticalCenter: parent.verticalCenter

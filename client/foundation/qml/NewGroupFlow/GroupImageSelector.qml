@@ -72,7 +72,7 @@ Rectangle {
 
     FileDialog {
         id: groupPicDialogue
-        folder: shortcuts.home
+        folder: StandardPaths.writableLocation(StandardPaths.PicturesLocation)
         nameFilters: ["Image File (*.jpg *.png *.jpeg)"]
 
         onCurrentFileChanged: {
