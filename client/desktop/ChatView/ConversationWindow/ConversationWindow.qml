@@ -90,6 +90,7 @@ ListView {
         width: parent.width
         messageModelData: model
         ListView.onAdd: chatScrollBarInner.setPosition(1.0)
+        bubbleIndex: index
 
         ChatBubbleHover {
             id: bubbleHoverHandler
@@ -113,7 +114,7 @@ ListView {
             onClosed: reactPopup.active = false
             y: {
                 if (bubbleActual.y - chatListView.contentY > height) {
-                    return -height //return bubbleActual.y - chatListView.contentY - height
+                    return -height
                 }
                 return CmnCfg.largeMargin * 2
             }
@@ -138,7 +139,6 @@ ListView {
 
         //TODO: this doesn't actually produce the desired behavior
         Component.onCompleted: {
-            print(ownedConversation.reactions(index))
             if (root.active) {
                 ownedConversation.markRead(index)
             }
