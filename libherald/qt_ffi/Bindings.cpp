@@ -547,6 +547,8 @@ bool conversations_set_data_muted(Conversations::Private *, int, bool);
 bool conversations_data_pairwise(const Conversations::Private *, int);
 void conversations_data_picture(const Conversations::Private *, int, QString *,
                                 qstring_set);
+quint8 conversations_data_status(const Conversations::Private *, int);
+bool conversations_set_data_status(Conversations::Private *, int, quint8);
 void conversations_data_title(const Conversations::Private *, int, QString *,
                               qstring_set);
 bool conversations_set_data_title(Conversations::Private *, int,
@@ -679,6 +681,21 @@ QString Conversations::picture(int row) const {
   return s;
 }
 
+quint8 Conversations::status(int row) const {
+  return conversations_data_status(m_d, row);
+}
+
+bool Conversations::setStatus(int row, quint8 value) {
+  bool set = false;
+  set = conversations_set_data_status(m_d, row, value);
+
+  if (set) {
+    QModelIndex index = createIndex(row, 0, row);
+    Q_EMIT dataChanged(index, index);
+  }
+  return set;
+}
+
 QString Conversations::title(int row) const {
   QString s;
   conversations_data_title(m_d, row, &s, set_qstring);
@@ -720,6 +737,8 @@ QVariant Conversations::data(const QModelIndex &index, int role) const {
     case Qt::UserRole + 6:
       return cleanNullQVariant(QVariant::fromValue(picture(index.row())));
     case Qt::UserRole + 7:
+      return QVariant::fromValue(status(index.row()));
+    case Qt::UserRole + 8:
       return cleanNullQVariant(QVariant::fromValue(title(index.row())));
     }
     break;
@@ -746,7 +765,8 @@ QHash<int, QByteArray> Conversations::roleNames() const {
   names.insert(Qt::UserRole + 4, "muted");
   names.insert(Qt::UserRole + 5, "pairwise");
   names.insert(Qt::UserRole + 6, "picture");
-  names.insert(Qt::UserRole + 7, "title");
+  names.insert(Qt::UserRole + 7, "status");
+  names.insert(Qt::UserRole + 8, "title");
   return names;
 }
 
@@ -789,6 +809,11 @@ bool Conversations::setData(const QModelIndex &index, const QVariant &value,
       }
     }
     if (role == Qt::UserRole + 7) {
+      if (value.canConvert(qMetaTypeId<quint8>())) {
+        return setStatus(index.row(), value.value<quint8>());
+      }
+    }
+    if (role == Qt::UserRole + 8) {
       if (!value.isValid() || value.isNull() ||
           value.canConvert(qMetaTypeId<QString>())) {
         return setTitle(index.row(), value.value<QString>());

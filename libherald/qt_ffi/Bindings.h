@@ -881,6 +881,8 @@ public:
   Q_INVOKABLE bool setMuted(int row, bool value);
   Q_INVOKABLE bool pairwise(int row) const;
   Q_INVOKABLE QString picture(int row) const;
+  Q_INVOKABLE quint8 status(int row) const;
+  Q_INVOKABLE bool setStatus(int row, quint8 value);
   Q_INVOKABLE QString title(int row) const;
   Q_INVOKABLE bool setTitle(int row, const QString &value);
 

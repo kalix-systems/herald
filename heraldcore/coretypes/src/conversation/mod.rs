@@ -176,6 +176,16 @@ impl ToSql for Status {
     }
 }
 
+impl Status {
+    pub fn from_u8(s: u8) -> Option<Self> {
+        match s {
+            0 => Some(Status::Active),
+            1 => Some(Status::Archived),
+            _ => None,
+        }
+    }
+}
+
 impl From<u8> for ExpirationPeriod {
     fn from(val: u8) -> Self {
         use ExpirationPeriod::*;
