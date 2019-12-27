@@ -1537,7 +1537,8 @@ public:
   void setSearchPattern(const QString &v);
   bool searchRegex() const;
   void setSearchRegex(bool v);
-  Q_INVOKABLE void addReaction(quint64 index, const QString &content);
+  Q_INVOKABLE void addReaction(const QByteArray &msg_id,
+                               const QString &content);
   Q_INVOKABLE bool clearConversationHistory();
   Q_INVOKABLE void clearSearch();
   Q_INVOKABLE bool deleteMessage(quint64 row_index);
@@ -1545,7 +1546,8 @@ public:
   Q_INVOKABLE void markRead(quint64 index);
   Q_INVOKABLE qint64 nextSearchMatch();
   Q_INVOKABLE qint64 prevSearchMatch();
-  Q_INVOKABLE void removeReaction(quint64 index, const QString &content);
+  Q_INVOKABLE void removeReaction(const QByteArray &msg_id,
+                                  const QString &content);
   Q_INVOKABLE bool saveAllAttachments(quint64 index, const QString &dest) const;
   Q_INVOKABLE void setElisionCharCount(quint16 char_count);
   Q_INVOKABLE void setElisionCharsPerLine(quint8 chars_per_line);
