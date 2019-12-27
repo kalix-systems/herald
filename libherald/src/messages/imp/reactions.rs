@@ -8,6 +8,7 @@ impl Messages {
     ) {
         let index = index as usize;
         let local_id = none!(self.local_id);
+        let cid = none!(self.conversation_id);
 
         let changed = none!(self.container.update_by_index(index, |data| {
             if data.reactions.is_none() {
@@ -28,9 +29,10 @@ impl Messages {
         self.model.data_changed(index, index);
         let mid = none!(self.container.msg_id(index).copied());
 
-        spawn!(err!(heraldcore::message::add_reaction(
-            &mid, &local_id, &content
-        )));
+        spawn!({
+            err!(heraldcore::message::add_reaction(&mid, &local_id, &content));
+            err!(heraldcore::network::send_reaction(cid, mid, content));
+        });
     }
 
     pub(crate) fn remove_reaction_(
@@ -40,6 +42,7 @@ impl Messages {
     ) {
         let index = index as usize;
         let local_id = none!(self.local_id);
+        let cid = none!(self.conversation_id);
 
         let changed = none!(self.container.update_by_index(index, |data| {
             if data.reactions.is_none() {
@@ -60,9 +63,14 @@ impl Messages {
 
         let mid = none!(self.container.msg_id(index).copied());
 
-        spawn!(err!(heraldcore::message::add_reaction(
-            &mid, &local_id, &content
-        )));
+        spawn!({
+            err!(heraldcore::message::remove_reaction(
+                &mid, &local_id, &content
+            ));
+            err!(heraldcore::network::send_reaction_removal(
+                cid, mid, content
+            ));
+        });
     }
 
     pub(crate) fn reactions_(

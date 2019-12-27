@@ -44,6 +44,7 @@ MouseArea {
             Imports.IconButton {
                 id: replyButton
                 visible: chatBubbleHitbox.containsMouse
+                         || bubbleActual.hoverHighlight
                 anchors {
                     margins: CmnCfg.defaultMargin
                 }
@@ -61,6 +62,7 @@ MouseArea {
             Imports.IconButton {
                 id: reactButton
                 visible: chatBubbleHitbox.containsMouse
+                         || bubbleActual.hoverHighlight
                 anchors {
                     margins: visible ? CmnCfg.defaultMargin : 0
                 }
@@ -75,7 +77,8 @@ MouseArea {
 
             Imports.IconButton {
                 id: downloadButton
-                visible: chatBubbleHitbox.containsMouse && download
+                visible: (chatBubbleHitbox.containsMouse
+                          || bubbleActual.hoverHighlight) && download
                 anchors {
                     margins: visible ? CmnCfg.defaultMargin : 0
                 }
@@ -87,7 +90,8 @@ MouseArea {
 
             Imports.IconButton {
                 id: messageOptionsButton
-                visible: chatBubbleHitbox.containsMouse
+                visible: bubbleActual.hoverHighlight
+                         || chatBubbleHitbox.containsMouse
 
                 anchors {
                     margins: CmnCfg.defaultMargin
