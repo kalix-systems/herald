@@ -15,11 +15,16 @@ impl Messages {
             }
 
             if let Some(ref mut r) = data.reactions {
-                r.add(content, local_id);
+                r.add((&content).clone(), local_id);
             }
         }));
-
         self.model.data_changed(index, index);
+
+        let mid = none!(self.container.msg_id(index).copied());
+
+        spawn!(err!(heraldcore::message::add_reaction(
+            &mid, &local_id, &content
+        )));
     }
 
     pub(crate) fn remove_reaction_(
@@ -36,11 +41,16 @@ impl Messages {
             }
 
             if let Some(ref mut r) = data.reactions {
-                r.remove(content, local_id);
+                r.remove((&content).clone(), local_id);
             }
         }));
 
         self.model.data_changed(index, index);
+
+        let mid = none!(self.container.msg_id(index).copied());
+        spawn!(err!(heraldcore::message::add_reaction(
+            &mid, &local_id, &content
+        )));
     }
 
     pub(crate) fn reactions_(
