@@ -31,15 +31,19 @@ pub(crate) fn get_message(
 
             let op = (op, is_reply).into();
 
+            let body: Option<MessageBody> = row.get("body")?;
+            let update: Option<Update> = row.get("update_item")?;
+            let content = Item::from_parts(body, update);
+
             Ok(Message {
                 message_id: row.get("msg_id")?,
                 author: row.get("author")?,
                 conversation: row.get("conversation_id")?,
-                body: row.get("body")?,
                 op,
                 send_status: row.get("send_status")?,
                 attachments,
                 time,
+                content,
                 receipts,
                 replies,
                 reactions,
@@ -91,13 +95,17 @@ pub(crate) fn message_data(
             let op: Option<MsgId> = row.get("op_msg_id")?;
             let op = (op, is_reply).into();
 
+            let body: Option<MessageBody> = row.get("body")?;
+            let update: Option<Update> = row.get("update_item")?;
+            let content = Item::from_parts(body, update);
+
             Ok(MsgData {
                 author: row.get("author")?,
-                body: row.get("body")?,
                 send_status: row.get("send_status")?,
                 op,
                 attachments,
                 time,
+                content,
                 receipts,
                 replies,
                 reactions,
@@ -134,11 +142,15 @@ pub(crate) fn get_message_opt(
 
             let op = (op, is_reply).into();
 
+            let body: Option<MessageBody> = row.get("body")?;
+            let update: Option<Update> = row.get("update_item")?;
+            let content = Item::from_parts(body, update);
+
             Ok(Message {
                 message_id: row.get("msg_id")?,
                 author: row.get("author")?,
                 conversation: row.get("conversation_id")?,
-                body: row.get("body")?,
+                content,
                 op,
                 send_status: row.get("send_status")?,
                 attachments,
@@ -289,11 +301,15 @@ pub(crate) fn by_send_status(
 
             let op = (op, is_reply).into();
 
+            let body: Option<MessageBody> = row.get("body")?;
+            let update: Option<Update> = row.get("update_item")?;
+            let content = Item::from_parts(body, update);
+
             Ok(Message {
                 message_id,
                 author: row.get("author")?,
                 conversation: row.get("conversation_id")?,
-                body: row.get("body")?,
+                content,
                 op,
                 send_status: row.get("send_status")?,
                 attachments,
@@ -402,7 +418,7 @@ impl OutboundMessageBuilder {
         let msg = Message {
             message_id: msg_id,
             author,
-            body: (&body).clone(),
+            content: body.clone().map(Item::Plain),
             op: op.into(),
             conversation: conversation_id,
             time,
@@ -639,7 +655,7 @@ impl InboundMessageBuilder {
         Ok(Some(Message {
             message_id: msg_id,
             author,
-            body,
+            content: body.map(Item::Plain),
             attachments,
             conversation: conversation_id,
             send_status: MessageSendStatus::Ack,

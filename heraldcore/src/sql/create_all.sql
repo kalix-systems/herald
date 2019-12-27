@@ -7,6 +7,8 @@ CREATE TABLE IF NOT EXISTS messages (
   conversation_id BLOB NOT NULL,
   -- text of message
   body TEXT,
+  -- message history update
+  update_item BLOB,
   -- timestamp associated with message
   insertion_ts INTEGER NOT NULL,
   -- timestamp the message was inserted into the database

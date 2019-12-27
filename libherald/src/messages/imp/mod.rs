@@ -6,7 +6,7 @@ use crate::{
 };
 use heraldcore::{
     config, conversation,
-    message::{self, MessageBody, MessageReceiptStatus, MsgData},
+    message::{self, MessageReceiptStatus, MsgData},
 };
 use messages_helper::search::SearchState;
 use std::collections::HashMap;

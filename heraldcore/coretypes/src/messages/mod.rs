@@ -21,7 +21,7 @@ pub struct Message {
     /// Recipient user id
     pub conversation: ConversationId,
     /// Body of message
-    pub body: Option<MessageBody>,
+    pub content: Option<Item>,
     /// Message time information
     pub time: MessageTime,
     /// Message id of the message being replied to
@@ -36,6 +36,12 @@ pub struct Message {
     pub reactions: Option<Reactions>,
     /// Attachment metadata
     pub attachments: AttachmentMeta,
+}
+
+impl Message {
+    pub fn text(&self) -> Option<&str> {
+        self.content.as_ref().and_then(Item::as_str)
+    }
 }
 
 /// An isolated message receipt.
@@ -154,6 +160,38 @@ impl ReplyId {
     }
 }
 
+/// An item in the message history
+#[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
+pub enum Item {
+    Plain(MessageBody),
+    Update(Update),
+}
+
+impl Item {
+    pub fn as_str(&self) -> Option<&str> {
+        match self {
+            Item::Plain(body) => Some(body.as_str()),
+            _ => None,
+        }
+    }
+
+    pub fn body(&self) -> Option<&MessageBody> {
+        match self {
+            Item::Plain(body) => Some(&body),
+            _ => None,
+        }
+    }
+}
+
+/// An update that appears appears in the message history
+#[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
+pub enum Update {
+    Color(u32),
+    Title(String),
+    Picture(String),
+    Expiration(crate::conversation::ExpirationPeriod),
+}
+
 #[derive(Clone, Copy, Debug)]
 /// Time data relating to messages
 pub struct MessageTime {
@@ -253,7 +291,7 @@ impl Default for MessageReceiptStatus {
 #[derive(Clone, Debug)]
 pub struct MsgData {
     pub author: UserId,
-    pub body: Option<MessageBody>,
+    pub content: Option<Item>,
     pub time: MessageTime,
     pub op: ReplyId,
     pub receipts: HashMap<UserId, MessageReceiptStatus>,
@@ -282,9 +320,9 @@ impl MsgData {
         &self,
         pattern: &search_pattern::SearchPattern,
     ) -> bool {
-        match self.body.as_ref() {
-            Some(body) => pattern.is_match(body.as_str()),
-            None => false,
+        match self.content.as_ref() {
+            Some(Item::Plain(body)) => pattern.is_match(body.as_str()),
+            _ => false,
         }
     }
 
@@ -300,6 +338,10 @@ impl MsgData {
 
         self.attachments.save_all(dest.as_ref().join(ext))
     }
+
+    pub fn text(&self) -> Option<&str> {
+        self.content.as_ref().and_then(Item::as_str)
+    }
 }
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
@@ -314,7 +356,7 @@ pub fn split_msg(msg: Message) -> (MessageMeta, MsgData) {
     let Message {
         message_id,
         author,
-        body,
+        content,
         time,
         op,
         receipts,
@@ -328,7 +370,7 @@ pub fn split_msg(msg: Message) -> (MessageMeta, MsgData) {
     let data = MsgData {
         author,
         receipts,
-        body,
+        content,
         op,
         attachments,
         time,
@@ -426,7 +468,7 @@ impl Elider {
 
     pub fn elided_body(
         &self,
-        body: MessageBody,
+        body: String,
     ) -> String {
         let graphemes = UnicodeSegmentation::graphemes(body.as_str(), true);
 
@@ -443,7 +485,7 @@ impl Elider {
         }
 
         if char_count < self.char_count && line_count < self.line_count {
-            return body.inner();
+            return body;
         }
 
         let chars_to_take = self.char_count.min(self.line_count * self.char_per_line);

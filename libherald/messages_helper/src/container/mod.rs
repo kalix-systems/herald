@@ -236,7 +236,7 @@ impl Container {
     ) -> Option<String> {
         let mid = self.op_msg_id(index)?;
 
-        access(&mid, |m| m.body.clone())
+        access(&mid, |m| m.text().map(ToString::to_string))
             .flatten()
             .map(|b| self.op_body_elider.elided_body(b))
     }

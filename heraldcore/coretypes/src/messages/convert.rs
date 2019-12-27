@@ -138,6 +138,19 @@ impl std::convert::TryFrom<i64> for MessageReceiptStatus {
     }
 }
 
+impl Item {
+    pub fn from_parts(
+        body: Option<MessageBody>,
+        update: Option<Update>,
+    ) -> Option<Item> {
+        match (body, update) {
+            (Some(body), None) => Item::Plain(body).into(),
+            (None, Some(update)) => Item::Update(update).into(),
+            _ => None,
+        }
+    }
+}
+
 impl Reactions {
     pub fn from_vec(reactions: Vec<Reaction>) -> Option<Self> {
         if reactions.is_empty() {

@@ -33,7 +33,7 @@ fn delete_get_message() {
 
     let message = db::get_message(&conn, &msg_id).expect(womp!("unable to get message"));
 
-    assert_eq!(message.body.expect(womp!()).as_str(), "hi");
+    assert_eq!(message.text().expect(womp!()), "hi");
 
     db::delete_message(&conn, &msg_id).expect(womp!("failed to delete message"));
 
@@ -197,10 +197,8 @@ fn message_send_status_updates() {
 
     assert_eq!(
         by_send_status(MessageSendStatus::Ack).expect(womp!())[0]
-            .body
-            .as_ref()
-            .expect(womp!())
-            .as_str(),
+            .text()
+            .expect(womp!()),
         "test"
     );
 

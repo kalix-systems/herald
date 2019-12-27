@@ -1,5 +1,5 @@
 use super::*;
-use crate::message::MessageTime;
+use crate::message::{Item as MsgItem, MessageBody, MessageTime, Update as UpdateMsg};
 use crate::w;
 use rusqlite::named_params;
 
@@ -43,11 +43,15 @@ pub(crate) fn conversation_messages(
 
             let op = (op, is_reply).into();
 
+            let body: Option<MessageBody> = row.get("body")?;
+            let update: Option<UpdateMsg> = row.get("update_item")?;
+            let content = MsgItem::from_parts(body, update);
+
             Ok(Message {
                 message_id,
                 author: row.get("author")?,
                 conversation: *conversation_id,
-                body: row.get("body")?,
+                content,
                 op,
                 time,
                 send_status: row.get("send_status")?,
