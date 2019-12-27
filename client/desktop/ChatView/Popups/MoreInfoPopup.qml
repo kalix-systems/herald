@@ -59,7 +59,7 @@ Popup {
                 font.weight: Font.DemiBold
                 color: CmnCfg.palette.black
                 width: parent.width
-                font.pixelSize: CmnCfg.headerSize
+                font.pixelSize: CmnCfg.headerFontSize
 
                 IconButton {
                     anchors.right: parent.right
@@ -212,7 +212,7 @@ Popup {
                 contentItem: Text {
                     text: qsTr("DELETE MESSAGE")
                     color: CmnCfg.palette.white
-                    font.pixelSize: CmnCfg.headerSize
+                    font.pixelSize: CmnCfg.headerFontSize
                     font.family: CmnCfg.chatFont.name
                 }
 

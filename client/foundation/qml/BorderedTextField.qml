@@ -8,6 +8,7 @@ TextField {
     property alias borderColor: border.color
 
     leftPadding: 0
+    rightPadding: 0
     bottomPadding: CmnCfg.units.dp(2)
     placeholderText: "Enter text"
     font: CmnCfg.defaultFont
