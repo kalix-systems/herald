@@ -19,7 +19,7 @@ RowLayout {
             initials: Herald.config.name[0].toUpperCase()
             pfpPath: Utils.safeStringOrDefault(Herald.config.profilePicture, "")
             size: CmnCfg.units.dp(24)
-            Layout.alignment: Qt.AlignCenter
+            anchors.verticalCenter: parent.verticalCenter
             Layout.leftMargin: CmnCfg.units.dp(12)
         }
 

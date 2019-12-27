@@ -8,8 +8,8 @@ RowLayout {
 
     anchors {
         fill: parent
-        rightMargin: CmnCfg.margin
-        leftMargin: CmnCfg.margin
+        rightMargin: CmnCfg.largeMargin
+        leftMargin: CmnCfg.largeMargin
     }
 
     AnimIconButton {

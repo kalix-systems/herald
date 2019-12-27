@@ -39,7 +39,7 @@ Column {
             }
         }
 
-        IconButton {
+        AnimIconButton {
             anchors.centerIn: parent
             imageSource: "qrc:/camera-icon.svg"
             color: CmnCfg.palette.iconFill

@@ -7,11 +7,11 @@ import "../Common"
 RowLayout {
     anchors {
         fill: parent
-        rightMargin: CmnCfg.margin
-        leftMargin: CmnCfg.margin
+        rightMargin: CmnCfg.defaultMargin
+        leftMargin: CmnCfg.defaultMargin
     }
 
-    IconButton {
+    AnimIconButton {
         id: drawerButton
         Layout.alignment: Qt.AlignLeft
         color: CmnCfg.palette.iconFill
@@ -25,7 +25,7 @@ RowLayout {
         text: qsTr("Settings")
         Layout.alignment: Qt.AlignCenter
         Layout.fillWidth: true
-        font.pixelSize: CmnCfg.chatPreviewSize
+        font.pixelSize: CmnCfg.headerTextSize
         font.family: CmnCfg.chatFont.name
         color: CmnCfg.palette.iconFill
     }

@@ -21,41 +21,32 @@ Page {
         color: CmnCfg.palette.white
     }
 
-        background: Rectangle {
-            color: CmnCfg.palette.offBlack
-        }
-
-        RowLayout {
-            anchors.fill: parent
-            Row {
-                Layout.alignment: Qt.AlignLeft
-                Layout.leftMargin: CmnCfg.units.dp(12)
-                spacing: CmnCfg.units.dp(16)
-                AnimIconButton {
-                    id: backButton
-                    color: CmnCfg.palette.iconFill
-                    imageSource: "qrc:/back-arrow-icon.svg"
-                    tapCallback: function () {
-                        mainView.pop(null)
-                    }
-                }
-            }
-
-            Label {
-                id: stateLabel
-                text: qsTr("New group")
-                font {
-                    pixelSize: CmnCfg.headerTextSize
-                    family: CmnCfg.labelFont.name
-                }
-                anchors.verticalCenter: parent.verticalCenter
+    RowLayout {
+        anchors.fill: parent
+        Row {
+            Layout.alignment: Qt.AlignLeft
+            Layout.leftMargin: CmnCfg.units.dp(12)
+            spacing: CmnCfg.units.dp(16)
+            AnimIconButton {
+                id: backButton
                 color: CmnCfg.palette.iconFill
+                imageSource: "qrc:/back-arrow-icon.svg"
+                tapCallback: function () {
+                    mainView.pop(null)
+                }
             }
         }
-    }
 
-    background: Rectangle {
-        color: CmnCfg.palette.white
+        Label {
+            id: stateLabel
+            text: qsTr("New group")
+            font {
+                pixelSize: CmnCfg.headerTextSize
+                family: CmnCfg.labelFont.name
+            }
+            Layout.alignment: Layout.verticalCenter
+            color: CmnCfg.palette.iconFill
+        }
     }
 
     ColumnLayout {
@@ -84,7 +75,6 @@ Page {
             Layout.fillWidth: parent
             Layout.leftMargin: CmnCfg.megaMargin
             Layout.rightMargin: CmnCfg.megaMargin
-
         }
 
         //TODO: This doesn't do anything yet
@@ -132,7 +122,8 @@ Page {
             TapHandler {
                 onTapped: {
                     if (titleText.text === "") {
-                        Herald.conversationBuilder.setTitle(qsTr("Untitled Group"))
+                        Herald.conversationBuilder.setTitle(
+                                    qsTr("Untitled Group"))
                     } else {
                         Herald.conversationBuilder.setTitle(titleText.text)
                     }
@@ -142,11 +133,11 @@ Page {
                                                     imageSelector.imageSource))
 
                         const picture = {
-                            'width': Math.round(parsed.width),
-                            'height': Math.round(parsed.height),
-                            'x': 0,
-                            'y': 0,
-                            'path': imageSelector.imageSource
+                            "width": Math.round(parsed.width),
+                            "height": Math.round(parsed.height),
+                            "x": 0,
+                            "y": 0,
+                            "path": imageSelector.imageSource
                         }
 
                         Herald.conversationBuilder.setProfilePicture(

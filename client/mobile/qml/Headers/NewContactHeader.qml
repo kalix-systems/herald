@@ -10,7 +10,7 @@ RowLayout {
         Layout.alignment: Qt.AlignLeft
         Layout.leftMargin: CmnCfg.units.dp(12)
         spacing: CmnCfg.units.dp(16)
-        IconButton {
+        AnimIconButton {
             id: backButton
             color: CmnCfg.palette.iconFill
             imageSource: "qrc:/back-arrow-icon.svg"
