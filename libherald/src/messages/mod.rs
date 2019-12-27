@@ -60,6 +60,17 @@ impl Messages {
                     .container
                     .handle_receipt(msg_id, status, recipient, |ix| model.data_changed(ix, ix)));
             }
+            MsgUpdate::Reaction {
+                msg_id,
+                reactionary,
+                content,
+            } => {
+                let model = &mut self.model;
+                none!(&self
+                    .container
+                    .handle_reaction(msg_id, reactionary, content, |ix| model
+                        .data_changed(ix, ix)));
+            }
             MsgUpdate::StoreDone(mid, meta) => {
                 let model = &mut self.model;
 
@@ -100,6 +111,12 @@ pub(crate) enum MsgUpdate {
         msg_id: MsgId,
         recipient: UserId,
         status: MessageReceiptStatus,
+    },
+    /// A reaction has been added
+    Reaction {
+        msg_id: MsgId,
+        reactionary: UserId,
+        content: heraldcore::message::ReactContent,
     },
     /// A rendered message from the `MessageBuilder`
     BuilderMsg(Box<heraldcore::message::Message>),

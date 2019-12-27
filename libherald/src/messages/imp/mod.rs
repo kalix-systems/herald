@@ -9,7 +9,6 @@ use heraldcore::{
     message::{self, MessageBody, MessageReceiptStatus, MsgData},
 };
 use messages_helper::search::SearchState;
-
 use std::collections::HashMap;
 use std::convert::TryInto;
 
@@ -19,6 +18,7 @@ mod body;
 mod flurry;
 mod last;
 mod op;
+mod reactions;
 mod receipts;
 mod search;
 mod time;

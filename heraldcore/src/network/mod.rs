@@ -42,6 +42,17 @@ pub enum Notification {
     NewMsg(Box<message::Message>),
     /// A message has been received.
     MsgReceipt(message::MessageReceipt),
+    /// A message reaction has been received
+    Reaction {
+        /// Conversation id
+        cid: ConversationId,
+        /// Message being reacted to
+        msg_id: MsgId,
+        /// The user that reacted
+        reactionary: UserId,
+        /// The content of the react
+        content: message::ReactContent,
+    },
     /// A new user has been added
     NewUser(Box<(coretypes::user::User, ConversationMeta)>),
     /// A new conversation has been added
@@ -125,6 +136,21 @@ pub(crate) fn send_normal_message(
     msg: cmessages::Msg,
 ) -> Result<(), HErr> {
     send_cmessage(cid, &ConversationMessage::Msg(msg))
+}
+
+/// Sends a reaction
+pub fn send_reaction(
+    cid: ConversationId,
+    msg_id: MsgId,
+    react_content: crate::message::ReactContent,
+) -> Result<(), HErr> {
+    send_cmessage(
+        cid,
+        &ConversationMessage::Reaction(cmessages::Reaction {
+            msg_id,
+            react_content,
+        }),
+    )
 }
 
 pub(crate) fn send_conversation_settings_update(
