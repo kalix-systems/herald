@@ -27,7 +27,6 @@ ListView {
         easing.type: Easing.InCubic
     }
     spacing: 0
-    height: contentHeight
 
     // disable these, we're handling them differently
     keyNavigationEnabled: false
@@ -70,6 +69,10 @@ ListView {
 
         chatScrollBarInner.setPosition(1.0)
         cacheBuffer = chatListView.height * 5
+
+        if (chatListView.count === 0) {
+            chatListView.height = chatListView.contentHeight
+        }
     }
 
     FileDialog {
