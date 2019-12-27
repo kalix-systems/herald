@@ -41,7 +41,7 @@ Page {
             id: stateLabel
             text: qsTr("New group")
             font {
-                pixelSize: CmnCfg.headerTextSize
+                pixelSize: CmnCfg.headerFontSize
                 family: CmnCfg.labelFont.name
             }
             Layout.alignment: Layout.verticalCenter
