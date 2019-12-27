@@ -9,17 +9,23 @@ impl Messages {
         let index = index as usize;
         let local_id = none!(self.local_id);
 
-        none!(self.container.update_by_index(index, |data| {
+        let changed = none!(self.container.update_by_index(index, |data| {
             if data.reactions.is_none() {
                 data.reactions.replace(Default::default());
             }
 
             if let Some(ref mut r) = data.reactions {
-                r.add((&content).clone(), local_id);
+                return r.add((&content).clone(), local_id);
             }
-        }));
-        self.model.data_changed(index, index);
 
+            false
+        }));
+
+        if !changed {
+            return;
+        }
+
+        self.model.data_changed(index, index);
         let mid = none!(self.container.msg_id(index).copied());
 
         spawn!(err!(heraldcore::message::add_reaction(
@@ -35,19 +41,25 @@ impl Messages {
         let index = index as usize;
         let local_id = none!(self.local_id);
 
-        none!(self.container.update_by_index(index, |data| {
+        let changed = none!(self.container.update_by_index(index, |data| {
             if data.reactions.is_none() {
                 data.reactions.replace(Default::default());
             }
 
             if let Some(ref mut r) = data.reactions {
-                r.remove((&content).clone(), local_id);
+                return r.remove((&content).clone(), local_id);
             }
+
+            false
         }));
 
+        if !changed {
+            return;
+        }
         self.model.data_changed(index, index);
 
         let mid = none!(self.container.msg_id(index).copied());
+
         spawn!(err!(heraldcore::message::add_reaction(
             &mid, &local_id, &content
         )));
