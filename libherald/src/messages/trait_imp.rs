@@ -359,4 +359,27 @@ impl Interface for Messages {
     ) {
         self.mark_read_(index)
     }
+
+    fn add_reaction(
+        &mut self,
+        index: u64,
+        content: String,
+    ) {
+        self.add_reaction_(index, content)
+    }
+
+    fn remove_reaction(
+        &mut self,
+        index: u64,
+        content: String,
+    ) {
+        self.remove_reaction_(index, content)
+    }
+
+    fn reactions(
+        &self,
+        index: usize,
+    ) -> String {
+        self.reactions_(index).unwrap_or_default()
+    }
 }

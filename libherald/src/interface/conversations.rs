@@ -282,6 +282,17 @@ pub trait ConversationsTrait {
         index: usize,
     ) -> Option<String>;
 
+    fn status(
+        &self,
+        index: usize,
+    ) -> u8;
+
+    fn set_status(
+        &mut self,
+        index: usize,
+        _: u8,
+    ) -> bool;
+
     fn title(
         &self,
         index: usize,
@@ -583,6 +594,24 @@ pub unsafe extern "C" fn conversations_data_picture(
         let str_: *const c_char = data.as_ptr() as (*const c_char);
         set(d, str_, to_c_int(data.len()));
     }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn conversations_data_status(
+    ptr: *const Conversations,
+    row: c_int,
+) -> u8 {
+    let obj = &*ptr;
+    obj.status(to_usize(row).unwrap_or(0))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn conversations_set_data_status(
+    ptr: *mut Conversations,
+    row: c_int,
+    value: u8,
+) -> bool {
+    (&mut *ptr).set_status(to_usize(row).unwrap_or(0), value)
 }
 
 #[no_mangle]

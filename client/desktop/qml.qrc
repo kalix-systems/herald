@@ -53,6 +53,7 @@
         <file>ChatView/ChatTextArea/js/ChatTextAreaUtils.mjs</file>
         <file>ChatView/Popups/ImageViewerPopup.qml</file>
         <file>SideBar/popups/SettingsComponents/SettingsListItem.qml</file>
+        <file>SideBar/popups/SettingsComponents/Profile.qml</file>
         <file>SideBar/popups/SettingsComponents/Notifications.qml</file>
         <file>SideBar/popups/SettingsComponents/Appearance.qml</file>
         <file>SideBar/popups/SettingsComponents/Privacy.qml</file>

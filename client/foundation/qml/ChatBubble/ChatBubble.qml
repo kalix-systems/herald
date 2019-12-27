@@ -51,6 +51,8 @@ Rectangle {
     readonly property string pfpUrl: messageModelData.authorProfilePicture
     property bool hoverHighlight: false
     property bool moreInfo: false
+    property alias expireInfo: expireInfo
+    property int bubbleIndex
 
     Connections {
         target: appRoot.globalTimer
@@ -60,6 +62,10 @@ Rectangle {
             timerIcon = (expirationTime !== undefined) ? (Utils.timerIcon(
                                                               expirationTime,
                                                               insertionTime)) : ""
+            expireInfo.expireTime = (expirationTime
+                                     !== undefined) ? (Utils.expireTimeShort(
+                                                           expirationTime,
+                                                           insertionTime)) : ""
         }
     }
     height: contentRoot.height
@@ -130,6 +136,11 @@ Rectangle {
         background: Item {}
     }
 
+    BubbleExpireInfo {
+        id: expireInfo
+        visible: isHead
+    }
+
     Column {
         z: highlight.z + 1
         id: contentRoot
@@ -143,8 +154,9 @@ Rectangle {
         bottomPadding: isTail ? CmnCfg.defaultMargin : CmnCfg.smallMargin
 
         BubbleLabel {
-            id: authorLabel
             visible: isHead
+
+            id: authorLabel
         }
 
         //reply bubble loader
@@ -235,5 +247,11 @@ Rectangle {
         }
 
         ElideHandler {}
+
+        Loader {
+            active: messageModelData.reactions.length > 0
+
+            sourceComponent: BubbleReacts {}
+        }
     }
 }

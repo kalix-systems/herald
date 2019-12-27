@@ -4,6 +4,7 @@
         <file>back-arrow-icon.svg</file>
         <file>camera-icon.svg</file>
         <file>chats-icon.svg</file>
+        <file>check-icon.svg</file>
         <file>contacts-icon.svg</file>
         <file>convos-filter-icon.svg</file>
         <file>convos-teams-filter-icon.svg</file>
@@ -57,5 +58,6 @@
         <file>down-chevron-icon.svg</file>
         <file>up-chevron-icon.svg</file>
         <file>regex-search-icon.svg</file>
+        <file>lenny-icon.svg</file>
     </qresource>
 </RCC>

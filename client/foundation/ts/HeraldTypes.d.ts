@@ -123,7 +123,7 @@ declare class Message extends Item {}
 
 declare class Users {
   add(userid: UserId): ConversationID;
-  setStatus(rowIndex: number, status: ContactStatus): boolean;
+  setStatus(rowIndex: number, status: UserStatus): boolean;
   setName(rowIndex: number, name: string): boolean;
   setProfilePicture(rowIndex: number, profilePicture: string): boolean;
   pairwiseConversationId(rowIndex: number): ConversationID;
@@ -138,14 +138,13 @@ declare class User {
   profilePicture?: string;
   // TODO const enum for colors
   color: number;
-  status: ContactStatus;
+  status: UserStatus;
   matched: boolean;
 }
 
-declare const enum ContactStatus {
+declare const enum UserStatus {
   Active = 0,
-  Archved = 1,
-  Deleted = 2
+  Deleted = 1
 }
 
 declare class Config {

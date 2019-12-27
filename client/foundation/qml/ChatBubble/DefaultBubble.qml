@@ -66,6 +66,11 @@ Rectangle {
                          !== undefined) ? (Utils.timerIcon(
                                                messageModelData.expirationTime,
                                                messageModelData.insertionTime)) : ""
+
+            expireInfo.expireTime = (messageModelData.expirationTime
+                                     !== undefined) ? (Utils.expireTimeShort(
+                                                           messageModelData.expirationTime,
+                                                           messageModelData.insertionTime)) : ""
         }
     }
     color: CmnCfg.palette.white
@@ -115,6 +120,10 @@ Rectangle {
         color: authorColor
         anchors.left: avatar.right
         anchors.leftMargin: CmnCfg.smallMargin
+    }
+
+    BubbleExpireInfo {
+        id: expireInfo
     }
 
     Button {

@@ -284,6 +284,12 @@ pub trait MessagesTrait {
         value: bool,
     );
 
+    fn add_reaction(
+        &mut self,
+        index: u64,
+        content: String,
+    ) -> ();
+
     fn clear_conversation_history(&mut self) -> bool;
 
     fn clear_search(&mut self) -> ();
@@ -306,6 +312,12 @@ pub trait MessagesTrait {
     fn next_search_match(&mut self) -> i64;
 
     fn prev_search_match(&mut self) -> i64;
+
+    fn remove_reaction(
+        &mut self,
+        index: u64,
+        content: String,
+    ) -> ();
 
     fn save_all_attachments(
         &self,
@@ -484,6 +496,11 @@ pub trait MessagesTrait {
         &self,
         index: usize,
     ) -> Option<String>;
+
+    fn reactions(
+        &self,
+        index: usize,
+    ) -> String;
 
     fn receipt_status(
         &self,
@@ -701,6 +718,19 @@ pub unsafe extern "C" fn messages_free(ptr: *mut Messages) {
 }
 
 #[no_mangle]
+pub unsafe extern "C" fn messages_add_reaction(
+    ptr: *mut Messages,
+    index: u64,
+    content_str: *const c_ushort,
+    content_len: c_int,
+) {
+    let obj = &mut *ptr;
+    let mut content = String::new();
+    set_string_from_utf16(&mut content, content_str, content_len);
+    obj.add_reaction(index, content)
+}
+
+#[no_mangle]
 pub unsafe extern "C" fn messages_clear_conversation_history(ptr: *mut Messages) -> bool {
     let obj = &mut *ptr;
     obj.clear_conversation_history()
@@ -751,6 +781,19 @@ pub unsafe extern "C" fn messages_next_search_match(ptr: *mut Messages) -> i64 {
 pub unsafe extern "C" fn messages_prev_search_match(ptr: *mut Messages) -> i64 {
     let obj = &mut *ptr;
     obj.prev_search_match()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn messages_remove_reaction(
+    ptr: *mut Messages,
+    index: u64,
+    content_str: *const c_ushort,
+    content_len: c_int,
+) {
+    let obj = &mut *ptr;
+    let mut content = String::new();
+    set_string_from_utf16(&mut content, content_str, content_len);
+    obj.remove_reaction(index, content)
 }
 
 #[no_mangle]
@@ -1263,6 +1306,19 @@ pub unsafe extern "C" fn messages_data_op_name(
         let str_: *const c_char = data.as_ptr() as (*const c_char);
         set(d, str_, to_c_int(data.len()));
     }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn messages_data_reactions(
+    ptr: *const Messages,
+    row: c_int,
+    d: *mut QString,
+    set: fn(*mut QString, *const c_char, len: c_int),
+) {
+    let obj = &*ptr;
+    let data = obj.reactions(to_usize(row).unwrap_or(0));
+    let str_: *const c_char = data.as_ptr() as *const c_char;
+    set(d, str_, to_c_int(data.len()));
 }
 
 #[no_mangle]

@@ -66,6 +66,26 @@ pub fn add_receipt(
     db::add_receipt(&db, msg_id, recip, receipt_status)
 }
 
+/// Adds a reaction to a message
+pub fn add_reaction(
+    msg_id: &MsgId,
+    reactionary: &UserId,
+    react_content: &str,
+) -> Result<(), HErr> {
+    let db = Database::get()?;
+    db::add_reaction(&db, msg_id, reactionary, react_content).map_err(HErr::from)
+}
+
+/// Removes a reaction from a message
+pub fn remove_reaction(
+    msg_id: &MsgId,
+    reactionary: &UserId,
+    react_content: &str,
+) -> Result<(), HErr> {
+    let db = Database::get()?;
+    db::remove_reaction(&db, msg_id, reactionary, react_content).map_err(HErr::from)
+}
+
 /// Gets messages by `MessageSendStatus`
 pub fn by_send_status(send_status: MessageSendStatus) -> Result<Vec<Message>, HErr> {
     let db = Database::get()?;

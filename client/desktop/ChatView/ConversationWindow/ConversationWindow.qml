@@ -10,6 +10,7 @@ import "../../SideBar/js/ContactView.mjs" as CUtils
 import Qt.labs.platform 1.1
 import QtQuick.Dialogs 1.3
 import QtGraphicalEffects 1.0
+import "../Popups" as Popups
 
 ListView {
     id: chatListView
@@ -68,8 +69,10 @@ ListView {
         model.setElisionCharsPerLine(40)
 
         chatScrollBarInner.setPosition(1.0)
-
         cacheBuffer = chatListView.height * 5
+        if (chatListView.count === 0) {
+            chatListView.height = chatListView.contentHeight
+        }
     }
 
     FileDialog {
@@ -87,16 +90,68 @@ ListView {
         width: parent.width
         messageModelData: model
         ListView.onAdd: chatScrollBarInner.setPosition(1.0)
+        bubbleIndex: index
 
         ChatBubbleHover {
             id: bubbleHoverHandler
             download: bubbleActual.imageAttach || bubbleActual.docAttach
-            onEntered: bubbleActual.hoverHighlight = true
-            onExited: bubbleActual.hoverHighlight = false
+            onEntered: {
+                bubbleActual.hoverHighlight = true
+                bubbleActual.expireInfo.visible = false
+            }
+            onExited: {
+                if (reactPopup.active == true) {
+                    bubbleActual.hoverHighlight = true
+                }
+
+                bubbleActual.hoverHighlight = false
+                if (isHead)
+                    bubbleActual.expireInfo.visible = true
+            }
         }
+
+        Popup {
+            id: emojiMenu
+            width: reactPopup.width
+            height: reactPopup.height
+            x: chatListView.width - width
+            onClosed: {
+                reactPopup.active = false
+            }
+            onOpened: {
+                bubbleActual.hoverHighlight = true
+            }
+
+            y: {
+                if (bubbleActual.y - chatListView.contentY > height) {
+                    return -height
+                }
+                return CmnCfg.largeMargin * 2
+            }
+
+            Popups.EmojiPopup {
+                id: reactPopup
+                anchors.centerIn: parent
+                isReactPopup: true
+                x: chatListView.width - width
+
+                z: convWindow.z + 1000
+                onActiveChanged: {
+                    if (!active)
+                        emojiMenu.close()
+                }
+
+                anchors {
+                    margins: CmnCfg.smallMargin
+                }
+            }
+        }
+
+        //TODO: this doesn't actually produce the desired behavior
         Component.onCompleted: {
-            if (root.active)
+            if (root.active) {
                 ownedConversation.markRead(index)
+            }
         }
     }
 }

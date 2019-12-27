@@ -16,6 +16,7 @@ impl ConversationBuilder {
             pairwise,
             expiration_period,
             members,
+            status,
             ..
         } = self;
 
@@ -24,6 +25,7 @@ impl ConversationBuilder {
             None => ConversationId::gen_new(),
         };
 
+        let status = status.unwrap_or_default();
         let color = color.unwrap_or_else(|| crate::utils::id_to_color(&id));
         let pairwise = pairwise.unwrap_or(false);
         let muted = muted.unwrap_or(false);
@@ -52,7 +54,8 @@ impl ConversationBuilder {
                 "@pairwise": pairwise,
                 "@muted": muted,
                 "@last_active_ts": last_active,
-                "@expiration_period": expiration_period
+                "@expiration_period": expiration_period,
+                "@status": status
             },
         ));
 
@@ -66,6 +69,7 @@ impl ConversationBuilder {
                 last_active,
                 expiration_period,
                 muted,
+                status,
             },
             members,
         })

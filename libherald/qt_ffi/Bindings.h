@@ -22,567 +22,556 @@ class Users;
 class UsersSearch;
 class Utils;
 extern "C" {
-using ConfigPtrBundle = struct ConfigPtrBundle;
+using ConfigPtrBundle              = struct ConfigPtrBundle;
 using ConversationBuilderPtrBundle = struct ConversationBuilderPtrBundle;
 using ConversationContentPtrBundle = struct ConversationContentPtrBundle;
-using ConversationsPtrBundle = struct ConversationsPtrBundle;
+using ConversationsPtrBundle       = struct ConversationsPtrBundle;
 using DocumentAttachmentsPtrBundle = struct DocumentAttachmentsPtrBundle;
-using ErrorsPtrBundle = struct ErrorsPtrBundle;
-using HeraldPtrBundle = struct HeraldPtrBundle;
-using MediaAttachmentsPtrBundle = struct MediaAttachmentsPtrBundle;
-using MembersPtrBundle = struct MembersPtrBundle;
-using MessageBuilderPtrBundle = struct MessageBuilderPtrBundle;
-using MessageSearchPtrBundle = struct MessageSearchPtrBundle;
-using MessagesPtrBundle = struct MessagesPtrBundle;
-using UsersPtrBundle = struct UsersPtrBundle;
-using UsersSearchPtrBundle = struct UsersSearchPtrBundle;
-using UtilsPtrBundle = struct UtilsPtrBundle;
+using ErrorsPtrBundle              = struct ErrorsPtrBundle;
+using HeraldPtrBundle              = struct HeraldPtrBundle;
+using MediaAttachmentsPtrBundle    = struct MediaAttachmentsPtrBundle;
+using MembersPtrBundle             = struct MembersPtrBundle;
+using MessageBuilderPtrBundle      = struct MessageBuilderPtrBundle;
+using MessageSearchPtrBundle       = struct MessageSearchPtrBundle;
+using MessagesPtrBundle            = struct MessagesPtrBundle;
+using UsersPtrBundle               = struct UsersPtrBundle;
+using UsersSearchPtrBundle         = struct UsersSearchPtrBundle;
+using UtilsPtrBundle               = struct UtilsPtrBundle;
 struct ConfigPtrBundle {
-  Config *config;
-  void (*config_color_changed)(Config *);
-  void (*config_colorscheme_changed)(Config *);
-  void (*config_config_id_changed)(Config *);
-  void (*config_name_changed)(Config *);
-  void (*config_nts_conversation_id_changed)(Config *);
-  void (*config_preferred_expiration_changed)(Config *);
-  void (*config_profile_picture_changed)(Config *);
+  Config* config;
+  void (*config_color_changed)(Config*);
+  void (*config_colorscheme_changed)(Config*);
+  void (*config_config_id_changed)(Config*);
+  void (*config_name_changed)(Config*);
+  void (*config_nts_conversation_id_changed)(Config*);
+  void (*config_preferred_expiration_changed)(Config*);
+  void (*config_profile_picture_changed)(Config*);
 };
 struct ConversationBuilderPtrBundle {
-  ConversationBuilder *conversation_builder;
-  void (*conversation_builder_picture_changed)(ConversationBuilder *);
+  ConversationBuilder* conversation_builder;
+  void (*conversation_builder_picture_changed)(ConversationBuilder*);
 
-  void (*conversation_builder_new_data_ready)(const ConversationBuilder *);
-  void (*conversation_builder_layout_about_to_be_changed)(
-      ConversationBuilder *);
-  void (*conversation_builder_layout_changed)(ConversationBuilder *);
-  void (*conversation_builder_data_changed)(ConversationBuilder *, quintptr,
+  void (*conversation_builder_new_data_ready)(const ConversationBuilder*);
+  void (*conversation_builder_layout_about_to_be_changed)(ConversationBuilder*);
+  void (*conversation_builder_layout_changed)(ConversationBuilder*);
+  void (*conversation_builder_data_changed)(ConversationBuilder*, quintptr,
                                             quintptr);
-  void (*conversation_builder_begin_reset_model)(ConversationBuilder *);
-  void (*conversation_builder_end_reset_model)(ConversationBuilder *);
-  void (*conversation_builder_begin_insert_rows)(ConversationBuilder *, int,
+  void (*conversation_builder_begin_reset_model)(ConversationBuilder*);
+  void (*conversation_builder_end_reset_model)(ConversationBuilder*);
+  void (*conversation_builder_begin_insert_rows)(ConversationBuilder*, int,
                                                  int);
-  void (*conversation_builder_end_insert_rows)(ConversationBuilder *);
-  void (*conversation_builder_begin_move_rows)(ConversationBuilder *, int, int,
+  void (*conversation_builder_end_insert_rows)(ConversationBuilder*);
+  void (*conversation_builder_begin_move_rows)(ConversationBuilder*, int, int,
                                                int);
-  void (*conversation_builder_end_move_rows)(ConversationBuilder *);
-  void (*conversation_builder_begin_remove_rows)(ConversationBuilder *, int,
+  void (*conversation_builder_end_move_rows)(ConversationBuilder*);
+  void (*conversation_builder_begin_remove_rows)(ConversationBuilder*, int,
                                                  int);
-  void (*conversation_builder_end_remove_rows)(ConversationBuilder *);
+  void (*conversation_builder_end_remove_rows)(ConversationBuilder*);
 };
 struct ConversationContentPtrBundle {
-  ConversationContent *conversation_content;
-  void (*conversation_content_conversation_id_changed)(ConversationContent *);
-  Members *members;
-  void (*members_filter_changed)(Members *);
-  void (*members_filter_regex_changed)(Members *);
+  ConversationContent* conversation_content;
+  void (*conversation_content_conversation_id_changed)(ConversationContent*);
+  Members* members;
+  void (*members_filter_changed)(Members*);
+  void (*members_filter_regex_changed)(Members*);
 
-  void (*members_new_data_ready)(const Members *);
-  void (*members_layout_about_to_be_changed)(Members *);
-  void (*members_layout_changed)(Members *);
-  void (*members_data_changed)(Members *, quintptr, quintptr);
-  void (*members_begin_reset_model)(Members *);
-  void (*members_end_reset_model)(Members *);
-  void (*members_begin_insert_rows)(Members *, int, int);
-  void (*members_end_insert_rows)(Members *);
-  void (*members_begin_move_rows)(Members *, int, int, int);
-  void (*members_end_move_rows)(Members *);
-  void (*members_begin_remove_rows)(Members *, int, int);
-  void (*members_end_remove_rows)(Members *);
-  Messages *messages;
-  MessageBuilder *message_builder;
-  void (*message_builder_body_changed)(MessageBuilder *);
-  DocumentAttachments *document_attachments;
+  void (*members_new_data_ready)(const Members*);
+  void (*members_layout_about_to_be_changed)(Members*);
+  void (*members_layout_changed)(Members*);
+  void (*members_data_changed)(Members*, quintptr, quintptr);
+  void (*members_begin_reset_model)(Members*);
+  void (*members_end_reset_model)(Members*);
+  void (*members_begin_insert_rows)(Members*, int, int);
+  void (*members_end_insert_rows)(Members*);
+  void (*members_begin_move_rows)(Members*, int, int, int);
+  void (*members_end_move_rows)(Members*);
+  void (*members_begin_remove_rows)(Members*, int, int);
+  void (*members_end_remove_rows)(Members*);
+  Messages*       messages;
+  MessageBuilder* message_builder;
+  void (*message_builder_body_changed)(MessageBuilder*);
+  DocumentAttachments* document_attachments;
 
-  void (*document_attachments_new_data_ready)(const DocumentAttachments *);
-  void (*document_attachments_layout_about_to_be_changed)(
-      DocumentAttachments *);
-  void (*document_attachments_layout_changed)(DocumentAttachments *);
-  void (*document_attachments_data_changed)(DocumentAttachments *, quintptr,
+  void (*document_attachments_new_data_ready)(const DocumentAttachments*);
+  void (*document_attachments_layout_about_to_be_changed)(DocumentAttachments*);
+  void (*document_attachments_layout_changed)(DocumentAttachments*);
+  void (*document_attachments_data_changed)(DocumentAttachments*, quintptr,
                                             quintptr);
-  void (*document_attachments_begin_reset_model)(DocumentAttachments *);
-  void (*document_attachments_end_reset_model)(DocumentAttachments *);
-  void (*document_attachments_begin_insert_rows)(DocumentAttachments *, int,
+  void (*document_attachments_begin_reset_model)(DocumentAttachments*);
+  void (*document_attachments_end_reset_model)(DocumentAttachments*);
+  void (*document_attachments_begin_insert_rows)(DocumentAttachments*, int,
                                                  int);
-  void (*document_attachments_end_insert_rows)(DocumentAttachments *);
-  void (*document_attachments_begin_move_rows)(DocumentAttachments *, int, int,
+  void (*document_attachments_end_insert_rows)(DocumentAttachments*);
+  void (*document_attachments_begin_move_rows)(DocumentAttachments*, int, int,
                                                int);
-  void (*document_attachments_end_move_rows)(DocumentAttachments *);
-  void (*document_attachments_begin_remove_rows)(DocumentAttachments *, int,
+  void (*document_attachments_end_move_rows)(DocumentAttachments*);
+  void (*document_attachments_begin_remove_rows)(DocumentAttachments*, int,
                                                  int);
-  void (*document_attachments_end_remove_rows)(DocumentAttachments *);
-  void (*message_builder_has_doc_attachment_changed)(MessageBuilder *);
-  void (*message_builder_has_media_attachment_changed)(MessageBuilder *);
-  void (*message_builder_is_reply_changed)(MessageBuilder *);
-  MediaAttachments *media_attachments;
+  void (*document_attachments_end_remove_rows)(DocumentAttachments*);
+  void (*message_builder_has_doc_attachment_changed)(MessageBuilder*);
+  void (*message_builder_has_media_attachment_changed)(MessageBuilder*);
+  void (*message_builder_is_reply_changed)(MessageBuilder*);
+  MediaAttachments* media_attachments;
 
-  void (*media_attachments_new_data_ready)(const MediaAttachments *);
-  void (*media_attachments_layout_about_to_be_changed)(MediaAttachments *);
-  void (*media_attachments_layout_changed)(MediaAttachments *);
-  void (*media_attachments_data_changed)(MediaAttachments *, quintptr,
-                                         quintptr);
-  void (*media_attachments_begin_reset_model)(MediaAttachments *);
-  void (*media_attachments_end_reset_model)(MediaAttachments *);
-  void (*media_attachments_begin_insert_rows)(MediaAttachments *, int, int);
-  void (*media_attachments_end_insert_rows)(MediaAttachments *);
-  void (*media_attachments_begin_move_rows)(MediaAttachments *, int, int, int);
-  void (*media_attachments_end_move_rows)(MediaAttachments *);
-  void (*media_attachments_begin_remove_rows)(MediaAttachments *, int, int);
-  void (*media_attachments_end_remove_rows)(MediaAttachments *);
-  void (*message_builder_op_author_changed)(MessageBuilder *);
-  void (*message_builder_op_body_changed)(MessageBuilder *);
-  void (*message_builder_op_doc_attachments_changed)(MessageBuilder *);
-  void (*message_builder_op_expiration_time_changed)(MessageBuilder *);
-  void (*message_builder_op_id_changed)(MessageBuilder *);
-  void (*message_builder_op_media_attachments_changed)(MessageBuilder *);
-  void (*message_builder_op_time_changed)(MessageBuilder *);
+  void (*media_attachments_new_data_ready)(const MediaAttachments*);
+  void (*media_attachments_layout_about_to_be_changed)(MediaAttachments*);
+  void (*media_attachments_layout_changed)(MediaAttachments*);
+  void (*media_attachments_data_changed)(MediaAttachments*, quintptr, quintptr);
+  void (*media_attachments_begin_reset_model)(MediaAttachments*);
+  void (*media_attachments_end_reset_model)(MediaAttachments*);
+  void (*media_attachments_begin_insert_rows)(MediaAttachments*, int, int);
+  void (*media_attachments_end_insert_rows)(MediaAttachments*);
+  void (*media_attachments_begin_move_rows)(MediaAttachments*, int, int, int);
+  void (*media_attachments_end_move_rows)(MediaAttachments*);
+  void (*media_attachments_begin_remove_rows)(MediaAttachments*, int, int);
+  void (*media_attachments_end_remove_rows)(MediaAttachments*);
+  void (*message_builder_op_author_changed)(MessageBuilder*);
+  void (*message_builder_op_body_changed)(MessageBuilder*);
+  void (*message_builder_op_doc_attachments_changed)(MessageBuilder*);
+  void (*message_builder_op_expiration_time_changed)(MessageBuilder*);
+  void (*message_builder_op_id_changed)(MessageBuilder*);
+  void (*message_builder_op_media_attachments_changed)(MessageBuilder*);
+  void (*message_builder_op_time_changed)(MessageBuilder*);
 
-  void (*message_builder_new_data_ready)(const MessageBuilder *);
-  void (*message_builder_layout_about_to_be_changed)(MessageBuilder *);
-  void (*message_builder_layout_changed)(MessageBuilder *);
-  void (*message_builder_data_changed)(MessageBuilder *, quintptr, quintptr);
-  void (*message_builder_begin_reset_model)(MessageBuilder *);
-  void (*message_builder_end_reset_model)(MessageBuilder *);
-  void (*message_builder_begin_insert_rows)(MessageBuilder *, int, int);
-  void (*message_builder_end_insert_rows)(MessageBuilder *);
-  void (*message_builder_begin_move_rows)(MessageBuilder *, int, int, int);
-  void (*message_builder_end_move_rows)(MessageBuilder *);
-  void (*message_builder_begin_remove_rows)(MessageBuilder *, int, int);
-  void (*message_builder_end_remove_rows)(MessageBuilder *);
-  void (*messages_is_empty_changed)(Messages *);
-  void (*messages_last_author_changed)(Messages *);
-  void (*messages_last_body_changed)(Messages *);
-  void (*messages_last_status_changed)(Messages *);
-  void (*messages_last_time_changed)(Messages *);
-  void (*messages_search_active_changed)(Messages *);
-  void (*messages_search_index_changed)(Messages *);
-  void (*messages_search_num_matches_changed)(Messages *);
-  void (*messages_search_pattern_changed)(Messages *);
-  void (*messages_search_regex_changed)(Messages *);
+  void (*message_builder_new_data_ready)(const MessageBuilder*);
+  void (*message_builder_layout_about_to_be_changed)(MessageBuilder*);
+  void (*message_builder_layout_changed)(MessageBuilder*);
+  void (*message_builder_data_changed)(MessageBuilder*, quintptr, quintptr);
+  void (*message_builder_begin_reset_model)(MessageBuilder*);
+  void (*message_builder_end_reset_model)(MessageBuilder*);
+  void (*message_builder_begin_insert_rows)(MessageBuilder*, int, int);
+  void (*message_builder_end_insert_rows)(MessageBuilder*);
+  void (*message_builder_begin_move_rows)(MessageBuilder*, int, int, int);
+  void (*message_builder_end_move_rows)(MessageBuilder*);
+  void (*message_builder_begin_remove_rows)(MessageBuilder*, int, int);
+  void (*message_builder_end_remove_rows)(MessageBuilder*);
+  void (*messages_is_empty_changed)(Messages*);
+  void (*messages_last_author_changed)(Messages*);
+  void (*messages_last_body_changed)(Messages*);
+  void (*messages_last_status_changed)(Messages*);
+  void (*messages_last_time_changed)(Messages*);
+  void (*messages_search_active_changed)(Messages*);
+  void (*messages_search_index_changed)(Messages*);
+  void (*messages_search_num_matches_changed)(Messages*);
+  void (*messages_search_pattern_changed)(Messages*);
+  void (*messages_search_regex_changed)(Messages*);
 
-  void (*messages_new_data_ready)(const Messages *);
-  void (*messages_layout_about_to_be_changed)(Messages *);
-  void (*messages_layout_changed)(Messages *);
-  void (*messages_data_changed)(Messages *, quintptr, quintptr);
-  void (*messages_begin_reset_model)(Messages *);
-  void (*messages_end_reset_model)(Messages *);
-  void (*messages_begin_insert_rows)(Messages *, int, int);
-  void (*messages_end_insert_rows)(Messages *);
-  void (*messages_begin_move_rows)(Messages *, int, int, int);
-  void (*messages_end_move_rows)(Messages *);
-  void (*messages_begin_remove_rows)(Messages *, int, int);
-  void (*messages_end_remove_rows)(Messages *);
+  void (*messages_new_data_ready)(const Messages*);
+  void (*messages_layout_about_to_be_changed)(Messages*);
+  void (*messages_layout_changed)(Messages*);
+  void (*messages_data_changed)(Messages*, quintptr, quintptr);
+  void (*messages_begin_reset_model)(Messages*);
+  void (*messages_end_reset_model)(Messages*);
+  void (*messages_begin_insert_rows)(Messages*, int, int);
+  void (*messages_end_insert_rows)(Messages*);
+  void (*messages_begin_move_rows)(Messages*, int, int, int);
+  void (*messages_end_move_rows)(Messages*);
+  void (*messages_begin_remove_rows)(Messages*, int, int);
+  void (*messages_end_remove_rows)(Messages*);
 
-  void (*conversation_content_new_data_ready)(const ConversationContent *);
-  void (*conversation_content_layout_about_to_be_changed)(
-      ConversationContent *);
-  void (*conversation_content_layout_changed)(ConversationContent *);
-  void (*conversation_content_data_changed)(ConversationContent *, quintptr,
+  void (*conversation_content_new_data_ready)(const ConversationContent*);
+  void (*conversation_content_layout_about_to_be_changed)(ConversationContent*);
+  void (*conversation_content_layout_changed)(ConversationContent*);
+  void (*conversation_content_data_changed)(ConversationContent*, quintptr,
                                             quintptr);
-  void (*conversation_content_begin_reset_model)(ConversationContent *);
-  void (*conversation_content_end_reset_model)(ConversationContent *);
-  void (*conversation_content_begin_insert_rows)(ConversationContent *, int,
+  void (*conversation_content_begin_reset_model)(ConversationContent*);
+  void (*conversation_content_end_reset_model)(ConversationContent*);
+  void (*conversation_content_begin_insert_rows)(ConversationContent*, int,
                                                  int);
-  void (*conversation_content_end_insert_rows)(ConversationContent *);
-  void (*conversation_content_begin_move_rows)(ConversationContent *, int, int,
+  void (*conversation_content_end_insert_rows)(ConversationContent*);
+  void (*conversation_content_begin_move_rows)(ConversationContent*, int, int,
                                                int);
-  void (*conversation_content_end_move_rows)(ConversationContent *);
-  void (*conversation_content_begin_remove_rows)(ConversationContent *, int,
+  void (*conversation_content_end_move_rows)(ConversationContent*);
+  void (*conversation_content_begin_remove_rows)(ConversationContent*, int,
                                                  int);
-  void (*conversation_content_end_remove_rows)(ConversationContent *);
+  void (*conversation_content_end_remove_rows)(ConversationContent*);
 };
 struct ConversationsPtrBundle {
-  Conversations *conversations;
-  void (*conversations_filter_changed)(Conversations *);
-  void (*conversations_filter_regex_changed)(Conversations *);
+  Conversations* conversations;
+  void (*conversations_filter_changed)(Conversations*);
+  void (*conversations_filter_regex_changed)(Conversations*);
 
-  void (*conversations_new_data_ready)(const Conversations *);
-  void (*conversations_layout_about_to_be_changed)(Conversations *);
-  void (*conversations_layout_changed)(Conversations *);
-  void (*conversations_data_changed)(Conversations *, quintptr, quintptr);
-  void (*conversations_begin_reset_model)(Conversations *);
-  void (*conversations_end_reset_model)(Conversations *);
-  void (*conversations_begin_insert_rows)(Conversations *, int, int);
-  void (*conversations_end_insert_rows)(Conversations *);
-  void (*conversations_begin_move_rows)(Conversations *, int, int, int);
-  void (*conversations_end_move_rows)(Conversations *);
-  void (*conversations_begin_remove_rows)(Conversations *, int, int);
-  void (*conversations_end_remove_rows)(Conversations *);
+  void (*conversations_new_data_ready)(const Conversations*);
+  void (*conversations_layout_about_to_be_changed)(Conversations*);
+  void (*conversations_layout_changed)(Conversations*);
+  void (*conversations_data_changed)(Conversations*, quintptr, quintptr);
+  void (*conversations_begin_reset_model)(Conversations*);
+  void (*conversations_end_reset_model)(Conversations*);
+  void (*conversations_begin_insert_rows)(Conversations*, int, int);
+  void (*conversations_end_insert_rows)(Conversations*);
+  void (*conversations_begin_move_rows)(Conversations*, int, int, int);
+  void (*conversations_end_move_rows)(Conversations*);
+  void (*conversations_begin_remove_rows)(Conversations*, int, int);
+  void (*conversations_end_remove_rows)(Conversations*);
 };
 struct DocumentAttachmentsPtrBundle {
-  DocumentAttachments *document_attachments;
+  DocumentAttachments* document_attachments;
 
-  void (*document_attachments_new_data_ready)(const DocumentAttachments *);
-  void (*document_attachments_layout_about_to_be_changed)(
-      DocumentAttachments *);
-  void (*document_attachments_layout_changed)(DocumentAttachments *);
-  void (*document_attachments_data_changed)(DocumentAttachments *, quintptr,
+  void (*document_attachments_new_data_ready)(const DocumentAttachments*);
+  void (*document_attachments_layout_about_to_be_changed)(DocumentAttachments*);
+  void (*document_attachments_layout_changed)(DocumentAttachments*);
+  void (*document_attachments_data_changed)(DocumentAttachments*, quintptr,
                                             quintptr);
-  void (*document_attachments_begin_reset_model)(DocumentAttachments *);
-  void (*document_attachments_end_reset_model)(DocumentAttachments *);
-  void (*document_attachments_begin_insert_rows)(DocumentAttachments *, int,
+  void (*document_attachments_begin_reset_model)(DocumentAttachments*);
+  void (*document_attachments_end_reset_model)(DocumentAttachments*);
+  void (*document_attachments_begin_insert_rows)(DocumentAttachments*, int,
                                                  int);
-  void (*document_attachments_end_insert_rows)(DocumentAttachments *);
-  void (*document_attachments_begin_move_rows)(DocumentAttachments *, int, int,
+  void (*document_attachments_end_insert_rows)(DocumentAttachments*);
+  void (*document_attachments_begin_move_rows)(DocumentAttachments*, int, int,
                                                int);
-  void (*document_attachments_end_move_rows)(DocumentAttachments *);
-  void (*document_attachments_begin_remove_rows)(DocumentAttachments *, int,
+  void (*document_attachments_end_move_rows)(DocumentAttachments*);
+  void (*document_attachments_begin_remove_rows)(DocumentAttachments*, int,
                                                  int);
-  void (*document_attachments_end_remove_rows)(DocumentAttachments *);
+  void (*document_attachments_end_remove_rows)(DocumentAttachments*);
 };
 struct ErrorsPtrBundle {
-  Errors *errors;
-  void (*errors_try_poll_changed)(Errors *);
+  Errors* errors;
+  void (*errors_try_poll_changed)(Errors*);
 };
 struct HeraldPtrBundle {
-  Herald *herald;
-  Config *config;
-  void (*config_color_changed)(Config *);
-  void (*config_colorscheme_changed)(Config *);
-  void (*config_config_id_changed)(Config *);
-  void (*config_name_changed)(Config *);
-  void (*config_nts_conversation_id_changed)(Config *);
-  void (*config_preferred_expiration_changed)(Config *);
-  void (*config_profile_picture_changed)(Config *);
-  void (*herald_config_init_changed)(Herald *);
-  void (*herald_connection_pending_changed)(Herald *);
-  void (*herald_connection_up_changed)(Herald *);
-  ConversationBuilder *conversation_builder;
-  void (*conversation_builder_picture_changed)(ConversationBuilder *);
+  Herald* herald;
+  Config* config;
+  void (*config_color_changed)(Config*);
+  void (*config_colorscheme_changed)(Config*);
+  void (*config_config_id_changed)(Config*);
+  void (*config_name_changed)(Config*);
+  void (*config_nts_conversation_id_changed)(Config*);
+  void (*config_preferred_expiration_changed)(Config*);
+  void (*config_profile_picture_changed)(Config*);
+  void (*herald_config_init_changed)(Herald*);
+  void (*herald_connection_pending_changed)(Herald*);
+  void (*herald_connection_up_changed)(Herald*);
+  ConversationBuilder* conversation_builder;
+  void (*conversation_builder_picture_changed)(ConversationBuilder*);
 
-  void (*conversation_builder_new_data_ready)(const ConversationBuilder *);
-  void (*conversation_builder_layout_about_to_be_changed)(
-      ConversationBuilder *);
-  void (*conversation_builder_layout_changed)(ConversationBuilder *);
-  void (*conversation_builder_data_changed)(ConversationBuilder *, quintptr,
+  void (*conversation_builder_new_data_ready)(const ConversationBuilder*);
+  void (*conversation_builder_layout_about_to_be_changed)(ConversationBuilder*);
+  void (*conversation_builder_layout_changed)(ConversationBuilder*);
+  void (*conversation_builder_data_changed)(ConversationBuilder*, quintptr,
                                             quintptr);
-  void (*conversation_builder_begin_reset_model)(ConversationBuilder *);
-  void (*conversation_builder_end_reset_model)(ConversationBuilder *);
-  void (*conversation_builder_begin_insert_rows)(ConversationBuilder *, int,
+  void (*conversation_builder_begin_reset_model)(ConversationBuilder*);
+  void (*conversation_builder_end_reset_model)(ConversationBuilder*);
+  void (*conversation_builder_begin_insert_rows)(ConversationBuilder*, int,
                                                  int);
-  void (*conversation_builder_end_insert_rows)(ConversationBuilder *);
-  void (*conversation_builder_begin_move_rows)(ConversationBuilder *, int, int,
+  void (*conversation_builder_end_insert_rows)(ConversationBuilder*);
+  void (*conversation_builder_begin_move_rows)(ConversationBuilder*, int, int,
                                                int);
-  void (*conversation_builder_end_move_rows)(ConversationBuilder *);
-  void (*conversation_builder_begin_remove_rows)(ConversationBuilder *, int,
+  void (*conversation_builder_end_move_rows)(ConversationBuilder*);
+  void (*conversation_builder_begin_remove_rows)(ConversationBuilder*, int,
                                                  int);
-  void (*conversation_builder_end_remove_rows)(ConversationBuilder *);
-  Conversations *conversations;
-  void (*conversations_filter_changed)(Conversations *);
-  void (*conversations_filter_regex_changed)(Conversations *);
+  void (*conversation_builder_end_remove_rows)(ConversationBuilder*);
+  Conversations* conversations;
+  void (*conversations_filter_changed)(Conversations*);
+  void (*conversations_filter_regex_changed)(Conversations*);
 
-  void (*conversations_new_data_ready)(const Conversations *);
-  void (*conversations_layout_about_to_be_changed)(Conversations *);
-  void (*conversations_layout_changed)(Conversations *);
-  void (*conversations_data_changed)(Conversations *, quintptr, quintptr);
-  void (*conversations_begin_reset_model)(Conversations *);
-  void (*conversations_end_reset_model)(Conversations *);
-  void (*conversations_begin_insert_rows)(Conversations *, int, int);
-  void (*conversations_end_insert_rows)(Conversations *);
-  void (*conversations_begin_move_rows)(Conversations *, int, int, int);
-  void (*conversations_end_move_rows)(Conversations *);
-  void (*conversations_begin_remove_rows)(Conversations *, int, int);
-  void (*conversations_end_remove_rows)(Conversations *);
-  Errors *errors;
-  void (*errors_try_poll_changed)(Errors *);
-  MessageSearch *message_search;
-  void (*message_search_regex_search_changed)(MessageSearch *);
-  void (*message_search_search_pattern_changed)(MessageSearch *);
+  void (*conversations_new_data_ready)(const Conversations*);
+  void (*conversations_layout_about_to_be_changed)(Conversations*);
+  void (*conversations_layout_changed)(Conversations*);
+  void (*conversations_data_changed)(Conversations*, quintptr, quintptr);
+  void (*conversations_begin_reset_model)(Conversations*);
+  void (*conversations_end_reset_model)(Conversations*);
+  void (*conversations_begin_insert_rows)(Conversations*, int, int);
+  void (*conversations_end_insert_rows)(Conversations*);
+  void (*conversations_begin_move_rows)(Conversations*, int, int, int);
+  void (*conversations_end_move_rows)(Conversations*);
+  void (*conversations_begin_remove_rows)(Conversations*, int, int);
+  void (*conversations_end_remove_rows)(Conversations*);
+  Errors* errors;
+  void (*errors_try_poll_changed)(Errors*);
+  MessageSearch* message_search;
+  void (*message_search_regex_search_changed)(MessageSearch*);
+  void (*message_search_search_pattern_changed)(MessageSearch*);
 
-  void (*message_search_new_data_ready)(const MessageSearch *);
-  void (*message_search_layout_about_to_be_changed)(MessageSearch *);
-  void (*message_search_layout_changed)(MessageSearch *);
-  void (*message_search_data_changed)(MessageSearch *, quintptr, quintptr);
-  void (*message_search_begin_reset_model)(MessageSearch *);
-  void (*message_search_end_reset_model)(MessageSearch *);
-  void (*message_search_begin_insert_rows)(MessageSearch *, int, int);
-  void (*message_search_end_insert_rows)(MessageSearch *);
-  void (*message_search_begin_move_rows)(MessageSearch *, int, int, int);
-  void (*message_search_end_move_rows)(MessageSearch *);
-  void (*message_search_begin_remove_rows)(MessageSearch *, int, int);
-  void (*message_search_end_remove_rows)(MessageSearch *);
-  void (*herald_registration_failure_code_changed)(Herald *);
-  Users *users;
-  void (*users_filter_changed)(Users *);
-  void (*users_filter_regex_changed)(Users *);
+  void (*message_search_new_data_ready)(const MessageSearch*);
+  void (*message_search_layout_about_to_be_changed)(MessageSearch*);
+  void (*message_search_layout_changed)(MessageSearch*);
+  void (*message_search_data_changed)(MessageSearch*, quintptr, quintptr);
+  void (*message_search_begin_reset_model)(MessageSearch*);
+  void (*message_search_end_reset_model)(MessageSearch*);
+  void (*message_search_begin_insert_rows)(MessageSearch*, int, int);
+  void (*message_search_end_insert_rows)(MessageSearch*);
+  void (*message_search_begin_move_rows)(MessageSearch*, int, int, int);
+  void (*message_search_end_move_rows)(MessageSearch*);
+  void (*message_search_begin_remove_rows)(MessageSearch*, int, int);
+  void (*message_search_end_remove_rows)(MessageSearch*);
+  void (*herald_registration_failure_code_changed)(Herald*);
+  Users* users;
+  void (*users_filter_changed)(Users*);
+  void (*users_filter_regex_changed)(Users*);
 
-  void (*users_new_data_ready)(const Users *);
-  void (*users_layout_about_to_be_changed)(Users *);
-  void (*users_layout_changed)(Users *);
-  void (*users_data_changed)(Users *, quintptr, quintptr);
-  void (*users_begin_reset_model)(Users *);
-  void (*users_end_reset_model)(Users *);
-  void (*users_begin_insert_rows)(Users *, int, int);
-  void (*users_end_insert_rows)(Users *);
-  void (*users_begin_move_rows)(Users *, int, int, int);
-  void (*users_end_move_rows)(Users *);
-  void (*users_begin_remove_rows)(Users *, int, int);
-  void (*users_end_remove_rows)(Users *);
-  UsersSearch *users_search;
-  void (*users_search_filter_changed)(UsersSearch *);
+  void (*users_new_data_ready)(const Users*);
+  void (*users_layout_about_to_be_changed)(Users*);
+  void (*users_layout_changed)(Users*);
+  void (*users_data_changed)(Users*, quintptr, quintptr);
+  void (*users_begin_reset_model)(Users*);
+  void (*users_end_reset_model)(Users*);
+  void (*users_begin_insert_rows)(Users*, int, int);
+  void (*users_end_insert_rows)(Users*);
+  void (*users_begin_move_rows)(Users*, int, int, int);
+  void (*users_end_move_rows)(Users*);
+  void (*users_begin_remove_rows)(Users*, int, int);
+  void (*users_end_remove_rows)(Users*);
+  UsersSearch* users_search;
+  void (*users_search_filter_changed)(UsersSearch*);
 
-  void (*users_search_new_data_ready)(const UsersSearch *);
-  void (*users_search_layout_about_to_be_changed)(UsersSearch *);
-  void (*users_search_layout_changed)(UsersSearch *);
-  void (*users_search_data_changed)(UsersSearch *, quintptr, quintptr);
-  void (*users_search_begin_reset_model)(UsersSearch *);
-  void (*users_search_end_reset_model)(UsersSearch *);
-  void (*users_search_begin_insert_rows)(UsersSearch *, int, int);
-  void (*users_search_end_insert_rows)(UsersSearch *);
-  void (*users_search_begin_move_rows)(UsersSearch *, int, int, int);
-  void (*users_search_end_move_rows)(UsersSearch *);
-  void (*users_search_begin_remove_rows)(UsersSearch *, int, int);
-  void (*users_search_end_remove_rows)(UsersSearch *);
-  Utils *utils;
+  void (*users_search_new_data_ready)(const UsersSearch*);
+  void (*users_search_layout_about_to_be_changed)(UsersSearch*);
+  void (*users_search_layout_changed)(UsersSearch*);
+  void (*users_search_data_changed)(UsersSearch*, quintptr, quintptr);
+  void (*users_search_begin_reset_model)(UsersSearch*);
+  void (*users_search_end_reset_model)(UsersSearch*);
+  void (*users_search_begin_insert_rows)(UsersSearch*, int, int);
+  void (*users_search_end_insert_rows)(UsersSearch*);
+  void (*users_search_begin_move_rows)(UsersSearch*, int, int, int);
+  void (*users_search_end_move_rows)(UsersSearch*);
+  void (*users_search_begin_remove_rows)(UsersSearch*, int, int);
+  void (*users_search_end_remove_rows)(UsersSearch*);
+  Utils* utils;
 
-  void (*herald_new_data_ready)(const Herald *);
-  void (*herald_layout_about_to_be_changed)(Herald *);
-  void (*herald_layout_changed)(Herald *);
-  void (*herald_data_changed)(Herald *, quintptr, quintptr);
-  void (*herald_begin_reset_model)(Herald *);
-  void (*herald_end_reset_model)(Herald *);
-  void (*herald_begin_insert_rows)(Herald *, int, int);
-  void (*herald_end_insert_rows)(Herald *);
-  void (*herald_begin_move_rows)(Herald *, int, int, int);
-  void (*herald_end_move_rows)(Herald *);
-  void (*herald_begin_remove_rows)(Herald *, int, int);
-  void (*herald_end_remove_rows)(Herald *);
+  void (*herald_new_data_ready)(const Herald*);
+  void (*herald_layout_about_to_be_changed)(Herald*);
+  void (*herald_layout_changed)(Herald*);
+  void (*herald_data_changed)(Herald*, quintptr, quintptr);
+  void (*herald_begin_reset_model)(Herald*);
+  void (*herald_end_reset_model)(Herald*);
+  void (*herald_begin_insert_rows)(Herald*, int, int);
+  void (*herald_end_insert_rows)(Herald*);
+  void (*herald_begin_move_rows)(Herald*, int, int, int);
+  void (*herald_end_move_rows)(Herald*);
+  void (*herald_begin_remove_rows)(Herald*, int, int);
+  void (*herald_end_remove_rows)(Herald*);
 };
 struct MediaAttachmentsPtrBundle {
-  MediaAttachments *media_attachments;
+  MediaAttachments* media_attachments;
 
-  void (*media_attachments_new_data_ready)(const MediaAttachments *);
-  void (*media_attachments_layout_about_to_be_changed)(MediaAttachments *);
-  void (*media_attachments_layout_changed)(MediaAttachments *);
-  void (*media_attachments_data_changed)(MediaAttachments *, quintptr,
-                                         quintptr);
-  void (*media_attachments_begin_reset_model)(MediaAttachments *);
-  void (*media_attachments_end_reset_model)(MediaAttachments *);
-  void (*media_attachments_begin_insert_rows)(MediaAttachments *, int, int);
-  void (*media_attachments_end_insert_rows)(MediaAttachments *);
-  void (*media_attachments_begin_move_rows)(MediaAttachments *, int, int, int);
-  void (*media_attachments_end_move_rows)(MediaAttachments *);
-  void (*media_attachments_begin_remove_rows)(MediaAttachments *, int, int);
-  void (*media_attachments_end_remove_rows)(MediaAttachments *);
+  void (*media_attachments_new_data_ready)(const MediaAttachments*);
+  void (*media_attachments_layout_about_to_be_changed)(MediaAttachments*);
+  void (*media_attachments_layout_changed)(MediaAttachments*);
+  void (*media_attachments_data_changed)(MediaAttachments*, quintptr, quintptr);
+  void (*media_attachments_begin_reset_model)(MediaAttachments*);
+  void (*media_attachments_end_reset_model)(MediaAttachments*);
+  void (*media_attachments_begin_insert_rows)(MediaAttachments*, int, int);
+  void (*media_attachments_end_insert_rows)(MediaAttachments*);
+  void (*media_attachments_begin_move_rows)(MediaAttachments*, int, int, int);
+  void (*media_attachments_end_move_rows)(MediaAttachments*);
+  void (*media_attachments_begin_remove_rows)(MediaAttachments*, int, int);
+  void (*media_attachments_end_remove_rows)(MediaAttachments*);
 };
 struct MembersPtrBundle {
-  Members *members;
-  void (*members_filter_changed)(Members *);
-  void (*members_filter_regex_changed)(Members *);
+  Members* members;
+  void (*members_filter_changed)(Members*);
+  void (*members_filter_regex_changed)(Members*);
 
-  void (*members_new_data_ready)(const Members *);
-  void (*members_layout_about_to_be_changed)(Members *);
-  void (*members_layout_changed)(Members *);
-  void (*members_data_changed)(Members *, quintptr, quintptr);
-  void (*members_begin_reset_model)(Members *);
-  void (*members_end_reset_model)(Members *);
-  void (*members_begin_insert_rows)(Members *, int, int);
-  void (*members_end_insert_rows)(Members *);
-  void (*members_begin_move_rows)(Members *, int, int, int);
-  void (*members_end_move_rows)(Members *);
-  void (*members_begin_remove_rows)(Members *, int, int);
-  void (*members_end_remove_rows)(Members *);
+  void (*members_new_data_ready)(const Members*);
+  void (*members_layout_about_to_be_changed)(Members*);
+  void (*members_layout_changed)(Members*);
+  void (*members_data_changed)(Members*, quintptr, quintptr);
+  void (*members_begin_reset_model)(Members*);
+  void (*members_end_reset_model)(Members*);
+  void (*members_begin_insert_rows)(Members*, int, int);
+  void (*members_end_insert_rows)(Members*);
+  void (*members_begin_move_rows)(Members*, int, int, int);
+  void (*members_end_move_rows)(Members*);
+  void (*members_begin_remove_rows)(Members*, int, int);
+  void (*members_end_remove_rows)(Members*);
 };
 struct MessageBuilderPtrBundle {
-  MessageBuilder *message_builder;
-  void (*message_builder_body_changed)(MessageBuilder *);
-  DocumentAttachments *document_attachments;
+  MessageBuilder* message_builder;
+  void (*message_builder_body_changed)(MessageBuilder*);
+  DocumentAttachments* document_attachments;
 
-  void (*document_attachments_new_data_ready)(const DocumentAttachments *);
-  void (*document_attachments_layout_about_to_be_changed)(
-      DocumentAttachments *);
-  void (*document_attachments_layout_changed)(DocumentAttachments *);
-  void (*document_attachments_data_changed)(DocumentAttachments *, quintptr,
+  void (*document_attachments_new_data_ready)(const DocumentAttachments*);
+  void (*document_attachments_layout_about_to_be_changed)(DocumentAttachments*);
+  void (*document_attachments_layout_changed)(DocumentAttachments*);
+  void (*document_attachments_data_changed)(DocumentAttachments*, quintptr,
                                             quintptr);
-  void (*document_attachments_begin_reset_model)(DocumentAttachments *);
-  void (*document_attachments_end_reset_model)(DocumentAttachments *);
-  void (*document_attachments_begin_insert_rows)(DocumentAttachments *, int,
+  void (*document_attachments_begin_reset_model)(DocumentAttachments*);
+  void (*document_attachments_end_reset_model)(DocumentAttachments*);
+  void (*document_attachments_begin_insert_rows)(DocumentAttachments*, int,
                                                  int);
-  void (*document_attachments_end_insert_rows)(DocumentAttachments *);
-  void (*document_attachments_begin_move_rows)(DocumentAttachments *, int, int,
+  void (*document_attachments_end_insert_rows)(DocumentAttachments*);
+  void (*document_attachments_begin_move_rows)(DocumentAttachments*, int, int,
                                                int);
-  void (*document_attachments_end_move_rows)(DocumentAttachments *);
-  void (*document_attachments_begin_remove_rows)(DocumentAttachments *, int,
+  void (*document_attachments_end_move_rows)(DocumentAttachments*);
+  void (*document_attachments_begin_remove_rows)(DocumentAttachments*, int,
                                                  int);
-  void (*document_attachments_end_remove_rows)(DocumentAttachments *);
-  void (*message_builder_has_doc_attachment_changed)(MessageBuilder *);
-  void (*message_builder_has_media_attachment_changed)(MessageBuilder *);
-  void (*message_builder_is_reply_changed)(MessageBuilder *);
-  MediaAttachments *media_attachments;
+  void (*document_attachments_end_remove_rows)(DocumentAttachments*);
+  void (*message_builder_has_doc_attachment_changed)(MessageBuilder*);
+  void (*message_builder_has_media_attachment_changed)(MessageBuilder*);
+  void (*message_builder_is_reply_changed)(MessageBuilder*);
+  MediaAttachments* media_attachments;
 
-  void (*media_attachments_new_data_ready)(const MediaAttachments *);
-  void (*media_attachments_layout_about_to_be_changed)(MediaAttachments *);
-  void (*media_attachments_layout_changed)(MediaAttachments *);
-  void (*media_attachments_data_changed)(MediaAttachments *, quintptr,
-                                         quintptr);
-  void (*media_attachments_begin_reset_model)(MediaAttachments *);
-  void (*media_attachments_end_reset_model)(MediaAttachments *);
-  void (*media_attachments_begin_insert_rows)(MediaAttachments *, int, int);
-  void (*media_attachments_end_insert_rows)(MediaAttachments *);
-  void (*media_attachments_begin_move_rows)(MediaAttachments *, int, int, int);
-  void (*media_attachments_end_move_rows)(MediaAttachments *);
-  void (*media_attachments_begin_remove_rows)(MediaAttachments *, int, int);
-  void (*media_attachments_end_remove_rows)(MediaAttachments *);
-  void (*message_builder_op_author_changed)(MessageBuilder *);
-  void (*message_builder_op_body_changed)(MessageBuilder *);
-  void (*message_builder_op_doc_attachments_changed)(MessageBuilder *);
-  void (*message_builder_op_expiration_time_changed)(MessageBuilder *);
-  void (*message_builder_op_id_changed)(MessageBuilder *);
-  void (*message_builder_op_media_attachments_changed)(MessageBuilder *);
-  void (*message_builder_op_time_changed)(MessageBuilder *);
+  void (*media_attachments_new_data_ready)(const MediaAttachments*);
+  void (*media_attachments_layout_about_to_be_changed)(MediaAttachments*);
+  void (*media_attachments_layout_changed)(MediaAttachments*);
+  void (*media_attachments_data_changed)(MediaAttachments*, quintptr, quintptr);
+  void (*media_attachments_begin_reset_model)(MediaAttachments*);
+  void (*media_attachments_end_reset_model)(MediaAttachments*);
+  void (*media_attachments_begin_insert_rows)(MediaAttachments*, int, int);
+  void (*media_attachments_end_insert_rows)(MediaAttachments*);
+  void (*media_attachments_begin_move_rows)(MediaAttachments*, int, int, int);
+  void (*media_attachments_end_move_rows)(MediaAttachments*);
+  void (*media_attachments_begin_remove_rows)(MediaAttachments*, int, int);
+  void (*media_attachments_end_remove_rows)(MediaAttachments*);
+  void (*message_builder_op_author_changed)(MessageBuilder*);
+  void (*message_builder_op_body_changed)(MessageBuilder*);
+  void (*message_builder_op_doc_attachments_changed)(MessageBuilder*);
+  void (*message_builder_op_expiration_time_changed)(MessageBuilder*);
+  void (*message_builder_op_id_changed)(MessageBuilder*);
+  void (*message_builder_op_media_attachments_changed)(MessageBuilder*);
+  void (*message_builder_op_time_changed)(MessageBuilder*);
 
-  void (*message_builder_new_data_ready)(const MessageBuilder *);
-  void (*message_builder_layout_about_to_be_changed)(MessageBuilder *);
-  void (*message_builder_layout_changed)(MessageBuilder *);
-  void (*message_builder_data_changed)(MessageBuilder *, quintptr, quintptr);
-  void (*message_builder_begin_reset_model)(MessageBuilder *);
-  void (*message_builder_end_reset_model)(MessageBuilder *);
-  void (*message_builder_begin_insert_rows)(MessageBuilder *, int, int);
-  void (*message_builder_end_insert_rows)(MessageBuilder *);
-  void (*message_builder_begin_move_rows)(MessageBuilder *, int, int, int);
-  void (*message_builder_end_move_rows)(MessageBuilder *);
-  void (*message_builder_begin_remove_rows)(MessageBuilder *, int, int);
-  void (*message_builder_end_remove_rows)(MessageBuilder *);
+  void (*message_builder_new_data_ready)(const MessageBuilder*);
+  void (*message_builder_layout_about_to_be_changed)(MessageBuilder*);
+  void (*message_builder_layout_changed)(MessageBuilder*);
+  void (*message_builder_data_changed)(MessageBuilder*, quintptr, quintptr);
+  void (*message_builder_begin_reset_model)(MessageBuilder*);
+  void (*message_builder_end_reset_model)(MessageBuilder*);
+  void (*message_builder_begin_insert_rows)(MessageBuilder*, int, int);
+  void (*message_builder_end_insert_rows)(MessageBuilder*);
+  void (*message_builder_begin_move_rows)(MessageBuilder*, int, int, int);
+  void (*message_builder_end_move_rows)(MessageBuilder*);
+  void (*message_builder_begin_remove_rows)(MessageBuilder*, int, int);
+  void (*message_builder_end_remove_rows)(MessageBuilder*);
 };
 struct MessageSearchPtrBundle {
-  MessageSearch *message_search;
-  void (*message_search_regex_search_changed)(MessageSearch *);
-  void (*message_search_search_pattern_changed)(MessageSearch *);
+  MessageSearch* message_search;
+  void (*message_search_regex_search_changed)(MessageSearch*);
+  void (*message_search_search_pattern_changed)(MessageSearch*);
 
-  void (*message_search_new_data_ready)(const MessageSearch *);
-  void (*message_search_layout_about_to_be_changed)(MessageSearch *);
-  void (*message_search_layout_changed)(MessageSearch *);
-  void (*message_search_data_changed)(MessageSearch *, quintptr, quintptr);
-  void (*message_search_begin_reset_model)(MessageSearch *);
-  void (*message_search_end_reset_model)(MessageSearch *);
-  void (*message_search_begin_insert_rows)(MessageSearch *, int, int);
-  void (*message_search_end_insert_rows)(MessageSearch *);
-  void (*message_search_begin_move_rows)(MessageSearch *, int, int, int);
-  void (*message_search_end_move_rows)(MessageSearch *);
-  void (*message_search_begin_remove_rows)(MessageSearch *, int, int);
-  void (*message_search_end_remove_rows)(MessageSearch *);
+  void (*message_search_new_data_ready)(const MessageSearch*);
+  void (*message_search_layout_about_to_be_changed)(MessageSearch*);
+  void (*message_search_layout_changed)(MessageSearch*);
+  void (*message_search_data_changed)(MessageSearch*, quintptr, quintptr);
+  void (*message_search_begin_reset_model)(MessageSearch*);
+  void (*message_search_end_reset_model)(MessageSearch*);
+  void (*message_search_begin_insert_rows)(MessageSearch*, int, int);
+  void (*message_search_end_insert_rows)(MessageSearch*);
+  void (*message_search_begin_move_rows)(MessageSearch*, int, int, int);
+  void (*message_search_end_move_rows)(MessageSearch*);
+  void (*message_search_begin_remove_rows)(MessageSearch*, int, int);
+  void (*message_search_end_remove_rows)(MessageSearch*);
 };
 struct MessagesPtrBundle {
-  Messages *messages;
-  MessageBuilder *message_builder;
-  void (*message_builder_body_changed)(MessageBuilder *);
-  DocumentAttachments *document_attachments;
+  Messages*       messages;
+  MessageBuilder* message_builder;
+  void (*message_builder_body_changed)(MessageBuilder*);
+  DocumentAttachments* document_attachments;
 
-  void (*document_attachments_new_data_ready)(const DocumentAttachments *);
-  void (*document_attachments_layout_about_to_be_changed)(
-      DocumentAttachments *);
-  void (*document_attachments_layout_changed)(DocumentAttachments *);
-  void (*document_attachments_data_changed)(DocumentAttachments *, quintptr,
+  void (*document_attachments_new_data_ready)(const DocumentAttachments*);
+  void (*document_attachments_layout_about_to_be_changed)(DocumentAttachments*);
+  void (*document_attachments_layout_changed)(DocumentAttachments*);
+  void (*document_attachments_data_changed)(DocumentAttachments*, quintptr,
                                             quintptr);
-  void (*document_attachments_begin_reset_model)(DocumentAttachments *);
-  void (*document_attachments_end_reset_model)(DocumentAttachments *);
-  void (*document_attachments_begin_insert_rows)(DocumentAttachments *, int,
+  void (*document_attachments_begin_reset_model)(DocumentAttachments*);
+  void (*document_attachments_end_reset_model)(DocumentAttachments*);
+  void (*document_attachments_begin_insert_rows)(DocumentAttachments*, int,
                                                  int);
-  void (*document_attachments_end_insert_rows)(DocumentAttachments *);
-  void (*document_attachments_begin_move_rows)(DocumentAttachments *, int, int,
+  void (*document_attachments_end_insert_rows)(DocumentAttachments*);
+  void (*document_attachments_begin_move_rows)(DocumentAttachments*, int, int,
                                                int);
-  void (*document_attachments_end_move_rows)(DocumentAttachments *);
-  void (*document_attachments_begin_remove_rows)(DocumentAttachments *, int,
+  void (*document_attachments_end_move_rows)(DocumentAttachments*);
+  void (*document_attachments_begin_remove_rows)(DocumentAttachments*, int,
                                                  int);
-  void (*document_attachments_end_remove_rows)(DocumentAttachments *);
-  void (*message_builder_has_doc_attachment_changed)(MessageBuilder *);
-  void (*message_builder_has_media_attachment_changed)(MessageBuilder *);
-  void (*message_builder_is_reply_changed)(MessageBuilder *);
-  MediaAttachments *media_attachments;
+  void (*document_attachments_end_remove_rows)(DocumentAttachments*);
+  void (*message_builder_has_doc_attachment_changed)(MessageBuilder*);
+  void (*message_builder_has_media_attachment_changed)(MessageBuilder*);
+  void (*message_builder_is_reply_changed)(MessageBuilder*);
+  MediaAttachments* media_attachments;
 
-  void (*media_attachments_new_data_ready)(const MediaAttachments *);
-  void (*media_attachments_layout_about_to_be_changed)(MediaAttachments *);
-  void (*media_attachments_layout_changed)(MediaAttachments *);
-  void (*media_attachments_data_changed)(MediaAttachments *, quintptr,
-                                         quintptr);
-  void (*media_attachments_begin_reset_model)(MediaAttachments *);
-  void (*media_attachments_end_reset_model)(MediaAttachments *);
-  void (*media_attachments_begin_insert_rows)(MediaAttachments *, int, int);
-  void (*media_attachments_end_insert_rows)(MediaAttachments *);
-  void (*media_attachments_begin_move_rows)(MediaAttachments *, int, int, int);
-  void (*media_attachments_end_move_rows)(MediaAttachments *);
-  void (*media_attachments_begin_remove_rows)(MediaAttachments *, int, int);
-  void (*media_attachments_end_remove_rows)(MediaAttachments *);
-  void (*message_builder_op_author_changed)(MessageBuilder *);
-  void (*message_builder_op_body_changed)(MessageBuilder *);
-  void (*message_builder_op_doc_attachments_changed)(MessageBuilder *);
-  void (*message_builder_op_expiration_time_changed)(MessageBuilder *);
-  void (*message_builder_op_id_changed)(MessageBuilder *);
-  void (*message_builder_op_media_attachments_changed)(MessageBuilder *);
-  void (*message_builder_op_time_changed)(MessageBuilder *);
+  void (*media_attachments_new_data_ready)(const MediaAttachments*);
+  void (*media_attachments_layout_about_to_be_changed)(MediaAttachments*);
+  void (*media_attachments_layout_changed)(MediaAttachments*);
+  void (*media_attachments_data_changed)(MediaAttachments*, quintptr, quintptr);
+  void (*media_attachments_begin_reset_model)(MediaAttachments*);
+  void (*media_attachments_end_reset_model)(MediaAttachments*);
+  void (*media_attachments_begin_insert_rows)(MediaAttachments*, int, int);
+  void (*media_attachments_end_insert_rows)(MediaAttachments*);
+  void (*media_attachments_begin_move_rows)(MediaAttachments*, int, int, int);
+  void (*media_attachments_end_move_rows)(MediaAttachments*);
+  void (*media_attachments_begin_remove_rows)(MediaAttachments*, int, int);
+  void (*media_attachments_end_remove_rows)(MediaAttachments*);
+  void (*message_builder_op_author_changed)(MessageBuilder*);
+  void (*message_builder_op_body_changed)(MessageBuilder*);
+  void (*message_builder_op_doc_attachments_changed)(MessageBuilder*);
+  void (*message_builder_op_expiration_time_changed)(MessageBuilder*);
+  void (*message_builder_op_id_changed)(MessageBuilder*);
+  void (*message_builder_op_media_attachments_changed)(MessageBuilder*);
+  void (*message_builder_op_time_changed)(MessageBuilder*);
 
-  void (*message_builder_new_data_ready)(const MessageBuilder *);
-  void (*message_builder_layout_about_to_be_changed)(MessageBuilder *);
-  void (*message_builder_layout_changed)(MessageBuilder *);
-  void (*message_builder_data_changed)(MessageBuilder *, quintptr, quintptr);
-  void (*message_builder_begin_reset_model)(MessageBuilder *);
-  void (*message_builder_end_reset_model)(MessageBuilder *);
-  void (*message_builder_begin_insert_rows)(MessageBuilder *, int, int);
-  void (*message_builder_end_insert_rows)(MessageBuilder *);
-  void (*message_builder_begin_move_rows)(MessageBuilder *, int, int, int);
-  void (*message_builder_end_move_rows)(MessageBuilder *);
-  void (*message_builder_begin_remove_rows)(MessageBuilder *, int, int);
-  void (*message_builder_end_remove_rows)(MessageBuilder *);
-  void (*messages_is_empty_changed)(Messages *);
-  void (*messages_last_author_changed)(Messages *);
-  void (*messages_last_body_changed)(Messages *);
-  void (*messages_last_status_changed)(Messages *);
-  void (*messages_last_time_changed)(Messages *);
-  void (*messages_search_active_changed)(Messages *);
-  void (*messages_search_index_changed)(Messages *);
-  void (*messages_search_num_matches_changed)(Messages *);
-  void (*messages_search_pattern_changed)(Messages *);
-  void (*messages_search_regex_changed)(Messages *);
+  void (*message_builder_new_data_ready)(const MessageBuilder*);
+  void (*message_builder_layout_about_to_be_changed)(MessageBuilder*);
+  void (*message_builder_layout_changed)(MessageBuilder*);
+  void (*message_builder_data_changed)(MessageBuilder*, quintptr, quintptr);
+  void (*message_builder_begin_reset_model)(MessageBuilder*);
+  void (*message_builder_end_reset_model)(MessageBuilder*);
+  void (*message_builder_begin_insert_rows)(MessageBuilder*, int, int);
+  void (*message_builder_end_insert_rows)(MessageBuilder*);
+  void (*message_builder_begin_move_rows)(MessageBuilder*, int, int, int);
+  void (*message_builder_end_move_rows)(MessageBuilder*);
+  void (*message_builder_begin_remove_rows)(MessageBuilder*, int, int);
+  void (*message_builder_end_remove_rows)(MessageBuilder*);
+  void (*messages_is_empty_changed)(Messages*);
+  void (*messages_last_author_changed)(Messages*);
+  void (*messages_last_body_changed)(Messages*);
+  void (*messages_last_status_changed)(Messages*);
+  void (*messages_last_time_changed)(Messages*);
+  void (*messages_search_active_changed)(Messages*);
+  void (*messages_search_index_changed)(Messages*);
+  void (*messages_search_num_matches_changed)(Messages*);
+  void (*messages_search_pattern_changed)(Messages*);
+  void (*messages_search_regex_changed)(Messages*);
 
-  void (*messages_new_data_ready)(const Messages *);
-  void (*messages_layout_about_to_be_changed)(Messages *);
-  void (*messages_layout_changed)(Messages *);
-  void (*messages_data_changed)(Messages *, quintptr, quintptr);
-  void (*messages_begin_reset_model)(Messages *);
-  void (*messages_end_reset_model)(Messages *);
-  void (*messages_begin_insert_rows)(Messages *, int, int);
-  void (*messages_end_insert_rows)(Messages *);
-  void (*messages_begin_move_rows)(Messages *, int, int, int);
-  void (*messages_end_move_rows)(Messages *);
-  void (*messages_begin_remove_rows)(Messages *, int, int);
-  void (*messages_end_remove_rows)(Messages *);
+  void (*messages_new_data_ready)(const Messages*);
+  void (*messages_layout_about_to_be_changed)(Messages*);
+  void (*messages_layout_changed)(Messages*);
+  void (*messages_data_changed)(Messages*, quintptr, quintptr);
+  void (*messages_begin_reset_model)(Messages*);
+  void (*messages_end_reset_model)(Messages*);
+  void (*messages_begin_insert_rows)(Messages*, int, int);
+  void (*messages_end_insert_rows)(Messages*);
+  void (*messages_begin_move_rows)(Messages*, int, int, int);
+  void (*messages_end_move_rows)(Messages*);
+  void (*messages_begin_remove_rows)(Messages*, int, int);
+  void (*messages_end_remove_rows)(Messages*);
 };
 struct UsersPtrBundle {
-  Users *users;
-  void (*users_filter_changed)(Users *);
-  void (*users_filter_regex_changed)(Users *);
+  Users* users;
+  void (*users_filter_changed)(Users*);
+  void (*users_filter_regex_changed)(Users*);
 
-  void (*users_new_data_ready)(const Users *);
-  void (*users_layout_about_to_be_changed)(Users *);
-  void (*users_layout_changed)(Users *);
-  void (*users_data_changed)(Users *, quintptr, quintptr);
-  void (*users_begin_reset_model)(Users *);
-  void (*users_end_reset_model)(Users *);
-  void (*users_begin_insert_rows)(Users *, int, int);
-  void (*users_end_insert_rows)(Users *);
-  void (*users_begin_move_rows)(Users *, int, int, int);
-  void (*users_end_move_rows)(Users *);
-  void (*users_begin_remove_rows)(Users *, int, int);
-  void (*users_end_remove_rows)(Users *);
+  void (*users_new_data_ready)(const Users*);
+  void (*users_layout_about_to_be_changed)(Users*);
+  void (*users_layout_changed)(Users*);
+  void (*users_data_changed)(Users*, quintptr, quintptr);
+  void (*users_begin_reset_model)(Users*);
+  void (*users_end_reset_model)(Users*);
+  void (*users_begin_insert_rows)(Users*, int, int);
+  void (*users_end_insert_rows)(Users*);
+  void (*users_begin_move_rows)(Users*, int, int, int);
+  void (*users_end_move_rows)(Users*);
+  void (*users_begin_remove_rows)(Users*, int, int);
+  void (*users_end_remove_rows)(Users*);
 };
 struct UsersSearchPtrBundle {
-  UsersSearch *users_search;
-  void (*users_search_filter_changed)(UsersSearch *);
+  UsersSearch* users_search;
+  void (*users_search_filter_changed)(UsersSearch*);
 
-  void (*users_search_new_data_ready)(const UsersSearch *);
-  void (*users_search_layout_about_to_be_changed)(UsersSearch *);
-  void (*users_search_layout_changed)(UsersSearch *);
-  void (*users_search_data_changed)(UsersSearch *, quintptr, quintptr);
-  void (*users_search_begin_reset_model)(UsersSearch *);
-  void (*users_search_end_reset_model)(UsersSearch *);
-  void (*users_search_begin_insert_rows)(UsersSearch *, int, int);
-  void (*users_search_end_insert_rows)(UsersSearch *);
-  void (*users_search_begin_move_rows)(UsersSearch *, int, int, int);
-  void (*users_search_end_move_rows)(UsersSearch *);
-  void (*users_search_begin_remove_rows)(UsersSearch *, int, int);
-  void (*users_search_end_remove_rows)(UsersSearch *);
+  void (*users_search_new_data_ready)(const UsersSearch*);
+  void (*users_search_layout_about_to_be_changed)(UsersSearch*);
+  void (*users_search_layout_changed)(UsersSearch*);
+  void (*users_search_data_changed)(UsersSearch*, quintptr, quintptr);
+  void (*users_search_begin_reset_model)(UsersSearch*);
+  void (*users_search_end_reset_model)(UsersSearch*);
+  void (*users_search_begin_insert_rows)(UsersSearch*, int, int);
+  void (*users_search_end_insert_rows)(UsersSearch*);
+  void (*users_search_begin_move_rows)(UsersSearch*, int, int, int);
+  void (*users_search_end_move_rows)(UsersSearch*);
+  void (*users_search_begin_remove_rows)(UsersSearch*, int, int);
+  void (*users_search_end_remove_rows)(UsersSearch*);
 };
 struct UtilsPtrBundle {
-  Utils *utils;
+  Utils* utils;
 };
 }
 class Config : public QObject {
@@ -606,8 +595,8 @@ public:
   class Private;
 
 private:
-  Private *m_d;
-  bool m_ownsPrivate;
+  Private* m_d;
+  bool     m_ownsPrivate;
   Q_PROPERTY(quint32 color READ color WRITE setColor NOTIFY colorChanged FINAL)
   Q_PROPERTY(quint32 colorscheme READ colorscheme WRITE setColorscheme NOTIFY
                  colorschemeChanged FINAL)
@@ -619,23 +608,23 @@ private:
                  setPreferredExpiration NOTIFY preferredExpirationChanged FINAL)
   Q_PROPERTY(QString profilePicture READ profilePicture NOTIFY
                  profilePictureChanged FINAL)
-  explicit Config(bool owned, QObject *parent);
+  explicit Config(bool owned, QObject* parent);
 
 public:
-  explicit Config(QObject *parent = nullptr);
+  explicit Config(QObject* parent = nullptr);
   ~Config() override;
-  quint32 color() const;
-  void setColor(quint32 v);
-  quint32 colorscheme() const;
-  void setColorscheme(quint32 v);
-  QString configId() const;
-  QString name() const;
-  void setName(const QString &v);
-  QByteArray ntsConversationId() const;
-  quint8 preferredExpiration() const;
-  void setPreferredExpiration(quint8 v);
-  QString profilePicture() const;
-  Q_INVOKABLE void setProfilePicture(const QString &profile_picture);
+  quint32          color() const;
+  void             setColor(quint32 v);
+  quint32          colorscheme() const;
+  void             setColorscheme(quint32 v);
+  QString          configId() const;
+  QString          name() const;
+  void             setName(const QString& v);
+  QByteArray       ntsConversationId() const;
+  quint8           preferredExpiration() const;
+  void             setPreferredExpiration(quint8 v);
+  QString          profilePicture() const;
+  Q_INVOKABLE void setProfilePicture(const QString& profile_picture);
 Q_SIGNALS:
   void colorChanged();
   void colorschemeChanged();
@@ -666,47 +655,47 @@ public:
   class Private;
 
 private:
-  Private *m_d;
-  bool m_ownsPrivate;
+  Private* m_d;
+  bool     m_ownsPrivate;
   Q_PROPERTY(QString picture READ picture NOTIFY pictureChanged FINAL)
-  explicit ConversationBuilder(bool owned, QObject *parent);
+  explicit ConversationBuilder(bool owned, QObject* parent);
 
 public:
-  explicit ConversationBuilder(QObject *parent = nullptr);
+  explicit ConversationBuilder(QObject* parent = nullptr);
   ~ConversationBuilder() override;
-  QString picture() const;
-  Q_INVOKABLE bool addMember(const QString &user_id);
+  QString          picture() const;
+  Q_INVOKABLE bool addMember(const QString& user_id);
   Q_INVOKABLE void clear();
   Q_INVOKABLE void finalize();
   Q_INVOKABLE void removeLast();
-  Q_INVOKABLE bool removeMemberById(const QString &user_id);
+  Q_INVOKABLE bool removeMemberById(const QString& user_id);
   Q_INVOKABLE bool removeMemberByIndex(quint64 index);
-  Q_INVOKABLE void setProfilePicture(const QString &profile_picture);
-  Q_INVOKABLE void setTitle(const QString &title);
-  int columnCount(const QModelIndex &parent = QModelIndex()) const override;
-  QVariant data(const QModelIndex &index,
-                int role = Qt::DisplayRole) const override;
+  Q_INVOKABLE void setProfilePicture(const QString& profile_picture);
+  Q_INVOKABLE void setTitle(const QString& title);
+  int columnCount(const QModelIndex& parent = QModelIndex()) const override;
+  QVariant    data(const QModelIndex& index,
+                   int                role = Qt::DisplayRole) const override;
   QModelIndex index(int row, int column,
-                    const QModelIndex &parent = QModelIndex()) const override;
-  QModelIndex parent(const QModelIndex &index) const override;
-  bool hasChildren(const QModelIndex &parent = QModelIndex()) const override;
-  int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-  bool canFetchMore(const QModelIndex &parent) const override;
-  void fetchMore(const QModelIndex &parent) override;
-  Qt::ItemFlags flags(const QModelIndex &index) const override;
+                    const QModelIndex& parent = QModelIndex()) const override;
+  QModelIndex parent(const QModelIndex& index) const override;
+  bool hasChildren(const QModelIndex& parent = QModelIndex()) const override;
+  int  rowCount(const QModelIndex& parent = QModelIndex()) const override;
+  bool canFetchMore(const QModelIndex& parent) const override;
+  void fetchMore(const QModelIndex& parent) override;
+  Qt::ItemFlags flags(const QModelIndex& index) const override;
   void sort(int column, Qt::SortOrder order = Qt::AscendingOrder) override;
-  int role(const char *name) const;
+  int  role(const char* name) const;
   QHash<int, QByteArray> roleNames() const override;
-  QVariant headerData(int section, Qt::Orientation orientation,
-                      int role = Qt::DisplayRole) const override;
-  bool setHeaderData(int section, Qt::Orientation orientation,
-                     const QVariant &value, int role = Qt::EditRole) override;
+  QVariant               headerData(int section, Qt::Orientation orientation,
+                                    int role = Qt::DisplayRole) const override;
+  bool                   setHeaderData(int section, Qt::Orientation orientation,
+                                       const QVariant& value, int role = Qt::EditRole) override;
   Q_INVOKABLE bool
   insertRows(int row, int count,
-             const QModelIndex &parent = QModelIndex()) override;
+             const QModelIndex& parent = QModelIndex()) override;
   Q_INVOKABLE bool
   removeRows(int row, int count,
-             const QModelIndex &parent = QModelIndex()) override;
+             const QModelIndex& parent = QModelIndex()) override;
 
   Q_INVOKABLE quint32 memberColor(int row) const;
   Q_INVOKABLE QString memberId(int row) const;
@@ -715,12 +704,12 @@ public:
 
 Q_SIGNALS:
   // new data is ready to be made available to the model with fetchMore()
-  void newDataReady(const QModelIndex &parent) const;
+  void newDataReady(const QModelIndex& parent) const;
 
 private:
   QHash<QPair<int, Qt::ItemDataRole>, QVariant> m_headerData;
-  void initHeaderData();
-  void updatePersistentIndexes();
+  void                                          initHeaderData();
+  void                                          updatePersistentIndexes();
 Q_SIGNALS:
   void pictureChanged();
 };
@@ -745,58 +734,58 @@ public:
   class Private;
 
 private:
-  Members *const m_members;
-  Messages *const m_messages;
-  Private *m_d;
-  bool m_ownsPrivate;
+  Members* const  m_members;
+  Messages* const m_messages;
+  Private*        m_d;
+  bool            m_ownsPrivate;
   Q_PROPERTY(QByteArray conversationId READ conversationId WRITE
                  setConversationId NOTIFY conversationIdChanged FINAL)
-  Q_PROPERTY(Members *members READ members NOTIFY membersChanged FINAL)
-  Q_PROPERTY(Messages *messages READ messages NOTIFY messagesChanged FINAL)
-  explicit ConversationContent(bool owned, QObject *parent);
+  Q_PROPERTY(Members* members READ members NOTIFY membersChanged FINAL)
+  Q_PROPERTY(Messages* messages READ messages NOTIFY messagesChanged FINAL)
+  explicit ConversationContent(bool owned, QObject* parent);
 
 public:
-  explicit ConversationContent(QObject *parent = nullptr);
+  explicit ConversationContent(QObject* parent = nullptr);
   ~ConversationContent() override;
-  QByteArray conversationId() const;
-  void setConversationId(const QByteArray &v);
-  const Members *members() const;
-  Members *members();
-  const Messages *messages() const;
-  Messages *messages();
-  int columnCount(const QModelIndex &parent = QModelIndex()) const override;
-  QVariant data(const QModelIndex &index,
-                int role = Qt::DisplayRole) const override;
+  QByteArray      conversationId() const;
+  void            setConversationId(const QByteArray& v);
+  const Members*  members() const;
+  Members*        members();
+  const Messages* messages() const;
+  Messages*       messages();
+  int columnCount(const QModelIndex& parent = QModelIndex()) const override;
+  QVariant    data(const QModelIndex& index,
+                   int                role = Qt::DisplayRole) const override;
   QModelIndex index(int row, int column,
-                    const QModelIndex &parent = QModelIndex()) const override;
-  QModelIndex parent(const QModelIndex &index) const override;
-  bool hasChildren(const QModelIndex &parent = QModelIndex()) const override;
-  int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-  bool canFetchMore(const QModelIndex &parent) const override;
-  void fetchMore(const QModelIndex &parent) override;
-  Qt::ItemFlags flags(const QModelIndex &index) const override;
+                    const QModelIndex& parent = QModelIndex()) const override;
+  QModelIndex parent(const QModelIndex& index) const override;
+  bool hasChildren(const QModelIndex& parent = QModelIndex()) const override;
+  int  rowCount(const QModelIndex& parent = QModelIndex()) const override;
+  bool canFetchMore(const QModelIndex& parent) const override;
+  void fetchMore(const QModelIndex& parent) override;
+  Qt::ItemFlags flags(const QModelIndex& index) const override;
   void sort(int column, Qt::SortOrder order = Qt::AscendingOrder) override;
-  int role(const char *name) const;
+  int  role(const char* name) const;
   QHash<int, QByteArray> roleNames() const override;
-  QVariant headerData(int section, Qt::Orientation orientation,
-                      int role = Qt::DisplayRole) const override;
-  bool setHeaderData(int section, Qt::Orientation orientation,
-                     const QVariant &value, int role = Qt::EditRole) override;
+  QVariant               headerData(int section, Qt::Orientation orientation,
+                                    int role = Qt::DisplayRole) const override;
+  bool                   setHeaderData(int section, Qt::Orientation orientation,
+                                       const QVariant& value, int role = Qt::EditRole) override;
   Q_INVOKABLE bool
   insertRows(int row, int count,
-             const QModelIndex &parent = QModelIndex()) override;
+             const QModelIndex& parent = QModelIndex()) override;
   Q_INVOKABLE bool
   removeRows(int row, int count,
-             const QModelIndex &parent = QModelIndex()) override;
+             const QModelIndex& parent = QModelIndex()) override;
 
 Q_SIGNALS:
   // new data is ready to be made available to the model with fetchMore()
-  void newDataReady(const QModelIndex &parent) const;
+  void newDataReady(const QModelIndex& parent) const;
 
 private:
   QHash<QPair<int, Qt::ItemDataRole>, QVariant> m_headerData;
-  void initHeaderData();
-  void updatePersistentIndexes();
+  void                                          initHeaderData();
+  void                                          updatePersistentIndexes();
 Q_SIGNALS:
   void conversationIdChanged();
   void membersChanged();
@@ -823,75 +812,77 @@ public:
   class Private;
 
 private:
-  Private *m_d;
-  bool m_ownsPrivate;
+  Private* m_d;
+  bool     m_ownsPrivate;
   Q_PROPERTY(
       QString filter READ filter WRITE setFilter NOTIFY filterChanged FINAL)
   Q_PROPERTY(bool filterRegex READ filterRegex WRITE setFilterRegex NOTIFY
                  filterRegexChanged FINAL)
-  explicit Conversations(bool owned, QObject *parent);
+  explicit Conversations(bool owned, QObject* parent);
 
 public:
-  explicit Conversations(QObject *parent = nullptr);
+  explicit Conversations(QObject* parent = nullptr);
   ~Conversations() override;
-  QString filter() const;
-  void setFilter(const QString &v);
-  bool filterRegex() const;
-  void setFilterRegex(bool v);
+  QString          filter() const;
+  void             setFilter(const QString& v);
+  bool             filterRegex() const;
+  void             setFilterRegex(bool v);
   Q_INVOKABLE void clearFilter();
-  Q_INVOKABLE qint64 indexById(const QByteArray &conversation_id) const;
-  Q_INVOKABLE bool removeConversation(quint64 row_index);
-  Q_INVOKABLE void setProfilePicture(quint64 index,
-                                     const QString &profile_picture);
-  Q_INVOKABLE bool toggleFilterRegex();
-  int columnCount(const QModelIndex &parent = QModelIndex()) const override;
-  QVariant data(const QModelIndex &index,
-                int role = Qt::DisplayRole) const override;
+  Q_INVOKABLE qint64 indexById(const QByteArray& conversation_id) const;
+  Q_INVOKABLE bool   removeConversation(quint64 row_index);
+  Q_INVOKABLE void   setProfilePicture(quint64        index,
+                                       const QString& profile_picture);
+  Q_INVOKABLE bool   toggleFilterRegex();
+  int columnCount(const QModelIndex& parent = QModelIndex()) const override;
+  QVariant    data(const QModelIndex& index,
+                   int                role = Qt::DisplayRole) const override;
   QModelIndex index(int row, int column,
-                    const QModelIndex &parent = QModelIndex()) const override;
-  QModelIndex parent(const QModelIndex &index) const override;
-  bool hasChildren(const QModelIndex &parent = QModelIndex()) const override;
-  int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-  bool canFetchMore(const QModelIndex &parent) const override;
-  void fetchMore(const QModelIndex &parent) override;
-  Qt::ItemFlags flags(const QModelIndex &index) const override;
+                    const QModelIndex& parent = QModelIndex()) const override;
+  QModelIndex parent(const QModelIndex& index) const override;
+  bool hasChildren(const QModelIndex& parent = QModelIndex()) const override;
+  int  rowCount(const QModelIndex& parent = QModelIndex()) const override;
+  bool canFetchMore(const QModelIndex& parent) const override;
+  void fetchMore(const QModelIndex& parent) override;
+  Qt::ItemFlags flags(const QModelIndex& index) const override;
   void sort(int column, Qt::SortOrder order = Qt::AscendingOrder) override;
-  int role(const char *name) const;
+  int  role(const char* name) const;
   QHash<int, QByteArray> roleNames() const override;
-  QVariant headerData(int section, Qt::Orientation orientation,
-                      int role = Qt::DisplayRole) const override;
-  bool setHeaderData(int section, Qt::Orientation orientation,
-                     const QVariant &value, int role = Qt::EditRole) override;
+  QVariant               headerData(int section, Qt::Orientation orientation,
+                                    int role = Qt::DisplayRole) const override;
+  bool                   setHeaderData(int section, Qt::Orientation orientation,
+                                       const QVariant& value, int role = Qt::EditRole) override;
   Q_INVOKABLE bool
   insertRows(int row, int count,
-             const QModelIndex &parent = QModelIndex()) override;
+             const QModelIndex& parent = QModelIndex()) override;
   Q_INVOKABLE bool
   removeRows(int row, int count,
-             const QModelIndex &parent = QModelIndex()) override;
+             const QModelIndex& parent = QModelIndex()) override;
 
-  bool setData(const QModelIndex &index, const QVariant &value,
-               int role = Qt::EditRole) override;
+  bool        setData(const QModelIndex& index, const QVariant& value,
+                      int role = Qt::EditRole) override;
   Q_INVOKABLE quint32 color(int row) const;
-  Q_INVOKABLE bool setColor(int row, quint32 value);
+  Q_INVOKABLE bool    setColor(int row, quint32 value);
   Q_INVOKABLE QByteArray conversationId(int row) const;
   Q_INVOKABLE quint8 expirationPeriod(int row) const;
-  Q_INVOKABLE bool setExpirationPeriod(int row, quint8 value);
-  Q_INVOKABLE bool matched(int row) const;
-  Q_INVOKABLE bool muted(int row) const;
-  Q_INVOKABLE bool setMuted(int row, bool value);
-  Q_INVOKABLE bool pairwise(int row) const;
+  Q_INVOKABLE bool   setExpirationPeriod(int row, quint8 value);
+  Q_INVOKABLE bool   matched(int row) const;
+  Q_INVOKABLE bool   muted(int row) const;
+  Q_INVOKABLE bool   setMuted(int row, bool value);
+  Q_INVOKABLE bool   pairwise(int row) const;
   Q_INVOKABLE QString picture(int row) const;
+  Q_INVOKABLE quint8 status(int row) const;
+  Q_INVOKABLE bool   setStatus(int row, quint8 value);
   Q_INVOKABLE QString title(int row) const;
-  Q_INVOKABLE bool setTitle(int row, const QString &value);
+  Q_INVOKABLE bool    setTitle(int row, const QString& value);
 
 Q_SIGNALS:
   // new data is ready to be made available to the model with fetchMore()
-  void newDataReady(const QModelIndex &parent) const;
+  void newDataReady(const QModelIndex& parent) const;
 
 private:
   QHash<QPair<int, Qt::ItemDataRole>, QVariant> m_headerData;
-  void initHeaderData();
-  void updatePersistentIndexes();
+  void                                          initHeaderData();
+  void                                          updatePersistentIndexes();
 Q_SIGNALS:
   void filterChanged();
   void filterRegexChanged();
@@ -917,49 +908,49 @@ public:
   class Private;
 
 private:
-  Private *m_d;
-  bool m_ownsPrivate;
-  explicit DocumentAttachments(bool owned, QObject *parent);
+  Private* m_d;
+  bool     m_ownsPrivate;
+  explicit DocumentAttachments(bool owned, QObject* parent);
 
 public:
-  explicit DocumentAttachments(QObject *parent = nullptr);
+  explicit DocumentAttachments(QObject* parent = nullptr);
   ~DocumentAttachments() override;
-  int columnCount(const QModelIndex &parent = QModelIndex()) const override;
-  QVariant data(const QModelIndex &index,
-                int role = Qt::DisplayRole) const override;
+  int columnCount(const QModelIndex& parent = QModelIndex()) const override;
+  QVariant    data(const QModelIndex& index,
+                   int                role = Qt::DisplayRole) const override;
   QModelIndex index(int row, int column,
-                    const QModelIndex &parent = QModelIndex()) const override;
-  QModelIndex parent(const QModelIndex &index) const override;
-  bool hasChildren(const QModelIndex &parent = QModelIndex()) const override;
-  int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-  bool canFetchMore(const QModelIndex &parent) const override;
-  void fetchMore(const QModelIndex &parent) override;
-  Qt::ItemFlags flags(const QModelIndex &index) const override;
+                    const QModelIndex& parent = QModelIndex()) const override;
+  QModelIndex parent(const QModelIndex& index) const override;
+  bool hasChildren(const QModelIndex& parent = QModelIndex()) const override;
+  int  rowCount(const QModelIndex& parent = QModelIndex()) const override;
+  bool canFetchMore(const QModelIndex& parent) const override;
+  void fetchMore(const QModelIndex& parent) override;
+  Qt::ItemFlags flags(const QModelIndex& index) const override;
   void sort(int column, Qt::SortOrder order = Qt::AscendingOrder) override;
-  int role(const char *name) const;
+  int  role(const char* name) const;
   QHash<int, QByteArray> roleNames() const override;
-  QVariant headerData(int section, Qt::Orientation orientation,
-                      int role = Qt::DisplayRole) const override;
-  bool setHeaderData(int section, Qt::Orientation orientation,
-                     const QVariant &value, int role = Qt::EditRole) override;
+  QVariant               headerData(int section, Qt::Orientation orientation,
+                                    int role = Qt::DisplayRole) const override;
+  bool                   setHeaderData(int section, Qt::Orientation orientation,
+                                       const QVariant& value, int role = Qt::EditRole) override;
   Q_INVOKABLE bool
   insertRows(int row, int count,
-             const QModelIndex &parent = QModelIndex()) override;
+             const QModelIndex& parent = QModelIndex()) override;
   Q_INVOKABLE bool
   removeRows(int row, int count,
-             const QModelIndex &parent = QModelIndex()) override;
+             const QModelIndex& parent = QModelIndex()) override;
 
   Q_INVOKABLE QString documentAttachmentName(int row) const;
   Q_INVOKABLE quint64 documentAttachmentSize(int row) const;
 
 Q_SIGNALS:
   // new data is ready to be made available to the model with fetchMore()
-  void newDataReady(const QModelIndex &parent) const;
+  void newDataReady(const QModelIndex& parent) const;
 
 private:
   QHash<QPair<int, Qt::ItemDataRole>, QVariant> m_headerData;
-  void initHeaderData();
-  void updatePersistentIndexes();
+  void                                          initHeaderData();
+  void                                          updatePersistentIndexes();
 Q_SIGNALS:
 };
 class Errors : public QObject {
@@ -983,15 +974,15 @@ public:
   class Private;
 
 private:
-  Private *m_d;
-  bool m_ownsPrivate;
+  Private* m_d;
+  bool     m_ownsPrivate;
   Q_PROPERTY(bool tryPoll READ tryPoll NOTIFY tryPollChanged FINAL)
-  explicit Errors(bool owned, QObject *parent);
+  explicit Errors(bool owned, QObject* parent);
 
 public:
-  explicit Errors(QObject *parent = nullptr);
+  explicit Errors(QObject* parent = nullptr);
   ~Errors() override;
-  bool tryPoll() const;
+  bool        tryPoll() const;
   Q_INVOKABLE QString nextError();
 Q_SIGNALS:
   void tryPollChanged();
@@ -1017,97 +1008,97 @@ public:
   class Private;
 
 private:
-  Config *const m_config;
-  ConversationBuilder *const m_conversationBuilder;
-  Conversations *const m_conversations;
-  Errors *const m_errors;
-  MessageSearch *const m_messageSearch;
-  Users *const m_users;
-  UsersSearch *const m_usersSearch;
-  Utils *const m_utils;
-  Private *m_d;
-  bool m_ownsPrivate;
-  Q_PROPERTY(Config *config READ config NOTIFY configChanged FINAL)
+  Config* const              m_config;
+  ConversationBuilder* const m_conversationBuilder;
+  Conversations* const       m_conversations;
+  Errors* const              m_errors;
+  MessageSearch* const       m_messageSearch;
+  Users* const               m_users;
+  UsersSearch* const         m_usersSearch;
+  Utils* const               m_utils;
+  Private*                   m_d;
+  bool                       m_ownsPrivate;
+  Q_PROPERTY(Config* config READ config NOTIFY configChanged FINAL)
   Q_PROPERTY(bool configInit READ configInit NOTIFY configInitChanged FINAL)
   Q_PROPERTY(bool connectionPending READ connectionPending NOTIFY
                  connectionPendingChanged FINAL)
   Q_PROPERTY(
       bool connectionUp READ connectionUp NOTIFY connectionUpChanged FINAL)
-  Q_PROPERTY(ConversationBuilder *conversationBuilder READ conversationBuilder
+  Q_PROPERTY(ConversationBuilder* conversationBuilder READ conversationBuilder
                  NOTIFY conversationBuilderChanged FINAL)
-  Q_PROPERTY(Conversations *conversations READ conversations NOTIFY
+  Q_PROPERTY(Conversations* conversations READ conversations NOTIFY
                  conversationsChanged FINAL)
-  Q_PROPERTY(Errors *errors READ errors NOTIFY errorsChanged FINAL)
-  Q_PROPERTY(MessageSearch *messageSearch READ messageSearch NOTIFY
+  Q_PROPERTY(Errors* errors READ errors NOTIFY errorsChanged FINAL)
+  Q_PROPERTY(MessageSearch* messageSearch READ messageSearch NOTIFY
                  messageSearchChanged FINAL)
   Q_PROPERTY(QVariant registrationFailureCode READ registrationFailureCode
                  NOTIFY registrationFailureCodeChanged FINAL)
-  Q_PROPERTY(Users *users READ users NOTIFY usersChanged FINAL)
+  Q_PROPERTY(Users* users READ users NOTIFY usersChanged FINAL)
   Q_PROPERTY(
-      UsersSearch *usersSearch READ usersSearch NOTIFY usersSearchChanged FINAL)
-  Q_PROPERTY(Utils *utils READ utils NOTIFY utilsChanged FINAL)
-  explicit Herald(bool owned, QObject *parent);
+      UsersSearch* usersSearch READ usersSearch NOTIFY usersSearchChanged FINAL)
+  Q_PROPERTY(Utils* utils READ utils NOTIFY utilsChanged FINAL)
+  explicit Herald(bool owned, QObject* parent);
 
 public:
-  explicit Herald(QObject *parent = nullptr);
+  explicit Herald(QObject* parent = nullptr);
   ~Herald() override;
-  const Config *config() const;
-  Config *config();
-  bool configInit() const;
-  bool connectionPending() const;
-  bool connectionUp() const;
-  const ConversationBuilder *conversationBuilder() const;
-  ConversationBuilder *conversationBuilder();
-  const Conversations *conversations() const;
-  Conversations *conversations();
-  const Errors *errors() const;
-  Errors *errors();
-  const MessageSearch *messageSearch() const;
-  MessageSearch *messageSearch();
-  QVariant registrationFailureCode() const;
-  const Users *users() const;
-  Users *users();
-  const UsersSearch *usersSearch() const;
-  UsersSearch *usersSearch();
-  const Utils *utils() const;
-  Utils *utils();
-  Q_INVOKABLE bool login();
-  Q_INVOKABLE void registerNewUser(const QString &user_id, const QString &addr,
-                                   const QString &port);
-  Q_INVOKABLE void setAppLocalDataDir(const QString &path);
-  int columnCount(const QModelIndex &parent = QModelIndex()) const override;
-  QVariant data(const QModelIndex &index,
-                int role = Qt::DisplayRole) const override;
+  const Config*              config() const;
+  Config*                    config();
+  bool                       configInit() const;
+  bool                       connectionPending() const;
+  bool                       connectionUp() const;
+  const ConversationBuilder* conversationBuilder() const;
+  ConversationBuilder*       conversationBuilder();
+  const Conversations*       conversations() const;
+  Conversations*             conversations();
+  const Errors*              errors() const;
+  Errors*                    errors();
+  const MessageSearch*       messageSearch() const;
+  MessageSearch*             messageSearch();
+  QVariant                   registrationFailureCode() const;
+  const Users*               users() const;
+  Users*                     users();
+  const UsersSearch*         usersSearch() const;
+  UsersSearch*               usersSearch();
+  const Utils*               utils() const;
+  Utils*                     utils();
+  Q_INVOKABLE bool           login();
+  Q_INVOKABLE void registerNewUser(const QString& user_id, const QString& addr,
+                                   const QString& port);
+  Q_INVOKABLE void setAppLocalDataDir(const QString& path);
+  int columnCount(const QModelIndex& parent = QModelIndex()) const override;
+  QVariant    data(const QModelIndex& index,
+                   int                role = Qt::DisplayRole) const override;
   QModelIndex index(int row, int column,
-                    const QModelIndex &parent = QModelIndex()) const override;
-  QModelIndex parent(const QModelIndex &index) const override;
-  bool hasChildren(const QModelIndex &parent = QModelIndex()) const override;
-  int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-  bool canFetchMore(const QModelIndex &parent) const override;
-  void fetchMore(const QModelIndex &parent) override;
-  Qt::ItemFlags flags(const QModelIndex &index) const override;
+                    const QModelIndex& parent = QModelIndex()) const override;
+  QModelIndex parent(const QModelIndex& index) const override;
+  bool hasChildren(const QModelIndex& parent = QModelIndex()) const override;
+  int  rowCount(const QModelIndex& parent = QModelIndex()) const override;
+  bool canFetchMore(const QModelIndex& parent) const override;
+  void fetchMore(const QModelIndex& parent) override;
+  Qt::ItemFlags flags(const QModelIndex& index) const override;
   void sort(int column, Qt::SortOrder order = Qt::AscendingOrder) override;
-  int role(const char *name) const;
+  int  role(const char* name) const;
   QHash<int, QByteArray> roleNames() const override;
-  QVariant headerData(int section, Qt::Orientation orientation,
-                      int role = Qt::DisplayRole) const override;
-  bool setHeaderData(int section, Qt::Orientation orientation,
-                     const QVariant &value, int role = Qt::EditRole) override;
+  QVariant               headerData(int section, Qt::Orientation orientation,
+                                    int role = Qt::DisplayRole) const override;
+  bool                   setHeaderData(int section, Qt::Orientation orientation,
+                                       const QVariant& value, int role = Qt::EditRole) override;
   Q_INVOKABLE bool
   insertRows(int row, int count,
-             const QModelIndex &parent = QModelIndex()) override;
+             const QModelIndex& parent = QModelIndex()) override;
   Q_INVOKABLE bool
   removeRows(int row, int count,
-             const QModelIndex &parent = QModelIndex()) override;
+             const QModelIndex& parent = QModelIndex()) override;
 
 Q_SIGNALS:
   // new data is ready to be made available to the model with fetchMore()
-  void newDataReady(const QModelIndex &parent) const;
+  void newDataReady(const QModelIndex& parent) const;
 
 private:
   QHash<QPair<int, Qt::ItemDataRole>, QVariant> m_headerData;
-  void initHeaderData();
-  void updatePersistentIndexes();
+  void                                          initHeaderData();
+  void                                          updatePersistentIndexes();
 Q_SIGNALS:
   void configChanged();
   void configInitChanged();
@@ -1143,48 +1134,48 @@ public:
   class Private;
 
 private:
-  Private *m_d;
-  bool m_ownsPrivate;
-  explicit MediaAttachments(bool owned, QObject *parent);
+  Private* m_d;
+  bool     m_ownsPrivate;
+  explicit MediaAttachments(bool owned, QObject* parent);
 
 public:
-  explicit MediaAttachments(QObject *parent = nullptr);
+  explicit MediaAttachments(QObject* parent = nullptr);
   ~MediaAttachments() override;
-  int columnCount(const QModelIndex &parent = QModelIndex()) const override;
-  QVariant data(const QModelIndex &index,
-                int role = Qt::DisplayRole) const override;
+  int columnCount(const QModelIndex& parent = QModelIndex()) const override;
+  QVariant    data(const QModelIndex& index,
+                   int                role = Qt::DisplayRole) const override;
   QModelIndex index(int row, int column,
-                    const QModelIndex &parent = QModelIndex()) const override;
-  QModelIndex parent(const QModelIndex &index) const override;
-  bool hasChildren(const QModelIndex &parent = QModelIndex()) const override;
-  int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-  bool canFetchMore(const QModelIndex &parent) const override;
-  void fetchMore(const QModelIndex &parent) override;
-  Qt::ItemFlags flags(const QModelIndex &index) const override;
+                    const QModelIndex& parent = QModelIndex()) const override;
+  QModelIndex parent(const QModelIndex& index) const override;
+  bool hasChildren(const QModelIndex& parent = QModelIndex()) const override;
+  int  rowCount(const QModelIndex& parent = QModelIndex()) const override;
+  bool canFetchMore(const QModelIndex& parent) const override;
+  void fetchMore(const QModelIndex& parent) override;
+  Qt::ItemFlags flags(const QModelIndex& index) const override;
   void sort(int column, Qt::SortOrder order = Qt::AscendingOrder) override;
-  int role(const char *name) const;
+  int  role(const char* name) const;
   QHash<int, QByteArray> roleNames() const override;
-  QVariant headerData(int section, Qt::Orientation orientation,
-                      int role = Qt::DisplayRole) const override;
-  bool setHeaderData(int section, Qt::Orientation orientation,
-                     const QVariant &value, int role = Qt::EditRole) override;
+  QVariant               headerData(int section, Qt::Orientation orientation,
+                                    int role = Qt::DisplayRole) const override;
+  bool                   setHeaderData(int section, Qt::Orientation orientation,
+                                       const QVariant& value, int role = Qt::EditRole) override;
   Q_INVOKABLE bool
   insertRows(int row, int count,
-             const QModelIndex &parent = QModelIndex()) override;
+             const QModelIndex& parent = QModelIndex()) override;
   Q_INVOKABLE bool
   removeRows(int row, int count,
-             const QModelIndex &parent = QModelIndex()) override;
+             const QModelIndex& parent = QModelIndex()) override;
 
   Q_INVOKABLE QString mediaAttachmentPath(int row) const;
 
 Q_SIGNALS:
   // new data is ready to be made available to the model with fetchMore()
-  void newDataReady(const QModelIndex &parent) const;
+  void newDataReady(const QModelIndex& parent) const;
 
 private:
   QHash<QPair<int, Qt::ItemDataRole>, QVariant> m_headerData;
-  void initHeaderData();
-  void updatePersistentIndexes();
+  void                                          initHeaderData();
+  void                                          updatePersistentIndexes();
 Q_SIGNALS:
 };
 class Members : public QAbstractItemModel {
@@ -1208,51 +1199,51 @@ public:
   class Private;
 
 private:
-  Private *m_d;
-  bool m_ownsPrivate;
+  Private* m_d;
+  bool     m_ownsPrivate;
   Q_PROPERTY(
       QString filter READ filter WRITE setFilter NOTIFY filterChanged FINAL)
   Q_PROPERTY(bool filterRegex READ filterRegex WRITE setFilterRegex NOTIFY
                  filterRegexChanged FINAL)
-  explicit Members(bool owned, QObject *parent);
+  explicit Members(bool owned, QObject* parent);
 
 public:
-  explicit Members(QObject *parent = nullptr);
+  explicit Members(QObject* parent = nullptr);
   ~Members() override;
-  QString filter() const;
-  void setFilter(const QString &v);
-  bool filterRegex() const;
-  void setFilterRegex(bool v);
-  Q_INVOKABLE bool addToConversation(const QString &id);
+  QString          filter() const;
+  void             setFilter(const QString& v);
+  bool             filterRegex() const;
+  void             setFilterRegex(bool v);
+  Q_INVOKABLE bool addToConversation(const QString& id);
   Q_INVOKABLE bool removeFromConversationByIndex(quint64 row_index);
   Q_INVOKABLE bool toggleFilterRegex();
-  int columnCount(const QModelIndex &parent = QModelIndex()) const override;
-  QVariant data(const QModelIndex &index,
-                int role = Qt::DisplayRole) const override;
+  int columnCount(const QModelIndex& parent = QModelIndex()) const override;
+  QVariant    data(const QModelIndex& index,
+                   int                role = Qt::DisplayRole) const override;
   QModelIndex index(int row, int column,
-                    const QModelIndex &parent = QModelIndex()) const override;
-  QModelIndex parent(const QModelIndex &index) const override;
-  bool hasChildren(const QModelIndex &parent = QModelIndex()) const override;
-  int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-  bool canFetchMore(const QModelIndex &parent) const override;
-  void fetchMore(const QModelIndex &parent) override;
-  Qt::ItemFlags flags(const QModelIndex &index) const override;
+                    const QModelIndex& parent = QModelIndex()) const override;
+  QModelIndex parent(const QModelIndex& index) const override;
+  bool hasChildren(const QModelIndex& parent = QModelIndex()) const override;
+  int  rowCount(const QModelIndex& parent = QModelIndex()) const override;
+  bool canFetchMore(const QModelIndex& parent) const override;
+  void fetchMore(const QModelIndex& parent) override;
+  Qt::ItemFlags flags(const QModelIndex& index) const override;
   void sort(int column, Qt::SortOrder order = Qt::AscendingOrder) override;
-  int role(const char *name) const;
+  int  role(const char* name) const;
   QHash<int, QByteArray> roleNames() const override;
-  QVariant headerData(int section, Qt::Orientation orientation,
-                      int role = Qt::DisplayRole) const override;
-  bool setHeaderData(int section, Qt::Orientation orientation,
-                     const QVariant &value, int role = Qt::EditRole) override;
+  QVariant               headerData(int section, Qt::Orientation orientation,
+                                    int role = Qt::DisplayRole) const override;
+  bool                   setHeaderData(int section, Qt::Orientation orientation,
+                                       const QVariant& value, int role = Qt::EditRole) override;
   Q_INVOKABLE bool
   insertRows(int row, int count,
-             const QModelIndex &parent = QModelIndex()) override;
+             const QModelIndex& parent = QModelIndex()) override;
   Q_INVOKABLE bool
   removeRows(int row, int count,
-             const QModelIndex &parent = QModelIndex()) override;
+             const QModelIndex& parent = QModelIndex()) override;
 
   Q_INVOKABLE quint32 color(int row) const;
-  Q_INVOKABLE bool matched(int row) const;
+  Q_INVOKABLE bool    matched(int row) const;
   Q_INVOKABLE QString name(int row) const;
   Q_INVOKABLE QByteArray pairwiseConversationId(int row) const;
   Q_INVOKABLE QString profilePicture(int row) const;
@@ -1261,12 +1252,12 @@ public:
 
 Q_SIGNALS:
   // new data is ready to be made available to the model with fetchMore()
-  void newDataReady(const QModelIndex &parent) const;
+  void newDataReady(const QModelIndex& parent) const;
 
 private:
   QHash<QPair<int, Qt::ItemDataRole>, QVariant> m_headerData;
-  void initHeaderData();
-  void updatePersistentIndexes();
+  void                                          initHeaderData();
+  void                                          updatePersistentIndexes();
 Q_SIGNALS:
   void filterChanged();
   void filterRegexChanged();
@@ -1292,19 +1283,19 @@ public:
   class Private;
 
 private:
-  DocumentAttachments *const m_documentAttachments;
-  MediaAttachments *const m_mediaAttachments;
-  Private *m_d;
-  bool m_ownsPrivate;
+  DocumentAttachments* const m_documentAttachments;
+  MediaAttachments* const    m_mediaAttachments;
+  Private*                   m_d;
+  bool                       m_ownsPrivate;
   Q_PROPERTY(QString body READ body WRITE setBody NOTIFY bodyChanged FINAL)
-  Q_PROPERTY(DocumentAttachments *documentAttachments READ documentAttachments
+  Q_PROPERTY(DocumentAttachments* documentAttachments READ documentAttachments
                  NOTIFY documentAttachmentsChanged FINAL)
   Q_PROPERTY(bool hasDocAttachment READ hasDocAttachment NOTIFY
                  hasDocAttachmentChanged FINAL)
   Q_PROPERTY(bool hasMediaAttachment READ hasMediaAttachment NOTIFY
                  hasMediaAttachmentChanged FINAL)
   Q_PROPERTY(bool isReply READ isReply NOTIFY isReplyChanged FINAL)
-  Q_PROPERTY(MediaAttachments *mediaAttachments READ mediaAttachments NOTIFY
+  Q_PROPERTY(MediaAttachments* mediaAttachments READ mediaAttachments NOTIFY
                  mediaAttachmentsChanged FINAL)
   Q_PROPERTY(QString opAuthor READ opAuthor NOTIFY opAuthorChanged FINAL)
   Q_PROPERTY(QString opBody READ opBody NOTIFY opBodyChanged FINAL)
@@ -1316,66 +1307,66 @@ private:
   Q_PROPERTY(QString opMediaAttachments READ opMediaAttachments NOTIFY
                  opMediaAttachmentsChanged FINAL)
   Q_PROPERTY(QVariant opTime READ opTime NOTIFY opTimeChanged FINAL)
-  explicit MessageBuilder(bool owned, QObject *parent);
+  explicit MessageBuilder(bool owned, QObject* parent);
 
 public:
-  explicit MessageBuilder(QObject *parent = nullptr);
+  explicit MessageBuilder(QObject* parent = nullptr);
   ~MessageBuilder() override;
-  QString body() const;
-  void setBody(const QString &v);
-  const DocumentAttachments *documentAttachments() const;
-  DocumentAttachments *documentAttachments();
-  bool hasDocAttachment() const;
-  bool hasMediaAttachment() const;
-  bool isReply() const;
-  const MediaAttachments *mediaAttachments() const;
-  MediaAttachments *mediaAttachments();
-  QString opAuthor() const;
-  QString opBody() const;
-  QString opDocAttachments() const;
-  QVariant opExpirationTime() const;
-  QByteArray opId() const;
-  void setOpId(const QByteArray &v);
-  QString opMediaAttachments() const;
-  QVariant opTime() const;
-  Q_INVOKABLE bool addAttachment(const QString &path);
-  Q_INVOKABLE void clearReply();
-  Q_INVOKABLE void finalize();
-  Q_INVOKABLE bool removeDoc(quint64 row_index);
-  Q_INVOKABLE bool removeMedia(quint64 row_index);
-  int columnCount(const QModelIndex &parent = QModelIndex()) const override;
-  QVariant data(const QModelIndex &index,
-                int role = Qt::DisplayRole) const override;
+  QString                    body() const;
+  void                       setBody(const QString& v);
+  const DocumentAttachments* documentAttachments() const;
+  DocumentAttachments*       documentAttachments();
+  bool                       hasDocAttachment() const;
+  bool                       hasMediaAttachment() const;
+  bool                       isReply() const;
+  const MediaAttachments*    mediaAttachments() const;
+  MediaAttachments*          mediaAttachments();
+  QString                    opAuthor() const;
+  QString                    opBody() const;
+  QString                    opDocAttachments() const;
+  QVariant                   opExpirationTime() const;
+  QByteArray                 opId() const;
+  void                       setOpId(const QByteArray& v);
+  QString                    opMediaAttachments() const;
+  QVariant                   opTime() const;
+  Q_INVOKABLE bool           addAttachment(const QString& path);
+  Q_INVOKABLE void           clearReply();
+  Q_INVOKABLE void           finalize();
+  Q_INVOKABLE bool           removeDoc(quint64 row_index);
+  Q_INVOKABLE bool           removeMedia(quint64 row_index);
+  int columnCount(const QModelIndex& parent = QModelIndex()) const override;
+  QVariant    data(const QModelIndex& index,
+                   int                role = Qt::DisplayRole) const override;
   QModelIndex index(int row, int column,
-                    const QModelIndex &parent = QModelIndex()) const override;
-  QModelIndex parent(const QModelIndex &index) const override;
-  bool hasChildren(const QModelIndex &parent = QModelIndex()) const override;
-  int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-  bool canFetchMore(const QModelIndex &parent) const override;
-  void fetchMore(const QModelIndex &parent) override;
-  Qt::ItemFlags flags(const QModelIndex &index) const override;
+                    const QModelIndex& parent = QModelIndex()) const override;
+  QModelIndex parent(const QModelIndex& index) const override;
+  bool hasChildren(const QModelIndex& parent = QModelIndex()) const override;
+  int  rowCount(const QModelIndex& parent = QModelIndex()) const override;
+  bool canFetchMore(const QModelIndex& parent) const override;
+  void fetchMore(const QModelIndex& parent) override;
+  Qt::ItemFlags flags(const QModelIndex& index) const override;
   void sort(int column, Qt::SortOrder order = Qt::AscendingOrder) override;
-  int role(const char *name) const;
+  int  role(const char* name) const;
   QHash<int, QByteArray> roleNames() const override;
-  QVariant headerData(int section, Qt::Orientation orientation,
-                      int role = Qt::DisplayRole) const override;
-  bool setHeaderData(int section, Qt::Orientation orientation,
-                     const QVariant &value, int role = Qt::EditRole) override;
+  QVariant               headerData(int section, Qt::Orientation orientation,
+                                    int role = Qt::DisplayRole) const override;
+  bool                   setHeaderData(int section, Qt::Orientation orientation,
+                                       const QVariant& value, int role = Qt::EditRole) override;
   Q_INVOKABLE bool
   insertRows(int row, int count,
-             const QModelIndex &parent = QModelIndex()) override;
+             const QModelIndex& parent = QModelIndex()) override;
   Q_INVOKABLE bool
   removeRows(int row, int count,
-             const QModelIndex &parent = QModelIndex()) override;
+             const QModelIndex& parent = QModelIndex()) override;
 
 Q_SIGNALS:
   // new data is ready to be made available to the model with fetchMore()
-  void newDataReady(const QModelIndex &parent) const;
+  void newDataReady(const QModelIndex& parent) const;
 
 private:
   QHash<QPair<int, Qt::ItemDataRole>, QVariant> m_headerData;
-  void initHeaderData();
-  void updatePersistentIndexes();
+  void                                          initHeaderData();
+  void                                          updatePersistentIndexes();
 Q_SIGNALS:
   void bodyChanged();
   void documentAttachmentsChanged();
@@ -1412,46 +1403,46 @@ public:
   class Private;
 
 private:
-  Private *m_d;
-  bool m_ownsPrivate;
+  Private* m_d;
+  bool     m_ownsPrivate;
   Q_PROPERTY(QVariant regexSearch READ regexSearch WRITE setRegexSearch NOTIFY
                  regexSearchChanged FINAL)
   Q_PROPERTY(QString searchPattern READ searchPattern WRITE setSearchPattern
                  NOTIFY searchPatternChanged FINAL)
-  explicit MessageSearch(bool owned, QObject *parent);
+  explicit MessageSearch(bool owned, QObject* parent);
 
 public:
-  explicit MessageSearch(QObject *parent = nullptr);
+  explicit MessageSearch(QObject* parent = nullptr);
   ~MessageSearch() override;
-  QVariant regexSearch() const;
-  void setRegexSearch(const QVariant &v);
-  QString searchPattern() const;
-  void setSearchPattern(const QString &v);
+  QVariant         regexSearch() const;
+  void             setRegexSearch(const QVariant& v);
+  QString          searchPattern() const;
+  void             setSearchPattern(const QString& v);
   Q_INVOKABLE void clearSearch();
-  int columnCount(const QModelIndex &parent = QModelIndex()) const override;
-  QVariant data(const QModelIndex &index,
-                int role = Qt::DisplayRole) const override;
+  int columnCount(const QModelIndex& parent = QModelIndex()) const override;
+  QVariant    data(const QModelIndex& index,
+                   int                role = Qt::DisplayRole) const override;
   QModelIndex index(int row, int column,
-                    const QModelIndex &parent = QModelIndex()) const override;
-  QModelIndex parent(const QModelIndex &index) const override;
-  bool hasChildren(const QModelIndex &parent = QModelIndex()) const override;
-  int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-  bool canFetchMore(const QModelIndex &parent) const override;
-  void fetchMore(const QModelIndex &parent) override;
-  Qt::ItemFlags flags(const QModelIndex &index) const override;
+                    const QModelIndex& parent = QModelIndex()) const override;
+  QModelIndex parent(const QModelIndex& index) const override;
+  bool hasChildren(const QModelIndex& parent = QModelIndex()) const override;
+  int  rowCount(const QModelIndex& parent = QModelIndex()) const override;
+  bool canFetchMore(const QModelIndex& parent) const override;
+  void fetchMore(const QModelIndex& parent) override;
+  Qt::ItemFlags flags(const QModelIndex& index) const override;
   void sort(int column, Qt::SortOrder order = Qt::AscendingOrder) override;
-  int role(const char *name) const;
+  int  role(const char* name) const;
   QHash<int, QByteArray> roleNames() const override;
-  QVariant headerData(int section, Qt::Orientation orientation,
-                      int role = Qt::DisplayRole) const override;
-  bool setHeaderData(int section, Qt::Orientation orientation,
-                     const QVariant &value, int role = Qt::EditRole) override;
+  QVariant               headerData(int section, Qt::Orientation orientation,
+                                    int role = Qt::DisplayRole) const override;
+  bool                   setHeaderData(int section, Qt::Orientation orientation,
+                                       const QVariant& value, int role = Qt::EditRole) override;
   Q_INVOKABLE bool
   insertRows(int row, int count,
-             const QModelIndex &parent = QModelIndex()) override;
+             const QModelIndex& parent = QModelIndex()) override;
   Q_INVOKABLE bool
   removeRows(int row, int count,
-             const QModelIndex &parent = QModelIndex()) override;
+             const QModelIndex& parent = QModelIndex()) override;
 
   Q_INVOKABLE QString afterFirstMatch(int row) const;
   Q_INVOKABLE QString author(int row) const;
@@ -1467,12 +1458,12 @@ public:
 
 Q_SIGNALS:
   // new data is ready to be made available to the model with fetchMore()
-  void newDataReady(const QModelIndex &parent) const;
+  void newDataReady(const QModelIndex& parent) const;
 
 private:
   QHash<QPair<int, Qt::ItemDataRole>, QVariant> m_headerData;
-  void initHeaderData();
-  void updatePersistentIndexes();
+  void                                          initHeaderData();
+  void                                          updatePersistentIndexes();
 Q_SIGNALS:
   void regexSearchChanged();
   void searchPatternChanged();
@@ -1498,10 +1489,10 @@ public:
   class Private;
 
 private:
-  MessageBuilder *const m_builder;
-  Private *m_d;
-  bool m_ownsPrivate;
-  Q_PROPERTY(MessageBuilder *builder READ builder NOTIFY builderChanged FINAL)
+  MessageBuilder* const m_builder;
+  Private*              m_d;
+  bool                  m_ownsPrivate;
+  Q_PROPERTY(MessageBuilder* builder READ builder NOTIFY builderChanged FINAL)
   Q_PROPERTY(bool isEmpty READ isEmpty NOTIFY isEmptyChanged FINAL)
   Q_PROPERTY(QString lastAuthor READ lastAuthor NOTIFY lastAuthorChanged FINAL)
   Q_PROPERTY(QString lastBody READ lastBody NOTIFY lastBodyChanged FINAL)
@@ -1517,63 +1508,65 @@ private:
                  NOTIFY searchPatternChanged FINAL)
   Q_PROPERTY(bool searchRegex READ searchRegex WRITE setSearchRegex NOTIFY
                  searchRegexChanged FINAL)
-  explicit Messages(bool owned, QObject *parent);
+  explicit Messages(bool owned, QObject* parent);
 
 public:
-  explicit Messages(QObject *parent = nullptr);
+  explicit Messages(QObject* parent = nullptr);
   ~Messages() override;
-  const MessageBuilder *builder() const;
-  MessageBuilder *builder();
-  bool isEmpty() const;
-  QString lastAuthor() const;
-  QString lastBody() const;
-  QVariant lastStatus() const;
-  QVariant lastTime() const;
-  bool searchActive() const;
-  void setSearchActive(bool v);
-  quint64 searchIndex() const;
-  quint64 searchNumMatches() const;
-  QString searchPattern() const;
-  void setSearchPattern(const QString &v);
-  bool searchRegex() const;
-  void setSearchRegex(bool v);
-  Q_INVOKABLE bool clearConversationHistory();
-  Q_INVOKABLE void clearSearch();
-  Q_INVOKABLE bool deleteMessage(quint64 row_index);
-  Q_INVOKABLE qint64 indexById(const QByteArray &msg_id) const;
-  Q_INVOKABLE void markRead(quint64 index);
+  const MessageBuilder* builder() const;
+  MessageBuilder*       builder();
+  bool                  isEmpty() const;
+  QString               lastAuthor() const;
+  QString               lastBody() const;
+  QVariant              lastStatus() const;
+  QVariant              lastTime() const;
+  bool                  searchActive() const;
+  void                  setSearchActive(bool v);
+  quint64               searchIndex() const;
+  quint64               searchNumMatches() const;
+  QString               searchPattern() const;
+  void                  setSearchPattern(const QString& v);
+  bool                  searchRegex() const;
+  void                  setSearchRegex(bool v);
+  Q_INVOKABLE void      addReaction(quint64 index, const QString& content);
+  Q_INVOKABLE bool      clearConversationHistory();
+  Q_INVOKABLE void      clearSearch();
+  Q_INVOKABLE bool      deleteMessage(quint64 row_index);
+  Q_INVOKABLE qint64 indexById(const QByteArray& msg_id) const;
+  Q_INVOKABLE void   markRead(quint64 index);
   Q_INVOKABLE qint64 nextSearchMatch();
   Q_INVOKABLE qint64 prevSearchMatch();
-  Q_INVOKABLE bool saveAllAttachments(quint64 index, const QString &dest) const;
+  Q_INVOKABLE void   removeReaction(quint64 index, const QString& content);
+  Q_INVOKABLE bool saveAllAttachments(quint64 index, const QString& dest) const;
   Q_INVOKABLE void setElisionCharCount(quint16 char_count);
   Q_INVOKABLE void setElisionCharsPerLine(quint8 chars_per_line);
   Q_INVOKABLE void setElisionLineCount(quint8 line_count);
   Q_INVOKABLE void setSearchHint(float scrollbar_position,
                                  float scrollbar_height);
-  int columnCount(const QModelIndex &parent = QModelIndex()) const override;
-  QVariant data(const QModelIndex &index,
-                int role = Qt::DisplayRole) const override;
+  int columnCount(const QModelIndex& parent = QModelIndex()) const override;
+  QVariant    data(const QModelIndex& index,
+                   int                role = Qt::DisplayRole) const override;
   QModelIndex index(int row, int column,
-                    const QModelIndex &parent = QModelIndex()) const override;
-  QModelIndex parent(const QModelIndex &index) const override;
-  bool hasChildren(const QModelIndex &parent = QModelIndex()) const override;
-  int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-  bool canFetchMore(const QModelIndex &parent) const override;
-  void fetchMore(const QModelIndex &parent) override;
-  Qt::ItemFlags flags(const QModelIndex &index) const override;
+                    const QModelIndex& parent = QModelIndex()) const override;
+  QModelIndex parent(const QModelIndex& index) const override;
+  bool hasChildren(const QModelIndex& parent = QModelIndex()) const override;
+  int  rowCount(const QModelIndex& parent = QModelIndex()) const override;
+  bool canFetchMore(const QModelIndex& parent) const override;
+  void fetchMore(const QModelIndex& parent) override;
+  Qt::ItemFlags flags(const QModelIndex& index) const override;
   void sort(int column, Qt::SortOrder order = Qt::AscendingOrder) override;
-  int role(const char *name) const;
+  int  role(const char* name) const;
   QHash<int, QByteArray> roleNames() const override;
-  QVariant headerData(int section, Qt::Orientation orientation,
-                      int role = Qt::DisplayRole) const override;
-  bool setHeaderData(int section, Qt::Orientation orientation,
-                     const QVariant &value, int role = Qt::EditRole) override;
+  QVariant               headerData(int section, Qt::Orientation orientation,
+                                    int role = Qt::DisplayRole) const override;
+  bool                   setHeaderData(int section, Qt::Orientation orientation,
+                                       const QVariant& value, int role = Qt::EditRole) override;
   Q_INVOKABLE bool
   insertRows(int row, int count,
-             const QModelIndex &parent = QModelIndex()) override;
+             const QModelIndex& parent = QModelIndex()) override;
   Q_INVOKABLE bool
   removeRows(int row, int count,
-             const QModelIndex &parent = QModelIndex()) override;
+             const QModelIndex& parent = QModelIndex()) override;
 
   Q_INVOKABLE QString author(int row) const;
   Q_INVOKABLE QVariant authorColor(int row) const;
@@ -1599,6 +1592,7 @@ public:
   Q_INVOKABLE QString opMediaAttachments(int row) const;
   Q_INVOKABLE QByteArray opMsgId(int row) const;
   Q_INVOKABLE QString opName(int row) const;
+  Q_INVOKABLE QString reactions(int row) const;
   Q_INVOKABLE QVariant receiptStatus(int row) const;
   Q_INVOKABLE QVariant replyType(int row) const;
   Q_INVOKABLE QVariant serverTime(int row) const;
@@ -1606,12 +1600,12 @@ public:
 
 Q_SIGNALS:
   // new data is ready to be made available to the model with fetchMore()
-  void newDataReady(const QModelIndex &parent) const;
+  void newDataReady(const QModelIndex& parent) const;
 
 private:
   QHash<QPair<int, Qt::ItemDataRole>, QVariant> m_headerData;
-  void initHeaderData();
-  void updatePersistentIndexes();
+  void                                          initHeaderData();
+  void                                          updatePersistentIndexes();
 Q_SIGNALS:
   void builderChanged();
   void isEmptyChanged();
@@ -1646,75 +1640,75 @@ public:
   class Private;
 
 private:
-  Private *m_d;
-  bool m_ownsPrivate;
+  Private* m_d;
+  bool     m_ownsPrivate;
   Q_PROPERTY(
       QString filter READ filter WRITE setFilter NOTIFY filterChanged FINAL)
   Q_PROPERTY(bool filterRegex READ filterRegex WRITE setFilterRegex NOTIFY
                  filterRegexChanged FINAL)
-  explicit Users(bool owned, QObject *parent);
+  explicit Users(bool owned, QObject* parent);
 
 public:
-  explicit Users(QObject *parent = nullptr);
+  explicit Users(QObject* parent = nullptr);
   ~Users() override;
-  QString filter() const;
-  void setFilter(const QString &v);
-  bool filterRegex() const;
-  void setFilterRegex(bool v);
-  Q_INVOKABLE QByteArray add(const QString &id);
-  Q_INVOKABLE void clearFilter();
-  Q_INVOKABLE quint32 colorById(const QString &id) const;
-  Q_INVOKABLE QString nameById(const QString &id) const;
-  Q_INVOKABLE QString profilePictureById(const QString &id) const;
-  Q_INVOKABLE void setProfilePicture(quint64 index,
-                                     const QString &profile_picture);
-  Q_INVOKABLE bool toggleFilterRegex();
-  int columnCount(const QModelIndex &parent = QModelIndex()) const override;
-  QVariant data(const QModelIndex &index,
-                int role = Qt::DisplayRole) const override;
+  QString     filter() const;
+  void        setFilter(const QString& v);
+  bool        filterRegex() const;
+  void        setFilterRegex(bool v);
+  Q_INVOKABLE QByteArray add(const QString& id);
+  Q_INVOKABLE void       clearFilter();
+  Q_INVOKABLE quint32 colorById(const QString& id) const;
+  Q_INVOKABLE QString nameById(const QString& id) const;
+  Q_INVOKABLE QString profilePictureById(const QString& id) const;
+  Q_INVOKABLE void    setProfilePicture(quint64        index,
+                                        const QString& profile_picture);
+  Q_INVOKABLE bool    toggleFilterRegex();
+  int columnCount(const QModelIndex& parent = QModelIndex()) const override;
+  QVariant    data(const QModelIndex& index,
+                   int                role = Qt::DisplayRole) const override;
   QModelIndex index(int row, int column,
-                    const QModelIndex &parent = QModelIndex()) const override;
-  QModelIndex parent(const QModelIndex &index) const override;
-  bool hasChildren(const QModelIndex &parent = QModelIndex()) const override;
-  int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-  bool canFetchMore(const QModelIndex &parent) const override;
-  void fetchMore(const QModelIndex &parent) override;
-  Qt::ItemFlags flags(const QModelIndex &index) const override;
+                    const QModelIndex& parent = QModelIndex()) const override;
+  QModelIndex parent(const QModelIndex& index) const override;
+  bool hasChildren(const QModelIndex& parent = QModelIndex()) const override;
+  int  rowCount(const QModelIndex& parent = QModelIndex()) const override;
+  bool canFetchMore(const QModelIndex& parent) const override;
+  void fetchMore(const QModelIndex& parent) override;
+  Qt::ItemFlags flags(const QModelIndex& index) const override;
   void sort(int column, Qt::SortOrder order = Qt::AscendingOrder) override;
-  int role(const char *name) const;
+  int  role(const char* name) const;
   QHash<int, QByteArray> roleNames() const override;
-  QVariant headerData(int section, Qt::Orientation orientation,
-                      int role = Qt::DisplayRole) const override;
-  bool setHeaderData(int section, Qt::Orientation orientation,
-                     const QVariant &value, int role = Qt::EditRole) override;
+  QVariant               headerData(int section, Qt::Orientation orientation,
+                                    int role = Qt::DisplayRole) const override;
+  bool                   setHeaderData(int section, Qt::Orientation orientation,
+                                       const QVariant& value, int role = Qt::EditRole) override;
   Q_INVOKABLE bool
   insertRows(int row, int count,
-             const QModelIndex &parent = QModelIndex()) override;
+             const QModelIndex& parent = QModelIndex()) override;
   Q_INVOKABLE bool
   removeRows(int row, int count,
-             const QModelIndex &parent = QModelIndex()) override;
+             const QModelIndex& parent = QModelIndex()) override;
 
-  bool setData(const QModelIndex &index, const QVariant &value,
-               int role = Qt::EditRole) override;
+  bool        setData(const QModelIndex& index, const QVariant& value,
+                      int role = Qt::EditRole) override;
   Q_INVOKABLE quint32 color(int row) const;
-  Q_INVOKABLE bool setColor(int row, quint32 value);
-  Q_INVOKABLE bool matched(int row) const;
+  Q_INVOKABLE bool    setColor(int row, quint32 value);
+  Q_INVOKABLE bool    matched(int row) const;
   Q_INVOKABLE QString name(int row) const;
-  Q_INVOKABLE bool setName(int row, const QString &value);
+  Q_INVOKABLE bool    setName(int row, const QString& value);
   Q_INVOKABLE QByteArray pairwiseConversationId(int row) const;
   Q_INVOKABLE QString profilePicture(int row) const;
   Q_INVOKABLE quint8 status(int row) const;
-  Q_INVOKABLE bool setStatus(int row, quint8 value);
+  Q_INVOKABLE bool   setStatus(int row, quint8 value);
   Q_INVOKABLE QString userId(int row) const;
 
 Q_SIGNALS:
   // new data is ready to be made available to the model with fetchMore()
-  void newDataReady(const QModelIndex &parent) const;
+  void newDataReady(const QModelIndex& parent) const;
 
 private:
   QHash<QPair<int, Qt::ItemDataRole>, QVariant> m_headerData;
-  void initHeaderData();
-  void updatePersistentIndexes();
+  void                                          initHeaderData();
+  void                                          updatePersistentIndexes();
 Q_SIGNALS:
   void filterChanged();
   void filterRegexChanged();
@@ -1740,62 +1734,62 @@ public:
   class Private;
 
 private:
-  Private *m_d;
-  bool m_ownsPrivate;
+  Private* m_d;
+  bool     m_ownsPrivate;
   Q_PROPERTY(
       QString filter READ filter WRITE setFilter NOTIFY filterChanged FINAL)
-  explicit UsersSearch(bool owned, QObject *parent);
+  explicit UsersSearch(bool owned, QObject* parent);
 
 public:
-  explicit UsersSearch(QObject *parent = nullptr);
+  explicit UsersSearch(QObject* parent = nullptr);
   ~UsersSearch() override;
-  QString filter() const;
-  void setFilter(const QString &v);
+  QString          filter() const;
+  void             setFilter(const QString& v);
   Q_INVOKABLE void clearFilter();
   Q_INVOKABLE void refresh();
-  int columnCount(const QModelIndex &parent = QModelIndex()) const override;
-  QVariant data(const QModelIndex &index,
-                int role = Qt::DisplayRole) const override;
+  int columnCount(const QModelIndex& parent = QModelIndex()) const override;
+  QVariant    data(const QModelIndex& index,
+                   int                role = Qt::DisplayRole) const override;
   QModelIndex index(int row, int column,
-                    const QModelIndex &parent = QModelIndex()) const override;
-  QModelIndex parent(const QModelIndex &index) const override;
-  bool hasChildren(const QModelIndex &parent = QModelIndex()) const override;
-  int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-  bool canFetchMore(const QModelIndex &parent) const override;
-  void fetchMore(const QModelIndex &parent) override;
-  Qt::ItemFlags flags(const QModelIndex &index) const override;
+                    const QModelIndex& parent = QModelIndex()) const override;
+  QModelIndex parent(const QModelIndex& index) const override;
+  bool hasChildren(const QModelIndex& parent = QModelIndex()) const override;
+  int  rowCount(const QModelIndex& parent = QModelIndex()) const override;
+  bool canFetchMore(const QModelIndex& parent) const override;
+  void fetchMore(const QModelIndex& parent) override;
+  Qt::ItemFlags flags(const QModelIndex& index) const override;
   void sort(int column, Qt::SortOrder order = Qt::AscendingOrder) override;
-  int role(const char *name) const;
+  int  role(const char* name) const;
   QHash<int, QByteArray> roleNames() const override;
-  QVariant headerData(int section, Qt::Orientation orientation,
-                      int role = Qt::DisplayRole) const override;
-  bool setHeaderData(int section, Qt::Orientation orientation,
-                     const QVariant &value, int role = Qt::EditRole) override;
+  QVariant               headerData(int section, Qt::Orientation orientation,
+                                    int role = Qt::DisplayRole) const override;
+  bool                   setHeaderData(int section, Qt::Orientation orientation,
+                                       const QVariant& value, int role = Qt::EditRole) override;
   Q_INVOKABLE bool
   insertRows(int row, int count,
-             const QModelIndex &parent = QModelIndex()) override;
+             const QModelIndex& parent = QModelIndex()) override;
   Q_INVOKABLE bool
   removeRows(int row, int count,
-             const QModelIndex &parent = QModelIndex()) override;
+             const QModelIndex& parent = QModelIndex()) override;
 
-  bool setData(const QModelIndex &index, const QVariant &value,
-               int role = Qt::EditRole) override;
+  bool        setData(const QModelIndex& index, const QVariant& value,
+                      int role = Qt::EditRole) override;
   Q_INVOKABLE QVariant color(int row) const;
-  Q_INVOKABLE bool matched(int row) const;
+  Q_INVOKABLE bool     matched(int row) const;
   Q_INVOKABLE QString name(int row) const;
   Q_INVOKABLE QString profilePicture(int row) const;
-  Q_INVOKABLE bool selected(int row) const;
-  Q_INVOKABLE bool setSelected(int row, bool value);
+  Q_INVOKABLE bool    selected(int row) const;
+  Q_INVOKABLE bool    setSelected(int row, bool value);
   Q_INVOKABLE QString userId(int row) const;
 
 Q_SIGNALS:
   // new data is ready to be made available to the model with fetchMore()
-  void newDataReady(const QModelIndex &parent) const;
+  void newDataReady(const QModelIndex& parent) const;
 
 private:
   QHash<QPair<int, Qt::ItemDataRole>, QVariant> m_headerData;
-  void initHeaderData();
-  void updatePersistentIndexes();
+  void                                          initHeaderData();
+  void                                          updatePersistentIndexes();
 Q_SIGNALS:
   void filterChanged();
 };
@@ -1820,19 +1814,19 @@ public:
   class Private;
 
 private:
-  Private *m_d;
-  bool m_ownsPrivate;
-  explicit Utils(bool owned, QObject *parent);
+  Private* m_d;
+  bool     m_ownsPrivate;
+  explicit Utils(bool owned, QObject* parent);
 
 public:
-  explicit Utils(QObject *parent = nullptr);
+  explicit Utils(QObject* parent = nullptr);
   ~Utils() override;
-  Q_INVOKABLE bool compareByteArray(const QByteArray &bs1,
-                                    const QByteArray &bs2) const;
-  Q_INVOKABLE QString imageDimensions(const QString &path) const;
-  Q_INVOKABLE bool isValidRandId(const QByteArray &bs) const;
-  Q_INVOKABLE bool saveFile(const QString &fpath,
-                            const QString &target_path) const;
+  Q_INVOKABLE bool compareByteArray(const QByteArray& bs1,
+                                    const QByteArray& bs2) const;
+  Q_INVOKABLE QString imageDimensions(const QString& path) const;
+  Q_INVOKABLE bool    isValidRandId(const QByteArray& bs) const;
+  Q_INVOKABLE bool    saveFile(const QString& fpath,
+                               const QString& target_path) const;
 Q_SIGNALS:
 };
 #endif // BINDINGS_H

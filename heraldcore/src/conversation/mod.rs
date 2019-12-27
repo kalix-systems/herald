@@ -96,6 +96,15 @@ pub fn set_muted(
     db::set_muted(&db, conversation_id, muted)
 }
 
+/// Sets archive status of a conversation
+pub fn set_status(
+    conversation_id: &ConversationId,
+    status: Status,
+) -> Result<(), HErr> {
+    let db = Database::get()?;
+    db::set_status(&db, conversation_id, status)
+}
+
 /// Sets title for a conversation
 pub fn set_title(
     conversation_id: &ConversationId,
