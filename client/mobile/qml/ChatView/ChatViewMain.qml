@@ -60,26 +60,5 @@ Page {
             left: parent.left
             top: chatScrollView.bottom
         }
-
-        onSelected: {
-            if (!risen && Qt.platform.os == "ios") {
-                risen = true
-                chatScrollView.height = chatScrollView.height
-                        - Qt.inputMethod.keyboardRectangle.height - chatTextArea.height
-                chatTextArea.select()
-            } else {
-                chatTextArea.select()
-            }
-        }
-
-        Connections {
-            target: Qt.inputMethod
-            onVisibleChanged: {
-                if (!Qt.inputMethod.visible && chatTextArea.risen) {
-                    chatTextArea.risen = false
-                    chatScrollView.height = chatPage.height - chatTextArea.height
-                }
-            }
-        }
     }
 }

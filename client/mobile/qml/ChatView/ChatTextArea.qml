@@ -12,7 +12,6 @@ RowLayout {
         cta.forceActiveFocus()
     }
 
-    signal selected
     property bool send: cta.text.length > 0
     property string chatName: 'conversation'
     width: parent.width
@@ -31,10 +30,12 @@ RowLayout {
         }
         Layout.fillWidth: true
         Layout.alignment: Qt.AlignVCenter
-        MouseArea {
-            z: cta.z + 1
-            anchors.fill: parent
-            onPressed: selected()
+        Keys.onPressed: {
+
+            if ((event.key === Qt.Key_Backspace || event.key === Qt.Key_Delete)
+                    && cta.text.length === 0) {
+                Qt.inputMethod.hide()
+            }
         }
     }
 
