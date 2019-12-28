@@ -1102,10 +1102,15 @@ DocumentAttachments::Private*
 void document_attachments_free(DocumentAttachments::Private*);
 }
 extern "C" {
-Errors::Private* errors_new(ErrorsPtrBundle*);
-void             errors_free(Errors::Private*);
-bool             errors_try_poll_get(const Errors::Private*);
-void             errors_next_error(Errors::Private*, QString*, qstring_set);
+void emoji_picker_data_emoji(const EmojiPicker::Private*, int, QString*,
+                             qstring_set);
+void emoji_picker_sort(EmojiPicker::Private*, unsigned char column,
+                       Qt::SortOrder order = Qt::AscendingOrder);
+int  emoji_picker_row_count(const EmojiPicker::Private*);
+bool emoji_picker_insert_rows(EmojiPicker::Private*, int, int);
+bool emoji_picker_remove_rows(EmojiPicker::Private*, int, int);
+bool emoji_picker_can_fetch_more(const EmojiPicker::Private*);
+void emoji_picker_fetch_more(EmojiPicker::Private*);
 }
 int EmojiPicker::columnCount(const QModelIndex& parent) const
 {
@@ -1139,17 +1144,14 @@ QModelIndex EmojiPicker::index(int row, int column,
       column < 1) {
     return createIndex(row, column, static_cast<quintptr>(row));
   }
-  return QModelIndex();
+  return {};
 }
 
-QModelIndex EmojiPicker::parent(const QModelIndex&) const
-{
-  return QModelIndex();
-}
+QModelIndex EmojiPicker::parent(const QModelIndex&) const { return {}; }
 
 bool EmojiPicker::canFetchMore(const QModelIndex& parent) const
 {
-  return (parent.isValid()) ? 0 : emoji_picker_can_fetch_more(m_d);
+  return (parent.isValid()) ? false : emoji_picker_can_fetch_more(m_d);
 }
 
 void EmojiPicker::fetchMore(const QModelIndex& parent)
@@ -3733,9 +3735,10 @@ DocumentAttachments::~DocumentAttachments()
 }
 void DocumentAttachments::initHeaderData() {}
 
-Errors::Errors(bool /*owned*/, QObject* parent)
-    : QObject(parent), m_d(nullptr), m_ownsPrivate(false)
+EmojiPicker::EmojiPicker(bool /*owned*/, QObject* parent)
+    : QAbstractItemModel(parent), m_d(nullptr), m_ownsPrivate(false)
 {
+  initHeaderData();
 }
 
 EmojiPicker::EmojiPicker(QObject* parent)

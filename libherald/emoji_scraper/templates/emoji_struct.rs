@@ -1,4 +1,4 @@
-emoji_struct {{
+EmojiData {{
     emoji: {emoji},
-    tags: ArrayVec::from({comma_seperated_tags})
+    tags:  &{comma_seperated_tags}
 }}

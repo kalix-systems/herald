@@ -21,7 +21,8 @@ void ObjectiveUtils::request_notifications()
 {
   UNUserNotificationCenter* center = [UNUserNotificationCenter currentNotificationCenter];
   [center requestAuthorizationWithOptions:
-              (UNAuthorizationOptionAlert +  UNAuthorizationOptionSound)
+              (UNAuthorizationOptionAlert +
+          UNAuthorizationOptionSound)
                         completionHandler:^(BOOL granted, NSError * _Nullable error) {
                         }];
 }

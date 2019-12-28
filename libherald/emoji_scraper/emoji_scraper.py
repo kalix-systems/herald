@@ -2,7 +2,7 @@
 import json
 import requests
 
-ouput_path = "../src/emoji_keyboard/picker_struct.rs"
+ouput_path = "../src/emoji_picker/picker_struct.rs"
 emoji_struct_f_string = open("templates/emoji_struct.rs", "r").read()
 rust_module_f_string = open("templates/rust_module.rs", "r").read()
 
@@ -24,7 +24,7 @@ emoji_json_url = "https://raw.githubusercontent.com/github/gemoji/master/db/emoj
 
 
 def format_struct(json_emoji_data_obj):
-    return emoji_struct_f_string.format(emoji=json_emoji_data_obj["emoji"], comma_seperated_tags=json_emoji_data_obj["tags"])
+    return emoji_struct_f_string.format(emoji=json_emoji_data_obj["emoji"], comma_seperated_tags='["' + '","'.join(json_emoji_data_obj["tags"]) + '"]')
 
 
 def output_to_file():
