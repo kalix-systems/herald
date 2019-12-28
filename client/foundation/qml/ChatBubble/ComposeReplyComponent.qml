@@ -7,11 +7,14 @@ import "qrc:/imports/js/utils.mjs" as Utils
 import "qrc:/imports" as Imports
 import "qrc:/imports/ChatBubble/ReplyBubble"
 import "qrc:/imports/ChatBubble" as ChatBubble
+import "qrc:/imports/ChatBubble/ReplyBubble/dyn"
 
 Rectangle {
     id: wrapper
     height: Math.max(wrapperRow.height + label.height, 20)
     color: CmnCfg.palette.medGrey
+
+    //pass in messages.builder on desktop and mobile
     property var builderData
 
     property color authorColor: CmnCfg.palette.avatarColors[Herald.users.colorById(
@@ -127,7 +130,9 @@ Rectangle {
                 Layout.preferredWidth: item ? item.width : 0
                 Component {
                     id: fileClipComponent
-                    FileClip {}
+                    ReplyFileClip {
+                        elideWidth: maxWidth
+                    }
                 }
             }
 

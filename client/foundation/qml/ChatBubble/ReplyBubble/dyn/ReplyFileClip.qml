@@ -11,6 +11,7 @@ Row {
     property alias nameMetrics: nameMetrics
     property alias fileSize: fileSize
     property real constraint: 0
+    property var elideWidth
     height: fileIcon.height
     spacing: CmnCfg.microMargin
 
@@ -37,7 +38,7 @@ Row {
             font.weight: Font.Medium
             maximumLineCount: 1
             elide: Text.ElideMiddle
-            Layout.maximumWidth: bubbleRoot.maxWidth - fileSize.width
+            Layout.maximumWidth: elideWidth - fileSize.width
                                  - fileIcon.width - constraint - parent.spacing * 3
         }
     }

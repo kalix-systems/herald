@@ -44,7 +44,6 @@
         <file>ChatView/ChatTextArea/ts/ChatViewTypes.d.ts</file>
         <file>ChatView/ChatTextArea/ImageAttachmentsComponent.qml</file>
         <file>ChatView/ChatTextArea/ConvoTextArea.qml</file>
-        <file>ChatView/ChatTextArea/ReplyComponent.qml</file>
         <file>ChatView/ConversationWindow/ChatBubbleHover.qml</file>
         <file>ChatView/ConversationWindow/ConversationWindow.qml</file>
         <file>ChatView/Header/ChatSearchComponent.qml</file>
