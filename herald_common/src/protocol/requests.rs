@@ -153,8 +153,8 @@ macro_rules! proto_enum {
             NewPrekey(new_prekeys::$inner),
             GetPrekey(get_prekeys::$inner),
 
-            AddToGroup(add_to_group::$inner),
-            LeaveGroups(leave_groups::$inner),
+            // AddToGroup(add_to_group::$inner),
+            // LeaveGroups(leave_groups::$inner),
 
             Push(push::$inner),
 

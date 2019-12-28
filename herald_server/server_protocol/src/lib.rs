@@ -1,7 +1,10 @@
 #![allow(unused_imports)]
 
 use dashmap::DashMap;
-use futures::stream::{self, BoxStream, Stream, StreamExt};
+use futures::{
+    future::{self, TryFutureExt},
+    stream::{self, BoxStream, Stream, StreamExt},
+};
 use herald_common::{
     protocol::{auth::*, *},
     *,
@@ -43,9 +46,11 @@ impl ActiveSession {
         id: i64,
     ) -> Result<(), tokio::sync::mpsc::error::SendError<TaggedPush>> {
         if let Some(s) = &self.ready {
-            s.acquire().await;
+            let _guard = s.acquire().await;
+            self.emitter.clone().send(TaggedPush { push, id })
+        } else {
+            self.emitter.clone().send(TaggedPush { push, id })
         }
-        self.emitter.clone().send(TaggedPush { push, id })
     }
 
     pub fn ready(&mut self) {
@@ -167,7 +172,7 @@ impl KrpcServer<HeraldProtocol> for State {
         &self,
         meta: &Self::ConnInfo,
     ) -> Result<Self::Pushes, Error> {
-        let (mut sender, receiver) = channel();
+        let (sender, receiver) = channel();
         let (interrupt, output) = Valved::new(receiver);
         let sem = Arc::new(Semaphore::new(0));
         let sess = ActiveSession {
@@ -202,24 +207,43 @@ impl KrpcServer<HeraldProtocol> for State {
 
     async fn on_push_ack(
         &self,
+        gid: &Self::ConnInfo,
         push: Self::ServePush,
-        ack: PushAck,
-    ) {
-        todo!()
+        _ack: PushAck,
+    ) -> Result<(), Error> {
+        self.new_connection()
+            .await?
+            .del_pending(gid.did, stream::once(future::ready(push.id)))
+            .await?;
+        Ok(())
     }
 
     async fn handle_req(
         &self,
-        conn: &Self::ConnInfo,
+        gid: &Self::ConnInfo,
         req: Request,
     ) -> Response {
-        todo!()
+        let res_fut = async {
+            Ok(match req {
+                Request::GetSigchain(u) => Response::GetSigchain(self.get_sigchain(u).await?),
+                Request::RecipExists(r) => Response::RecipExists(self.recip_exists(r).await?),
+                Request::NewSig(n) => Response::NewSig(self.new_sig(n).await?),
+                Request::NewPrekey(keys) => Response::NewPrekey(self.new_prekeys(keys).await?),
+                Request::GetPrekey(keys) => Response::GetPrekey(self.get_prekeys(keys).await?),
+                Request::Push(push::Req { to, msg }) => {
+                    Response::Push(self.send_push(*gid, to, msg).await?)
+                }
+            })
+        };
+        res_fut
+            .unwrap_or_else(|e: Error| Response::Err(format!("{}", e)))
+            .await
     }
 
     async fn on_close(
         &self,
-        cinfo: Self::ConnInfo,
+        gid: Self::ConnInfo,
     ) {
-        todo!()
+        self.active.remove(&gid.did).map(|(_, s)| s.interrupt());
     }
 }

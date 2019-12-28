@@ -132,9 +132,11 @@ impl KrpcServer<ChatProtocol> for Server {
     #[allow(clippy::unit_arg)]
     async fn on_push_ack(
         &self,
+        _: &Self::ConnInfo,
         _: Push,
         _: PushAck,
-    ) {
+    ) -> Result<(), Error> {
+        Ok(())
     }
 
     async fn handle_req(

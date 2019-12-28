@@ -50,9 +50,10 @@ pub trait KrpcServer<P: Protocol>: Sync {
 
     async fn on_push_ack(
         &self,
+        meta: &Self::ConnInfo,
         push: Self::ServePush,
         ack: P::PushAck,
-    );
+    ) -> Result<(), Error>;
 
     async fn handle_req(
         &self,

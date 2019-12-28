@@ -125,7 +125,7 @@ where
                         }
                         ClientFrame::Ack(u, a) => {
                             if let Some(push) = awaiting.take(u as usize) {
-                                server.on_push_ack(push, a).await;
+                                server.on_push_ack(cinfo, push, a).await?;
                                 Ok(())
                             } else {
                                 Ok(())

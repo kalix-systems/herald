@@ -34,7 +34,7 @@ where
                 let ack_bytes = push_rx.read_to_end(P::MAX_ACK_SIZE).await?;
                 let ack = kson::from_bytes(ack_bytes.into())?;
 
-                server.on_push_ack(push, ack).await;
+                server.on_push_ack(&cinfo, push, ack).await?;
 
                 Ok(())
             }
