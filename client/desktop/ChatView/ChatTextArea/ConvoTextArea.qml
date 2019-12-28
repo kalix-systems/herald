@@ -27,31 +27,30 @@ Rectangle {
     // summy file Dialog
     property alias attachmentsDialogue: attachmentsDialogue
 
-    // camera button
-    // property alias cameraButton: cameraButton
     property string replyText: ""
     property string replyName: ""
-    property bool owned: replyUid === herald.config.configId
+    property bool owned: replyUid === Herald.config.configId
     property string replyUid
 
     property var replyId
 
     color: CmnCfg.palette.white
     clip: true
-
     height: containerCol.height
 
-    Imports.ButtonForm {
+    Imports.IconButton {
         id: attachmentsButton
         anchors.right: parent.right
+        anchors.rightMargin: CmnCfg.defaultMargin
         anchors.bottom: parent.bottom
         bottomPadding: CmnCfg.smallMargin * 0.5
         source: "qrc:/attach-icon.svg"
     }
 
-    Imports.ButtonForm {
+    Imports.IconButton {
         id: emojiButton
         anchors.left: parent.left
+        anchors.leftMargin: CmnCfg.defaultMargin
         anchors.bottom: parent.bottom
         bottomPadding: CmnCfg.smallMargin * 0.5
         source: "qrc:/emoji-icon.svg"
@@ -73,7 +72,10 @@ Rectangle {
         bottomPadding: CmnCfg.smallMargin * 0.5
 
         Column {
-            width: parent.width
+            width: textWrapperRect.width
+            spacing: CmnCfg.smallMargin
+            anchors.horizontalCenter: parent.horizontalCenter
+
             Loader {
                 id: replyLoader
                 property string opName: replyName
@@ -81,19 +83,36 @@ Rectangle {
                 active: ownedConversation.builder.isReply
                 height: item ? item.height : 0
                 sourceComponent: ReplyComponent {
-                    startColor: CmnCfg.avatarColors[herald.users.colorById(
+                    startColor: CmnCfg.avatarColors[Herald.users.colorById(
                                                         replyUid)]
                 }
-                width: textWrapperRect.width
-                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.leftMargin: CmnCfg.smallMargin
+                anchors.rightMargin: CmnCfg.smallMargin
             }
 
             Loader {
                 id: attachmentLoader
                 active: ownedConversation.builder.hasMediaAttachment
                 height: item ? item.height : 0
-                sourceComponent: AttachmentsComponent {}
                 width: scrollView.width
+                sourceComponent: ImageAttachmentsComponent {}
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.leftMargin: CmnCfg.smallMargin
+                anchors.rightMargin: CmnCfg.smallMargin
+            }
+
+            Loader {
+                id: fileLoader
+                active: ownedConversation.builder.hasDocAttachment
+                height: item ? item.height : 0
+                sourceComponent: FileAttachmentsComponent {}
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.leftMargin: CmnCfg.smallMargin
+                anchors.rightMargin: CmnCfg.smallMargin
             }
         }
 
@@ -108,17 +127,24 @@ Rectangle {
                 background: Rectangle {
                     color: CmnCfg.palette.white
                 }
+
+                //TODO: use system palette.
                 bottomPadding: CmnCfg.smallMargin * 0.5
                 selectionColor: CmnCfg.palette.highlightColor
                 color: CmnCfg.palette.black
                 selectByMouse: true
                 wrapMode: TextArea.WrapAtWordBoundaryOrAnywhere
-                placeholderText: "Message " + conversationItem.title
+                placeholderText: qsTr("Message") + " " + conversationItem.title
 
                 Keys.forwardTo: keysProxy
                 Keys.onEscapePressed: focus = false
-
                 onEditingFinished: convWindow.focus = true
+
+                // transfer focus to the compose field
+                Connections {
+                    target: ownedConversation.builder
+                    onOpIdChanged: chatText.forceActiveFocus()
+                }
             }
         }
     }
@@ -137,43 +163,4 @@ Rectangle {
             }
         }
     }
-
-    states: [
-
-
-        /*State {
-            name: "replystate"
-            when: ownedConversation.builder.isReply
-            PropertyChanges {
-                target: replyLoader
-                active: true
-            }
-            PropertyChanges {
-                target: scrollView
-                focus: true
-            }
-        },
-
-        State {
-            name: "attachmentstate"
-            when: ownedConversation.builder.hasDocAttachment
-                  || ownedConversation.builder.hasMediaAttachment
-            PropertyChanges {
-                target: attachmentLoader
-                active: true
-            }
-        },*/
-        State {
-            name: "default"
-            PropertyChanges {
-                target: replyLoader
-                active: false
-            }
-
-            PropertyChanges {
-                target: scrollView
-                focus: true
-            }
-        }
-    ]
 }

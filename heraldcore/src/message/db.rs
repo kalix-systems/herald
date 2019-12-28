@@ -11,9 +11,11 @@ pub(crate) fn get_message(
     let receipts = get_receipts(conn, msg_id)?;
     let replies = self::replies(conn, msg_id)?;
     let attachments = crate::message::attachments::db::get(conn, &msg_id)?;
+    let reactions = reactions(conn, msg_id)?;
 
-    Ok(w!(conn.query_row_named(
-        include_str!("sql/get_message.sql"),
+    let mut stmt = conn.prepare_cached(include_str!("sql/get_message.sql"))?;
+
+    Ok(w!(stmt.query_row_named(
         named_params! {
             "@msg_id": msg_id
         },
@@ -40,8 +42,67 @@ pub(crate) fn get_message(
                 time,
                 receipts,
                 replies,
+                reactions,
             })
         },
+    )))
+}
+
+/// Get message metadata by message id
+pub(crate) fn message_meta(
+    conn: &Conn,
+    msg_id: &MsgId,
+) -> Result<MessageMeta, HErr> {
+    let mut stmt = conn.prepare_cached(include_str!("sql/message_meta.sql"))?;
+    Ok(w!(stmt.query_row_named(
+        named_params! { "@msg_id": msg_id },
+        |row| {
+            Ok(MessageMeta {
+                insertion_time: row.get("insertion_ts")?,
+                msg_id: *msg_id,
+                match_status: MatchStatus::NotMatched,
+            })
+        }
+    )))
+}
+
+/// Get message data by message id
+pub(crate) fn message_data(
+    conn: &Conn,
+    msg_id: &MsgId,
+) -> Result<MsgData, HErr> {
+    let mut stmt = conn.prepare_cached(include_str!("sql/message_data.sql"))?;
+
+    let receipts = get_receipts(conn, msg_id)?;
+    let replies = replies(conn, msg_id)?;
+    let reactions = reactions(conn, msg_id)?;
+    let attachments = crate::message::attachments::db::get(conn, &msg_id)?;
+
+    Ok(w!(stmt.query_row_named(
+        named_params! { "@msg_id": msg_id },
+        |row| {
+            let time = MessageTime {
+                insertion: row.get("insertion_ts")?,
+                server: row.get("server_ts")?,
+                expiration: row.get("expiration_ts")?,
+            };
+
+            let is_reply: bool = row.get("is_reply")?;
+            let op: Option<MsgId> = row.get("op_msg_id")?;
+            let op = (op, is_reply).into();
+
+            Ok(MsgData {
+                author: row.get("author")?,
+                body: row.get("body")?,
+                send_status: row.get("send_status")?,
+                op,
+                attachments,
+                time,
+                receipts,
+                replies,
+                reactions,
+            })
+        }
     )))
 }
 
@@ -60,6 +121,7 @@ pub(crate) fn get_message_opt(
             let receipts = get_receipts(conn, msg_id)?;
             let replies = self::replies(conn, msg_id)?;
             let attachments = crate::message::attachments::db::get(conn, &msg_id)?;
+            let reactions = reactions(conn, msg_id)?;
 
             let time = MessageTime {
                 insertion: row.get("insertion_ts")?,
@@ -83,6 +145,7 @@ pub(crate) fn get_message_opt(
                 time,
                 receipts,
                 replies,
+                reactions,
             })
         },
     )?;
@@ -132,6 +195,64 @@ pub(crate) fn replies(
     Ok(w!(res.collect()))
 }
 
+pub(crate) fn reactions(
+    conn: &rusqlite::Connection,
+    msg_id: &MsgId,
+) -> Result<Option<Reactions>, rusqlite::Error> {
+    let mut stmt = w!(conn.prepare_cached(include_str!("sql/reactions.sql")));
+
+    let res = w!(
+        stmt.query_map_named(named_params!("@msg_id": msg_id), |row| {
+            let reactionary = row.get("reactionary")?;
+            let react_content = row.get("react_content")?;
+            let time = row.get("insertion_ts")?;
+
+            Ok(Reaction {
+                reactionary,
+                time,
+                react_content,
+            })
+        })
+    );
+
+    res.collect::<Result<Vec<_>, _>>().map(Reactions::from_vec)
+}
+
+pub(crate) fn add_reaction(
+    conn: &rusqlite::Connection,
+    msg_id: &MsgId,
+    reactionary: &UserId,
+    react_content: &str,
+) -> Result<(), rusqlite::Error> {
+    let mut stmt = w!(conn.prepare_cached(include_str!("sql/add_reaction.sql")));
+
+    stmt.execute_named(named_params!(
+        "@msg_id": msg_id,
+        "@reactionary": reactionary,
+        "@react_content": react_content,
+        "@insertion_ts": Time::now()
+    ))?;
+
+    Ok(())
+}
+
+pub(crate) fn remove_reaction(
+    conn: &rusqlite::Connection,
+    msg_id: &MsgId,
+    reactionary: &UserId,
+    react_content: &str,
+) -> Result<(), rusqlite::Error> {
+    let mut stmt = w!(conn.prepare_cached(include_str!("sql/remove_reaction.sql")));
+
+    stmt.execute_named(named_params!(
+        "@msg_id": msg_id,
+        "@reactionary": reactionary,
+        "@react_content": react_content,
+    ))?;
+
+    Ok(())
+}
+
 pub(crate) fn add_receipt(
     conn: &Conn,
     msg_id: MsgId,
@@ -155,6 +276,7 @@ pub(crate) fn by_send_status(
             let receipts = get_receipts(conn, &message_id)?;
             let replies = self::replies(conn, &message_id)?;
             let attachments = crate::message::attachments::db::get(conn, &message_id)?;
+            let reactions = reactions(conn, &message_id)?;
 
             let time = MessageTime {
                 insertion: row.get("insertion_ts")?,
@@ -178,6 +300,7 @@ pub(crate) fn by_send_status(
                 time,
                 receipts,
                 replies,
+                reactions,
             })
         })
     );
@@ -287,6 +410,7 @@ impl OutboundMessageBuilder {
             attachments: vec![].into(),
             receipts: HashMap::new(),
             replies: HashSet::new(),
+            reactions: None,
         };
 
         callback(StoreAndSend::Msg(Box::new(msg)));
@@ -379,7 +503,6 @@ impl OutboundMessageBuilder {
 
         let out = match rx.recv().map_err(|_| channel_recv_err!())? {
             StoreAndSend::Msg(msg) => msg,
-            // TODO use line number
             StoreAndSend::Error { error, .. } => return Err(error),
             other => {
                 panic!("Unexpected  variant {:?}", other);
@@ -509,6 +632,8 @@ impl InboundMessageBuilder {
 
         let receipts = get_receipts(&conn, &msg_id).unwrap_or_default();
         let replies = self::replies(&conn, &msg_id).unwrap_or_default();
+        let reactions = reactions(&conn, &msg_id).unwrap_or_default();
+
         let attachments = crate::message::attachments::db::get(&conn, &msg_id).unwrap_or_default();
 
         Ok(Some(Message {
@@ -522,6 +647,7 @@ impl InboundMessageBuilder {
             time,
             receipts,
             replies,
+            reactions,
         }))
     }
 }

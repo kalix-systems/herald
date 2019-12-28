@@ -10,12 +10,13 @@ impl ConversationBuilder {
         let Self {
             conversation_id,
             title,
-            picture,
+            mut picture,
             color,
             muted,
             pairwise,
             expiration_period,
             members,
+            status,
             ..
         } = self;
 
@@ -24,15 +25,18 @@ impl ConversationBuilder {
             None => ConversationId::gen_new(),
         };
 
+        let status = status.unwrap_or_default();
         let color = color.unwrap_or_else(|| crate::utils::id_to_color(&id));
         let pairwise = pairwise.unwrap_or(false);
         let muted = muted.unwrap_or(false);
-        let expiration_period = expiration_period.unwrap_or_default();
 
-        let picture = match picture.as_ref() {
+        let expiration_period = expiration_period
+            .unwrap_or_else(|| crate::config::db::preferred_expiration(tx).unwrap_or_default());
+
+        let picture = match picture.take() {
             Some(picture) => {
-                // TODO Give more specific error
-                let path: std::path::PathBuf = crate::image_utils::update_picture(picture, None)?;
+                let path: std::path::PathBuf =
+                    crate::image_utils::update_picture(picture, None::<&str>)?;
                 path.into_os_string().into_string().ok()
             }
             None => None,
@@ -50,7 +54,8 @@ impl ConversationBuilder {
                 "@pairwise": pairwise,
                 "@muted": muted,
                 "@last_active_ts": last_active,
-                "@expiration_period": expiration_period
+                "@expiration_period": expiration_period,
+                "@status": status
             },
         ));
 
@@ -64,6 +69,7 @@ impl ConversationBuilder {
                 last_active,
                 expiration_period,
                 muted,
+                status,
             },
             members,
         })

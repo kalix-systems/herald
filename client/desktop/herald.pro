@@ -18,14 +18,19 @@ CONFIG += sdk_no_version_check
 RESOURCES += \
     qml.qrc
 
-SOURCES   += main.cpp
+SOURCES   += main.cpp \
 
 # libherald headers, source, and libs
 include(../foundation/foundation.pri)
 
 macx {
-   ICON = ../foundation/icons/herald.icns
+    ICON = ../foundation/icons/herald.icns
 }
+
+
+#CONFIG(debug, debug|profile|release) {
+#    CONFIG+=sanitizer CONFIG+=sanitize_address sanitize_undefined
+#}
 
 unix:!macx {
     isEmpty(PREFIX) {
@@ -48,3 +53,5 @@ unix:!macx {
         herald.desktop \
         ../foundation/icons/herald.png
 }
+
+

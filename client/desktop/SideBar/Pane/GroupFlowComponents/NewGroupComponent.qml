@@ -14,36 +14,32 @@ Component {
     // spacing behaviour better. (there is no change in layout on resize, anchors more correct)
     Rectangle {
         anchors.fill: parent
-        color: CmnCfg.palette.lightGrey
+        color: CmnCfg.palette.offBlack
 
         //header includes group title and picture settings
         GroupHeaderComponent {
             id: topRect
         }
 
-        TextArea {
+        Imports.BorderedTextField {
             id: titleText
-            anchors.top: topRect.bottom
-            leftPadding: 12
+            anchors {
+                top: topRect.bottom
+                topMargin: CmnCfg.megaMargin
+                horizontalCenter: parent.horizontalCenter
+            }
+            color: CmnCfg.palette.white
             placeholderText: "Group title"
+            width: parent.width - CmnCfg.megaMargin
         }
 
         Rectangle {
-            anchors.top: titleText.bottom
-            id: divider
-            height: 1
-            width: parent.width - CmnCfg.largeMargin
-            anchors.horizontalCenter: parent.horizontalCenter
-            color: "black"
-        }
-
-        Rectangle {
-            anchors.top: divider.bottom
-            anchors.topMargin: 20
             id: bigDivider
+            anchors.top: titleText.bottom
+            anchors.topMargin: CmnCfg.megaMargin
             height: 1
             width: parent.width
-            color: "black"
+            color: CmnCfg.palette.lightGrey
         }
 
         //component for searching contacts to add
@@ -54,38 +50,56 @@ Component {
         }
 
         //create group button
-        Imports.ButtonForm {
+        Imports.IconButton {
             anchors.top: groupSelectText.bottom
-            anchors.topMargin: CmnCfg.smallMargin / 2
+            anchors.topMargin: CmnCfg.smallMargin
             anchors.right: parent.right
-            anchors.rightMargin: CmnCfg.largeMargin / 2
+            anchors.rightMargin: CmnCfg.megaMargin / 2
 
             width: 60
             height: 30
 
             background: Rectangle {
                 anchors.fill: parent
-                color: CmnCfg.palette.offBlack
+                color: CmnCfg.palette.medGrey
             }
 
             Text {
-                text: "CREATE"
+                text: qsTr("CREATE")
                 anchors.centerIn: parent
-                color: "white"
+                color: CmnCfg.palette.black
                 font.family: CmnCfg.labelFont.name
             }
             onClicked: {
-                titleText.text == "" ? herald.conversationBuilder.setTitle(
-                                           "Untitled Group") : herald.conversationBuilder.setTitle(
-                                           titleText.text)
-                if (topRect.profPic !== "") {
-                    herald.conversationBuilder.picture = topRect.profPic
+                if (titleText.text === "") {
+                    Herald.conversationBuilder.setTitle(qsTr("Untitled Group"))
+                } else {
+                    Herald.conversationBuilder.setTitle(titleText.text)
                 }
-                herald.conversationBuilder.finalize()
+
+                if (topRect.profPic !== "") {
+
+                    var parsed = JSON.parse(Herald.utils.imageDimensions(
+                                                topRect.profPic))
+
+                    const picture = {
+                        "width": Math.round(parsed.width),
+                        "height": Math.round(parsed.height),
+                        "x": 0,
+                        "y": 0,
+                        "path": topRect.profPic
+                    }
+
+                    Herald.conversationBuilder.setProfilePicture(
+                                JSON.stringify(picture))
+                }
+
+                Herald.conversationBuilder.finalize()
                 sideBarState.state = ""
             }
         }
-        Component.onCompleted: herald.usersSearch.refresh()
-        Component.onDestruction: herald.conversationBuilder.clear()
+
+        Component.onCompleted: Herald.usersSearch.refresh()
+        Component.onDestruction: Herald.conversationBuilder.clear()
     }
 }

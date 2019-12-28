@@ -11,7 +11,6 @@ use std::fmt;
 #[derive(Debug)]
 /// Error variants
 pub enum HErr {
-    // TODO: replace all instances of this with enum branches
     /// Uncategorized error.
     HeraldError(String),
     /// Database error.

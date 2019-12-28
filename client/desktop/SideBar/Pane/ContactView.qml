@@ -6,15 +6,7 @@ import "../../common" as Common
 import "qrc:/imports/js/utils.mjs" as Utils
 import ".././js/ContactView.mjs" as JS
 import "../popups" as Popups
-import "qrc:/imports/Avatar" as Av
-
-// Reveiw Key
-// OS Dependent: OSD
-// Global State: GS
-// Just Hacky: JH
-// Type Script: TS
-// Needs polish badly: NPB
-// Factor Component: FC
+import "qrc:/imports/Entity" as Av
 
 /// --- displays a list of contacts
 ListView {
@@ -40,8 +32,7 @@ ListView {
 
             labelComponent: Av.ConversationLabel {
                 contactName: contactData.name
-                labelColor: CmnCfg.palette.black
-                labelSize: 14
+                labelFontSize: 14
                 lastBody: "@" + contactData.userId
             }
 

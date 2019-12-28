@@ -1,13 +1,13 @@
 use crate::{
     attachments::{DocumentAttachments, MediaAttachments},
-    content_push, ffi,
+    content_push, err, ffi,
     interface::*,
-    push, ret_err, ret_none, spawn,
+    none, push, spawn,
 };
 use herald_common::{Time, UserId};
 use heraldcore::{
     message::{attachments::is_media, *},
-    types::{ConversationId, InvalidRandomIdLength, MsgId},
+    types::{ConversationId, MsgId},
 };
 use std::{convert::TryInto, path::PathBuf};
 
@@ -59,7 +59,7 @@ impl MessageBuilderTrait for MessageBuilder {
         match body {
             Some(body) => {
                 if !body.is_empty() {
-                    self.inner.body(ret_err!(body.try_into()));
+                    self.inner.body(err!(body.try_into()));
                 } else {
                     self.inner.body = None;
                 }
@@ -85,18 +85,20 @@ impl MessageBuilderTrait for MessageBuilder {
                 .into_iter()
                 .map(PathBuf::from),
         );
-
         let builder = std::mem::replace(&mut self.inner, Default::default());
         self.inner.conversation = builder.conversation;
         self.model.end_reset_model();
 
-        self.emit.is_reply_changed();
+        if self.op.take().is_some() {
+            self.emit.is_reply_changed();
+        }
+
         self.emit.has_media_attachment_changed();
         self.emit.has_doc_attachment_changed();
         self.emit.body_changed();
         self.emit_op_changed();
 
-        let cid = ret_none!(builder.conversation);
+        let cid = none!(builder.conversation);
 
         spawn!({
             builder.store_and_send(move |m| {
@@ -105,16 +107,16 @@ impl MessageBuilderTrait for MessageBuilder {
 
                 match m {
                     Msg(msg) => {
-                        ret_err!(content_push(cid, MsgUpdate::BuilderMsg(msg)));
+                        err!(content_push(cid, MsgUpdate::BuilderMsg(msg)));
                     }
                     Error { error, location } => {
                         push((Err::<(), HErr>(error), location));
                     }
                     StoreDone(mid, meta) => {
-                        ret_err!(content_push(cid, MsgUpdate::StoreDone(mid, meta)));
+                        err!(content_push(cid, MsgUpdate::StoreDone(mid, meta)));
                     }
-                    SendDone(_) => {
-                        // TODO: send status?
+                    SendDone(mid) => {
+                        err!(content_push(cid, MsgUpdate::SendDone(mid)));
                     }
                 }
             })
@@ -145,13 +147,16 @@ impl MessageBuilderTrait for MessageBuilder {
         Some(self.op.as_ref()?.time.into())
     }
 
-    // TODO
-    fn op_doc_attachments(&self) -> Option<&str> {
-        None
+    fn op_expiration_time(&self) -> Option<i64> {
+        self.op.as_ref()?.expiration.map(Time::into)
     }
 
-    fn op_media_attachments(&self) -> Option<&str> {
-        None
+    fn op_doc_attachments(&self) -> &str {
+        self.op.as_ref().map(Reply::doc).unwrap_or("")
+    }
+
+    fn op_media_attachments(&self) -> &str {
+        self.op.as_ref().map(Reply::media).unwrap_or("")
     }
 
     fn add_attachment(
@@ -241,6 +246,21 @@ impl MessageBuilderTrait for MessageBuilder {
     fn has_media_attachment(&self) -> bool {
         !self.media_attachments.is_empty()
     }
+
+    fn set_op_id(
+        &mut self,
+        op_msg_id: Option<ffi::MsgIdRef>,
+    ) {
+        match op_msg_id {
+            Some(op_msg_id) => {
+                let op_msg_id = err!(op_msg_id.try_into());
+                self.update_op_id(&op_msg_id);
+            }
+            None => {
+                self.clear_reply_();
+            }
+        };
+    }
 }
 
 impl MessageBuilder {
@@ -249,19 +269,5 @@ impl MessageBuilder {
         cid: ConversationId,
     ) {
         self.inner.conversation_id(cid);
-    }
-
-    pub(super) fn set_op_id(
-        &mut self,
-        op_msg_id: Option<ffi::MsgIdRef>,
-        container: &super::Container,
-    ) -> Result<OpChanged, InvalidRandomIdLength> {
-        match op_msg_id {
-            Some(op_msg_id) => {
-                let op_msg_id = op_msg_id.try_into()?;
-                Ok(self.update_op_id(&op_msg_id, container))
-            }
-            None => Ok(self.clear_reply_()),
-        }
     }
 }

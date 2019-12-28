@@ -70,6 +70,10 @@ impl HeraldTrait for Herald {
         self.register_new_user_(user_id, server_addr, server_port)
     }
 
+    fn registration_failure_code(&self) -> Option<u8> {
+        self.registration_failure_code.map(|c| c as u8)
+    }
+
     fn can_fetch_more(&self) -> bool {
         self.can_fetch_more_()
     }

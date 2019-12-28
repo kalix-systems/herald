@@ -1,86 +1,69 @@
-import QtQuick 2.12
-import QtQuick.Controls 2.12
-import QtQuick.Layouts 1.12
-import LibHerald 1.0
-import QtGraphicalEffects 1.12
-import "./../"
+import QtQuick 2.14
+import QtQuick.Controls 2.14
 import Qt.labs.platform 1.1
-import QtQuick.Dialogs 1.3
+import QtGraphicalEffects 1.12
+import LibHerald 1.0
+import "./../"
 import "../js/utils.mjs" as Utils
 
+// A visual list of documents
 ListView {
-    id: docFileItemRoot
+    id: fileList
+
     interactive: false
-    width: 200
-    delegate: Item {
-        id: fileRow
-        width: Math.max(bubbleRoot.width - CmnCfg.smallMargin * 2, 100)
-        height: 24
-        clip: true
+    width: contentItem.childrenRect.width + CmnCfg.smallMargin * 2
+    height: 24 * Math.min(docParsed.length, 5)
+    spacing: CmnCfg.microMargin
+    clip: true
 
-        Image {
-            anchors.left: parent.left
-            id: fileIcon
-            anchors.verticalCenter: parent.verticalCenter
-            source: "qrc:/file-icon.svg"
-            height: 20
-            width: height
-        }
+    ScrollBar.vertical: ScrollBar {
+        id: scrollBar
+        policy: contentHeight > height ? ScrollBar.AlwaysOn : ScrollBar.AlwaysOff
+    }
+    boundsBehavior: Flickable.StopAtBounds
 
-        TextMetrics {
-            id: nameMetrics
-            text: name
-            elide: Text.ElideMiddle
-            elideWidth: fileRow.width - fileSize.width - 40 - CmnCfg.smallMargin * 2
+    delegate: Row {
+        spacing: CmnCfg.smallMargin / 2
+
+        IconButton {
+            id: downloadIcon
+            icon.source: "qrc:/file-download-icon.svg"
+            icon.height: 20
+            icon.width: height
+            onClicked: {
+                attachmentDownloader.filePath = path
+                attachmentDownloader.open()
+            }
         }
 
         Text {
-            anchors.left: fileIcon.right
-            anchors.leftMargin: CmnCfg.smallMargin
-            anchors.verticalCenter: parent.verticalCenter
             id: fileName
             color: CmnCfg.palette.black
-            text: nameMetrics.elidedText
+            text: fileNameMetrics.elidedText
             font.family: CmnCfg.chatFont.name
             font.pixelSize: 13
             font.weight: Font.Medium
+
+            TextMetrics {
+                id: fileNameMetrics
+                text: name
+                font.family: CmnCfg.chatFont.name
+                font.pixelSize: 13
+                font.weight: Font.Medium
+                elide: Text.ElideMiddle
+                elideWidth: bubbleRoot.maxWidth * 0.8 - fileSize.width
+                            + downloadIcon.width + CmnCfg.smallMargin * 2
+            }
         }
 
         Text {
             id: fileSize
-            anchors.left: fileName.right
-            anchors.leftMargin: CmnCfg.smallMargin
-            anchors.verticalCenter: parent.verticalCenter
             text: Utils.friendlyFileSize(size)
             font.family: CmnCfg.chatFont.name
             font.pixelSize: 10
             font.weight: Font.Light
             color: CmnCfg.palette.darkGrey
-        }
-
-        ButtonForm {
-            id: downloadIcon
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.right: parent.right
-            source: "qrc:/download-icon.svg"
-            height: 20
-            width: height
-            fill: CmnCfg.palette.black
-            onClicked: {
-                fileChooser.open()
-            }
-        }
-
-        FileDialog {
-            id: fileChooser
-            selectExisting: false
-            selectFolder: true
-            selectMultiple: false
-            folder: StandardPaths.writableLocation(
-                        StandardPaths.DesktopLocation)
-            onAccepted: {
-                herald.utils.saveFile(path, fileUrl)
-            }
+            anchors.verticalCenter: fileName.verticalCenter
         }
     }
 }

@@ -12,22 +12,27 @@ Component {
     id: searchBarComponent
 
     Column {
-        //wrapper column to position textarea and underline
+        //wrapper column to position text field and underline
         anchors.right: parent.right
         RowLayout {
 
             id: searchToolBar
             anchors.horizontalCenter: parent.horizontalCenter
 
-            spacing: CmnCfg.smallMargin / 2
+            spacing: CmnCfg.microMargin
 
             anchors {
-                leftMargin: CmnCfg.margin
-                rightMargin: CmnCfg.margin
+                leftMargin: CmnCfg.defaultMargin
+                rightMargin: CmnCfg.defaultMargin
             }
 
             //main search component
-            SearchTextArea {}
+            SearchTextField {
+                //TODO: proper width calculation
+                Layout.maximumWidth: 300
+                Layout.minimumWidth: 200
+                Layout.alignment: Qt.AlignLeft | Qt.AlignTop
+            }
 
             Text {
                 id: indexText
@@ -41,36 +46,32 @@ Component {
                 Layout.leftMargin: -20
             }
 
-            Imports.ButtonForm {
+            Imports.IconButton {
                 id: back
-                source: "qrc:/up-chevron-icon-white.svg"
-                Layout.alignment: Qt.AlignVCenter
+                source: "qrc:/up-chevron-icon.svg"
                 fill: CmnCfg.palette.lightGrey
+                Layout.alignment: Qt.AlignVCenter
                 enabled: searchToolBar.state === "searchActiveState"
                 opacity: enabled ? 1 : 0.5
-                onClicked: {
-                    convWindow.positionViewAtIndex(
-                                ownedConversation.prevSearchMatch(),
-                                ListView.Center)
-                }
+                onClicked: convWindow.positionViewAtIndex(
+                               ownedConversation.prevSearchMatch(),
+                               ListView.Center)
             }
 
-            Imports.ButtonForm {
+            Imports.IconButton {
                 id: forward
-                source: "qrc:/down-chevron-icon-white.svg"
-                Layout.alignment: Qt.AlignVCenter
+                source: "qrc:/down-chevron-icon.svg"
                 fill: CmnCfg.palette.lightGrey
+                Layout.alignment: Qt.AlignVCenter
                 enabled: searchToolBar.state === "searchActiveState"
                 opacity: enabled ? 1 : 0.5
 
-                onClicked: {
-                    convWindow.positionViewAtIndex(
-                                ownedConversation.nextSearchMatch(),
-                                ListView.Center)
-                }
+                onClicked: convWindow.positionViewAtIndex(
+                               ownedConversation.nextSearchMatch(),
+                               ListView.Center)
             }
 
-            Imports.ButtonForm {
+            Imports.IconButton {
                 source: "qrc:/x-icon.svg"
                 Layout.alignment: Qt.AlignVCenter
                 fill: CmnCfg.palette.lightGrey
@@ -88,8 +89,8 @@ Component {
 
         Rectangle {
             height: 1
-            width: searchToolBar.width - CmnCfg.smallMargin
-            anchors.horizontalCenter: parent.horizontalCenter
+            width: searchToolBar.width - CmnCfg.microMargin
+            anchors.left: parent.left
             color: "white"
         }
 

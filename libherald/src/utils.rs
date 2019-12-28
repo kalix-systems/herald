@@ -1,4 +1,5 @@
 /// Strips `qrc` prefix from paths passed from QML.
+#[cfg(not(target_os = "ios"))]
 pub fn strip_qrc(mut path: String) -> Option<String> {
     if path.len() < 7 {
         None
@@ -7,8 +8,15 @@ pub fn strip_qrc(mut path: String) -> Option<String> {
     }
 }
 
-pub(crate) fn err_string_msg(
-    e: &dyn std::error::Error,
+/// On Ios there are no QRC prefixes on directories
+/// from QT, this function is effectively a no-op
+#[cfg(target_os = "ios")]
+pub fn strip_qrc(path: String) -> Option<String> {
+    Some(path)
+}
+
+pub(crate) fn err_string_msg<E: std::error::Error>(
+    e: &E,
     file: &str,
     line: u32,
     msg: &'static str,
@@ -22,8 +30,8 @@ pub(crate) fn err_string_msg(
     )
 }
 
-pub(crate) fn ret_err_string(
-    e: &dyn std::error::Error,
+pub(crate) fn err_string<E: std::error::Error>(
+    e: &E,
     file: &str,
     line: u32,
 ) -> String {
@@ -37,17 +45,21 @@ pub(crate) fn ret_err_string(
 
 #[macro_export]
 /// Early return on error
-macro_rules! ret_err {
+macro_rules! err {
     ($maybe: expr) => {
-        ret_err!($maybe, ())
+        err!($maybe, ())
     };
     ($maybe: expr, $retval: expr) => {
         match $maybe {
             Ok(val) => val,
             Err(e) => {
-                let err_string = crate::utils::ret_err_string(&e, file!(), line!());
+                use ::std::io::Write;
 
-                eprintln!("{}", err_string);
+                let err_string = crate::utils::err_string(&e, file!(), line!());
+
+                let mut se = ::std::io::stderr();
+                drop(writeln!(&mut se, "{}", err_string));
+
                 $crate::push(crate::Update::Error(err_string));
                 return $retval;
             }
@@ -62,10 +74,14 @@ macro_rules! cont_err {
         match $maybe {
             Ok(val) => val,
             Err(e) => {
+                use ::std::io::Write;
                 use $crate::shared::SingletonBus;
-                let err_string = crate::utils::ret_err_string(&e, file!(), line!());
 
-                eprintln!("{}", err_string);
+                let err_string = crate::utils::err_string(&e, file!(), line!());
+
+                let mut se = ::std::io::stderr();
+                drop(writeln!(&mut se, "{}", err_string));
+
                 $crate::push(crate::Update::Error(err_string)).ok();
                 continue;
             }
@@ -80,9 +96,13 @@ macro_rules! push_err {
         match $maybe {
             Ok(val) => Some(val),
             Err(e) => {
+                use ::std::io::Write;
+
                 let err_string = crate::utils::err_string_msg(&e, file!(), line!(), $msg);
 
-                eprintln!("{}", err_string);
+                let mut se = ::std::io::stderr();
+                drop(writeln!(&mut se, "{}", err_string));
+
                 $crate::push(Update::Error(err_string));
                 None
             }
@@ -90,7 +110,7 @@ macro_rules! push_err {
     };
 }
 
-pub(crate) fn ret_none_string(
+pub(crate) fn none_string(
     file: &str,
     line: u32,
 ) -> String {
@@ -103,17 +123,21 @@ pub(crate) fn ret_none_string(
 
 #[macro_export]
 /// Early return on unexpected `None`
-macro_rules! ret_none {
+macro_rules! none {
     ($maybe: expr) => {
-        ret_none!($maybe, ())
+        none!($maybe, ())
     };
     ($maybe: expr, $retval: expr) => {
         match $maybe {
             Some(val) => val,
             None => {
-                let err_string = $crate::utils::ret_none_string(file!(), line!());
+                use ::std::io::Write;
 
-                eprintln!("{}", err_string);
+                let err_string = $crate::utils::none_string(file!(), line!());
+
+                let mut se = ::std::io::stderr();
+                drop(writeln!(&mut se, "{}", err_string));
+
                 $crate::push(crate::Update::Error(err_string));
                 return $retval;
             }
@@ -128,9 +152,13 @@ macro_rules! cont_none {
         match $maybe {
             Some(val) => val,
             None => {
-                let err_string = $crate::utils::ret_none_string(file!(), line!());
+                use ::std::io::Write;
 
-                eprintln!("{}", err_string);
+                let err_string = $crate::utils::none_string(file!(), line!());
+
+                let mut se = ::std::io::stderr();
+                drop(writeln!(&mut se, "{}", err_string));
+
                 $crate::push(crate::Update::Error(err_string));
                 continue;
             }
@@ -145,7 +173,7 @@ macro_rules! spawn {
         spawn!($code, ())
     };
     ($code: expr, $retval: expr) => {
-        ret_err!(
+        err!(
             ::std::thread::Builder::new().spawn(move || { $code }),
             $retval
         )

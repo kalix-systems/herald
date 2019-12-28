@@ -4,14 +4,6 @@ import "qrc:/imports/themes" as Themes
 import "qrc:/imports" as Imports
 pragma Singleton
 
-// Reveiw Key
-// OS Dependent: OSD
-// Global State: GS
-// Just Hacky: JH
-// Type Script: TS
-// Needs polish badly: NPB
-// Factor Component: FC
-// FS: Fix scoping
 Item {
     id: cfg
 
@@ -20,55 +12,88 @@ Item {
     }
 
     readonly property alias units: units
-    /// edge rounding for all rectangles that use the radius property
-    readonly property real radius: units.largeSpacing
-    /// standard margin size used to interior objects
-    readonly property real margin: units.largeSpacing
-    /// standard half margin
-    readonly property real smallMargin: 8
-    /// standard half padding unit
-    readonly property real smallPadding: units.smallSpacing
-    /// standard padding unit
-    readonly property real padding: units.smallSpacing
-    /// standard toolbar height
-    readonly property real toolbarHeight: units.dp(40)
+
+
+    // MARGINS & SPACING
+
+    /// standard tiny margin
+    readonly property real microMargin: units.dp(4)
+    /// standard small margin
+    readonly property real smallMargin: units.dp(8)
+    /// standard margin size
+    readonly property real defaultMargin: units.dp(12)
+    /// standard large margin size
+    readonly property real largeMargin: units.dp(16)
+    /// standard very large margin
+    readonly property real megaMargin: units.dp(24)
+
+
+    // TODO shouldn't use spacers
     /// gap used for tool bars, avatar margins, etc
     readonly property real smallSpacer: units.dp(8)
     /// gap used for larger spacings in tool bars.
     readonly property real largeSpacer: units.dp(12)
 
-    /// Font sizes, IMPORTANT: these are in PT, not pixels
-    /// standard chat text size
-    property int chatTextSize: 14
-    /// Chat preview size
-    property int chatPreviewSize: 15
+
+    // FONTS
+
     /// standard header size
-    property int headerTextSize: 20
+    readonly property real headerTextSize: units.dp(18)
+    /// size of labels
+    readonly property real labelSize: units.dp(18)
+    /// standard chat text size
+    readonly property real chatTextSize: units.dp(16)
+    /// size for contact/group name labels in lists
+    readonly property int entityLabelSize: units.dp(18)
+    /// size for contact/group name labels in lists
+    readonly property int entitySubLabelSize: units.dp(17)
     /// standard button text size
-    property int buttonTextSize: 17
+    readonly property real buttonTextSize: units.dp(17)
+
+    readonly property FontLoader chatFont: metaTheme.chatFont
+    readonly property FontLoader labelFont: metaTheme.cairo
+
+    // default font for basic UI text
+    readonly property font defaultFont: Qt.font({
+        family: chatFont.name,
+        pixelSize: units.dp(17)
+    })
+
+
+    // STANDARD COMPONENT SIZES
+
+    /// standard toolbar height
+    readonly property real toolbarHeight: units.dp(40)
+
+    /// logged-in user avatar size
+    readonly property real identityAvatarDiameter: units.dp(30)
+    /// standard avatar size
+    readonly property real avatarSize: units.dp(56)
+
+    /// width of chat bubble left accent bar
+    readonly property int accentBarWidth: 4
+
+    /// height & width of icon buttons
+    readonly property real iconSize: units.dp(24)
+
+    /// height of floating action buttons on home screen
+    readonly property real fabDiameter: units.dp(56)
+
+    /// height of floating action buttons on home screen
+    readonly property real miniFabDiameter: units.dp(40)
+
+
+    // MISC
 
     /// standard z values
-    property int overlayZ: 10
-    property int topZ: 9
-    property int middleZ: 5
-    property int bottomZ: 1
-    property int underlayZ: -1
-    /// standard avatar size
-    property int avatarSize: units.dp(48)
+    readonly property int overlayZ: 10
+    readonly property int topZ: 9
+    readonly property int middleZ: 5
+    readonly property int bottomZ: 1
+    readonly property int underlayZ: -1
+
     /// user settable cfg
-    property int theme: 0
-
-    property FontLoader chatFont: metaTheme.chatFont
-    property FontLoader labelFont: metaTheme.labelFont
-
-    property QtObject iconSizes: QtObject {
-        property int small: units.dp(16)
-        property int smallMedium: units.dp(24)
-        property int medium: units.dp(32)
-        property int large: units.dp(48)
-        property int huge: units.dp(64)
-        property int enormous: units.dp(164)
-    }
+    readonly property int theme: 0
 
     /// emoji skin color
     Settings {
@@ -80,6 +105,6 @@ Item {
         id: metaTheme
     }
     /// palette :
-    property QtObject palette: metaTheme.themes[theme]
-    property var avatarColors: palette.avatarColors
+    readonly property QtObject palette: metaTheme.themes[theme]
+    readonly property var avatarColors: palette.avatarColors
 }

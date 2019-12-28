@@ -64,6 +64,14 @@ pub fn conversation_messages(conversation_id: &ConversationId) -> Result<Vec<Mes
     db::conversation_messages(&db, conversation_id)
 }
 
+/// Get all message metadata in a conversation.
+pub fn conversation_message_meta(
+    conversation_id: &ConversationId
+) -> Result<Vec<crate::message::MessageMeta>, HErr> {
+    let db = Database::get()?;
+    db::conversation_message_meta(&db, conversation_id)
+}
+
 /// Get conversation metadata
 pub fn meta(conversation_id: &ConversationId) -> Result<ConversationMeta, HErr> {
     let db = Database::get()?;
@@ -88,6 +96,15 @@ pub fn set_muted(
     db::set_muted(&db, conversation_id, muted)
 }
 
+/// Sets archive status of a conversation
+pub fn set_status(
+    conversation_id: &ConversationId,
+    status: Status,
+) -> Result<(), HErr> {
+    let db = Database::get()?;
+    db::set_status(&db, conversation_id, status)
+}
+
 /// Sets title for a conversation
 pub fn set_title(
     conversation_id: &ConversationId,
@@ -100,7 +117,7 @@ pub fn set_title(
 /// Sets picture for a conversation
 pub fn set_picture(
     conversation_id: &ConversationId,
-    picture: Option<&str>,
+    picture: Option<image_utils::ProfilePicture>,
 ) -> Result<Option<String>, HErr> {
     let db = Database::get()?;
     db::set_picture(&db, conversation_id, picture)

@@ -9,6 +9,7 @@ pub struct ConfigEmitter {
     pub(super) config_id_changed: fn(*mut ConfigQObject),
     pub(super) name_changed: fn(*mut ConfigQObject),
     pub(super) nts_conversation_id_changed: fn(*mut ConfigQObject),
+    pub(super) preferred_expiration_changed: fn(*mut ConfigQObject),
     pub(super) profile_picture_changed: fn(*mut ConfigQObject),
 }
 
@@ -27,6 +28,7 @@ impl ConfigEmitter {
             config_id_changed: self.config_id_changed,
             name_changed: self.name_changed,
             nts_conversation_id_changed: self.nts_conversation_id_changed,
+            preferred_expiration_changed: self.preferred_expiration_changed,
             profile_picture_changed: self.profile_picture_changed,
         }
     }
@@ -77,6 +79,14 @@ impl ConfigEmitter {
         }
     }
 
+    pub fn preferred_expiration_changed(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+
+        if !ptr.is_null() {
+            (self.preferred_expiration_changed)(ptr);
+        }
+    }
+
     pub fn profile_picture_changed(&mut self) {
         let ptr = self.qobject.load(Ordering::SeqCst);
 
@@ -116,12 +126,19 @@ pub trait ConfigTrait {
 
     fn nts_conversation_id(&self) -> &[u8];
 
+    fn preferred_expiration(&self) -> u8;
+
+    fn set_preferred_expiration(
+        &mut self,
+        value: u8,
+    );
+
     fn profile_picture(&self) -> Option<&str>;
 
     fn set_profile_picture(
         &mut self,
-        value: Option<String>,
-    );
+        profile_picture: String,
+    ) -> ();
 }
 
 #[no_mangle]
@@ -140,6 +157,7 @@ pub unsafe fn config_new_inner(ptr_bundle: *mut ConfigPtrBundle) -> Config {
         config_config_id_changed,
         config_name_changed,
         config_nts_conversation_id_changed,
+        config_preferred_expiration_changed,
         config_profile_picture_changed,
     } = ptr_bundle;
     let config_emit = ConfigEmitter {
@@ -149,6 +167,7 @@ pub unsafe fn config_new_inner(ptr_bundle: *mut ConfigPtrBundle) -> Config {
         config_id_changed: config_config_id_changed,
         name_changed: config_name_changed,
         nts_conversation_id_changed: config_nts_conversation_id_changed,
+        preferred_expiration_changed: config_preferred_expiration_changed,
         profile_picture_changed: config_profile_picture_changed,
     };
     let d_config = Config::new(config_emit);
@@ -158,6 +177,22 @@ pub unsafe fn config_new_inner(ptr_bundle: *mut ConfigPtrBundle) -> Config {
 #[no_mangle]
 pub unsafe extern "C" fn config_free(ptr: *mut Config) {
     Box::from_raw(ptr).emit().clear();
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn config_set_profile_picture(
+    ptr: *mut Config,
+    profile_picture_str: *const c_ushort,
+    profile_picture_len: c_int,
+) {
+    let obj = &mut *ptr;
+    let mut profile_picture = String::new();
+    set_string_from_utf16(
+        &mut profile_picture,
+        profile_picture_str,
+        profile_picture_len,
+    );
+    obj.set_profile_picture(profile_picture)
 }
 
 #[no_mangle]
@@ -235,6 +270,19 @@ pub unsafe extern "C" fn config_nts_conversation_id_get(
 }
 
 #[no_mangle]
+pub unsafe extern "C" fn config_preferred_expiration_get(ptr: *const Config) -> u8 {
+    (&*ptr).preferred_expiration()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn config_preferred_expiration_set(
+    ptr: *mut Config,
+    value: u8,
+) {
+    (&mut *ptr).set_preferred_expiration(value)
+}
+
+#[no_mangle]
 pub unsafe extern "C" fn config_profile_picture_get(
     ptr: *const Config,
     prop: *mut QString,
@@ -248,24 +296,6 @@ pub unsafe extern "C" fn config_profile_picture_get(
     }
 }
 
-#[no_mangle]
-pub unsafe extern "C" fn config_profile_picture_set(
-    ptr: *mut Config,
-    value: *const c_ushort,
-    len: c_int,
-) {
-    let obj = &mut *ptr;
-    let mut s = String::new();
-    set_string_from_utf16(&mut s, value, len);
-    obj.set_profile_picture(Some(s));
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn config_profile_picture_set_none(ptr: *mut Config) {
-    let obj = &mut *ptr;
-    obj.set_profile_picture(None);
-}
-
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct ConfigPtrBundle {
@@ -275,5 +305,6 @@ pub struct ConfigPtrBundle {
     config_config_id_changed: fn(*mut ConfigQObject),
     config_name_changed: fn(*mut ConfigQObject),
     config_nts_conversation_id_changed: fn(*mut ConfigQObject),
+    config_preferred_expiration_changed: fn(*mut ConfigQObject),
     config_profile_picture_changed: fn(*mut ConfigQObject),
 }

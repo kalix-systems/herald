@@ -5,19 +5,26 @@ import LibHerald 1.0
 import QtQuick.Dialogs 1.3
 import Qt.labs.platform 1.0
 import "qrc:/imports" as Imports
-import "qrc:/imports/Avatar"
+import "qrc:/imports/Entity"
 import "qrc:/imports/js/utils.mjs" as Utils
+import "../../common" as Common
 
 ToolBar {
     id: chatToolBar
     property var conversationItem
-    property Messages ownedConversation: parent.ownedConversation
+    property var ownedConversation: parent.ownedConversation
 
     height: CmnCfg.toolbarHeight
     z: CmnCfg.middleZ
 
     background: Rectangle {
         color: CmnCfg.palette.offBlack
+    }
+    Rectangle {
+        anchors.left: parent.left
+        height: parent.height + 1
+        width: 1
+        color: CmnCfg.palette.lightGrey
     }
 
     RowLayout {
@@ -27,37 +34,34 @@ ToolBar {
 
         anchors {
             fill: parent
-            leftMargin: CmnCfg.margin
+            leftMargin: CmnCfg.defaultMargin
             rightMargin: CmnCfg.smallMargin
         }
 
-        AvatarMain {
+        Avatar {
             id: avatar
             size: 32
-            avatarHeight: groupAvatar ? 30 : 32
-            iconColor: CmnCfg.avatarColors[conversationItem.color]
-            textColor: CmnCfg.palette.iconFill
+            color: CmnCfg.avatarColors[conversationItem.color]
             initials: conversationItem.title[0].toUpperCase()
             Layout.alignment: Qt.AlignLeft
             pfpPath: Utils.safeStringOrDefault(conversationItem.picture, "")
-            groupAvatar: !conversationItem.pairwise
+            isGroup: !conversationItem.pairwise
             anchors {
-                margins: 16
+                margins: CmnCfg.defaultMargin
             }
         }
 
         Label {
             id: uid
-            font {
-                bold: true
-                family: CmnCfg.labelFont.name
-                pixelSize: 18
-            }
+            font: CmnCfg.headerBarFont
             Layout.alignment: Qt.AlignLeft
             Layout.fillWidth: true
             elide: Label.ElideRight
             text: conversationItem.title
             color: CmnCfg.palette.white
+            // top padding aligns headerText baseline with baseline of
+            // initial in user avatar to right
+            topPadding: 1
         }
 
         Loader {
@@ -68,22 +72,40 @@ ToolBar {
 
         Row {
             id: optionsRow
-            spacing: CmnCfg.margin
+            spacing: CmnCfg.defaultMargin
             Layout.alignment: Qt.AlignRight
             height: parent.height
 
-            Imports.ButtonForm {
+            Imports.IconButton {
                 id: searchButton
-                source: "qrc:/search-icon.svg"
+                source: !ownedConversation.searchRegex ? "qrc:/search-icon.svg" : "qrc:/regex-search-icon.svg"
                 fill: CmnCfg.palette.lightGrey
                 topPadding: 1
                 onClicked: chatToolBar.state = "searchState"
+                MouseArea {
+                    anchors.fill: parent
+                    acceptedButtons: Qt.RightButton
+                    onClicked: searchOptionMenu.open()
+                    propagateComposedEvents: true
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                }
+
+                Menu {
+                    id: searchOptionMenu
+
+                    MenuItem {
+                        text: ownedConversation.searchRegex ? qsTr("Switch to basic search") : qsTr(
+                                                                  "Switch to regex search")
+                        onTriggered: ownedConversation.searchRegex = !ownedConversation.searchRegex
+                    }
+                }
             }
 
-            Imports.ButtonForm {
+            Imports.IconButton {
                 id: timerButton
                 source: timerMenu.chosenTimer
-                fill: CmnCfg.palette.lightGrey
+                fill: "transparent"
                 topPadding: 1
                 onClicked: timerMenu.open()
             }
@@ -93,7 +115,7 @@ ToolBar {
                 conversationItem: chatToolBar.conversationItem
             }
 
-            Imports.ButtonForm {
+            Imports.IconButton {
                 id: convOptionsButton
                 source: "qrc:/options-icon.svg"
                 fill: CmnCfg.palette.lightGrey

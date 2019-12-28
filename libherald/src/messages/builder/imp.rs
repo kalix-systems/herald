@@ -1,5 +1,5 @@
 use super::*;
-use crate::messages::{Container, MsgData};
+use heraldcore::message::MsgData;
 
 impl MessageBuilder {
     pub(super) fn clear_reply_(&mut self) -> OpChanged {
@@ -18,15 +18,16 @@ impl MessageBuilder {
     pub(super) fn update_op_id(
         &mut self,
         op_msg_id: &MsgId,
-        container: &Container,
     ) -> OpChanged {
+        let was_none = self.inner.op.is_none();
+
         if let Some(old) = self.inner.op {
             if *op_msg_id == old {
                 return OpChanged::NotChanged;
             }
         }
 
-        let reply = match get_reply(&op_msg_id, container) {
+        let reply = match get_reply(&op_msg_id) {
             Some(reply) => reply,
             None => return self.clear_reply_(),
         };
@@ -36,13 +37,11 @@ impl MessageBuilder {
 
         self.emit_op_changed();
 
-        self.emit.is_reply_changed();
+        if was_none {
+            self.emit.is_reply_changed();
+        }
 
         OpChanged::Changed
-    }
-
-    pub(in crate::messages) fn op_id_slice(&self) -> Option<ffi::MsgIdRef> {
-        Some(self.inner.op.as_ref()?.as_slice())
     }
 
     pub(super) fn emit_op_changed(&mut self) {
@@ -52,6 +51,7 @@ impl MessageBuilder {
         self.emit.op_time_changed();
         self.emit.op_doc_attachments_changed();
         self.emit.op_media_attachments_changed();
+        self.emit.op_expiration_time_changed();
     }
 
     pub(in crate::messages) fn try_clear_reply(
@@ -69,25 +69,47 @@ impl MessageBuilder {
 #[derive(Debug)]
 pub(super) struct Reply {
     pub(super) time: Time,
+    pub(super) expiration: Option<Time>,
     pub(super) body: Option<MessageBody>,
     pub(super) author: UserId,
+    pub(super) doc_attachments_json: Option<String>,
+    pub(super) media_attachments_json: Option<String>,
 }
 
 impl Reply {
     pub(super) fn from_msg_data(data: &MsgData) -> Reply {
+        let doc_attachments_json =
+            messages_helper::doc_attachments_json(&data.attachments, Some(1));
+        let media_attachments_json =
+            messages_helper::media_attachments_json(&data.attachments, Some(5));
+
         Reply {
             time: data.time.insertion,
+            expiration: data.time.expiration,
             body: data.body.clone(),
             author: data.author,
+            doc_attachments_json,
+            media_attachments_json,
         }
+    }
+
+    pub(super) fn media(&self) -> &str {
+        self.media_attachments_json
+            .as_ref()
+            .map(String::as_str)
+            .unwrap_or("")
+    }
+
+    pub(super) fn doc(&self) -> &str {
+        self.doc_attachments_json
+            .as_ref()
+            .map(String::as_str)
+            .unwrap_or("")
     }
 }
 
-fn get_reply(
-    op_msg_id: &MsgId,
-    container: &Container,
-) -> Option<Reply> {
-    container.get_data(op_msg_id).map(Reply::from_msg_data)
+fn get_reply(op_msg_id: &MsgId) -> Option<Reply> {
+    messages_helper::container::access(op_msg_id, Reply::from_msg_data)
 }
 
 #[derive(Debug)]

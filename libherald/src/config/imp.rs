@@ -30,6 +30,7 @@ impl Config {
             Picture(maybe_path) => {
                 self.inner.as_mut()?.profile_picture = maybe_path;
 
+                // TODO update note to self conversation picture
                 self.emit.profile_picture_changed();
             }
         }

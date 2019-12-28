@@ -15,6 +15,7 @@ fn add_user() {
         .name("name".into())
         .add_db(&mut conn)
         .expect("Failed to add user");
+
     UserBuilder::new(id2)
         .color(1)
         .add_db(&mut conn)
@@ -53,8 +54,12 @@ fn fs_profile_picture() {
         .add_db(&mut conn)
         .expect(womp!("Failed to add user"));
 
-    db::set_profile_picture(&conn, id, Some(test_picture.into()))
-        .expect(womp!("Failed to set profile picture"));
+    db::set_profile_picture(
+        &conn,
+        id,
+        Some(image_utils::ProfilePicture::autocrop(test_picture.into())),
+    )
+    .expect(womp!("Failed to set profile picture"));
 
     std::fs::remove_dir_all(pictures_dir()).expect(womp!());
 }
@@ -149,34 +154,6 @@ fn all_users() {
 }
 
 #[test]
-fn set_status() {
-    let mut conn = Database::in_memory_with_config().expect(womp!());
-
-    let id = "HelloWorld".try_into().expect(womp!());
-    let user = UserBuilder::new(id).add_db(&mut conn).expect(womp!()).0;
-
-    db::set_status(&mut conn, id, UserStatus::Archived).expect(womp!());
-
-    assert_eq!(
-        db::status(&conn, id).expect("Failed to determine user status"),
-        UserStatus::Archived
-    );
-
-    db::set_status(&mut conn, id, UserStatus::Deleted).expect(womp!());
-
-    assert_eq!(
-        db::status(&conn, id).expect("Failed to determine user status"),
-        UserStatus::Deleted
-    );
-
-    assert!(
-        crate::conversation::db::conversation_messages(&conn, &user.pairwise_conversation)
-            .expect(womp!())
-            .is_empty()
-    );
-}
-
-#[test]
 fn add_remove_member() {
     let mut conn = Database::in_memory_with_config().expect(womp!());
 
@@ -228,7 +205,7 @@ fn by_status_users() {
         .add_db(&mut conn)
         .expect("Failed to add id1");
     UserBuilder::new(id2)
-        .status(UserStatus::Archived)
+        .status(UserStatus::Deleted)
         .add_db(&mut conn)
         .expect("Failed to add id2");
 

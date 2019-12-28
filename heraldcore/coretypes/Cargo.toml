@@ -8,6 +8,7 @@ edition = "2018"
 hex = "0.4.0"
 tar = "0.4.26"
 json = "0.12.0"
+unicode-segmentation = "1.6.0"
 
 [dependencies.herald_common]
 path             = "../../herald_common"
@@ -33,6 +34,6 @@ path = "../../kson"
 path = "../../kcl"
 
 [dependencies.rusqlite]
-version          = "0.20.0"
+version          = "0.21"
 default_features = false
 features         = ["functions", "bundled"]

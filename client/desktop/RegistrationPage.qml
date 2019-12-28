@@ -64,7 +64,7 @@ Rectangle {
 
             onTextChanged: entryField.text = text.trim()
 
-            Keys.onReturnPressed: herald.registerNewUser(
+            Keys.onReturnPressed: Herald.registerNewUser(
                                       entryField.text.trim(),
                                       serverAddrTextField.text.trim(),
                                       serverPortTextField.text.trim())
@@ -87,9 +87,11 @@ Rectangle {
         }
 
         Button {
+            id: registrationButton
             anchors.horizontalCenter: parent.horizontalCenter
             width: 80
             height: 25
+
             Text {
                 anchors.centerIn: parent
                 color: "white"
@@ -99,9 +101,50 @@ Rectangle {
                 color: "steelblue"
                 radius: 3
             }
-            onClicked: herald.registerNewUser(entryField.text.trim(),
+
+            onClicked: Herald.registerNewUser(entryField.text.trim(),
                                               serverAddrTextField.text.trim(),
                                               serverPortTextField.text.trim())
+        }
+
+        Text {
+            id: registrationFailureMessage
+            // TODO mostly just a place holder
+            anchors.horizontalCenter: parent.horizontalCenter
+            text: ""
+            color: "red"
+            visible: false
+
+            Connections {
+                target: Herald
+                onRegistrationFailureCodeChanged: {
+                    const code = Herald.registrationFailureCode
+                    if (code !== undefined) {
+                        switch (code) {
+                        case 0:
+                            registrationFailureMessage.text = qsTr(
+                                        "User id taken")
+                            break
+                        case 1:
+                            registrationFailureMessage.text = qsTr("Key taken")
+                            break
+                        case 2:
+                            registrationFailureMessage.text = qsTr(
+                                        "Bad signature")
+                            break
+                        case 3:
+                            registrationFailureMessage.text = qsTr(
+                                        "Registration failed")
+                            break
+                        default:
+                            registrationFailureMessage.text = qsTr(
+                                        "Registration failed")
+                        }
+
+                        registrationFailureMessage.visible = true
+                    }
+                }
+            }
         }
     }
 
@@ -118,7 +161,7 @@ Rectangle {
         Text {
             anchors.centerIn: parent
             color: "white"
-            text: "Register Device To Existing Account ▸"
+            text: qsTr("Register Device To Existing Account ▸")
         }
     }
 }

@@ -14,18 +14,18 @@ export function friendlyFileSize(byteSize: number): string {
     return byteSize + " B";
   }
 
-  if (byteSize < 10**6) {
+  if (byteSize < 10 ** 6) {
     const kb = byteSize / 1000;
     return Math.round(kb) + " KB";
   }
 
-  if (byteSize < 10**9) {
-    const mb = byteSize / 10**6;
-    return Math.round(10*mb) / 10 + " MB";
+  if (byteSize < 10 ** 9) {
+    const mb = byteSize / 10 ** 6;
+    return Math.round(10 * mb) / 10 + " MB";
   }
 
-  const gb = byteSize / 10**9;
-  return Math.round(10*gb) / gb + " GB";
+  const gb = byteSize / 10 ** 9;
+  return Math.round(10 * gb) / gb + " GB";
 }
 
 export function friendlyTimestamp(msEpochTime: number): string {
@@ -90,6 +90,47 @@ export function friendlyTimestamp(msEpochTime: number): string {
   const monthNum = dt.getMonth();
   const dateNum = dt.getDate();
   return months[monthNum] + " " + dateNum + " " + dt.getFullYear();
+}
+
+export function expireTimeShort(expireTime: number, insertTime: number): string {
+  const secondsPerMinute = 60;
+  const secondsPerHour = 3600;
+  const secondsPerDay = 3600 * 24;
+  const secondsPerWeek = 3600 * 24 * 7;
+  const secondsPerMonth = 3600 * 24 * 7 * 4
+  //using 7 * 4 * 12 instead of 365 because we want to not allow e.g. 13MO as a return
+  const secondsPerYear = 3600 * 24 * 7 * 4 * 12;
+
+  const currentTime = Date.now()
+
+  const diff = Math.round((expireTime - currentTime) / 1000);
+
+  if (diff < 0) return "";
+
+  if (diff < secondsPerMinute) return diff + " SEC";
+
+  if (diff < secondsPerHour) {
+    return Math.round(diff / secondsPerMinute) + " MIN";
+  }
+
+  if (diff < secondsPerDay) {
+    return Math.round(diff / secondsPerHour) + " HR";
+  }
+
+  if (diff < secondsPerWeek) {
+    return Math.round(diff / secondsPerDay) + " D"
+  }
+
+  if (diff < secondsPerMonth) {
+
+    return Math.round(diff / secondsPerWeek) + " WK"
+  }
+  if (diff < secondsPerYear) {
+    return Math.round(diff / secondsPerMonth) + " MO"
+  }
+  return Math.round(diff / secondsPerYear) + " Y"
+
+
 }
 
 function isBoolean(maybeBool: unknown): boolean {
@@ -175,32 +216,53 @@ export function safeStringOrDefault(
 }
 
 export function initialize(name: string): string {
-    const tokens = name.split(' ').slice(0, 3)
-    var str = ""
-    tokens.forEach(function anon(string) {
-        str += string[0].toUpperCase()
-    })
-    return str
+  const tokens = name.split(" ").slice(0, 3);
+  var str = "";
+  tokens.forEach(function anon(string) {
+    str += string[0].toUpperCase();
+  });
+  return str;
 }
 
 /*
  * returns the uri of an icon corresponding to the
  * receipt code
  * */
-export function receiptCodeSwitch(receiptCode: number): string {
+export function receiptCodeSwitch(receiptCode: MessageReceiptStatus): string {
   switch (receiptCode) {
-    case 0: {
+    case MessageReceiptStatus.Nil: {
       return "";
     }
-    case 1: {
+    case MessageReceiptStatus.Received: {
       return "qrc:/single-check-receipt-icon.svg";
     }
-    case 2: {
+    case MessageReceiptStatus.Read: {
       return "qrc:/double-check-receipt-icon.svg";
     }
-    case 3: {
-      return "qrc:/single-check-receipt-icon.svg";
-    }
+    default:
+      return "";
   }
-  return "";
 }
+
+export function timerIcon(expireTime: number, insertTime: number): string {
+  var timeNow = Date.now();
+  var proportion = (timeNow - insertTime) / (expireTime - insertTime);
+  if (proportion < 0.25) return "qrc:/mini-timer-icons/full.svg";
+  else if (proportion < 0.5) return "qrc:/mini-timer-icons/almost-full.svg";
+  else if (proportion < 0.75) return "qrc:/mini-timer-icons/almost-empty.svg";
+  else return "qrc:/mini-timer-icons/empty.svg";
+}
+
+export function userTime(timestamp: number): string {
+        var d = new Date(timestamp)
+        var year = d.getFullYear()
+        var month = ("0" + (d.getMonth() + 1)).slice(-2)
+        var day = ("0" + d.getDate()).slice(-2)
+        var hour = d.getHours()
+        var min = ("0" + d.getMinutes()).slice(-2)
+        var sec = ("0" + d.getSeconds()).slice(-2)
+
+        var time = year + "-" + month + "-" + day + " " + hour + ":" + min + ":" + sec
+
+        return time
+    }

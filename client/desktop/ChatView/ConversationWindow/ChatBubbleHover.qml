@@ -4,53 +4,104 @@ import "qrc:/imports" as Imports
 import LibHerald 1.0
 import QtQuick.Layouts 1.12
 import "../Popups" as Popups
+import Qt.labs.platform 1.1
+import QtQuick.Dialogs 1.3
+import QtQuick.Controls 2.3
 
 MouseArea {
     id: chatBubbleHitbox
-    z: CmnCfg.underlayZ
+    property bool download: false
+
     propagateComposedEvents: true
     hoverEnabled: true
-    width: parent.width + 50
+    anchors.fill: bubbleActual
+    z: 100
+    onClicked: mouse.accepted = false
+    onPressed: mouse.accepted = false
+    onReleased: mouse.accepted = false
+    onDoubleClicked: mouse.accepted = false
+    onPositionChanged: mouse.accepted = false
+    onPressAndHold: mouse.accepted = false
 
-    anchors {
-        // Ternary is okay, types are enforced, cases are explicit.
-        left: !outbound ? parent.left : undefined
-        right: outbound ? parent.right : undefined
-        bottom: parent.bottom
-        top: parent.top
-    }
-
-    Imports.ButtonForm {
-        id: messageOptionsButton
-        visible: chatBubbleHitbox.containsMouse
-
-        anchors {
-            left: outbound ? parent.left : undefined
-            right: !outbound ? parent.right : undefined
-            margins: CmnCfg.margin
-            verticalCenter: chatBubbleHitbox.verticalCenter
-        }
-        source: "qrc:/options-icon.svg"
+    Rectangle {
+        id: buttonRect
+        width: buttonRow.width
+        height: buttonRow.height
+        // color: bubbleActual.authorColor
         z: CmnCfg.overlayZ
-        onClicked: messageOptionsMenu.open()
-    }
-
-    Popups.MessageOptionsPopup {
-        id: messageOptionsMenu
-    }
-
-    Imports.ButtonForm {
-        id: replyButton
-        visible: chatBubbleHitbox.containsMouse
+        color: "transparent"
         anchors {
-            right: outbound ? messageOptionsButton.left : undefined
-            left: !outbound ? messageOptionsButton.right : undefined
-            margins: CmnCfg.margin
-            verticalCenter: chatBubbleHitbox.verticalCenter
+            right: parent.right
+            top: parent.top
+            topMargin: CmnCfg.smallMargin
         }
-        source: "qrc:/reply-icon.svg"
-        z: CmnCfg.overlayZ
 
-        onClicked: ownedConversation.builderOpMsgId = msgId
+        Row {
+            id: buttonRow
+            spacing: CmnCfg.defaultMargin
+            rightPadding: CmnCfg.smallMargin
+
+            Imports.IconButton {
+                id: replyButton
+                visible: chatBubbleHitbox.containsMouse
+                         || bubbleActual.hoverHighlight
+                anchors {
+                    margins: CmnCfg.defaultMargin
+                }
+                source: "qrc:/reply-icon.svg"
+                z: CmnCfg.overlayZ
+
+                // changing the opId transfers focus to the compose field
+                onClicked: ownedConversation.builder.opId = msgId
+            }
+
+            Popups.MessageOptionsPopup {
+                id: messageOptionsMenu
+            }
+
+            Imports.IconButton {
+                id: reactButton
+                visible: chatBubbleHitbox.containsMouse
+                         || bubbleActual.hoverHighlight
+                anchors {
+                    margins: visible ? CmnCfg.defaultMargin : 0
+                }
+                z: CmnCfg.overlayZ
+                icon.width: visible ? 24 : 0
+                source: "qrc:/lenny-icon.svg"
+                onClicked: {
+                    reactPopup.active = true
+                    emojiMenu.open()
+                }
+            }
+
+            Imports.IconButton {
+                id: downloadButton
+                visible: (chatBubbleHitbox.containsMouse
+                          || bubbleActual.hoverHighlight) && download
+                anchors {
+                    margins: visible ? CmnCfg.defaultMargin : 0
+                }
+                z: CmnCfg.overlayZ
+                icon.width: visible ? 22 : 0
+                source: "qrc:/download-icon.svg"
+                onClicked: downloadFileChooser.open()
+            }
+
+            Imports.IconButton {
+                id: messageOptionsButton
+                visible: bubbleActual.hoverHighlight
+                         || chatBubbleHitbox.containsMouse
+
+                anchors {
+                    margins: CmnCfg.defaultMargin
+                }
+                source: "qrc:/options-icon.svg"
+                z: CmnCfg.overlayZ
+                onClicked: {
+                    messageOptionsMenu.open()
+                }
+            }
+        }
     }
 }

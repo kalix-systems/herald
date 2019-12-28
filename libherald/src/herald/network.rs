@@ -29,7 +29,7 @@ impl NotifHandler {
         match notif {
             NewMsg(msg) => {
                 let cid = msg.conversation;
-                ret_err!(content_push(cid, MsgUpdate::NewMsg(msg)));
+                err!(content_push(cid, MsgUpdate::NewMsg(msg)));
             }
             MsgReceipt(message::MessageReceipt {
                 msg_id,
@@ -37,7 +37,7 @@ impl NotifHandler {
                 recipient,
                 status,
             }) => {
-                ret_err!(content_push(
+                err!(content_push(
                     cid,
                     MsgUpdate::Receipt {
                         msg_id,
@@ -46,6 +46,21 @@ impl NotifHandler {
                     }
                 ));
             }
+            Reaction {
+                msg_id,
+                reactionary,
+                content,
+                cid,
+                remove,
+            } => err!(content_push(
+                cid,
+                MsgUpdate::Reaction {
+                    msg_id,
+                    reactionary,
+                    content,
+                    remove
+                }
+            )),
             NewUser(update) => {
                 let (user, meta) = *update;
                 // add user
@@ -63,14 +78,14 @@ impl NotifHandler {
 
                 // add conversation
                 if accepted {
-                    let meta = ret_err!(heraldcore::conversation::meta(&cid));
+                    let meta = err!(heraldcore::conversation::meta(&cid));
 
                     push(ConvUpdate::NewConversation(meta));
                 }
             }
             AddConversationResponse(cid, uid, accepted) => {
                 use crate::members::MemberUpdate;
-                ret_err!(content_push(cid, MemberUpdate::ReqResp(uid, accepted)));
+                err!(content_push(cid, MemberUpdate::ReqResp(uid, accepted)));
             }
             Settings(cid, settings) => {
                 push(ConvUpdate::Settings(cid, settings));

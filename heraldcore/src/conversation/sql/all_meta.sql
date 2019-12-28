@@ -6,7 +6,8 @@ SELECT
   muted,
   pairwise,
   last_active_ts,
-  expiration_period
+  expiration_period,
+  status
 FROM
   conversations
 ORDER BY

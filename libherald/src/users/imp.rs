@@ -5,7 +5,7 @@ impl Users {
     pub(super) fn inner_filter(&mut self) {
         for (ix, user) in self.list.iter_mut().enumerate() {
             let lock = shared::user_data().read();
-            let inner = ret_none!(lock.get(&user.id));
+            let inner = none!(lock.get(&user.id));
             let old_matched = user.matched;
             user.matched = self
                 .filter
@@ -49,6 +49,15 @@ impl Users {
                 } else {
                     println!("PLACEHOLDER: {} did not accept your user request", uid);
                 }
+            }
+            UserUpdate::DataChanged(id) => {
+                let user = User { id, matched: false };
+                let pos = match self.list.binary_search(&user) {
+                    Ok(pos) => pos,
+                    Err(_) => return,
+                };
+
+                self.model.data_changed(pos, pos);
             }
         }
     }

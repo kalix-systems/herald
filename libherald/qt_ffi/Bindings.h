@@ -7,86 +7,36 @@
 #include <QtCore/QObject>
 
 class Config;
-typedef Config* ConfigRef;
-Q_DECLARE_METATYPE(ConfigRef);
-
 class ConversationBuilder;
-typedef ConversationBuilder* ConversationBuilderRef;
-Q_DECLARE_METATYPE(ConversationBuilderRef);
-
 class ConversationContent;
-typedef ConversationContent* ConversationContentRef;
-Q_DECLARE_METATYPE(ConversationContentRef);
-
 class Conversations;
-typedef Conversations* ConversationsRef;
-Q_DECLARE_METATYPE(ConversationsRef);
-
 class DocumentAttachments;
-typedef DocumentAttachments* DocumentAttachmentsRef;
-Q_DECLARE_METATYPE(DocumentAttachmentsRef);
-
-class EmojiPicker;
-typedef EmojiPicker* EmojiPickerRef;
-Q_DECLARE_METATYPE(EmojiPickerRef);
-
 class Errors;
-typedef Errors* ErrorsRef;
-Q_DECLARE_METATYPE(ErrorsRef);
-
 class Herald;
-typedef Herald* HeraldRef;
-Q_DECLARE_METATYPE(HeraldRef);
-
 class MediaAttachments;
-typedef MediaAttachments* MediaAttachmentsRef;
-Q_DECLARE_METATYPE(MediaAttachmentsRef);
-
 class Members;
-typedef Members* MembersRef;
-Q_DECLARE_METATYPE(MembersRef);
-
 class MessageBuilder;
-typedef MessageBuilder* MessageBuilderRef;
-Q_DECLARE_METATYPE(MessageBuilderRef);
-
 class MessageSearch;
-typedef MessageSearch* MessageSearchRef;
-Q_DECLARE_METATYPE(MessageSearchRef);
-
 class Messages;
-typedef Messages* MessagesRef;
-Q_DECLARE_METATYPE(MessagesRef);
-
 class Users;
-typedef Users* UsersRef;
-Q_DECLARE_METATYPE(UsersRef);
-
 class UsersSearch;
-typedef UsersSearch* UsersSearchRef;
-Q_DECLARE_METATYPE(UsersSearchRef);
-
 class Utils;
-typedef Utils* UtilsRef;
-Q_DECLARE_METATYPE(UtilsRef);
-
 extern "C" {
-typedef struct ConfigPtrBundle              ConfigPtrBundle;
-typedef struct ConversationBuilderPtrBundle ConversationBuilderPtrBundle;
-typedef struct ConversationContentPtrBundle ConversationContentPtrBundle;
-typedef struct ConversationsPtrBundle       ConversationsPtrBundle;
-typedef struct DocumentAttachmentsPtrBundle DocumentAttachmentsPtrBundle;
-typedef struct EmojiPickerPtrBundle         EmojiPickerPtrBundle;
-typedef struct ErrorsPtrBundle              ErrorsPtrBundle;
-typedef struct HeraldPtrBundle              HeraldPtrBundle;
-typedef struct MediaAttachmentsPtrBundle    MediaAttachmentsPtrBundle;
-typedef struct MembersPtrBundle             MembersPtrBundle;
-typedef struct MessageBuilderPtrBundle      MessageBuilderPtrBundle;
-typedef struct MessageSearchPtrBundle       MessageSearchPtrBundle;
-typedef struct MessagesPtrBundle            MessagesPtrBundle;
-typedef struct UsersPtrBundle               UsersPtrBundle;
-typedef struct UsersSearchPtrBundle         UsersSearchPtrBundle;
-typedef struct UtilsPtrBundle               UtilsPtrBundle;
+using ConfigPtrBundle              = struct ConfigPtrBundle;
+using ConversationBuilderPtrBundle = struct ConversationBuilderPtrBundle;
+using ConversationContentPtrBundle = struct ConversationContentPtrBundle;
+using ConversationsPtrBundle       = struct ConversationsPtrBundle;
+using DocumentAttachmentsPtrBundle = struct DocumentAttachmentsPtrBundle;
+using ErrorsPtrBundle              = struct ErrorsPtrBundle;
+using HeraldPtrBundle              = struct HeraldPtrBundle;
+using MediaAttachmentsPtrBundle    = struct MediaAttachmentsPtrBundle;
+using MembersPtrBundle             = struct MembersPtrBundle;
+using MessageBuilderPtrBundle      = struct MessageBuilderPtrBundle;
+using MessageSearchPtrBundle       = struct MessageSearchPtrBundle;
+using MessagesPtrBundle            = struct MessagesPtrBundle;
+using UsersPtrBundle               = struct UsersPtrBundle;
+using UsersSearchPtrBundle         = struct UsersSearchPtrBundle;
+using UtilsPtrBundle               = struct UtilsPtrBundle;
 struct ConfigPtrBundle {
   Config* config;
   void (*config_color_changed)(Config*);
@@ -94,6 +44,7 @@ struct ConfigPtrBundle {
   void (*config_config_id_changed)(Config*);
   void (*config_name_changed)(Config*);
   void (*config_nts_conversation_id_changed)(Config*);
+  void (*config_preferred_expiration_changed)(Config*);
   void (*config_profile_picture_changed)(Config*);
 };
 struct ConversationBuilderPtrBundle {
@@ -177,6 +128,7 @@ struct ConversationContentPtrBundle {
   void (*message_builder_op_author_changed)(MessageBuilder*);
   void (*message_builder_op_body_changed)(MessageBuilder*);
   void (*message_builder_op_doc_attachments_changed)(MessageBuilder*);
+  void (*message_builder_op_expiration_time_changed)(MessageBuilder*);
   void (*message_builder_op_id_changed)(MessageBuilder*);
   void (*message_builder_op_media_attachments_changed)(MessageBuilder*);
   void (*message_builder_op_time_changed)(MessageBuilder*);
@@ -193,7 +145,6 @@ struct ConversationContentPtrBundle {
   void (*message_builder_end_move_rows)(MessageBuilder*);
   void (*message_builder_begin_remove_rows)(MessageBuilder*, int, int);
   void (*message_builder_end_remove_rows)(MessageBuilder*);
-  void (*messages_builder_op_msg_id_changed)(Messages*);
   void (*messages_is_empty_changed)(Messages*);
   void (*messages_last_author_changed)(Messages*);
   void (*messages_last_body_changed)(Messages*);
@@ -302,6 +253,7 @@ struct HeraldPtrBundle {
   void (*config_config_id_changed)(Config*);
   void (*config_name_changed)(Config*);
   void (*config_nts_conversation_id_changed)(Config*);
+  void (*config_preferred_expiration_changed)(Config*);
   void (*config_profile_picture_changed)(Config*);
   void (*herald_config_init_changed)(Herald*);
   void (*herald_connection_pending_changed)(Herald*);
@@ -359,6 +311,7 @@ struct HeraldPtrBundle {
   void (*message_search_end_move_rows)(MessageSearch*);
   void (*message_search_begin_remove_rows)(MessageSearch*, int, int);
   void (*message_search_end_remove_rows)(MessageSearch*);
+  void (*herald_registration_failure_code_changed)(Herald*);
   Users* users;
   void (*users_filter_changed)(Users*);
   void (*users_filter_regex_changed)(Users*);
@@ -480,6 +433,7 @@ struct MessageBuilderPtrBundle {
   void (*message_builder_op_author_changed)(MessageBuilder*);
   void (*message_builder_op_body_changed)(MessageBuilder*);
   void (*message_builder_op_doc_attachments_changed)(MessageBuilder*);
+  void (*message_builder_op_expiration_time_changed)(MessageBuilder*);
   void (*message_builder_op_id_changed)(MessageBuilder*);
   void (*message_builder_op_media_attachments_changed)(MessageBuilder*);
   void (*message_builder_op_time_changed)(MessageBuilder*);
@@ -557,6 +511,7 @@ struct MessagesPtrBundle {
   void (*message_builder_op_author_changed)(MessageBuilder*);
   void (*message_builder_op_body_changed)(MessageBuilder*);
   void (*message_builder_op_doc_attachments_changed)(MessageBuilder*);
+  void (*message_builder_op_expiration_time_changed)(MessageBuilder*);
   void (*message_builder_op_id_changed)(MessageBuilder*);
   void (*message_builder_op_media_attachments_changed)(MessageBuilder*);
   void (*message_builder_op_time_changed)(MessageBuilder*);
@@ -573,7 +528,6 @@ struct MessagesPtrBundle {
   void (*message_builder_end_move_rows)(MessageBuilder*);
   void (*message_builder_begin_remove_rows)(MessageBuilder*, int, int);
   void (*message_builder_end_remove_rows)(MessageBuilder*);
-  void (*messages_builder_op_msg_id_changed)(Messages*);
   void (*messages_is_empty_changed)(Messages*);
   void (*messages_last_author_changed)(Messages*);
   void (*messages_last_body_changed)(Messages*);
@@ -668,29 +622,34 @@ private:
   Q_PROPERTY(QString name READ name WRITE setName NOTIFY nameChanged FINAL)
   Q_PROPERTY(QByteArray ntsConversationId READ ntsConversationId NOTIFY
                  ntsConversationIdChanged FINAL)
-  Q_PROPERTY(QString profilePicture READ profilePicture WRITE setProfilePicture
-                 NOTIFY profilePictureChanged FINAL)
+  Q_PROPERTY(quint8 preferredExpiration READ preferredExpiration WRITE
+                 setPreferredExpiration NOTIFY preferredExpirationChanged FINAL)
+  Q_PROPERTY(QString profilePicture READ profilePicture NOTIFY
+                 profilePictureChanged FINAL)
   explicit Config(bool owned, QObject* parent);
 
 public:
   explicit Config(QObject* parent = nullptr);
   ~Config() override;
-  quint32    color() const;
-  void       setColor(quint32 v);
-  quint32    colorscheme() const;
-  void       setColorscheme(quint32 v);
-  QString    configId() const;
-  QString    name() const;
-  void       setName(const QString& v);
-  QByteArray ntsConversationId() const;
-  QString    profilePicture() const;
-  void       setProfilePicture(const QString& v);
+  quint32          color() const;
+  void             setColor(quint32 v);
+  quint32          colorscheme() const;
+  void             setColorscheme(quint32 v);
+  QString          configId() const;
+  QString          name() const;
+  void             setName(const QString& v);
+  QByteArray       ntsConversationId() const;
+  quint8           preferredExpiration() const;
+  void             setPreferredExpiration(quint8 v);
+  QString          profilePicture() const;
+  Q_INVOKABLE void setProfilePicture(const QString& profile_picture);
 Q_SIGNALS:
   void colorChanged();
   void colorschemeChanged();
   void configIdChanged();
   void nameChanged();
   void ntsConversationIdChanged();
+  void preferredExpirationChanged();
   void profilePictureChanged();
 };
 class ConversationBuilder : public QAbstractItemModel {
@@ -717,21 +676,20 @@ public:
 private:
   Private* m_d;
   bool     m_ownsPrivate;
-  Q_PROPERTY(
-      QString picture READ picture WRITE setPicture NOTIFY pictureChanged FINAL)
+  Q_PROPERTY(QString picture READ picture NOTIFY pictureChanged FINAL)
   explicit ConversationBuilder(bool owned, QObject* parent);
 
 public:
   explicit ConversationBuilder(QObject* parent = nullptr);
   ~ConversationBuilder() override;
   QString          picture() const;
-  void             setPicture(const QString& v);
   Q_INVOKABLE bool addMember(const QString& user_id);
   Q_INVOKABLE void clear();
   Q_INVOKABLE void finalize();
   Q_INVOKABLE void removeLast();
   Q_INVOKABLE bool removeMemberById(const QString& user_id);
   Q_INVOKABLE bool removeMemberByIndex(quint64 index);
+  Q_INVOKABLE void setProfilePicture(const QString& profile_picture);
   Q_INVOKABLE void setTitle(const QString& title);
   int columnCount(const QModelIndex& parent = QModelIndex()) const override;
   QVariant    data(const QModelIndex& index,
@@ -758,7 +716,10 @@ public:
   removeRows(int row, int count,
              const QModelIndex& parent = QModelIndex()) override;
 
+  Q_INVOKABLE quint32 memberColor(int row) const;
   Q_INVOKABLE QString memberId(int row) const;
+  Q_INVOKABLE QString memberName(int row) const;
+  Q_INVOKABLE QString memberProfilePicture(int row) const;
 
 Q_SIGNALS:
   // new data is ready to be made available to the model with fetchMore()
@@ -890,6 +851,8 @@ public:
   Q_INVOKABLE void clearFilter();
   Q_INVOKABLE qint64 indexById(const QByteArray& conversation_id) const;
   Q_INVOKABLE bool   removeConversation(quint64 row_index);
+  Q_INVOKABLE void   setProfilePicture(quint64        index,
+                                       const QString& profile_picture);
   Q_INVOKABLE bool   toggleFilterRegex();
   int columnCount(const QModelIndex& parent = QModelIndex()) const override;
   QVariant    data(const QModelIndex& index,
@@ -928,7 +891,8 @@ public:
   Q_INVOKABLE bool   setMuted(int row, bool value);
   Q_INVOKABLE bool   pairwise(int row) const;
   Q_INVOKABLE QString picture(int row) const;
-  Q_INVOKABLE bool    setPicture(int row, const QString& value);
+  Q_INVOKABLE quint8 status(int row) const;
+  Q_INVOKABLE bool   setStatus(int row, quint8 value);
   Q_INVOKABLE QString title(int row) const;
   Q_INVOKABLE bool    setTitle(int row, const QString& value);
 
@@ -998,7 +962,7 @@ public:
   removeRows(int row, int count,
              const QModelIndex& parent = QModelIndex()) override;
 
-  Q_INVOKABLE QString documentAttachmentPath(int row) const;
+  Q_INVOKABLE QString documentAttachmentName(int row) const;
   Q_INVOKABLE quint64 documentAttachmentSize(int row) const;
 
 Q_SIGNALS:
@@ -1163,6 +1127,8 @@ private:
   Q_PROPERTY(Errors* errors READ errors NOTIFY errorsChanged FINAL)
   Q_PROPERTY(MessageSearch* messageSearch READ messageSearch NOTIFY
                  messageSearchChanged FINAL)
+  Q_PROPERTY(QVariant registrationFailureCode READ registrationFailureCode
+                 NOTIFY registrationFailureCodeChanged FINAL)
   Q_PROPERTY(Users* users READ users NOTIFY usersChanged FINAL)
   Q_PROPERTY(
       UsersSearch* usersSearch READ usersSearch NOTIFY usersSearchChanged FINAL)
@@ -1185,6 +1151,7 @@ public:
   Errors*                    errors();
   const MessageSearch*       messageSearch() const;
   MessageSearch*             messageSearch();
+  QVariant                   registrationFailureCode() const;
   const Users*               users() const;
   Users*                     users();
   const UsersSearch*         usersSearch() const;
@@ -1237,6 +1204,7 @@ Q_SIGNALS:
   void conversationsChanged();
   void errorsChanged();
   void messageSearchChanged();
+  void registrationFailureCodeChanged();
   void usersChanged();
   void usersSearchChanged();
   void utilsChanged();
@@ -1432,7 +1400,9 @@ private:
   Q_PROPERTY(QString opBody READ opBody NOTIFY opBodyChanged FINAL)
   Q_PROPERTY(QString opDocAttachments READ opDocAttachments NOTIFY
                  opDocAttachmentsChanged FINAL)
-  Q_PROPERTY(QByteArray opId READ opId NOTIFY opIdChanged FINAL)
+  Q_PROPERTY(QVariant opExpirationTime READ opExpirationTime NOTIFY
+                 opExpirationTimeChanged FINAL)
+  Q_PROPERTY(QByteArray opId READ opId WRITE setOpId NOTIFY opIdChanged FINAL)
   Q_PROPERTY(QString opMediaAttachments READ opMediaAttachments NOTIFY
                  opMediaAttachmentsChanged FINAL)
   Q_PROPERTY(QVariant opTime READ opTime NOTIFY opTimeChanged FINAL)
@@ -1453,7 +1423,9 @@ public:
   QString                    opAuthor() const;
   QString                    opBody() const;
   QString                    opDocAttachments() const;
+  QVariant                   opExpirationTime() const;
   QByteArray                 opId() const;
+  void                       setOpId(const QByteArray& v);
   QString                    opMediaAttachments() const;
   QVariant                   opTime() const;
   Q_INVOKABLE bool           addAttachment(const QString& path);
@@ -1504,6 +1476,7 @@ Q_SIGNALS:
   void opAuthorChanged();
   void opBodyChanged();
   void opDocAttachmentsChanged();
+  void opExpirationTimeChanged();
   void opIdChanged();
   void opMediaAttachmentsChanged();
   void opTimeChanged();
@@ -1621,8 +1594,6 @@ private:
   Private*              m_d;
   bool                  m_ownsPrivate;
   Q_PROPERTY(MessageBuilder* builder READ builder NOTIFY builderChanged FINAL)
-  Q_PROPERTY(QByteArray builderOpMsgId READ builderOpMsgId WRITE
-                 setBuilderOpMsgId NOTIFY builderOpMsgIdChanged FINAL)
   Q_PROPERTY(bool isEmpty READ isEmpty NOTIFY isEmptyChanged FINAL)
   Q_PROPERTY(QString lastAuthor READ lastAuthor NOTIFY lastAuthorChanged FINAL)
   Q_PROPERTY(QString lastBody READ lastBody NOTIFY lastBodyChanged FINAL)
@@ -1645,8 +1616,6 @@ public:
   ~Messages() override;
   const MessageBuilder* builder() const;
   MessageBuilder*       builder();
-  QByteArray            builderOpMsgId() const;
-  void                  setBuilderOpMsgId(const QByteArray& v);
   bool                  isEmpty() const;
   QString               lastAuthor() const;
   QString               lastBody() const;
@@ -1660,17 +1629,21 @@ public:
   void                  setSearchPattern(const QString& v);
   bool                  searchRegex() const;
   void                  setSearchRegex(bool v);
+  Q_INVOKABLE void      addReaction(quint64 index, const QString& content);
   Q_INVOKABLE bool      clearConversationHistory();
   Q_INVOKABLE void      clearSearch();
   Q_INVOKABLE bool      deleteMessage(quint64 row_index);
   Q_INVOKABLE qint64 indexById(const QByteArray& msg_id) const;
+  Q_INVOKABLE void   markRead(quint64 index);
   Q_INVOKABLE qint64 nextSearchMatch();
   Q_INVOKABLE qint64 prevSearchMatch();
-  Q_INVOKABLE void   setElisionCharCount(quint16 char_count);
-  Q_INVOKABLE void   setElisionCharsPerLine(quint8 chars_per_line);
-  Q_INVOKABLE void   setElisionLineCount(quint8 line_count);
-  Q_INVOKABLE void   setSearchHint(float scrollbar_position,
-                                   float scrollbar_height);
+  Q_INVOKABLE void   removeReaction(quint64 index, const QString& content);
+  Q_INVOKABLE bool saveAllAttachments(quint64 index, const QString& dest) const;
+  Q_INVOKABLE void setElisionCharCount(quint16 char_count);
+  Q_INVOKABLE void setElisionCharsPerLine(quint8 chars_per_line);
+  Q_INVOKABLE void setElisionLineCount(quint8 line_count);
+  Q_INVOKABLE void setSearchHint(float scrollbar_position,
+                                 float scrollbar_height);
   int columnCount(const QModelIndex& parent = QModelIndex()) const override;
   QVariant    data(const QModelIndex& index,
                    int                role = Qt::DisplayRole) const override;
@@ -1697,10 +1670,14 @@ public:
              const QModelIndex& parent = QModelIndex()) override;
 
   Q_INVOKABLE QString author(int row) const;
+  Q_INVOKABLE QVariant authorColor(int row) const;
+  Q_INVOKABLE QString authorName(int row) const;
+  Q_INVOKABLE QString authorProfilePicture(int row) const;
   Q_INVOKABLE QString body(int row) const;
   Q_INVOKABLE QString docAttachments(int row) const;
   Q_INVOKABLE QVariant expirationTime(int row) const;
   Q_INVOKABLE QString fullBody(int row) const;
+  Q_INVOKABLE QString fullMediaAttachments(int row) const;
   Q_INVOKABLE QVariant insertionTime(int row) const;
   Q_INVOKABLE QVariant isHead(int row) const;
   Q_INVOKABLE QVariant isTail(int row) const;
@@ -1709,14 +1686,18 @@ public:
   Q_INVOKABLE QByteArray msgId(int row) const;
   Q_INVOKABLE QString opAuthor(int row) const;
   Q_INVOKABLE QString opBody(int row) const;
+  Q_INVOKABLE QVariant opColor(int row) const;
   Q_INVOKABLE QString opDocAttachments(int row) const;
   Q_INVOKABLE QVariant opExpirationTime(int row) const;
   Q_INVOKABLE QVariant opInsertionTime(int row) const;
   Q_INVOKABLE QString opMediaAttachments(int row) const;
   Q_INVOKABLE QByteArray opMsgId(int row) const;
+  Q_INVOKABLE QString opName(int row) const;
+  Q_INVOKABLE QString reactions(int row) const;
   Q_INVOKABLE QVariant receiptStatus(int row) const;
   Q_INVOKABLE QVariant replyType(int row) const;
   Q_INVOKABLE QVariant serverTime(int row) const;
+  Q_INVOKABLE QString userReceipts(int row) const;
 
 Q_SIGNALS:
   // new data is ready to be made available to the model with fetchMore()
@@ -1728,7 +1709,6 @@ private:
   void                                          updatePersistentIndexes();
 Q_SIGNALS:
   void builderChanged();
-  void builderOpMsgIdChanged();
   void isEmptyChanged();
   void lastAuthorChanged();
   void lastBodyChanged();
@@ -1782,6 +1762,8 @@ public:
   Q_INVOKABLE quint32 colorById(const QString& id) const;
   Q_INVOKABLE QString nameById(const QString& id) const;
   Q_INVOKABLE QString profilePictureById(const QString& id) const;
+  Q_INVOKABLE void    setProfilePicture(quint64        index,
+                                        const QString& profile_picture);
   Q_INVOKABLE bool    toggleFilterRegex();
   int columnCount(const QModelIndex& parent = QModelIndex()) const override;
   QVariant    data(const QModelIndex& index,
@@ -1817,7 +1799,6 @@ public:
   Q_INVOKABLE bool    setName(int row, const QString& value);
   Q_INVOKABLE QByteArray pairwiseConversationId(int row) const;
   Q_INVOKABLE QString profilePicture(int row) const;
-  Q_INVOKABLE bool    setProfilePicture(int row, const QString& value);
   Q_INVOKABLE quint8 status(int row) const;
   Q_INVOKABLE bool   setStatus(int row, quint8 value);
   Q_INVOKABLE QString userId(int row) const;
@@ -1946,9 +1927,10 @@ public:
   ~Utils() override;
   Q_INVOKABLE bool compareByteArray(const QByteArray& bs1,
                                     const QByteArray& bs2) const;
-  Q_INVOKABLE bool isValidRandId(const QByteArray& bs) const;
-  Q_INVOKABLE bool saveFile(const QString& fpath,
-                            const QString& target_path) const;
+  Q_INVOKABLE QString imageDimensions(const QString& path) const;
+  Q_INVOKABLE bool    isValidRandId(const QByteArray& bs) const;
+  Q_INVOKABLE bool    saveFile(const QString& fpath,
+                               const QString& target_path) const;
 Q_SIGNALS:
 };
 #endif // BINDINGS_H

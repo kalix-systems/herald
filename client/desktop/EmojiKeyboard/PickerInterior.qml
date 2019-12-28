@@ -69,7 +69,7 @@ Item {
         ComboBox {
             id: menu
             anchors.right: parent.right
-            anchors.margins: CmnCfg.margin
+            anchors.margins: CmnCfg.defaultMargin
             anchors.verticalCenter: taBox.verticalCenter
             height: 24
             width: 24
@@ -140,6 +140,9 @@ Item {
             clip: true
             ScrollBar.vertical: ScrollBar {}
             contentHeight: innerCol.height
+
+            maximumFlickVelocity: 700
+            flickDeceleration: emojiList.height * 10
             Column {
                 id: innerCol
                 Repeater {
@@ -160,8 +163,10 @@ Item {
                             sourceComponent: Grid {
                                 id: emojiGrid
                                 columns: 10
-                                spacing: 7
+                                spacing: 10
                                 width: listView.width
+                                horizontalItemAlignment: Grid.AlignHCenter
+                                verticalItemAlignment: Grid.AlignVCenter
                                 Repeater {
                                     id: self
                                     model: modelData.List

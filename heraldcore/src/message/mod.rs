@@ -22,6 +22,18 @@ pub fn get_message(msg_id: &MsgId) -> Result<Message, HErr> {
     db::get_message(&db, msg_id)
 }
 
+/// Get message metadata by message id
+pub fn message_meta(msg_id: &MsgId) -> Result<MessageMeta, HErr> {
+    let db = Database::get()?;
+    db::message_meta(&db, msg_id)
+}
+
+/// Get message data by message id
+pub fn message_data(msg_id: &MsgId) -> Result<MsgData, HErr> {
+    let db = Database::get()?;
+    db::message_data(&db, msg_id)
+}
+
 /// Gets a message by message id. If the message cannot be found, it returns an option rather than
 /// an error.
 pub fn get_message_opt(msg_id: &MsgId) -> Result<Option<Message>, HErr> {
@@ -44,13 +56,34 @@ pub fn get_message_receipts(msg_id: &MsgId) -> Result<HashMap<UserId, MessageRec
     Ok(db::get_receipts(&db, msg_id)?)
 }
 
-pub(crate) fn add_receipt(
+/// Adds a message receipt
+pub fn add_receipt(
     msg_id: MsgId,
     recip: UserId,
     receipt_status: MessageReceiptStatus,
 ) -> Result<(), HErr> {
     let db = Database::get()?;
     db::add_receipt(&db, msg_id, recip, receipt_status)
+}
+
+/// Adds a reaction to a message
+pub fn add_reaction(
+    msg_id: &MsgId,
+    reactionary: &UserId,
+    react_content: &str,
+) -> Result<(), HErr> {
+    let db = Database::get()?;
+    db::add_reaction(&db, msg_id, reactionary, react_content).map_err(HErr::from)
+}
+
+/// Removes a reaction from a message
+pub fn remove_reaction(
+    msg_id: &MsgId,
+    reactionary: &UserId,
+    react_content: &str,
+) -> Result<(), HErr> {
+    let db = Database::get()?;
+    db::remove_reaction(&db, msg_id, reactionary, react_content).map_err(HErr::from)
 }
 
 /// Gets messages by `MessageSendStatus`

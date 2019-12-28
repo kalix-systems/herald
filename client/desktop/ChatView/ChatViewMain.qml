@@ -12,10 +12,13 @@ import "../common" as Common
 import "Popups" as Popups
 
 Page {
-    id: chatPane
+    id: chatPage
 
+    //TODO: rename this to something sane
     property var conversationItem
-    property Messages ownedConversation
+    //TODO: rename to something sane and not a shadow
+    property var ownedConversation
+    property var conversationMembers
 
     background: Rectangle {
         color: CmnCfg.palette.white
@@ -35,7 +38,7 @@ Page {
         color: CmnCfg.palette.borderColor
         z: messageBar.z
     }
-
+    //TODO: Rename to MessagesView
     ConvoWindow.ConversationWindow {
         id: convWindow
         focus: true
@@ -48,29 +51,23 @@ Page {
 
         Component.onCompleted: forceActiveFocus()
         Keys.onPressed: KeyNav.convWindowKeyHandler(event, chatScrollBar,
-                                                    chatListView,
+                                                    convWindow,
                                                     ScrollBar.AlwaysOn,
                                                     ScrollBar.AsNeeded)
 
         Connections {
-            target: ownedConversation
-            onRowsInserted: {
-                convWindow.contentY = convWindow.contentHeight
-            }
-        }
-
-        Connections {
             target: conversationList
             onMessagePositionRequested: {
-                const msg_idx = chatPane.ownedConversation.indexById(
+                const msg_idx = chatPage.ownedConversation.indexById(
                                   requestedMsgId)
 
                 // early return on out of bounds
-                if (msg_idx < 0)
+                if ((msg_idx < 0) || (msg_idx >= convWindow.count))
                     return
 
                 convWindow.positionViewAtIndex(msg_idx, ListView.Center)
-                convWindow.highlightAnimation.target = convWindow.itemAtIndex(msg_idx).highlight
+                convWindow.highlightAnimation.target = convWindow.itemAtIndex(
+                            msg_idx).highlightItem
                 convWindow.highlightAnimation.start()
             }
         }
@@ -110,16 +107,17 @@ Page {
             left: parent.left
             right: parent.right
             bottom: parent.bottom
-            margins: CmnCfg.margin
+            topMargin: CmnCfg.defaultMargin
             bottomMargin: 0
+            leftMargin: 0
+            rightMargin: 0
         }
 
         keysProxy: Item {
-            Keys.onReturnPressed: TextJs.enterKeyHandler(event,
-                                                     chatTextArea.chatText,
-                                                     ownedConversation.builder,
-                                                     ownedConversation,
-                                                     chatTextArea)
+            Keys.onReturnPressed: TextJs.enterKeyHandler(
+                                      event, chatTextArea.chatText,
+                                      ownedConversation.builder,
+                                      ownedConversation, chatTextArea)
             // TODO: Tab should cycle through a hierarchy of items as far as focus
         }
         emojiButton.onClicked: emoKeysPopup.active = !!!emoKeysPopup.active

@@ -1,5 +1,5 @@
 use bytes::*;
-use coremacros::{abort_err, from_fn};
+use coremacros::{exit_err, from_fn};
 use coretypes::ids::ConversationId;
 use herald_common::*;
 use once_cell::sync::OnceCell;
@@ -27,11 +27,11 @@ fn ck_conn() -> &'static Mutex<rusqlite::Connection> {
         kcl::init();
 
         let path = db_dir().join("ck.sqlite3");
-        let mut conn = abort_err!(rusqlite::Connection::open(path));
-        let tx = abort_err!(conn.transaction());
+        let mut conn = exit_err!(rusqlite::Connection::open(path));
+        let tx = exit_err!(conn.transaction());
 
-        abort_err!(tx.execute_batch(include_str!("sql/create.sql")));
-        abort_err!(tx.commit());
+        exit_err!(tx.execute_batch(include_str!("sql/create.sql")));
+        exit_err!(tx.commit());
 
         Mutex::new(conn)
     })

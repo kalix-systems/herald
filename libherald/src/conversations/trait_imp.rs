@@ -77,12 +77,12 @@ impl ConversationsTrait for Conversations {
         self.picture_(index)
     }
 
-    fn set_picture(
+    fn set_profile_picture(
         &mut self,
-        index: usize,
-        picture: Option<String>,
-    ) -> bool {
-        self.set_picture_(index, picture)
+        index: u64,
+        picture_json: String,
+    ) {
+        self.set_profile_picture_(index, picture_json)
     }
 
     fn title(
@@ -161,5 +161,20 @@ impl ConversationsTrait for Conversations {
         cid: ffi::ConversationIdRef,
     ) -> i64 {
         self.index_by_id_(cid)
+    }
+
+    fn set_status(
+        &mut self,
+        index: usize,
+        status: u8,
+    ) -> bool {
+        self.set_status_(index, status)
+    }
+
+    fn status(
+        &self,
+        index: usize,
+    ) -> u8 {
+        self.status_(index) as u8
     }
 }

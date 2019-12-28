@@ -5,7 +5,8 @@ authors = ["Baeo Maltinsky <baeo.maltinsky@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-hex                  = "0.4.0"
+hex  = "0.4"
+json = "0.12.0"
 
 [dependencies.platform_dirs]
 path = "../platform_dirs"
@@ -14,6 +15,6 @@ path = "../platform_dirs"
 path = "../../kcl"
 
 [dependencies.image]
-version          = "0.22.1"
+version          = "0.22"
 default_features = false
 features         = ["gif_codec", "jpeg", "png_codec", "bmp", "pnm"]

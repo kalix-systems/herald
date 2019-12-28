@@ -5,6 +5,10 @@ import QtQuick.Controls 2.13
 import LibHerald 1.0
 import "SideBar/popups" as Popups
 import "./SideBar"
+import "."
+import "ChatView/Popups" as CvPopups
+import Qt.labs.platform 1.1
+import QtQuick.Dialogs 1.3
 
 Item {
     id: appRoot
@@ -13,8 +17,43 @@ Item {
     anchors.fill: parent.fill
 
     TopMenuBar {
-        Popups.ConfigPopup {
+        Popups.SettingsPopup {
             id: preferencesPopup
+        }
+    }
+
+    FileDialog {
+        id: attachmentDownloader
+        property string filePath
+        selectFolder: true
+        folder: StandardPaths.writableLocation(StandardPaths.DesktopLocation)
+        onAccepted: Herald.utils.saveFile(filePath, fileUrl)
+        selectExisting: false
+    }
+
+    readonly property alias globalTimer: globalTimer
+    Timer {
+        id: globalTimer
+        signal refreshTime
+
+        interval: 10000
+        running: true
+        repeat: true
+        onTriggered: refreshTime()
+    }
+
+    Loader {
+        id: messageInfoLoader
+        width: active ? chatView.width : 0
+        height: active ? chatView.height : 0
+        anchors.top: active ? parent.top : undefined
+        anchors.right: active ? parent.right : undefined
+        property var convoMembers
+        property var messageData
+        property var ownedMessages
+        active: false
+        sourceComponent: CvPopups.MoreInfoPopup {
+            id: moreInfo
         }
     }
 
@@ -22,8 +61,8 @@ Item {
         id: avatarColorPicker
     }
 
-    Popups.ConfigPopup {
-        id: configPopup
+    Popups.SettingsPopup {
+        id: settingsPopup
     }
 
     Popups.ContextOptionsMenu {
@@ -34,6 +73,10 @@ Item {
         id: convoMenu
     }
 
+    Popups.ImageCropPopup {
+        id: imageCrop
+    }
+    // TODO: move into seperate file
     Component {
         id: splash
 
@@ -47,15 +90,19 @@ Item {
                 color: CmnCfg.palette.offBlack
                 height: CmnCfg.toolbarHeight + 1
 
+                Rectangle {
+                    anchors.left: parent.left
+                    height: parent.height
+                    width: 1
+                    color: CmnCfg.palette.lightGrey
+                }
+
                 Text {
                     anchors.left: parent.left
-                    anchors.leftMargin: CmnCfg.largeMargin
+                    anchors.leftMargin: CmnCfg.megaMargin
                     anchors.verticalCenter: parent.verticalCenter
-                    text: "Herald"
-
-                    font.pixelSize: CmnCfg.headerSize
-                    font.family: CmnCfg.labelFont.name
-                    font.bold: true
+                    text: qsTr("Herald")
+                    font: CmnCfg.headerBarFont
                     color: CmnCfg.palette.white
                 }
             }
@@ -82,21 +129,23 @@ Item {
             sourceComponent: splash
         }
 
+        // TODO: combine these two rectangles and figure out width
         handle: Item {
             id: handle
             implicitWidth: 1
             Rectangle {
                 id: toolBarHandle
                 implicitWidth: 1
-                color: CmnCfg.palette.medGrey
-                height: CmnCfg.toolbarHeight
+                color: CmnCfg.palette.offBlack
+                height: CmnCfg.toolbarHeight + 1
                 anchors {
                     top: parent.top
                 }
             }
+
             Rectangle {
                 implicitWidth: 1
-                color: CmnCfg.palette.black
+                color: CmnCfg.palette.offBlack
                 anchors {
                     top: toolBarHandle.bottom
                     bottom: parent.bottom
@@ -105,5 +154,5 @@ Item {
         }
     }
 
-    Component.onCompleted: herald.login()
+    Component.onCompleted: Herald.login()
 }

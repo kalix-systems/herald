@@ -5,7 +5,7 @@ use platform_dirs::attachments_dir;
 use std::{
     ffi::OsString,
     fmt,
-    fs::read_dir,
+    fs::{self, read_dir},
     path::{Path, PathBuf},
 };
 use tar::{Archive, Builder};
@@ -14,6 +14,7 @@ use tar::{Archive, Builder};
 pub enum Error {
     Read(std::io::Error, Location),
     Write(std::io::Error, Location),
+    StripPrefixError(std::path::StripPrefixError, Location),
     Hash,
     InvalidPathComponent(OsString),
     NonUnicodePath(OsString),
@@ -44,6 +45,12 @@ impl fmt::Display for Error {
                 "Encountered non-unicode path while converting to Strings, path bytes were: {:x?}",
                 os_str
             ),
+            StripPrefixError(e, loc) => write!(
+                f,
+                "Strip prefix error saving attachment at {location}: {error}",
+                location = loc,
+                error = e,
+            ),
             InvalidPathComponent(os_str) => write!(
                 f,
                 "Encountered invalid filename while creating attachment, path bytes were: {:x?}",
@@ -61,7 +68,6 @@ impl std::error::Error for Error {}
 #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
 pub struct Attachment {
     data: Vec<u8>,
-    // TODO: make a Path newtype
     hash_dir: String,
 }
 
@@ -129,11 +135,9 @@ impl AttachmentMeta {
     pub fn flat(&self) -> Result<Vec<PathBuf>, Error> {
         let mut out = Vec::with_capacity(self.0.len());
 
+        let path = attachments_dir();
         for p in self.0.iter() {
-            let mut path = attachments_dir();
-            path.push(p);
-
-            for entry in read_dir(path).map_err(|e| Error::Read(e, loc!()))? {
+            for entry in read_dir(path.join(p)).map_err(|e| Error::Read(e, loc!()))? {
                 out.push(entry.map_err(|e| Error::Read(e, loc!()))?.path());
             }
         }
@@ -167,18 +171,34 @@ impl AttachmentMeta {
         Ok(out)
     }
 
-    pub fn media_attachments(&self) -> Result<Vec<MediaMeta>, Error> {
-        let mut out = Vec::with_capacity(self.0.len());
+    pub fn media_attachments(
+        &self,
+        limit: Option<usize>,
+    ) -> Result<Media, Error> {
+        let mut items = Vec::with_capacity(limit.unwrap_or(8));
 
-        for p in self.0.as_slice().iter() {
-            let mut path = attachments_dir();
+        let mut limit = limit.unwrap_or(std::usize::MAX);
+        let mut num_more = 0;
 
-            path.push(p);
+        let base = attachments_dir();
 
+        for path in self.0.iter().map(|p| base.join(p)) {
             for entry in read_dir(path).map_err(|e| Error::Read(e, loc!()))? {
-                let file = entry.map_err(|e| Error::Read(e, loc!()))?.path();
+                let entry: std::fs::DirEntry = entry.map_err(|e| Error::Read(e, loc!()))?;
+
+                let file = entry.path();
 
                 if is_media(&file) {
+                    if limit == 0 {
+                        num_more += 1;
+                        continue;
+                    }
+
+                    let name = entry
+                        .file_name()
+                        .into_string()
+                        .map_err(Error::NonUnicodePath)?;
+
                     let path = file
                         .into_os_string()
                         .into_string()
@@ -187,87 +207,155 @@ impl AttachmentMeta {
                     let (width, height) =
                         image_utils::image_dimensions(&path).map_err(Error::Image)?;
 
-                    out.push(MediaMeta {
+                    items.push(MediaMeta {
                         width,
                         height,
+                        name,
                         path,
                     });
+
+                    limit -= 1;
                 }
             }
         }
 
-        Ok(out)
+        Ok(Media { items, num_more })
     }
 
-    pub fn doc_attachments(&self) -> Result<Vec<DocMeta>, Error> {
-        let mut out = Vec::with_capacity(self.0.len());
+    pub fn doc_attachments(
+        &self,
+        limit: Option<usize>,
+    ) -> Result<Docs, Error> {
+        let mut items = Vec::with_capacity(limit.unwrap_or(8));
 
-        for p in self.0.iter() {
-            let mut path = attachments_dir();
+        let mut limit = limit.unwrap_or(std::usize::MAX);
+        let mut num_more = 0;
 
-            path.push(p);
-
+        let base = attachments_dir();
+        for path in self.0.iter().map(|p| base.join(p)) {
             for entry in read_dir(path).map_err(|e| Error::Read(e, loc!()))? {
                 let entry: std::fs::DirEntry = entry.map_err(|e| Error::Read(e, loc!()))?;
 
                 let file = entry.path();
 
                 if !is_media(&file) {
+                    if limit == 0 {
+                        num_more += 1;
+                        continue;
+                    }
+
                     let size = entry.metadata().map_err(|e| Error::Read(e, loc!()))?.len();
                     let name = entry
                         .file_name()
                         .into_string()
                         .map_err(Error::NonUnicodePath)?;
 
-                    out.push(DocMeta {
+                    items.push(DocMeta {
                         path: file
                             .into_os_string()
                             .into_string()
                             .map_err(Error::NonUnicodePath)?,
                         name,
                         size,
-                    })
+                    });
+
+                    limit -= 1;
                 }
             }
         }
 
-        Ok(out)
+        Ok(Docs { items, num_more })
     }
 
     /// Indicicates whether `AttachmentMeta` is empty.
     pub fn is_empty(&self) -> bool {
         self.0.is_empty()
     }
+
+    /// Saves all attachments to the `dest` directory
+    pub fn save_all<P: AsRef<Path>>(
+        &self,
+        dest: P,
+    ) -> Result<(), Error> {
+        fs::create_dir_all(&dest).map_err(|e| Error::Write(e, loc!()))?;
+
+        for p in self.flat()? {
+            if let Some(dest_tail) = p.file_name() {
+                let dest = dest.as_ref().join(dest_tail);
+
+                fs::copy(&p, dest).map_err(|e| Error::Write(e, loc!()))?;
+            }
+        }
+
+        Ok(())
+    }
 }
 
 pub struct MediaMeta {
     pub path: String,
+    pub name: String,
     pub width: u32,
     pub height: u32,
 }
 
-impl From<MediaMeta> for json::JsonValue {
-    fn from(meta: MediaMeta) -> json::JsonValue {
-        let MediaMeta {
-            path,
-            width,
-            height,
-        } = meta;
+pub struct Media {
+    pub items: Vec<MediaMeta>,
+    pub num_more: usize,
+}
 
-        use json::object;
-
-        object! {
-            "path" => path,
-            "width" => width,
-            "height" => height
-        }
-    }
+pub struct Docs {
+    pub items: Vec<DocMeta>,
+    pub num_more: usize,
 }
 
 pub struct DocMeta {
     pub path: String,
     pub name: String,
     pub size: u64,
+}
+
+impl From<MediaMeta> for json::JsonValue {
+    fn from(meta: MediaMeta) -> json::JsonValue {
+        use json::object;
+
+        let MediaMeta {
+            path,
+            width,
+            height,
+            name,
+        } = meta;
+
+        object! {
+            "path" => path,
+            "width" => width,
+            "height" => height,
+            "name" => name,
+        }
+    }
+}
+
+impl From<Docs> for json::JsonValue {
+    fn from(docs: Docs) -> json::JsonValue {
+        use json::object;
+        let Docs { items, num_more } = docs;
+
+        object! {
+            "items" => items,
+            "num_more" => num_more,
+        }
+    }
+}
+
+impl From<Media> for json::JsonValue {
+    fn from(media: Media) -> json::JsonValue {
+        use json::object;
+        let Media { items, num_more } = media;
+
+        object! {
+            "items" => items,
+            "num_more" => num_more,
+        }
+    }
 }
 
 impl From<DocMeta> for json::JsonValue {

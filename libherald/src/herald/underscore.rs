@@ -1,5 +1,5 @@
 use super::*;
-use crate::ret_none;
+use crate::none;
 
 impl Herald {
     #[allow(clippy::too_many_arguments)]
@@ -30,6 +30,7 @@ impl Herald {
             errors,
             users_search,
             utils,
+            registration_failure_code: None,
         }
     }
 
@@ -46,27 +47,32 @@ impl Herald {
         use register::*;
 
         let addr = if !(server_addr.is_empty() && server_port.is_empty()) {
-            Some(ret_err!(format!("{}:{}", server_addr, server_port).parse()))
+            Some(err!(format!("{}:{}", server_addr, server_port).parse()))
         } else {
             None
         };
 
-        let uid = ret_err!(UserId::try_from(user_id.as_str()));
+        let uid = err!(UserId::try_from(user_id.as_str()));
 
-        spawn!(match ret_err!(net::register(uid, addr)) {
-            Res::UIDTaken => {
-                eprintln!("UID taken!");
+        spawn!(
+            match push_err!(net::register(uid, addr), "Registration failed") {
+                Some(Res::UIDTaken) => {
+                    push(shared::RegistrationFailureCode::UserIdTaken);
+                }
+                Some(Res::KeyTaken) => {
+                    push(shared::RegistrationFailureCode::KeyTaken);
+                }
+                Some(Res::BadSig(_)) => {
+                    push(shared::RegistrationFailureCode::BadSignature);
+                }
+                Some(Res::Success) => {
+                    push(shared::Update::RegistrationSuccess);
+                }
+                None => {
+                    push(shared::RegistrationFailureCode::Other);
+                }
             }
-            Res::KeyTaken => {
-                eprintln!("Key taken!");
-            }
-            Res::BadSig(s) => {
-                eprintln!("Bad sig: {:?}", s);
-            }
-            Res::Success => {
-                push(shared::Update::RegistrationSuccess);
-            }
-        });
+        );
     }
 
     pub(crate) fn can_fetch_more_(&self) -> bool {
@@ -91,7 +97,7 @@ impl Herald {
         let mut handler = NotifHandler::new(self.emit.clone(), self.effects_flags.clone());
 
         spawn!(
-            ret_err!(net::login(
+            err!(net::login(
                 move |notif: Notification| {
                     handler.send(notif);
                 },
@@ -114,7 +120,7 @@ impl Herald {
         path: String,
     ) {
         if let Some(path) = crate::utils::strip_qrc(path) {
-            ret_none!(heraldcore::set_data_dir(std::path::PathBuf::from(path)));
+            none!(heraldcore::set_data_dir(std::path::PathBuf::from(path)));
         }
 
         if config::id().is_ok() {

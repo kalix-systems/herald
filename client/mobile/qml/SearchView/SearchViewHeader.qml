@@ -9,14 +9,14 @@ RowLayout {
     anchors.margins: CmnCfg.units.dp(12)
     spacing: CmnCfg.units.dp(12)
 
-    IconButton {
+    AnimIconButton {
         id: backButton
         Layout.alignment: Qt.AlignLeft
         tapCallback: searchBarTr
         imageSource: "qrc:/back-arrow-icon.svg"
     }
 
-    IconButton {
+    AnimIconButton {
         id: clearButton
         Layout.alignment: Qt.AlignRight
         tapCallback: searchBarTr
@@ -24,7 +24,10 @@ RowLayout {
     }
 
     function searchBarTr() {
-        var cvs = contactViewMain.state
-        contactViewMain.state = cvs === "search" ? "default" : "search"
+        if (contactViewMain.state === "search") {
+            contactViewMain.state = "default"
+        } else {
+            contactViewMain.state = "search"
+        }
     }
 }

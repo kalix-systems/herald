@@ -30,6 +30,7 @@ pub(crate) fn conversation_messages(
             let receipts = crate::message::db::get_receipts(conn, &message_id)?;
             let replies = crate::message::db::replies(conn, &message_id)?;
             let attachments = crate::message::attachments::db::get(conn, &message_id)?;
+            let reactions = crate::message::db::reactions(conn, &message_id)?;
 
             let time = MessageTime {
                 insertion: row.get("insertion_ts")?,
@@ -53,6 +54,7 @@ pub(crate) fn conversation_messages(
                 attachments,
                 receipts,
                 replies,
+                reactions,
             })
         },
     ));
@@ -64,6 +66,35 @@ pub(crate) fn conversation_messages(
 
     Ok(messages)
 }
+
+pub(crate) fn conversation_message_meta(
+    conn: &rusqlite::Connection,
+    conversation_id: &ConversationId,
+) -> Result<Vec<crate::message::MessageMeta>, HErr> {
+    let mut stmt = w!(conn.prepare(include_str!("../message/sql/conversation_message_meta.sql")));
+
+    let res = w!(stmt.query_map_named(
+        named_params! {
+            "@conversation_id": conversation_id
+        },
+        |row| {
+            Ok(crate::message::MessageMeta {
+                msg_id: row.get("msg_id")?,
+                insertion_time: row.get("insertion_ts")?,
+                match_status: crate::message::MatchStatus::NotMatched,
+            })
+        }
+    ));
+
+    let mut messages = Vec::new();
+    for msg in res {
+        messages.push(w!(msg));
+    }
+
+    Ok(messages)
+}
+
+/// Get all message metadata in a conversation.
 
 /// Get conversation metadata
 pub(crate) fn meta(
@@ -91,7 +122,7 @@ pub(crate) fn expiration_period(
     )))
 }
 
-/// Gets expiration period for a conversation
+/// Gets picture for a conversation
 pub(crate) fn picture(
     conn: &rusqlite::Connection,
     conversation_id: &ConversationId,
@@ -125,9 +156,22 @@ pub(crate) fn set_muted(
     conversation_id: &ConversationId,
     muted: bool,
 ) -> Result<(), HErr> {
-    w!(conn.execute(
+    w!(conn.execute_named(
         include_str!("sql/update_muted.sql"),
-        params![muted, conversation_id],
+        named_params!["@muted": muted, "@conversation_id": conversation_id],
+    ));
+    Ok(())
+}
+
+/// Sets archive status of a conversation
+pub(crate) fn set_status(
+    conn: &rusqlite::Connection,
+    conversation_id: &ConversationId,
+    status: Status,
+) -> Result<(), HErr> {
+    w!(conn.execute(
+        include_str!("sql/update_status.sql"),
+        params![status, conversation_id],
     ));
     Ok(())
 }
@@ -149,13 +193,13 @@ pub(crate) fn set_title(
 pub(crate) fn set_picture(
     conn: &rusqlite::Connection,
     conversation_id: &ConversationId,
-    picture: Option<&str>,
+    picture: Option<image_utils::ProfilePicture>,
 ) -> Result<Option<String>, HErr> {
     let old_picture = self::picture(&conn, conversation_id)?;
 
     let path = match picture {
-        Some(path) => Some(
-            image_utils::update_picture(path, old_picture.as_ref().map(String::as_str))?
+        Some(picture) => Some(
+            image_utils::update_picture(picture, old_picture.as_ref().map(String::as_str))?
                 .into_os_string()
                 .into_string()?,
         ),
@@ -224,5 +268,6 @@ fn from_db(row: &rusqlite::Row) -> Result<ConversationMeta, rusqlite::Error> {
         pairwise: row.get("pairwise")?,
         last_active: row.get("last_active_ts")?,
         expiration_period: row.get("expiration_period")?,
+        status: row.get("status")?,
     })
 }

@@ -1,5 +1,4 @@
 
-
 /*
  *   Copyright 2015 Marco Martin <mart@kde.org>
  *
@@ -30,66 +29,19 @@ QtObject {
 
 
     /**
-     * The fundamental unit of space that should be used for sizes, expressed in pixels.
-     * Given the screen has an accurate DPI settings, it corresponds to a width of
-     * the capital letter M
-     */
-    property int gridUnit: fontMetrics.height
-
-    function gu(dips) {
-        return gridUnit * dips
-    }
-
-
-    /**
-     * units.iconSizes provides access to platform-dependent icon sizing
-     *
-     * The icon sizes provided are normalized for different DPI, so icons
-     * will scale depending on the DPI.
-     *
-     * Icon sizes from KIconLoader, adjusted to devicePixelRatio:
-     * * small
-     * * smallMedium
-     * * medium
-     * * large
-     * * huge
-     * * enormous
-     *
-     * Not devicePixelRation-adjusted::
-     * * desktop
-     */
-
-
-    /**
-     * units.smallSpacing is the amount of spacing that should be used around smaller UI elements,
-     * for example as spacing in Columns. Internally, this size depends on the size of
-     * the default font as rendered on the screen, so it takes user-configured font size and DPI
-     * into account.
-     */
-    property int smallSpacing: Math.floor(gridUnit / 4)
-
-
-    /**
-     * units.largeSpacing is the amount of spacing that should be used inside bigger UI elements,
-     * for example between an icon and the corresponding text. Internally, this size depends on
-     * the size of the default font as rendered on the screen, so it takes user-configured font
-     * size and DPI into account.
-     */
-    property int largeSpacing: smallSpacing * 2
-
-
-    /**
      * The ratio between physical and device-independent pixels. This value does not depend on the \
      * size of the configured font. If you want to take font sizes into account when scaling elements,
      * use theme.mSize(theme.defaultFont), units.smallSpacing and units.largeSpacing.
      * The devicePixelRatio follows the definition of "device independent pixel" by Microsoft.
      */
-    readonly property real devicePixelRatio: Screen.devicePixelRatio
-    readonly property real deviceDotsPerInch: Screen.pixelDensity * 25.4
+
+    //readonly property real devicePixelRatio: Screen.devicePixelRatio
+    // 25.4 = mm per in
+    // 160 =
+    readonly property real deviceDotsPerInch: (Screen.pixelDensity * 25.4) / 160
 
     function dp(dips) {
-        var ref_dpi = deviceDotsPerInch
-        return dips
+        return dips * deviceDotsPerInch
     }
 
 
@@ -108,39 +60,25 @@ QtObject {
 
 
     /**
-     * time in ms by which the display of tooltips will be delayed.
-     *
-     * @sa ToolTip.delay property
-     */
-    property int toolTipDelay: 700
-
-
-    /**
-     * How much the mouse scroll wheel scrolls, expressed in lines of text.
-     * Note: this is strictly for classical mouse wheels, touchpads 2 figer scrolling won't be affected
-     */
-    readonly property int wheelScrollLines: 3
-
-
-    /**
      * metrics used by the default font
      */
-    property variant fontMetrics: TextMetrics {
-        text: "M"
-        function roundedIconSize(size) {
-            if (size < 16) {
-                return size
-            } else if (size < 22) {
-                return 16
-            } else if (size < 32) {
-                return 22
-            } else if (size < 48) {
-                return 32
-            } else if (size < 64) {
-                return 48
-            } else {
-                return size
-            }
-        }
-    }
+    // TODO decide whether to use this vs defining rounding behavior ourselves
+    //    property variant fontMetrics: TextMetrics {
+    //        text: "M"
+    //        function roundedIconSize(size) {
+    //            if (size < 16) {
+    //                return size
+    //            } else if (size < 22) {
+    //                return 16
+    //            } else if (size < 32) {
+    //                return 22
+    //            } else if (size < 48) {
+    //                return 32
+    //            } else if (size < 64) {
+    //                return 48
+    //            } else {
+    //                return size
+    //            }
+    //        }
+    //    }
 }

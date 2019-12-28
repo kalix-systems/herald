@@ -5,27 +5,21 @@ import LibHerald 1.0
 // Includes CVFLoatingButton. ListItem, and Header
 import "./Controls"
 import "../Common" as Common
+import "qrc:/imports/js/utils.mjs" as Utils
 import QtGraphicalEffects 1.0
 
+// The home page of the entire application
+// contains a list of conversations by default
 Page {
     id: cvMainView
-
-    header: Loader {
-        id: headerLoader
-        sourceComponent: HomeHeader {}
-    }
 
     background: Rectangle {
         color: CmnCfg.palette.white
     }
 
-    Common.Drawer {
-        id: contextDrawer
-        DrawerContents {}
-    }
-
     // the body of this entire element
     // displays conversations
+    // TODO: figure out why this is in a loader.
     Loader {
         id: listViewLoader
         anchors.fill: parent
@@ -34,20 +28,20 @@ Page {
             clip: true
             boundsBehavior: ListView.StopAtBounds
             anchors.fill: parent
-            model: herald.conversations
+            model: Herald.conversations
             delegate: ConversationItem {
-                readonly property var conversationIdProxy: conversationId
-                readonly property int colorProxy: model.color
-                readonly property ConversationContent ownedConversationContent: ConversationContent {
-                    conversationId: conversationIdProxy
+                convoTitle: title
+                colorCode: model.color
+                imageSource: Utils.safeStringOrDefault(model.picture, "")
+                isGroup: !model.pairwise
+                convContent: ConversationContent {
+                    conversationId: model.conversationId
                 }
-                convContent: ownedConversationContent
-
-                colorCode: colorProxy
             }
         }
     }
 
+    // TODO: maybe make this a popup?
     ColorOverlay {
         id: disabledOverlay
         visible: false
@@ -57,15 +51,13 @@ Page {
 
         TapHandler {
             //grabPermissions: PointerHandler.TakeOverForbidden
-            onTapped: {
-                cvMainView.state = "default"
-            }
+            onTapped: cvMainView.state = "default"
         }
     }
 
     Component {
         id: fab
-        FloatingActionButtons {}
+        ExpandedComposeButtons {}
     }
 
     Component {

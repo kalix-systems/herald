@@ -7,26 +7,26 @@ static DIR: once_cell::sync::OnceCell<PathBuf> = once_cell::sync::OnceCell::new(
 
 static FALLBACK_DIR: &str = ".data_dir";
 
-#[cfg(not(feature = "deploy_desktop"))]
+#[cfg(not(feature = "deploy"))]
 #[must_use]
 pub fn set_data_dir<P: AsRef<Path>>(_: P) -> Option<()> {
     DIR.set(PathBuf::from(FALLBACK_DIR)).ok()
 }
 
-#[cfg(feature = "deploy_desktop")]
+#[cfg(feature = "deploy")]
 #[must_use]
 pub fn set_data_dir<P: AsRef<Path>>(path: P) -> Option<()> {
     DIR.set(path.as_ref().to_path_buf()).ok()
 }
 
-#[cfg(feature = "deploy_desktop")]
+#[cfg(feature = "deploy")]
 fn data_dir() -> PathBuf {
     DIR.get()
         .unwrap_or(&PathBuf::from(FALLBACK_DIR))
         .to_path_buf()
 }
 
-#[cfg(not(feature = "deploy_desktop"))]
+#[cfg(not(feature = "deploy"))]
 fn data_dir() -> PathBuf {
     PathBuf::from(FALLBACK_DIR)
 }

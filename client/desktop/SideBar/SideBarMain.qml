@@ -12,41 +12,49 @@ Page {
     id: sideBar
     property real windowFraction: width / root.width
     readonly property real maxWindowFraction: 0.66
+
     // maximum width, where root is ApplicationWindow
     SplitView.maximumWidth: root.width * maxWindowFraction
     SplitView.minimumWidth: 250
     SplitView.preferredWidth: 300
     padding: 0 // All Interior Elements span the entire pane
+
     property alias sideBarState: sideBarState
 
-    background: Rectangle {
-        color: CmnCfg.palette.lightGrey
+    // TODO: RENAME the PANE to sideBarContent
+    Pane.SideBarPane {
+        id: sideBarPane
     }
 
-    ///--- SearchBar for contacts, add contact button
+    background: Rectangle {
+        color: CmnCfg.palette.offBlack
+    }
+
     header: Loader {
         id: headerLoader
+
         property string searchPlaceholder: ""
         property bool contactsSearch: false
         property string headerText: ""
 
-        sourceComponent: Header.ContextBar {
+        sourceComponent: Header.ConversationsHeader {
             id: contextBarComponent
         }
 
         Common.Divider {
             anchors.top: parent.bottom
+            color: CmnCfg.palette.lightGrey
+            width: parent.width + 1
         }
-    }
 
-    //component loaded into header depending on sidebar state
-    Header.HeaderComponent {
-        id: headerBarComponent
-    }
+        //component loaded into header depending on sidebar state
+        Header.AltContextHeader {
+            id: altContextHeader
+        }
 
-    //TODO: get rid of this once global search implemented
-    Header.SearchComponent {
-        id: searchBarComponent
+        Header.SearchComponent {
+            id: searchBarComponent
+        }
     }
 
     GroupFlow.NewGroupComponent {

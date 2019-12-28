@@ -5,13 +5,42 @@ declare class MsgId extends ByteArray {}
 declare class MessageSearch {}
 
 declare const enum ExpirationPeriod {
+  // Messages never expire
   Never = 0,
-  OneMinute = 1,
-  OneHour = 2,
-  OneDay = 3,
-  OneWeek = 4,
-  OneMonth = 5,
-  OneYear = 6
+  // Messages expire after 30 seconds
+  ThirtySeconds = 1,
+  // Messages expire after one minute
+  OneMinute = 2,
+  // Messages expire after one minute
+  ThirtyMinutes = 3,
+  // Messages expire after one hour
+  OneHour = 4,
+  // Messages expire after twelve hours
+  TwelveHours = 5,
+  // Messages expire after one day
+  OneDay = 6,
+  // Message expire after one week
+  OneWeek = 7,
+  // Messages expire after one month
+  OneMonth = 8,
+  // Messages expire after one year
+  OneYear = 9
+}
+
+declare const enum MessageReceiptStatus {
+  /// Not acknowledged
+  Nil = 0,
+  /// Received by user
+  Received = 1,
+  /// Read by the recipient
+  Read = 2
+}
+
+declare const enum RegistrationFailureCode {
+  UserIdTaken = 0,
+  KeyTaken = 1,
+  BadSignature = 2,
+  Other = 3
 }
 
 declare const enum MatchStatus {
@@ -53,8 +82,6 @@ declare class Messages {
   isEmpty: string;
   lastTime: number;
   builder: MessageBuilder;
-  // id of the message the message builder is replying to, if any
-  builderOpMsgId: MsgId;
 
   deleteMessage(rowIndex: number): boolean;
   clearConversationHistory(): void;
@@ -67,12 +94,15 @@ declare class Messages {
   searchIndex?: number;
   prevSearchMatch(): number;
   nextSearchMatch(): number;
+
+  saveAllAttachments(index: number, dest: string): boolean;
 }
 
 declare class MessageBuilder {
   isReply: boolean;
   body?: string;
-  isMediaMessage: boolean;
+  hasMediaAttachment: boolean;
+  hasDocAttachment: boolean;
   parseMarkdown: boolean;
 
   opId?: MsgId;
@@ -93,7 +123,7 @@ declare class Message extends Item {}
 
 declare class Users {
   add(userid: UserId): ConversationID;
-  setStatus(rowIndex: number, status: ContactStatus): boolean;
+  setStatus(rowIndex: number, status: UserStatus): boolean;
   setName(rowIndex: number, name: string): boolean;
   setProfilePicture(rowIndex: number, profilePicture: string): boolean;
   pairwiseConversationId(rowIndex: number): ConversationID;
@@ -108,14 +138,13 @@ declare class User {
   profilePicture?: string;
   // TODO const enum for colors
   color: number;
-  status: ContactStatus;
+  status: UserStatus;
   matched: boolean;
 }
 
-declare const enum ContactStatus {
+declare const enum UserStatus {
   Active = 0,
-  Archved = 1,
-  Deleted = 2
+  Deleted = 1
 }
 
 declare class Config {

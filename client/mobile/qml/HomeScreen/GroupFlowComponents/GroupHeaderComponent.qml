@@ -8,6 +8,8 @@ import "../../Common"
 import QtGraphicalEffects 1.0
 import Qt.labs.platform 1.0
 
+// TODO: Factor this out into foundation.
+// ^^^^ FOR ALL FILES IN THIS DIRECTORY
 Column {
     id: topRect
     anchors.top: parent.top
@@ -16,6 +18,7 @@ Column {
     property alias groupTitle: titleText.text
     spacing: CmnCfg.units.dp(12)
     topPadding: CmnCfg.units.dp(24)
+
     Rectangle {
         anchors.horizontalCenter: parent.horizontalCenter
         id: cameraSection
@@ -25,6 +28,7 @@ Column {
         Loader {
             id: groupImageLoader
             active: false
+            //TODO: this is a rage manuever, please ammend
             z: 100
             property string imageSource
             anchors.fill: parent
@@ -35,7 +39,7 @@ Column {
             }
         }
 
-        IconButton {
+        AnimIconButton {
             anchors.centerIn: parent
             imageSource: "qrc:/camera-icon.svg"
             color: CmnCfg.palette.iconFill
@@ -51,7 +55,7 @@ Column {
         anchors.horizontalCenter: parent.horizontalCenter
         TextArea {
             id: titleText
-            placeholderText: "Group title"
+            placeholderText: qsTr("Group title")
             leftPadding: 0
         }
 
@@ -64,7 +68,7 @@ Column {
         //TODO: This doesn't do anything yet
         CheckBox {
             topPadding: CmnCfg.units.dp(12)
-            text: "Enable channels"
+            text: qsTr("Enable channels")
             font.family: CmnCfg.chatFont.name
             checked: false
             indicator.width: CmnCfg.units.dp(18)

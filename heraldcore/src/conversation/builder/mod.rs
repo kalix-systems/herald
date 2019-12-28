@@ -1,4 +1,5 @@
 use super::*;
+use image_utils::ProfilePicture;
 use std::collections::HashSet;
 
 mod db;
@@ -11,7 +12,7 @@ pub struct ConversationBuilder {
     /// Conversation title
     pub title: Option<String>,
     /// Conversation picture
-    pub picture: Option<String>,
+    pub picture: Option<ProfilePicture>,
     /// Conversation color,
     pub color: Option<u32>,
     /// Indicates whether the conversation is muted
@@ -20,6 +21,8 @@ pub struct ConversationBuilder {
     pub pairwise: Option<bool>,
     /// The default period that passes before a message expires
     pub expiration_period: Option<ExpirationPeriod>,
+    /// Status
+    pub status: Option<Status>,
     /// Members to be added to the conversation
     members: Vec<UserId>,
     member_set: HashSet<UserId>,
@@ -57,7 +60,7 @@ impl ConversationBuilder {
     /// Sets picture
     pub fn picture(
         &mut self,
-        picture: String,
+        picture: ProfilePicture,
     ) -> &mut Self {
         self.picture.replace(picture);
         self
@@ -96,6 +99,15 @@ impl ConversationBuilder {
         expiration_period: ExpirationPeriod,
     ) -> &mut Self {
         self.expiration_period.replace(expiration_period);
+        self
+    }
+
+    /// Sets expiration period
+    pub fn status(
+        &mut self,
+        status: Status,
+    ) -> &mut Self {
+        self.status.replace(status);
         self
     }
 

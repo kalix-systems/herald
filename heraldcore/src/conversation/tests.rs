@@ -79,6 +79,30 @@ fn add_and_get() {
 }
 
 #[test]
+fn conversation_message_meta() {
+    let mut conn = Database::in_memory_with_config().expect(womp!());
+
+    let receiver = crate::user::db::test_user(&mut conn, "receiver");
+
+    let conv = receiver.pairwise_conversation;
+
+    let mut builder = InboundMessageBuilder::default();
+    let msg_id = [0; 32].into();
+    builder
+        .id(msg_id)
+        .author(receiver.id)
+        .conversation_id(conv)
+        .timestamp(Time::now())
+        .body("hi".try_into().expect(womp!()));
+
+    let stored_meta = builder.store_db(&mut conn).expect(womp!()).expect(womp!());
+
+    let meta = db::conversation_message_meta(&conn, &conv).expect(womp!("unable to get message"));
+
+    assert_eq!(stored_meta.time.insertion, meta[0].insertion_time);
+}
+
+#[test]
 fn matches() {
     let mut conn = Database::in_memory_with_config().expect(womp!());
 
@@ -116,8 +140,14 @@ fn set_prof_pic() {
 
     let test_picture = "test_resources/maryland.png";
 
-    super::db::set_picture(&conn, &conv_id, Some(&test_picture))
-        .expect(womp!("failed to set picture"));
+    super::db::set_picture(
+        &conn,
+        &conv_id,
+        Some(image_utils::ProfilePicture::autocrop(
+            test_picture.to_owned(),
+        )),
+    )
+    .expect(womp!("failed to set picture"));
 
     std::fs::remove_dir_all(pictures_dir()).expect(womp!());
 }

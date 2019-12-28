@@ -7,41 +7,54 @@ import "../Common"
 RowLayout {
     id: chatRowLayout
     readonly property real textareaHeight: CmnCfg.units.dp(24)
+
+    readonly property var select: function () {
+        cta.forceActiveFocus()
+    }
+
     property bool send: cta.text.length > 0
+    property string chatName: 'conversation'
     width: parent.width
     spacing: 0
 
     TextArea {
         id: cta
         height: chatRowLayout.textareaHeight
-        Layout.fillWidth: true
-        Layout.alignment: Qt.AlignBottom
-        placeholderText: "Send a message..."
-        wrapMode: "WrapAtWordBoundaryOrAnywhere"
+        placeholderText: qsTr('Message ' + chatRowLayout.chatName)
+        wrapMode: TextArea.WrapAtWordBoundaryOrAnywhere
         color: CmnCfg.palette.black
         selectionColor: CmnCfg.palette.highlightColor
-
         font {
-            pointSize: CmnCfg.chatPreviewSize
+            pixelSize: CmnCfg.chatTextSize
             family: CmnCfg.chatFont.name
+        }
+        Layout.fillWidth: true
+        Layout.alignment: Qt.AlignVCenter
+        Keys.onPressed: {
+
+            if ((event.key === Qt.Key_Backspace || event.key === Qt.Key_Delete)
+                    && cta.text.length === 0) {
+                Qt.inputMethod.hide()
+            }
         }
     }
 
     Grid {
         // TODO: Collapse options into plus when typing
-        columns: 2 //cta.lineCount > 1 ? 1 : 2
+        // TODO: this is a binding loop use TextMetrics
+        columns: cta.lineCount > 1 ? 1 : 2
         Layout.alignment: Qt.AlignRight | Qt.AlignBottom
         Layout.margins: CmnCfg.units.dp(12)
-        Layout.bottomMargin: CmnCfg.units.dp(6)
+        Layout.bottomMargin: CmnCfg.units.dp(12)
         spacing: CmnCfg.units.dp(12)
 
-        IconButton {
+        AnimIconButton {
             Layout.alignment: Qt.AlignRight
             color: CmnCfg.palette.black
             imageSource: "qrc:/camera-icon.svg"
         }
 
-        IconButton {
+        AnimIconButton {
             Layout.alignment: Qt.AlignRight
             color: CmnCfg.palette.black
             tapCallback: send ? function () {

@@ -1,47 +1,44 @@
-import QtQuick 2.13
-import QtQuick.Controls 2.12
+import QtQuick 2.14
+import QtQuick.Controls 2.14
 import Qt.labs.platform 1.1
-import LibHerald 1.0
 import "qrc:/imports/errors"
 import "./LoginPage" as LoginPage
+import LibHerald 1.0
 
 ApplicationWindow {
     id: root
     visible: true
+    // for desktop prototyping
+    // removed on desktop
     width: 300
     height: 500
 
-    Herald {
-        id: herald
+    ErrorDialog {
+        id: errPopup
 
-        property var errPopup: ErrorDialog {}
+        Connections {
+            target: Herald.errors
+            onTryPollChanged: {
+                const errMsg = Herald.errors.nextError()
 
-        errors.onTryPollChanged: {
-            var errMsg = herald.errors.nextError()
-            if (errMsg !== "") {
-                errPopup.errorMsg = errMsg
-                errPopup.open()
+                if (errMsg !== "") {
+                    errPopup.errorMsg = errMsg
+                    errPopup.open()
+                }
             }
         }
-
-        // NOTE: This is very important. Until our initialization is cleaned up this has to happen immediately after `Herald`
-        // is initialized.
-        Component.onCompleted: herald.setAppLocalDataDir(
-                                   StandardPaths.writableLocation(
-                                       StandardPaths.AppLocalDataLocation))
     }
 
-    Loader {
-        id: capitan
-        active: false
-        sourceComponent: Item {}
+    MobileHelper {
+        id: mobHelper
+        Component.onCompleted: set_status_bar_color(CmnCfg.palette.offBlack)
     }
 
     Loader {
         id: loginPageLoader
-        active: !herald.configInit
+        active: !Herald.configInit
         anchors.fill: parent
-        // windows cannot be filled, unless reffered to as parent
+        // windows cannot be filled, unless referred to as parent
         sourceComponent: LoginPage.LoginLandingPage {
             id: lpMain
             anchors.fill: parent
@@ -50,7 +47,7 @@ ApplicationWindow {
 
     Loader {
         id: appLoader
-        active: herald.configInit
+        active: Herald.configInit
         anchors.fill: parent
         sourceComponent: App {}
     }

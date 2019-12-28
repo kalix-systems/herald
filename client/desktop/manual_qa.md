@@ -10,6 +10,10 @@ Messages
 	c. Send an attachment (for now, only images)
 	d. Check that clear history in options menu in chat bar works (and also updates sidebar)
 
+Message view controls
+	a. check that up and down arrow keys scroll, page up and page down, home and end
+	b. Check that j/k scroll up and down, g and G take you to beginning and end
+
 Contact flow
 	a. Add a contact
 	b. Messages (a - d)
@@ -31,7 +35,7 @@ Global search
 ADDITIONAL CHECKS
 
 Messages (additional)
-	d. Check flurry logic - messages sent in a row should only have an avatar on the last
+	d. Check flurry logic - messages sent in a row should only have an avatar on the first
 	e. Check colors/timestamps on reply bubbles, make sure they match originals
 	f. Check that setting disappearing timer to off removes timer icon on ensuing message bubbles
 

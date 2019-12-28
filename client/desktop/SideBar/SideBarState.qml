@@ -6,27 +6,9 @@ import "../SideBar/Header" as Header
 import "../SideBar/Pane" as Pane
 import "../SideBar/Pane/GroupFlowComponents" as GroupFlow
 
-Page {
-    id: sideBarStateLoader
-    padding: 0
+Item {
 
-    background: Rectangle {
-        color: CmnCfg.palette.lightGrey
-    }
-
-    Component {
-        id: contactslvComponent
-        Pane.ContactView {
-            id: contactsListView
-            anchors.fill: parent
-            model: herald.users
-        }
-    }
-
-    Pane.SideBarPane {
-        id: sideBarPane
-    }
-
+    // TODO PAUL: add transitions
     states: [
         State {
             name: "newContactState"
@@ -36,9 +18,9 @@ Page {
             }
             PropertyChanges {
                 target: headerLoader
-                sourceComponent: headerBarComponent
-                searchPlaceholder: "Search your conversations"
-                headerText: "Add contact"
+                sourceComponent: altContextHeader
+                searchPlaceholder: qsTr("Search your conversations")
+                headerText: qsTr("Add contact")
             }
         },
 
@@ -51,8 +33,8 @@ Page {
 
             PropertyChanges {
                 target: headerLoader
-                sourceComponent: headerBarComponent
-                headerText: "New group"
+                sourceComponent: altContextHeader
+                headerText: qsTr("New group")
                 contactsSearch: true
             }
         },
@@ -62,29 +44,13 @@ Page {
             PropertyChanges {
                 target: headerLoader
                 sourceComponent: searchBarComponent
-                searchPlaceholder: "Search your conversations"
+                searchPlaceholder: qsTr("Search your conversations")
             }
 
             //load model into view
             PropertyChanges {
                 target: sideBarPane.messageSearchLoader
-                searchModel: herald.messageSearch
-            }
-        },
-
-        //TODO: following state should be reworked to match new design
-        State {
-            name: "newConversationState"
-            PropertyChanges {
-                target: sideBarBodyLoader
-                sourceComponent: contactslvComponent
-            }
-
-            PropertyChanges {
-                target: headerLoader
-                sourceComponent: searchBarComponent
-                searchPlaceholder: "Enter contact name"
-                contactsSearch: true
+                searchModel: Herald.messageSearch
             }
         }
     ]

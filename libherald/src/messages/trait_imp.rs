@@ -47,18 +47,39 @@ impl Interface for Messages {
         self.author_(index)
     }
 
+    fn author_color(
+        &self,
+        index: usize,
+    ) -> Option<u32> {
+        self.author_color_(index)
+    }
+
+    fn author_name(
+        &self,
+        index: usize,
+    ) -> Option<ffi::UserId> {
+        self.author_name_(index)
+    }
+
+    fn author_profile_picture(
+        &self,
+        index: usize,
+    ) -> String {
+        self.author_profile_picture_(index).unwrap_or_default()
+    }
+
     fn body(
         &self,
         index: usize,
-    ) -> Option<String> {
-        self.body_(index)
+    ) -> String {
+        self.body_(index).unwrap_or_default()
     }
 
     fn full_body(
         &self,
         index: usize,
-    ) -> Option<String> {
-        self.full_body_(index)
+    ) -> String {
+        self.full_body_(index).unwrap_or_default()
     }
 
     fn receipt_status(
@@ -88,11 +109,19 @@ impl Interface for Messages {
     ) -> String {
         self.doc_attachments_(index).unwrap_or_default()
     }
+
     fn media_attachments(
         &self,
         index: usize,
     ) -> String {
         self.media_attachments_(index).unwrap_or_default()
+    }
+
+    fn full_media_attachments(
+        &self,
+        index: usize,
+    ) -> String {
+        self.full_media_attachments_(index).unwrap_or_default()
     }
 
     fn delete_message(
@@ -143,18 +172,11 @@ impl Interface for Messages {
         self.set_search_hint_(scroll_position, scroll_height)
     }
 
-    fn set_builder_op_msg_id(
-        &mut self,
-        id: Option<ffi::MsgIdRef>,
-    ) {
-        self.set_builder_op_msg_id_(id)
-    }
-
     fn op_body(
         &self,
         index: usize,
-    ) -> Option<String> {
-        self.op_body_(index)
+    ) -> String {
+        self.op_body_(index).unwrap_or_default()
     }
 
     fn insertion_time(
@@ -193,14 +215,10 @@ impl Interface for Messages {
         self.builder_mut_()
     }
 
-    fn builder_op_msg_id(&self) -> Option<ffi::MsgIdRef> {
-        self.builder_op_msg_id_()
-    }
-
     fn op_msg_id(
         &self,
         index: usize,
-    ) -> Option<ffi::MsgIdRef> {
+    ) -> Option<ffi::MsgId> {
         self.op_msg_id_(index)
     }
 
@@ -237,6 +255,20 @@ impl Interface for Messages {
         index: usize,
     ) -> String {
         self.op_doc_attachments_(index).unwrap_or_default()
+    }
+
+    fn op_color(
+        &self,
+        index: usize,
+    ) -> Option<u32> {
+        self.op_color_(index)
+    }
+
+    fn op_name(
+        &self,
+        index: usize,
+    ) -> Option<String> {
+        self.op_name_(index)
     }
 
     fn msg_id(
@@ -304,5 +336,50 @@ impl Interface for Messages {
         chars_per_line: u8,
     ) {
         self.set_elision_chars_per_line_(chars_per_line)
+    }
+
+    fn save_all_attachments(
+        &self,
+        index: u64,
+        dest: String,
+    ) -> bool {
+        self.save_all_attachments_(index as usize, dest)
+    }
+
+    fn user_receipts(
+        &self,
+        index: usize,
+    ) -> String {
+        self.user_receipts_(index).unwrap_or_default()
+    }
+
+    fn mark_read(
+        &mut self,
+        index: u64,
+    ) {
+        self.mark_read_(index)
+    }
+
+    fn add_reaction(
+        &mut self,
+        index: u64,
+        content: String,
+    ) {
+        self.add_reaction_(index, content)
+    }
+
+    fn remove_reaction(
+        &mut self,
+        index: u64,
+        content: String,
+    ) {
+        self.remove_reaction_(index, content)
+    }
+
+    fn reactions(
+        &self,
+        index: usize,
+    ) -> String {
+        self.reactions_(index).unwrap_or_default()
     }
 }

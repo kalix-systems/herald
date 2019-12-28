@@ -7,7 +7,7 @@ import "../popups/js/NewContactDialogue.mjs" as JS
 import "../../SideBar" as SBUtils
 import QtGraphicalEffects 1.0
 import Qt.labs.platform 1.0
-import "qrc:/imports/Avatar"
+import "qrc:/imports/Entity"
 import "qrc:/imports" as Imports
 import "qrc:/imports/js/utils.mjs" as Utils
 
@@ -15,88 +15,70 @@ Component {
     id: searchBarComponent
 
     ToolBar {
-        height: CmnCfg.toolbarHeight
+        height: CmnCfg.toolbarHeight + 1
         background: Rectangle {
             color: CmnCfg.palette.offBlack
         }
+
         RowLayout {
-
             anchors.fill: parent
+            spacing: 0
 
-            Common.ConfigAvatar {}
+            HeaderAvatar {
+                Layout.leftMargin: CmnCfg.smallMargin
+            }
 
-            Rectangle {
+            Imports.BorderedTextField {
+                id: searchText
+                placeholderText: headerLoader.searchPlaceholder
+                selectByMouse: true
+
+                Layout.alignment: Qt.AlignBottom | Qt.AlignHCenter
                 Layout.fillWidth: true
-                color: CmnCfg.palette.offBlack
-                height: parent.height
-                Layout.leftMargin: -12
+                Layout.bottomMargin: CmnCfg.smallMargin
+                Layout.leftMargin: CmnCfg.smallMargin
+                Layout.rightMargin: CmnCfg.smallMargin
 
-                TextArea {
-                    id: searchText
-                    height: CmnCfg.toolbarHeight - CmnCfg.smallMargin / 2
-                    width: parent.width
-                    placeholderText: headerLoader.searchPlaceholder
-                    color: "white"
-                    verticalAlignment: TextEdit.AlignVCenter
-                    anchors.top: parent.top
-                    anchors.topMargin: CmnCfg.smallMargin / 4
-
-                    background: Rectangle {
-                        color: CmnCfg.palette.offBlack
-                        anchors.fill: parent
-                    }
-
-                    Keys.onPressed: {
-                        // this makes sure that returns and tabs are not evaluated
-                        if (event.key === Qt.Key_Return
-                                || event.key === Qt.Key_Tab) {
-                            event.accepted = true
-                        }
-                    }
-
-                    Imports.ButtonForm {
-                        source: "qrc:/x-icon.svg"
-                        scale: 0.8
-                        fill: CmnCfg.palette.lightGrey
-                        anchors.right: parent.right
-                        anchors.rightMargin: CmnCfg.smallMargin / 2
-                        anchors.verticalCenter: parent.verticalCenter
-                        onClicked: {
-                            herald.messageSearch.clearSearch()
-                            herald.conversations.filter = ""
-                            sideBarState.state = ""
-                        }
-                    }
-
-                    onTextChanged: {
-                        if (contactsSearch) {
-                            Qt.callLater(function (text) {
-                                herald.users.filter = text
-                            }, searchText.text)
-                        } else {
-                            Qt.callLater(function (text) {
-                                herald.conversations.filter = text
-                                herald.messageSearch.searchPattern = text
-                            }, searchText.text)
-                        }
-                    }
-
-                    Component.onDestruction: {
-                        herald.users.clearFilter()
-                        herald.conversations.clearFilter()
-                        herald.messageSearch.clearSearch()
+                Keys.onPressed: {
+                    // this makes sure that returns and tabs are not evaluated
+                    if (event.key === Qt.Key_Return
+                            || event.key === Qt.Key_Tab) {
+                        event.accepted = true
                     }
                 }
 
-                Rectangle {
-                    width: searchText.width - CmnCfg.mediumMargin
-                    color: "white"
-                    height: 1
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    anchors.bottomMargin: CmnCfg.smallMargin
-                    anchors.bottom: parent.bottom
+                onTextChanged: {
+                    if (contactsSearch) {
+                        Qt.callLater(function (text) {
+                            Herald.users.filter = text
+                        }, searchText.text)
+                    } else {
+                        Qt.callLater(function (text) {
+                            Herald.conversations.filter = text
+                            Herald.messageSearch.searchPattern = text
+                        }, searchText.text)
+                    }
+                }
+
+                Component.onDestruction: {
+                    Herald.users.clearFilter()
+                    Herald.conversations.clearFilter()
+                    Herald.messageSearch.clearSearch()
                 }
             }
+
+            Imports.IconButton {
+                source: "qrc:/x-icon.svg"
+                fill: CmnCfg.palette.lightGrey
+                Layout.alignment: Qt.AlignRight
+                Layout.rightMargin: CmnCfg.smallMargin
+                onClicked: {
+                    Herald.messageSearch.clearSearch()
+                    Herald.conversations.filter = ""
+                    sideBarState.state = ""
+                }
+            }
+
         }
     }
 }

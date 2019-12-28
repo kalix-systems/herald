@@ -1,0 +1,10 @@
+[package]
+name = "revec"
+version = "0.1.0"
+authors = ["Baeo Maltinsky <baeo.maltinsky@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+im = "14.1.0"

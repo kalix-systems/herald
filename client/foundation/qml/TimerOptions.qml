@@ -13,37 +13,58 @@ Menu {
     property int chosenPeriod: conversationItem.expirationPeriod
     property string chosenTimer: timerModel.get(chosenPeriod).path
 
+    // TODO real icon
     ListModel {
         id: timerModel
 
         ListElement {
-            name: "Off"
-            path: "qrc:/timer-icons/off.svg"
+            name: qsTr("Off")
+            path: "qrc:/timer-option-icons/off.svg"
         }
 
         ListElement {
-            name: "1 minute"
-            path: "qrc:/timer-icons/1min.svg"
+            name: qsTr("30 seconds")
+            path: "qrc:/timer-option-icons/30s.svg"
         }
+
         ListElement {
-            name: "1 hour"
-            path: "qrc:/timer-icons/1h.svg"
+            name: qsTr("1 minute")
+            path: "qrc:/timer-option-icons/1min.svg"
         }
+
         ListElement {
-            name: "1 day"
-            path: "qrc:/timer-icons/1d.svg"
+            name: qsTr("30 minutes")
+            path: "qrc:/timer-option-icons/30min.svg"
         }
+
         ListElement {
-            name: "1 week"
-            path: "qrc:/timer-icons/1w.svg"
+            name: qsTr("1 hour")
+            path: "qrc:/timer-option-icons/1h.svg"
         }
+
         ListElement {
-            name: "1 month"
-            path: "qrc:/timer-icons/1mo.svg"
+            name: qsTr("12 hours")
+            path: "qrc:/timer-option-icons/12h.svg"
         }
+
         ListElement {
-            name: "1 year"
-            path: "qrc:/timer-icons/1y.svg"
+            name: qsTr("1 day")
+            path: "qrc:/timer-option-icons/1d.svg"
+        }
+
+        ListElement {
+            name: qsTr("1 week")
+            path: "qrc:/timer-option-icons/1w.svg"
+        }
+
+        ListElement {
+            name: qsTr("1 month")
+            path: "qrc:/timer-option-icons/1mo.svg"
+        }
+
+        ListElement {
+            name: qsTr("1 year")
+            path: "qrc:/timer-option-icons/1y.svg"
         }
     }
 
@@ -54,9 +75,7 @@ Menu {
             text: name
             checkable: true
             checked: conversationItem.expirationPeriod === index
-            onTriggered: {
-                conversationItem.expirationPeriod = index
-            }
+            onTriggered: conversationItem.expirationPeriod = index
         }
 
         onObjectAdded: optMenu.insertItem(index, object)

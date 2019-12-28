@@ -9,25 +9,31 @@ Flickable {
 
     property alias messageSearchLoader: messageSearchLoader
     property alias sideBarBodyLoader: sideBarBodyLoader
+
     anchors.fill: parent
-    contentHeight: wrapperCol.height
     interactive: true
+    contentHeight: wrapperCol.height
     boundsBehavior: Flickable.StopAtBounds
+
     ScrollBar.vertical: ScrollBar {
         policy: ScrollBar.AsNeeded
-        width: CmnCfg.padding
+        width: CmnCfg.smallMargin
     }
+
     //column to load content, components are inside instead of being declared separately because
     // otherwise loader cannot keep track of contentHeight of the listviews.
     Column {
         id: wrapperCol
         width: parent.width
+
         Text {
-            text: "Conversations"
+            text: qsTr("Conversations")
             anchors.left: parent.left
             anchors.leftMargin: CmnCfg.smallMargin
             topPadding: CmnCfg.smallMargin
             font.bold: true
+            font.family: CmnCfg.chatFont.name
+            color: CmnCfg.palette.lightGrey
             visible: sideBarState.state === "globalSearch"
         }
 
@@ -36,26 +42,29 @@ Flickable {
             sourceComponent: Component {
                 ConversationViewMain {
                     id: convosLvComponent
-                    model: herald.conversations
+                    model: Herald.conversations
                 }
             }
             width: parent.width
         }
 
         Text {
-            text: "Messages"
+            text: qsTr("Messages")
             anchors.left: parent.left
             anchors.leftMargin: CmnCfg.smallMargin
             topPadding: CmnCfg.smallMargin
             font.bold: true
+            font.family: CmnCfg.chatFont.name
+            color: CmnCfg.palette.lightGrey
             visible: sideBarState.state === "globalSearch"
         }
 
         Loader {
             id: messageSearchLoader
             width: parent.width
-            //model loaded into search view only in search state
             property var searchModel
+
+            //model loaded into search view only in search state
             sourceComponent: Component {
                 MessageSearchView {
                     model: searchModel

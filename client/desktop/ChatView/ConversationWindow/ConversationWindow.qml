@@ -1,17 +1,20 @@
-import QtQuick.Controls 2.13
+import QtQuick.Controls 2.14
 import QtQuick.Layouts 1.12
-import QtQuick 2.13
+import QtQuick 2.14
 import LibHerald 1.0
 import "qrc:/imports/ChatBubble" as CB
-import "qrc:/imports/Avatar"
+import "qrc:/imports/Entity"
 import "." as CVUtils
 import "qrc:/imports/js/utils.mjs" as Utils
 import "../../SideBar/js/ContactView.mjs" as CUtils
+import Qt.labs.platform 1.1
+import QtQuick.Dialogs 1.3
+import QtGraphicalEffects 1.0
+import "../Popups" as Popups
 
 ListView {
     id: chatListView
     property alias chatScrollBar: chatScrollBarInner
-    property alias chatListView: chatListView
 
     //this should be in here and not in the bubble because conversation window
     //needs access to it, add a separate animation to mobile
@@ -19,15 +22,16 @@ ListView {
     property NumberAnimation highlightAnimation: NumberAnimation {
         id: bubbleHighlightAnimation
         property: "opacity"
-        from: 1.0
+        from: 0.4
         to: 0.0
-        duration: 600
+        duration: 800
         easing.type: Easing.InCubic
     }
+    spacing: 0
 
-    // TODO this only clips because of highlight rectangles, figure out a way to
-    // not use clip
-    clip: true
+    // disable these, we're handling them differently
+    keyNavigationEnabled: false
+    keyNavigationWraps: false
 
     maximumFlickVelocity: 1500
     flickDeceleration: chatListView.height * 10
@@ -35,13 +39,10 @@ ListView {
     onFlickStarted: focus = true
 
     highlightFollowsCurrentItem: false
-    cacheBuffer: chatListView.height * 3
-
-    Layout.maximumWidth: parent.width
 
     ScrollBar.vertical: ScrollBar {
         id: chatScrollBarInner
-        width: CmnCfg.padding
+        width: CmnCfg.smallMargin
 
         policy: ScrollBar.AsNeeded
         hoverEnabled: true
@@ -52,106 +53,105 @@ ListView {
 
     boundsBehavior: ListView.StopAtBounds
     boundsMovement: Flickable.StopAtBounds
+    model: chatPage.ownedConversation
 
-    model: ownedConversation
+    // Note: we load the list view from the bottom up to make
+    // scroll behavior more predictable
+    verticalLayoutDirection: ListView.VerticalBottomToTop
+
+    // this is set to a higher value in `Component.onCompleted`
+    // but is set to `0` here to improve initial load times
+    cacheBuffer: 0
 
     Component.onCompleted: {
-        ownedConversation.setElisionLineCount(38)
-        ownedConversation.setElisionCharCount(38 * 40)
-        ownedConversation.setElisionCharsPerLine(40)
-        positionViewAtEnd()
+        model.setElisionLineCount(38)
+        model.setElisionCharCount(38 * 40)
+        model.setElisionCharsPerLine(40)
+
+        chatScrollBarInner.setPosition(1.0)
+        cacheBuffer = chatListView.height * 5
+        if (chatListView.count === 0) {
+            chatListView.height = chatListView.contentHeight
+        }
     }
 
-    delegate: Row {
-        id: chatRow
-        readonly property string proxyBody: body
-        property string proxyReceiptImage: CUtils.receiptStatusSwitch(
-                                               receiptStatus)
-        readonly property color userColor: CmnCfg.avatarColors[herald.users.colorById(
-                                                                   author)]
-        readonly property string timestamp: Utils.friendlyTimestamp(
-                                                insertionTime)
+    FileDialog {
+        id: downloadFileChooser
+        selectFolder: true
+        folder: StandardPaths.writableLocation(StandardPaths.DesktopLocation)
+        onAccepted: ownedConversation.saveAllAttachments(index, fileUrl)
+        selectExisting: false
+    }
 
-        readonly property bool outbound: author === herald.config.configId
+    delegate: CB.ChatBubble {
+        id: bubbleActual
+        convContainer: chatListView
+        defaultWidth: chatListView.width
+        width: parent.width
+        messageModelData: model
+        ListView.onAdd: chatScrollBarInner.setPosition(1.0)
+        bubbleIndex: index
 
-        readonly property string authName: outbound ? herald.config.name : herald.users.nameById(
-                                                          author)
-        readonly property string pfpUrl: outbound ? herald.config.profilePicture : herald.users.profilePictureById(
-                                                        author)
-        property alias highlight: bubbleActual.highlightItem
-        property bool elided: body.length !== fullBody.length
+        ChatBubbleHover {
+            id: bubbleHoverHandler
+            download: bubbleActual.imageAttach || bubbleActual.docAttach
+            onEntered: {
+                bubbleActual.hoverHighlight = true
+                bubbleActual.expireInfo.visible = false
+            }
+            onExited: {
+                if (reactPopup.active == true) {
+                    bubbleActual.hoverHighlight = true
+                }
 
-        property var messageModelData: model
-        anchors {
-            right: outbound ? parent.right : undefined
-            left: !outbound ? parent.left : undefined
-            rightMargin: CmnCfg.margin
-            leftMargin: CmnCfg.smallMargin
-        }
-
-        spacing: CmnCfg.margin
-        bottomPadding: isTail ? CmnCfg.mediumMargin / 2 : CmnCfg.smallMargin / 2
-        topPadding: isHead ? CmnCfg.mediumMargin / 2 : CmnCfg.smallMargin / 2
-
-        Component {
-            id: std
-            CB.StandardBubble {
-                body: proxyBody
-                friendlyTimestamp: timestamp
-                authorName: authName
-                receiptImage: proxyReceiptImage
-                authorColor: userColor
-                elided: chatRow.elided
-                medAttachments: mediaAttachments
-                documentAttachments: docAttachments
-                imageAttach: mediaAttachments.length !== 0
-                docAttach: docAttachments.length !== 0
-                replyId: opMsgId
-                reply: replyType > 0
-                maxWidth: chatListView.width * 0.66
-                messageModelData: chatRow.messageModelData
+                bubbleActual.hoverHighlight = false
+                if (isHead)
+                    bubbleActual.expireInfo.visible = true
             }
         }
-        AvatarMain {
-            iconColor: userColor
-            initials: authName[0].toUpperCase()
-            opacity: isTail && !outbound ? 1 : 0
-            size: 28
-            anchors {
-                bottom: parent.bottom
-                margins: CmnCfg.margin
-                bottomMargin: parent.bottomPadding
+
+        Popup {
+            id: emojiMenu
+            width: reactPopup.width
+            height: reactPopup.height
+            x: chatListView.width - width
+            onClosed: {
+                reactPopup.active = false
             }
-            z: 10
-            pfpPath: parent.pfpUrl
-            avatarHeight: 28
+            onOpened: {
+                bubbleActual.hoverHighlight = true
+            }
+
+            y: {
+                if (bubbleActual.y - chatListView.contentY > height) {
+                    return -height
+                }
+                return CmnCfg.largeMargin * 2
+            }
+
+            Popups.EmojiPopup {
+                id: reactPopup
+                anchors.centerIn: parent
+                isReactPopup: true
+                x: chatListView.width - width
+
+                z: convWindow.z + 1000
+                onActiveChanged: {
+                    if (!active)
+                        emojiMenu.close()
+                }
+
+                anchors {
+                    margins: CmnCfg.smallMargin
+                }
+            }
         }
 
-        CB.ChatBubble {
-            id: bubbleActual
-            color: CmnCfg.palette.lightGrey
-            senderColor: userColor
-            convContainer: convWindow
-            highlight: matchStatus === 2
-            content: std
-            maxWidth: chatListView.width * 0.66
-
-            ChatBubbleHover {}
-        }
-
-        AvatarMain {
-            iconColor: userColor
-            initials: authName[0].toUpperCase()
-            opacity: isTail && outbound ? 1 : 0
-            size: 28
-            anchors {
-                bottom: parent.bottom
-                margins: CmnCfg.margin
-                bottomMargin: parent.bottomPadding
+        //TODO: this doesn't actually produce the desired behavior
+        Component.onCompleted: {
+            if (root.active) {
+                ownedConversation.markRead(index)
             }
-            z: 10
-            pfpPath: parent.pfpUrl
-            avatarHeight: 28
         }
     }
 }

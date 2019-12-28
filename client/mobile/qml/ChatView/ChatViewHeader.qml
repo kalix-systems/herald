@@ -18,11 +18,11 @@ ToolBar {
     RowLayout {
         anchors {
             fill: parent
-            rightMargin: CmnCfg.margin
-            leftMargin: CmnCfg.margin
+            rightMargin: CmnCfg.defaultMargin
+            leftMargin: CmnCfg.defaultMargin
         }
 
-        IconButton {
+        AnimIconButton {
             id: backButton
             Layout.alignment: Qt.AlignLeft
             color: CmnCfg.palette.iconFill
@@ -38,9 +38,9 @@ ToolBar {
             Label {
                 text: title
                 font {
-                    pointSize: CmnCfg.chatPreviewSize
+                    pixelSize: CmnCfg.headerTextSize
                     family: CmnCfg.labelFont.name
-                    bold: true
+                    weight: Font.DemiBold
                 }
 
                 anchors.verticalCenter: parent.verticalCenter
@@ -48,7 +48,7 @@ ToolBar {
             }
         }
 
-        IconButton {
+        AnimIconButton {
             id: searchButton
             Layout.alignment: Qt.AlignRight
             color: CmnCfg.palette.iconFill

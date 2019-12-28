@@ -41,6 +41,88 @@ fn delete_get_message() {
 }
 
 #[test]
+fn message_meta() {
+    let mut conn = Database::in_memory_with_config().expect(womp!());
+
+    let receiver = crate::user::db::test_user(&mut conn, "receiver");
+
+    let conv = receiver.pairwise_conversation;
+
+    let mut builder = InboundMessageBuilder::default();
+    let msg_id = [0; 32].into();
+    builder
+        .id(msg_id)
+        .author(receiver.id)
+        .conversation_id(conv)
+        .timestamp(Time::now())
+        .body("hi".try_into().expect(womp!()));
+
+    let stored_meta = builder.store_db(&mut conn).expect(womp!()).expect(womp!());
+
+    let meta = db::message_meta(&conn, &msg_id).expect(womp!("unable to get message"));
+
+    assert_eq!(stored_meta.time.insertion, meta.insertion_time);
+}
+
+#[test]
+fn reaction() {
+    let mut conn = Database::in_memory_with_config().expect(womp!());
+
+    let receiver = crate::user::db::test_user(&mut conn, "receiver");
+
+    let conv = receiver.pairwise_conversation;
+
+    let mut builder = InboundMessageBuilder::default();
+    let msg_id = [0; 32].into();
+    builder
+        .id(msg_id)
+        .author(receiver.id)
+        .conversation_id(conv)
+        .timestamp(Time::now())
+        .body("hi".try_into().expect(womp!()));
+
+    builder.store_db(&mut conn).expect(womp!()).expect(womp!());
+
+    assert!(db::reactions(&conn, &msg_id).expect(womp!()).is_none());
+
+    db::add_reaction(&conn, &msg_id, &receiver.id, "++").expect(womp!());
+
+    let reactions = db::reactions(&conn, &msg_id)
+        .expect(womp!())
+        .expect(womp!());
+    assert_eq!(reactions.content.len(), 1);
+
+    db::remove_reaction(&conn, &msg_id, &receiver.id, "++").expect(womp!());
+
+    let reactions = db::reactions(&conn, &msg_id).expect(womp!());
+    assert!(reactions.is_none());
+}
+
+#[test]
+fn message_data() {
+    let mut conn = Database::in_memory_with_config().expect(womp!());
+
+    let receiver = crate::user::db::test_user(&mut conn, "receiver");
+
+    let conv = receiver.pairwise_conversation;
+
+    let mut builder = InboundMessageBuilder::default();
+    let msg_id = [0; 32].into();
+    builder
+        .id(msg_id)
+        .author(receiver.id)
+        .conversation_id(conv)
+        .timestamp(Time::now())
+        .body("hi".try_into().expect(womp!()));
+
+    let stored = builder.store_db(&mut conn).expect(womp!()).expect(womp!());
+
+    let data = db::message_data(&conn, &msg_id).expect(womp!("unable to get message"));
+
+    assert_eq!(stored.time.insertion, data.time.insertion);
+}
+
+#[test]
 fn reply() {
     let mut conn = Database::in_memory_with_config().expect(womp!());
 

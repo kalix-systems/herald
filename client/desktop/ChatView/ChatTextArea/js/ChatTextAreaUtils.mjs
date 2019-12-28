@@ -4,7 +4,9 @@ export function enterKeyHandler(event, target, builder, messageModel, textAreaFo
         target.cursorPosition = target.text.length;
         return;
     }
-    if (target.text.trim().length <= 0) {
+    if (target.text.trim().length === 0 &&
+        !builder.hasDocAttachment &&
+        !builder.hasMediaAttachment) {
         return;
     }
     // clear before positional reset
@@ -12,7 +14,6 @@ export function enterKeyHandler(event, target, builder, messageModel, textAreaFo
     target.clear();
     builder.body = text;
     builder.finalize();
-    textAreaForm.state = "default";
 }
 export function appendToTextArea(text, target) {
     const position = target.selectionEnd;

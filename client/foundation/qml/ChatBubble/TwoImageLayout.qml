@@ -3,15 +3,15 @@ import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
 import LibHerald 1.0
 
+// TODO: All these image layouts should be in an image layout subdirectory
 Row {
     height: 150
     spacing: CmnCfg.smallMargin
     property var firstImage
     property var secondImage
-    property var imageTappedCallback: function () {
+    property var imageClickedCallBack: function () {
         throw "undefined callback"
     }
-
     Rectangle {
         height: 150
         width: height
@@ -28,7 +28,7 @@ Row {
             fillMode: Image.PreserveAspectFit
             asynchronous: true
             MouseArea {
-                onClicked: imageTappedCallBack(parent.source)
+                onClicked: imageClickedCallBack(parent.source)
                 anchors.fill: parent
             }
         }
@@ -50,7 +50,7 @@ Row {
             anchors.centerIn: parent
             asynchronous: true
             MouseArea {
-                onClicked: imageTappedCallBack(parent.source)
+                onClicked: imageClickedCallBack(parent.source)
                 anchors.fill: parent
             }
         }

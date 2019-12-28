@@ -11,6 +11,7 @@ pub struct MessageBuilderEmitter {
     pub(super) op_author_changed: fn(*mut MessageBuilderQObject),
     pub(super) op_body_changed: fn(*mut MessageBuilderQObject),
     pub(super) op_doc_attachments_changed: fn(*mut MessageBuilderQObject),
+    pub(super) op_expiration_time_changed: fn(*mut MessageBuilderQObject),
     pub(super) op_id_changed: fn(*mut MessageBuilderQObject),
     pub(super) op_media_attachments_changed: fn(*mut MessageBuilderQObject),
     pub(super) op_time_changed: fn(*mut MessageBuilderQObject),
@@ -34,6 +35,7 @@ impl MessageBuilderEmitter {
             op_author_changed: self.op_author_changed,
             op_body_changed: self.op_body_changed,
             op_doc_attachments_changed: self.op_doc_attachments_changed,
+            op_expiration_time_changed: self.op_expiration_time_changed,
             op_id_changed: self.op_id_changed,
             op_media_attachments_changed: self.op_media_attachments_changed,
             op_time_changed: self.op_time_changed,
@@ -100,6 +102,14 @@ impl MessageBuilderEmitter {
 
         if !ptr.is_null() {
             (self.op_doc_attachments_changed)(ptr);
+        }
+    }
+
+    pub fn op_expiration_time_changed(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+
+        if !ptr.is_null() {
+            (self.op_expiration_time_changed)(ptr);
         }
     }
 
@@ -271,11 +281,18 @@ pub trait MessageBuilderTrait {
 
     fn op_body(&self) -> Option<&str>;
 
-    fn op_doc_attachments(&self) -> Option<&str>;
+    fn op_doc_attachments(&self) -> &str;
+
+    fn op_expiration_time(&self) -> Option<i64>;
 
     fn op_id(&self) -> Option<&[u8]>;
 
-    fn op_media_attachments(&self) -> Option<&str>;
+    fn set_op_id(
+        &mut self,
+        value: Option<&[u8]>,
+    );
+
+    fn op_media_attachments(&self) -> &str;
 
     fn op_time(&self) -> Option<i64>;
 
@@ -378,6 +395,7 @@ pub unsafe fn message_builder_new_inner(
         message_builder_op_author_changed,
         message_builder_op_body_changed,
         message_builder_op_doc_attachments_changed,
+        message_builder_op_expiration_time_changed,
         message_builder_op_id_changed,
         message_builder_op_media_attachments_changed,
         message_builder_op_time_changed,
@@ -441,6 +459,7 @@ pub unsafe fn message_builder_new_inner(
         op_author_changed: message_builder_op_author_changed,
         op_body_changed: message_builder_op_body_changed,
         op_doc_attachments_changed: message_builder_op_doc_attachments_changed,
+        op_expiration_time_changed: message_builder_op_expiration_time_changed,
         op_id_changed: message_builder_op_id_changed,
         op_media_attachments_changed: message_builder_op_media_attachments_changed,
         op_time_changed: message_builder_op_time_changed,
@@ -617,9 +636,23 @@ pub unsafe extern "C" fn message_builder_op_doc_attachments_get(
 ) {
     let obj = &*ptr;
     let value = obj.op_doc_attachments();
-    if let Some(value) = value {
-        let str_: *const c_char = value.as_ptr() as (*const c_char);
-        set(prop, str_, to_c_int(value.len()));
+    let str_: *const c_char = value.as_ptr() as *const c_char;
+    set(prop, str_, to_c_int(value.len()));
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn message_builder_op_expiration_time_get(
+    ptr: *const MessageBuilder
+) -> COption<i64> {
+    match (&*ptr).op_expiration_time() {
+        Some(value) => COption {
+            data: value,
+            some: true,
+        },
+        None => COption {
+            data: i64::default(),
+            some: false,
+        },
     }
 }
 
@@ -638,6 +671,23 @@ pub unsafe extern "C" fn message_builder_op_id_get(
 }
 
 #[no_mangle]
+pub unsafe extern "C" fn message_builder_op_id_set(
+    ptr: *mut MessageBuilder,
+    value: *const c_char,
+    len: c_int,
+) {
+    let obj = &mut *ptr;
+    let value = qba_slice!(value, len);
+    obj.set_op_id(Some(value));
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn message_builder_op_id_set_none(ptr: *mut MessageBuilder) {
+    let obj = &mut *ptr;
+    obj.set_op_id(None);
+}
+
+#[no_mangle]
 pub unsafe extern "C" fn message_builder_op_media_attachments_get(
     ptr: *const MessageBuilder,
     prop: *mut QString,
@@ -645,10 +695,8 @@ pub unsafe extern "C" fn message_builder_op_media_attachments_get(
 ) {
     let obj = &*ptr;
     let value = obj.op_media_attachments();
-    if let Some(value) = value {
-        let str_: *const c_char = value.as_ptr() as (*const c_char);
-        set(prop, str_, to_c_int(value.len()));
-    }
+    let str_: *const c_char = value.as_ptr() as *const c_char;
+    set(prop, str_, to_c_int(value.len()));
 }
 
 #[no_mangle]
@@ -750,6 +798,7 @@ pub struct MessageBuilderPtrBundle {
     message_builder_op_author_changed: fn(*mut MessageBuilderQObject),
     message_builder_op_body_changed: fn(*mut MessageBuilderQObject),
     message_builder_op_doc_attachments_changed: fn(*mut MessageBuilderQObject),
+    message_builder_op_expiration_time_changed: fn(*mut MessageBuilderQObject),
     message_builder_op_id_changed: fn(*mut MessageBuilderQObject),
     message_builder_op_media_attachments_changed: fn(*mut MessageBuilderQObject),
     message_builder_op_time_changed: fn(*mut MessageBuilderQObject),

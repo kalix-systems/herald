@@ -67,7 +67,8 @@ impl Conversations {
         color_inner, color, u32,
         pairwise_inner, pairwise, bool,
         muted_inner, muted, bool,
-        expiration_inner, expiration_period, ExpirationPeriod
+        expiration_inner, expiration_period, ExpirationPeriod,
+        status_inner, status, heraldcore::conversation::Status
     }
 
     imp_clone! {
@@ -80,7 +81,8 @@ impl Conversations {
         set_color_inner, color, u32,
         set_picture_inner, picture, Option<String>,
         set_expiration_inner, expiration_period, ExpirationPeriod,
-        set_title_inner, title, Option<String>
+        set_title_inner, title, Option<String>,
+        set_status_inner, status, heraldcore::conversation::Status
     }
 }
 
@@ -90,7 +92,7 @@ impl crate::Loadable for Conversations {
     fn try_load(&mut self) -> Result<(), std::io::Error> {
         std::thread::Builder::new().spawn(|| {
             let mut list = Vector::new();
-            for meta in ret_err!(conversation::all_meta()).into_iter() {
+            for meta in err!(conversation::all_meta()).into_iter() {
                 let (conv, data) = split_meta(meta);
                 shared::insert_data(conv.id, data);
                 list.push_back(conv);

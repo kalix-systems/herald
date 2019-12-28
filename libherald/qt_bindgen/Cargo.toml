@@ -6,5 +6,6 @@ edition = "2018"
 license = "GPLv2"
 
 [dependencies.riqtshaw]
+#path = "../../../riqtshaw"
 git = "https://github.com/kalix-systems/riqtshaw"
-rev = "a025cfde46c86ed9395b35f959d4be839d288f4f"
+rev = "917a60075adcbc97f8ff6c2314de8e9277e04643"

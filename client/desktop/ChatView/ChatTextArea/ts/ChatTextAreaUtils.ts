@@ -11,7 +11,11 @@ export function enterKeyHandler(
     return;
   }
 
-  if (target.text.trim().length <= 0) {
+  if (
+    target.text.trim().length === 0 &&
+    !builder.hasDocAttachment &&
+    !builder.hasMediaAttachment
+  ) {
     return;
   }
 
@@ -21,7 +25,6 @@ export function enterKeyHandler(
 
   builder.body = text;
   builder.finalize();
-  textAreaForm.state = "default";
 }
 
 export function appendToTextArea(text: string, target: TextArea): void {

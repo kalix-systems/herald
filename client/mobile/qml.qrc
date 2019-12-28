@@ -7,36 +7,37 @@
         <file>qml/LoginPage/LoginLandingPage.qml</file>
         <file>qml/LoginPage/LoginPageMain.qml</file>
         <file>qml/LoginPage/Registration.qml</file>
-        <file>qml/Common/BusyIndicator.qml</file>
         <file>qml/Common/CommonConfig.qml</file>
         <file>qml/Common/Divider.qml</file>
-        <file>qml/Common/IconButton.qml</file>
-        <file>qml/Common/StdText.qml</file>
+        <file>qml/Common/EntityBlock.qml</file>
+        <file>qml/Common/AnimIconButton.qml</file>
         <file>qml/SearchView/SearchViewHeader.qml</file>
         <file>qml/SearchView/SearchViewMain.qml</file>
         <file>qml/LoginPage/Controls/LoginButton.qml</file>
         <file>qml/LoginPage/Controls/LoginField.qml</file>
         <file>qml/Common/Drawer.qml</file>
-        <file>qml/ConfigMenu/ConfigMenuMain.qml</file>
-        <file>qml/ConfigMenu/Controls/ConfigHeader.qml</file>
-        <file>qml/Common/HeaderText.qml</file>
-        <file>qml/ConfigMenu/Controls/ConfigSection.qml</file>
+        <file>qml/SettingsMenu/SettingsMenuMain.qml</file>
+        <file>qml/SettingsMenu/Controls/SettingsHeader.qml</file>
+        <file>qml/SettingsMenu/Controls/SettingsSection.qml</file>
         <file>qml/NewContactView/NewContactViewMain.qml</file>
-        <file>qml/NewContactView/Controls/NewContactHeader.qml</file>
         <file>qml/App.qml</file>
         <file>qml/ChatView/TextMessageList.qml</file>
-        <file>qml/ChatView/ChatViewHeader.qml</file>
         <file>qml/ChatView/ChatTextArea.qml</file>
         <file>qml/HomeScreen/Controls/ComposeButton.qml</file>
         <file>qml/HomeScreen/Controls/CVToolButton.qml</file>
         <file>qml/HomeScreen/ConversationItem.qml</file>
-        <file>qml/HomeScreen/DrawerContents.qml</file>
-        <file>qml/HomeScreen/HomeHeader.qml</file>
         <file>qml/HomeScreen/HomeScreenMain.qml</file>
-        <file>qml/HomeScreen/Controls/FloatingActionButtons.qml</file>
+        <file>qml/HomeScreen/Controls/ExpandedComposeButtons.qml</file>
         <file>qml/HomeScreen/NewGroupView.qml</file>
         <file>qml/HomeScreen/GroupFlowComponents/ContactsSearchComponent.qml</file>
         <file>qml/HomeScreen/GroupFlowComponents/FinalGroupList.qml</file>
         <file>qml/HomeScreen/GroupFlowComponents/GroupHeaderComponent.qml</file>
+        <file>qml/Headers/ChatHeader.qml</file>
+        <file>qml/Headers/SettingsHeader.qml</file>
+        <file>qml/Headers/HeadersMain.qml</file>
+        <file>qml/Headers/HomeHeader.qml</file>
+        <file>qml/Headers/Transitions.qml</file>
+        <file>qml/Headers/NewContactHeader.qml</file>
+        <file>qml/Headers/NewGroupHeader.qml</file>
     </qresource>
 </RCC>

@@ -1,8 +1,8 @@
 use crate::interface::*;
 use crate::utils::strip_qrc;
-use crate::{ret_err, ret_none};
-use std::fs::copy;
-use std::path::Path;
+use crate::{err, none, spawn};
+use std::fs;
+use std::path::PathBuf;
 /// A collection of pure functions that are used in QML.
 pub struct Utils {
     emit: UtilsEmitter,
@@ -33,15 +33,38 @@ impl UtilsTrait for Utils {
         fpath: String,
         target_path: String,
     ) -> bool {
-        if let Some(target_path) = strip_qrc(target_path) {
-            let existing_path = Path::new(&fpath);
-            let fname = ret_none!(existing_path.file_name(), false);
-            let target_path = Path::new(&target_path).join(&fname);
-            ret_err!(copy(existing_path, target_path), false);
-            true
-        } else {
+        let target_path = none!(strip_qrc(target_path), false);
+
+        let existing_path = PathBuf::from(fpath);
+
+        let fname = none!(existing_path.file_name(), false);
+
+        let target_path = PathBuf::from(&target_path).join(&fname);
+
+        spawn!(
+            {
+                err!(fs::copy(existing_path, target_path));
+            },
             false
-        }
+        );
+        true
+    }
+
+    fn image_dimensions(
+        &self,
+        path: String,
+    ) -> String {
+        let path = none!(strip_qrc(path), "".to_owned());
+        let (width, height) = err!(
+            heraldcore::image_utils::image_dimensions(path),
+            "".to_owned()
+        );
+
+        (json::object! {
+            "width" => width,
+            "height" => height,
+        })
+        .dump()
     }
 
     fn emit(&mut self) -> &mut UtilsEmitter {

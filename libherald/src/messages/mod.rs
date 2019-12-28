@@ -1,20 +1,22 @@
 use crate::{
+    err,
     interface::{MessagesEmitter as Emitter, MessagesList as List},
-    ret_err, ret_none,
+    none,
     toasts::new_msg_toast,
 };
 use herald_common::UserId;
-use heraldcore::{conversation, errors::HErr, message::MessageReceiptStatus, types::*, NE};
-use im::vector::Vector;
-use messages_helper::search::SearchState;
+use heraldcore::{
+    conversation,
+    errors::HErr,
+    message::{Elider, MessageReceiptStatus},
+    types::*,
+};
+use messages_helper::{container::Container, search::SearchState};
 use search_pattern::SearchPattern;
-use std::collections::HashMap;
 
-mod container;
-use container::*;
-mod imp;
+mod helpers;
+pub(crate) mod imp;
 mod trait_imp;
-pub(crate) mod underscore;
 
 /// Implementation of `crate::interface::MessageBuilderTrait`.
 pub mod builder;
@@ -42,31 +44,50 @@ impl Messages {
             MsgUpdate::NewMsg(new) => {
                 new_msg_toast(new.as_ref());
 
-                ret_err!(self.insert_helper(*new));
+                err!(self.insert_helper(*new));
             }
             MsgUpdate::BuilderMsg(msg) => {
-                ret_err!(self.insert_helper(*msg));
+                err!(self.insert_helper(*msg));
             }
             MsgUpdate::Receipt {
                 msg_id,
                 recipient,
                 status,
             } => {
-                ret_err!(container::handle_receipt(
-                    &mut self.container,
+                let model = &mut self.model;
+
+                none!(&self
+                    .container
+                    .handle_receipt(msg_id, status, recipient, |ix| model.data_changed(ix, ix)));
+            }
+            MsgUpdate::Reaction {
+                msg_id,
+                reactionary,
+                content,
+                remove,
+            } => {
+                let model = &mut self.model;
+                none!(&self.container.handle_reaction(
                     msg_id,
-                    status,
-                    recipient,
-                    &mut self.model
+                    reactionary,
+                    content,
+                    remove,
+                    |ix| model.data_changed(ix, ix)
                 ));
             }
             MsgUpdate::StoreDone(mid, meta) => {
-                ret_none!(container::handle_store_done(
-                    &mut self.container,
-                    mid,
-                    meta,
-                    &mut self.model
-                ));
+                let model = &mut self.model;
+
+                none!(&self
+                    .container
+                    .handle_store_done(mid, meta, |ix| model.data_changed(ix, ix)));
+            }
+            MsgUpdate::SendDone(mid) => {
+                let model = &mut self.model;
+
+                none!(&self
+                    .container
+                    .handle_send_done(mid, |ix| { model.data_changed(ix, ix) }));
             }
             MsgUpdate::ExpiredMessages(mids) => self.handle_expiration(mids),
             MsgUpdate::Container(container) => {
@@ -95,12 +116,21 @@ pub(crate) enum MsgUpdate {
         recipient: UserId,
         status: MessageReceiptStatus,
     },
+    /// A reaction has been added or removed
+    Reaction {
+        msg_id: MsgId,
+        reactionary: UserId,
+        content: heraldcore::message::ReactContent,
+        remove: bool,
+    },
     /// A rendered message from the `MessageBuilder`
     BuilderMsg(Box<heraldcore::message::Message>),
-    /// Save is complete
+    /// An outbound message has been saved
     StoreDone(MsgId, heraldcore::message::attachments::AttachmentMeta),
     /// There are expired messages that need to be pruned
     ExpiredMessages(Vec<MsgId>),
     /// The container contents, sent when the conversation id is first set.
     Container(Box<Container>),
+    /// An outbound message has arrived at the server
+    SendDone(MsgId),
 }

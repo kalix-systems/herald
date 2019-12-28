@@ -63,6 +63,13 @@ fn herald() -> Object {
         connectionUp: Prop::new().simple(Bool),
         connectionPending: Prop::new().simple(Bool),
 
+        // Registration failure code
+        // UserIdTaken  => 0,
+        // KeyTaken     => 1,
+        // BadSignature => 2,
+        // Other        => 3,
+        registrationFailureCode: Prop::new().simple(QUint8).optional(),
+
         // object props
         config: Prop::new().object(config()),
         conversationBuilder: Prop::new().object(conversation_builder()),
@@ -104,6 +111,8 @@ fn utils() -> Object {
         const compareByteArray(bs1: QByteArray, bs2: QByteArray) => Bool,
         const isValidRandId(bs: QByteArray) => Bool,
         const saveFile(fpath: QString, target_path: QString) => Bool,
+        // Returns image dimensions of the image at `path`, serialized as JSON
+        const imageDimensions(path: QString) => QString,
     };
 
     obj! {
@@ -121,14 +130,18 @@ fn conversations() -> Object {
        pairwise: ItemProp::new(Bool),
        expirationPeriod: ItemProp::new(QUint8).write(),
        matched: matched_item_prop(),
-       picture: picture_item_prop().write().get_by_value(),
-       color: color_item_prop().write()
+       picture: picture_item_prop().get_by_value(),
+       color: color_item_prop().write(),
+       status: ItemProp::new(QUint8).write()
     };
 
     let funcs = functions! {
         mut removeConversation(row_index: QUint64) => Bool,
         mut toggleFilterRegex() => Bool,
         mut clearFilter() => Void,
+        // `profile_picture` is a path and bounding rectangle encoded as JSON.
+        // See `heraldcore/image_utils`.
+        mut setProfilePicture(index: QUint64, profile_picture: QString) => Void,
         const indexById(conversation_id: QByteArray) => Qint64,
     };
 
@@ -146,7 +159,7 @@ fn users() -> Object {
        pairwiseConversationId: ItemProp::new(QByteArray).get_by_value(),
        status: ItemProp::new(QUint8).write(),
        matched: matched_item_prop(),
-       profilePicture: picture_item_prop().get_by_value().write(),
+       profilePicture: picture_item_prop().get_by_value(),
        color: color_item_prop().write()
     };
 
@@ -154,6 +167,9 @@ fn users() -> Object {
         mut add(id: QString) => QByteArray,
         mut toggleFilterRegex() => Bool,
         mut clearFilter() => Void,
+        // `profile_picture` is a path and bounding rectangle encoded as JSON.
+        // See `heraldcore/image_utils`.
+        mut setProfilePicture(index: QUint64, profile_picture: QString) => Void,
         const colorById(id: QString) => QUint32,
         const nameById(id: QString) => QString,
         const profilePictureById(id: QString) => QString,
@@ -235,9 +251,7 @@ fn messages() -> Object {
         // Position in search results of focused item, e.g., 4 out of 7
         searchIndex: Prop::new().simple(QUint64),
 
-        builder: Prop::new().object(message_builder()),
-        // Id of the message the message builder is replying to, if any
-        builderOpMsgId: Prop::new().simple(QByteArray).optional().write()
+        builder: Prop::new().object(message_builder())
     };
 
     let item_props = item_props! {
@@ -246,21 +260,32 @@ fn messages() -> Object {
         // Author of the message
         author: ItemProp::new(QString).optional().get_by_value(),
         // Message body. Possibly truncated if the message is too long
-        body: ItemProp::new(QString).optional().get_by_value(),
+        body: ItemProp::new(QString).get_by_value(),
         // Full message body
-        fullBody: ItemProp::new(QString).optional().get_by_value(),
+        fullBody: ItemProp::new(QString).get_by_value(),
         // Time the message was saved locally
         insertionTime: ItemProp::new(Qint64).optional(),
         // Time the message arrived at the server (only valid for inbound messages)
         serverTime: ItemProp::new(Qint64).optional(),
         // Time the message will expire, if ever
         expirationTime: ItemProp::new(Qint64).optional(),
+        // User profile picture
+        authorProfilePicture: ItemProp::new(QString).get_by_value(),
+        // User color
+        authorColor: ItemProp::new(QUint32).optional(),
+        // User name
+        authorName: ItemProp::new(QString).optional().get_by_value(),
+        // Message reactions
+        reactions: ItemProp::new(QString).get_by_value(),
 
         // Media attachments metadata, serialized as JSON
         mediaAttachments: ItemProp::new(QString).get_by_value(),
+        // Full media attachments metadata, serialized as JSON
+        fullMediaAttachments: ItemProp::new(QString).get_by_value(),
         // Document attachments metadata, serialized as JSON
         docAttachments: ItemProp::new(QString).get_by_value(),
 
+        userReceipts: ItemProp::new(QString).get_by_value(),
         receiptStatus: ItemProp::new(QUint32).optional(),
         isHead: ItemProp::new(Bool).optional(),
         isTail: ItemProp::new(Bool).optional(),
@@ -276,11 +301,13 @@ fn messages() -> Object {
         replyType: ItemProp::new(QUint8).optional(),
 
         // Message preview properties
-        opMsgId: ItemProp::new(QByteArray).optional(),
+        opMsgId: ItemProp::new(QByteArray).optional().get_by_value(),
         opAuthor: ItemProp::new(QString).optional().get_by_value(),
-        opBody: ItemProp::new(QString).optional().get_by_value(),
+        opBody: ItemProp::new(QString).get_by_value(),
         opInsertionTime: ItemProp::new(Qint64).optional(),
         opExpirationTime: ItemProp::new(Qint64).optional(),
+        opColor: ItemProp::new(QUint32).optional(),
+        opName: ItemProp::new(QString).optional().get_by_value(),
 
         // Media attachments metadata, serialized as JSON
         opMediaAttachments: ItemProp::new(QString).get_by_value(),
@@ -290,6 +317,7 @@ fn messages() -> Object {
 
     let funcs = functions! {
         mut deleteMessage(row_index: QUint64) => Bool,
+        mut markRead(index: QUint64) => Void,
         mut clearConversationHistory() => Bool,
         mut clearSearch() => Void,
         mut nextSearchMatch() => Qint64,
@@ -298,7 +326,10 @@ fn messages() -> Object {
         mut setElisionLineCount(line_count: QUint8) => Void,
         mut setElisionCharCount(char_count: QUint16) => Void,
         mut setElisionCharsPerLine(chars_per_line: QUint8) => Void,
+        mut addReaction(index: QUint64, content: QString) => Void,
+        mut removeReaction(index: QUint64, content: QString) => Void,
         const indexById(msg_id: QByteArray) => Qint64,
+        const saveAllAttachments(index: QUint64, dest: QString) => Bool,
     };
 
     obj! {
@@ -318,14 +349,16 @@ fn message_builder() -> Object {
         mediaAttachments: Prop::new().object(media_attachments()),
 
         // Message id of the message being replied to, if any
-        opId: Prop::new().simple(QByteArray).optional(),
+        opId: Prop::new().simple(QByteArray).optional().write(),
         opAuthor: Prop::new().simple(QString).optional(),
         opBody: Prop::new().simple(QString).optional(),
         opTime: Prop::new().simple(Qint64).optional(),
         // Media attachments metadata, serialized as JSON
-        opMediaAttachments: Prop::new().simple(QString).optional(),
+        opMediaAttachments: Prop::new().simple(QString),
         // Document attachments metadata, serialized as JSON
-        opDocAttachments: Prop::new().simple(QString).optional()
+        opDocAttachments: Prop::new().simple(QString),
+        // Time the message will expire, if ever
+        opExpirationTime: Prop::new().simple(Qint64).optional()
     );
 
     let funcs = functions! {
@@ -345,24 +378,34 @@ fn config() -> Object {
     let props = props! {
         configId: Prop::new().simple(QString),
         name: Prop::new().simple(QString).write(),
-        profilePicture: Prop::new().simple(QString).write().optional(),
+        profilePicture: Prop::new().simple(QString).optional(),
         color: Prop::new().simple(QUint32).write(),
         colorscheme: Prop::new().simple(QUint32).write(),
-        ntsConversationId: Prop::new().simple(QByteArray)
+        ntsConversationId: Prop::new().simple(QByteArray),
+        preferredExpiration: Prop::new().simple(QUint8).write()
+    };
+
+    let funcs = functions! {
+        // `profile_picture` is a path and bounding rectangle encoded as JSON.
+        // See `heraldcore/image_utils`.
+        mut setProfilePicture(profile_picture: QString) => Void,
     };
 
     obj! {
-        Config: Obj::new().props(props)
+        Config: Obj::new().props(props).funcs(funcs)
     }
 }
 
 fn conversation_builder() -> Object {
     let item_prop = item_props! {
-        memberId: ItemProp::new(QString)
+        memberId: ItemProp::new(QString),
+        memberColor: ItemProp::new(QUint32),
+        memberName: ItemProp::new(QString).get_by_value(),
+        memberProfilePicture: ItemProp::new(QString).get_by_value()
     };
 
     let prop = props! {
-        picture: Prop::new().simple(QString).write().optional()
+        picture: Prop::new().simple(QString).optional()
     };
 
     let funcs = functions! {
@@ -370,9 +413,13 @@ fn conversation_builder() -> Object {
         mut removeMemberById(user_id: QString) => Bool,
         mut removeMemberByIndex(index: QUint64) => Bool,
         mut removeLast() => Void,
-        mut setTitle(title: QString) => Void,
         mut finalize() => Void,
         mut clear() => Void,
+
+        mut setTitle(title: QString) => Void,
+        // `profile_picture` is a path and bounding rectangle encoded as JSON.
+        // See `heraldcore/image_utils`.
+        mut setProfilePicture(profile_picture: QString) => Void,
     };
 
     obj! {
@@ -417,8 +464,8 @@ fn media_attachments() -> Object {
 
 fn document_attachments() -> Object {
     let item_props = item_props! {
-        // Path the the attachment
-        documentAttachmentPath: ItemProp::new(QString),
+        // File name
+        documentAttachmentName: ItemProp::new(QString).get_by_value(),
         documentAttachmentSize: ItemProp::new(QUint64)
     };
 

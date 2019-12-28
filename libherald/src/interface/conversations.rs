@@ -190,6 +190,12 @@ pub trait ConversationsTrait {
         row_index: u64,
     ) -> bool;
 
+    fn set_profile_picture(
+        &mut self,
+        index: u64,
+        profile_picture: String,
+    ) -> ();
+
     fn toggle_filter_regex(&mut self) -> bool;
 
     fn row_count(&self) -> usize;
@@ -276,10 +282,15 @@ pub trait ConversationsTrait {
         index: usize,
     ) -> Option<String>;
 
-    fn set_picture(
+    fn status(
+        &self,
+        index: usize,
+    ) -> u8;
+
+    fn set_status(
         &mut self,
         index: usize,
-        _: Option<String>,
+        _: u8,
     ) -> bool;
 
     fn title(
@@ -375,6 +386,23 @@ pub unsafe extern "C" fn conversations_remove_conversation(
 ) -> bool {
     let obj = &mut *ptr;
     obj.remove_conversation(row_index)
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn conversations_set_profile_picture(
+    ptr: *mut Conversations,
+    index: u64,
+    profile_picture_str: *const c_ushort,
+    profile_picture_len: c_int,
+) {
+    let obj = &mut *ptr;
+    let mut profile_picture = String::new();
+    set_string_from_utf16(
+        &mut profile_picture,
+        profile_picture_str,
+        profile_picture_len,
+    );
+    obj.set_profile_picture(index, profile_picture)
 }
 
 #[no_mangle]
@@ -569,24 +597,21 @@ pub unsafe extern "C" fn conversations_data_picture(
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn conversations_set_data_picture(
-    ptr: *mut Conversations,
+pub unsafe extern "C" fn conversations_data_status(
+    ptr: *const Conversations,
     row: c_int,
-    str_: *const c_ushort,
-    len: c_int,
-) -> bool {
-    let obj = &mut *ptr;
-    let mut value = String::new();
-    set_string_from_utf16(&mut value, str_, len);
-    obj.set_picture(to_usize(row).unwrap_or(0), Some(value))
+) -> u8 {
+    let obj = &*ptr;
+    obj.status(to_usize(row).unwrap_or(0))
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn conversations_set_data_picture_none(
+pub unsafe extern "C" fn conversations_set_data_status(
     ptr: *mut Conversations,
     row: c_int,
+    value: u8,
 ) -> bool {
-    (&mut *ptr).set_picture(to_usize(row).unwrap_or(0), None)
+    (&mut *ptr).set_status(to_usize(row).unwrap_or(0), value)
 }
 
 #[no_mangle]

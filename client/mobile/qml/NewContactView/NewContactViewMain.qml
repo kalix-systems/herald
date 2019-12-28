@@ -3,44 +3,41 @@ import QtQuick.Layouts 1.12
 import QtQuick 2.12
 import LibHerald 1.0
 import "../Common" as Common
-import "Controls"
+import "qrc:/imports" as Imports
 
 Page {
 
-    header: NewContactHeader {}
-
     ColumnLayout {
         anchors.fill: parent
-        spacing: CmnCfg.margin
+        spacing: CmnCfg.defaultMargin
         anchors.leftMargin: parent.width * 0.1
 
         Label {
-            text: "Request a New Contact"
+            text: qsTr("Request a new contact")
         }
 
-        TextArea {
+        Imports.BorderedTextField {
             id: usernameTextArea
             Layout.preferredWidth: parent.width * 0.8
-            background: Rectangle {
-                border.color: CmnCfg.palette.borderColor
-            }
-            placeholderText: "Enter a UID"
+            placeholderText: qsTr("Enter a username")
+            color: CmnCfg.palette.black
+            borderColor: CmnCfg.palette.black
         }
 
         TextArea {
             Layout.alignment: Qt.AlignLeft
             Layout.preferredWidth: parent.width * 0.8
             Layout.preferredHeight: parent.height * 0.5
-            placeholderText: "Enter message text"
+            placeholderText: qsTr("Enter message text")
             background: Rectangle {
                 border.color: CmnCfg.palette.borderColor
             }
         }
 
         Button {
-            text: "Send"
+            text: qsTr("Send")
             onClicked: {
-                herald.users.add(usernameTextArea.text.trim())
+                Herald.users.add(usernameTextArea.text.trim())
                 mainView.pop()
             }
         }

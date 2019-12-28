@@ -2,48 +2,56 @@ import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
 import LibHerald 1.0
-import QtGraphicalEffects 1.12
+import QtGraphicalEffects 1.1
 
-ColumnLayout {
+Column {
     id: wrapperCol
-    property real maxWidth: Math.min(bubbleRoot.maxWidth, 600)
+
+    property real maxWidth: Math.min(contentRoot.maxWidth, 600)
     property var mediaParsed
     // callback triggered whenever an image is tapped
-    property var imageTappedCallBack: function (source) {
+    // TODO: Rename this it is nonsense
+    property var imageClickedCallBack: function (source) {
+        let currentIndex = mediaParsed.items.findIndex(function (object) {
+            if (object === undefined || object === null) {
+                return false
+            }
 
-        let currentIndex = mediaParsed.findIndex(function (object) {
-            // can't use triple equality here because it
-            // checks for pointer equivalence...
-            return ("file:" + object.path) == source
+            return String("file:" + object.path) === String(source)
         })
-        imageViewerPopup.sourceAtc = mediaParsed
-        imageViewerPopup.index = currentIndex
-        imageViewerPopup.reset()
-        imageViewerPopup.show()
-        imageViewerPopup.raise()
+        galleryLoader.imageAttachments = JSON.parse(fullMedAttachments).items
+        galleryLoader.currentIndex = currentIndex
+        galleryLoader.active = true
+        galleryLoader.item.open()
     }
 
     spacing: 0
 
     Component.onCompleted: {
-        const media = medAttachments.length == 0 ? "" : JSON.parse(
-                                                       medAttachments)
-        const mediaLen = media.length
-        mediaParsed = media
-        switch (mediaLen) {
+        if (medAttachments.length === 0) {
+            return
+        }
+
+        wrapperCol.mediaParsed = JSON.parse(medAttachments)
+
+        switch (wrapperCol.mediaParsed.num_more) {
         case 0:
-            break
-        case 1:
-            imageLoader.sourceComponent = oneImage
-            break
-        case 2:
-            imageLoader.sourceComponent = twoImage
-            break
-        case 3:
-            imageLoader.sourceComponent = threeImage
-            break
-        case 4:
-            imageLoader.sourceComponent = fourImage
+            switch (wrapperCol.mediaParsed.items.length) {
+            case 0:
+                break
+            case 1:
+                imageLoader.sourceComponent = oneImage
+                break
+            case 2:
+                imageLoader.sourceComponent = twoImage
+                break
+            case 3:
+                imageLoader.sourceComponent = threeImage
+                break
+            case 4:
+                imageLoader.sourceComponent = fourImage
+                break
+            }
             break
         default:
             imageLoader.sourceComponent = fiveImage
@@ -53,8 +61,6 @@ ColumnLayout {
 
     Loader {
         id: imageLoader
-
-        Layout.margins: CmnCfg.smallMargin
 
         DropShadow {
             source: parent.item
@@ -71,50 +77,50 @@ ColumnLayout {
     Component {
         id: oneImage
         OneImageLayout {
-            firstImage: mediaParsed[0]
-            imageTappedCallback: wrapperCol.imageTappedCallBack
+            firstImage: mediaParsed.items[0]
+            imageClickedCallBack: wrapperCol.imageClickedCallBack
         }
     }
 
     Component {
         id: twoImage
         TwoImageLayout {
-            firstImage: mediaParsed[0]
-            secondImage: mediaParsed[1]
-            imageTappedCallback: wrapperCol.imageTappedCallBack
+            firstImage: mediaParsed.items[0]
+            secondImage: mediaParsed.items[1]
+            imageClickedCallBack: wrapperCol.imageClickedCallBack
         }
     }
 
     Component {
         id: threeImage
         ThreeImageLayout {
-            firstImage: mediaParsed[0]
-            secondImage: mediaParsed[1]
-            thirdImage: mediaParsed[2]
-            imageTappedCallback: wrapperCol.imageTappedCallBack
+            firstImage: mediaParsed.items[0]
+            secondImage: mediaParsed.items[1]
+            thirdImage: mediaParsed.items[2]
+            imageClickedCallBack: wrapperCol.imageClickedCallBack
         }
     }
 
     Component {
         id: fourImage
         FourImageLayout {
-            firstImage: mediaParsed[0]
-            secondImage: mediaParsed[1]
-            thirdImage: mediaParsed[2]
-            fourthImage: mediaParsed[3]
-            imageTappedCallback: wrapperCol.imageTappedCallBack
+            firstImage: mediaParsed.items[0]
+            secondImage: mediaParsed.items[1]
+            thirdImage: mediaParsed.items[2]
+            fourthImage: mediaParsed.items[3]
+            imageClickedCallBack: wrapperCol.imageClickedCallBack
         }
     }
 
     Component {
         id: fiveImage
         MultiImageLayout {
-            firstImage: mediaParsed[0]
-            secondImage: mediaParsed[1]
-            thirdImage: mediaParsed[2]
-            fourthImage: mediaParsed[3]
-            count: mediaParsed.length - 4
-            imageTappedCallback: wrapperCol.imageTappedCallBack
+            firstImage: mediaParsed.items[0]
+            secondImage: mediaParsed.items[1]
+            thirdImage: mediaParsed.items[2]
+            fourthImage: mediaParsed.items[3]
+            count: mediaParsed.num_more
+            imageClickedCallBack: wrapperCol.imageClickedCallBack
         }
     }
 }
