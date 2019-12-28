@@ -7,4 +7,4 @@ Struct emoji_struct {{
     tags: ArrayVec::<'static &str, 8>
 }}
 
-static [emoji_struct; {length} ]: emoji_data = {emoji_data}
+pub static [emoji_struct; {length} ]: emoji_data = {emoji_data}

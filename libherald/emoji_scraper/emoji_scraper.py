@@ -2,9 +2,10 @@
 import json
 import requests
 
-ouput_path = "../src/emoji_picker/picker_struct.rs"
+ouput_path = "../src/emoji_keyboard/picker_struct.rs"
 emoji_struct_f_string = open("templates/emoji_struct.rs", "r").read()
 rust_module_f_string = open("templates/rust_module.rs", "r").read()
+
 # url for emoji data
 emoji_json_url = "https://raw.githubusercontent.com/github/gemoji/master/db/emoji.json"
 
