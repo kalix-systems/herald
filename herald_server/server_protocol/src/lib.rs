@@ -20,12 +20,13 @@ use tokio::{
     },
 };
 
+mod handlers;
 mod login;
 
 pub struct ActiveSession {
     interrupt: Trigger,
     done: Tripwire,
-    emitter: Sender<Push>,
+    emitter: Sender<(Push, i64)>,
 }
 
 impl ActiveSession {
@@ -43,9 +44,10 @@ impl ActiveSession {
 
     pub fn push(
         &self,
-        push: &Push,
-    ) -> Result<(), tokio::sync::mpsc::error::SendError<Push>> {
-        self.emitter.clone().send(push.clone())
+        push: Push,
+        id: i64,
+    ) -> Result<(), tokio::sync::mpsc::error::SendError<(Push, i64)>> {
+        self.emitter.clone().send((push, id))
     }
 }
 

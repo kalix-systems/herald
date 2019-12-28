@@ -20,6 +20,19 @@ pub enum Recip {
     Many(Recips),
 }
 
+impl Recip {
+    pub fn tag(&self) -> PushTag {
+        match self {
+            Recip::One(SingleRecip::Group(_)) => PushTag::Group,
+            Recip::One(SingleRecip::User(_)) => PushTag::User,
+            Recip::One(SingleRecip::Key(_)) => PushTag::Key,
+            Recip::Many(Recips::Groups(_)) => PushTag::Group,
+            Recip::Many(Recips::Users(_)) => PushTag::User,
+            Recip::Many(Recips::Keys(_)) => PushTag::Key,
+        }
+    }
+}
+
 pub mod get_sigchain {
     use super::*;
 
@@ -129,7 +142,7 @@ pub mod push {
 }
 
 macro_rules! proto_enum {
-    ($name:ident, $inner:ident) => {
+    ($name:ident, $inner:ident, [ $($extra:tt)* ]) => {
         #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
         pub enum $name {
             GetSigchain(get_sigchain::$inner),
@@ -144,9 +157,14 @@ macro_rules! proto_enum {
             LeaveGroups(leave_groups::$inner),
 
             Push(push::$inner),
+
+            $($extra)*
         }
+    };
+    ($name:ident, $inner:ident) => {
+        proto_enum!($name,$inner,[]);
     };
 }
 
 proto_enum!(Request, Req);
-proto_enum!(Response, Res);
+proto_enum!(Response, Res, [Err(String)]);

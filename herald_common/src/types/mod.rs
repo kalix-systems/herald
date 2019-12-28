@@ -107,4 +107,5 @@ pub enum PKIResponse {
     BadSig(SigValid),
     Redundant,
     DeadKey,
+    InvalidOp,
 }

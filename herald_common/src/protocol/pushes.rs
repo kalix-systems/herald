@@ -4,7 +4,7 @@ use super::*;
 pub enum PushTag {
     Group,
     User,
-    Device,
+    Key,
 }
 
 #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
