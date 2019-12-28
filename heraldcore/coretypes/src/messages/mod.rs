@@ -20,7 +20,7 @@ pub struct Message {
     pub author: UserId,
     /// Recipient user id
     pub conversation: ConversationId,
-    /// Body of message
+    /// Content of message
     pub content: Option<Item>,
     /// Message time information
     pub time: MessageTime,
