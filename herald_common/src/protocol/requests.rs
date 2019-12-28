@@ -84,6 +84,18 @@ pub mod add_to_group {
     #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
     pub enum Res {
         Success,
+        AddedByMissing(UserId),
+        MissingUser(UserId),
+    }
+}
+
+pub mod init_group {
+    use super::*;
+
+    #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
+    pub enum Res {
+        Success,
+        GroupAlreadyExists(ConversationId),
         MissingUser(UserId),
     }
 }

@@ -238,7 +238,12 @@ mod tests {
         let uids = vec![a_uid, b_uid, c_uid];
 
         assert_eq!(
-            wa!(client.add_to_group(iter(uids.clone()), cid1)),
+            wa!(client.init_group(a_uid, cid1)),
+            init_group::Res::Success
+        );
+
+        assert_eq!(
+            wa!(client.add_to_group(a_uid, iter(uids.clone()), cid1)),
             add_to_group::Res::Success
         );
 
@@ -247,7 +252,12 @@ mod tests {
         let cid2 = ConversationId::gen_new();
 
         assert_eq!(
-            wa!(client.add_to_group(iter(uids.clone()), cid2)),
+            wa!(client.init_group(a_uid, cid2)),
+            init_group::Res::Success
+        );
+
+        assert_eq!(
+            wa!(client.add_to_group(a_uid, iter(uids.clone()), cid2)),
             add_to_group::Res::Success
         );
 

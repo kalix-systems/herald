@@ -500,6 +500,7 @@ mod tests {
     use crate::tests::get_client;
     use crate::{w, wa};
     use futures::stream::iter;
+    use protocol::auth::register::ServeEvent;
     use serial_test_derive::serial;
     use std::convert::TryInto;
     use womp::*;
@@ -530,6 +531,7 @@ mod tests {
         for k in devs {
             let pending = wa!(client.get_pending(k));
             assert_eq!(pending.len(), 1);
+
             let pending = pending
                 .into_iter()
                 .map(|(p, ix)| {
@@ -617,7 +619,7 @@ mod tests {
         let a_init = a_kp.sign(a_uid);
 
         wa!(client.new_user(a_init));
-        wa!(client.add_to_group(futures::stream::iter(vec![a_uid]), cid));
+        wa!(client.init_group(a_uid, cid));
 
         let devs = match wa!(client.add_to_pending_and_get_valid_devs(&recip, &push)) {
             PushedTo::PushedTo { devs, .. } => {
@@ -709,25 +711,41 @@ mod tests {
         let a_uid: UserId = "a".try_into().expect(womp!());
         let a_kp = sig::KeyPair::gen_new();
         let a_init = a_kp.sign(a_uid);
-        wa!(client.new_user(a_init));
+        assert_eq!(
+            client.new_user(a_init).await.expect(womp!()),
+            ServeEvent::Success
+        );
 
         let b_uid: UserId = "b".try_into().expect(womp!());
 
         let b_kp = sig::KeyPair::gen_new();
         let b_init = b_kp.sign(b_uid);
-        wa!(client.new_user(b_init));
+        assert_eq!(
+            client.new_user(b_init).await.expect(womp!()),
+            ServeEvent::Success
+        );
 
         let c_uid: UserId = "c".try_into().expect(womp!());
-
         let c_kp = sig::KeyPair::gen_new();
         let c_init = c_kp.sign(c_uid);
-        wa!(client.new_user(c_init));
+        assert_eq!(
+            client.new_user(c_init).await.expect(womp!()),
+            ServeEvent::Success
+        );
+
+        let d_uid: UserId = "d".try_into().expect(womp!());
+        let d_kp = sig::KeyPair::gen_new();
+        let d_init = d_kp.sign(d_uid);
+        assert_eq!(
+            client.new_user(d_init).await.expect(womp!()),
+            ServeEvent::Success
+        );
 
         let cid1 = ConversationId::gen_new();
         let cid2 = ConversationId::gen_new();
 
-        let uids1 = vec![a_uid];
-        let uids2 = vec![b_uid, c_uid];
+        let uids1 = vec![c_uid];
+        let uids2 = vec![d_uid];
 
         let cids = vec![cid1, cid2];
 
@@ -735,10 +753,13 @@ mod tests {
 
         assert!(wa!(client.add_to_pending_and_get_valid_devs(&recip, &push)).is_missing());
 
-        wa!(client.add_to_group(iter(uids1.clone()), cid1));
-        wa!(client.add_to_group(iter(uids2.clone()), cid2));
+        wa!(client.init_group(a_uid, cid1));
+        wa!(client.init_group(b_uid, cid2));
 
-        let keys = [a_kp, b_kp, c_kp]
+        wa!(client.add_to_group(a_uid, iter(uids1.clone()), cid1));
+        wa!(client.add_to_group(b_uid, iter(uids2.clone()), cid2));
+
+        let keys = [a_kp, b_kp, c_kp, d_kp]
             .iter()
             .map(|k| *k.public_key())
             .collect::<Vec<_>>();
