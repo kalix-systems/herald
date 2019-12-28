@@ -2,6 +2,9 @@
 import json
 import requests
 
+ouput_path = "../src/emoji_picker/picker_struct.rs"
+emoji_struct_f_string = open("templates/emoji_struct.rs", "r").read()
+rust_module_f_string = open("templates/rust_module.rs", "r").read()
 # url for emoji data
 emoji_json_url = "https://raw.githubusercontent.com/github/gemoji/master/db/emoji.json"
 
@@ -18,16 +21,9 @@ emoji_json_url = "https://raw.githubusercontent.com/github/gemoji/master/db/emoj
 #   ios_version: Float -- unused
 # }
 
-ouput_path = "../src/emoji_picker/picker_struct.rs"
-
-
-def pull_json():
-    # requests json from raw content url
-    print("requesting JSON")
-
 
 def format_struct(json_emoji_data_obj):
-    print("parsing emoji")
+    return emoji_struct_f_string.format(emoji=json_emoji_data_obj["emoji"], comma_seperated_tags=json_emoji_data_obj["tags"])
 
 
 def output_to_file():
@@ -44,11 +40,21 @@ def combine_tags(obj):
 
 def main():
     print("Launching requests")
-    emoji_struct_f_string = open("templates/emoji_struct.rs", "r").read()
-    rust_module_f_string = open("templates/rust_module.rs", "r").read()
+
     raw_json = requests.get(emoji_json_url)
+
     raw_obj = list(map(lambda obj: {
-                   "emoji": obj["emoji"], "tags": combine_tags(obj)}, json.loads(raw_json.text)))
+                   "emoji": "\"" + obj["emoji"] + "\"", "tags": combine_tags(obj)}, json.loads(raw_json.text)))
+    struct_strings = [format_struct(i) for i in raw_obj]
+
+    struct_strings = ",".join(struct_strings)
+
+    struct_strings = "[\n" + struct_strings + "]"
+
+    module_string = rust_module_f_string.format(
+        emoji_data=struct_strings, length=len(raw_obj))
+
+    open(ouput_path, "w").write(module_string)
 
 
 if __name__ == "__main__":

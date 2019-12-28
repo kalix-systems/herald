@@ -2,11 +2,9 @@
 extern crate arrayvec;
 use arrayvec::ArrayVec;
 
-Struct emoji_struct {
+Struct emoji_struct {{
     emoji: char
     tags: ArrayVec::<'static &str, 8>
-}
+}}
 
-static [emoji_struct; {length} ]: emoji_data = [
-{emoji_data}
-]
+static [emoji_struct; {length} ]: emoji_data = {emoji_data}
