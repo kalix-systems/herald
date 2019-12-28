@@ -2,6970 +2,7244 @@
 
 pub struct EmojiData {
     pub emoji: &'static str,
-    pub tags: &'static [&'static str]
+    pub tags: &'static [&'static str],
 }
 
-pub static SMILEYS_&_EMOTION: usize = 0;
-pub static PEOPLE_&_BODY: usize = 149;
-pub static ANIMALS_&_NATURE: usize = 483;
-pub static FOOD_&_DRINK: usize = 610;
-pub static TRAVEL_&_PLACES: usize = 731;
+pub static SMILEYS_EMOTION: usize = 0;
+pub static PEOPLE_BODY: usize = 149;
+pub static ANIMALS_NATURE: usize = 483;
+pub static FOOD_DRINK: usize = 610;
+pub static TRAVEL_PLACES: usize = 731;
 pub static ACTIVITIES: usize = 941;
 pub static OBJECTS: usize = 1020;
 pub static SYMBOLS: usize = 1253;
 pub static FLAGS: usize = 1470;
 
-pub static EMOJI_DATA: [EmojiData; 1738]  = [
-EmojiData {
-    emoji: "😀",
-    tags:  &["grinning face","smile","happy","grinning"]
-}
-,EmojiData {
-    emoji: "😃",
-    tags:  &["grinning face with big eyes","happy","joy","haha","smiley"]
-}
-,EmojiData {
-    emoji: "😄",
-    tags:  &["grinning face with smiling eyes","happy","joy","laugh","pleased","smile"]
-}
-,EmojiData {
-    emoji: "😁",
-    tags:  &["beaming face with smiling eyes","grin"]
-}
-,EmojiData {
-    emoji: "😆",
-    tags:  &["grinning squinting face","happy","haha","laughing","satisfied"]
-}
-,EmojiData {
-    emoji: "😅",
-    tags:  &["grinning face with sweat","hot","sweat smile"]
-}
-,EmojiData {
-    emoji: "🤣",
-    tags:  &["rolling on the floor laughing","lol","laughing","rofl"]
-}
-,EmojiData {
-    emoji: "😂",
-    tags:  &["face with tears of joy","tears","joy"]
-}
-,EmojiData {
-    emoji: "🙂",
-    tags:  &["slightly smiling face"]
-}
-,EmojiData {
-    emoji: "🙃",
-    tags:  &["upside-down face","upside down face"]
-}
-,EmojiData {
-    emoji: "😉",
-    tags:  &["winking face","flirt","wink"]
-}
-,EmojiData {
-    emoji: "😊",
-    tags:  &["smiling face with smiling eyes","proud","blush"]
-}
-,EmojiData {
-    emoji: "😇",
-    tags:  &["smiling face with halo","angel","innocent"]
-}
-,EmojiData {
-    emoji: "🥰",
-    tags:  &["smiling face with hearts","love","smiling face with three hearts"]
-}
-,EmojiData {
-    emoji: "😍",
-    tags:  &["smiling face with heart-eyes","love","crush","heart eyes"]
-}
-,EmojiData {
-    emoji: "🤩",
-    tags:  &["star-struck","eyes","star struck"]
-}
-,EmojiData {
-    emoji: "😘",
-    tags:  &["face blowing a kiss","flirt","kissing heart"]
-}
-,EmojiData {
-    emoji: "😗",
-    tags:  &["kissing face","kissing"]
-}
-,EmojiData {
-    emoji: "☺️",
-    tags:  &["smiling face","blush","pleased","relaxed"]
-}
-,EmojiData {
-    emoji: "😚",
-    tags:  &["kissing face with closed eyes","kissing closed eyes"]
-}
-,EmojiData {
-    emoji: "😙",
-    tags:  &["kissing face with smiling eyes","kissing smiling eyes"]
-}
-,EmojiData {
-    emoji: "😋",
-    tags:  &["face savoring food","tongue","lick","yum"]
-}
-,EmojiData {
-    emoji: "😛",
-    tags:  &["face with tongue","stuck out tongue"]
-}
-,EmojiData {
-    emoji: "😜",
-    tags:  &["winking face with tongue","prank","silly","stuck out tongue winking eye"]
-}
-,EmojiData {
-    emoji: "🤪",
-    tags:  &["zany face","goofy","wacky"]
-}
-,EmojiData {
-    emoji: "😝",
-    tags:  &["squinting face with tongue","prank","stuck out tongue closed eyes"]
-}
-,EmojiData {
-    emoji: "🤑",
-    tags:  &["money-mouth face","rich","money mouth face"]
-}
-,EmojiData {
-    emoji: "🤗",
-    tags:  &["hugging face","hugs"]
-}
-,EmojiData {
-    emoji: "🤭",
-    tags:  &["face with hand over mouth","quiet","whoops","hand over mouth"]
-}
-,EmojiData {
-    emoji: "🤫",
-    tags:  &["shushing face","silence","quiet"]
-}
-,EmojiData {
-    emoji: "🤔",
-    tags:  &["thinking face","thinking"]
-}
-,EmojiData {
-    emoji: "🤐",
-    tags:  &["zipper-mouth face","silence","hush","zipper mouth face"]
-}
-,EmojiData {
-    emoji: "🤨",
-    tags:  &["face with raised eyebrow","suspicious","raised eyebrow"]
-}
-,EmojiData {
-    emoji: "😐",
-    tags:  &["neutral face","meh"]
-}
-,EmojiData {
-    emoji: "😑",
-    tags:  &["expressionless face","expressionless"]
-}
-,EmojiData {
-    emoji: "😶",
-    tags:  &["face without mouth","mute","silence","no mouth"]
-}
-,EmojiData {
-    emoji: "😏",
-    tags:  &["smirking face","smug","smirk"]
-}
-,EmojiData {
-    emoji: "😒",
-    tags:  &["unamused face","meh","unamused"]
-}
-,EmojiData {
-    emoji: "🙄",
-    tags:  &["face with rolling eyes","roll eyes"]
-}
-,EmojiData {
-    emoji: "😬",
-    tags:  &["grimacing face","grimacing"]
-}
-,EmojiData {
-    emoji: "🤥",
-    tags:  &["lying face","liar"]
-}
-,EmojiData {
-    emoji: "😌",
-    tags:  &["relieved face","whew","relieved"]
-}
-,EmojiData {
-    emoji: "😔",
-    tags:  &["pensive face","pensive"]
-}
-,EmojiData {
-    emoji: "😪",
-    tags:  &["sleepy face","tired","sleepy"]
-}
-,EmojiData {
-    emoji: "🤤",
-    tags:  &["drooling face"]
-}
-,EmojiData {
-    emoji: "😴",
-    tags:  &["sleeping face","zzz","sleeping"]
-}
-,EmojiData {
-    emoji: "😷",
-    tags:  &["face with medical mask","sick","ill","mask"]
-}
-,EmojiData {
-    emoji: "🤒",
-    tags:  &["face with thermometer","sick"]
-}
-,EmojiData {
-    emoji: "🤕",
-    tags:  &["face with head-bandage","hurt","face with head bandage"]
-}
-,EmojiData {
-    emoji: "🤢",
-    tags:  &["nauseated face","sick","barf","disgusted"]
-}
-,EmojiData {
-    emoji: "🤮",
-    tags:  &["face vomiting","barf","sick","vomiting face"]
-}
-,EmojiData {
-    emoji: "🤧",
-    tags:  &["sneezing face","achoo","sick"]
-}
-,EmojiData {
-    emoji: "🥵",
-    tags:  &["hot face","heat","sweating"]
-}
-,EmojiData {
-    emoji: "🥶",
-    tags:  &["cold face","freezing","ice"]
-}
-,EmojiData {
-    emoji: "🥴",
-    tags:  &["woozy face","groggy"]
-}
-,EmojiData {
-    emoji: "😵",
-    tags:  &["dizzy face"]
-}
-,EmojiData {
-    emoji: "🤯",
-    tags:  &["exploding head","mind","blown"]
-}
-,EmojiData {
-    emoji: "🤠",
-    tags:  &["cowboy hat face"]
-}
-,EmojiData {
-    emoji: "🥳",
-    tags:  &["partying face","celebration","birthday"]
-}
-,EmojiData {
-    emoji: "😎",
-    tags:  &["smiling face with sunglasses","cool","sunglasses"]
-}
-,EmojiData {
-    emoji: "🤓",
-    tags:  &["nerd face","geek","glasses"]
-}
-,EmojiData {
-    emoji: "🧐",
-    tags:  &["face with monocle","monocle face"]
-}
-,EmojiData {
-    emoji: "😕",
-    tags:  &["confused face","confused"]
-}
-,EmojiData {
-    emoji: "😟",
-    tags:  &["worried face","nervous","worried"]
-}
-,EmojiData {
-    emoji: "🙁",
-    tags:  &["slightly frowning face"]
-}
-,EmojiData {
-    emoji: "☹️",
-    tags:  &["frowning face"]
-}
-,EmojiData {
-    emoji: "😮",
-    tags:  &["face with open mouth","surprise","impressed","wow","open mouth"]
-}
-,EmojiData {
-    emoji: "😯",
-    tags:  &["hushed face","silence","speechless","hushed"]
-}
-,EmojiData {
-    emoji: "😲",
-    tags:  &["astonished face","amazed","gasp","astonished"]
-}
-,EmojiData {
-    emoji: "😳",
-    tags:  &["flushed face","flushed"]
-}
-,EmojiData {
-    emoji: "🥺",
-    tags:  &["pleading face","puppy","eyes"]
-}
-,EmojiData {
-    emoji: "😦",
-    tags:  &["frowning face with open mouth","frowning"]
-}
-,EmojiData {
-    emoji: "😧",
-    tags:  &["anguished face","stunned","anguished"]
-}
-,EmojiData {
-    emoji: "😨",
-    tags:  &["fearful face","scared","shocked","oops","fearful"]
-}
-,EmojiData {
-    emoji: "😰",
-    tags:  &["anxious face with sweat","nervous","cold sweat"]
-}
-,EmojiData {
-    emoji: "😥",
-    tags:  &["sad but relieved face","phew","sweat","nervous","disappointed relieved"]
-}
-,EmojiData {
-    emoji: "😢",
-    tags:  &["crying face","sad","tear","cry"]
-}
-,EmojiData {
-    emoji: "😭",
-    tags:  &["loudly crying face","sad","cry","bawling","sob"]
-}
-,EmojiData {
-    emoji: "😱",
-    tags:  &["face screaming in fear","horror","shocked","scream"]
-}
-,EmojiData {
-    emoji: "😖",
-    tags:  &["confounded face","confounded"]
-}
-,EmojiData {
-    emoji: "😣",
-    tags:  &["persevering face","struggling","persevere"]
-}
-,EmojiData {
-    emoji: "😞",
-    tags:  &["disappointed face","sad","disappointed"]
-}
-,EmojiData {
-    emoji: "😓",
-    tags:  &["downcast face with sweat","sweat"]
-}
-,EmojiData {
-    emoji: "😩",
-    tags:  &["weary face","tired","weary"]
-}
-,EmojiData {
-    emoji: "😫",
-    tags:  &["tired face","upset","whine"]
-}
-,EmojiData {
-    emoji: "🥱",
-    tags:  &["yawning face"]
-}
-,EmojiData {
-    emoji: "😤",
-    tags:  &["face with steam from nose","smug","triumph"]
-}
-,EmojiData {
-    emoji: "😡",
-    tags:  &["pouting face","angry","rage","pout"]
-}
-,EmojiData {
-    emoji: "😠",
-    tags:  &["angry face","mad","annoyed","angry"]
-}
-,EmojiData {
-    emoji: "🤬",
-    tags:  &["face with symbols on mouth","foul","cursing face"]
-}
-,EmojiData {
-    emoji: "😈",
-    tags:  &["smiling face with horns","devil","evil","horns","smiling imp"]
-}
-,EmojiData {
-    emoji: "👿",
-    tags:  &["angry face with horns","angry","devil","evil","horns","imp"]
-}
-,EmojiData {
-    emoji: "💀",
-    tags:  &["skull","dead","danger","poison"]
-}
-,EmojiData {
-    emoji: "☠️",
-    tags:  &["skull and crossbones","danger","pirate"]
-}
-,EmojiData {
-    emoji: "💩",
-    tags:  &["pile of poo","crap","hankey","poop","shit"]
-}
-,EmojiData {
-    emoji: "🤡",
-    tags:  &["clown face"]
-}
-,EmojiData {
-    emoji: "👹",
-    tags:  &["ogre","monster","japanese ogre"]
-}
-,EmojiData {
-    emoji: "👺",
-    tags:  &["goblin","japanese goblin"]
-}
-,EmojiData {
-    emoji: "👻",
-    tags:  &["ghost","halloween"]
-}
-,EmojiData {
-    emoji: "👽",
-    tags:  &["alien","ufo"]
-}
-,EmojiData {
-    emoji: "👾",
-    tags:  &["alien monster","game","retro","space invader"]
-}
-,EmojiData {
-    emoji: "🤖",
-    tags:  &["robot"]
-}
-,EmojiData {
-    emoji: "😺",
-    tags:  &["grinning cat","smiley cat"]
-}
-,EmojiData {
-    emoji: "😸",
-    tags:  &["grinning cat with smiling eyes","smile cat"]
-}
-,EmojiData {
-    emoji: "😹",
-    tags:  &["cat with tears of joy","joy cat"]
-}
-,EmojiData {
-    emoji: "😻",
-    tags:  &["smiling cat with heart-eyes","heart eyes cat"]
-}
-,EmojiData {
-    emoji: "😼",
-    tags:  &["cat with wry smile","smirk cat"]
-}
-,EmojiData {
-    emoji: "😽",
-    tags:  &["kissing cat"]
-}
-,EmojiData {
-    emoji: "🙀",
-    tags:  &["weary cat","horror","scream cat"]
-}
-,EmojiData {
-    emoji: "😿",
-    tags:  &["crying cat","sad","tear","crying cat face"]
-}
-,EmojiData {
-    emoji: "😾",
-    tags:  &["pouting cat"]
-}
-,EmojiData {
-    emoji: "🙈",
-    tags:  &["see-no-evil monkey","monkey","blind","ignore","see no evil"]
-}
-,EmojiData {
-    emoji: "🙉",
-    tags:  &["hear-no-evil monkey","monkey","deaf","hear no evil"]
-}
-,EmojiData {
-    emoji: "🙊",
-    tags:  &["speak-no-evil monkey","monkey","mute","hush","speak no evil"]
-}
-,EmojiData {
-    emoji: "💋",
-    tags:  &["kiss mark","lipstick","kiss"]
-}
-,EmojiData {
-    emoji: "💌",
-    tags:  &["love letter","email","envelope"]
-}
-,EmojiData {
-    emoji: "💘",
-    tags:  &["heart with arrow","love","heart","cupid"]
-}
-,EmojiData {
-    emoji: "💝",
-    tags:  &["heart with ribbon","chocolates","gift heart"]
-}
-,EmojiData {
-    emoji: "💖",
-    tags:  &["sparkling heart"]
-}
-,EmojiData {
-    emoji: "💗",
-    tags:  &["growing heart","heartpulse"]
-}
-,EmojiData {
-    emoji: "💓",
-    tags:  &["beating heart","heartbeat"]
-}
-,EmojiData {
-    emoji: "💞",
-    tags:  &["revolving hearts"]
-}
-,EmojiData {
-    emoji: "💕",
-    tags:  &["two hearts"]
-}
-,EmojiData {
-    emoji: "💟",
-    tags:  &["heart decoration"]
-}
-,EmojiData {
-    emoji: "❣️",
-    tags:  &["heart exclamation","heavy heart exclamation"]
-}
-,EmojiData {
-    emoji: "💔",
-    tags:  &["broken heart"]
-}
-,EmojiData {
-    emoji: "❤️",
-    tags:  &["red heart","love","heart"]
-}
-,EmojiData {
-    emoji: "🧡",
-    tags:  &["orange heart"]
-}
-,EmojiData {
-    emoji: "💛",
-    tags:  &["yellow heart"]
-}
-,EmojiData {
-    emoji: "💚",
-    tags:  &["green heart"]
-}
-,EmojiData {
-    emoji: "💙",
-    tags:  &["blue heart"]
-}
-,EmojiData {
-    emoji: "💜",
-    tags:  &["purple heart"]
-}
-,EmojiData {
-    emoji: "🤎",
-    tags:  &["brown heart"]
-}
-,EmojiData {
-    emoji: "🖤",
-    tags:  &["black heart"]
-}
-,EmojiData {
-    emoji: "🤍",
-    tags:  &["white heart"]
-}
-,EmojiData {
-    emoji: "💯",
-    tags:  &["hundred points","score","perfect","100"]
-}
-,EmojiData {
-    emoji: "💢",
-    tags:  &["anger symbol","angry","anger"]
-}
-,EmojiData {
-    emoji: "💥",
-    tags:  &["collision","explode","boom"]
-}
-,EmojiData {
-    emoji: "💫",
-    tags:  &["dizzy","star"]
-}
-,EmojiData {
-    emoji: "💦",
-    tags:  &["sweat droplets","water","workout","sweat drops"]
-}
-,EmojiData {
-    emoji: "💨",
-    tags:  &["dashing away","wind","blow","fast","dash"]
-}
-,EmojiData {
-    emoji: "🕳️",
-    tags:  &["hole"]
-}
-,EmojiData {
-    emoji: "💣",
-    tags:  &["bomb","boom"]
-}
-,EmojiData {
-    emoji: "💬",
-    tags:  &["speech balloon","comment"]
-}
-,EmojiData {
-    emoji: "👁️‍🗨️",
-    tags:  &["eye in speech bubble","eye speech bubble"]
-}
-,EmojiData {
-    emoji: "🗨️",
-    tags:  &["left speech bubble"]
-}
-,EmojiData {
-    emoji: "🗯️",
-    tags:  &["right anger bubble"]
-}
-,EmojiData {
-    emoji: "💭",
-    tags:  &["thought balloon","thinking"]
-}
-,EmojiData {
-    emoji: "💤",
-    tags:  &["zzz","sleeping"]
-}
-,EmojiData {
-    emoji: "👋",
-    tags:  &["waving hand","goodbye","wave"]
-}
-,EmojiData {
-    emoji: "🤚",
-    tags:  &["raised back of hand"]
-}
-,EmojiData {
-    emoji: "🖐️",
-    tags:  &["hand with fingers splayed","raised hand with fingers splayed"]
-}
-,EmojiData {
-    emoji: "✋",
-    tags:  &["raised hand","highfive","stop","hand"]
-}
-,EmojiData {
-    emoji: "🖖",
-    tags:  &["vulcan salute","prosper","spock"]
-}
-,EmojiData {
-    emoji: "👌",
-    tags:  &["OK hand","ok hand"]
-}
-,EmojiData {
-    emoji: "🤏",
-    tags:  &["pinching hand"]
-}
-,EmojiData {
-    emoji: "✌️",
-    tags:  &["victory hand","victory","peace","v"]
-}
-,EmojiData {
-    emoji: "🤞",
-    tags:  &["crossed fingers","luck","hopeful"]
-}
-,EmojiData {
-    emoji: "🤟",
-    tags:  &["love-you gesture","love you gesture"]
-}
-,EmojiData {
-    emoji: "🤘",
-    tags:  &["sign of the horns","metal"]
-}
-,EmojiData {
-    emoji: "🤙",
-    tags:  &["call me hand"]
-}
-,EmojiData {
-    emoji: "👈",
-    tags:  &["backhand index pointing left","point left"]
-}
-,EmojiData {
-    emoji: "👉",
-    tags:  &["backhand index pointing right","point right"]
-}
-,EmojiData {
-    emoji: "👆",
-    tags:  &["backhand index pointing up","point up 2"]
-}
-,EmojiData {
-    emoji: "🖕",
-    tags:  &["middle finger","fu"]
-}
-,EmojiData {
-    emoji: "👇",
-    tags:  &["backhand index pointing down","point down"]
-}
-,EmojiData {
-    emoji: "☝️",
-    tags:  &["index pointing up","point up"]
-}
-,EmojiData {
-    emoji: "👍",
-    tags:  &["thumbs up","approve","ok","+1","thumbsup"]
-}
-,EmojiData {
-    emoji: "👎",
-    tags:  &["thumbs down","disapprove","bury","-1","thumbsdown"]
-}
-,EmojiData {
-    emoji: "✊",
-    tags:  &["raised fist","power","fist raised","fist"]
-}
-,EmojiData {
-    emoji: "👊",
-    tags:  &["oncoming fist","attack","fist oncoming","facepunch","punch"]
-}
-,EmojiData {
-    emoji: "🤛",
-    tags:  &["left-facing fist","fist left"]
-}
-,EmojiData {
-    emoji: "🤜",
-    tags:  &["right-facing fist","fist right"]
-}
-,EmojiData {
-    emoji: "👏",
-    tags:  &["clapping hands","praise","applause","clap"]
-}
-,EmojiData {
-    emoji: "🙌",
-    tags:  &["raising hands","hooray","raised hands"]
-}
-,EmojiData {
-    emoji: "👐",
-    tags:  &["open hands"]
-}
-,EmojiData {
-    emoji: "🤲",
-    tags:  &["palms up together"]
-}
-,EmojiData {
-    emoji: "🤝",
-    tags:  &["handshake","deal"]
-}
-,EmojiData {
-    emoji: "🙏",
-    tags:  &["folded hands","please","hope","wish","pray"]
-}
-,EmojiData {
-    emoji: "✍️",
-    tags:  &["writing hand"]
-}
-,EmojiData {
-    emoji: "💅",
-    tags:  &["nail polish","beauty","manicure","nail care"]
-}
-,EmojiData {
-    emoji: "🤳",
-    tags:  &["selfie"]
-}
-,EmojiData {
-    emoji: "💪",
-    tags:  &["flexed biceps","flex","bicep","strong","workout","muscle"]
-}
-,EmojiData {
-    emoji: "🦾",
-    tags:  &["mechanical arm"]
-}
-,EmojiData {
-    emoji: "🦿",
-    tags:  &["mechanical leg"]
-}
-,EmojiData {
-    emoji: "🦵",
-    tags:  &["leg"]
-}
-,EmojiData {
-    emoji: "🦶",
-    tags:  &["foot"]
-}
-,EmojiData {
-    emoji: "👂",
-    tags:  &["ear","hear","sound","listen"]
-}
-,EmojiData {
-    emoji: "🦻",
-    tags:  &["ear with hearing aid"]
-}
-,EmojiData {
-    emoji: "👃",
-    tags:  &["nose","smell"]
-}
-,EmojiData {
-    emoji: "🧠",
-    tags:  &["brain"]
-}
-,EmojiData {
-    emoji: "🦷",
-    tags:  &["tooth"]
-}
-,EmojiData {
-    emoji: "🦴",
-    tags:  &["bone"]
-}
-,EmojiData {
-    emoji: "👀",
-    tags:  &["eyes","look","see","watch"]
-}
-,EmojiData {
-    emoji: "👁️",
-    tags:  &["eye"]
-}
-,EmojiData {
-    emoji: "👅",
-    tags:  &["tongue","taste"]
-}
-,EmojiData {
-    emoji: "👄",
-    tags:  &["mouth","kiss","lips"]
-}
-,EmojiData {
-    emoji: "👶",
-    tags:  &["baby","child","newborn"]
-}
-,EmojiData {
-    emoji: "🧒",
-    tags:  &["child"]
-}
-,EmojiData {
-    emoji: "👦",
-    tags:  &["boy","child"]
-}
-,EmojiData {
-    emoji: "👧",
-    tags:  &["girl","child"]
-}
-,EmojiData {
-    emoji: "🧑",
-    tags:  &["person","adult"]
-}
-,EmojiData {
-    emoji: "👱",
-    tags:  &["person: blond hair","blond haired person"]
-}
-,EmojiData {
-    emoji: "👨",
-    tags:  &["man","mustache","father","dad"]
-}
-,EmojiData {
-    emoji: "🧔",
-    tags:  &["man: beard","bearded person"]
-}
-,EmojiData {
-    emoji: "👨‍🦰",
-    tags:  &["man: red hair","red haired man"]
-}
-,EmojiData {
-    emoji: "👨‍🦱",
-    tags:  &["man: curly hair","curly haired man"]
-}
-,EmojiData {
-    emoji: "👨‍🦳",
-    tags:  &["man: white hair","white haired man"]
-}
-,EmojiData {
-    emoji: "👨‍🦲",
-    tags:  &["man: bald","bald man"]
-}
-,EmojiData {
-    emoji: "👩",
-    tags:  &["woman","girls"]
-}
-,EmojiData {
-    emoji: "👩‍🦰",
-    tags:  &["woman: red hair","red haired woman"]
-}
-,EmojiData {
-    emoji: "🧑‍🦰",
-    tags:  &["person: red hair","person red hair"]
-}
-,EmojiData {
-    emoji: "👩‍🦱",
-    tags:  &["woman: curly hair","curly haired woman"]
-}
-,EmojiData {
-    emoji: "🧑‍🦱",
-    tags:  &["person: curly hair","person curly hair"]
-}
-,EmojiData {
-    emoji: "👩‍🦳",
-    tags:  &["woman: white hair","white haired woman"]
-}
-,EmojiData {
-    emoji: "🧑‍🦳",
-    tags:  &["person: white hair","person white hair"]
-}
-,EmojiData {
-    emoji: "👩‍🦲",
-    tags:  &["woman: bald","bald woman"]
-}
-,EmojiData {
-    emoji: "🧑‍🦲",
-    tags:  &["person: bald","person bald"]
-}
-,EmojiData {
-    emoji: "👱‍♀️",
-    tags:  &["woman: blond hair","blond haired woman","blonde woman"]
-}
-,EmojiData {
-    emoji: "👱‍♂️",
-    tags:  &["man: blond hair","blond haired man"]
-}
-,EmojiData {
-    emoji: "🧓",
-    tags:  &["older person","older adult"]
-}
-,EmojiData {
-    emoji: "👴",
-    tags:  &["old man","older man"]
-}
-,EmojiData {
-    emoji: "👵",
-    tags:  &["old woman","older woman"]
-}
-,EmojiData {
-    emoji: "🙍",
-    tags:  &["person frowning","frowning person"]
-}
-,EmojiData {
-    emoji: "🙍‍♂️",
-    tags:  &["man frowning","frowning man"]
-}
-,EmojiData {
-    emoji: "🙍‍♀️",
-    tags:  &["woman frowning","frowning woman"]
-}
-,EmojiData {
-    emoji: "🙎",
-    tags:  &["person pouting","pouting face"]
-}
-,EmojiData {
-    emoji: "🙎‍♂️",
-    tags:  &["man pouting","pouting man"]
-}
-,EmojiData {
-    emoji: "🙎‍♀️",
-    tags:  &["woman pouting","pouting woman"]
-}
-,EmojiData {
-    emoji: "🙅",
-    tags:  &["person gesturing NO","stop","halt","denied","no good"]
-}
-,EmojiData {
-    emoji: "🙅‍♂️",
-    tags:  &["man gesturing NO","stop","halt","denied","no good man","ng man"]
-}
-,EmojiData {
-    emoji: "🙅‍♀️",
-    tags:  &["woman gesturing NO","stop","halt","denied","no good woman","ng woman"]
-}
-,EmojiData {
-    emoji: "🙆",
-    tags:  &["person gesturing OK","ok person"]
-}
-,EmojiData {
-    emoji: "🙆‍♂️",
-    tags:  &["man gesturing OK","ok man"]
-}
-,EmojiData {
-    emoji: "🙆‍♀️",
-    tags:  &["woman gesturing OK","ok woman"]
-}
-,EmojiData {
-    emoji: "💁",
-    tags:  &["person tipping hand","tipping hand person","information desk person"]
-}
-,EmojiData {
-    emoji: "💁‍♂️",
-    tags:  &["man tipping hand","information","tipping hand man","sassy man"]
-}
-,EmojiData {
-    emoji: "💁‍♀️",
-    tags:  &["woman tipping hand","information","tipping hand woman","sassy woman"]
-}
-,EmojiData {
-    emoji: "🙋",
-    tags:  &["person raising hand","raising hand"]
-}
-,EmojiData {
-    emoji: "🙋‍♂️",
-    tags:  &["man raising hand","raising hand man"]
-}
-,EmojiData {
-    emoji: "🙋‍♀️",
-    tags:  &["woman raising hand","raising hand woman"]
-}
-,EmojiData {
-    emoji: "🧏",
-    tags:  &["deaf person"]
-}
-,EmojiData {
-    emoji: "🧏‍♂️",
-    tags:  &["deaf man"]
-}
-,EmojiData {
-    emoji: "🧏‍♀️",
-    tags:  &["deaf woman"]
-}
-,EmojiData {
-    emoji: "🙇",
-    tags:  &["person bowing","respect","thanks","bow"]
-}
-,EmojiData {
-    emoji: "🙇‍♂️",
-    tags:  &["man bowing","respect","thanks","bowing man"]
-}
-,EmojiData {
-    emoji: "🙇‍♀️",
-    tags:  &["woman bowing","respect","thanks","bowing woman"]
-}
-,EmojiData {
-    emoji: "🤦",
-    tags:  &["person facepalming","facepalm"]
-}
-,EmojiData {
-    emoji: "🤦‍♂️",
-    tags:  &["man facepalming"]
-}
-,EmojiData {
-    emoji: "🤦‍♀️",
-    tags:  &["woman facepalming"]
-}
-,EmojiData {
-    emoji: "🤷",
-    tags:  &["person shrugging","shrug"]
-}
-,EmojiData {
-    emoji: "🤷‍♂️",
-    tags:  &["man shrugging"]
-}
-,EmojiData {
-    emoji: "🤷‍♀️",
-    tags:  &["woman shrugging"]
-}
-,EmojiData {
-    emoji: "🧑‍⚕️",
-    tags:  &["health worker"]
-}
-,EmojiData {
-    emoji: "👨‍⚕️",
-    tags:  &["man health worker","doctor","nurse"]
-}
-,EmojiData {
-    emoji: "👩‍⚕️",
-    tags:  &["woman health worker","doctor","nurse"]
-}
-,EmojiData {
-    emoji: "🧑‍🎓",
-    tags:  &["student"]
-}
-,EmojiData {
-    emoji: "👨‍🎓",
-    tags:  &["man student","graduation"]
-}
-,EmojiData {
-    emoji: "👩‍🎓",
-    tags:  &["woman student","graduation"]
-}
-,EmojiData {
-    emoji: "🧑‍🏫",
-    tags:  &["teacher"]
-}
-,EmojiData {
-    emoji: "👨‍🏫",
-    tags:  &["man teacher","school","professor"]
-}
-,EmojiData {
-    emoji: "👩‍🏫",
-    tags:  &["woman teacher","school","professor"]
-}
-,EmojiData {
-    emoji: "🧑‍⚖️",
-    tags:  &["judge"]
-}
-,EmojiData {
-    emoji: "👨‍⚖️",
-    tags:  &["man judge","justice"]
-}
-,EmojiData {
-    emoji: "👩‍⚖️",
-    tags:  &["woman judge","justice"]
-}
-,EmojiData {
-    emoji: "🧑‍🌾",
-    tags:  &["farmer"]
-}
-,EmojiData {
-    emoji: "👨‍🌾",
-    tags:  &["man farmer"]
-}
-,EmojiData {
-    emoji: "👩‍🌾",
-    tags:  &["woman farmer"]
-}
-,EmojiData {
-    emoji: "🧑‍🍳",
-    tags:  &["cook"]
-}
-,EmojiData {
-    emoji: "👨‍🍳",
-    tags:  &["man cook","chef"]
-}
-,EmojiData {
-    emoji: "👩‍🍳",
-    tags:  &["woman cook","chef"]
-}
-,EmojiData {
-    emoji: "🧑‍🔧",
-    tags:  &["mechanic"]
-}
-,EmojiData {
-    emoji: "👨‍🔧",
-    tags:  &["man mechanic"]
-}
-,EmojiData {
-    emoji: "👩‍🔧",
-    tags:  &["woman mechanic"]
-}
-,EmojiData {
-    emoji: "🧑‍🏭",
-    tags:  &["factory worker"]
-}
-,EmojiData {
-    emoji: "👨‍🏭",
-    tags:  &["man factory worker"]
-}
-,EmojiData {
-    emoji: "👩‍🏭",
-    tags:  &["woman factory worker"]
-}
-,EmojiData {
-    emoji: "🧑‍💼",
-    tags:  &["office worker"]
-}
-,EmojiData {
-    emoji: "👨‍💼",
-    tags:  &["man office worker","business"]
-}
-,EmojiData {
-    emoji: "👩‍💼",
-    tags:  &["woman office worker","business"]
-}
-,EmojiData {
-    emoji: "🧑‍🔬",
-    tags:  &["scientist"]
-}
-,EmojiData {
-    emoji: "👨‍🔬",
-    tags:  &["man scientist","research"]
-}
-,EmojiData {
-    emoji: "👩‍🔬",
-    tags:  &["woman scientist","research"]
-}
-,EmojiData {
-    emoji: "🧑‍💻",
-    tags:  &["technologist"]
-}
-,EmojiData {
-    emoji: "👨‍💻",
-    tags:  &["man technologist","coder"]
-}
-,EmojiData {
-    emoji: "👩‍💻",
-    tags:  &["woman technologist","coder"]
-}
-,EmojiData {
-    emoji: "🧑‍🎤",
-    tags:  &["singer"]
-}
-,EmojiData {
-    emoji: "👨‍🎤",
-    tags:  &["man singer","rockstar"]
-}
-,EmojiData {
-    emoji: "👩‍🎤",
-    tags:  &["woman singer","rockstar"]
-}
-,EmojiData {
-    emoji: "🧑‍🎨",
-    tags:  &["artist"]
-}
-,EmojiData {
-    emoji: "👨‍🎨",
-    tags:  &["man artist","painter"]
-}
-,EmojiData {
-    emoji: "👩‍🎨",
-    tags:  &["woman artist","painter"]
-}
-,EmojiData {
-    emoji: "🧑‍✈️",
-    tags:  &["pilot"]
-}
-,EmojiData {
-    emoji: "👨‍✈️",
-    tags:  &["man pilot"]
-}
-,EmojiData {
-    emoji: "👩‍✈️",
-    tags:  &["woman pilot"]
-}
-,EmojiData {
-    emoji: "🧑‍🚀",
-    tags:  &["astronaut"]
-}
-,EmojiData {
-    emoji: "👨‍🚀",
-    tags:  &["man astronaut","space"]
-}
-,EmojiData {
-    emoji: "👩‍🚀",
-    tags:  &["woman astronaut","space"]
-}
-,EmojiData {
-    emoji: "🧑‍🚒",
-    tags:  &["firefighter"]
-}
-,EmojiData {
-    emoji: "👨‍🚒",
-    tags:  &["man firefighter"]
-}
-,EmojiData {
-    emoji: "👩‍🚒",
-    tags:  &["woman firefighter"]
-}
-,EmojiData {
-    emoji: "👮",
-    tags:  &["police officer","law","cop"]
-}
-,EmojiData {
-    emoji: "👮‍♂️",
-    tags:  &["man police officer","law","cop","policeman"]
-}
-,EmojiData {
-    emoji: "👮‍♀️",
-    tags:  &["woman police officer","law","cop","policewoman"]
-}
-,EmojiData {
-    emoji: "🕵️",
-    tags:  &["detective","sleuth"]
-}
-,EmojiData {
-    emoji: "🕵️‍♂️",
-    tags:  &["man detective","sleuth","male detective"]
-}
-,EmojiData {
-    emoji: "🕵️‍♀️",
-    tags:  &["woman detective","sleuth","female detective"]
-}
-,EmojiData {
-    emoji: "💂",
-    tags:  &["guard"]
-}
-,EmojiData {
-    emoji: "💂‍♂️",
-    tags:  &["man guard","guardsman"]
-}
-,EmojiData {
-    emoji: "💂‍♀️",
-    tags:  &["woman guard","guardswoman"]
-}
-,EmojiData {
-    emoji: "👷",
-    tags:  &["construction worker","helmet"]
-}
-,EmojiData {
-    emoji: "👷‍♂️",
-    tags:  &["man construction worker","helmet","construction worker man"]
-}
-,EmojiData {
-    emoji: "👷‍♀️",
-    tags:  &["woman construction worker","helmet","construction worker woman"]
-}
-,EmojiData {
-    emoji: "🤴",
-    tags:  &["prince","crown","royal"]
-}
-,EmojiData {
-    emoji: "👸",
-    tags:  &["princess","crown","royal"]
-}
-,EmojiData {
-    emoji: "👳",
-    tags:  &["person wearing turban","person with turban"]
-}
-,EmojiData {
-    emoji: "👳‍♂️",
-    tags:  &["man wearing turban","man with turban"]
-}
-,EmojiData {
-    emoji: "👳‍♀️",
-    tags:  &["woman wearing turban","woman with turban"]
-}
-,EmojiData {
-    emoji: "👲",
-    tags:  &["man with skullcap","man with gua pi mao"]
-}
-,EmojiData {
-    emoji: "🧕",
-    tags:  &["woman with headscarf","hijab"]
-}
-,EmojiData {
-    emoji: "🤵",
-    tags:  &["man in tuxedo","groom","marriage","wedding"]
-}
-,EmojiData {
-    emoji: "👰",
-    tags:  &["bride with veil","marriage","wedding"]
-}
-,EmojiData {
-    emoji: "🤰",
-    tags:  &["pregnant woman"]
-}
-,EmojiData {
-    emoji: "🤱",
-    tags:  &["breast-feeding","nursing","breast feeding"]
-}
-,EmojiData {
-    emoji: "👼",
-    tags:  &["baby angel","angel"]
-}
-,EmojiData {
-    emoji: "🎅",
-    tags:  &["Santa Claus","christmas","santa"]
-}
-,EmojiData {
-    emoji: "🤶",
-    tags:  &["Mrs. Claus","santa","mrs claus"]
-}
-,EmojiData {
-    emoji: "🦸",
-    tags:  &["superhero"]
-}
-,EmojiData {
-    emoji: "🦸‍♂️",
-    tags:  &["man superhero","superhero man"]
-}
-,EmojiData {
-    emoji: "🦸‍♀️",
-    tags:  &["woman superhero","superhero woman"]
-}
-,EmojiData {
-    emoji: "🦹",
-    tags:  &["supervillain"]
-}
-,EmojiData {
-    emoji: "🦹‍♂️",
-    tags:  &["man supervillain","supervillain man"]
-}
-,EmojiData {
-    emoji: "🦹‍♀️",
-    tags:  &["woman supervillain","supervillain woman"]
-}
-,EmojiData {
-    emoji: "🧙",
-    tags:  &["mage","wizard"]
-}
-,EmojiData {
-    emoji: "🧙‍♂️",
-    tags:  &["man mage","wizard","mage man"]
-}
-,EmojiData {
-    emoji: "🧙‍♀️",
-    tags:  &["woman mage","wizard","mage woman"]
-}
-,EmojiData {
-    emoji: "🧚",
-    tags:  &["fairy"]
-}
-,EmojiData {
-    emoji: "🧚‍♂️",
-    tags:  &["man fairy","fairy man"]
-}
-,EmojiData {
-    emoji: "🧚‍♀️",
-    tags:  &["woman fairy","fairy woman"]
-}
-,EmojiData {
-    emoji: "🧛",
-    tags:  &["vampire"]
-}
-,EmojiData {
-    emoji: "🧛‍♂️",
-    tags:  &["man vampire","vampire man"]
-}
-,EmojiData {
-    emoji: "🧛‍♀️",
-    tags:  &["woman vampire","vampire woman"]
-}
-,EmojiData {
-    emoji: "🧜",
-    tags:  &["merperson"]
-}
-,EmojiData {
-    emoji: "🧜‍♂️",
-    tags:  &["merman"]
-}
-,EmojiData {
-    emoji: "🧜‍♀️",
-    tags:  &["mermaid"]
-}
-,EmojiData {
-    emoji: "🧝",
-    tags:  &["elf"]
-}
-,EmojiData {
-    emoji: "🧝‍♂️",
-    tags:  &["man elf","elf man"]
-}
-,EmojiData {
-    emoji: "🧝‍♀️",
-    tags:  &["woman elf","elf woman"]
-}
-,EmojiData {
-    emoji: "🧞",
-    tags:  &["genie"]
-}
-,EmojiData {
-    emoji: "🧞‍♂️",
-    tags:  &["man genie","genie man"]
-}
-,EmojiData {
-    emoji: "🧞‍♀️",
-    tags:  &["woman genie","genie woman"]
-}
-,EmojiData {
-    emoji: "🧟",
-    tags:  &["zombie"]
-}
-,EmojiData {
-    emoji: "🧟‍♂️",
-    tags:  &["man zombie","zombie man"]
-}
-,EmojiData {
-    emoji: "🧟‍♀️",
-    tags:  &["woman zombie","zombie woman"]
-}
-,EmojiData {
-    emoji: "💆",
-    tags:  &["person getting massage","spa","massage"]
-}
-,EmojiData {
-    emoji: "💆‍♂️",
-    tags:  &["man getting massage","spa","massage man"]
-}
-,EmojiData {
-    emoji: "💆‍♀️",
-    tags:  &["woman getting massage","spa","massage woman"]
-}
-,EmojiData {
-    emoji: "💇",
-    tags:  &["person getting haircut","beauty","haircut"]
-}
-,EmojiData {
-    emoji: "💇‍♂️",
-    tags:  &["man getting haircut","haircut man"]
-}
-,EmojiData {
-    emoji: "💇‍♀️",
-    tags:  &["woman getting haircut","haircut woman"]
-}
-,EmojiData {
-    emoji: "🚶",
-    tags:  &["person walking","walking"]
-}
-,EmojiData {
-    emoji: "🚶‍♂️",
-    tags:  &["man walking","walking man"]
-}
-,EmojiData {
-    emoji: "🚶‍♀️",
-    tags:  &["woman walking","walking woman"]
-}
-,EmojiData {
-    emoji: "🧍",
-    tags:  &["person standing","standing person"]
-}
-,EmojiData {
-    emoji: "🧍‍♂️",
-    tags:  &["man standing","standing man"]
-}
-,EmojiData {
-    emoji: "🧍‍♀️",
-    tags:  &["woman standing","standing woman"]
-}
-,EmojiData {
-    emoji: "🧎",
-    tags:  &["person kneeling","kneeling person"]
-}
-,EmojiData {
-    emoji: "🧎‍♂️",
-    tags:  &["man kneeling","kneeling man"]
-}
-,EmojiData {
-    emoji: "🧎‍♀️",
-    tags:  &["woman kneeling","kneeling woman"]
-}
-,EmojiData {
-    emoji: "🧑‍🦯",
-    tags:  &["person with probing cane"]
-}
-,EmojiData {
-    emoji: "👨‍🦯",
-    tags:  &["man with probing cane"]
-}
-,EmojiData {
-    emoji: "👩‍🦯",
-    tags:  &["woman with probing cane"]
-}
-,EmojiData {
-    emoji: "🧑‍🦼",
-    tags:  &["person in motorized wheelchair"]
-}
-,EmojiData {
-    emoji: "👨‍🦼",
-    tags:  &["man in motorized wheelchair"]
-}
-,EmojiData {
-    emoji: "👩‍🦼",
-    tags:  &["woman in motorized wheelchair"]
-}
-,EmojiData {
-    emoji: "🧑‍🦽",
-    tags:  &["person in manual wheelchair"]
-}
-,EmojiData {
-    emoji: "👨‍🦽",
-    tags:  &["man in manual wheelchair"]
-}
-,EmojiData {
-    emoji: "👩‍🦽",
-    tags:  &["woman in manual wheelchair"]
-}
-,EmojiData {
-    emoji: "🏃",
-    tags:  &["person running","exercise","workout","marathon","runner","running"]
-}
-,EmojiData {
-    emoji: "🏃‍♂️",
-    tags:  &["man running","exercise","workout","marathon","running man"]
-}
-,EmojiData {
-    emoji: "🏃‍♀️",
-    tags:  &["woman running","exercise","workout","marathon","running woman"]
-}
-,EmojiData {
-    emoji: "💃",
-    tags:  &["woman dancing","dress","dancer"]
-}
-,EmojiData {
-    emoji: "🕺",
-    tags:  &["man dancing","dancer"]
-}
-,EmojiData {
-    emoji: "🕴️",
-    tags:  &["man in suit levitating","business suit levitating"]
-}
-,EmojiData {
-    emoji: "👯",
-    tags:  &["people with bunny ears","bunny","dancers"]
-}
-,EmojiData {
-    emoji: "👯‍♂️",
-    tags:  &["men with bunny ears","bunny","dancing men"]
-}
-,EmojiData {
-    emoji: "👯‍♀️",
-    tags:  &["women with bunny ears","bunny","dancing women"]
-}
-,EmojiData {
-    emoji: "🧖",
-    tags:  &["person in steamy room","steamy","sauna person"]
-}
-,EmojiData {
-    emoji: "🧖‍♂️",
-    tags:  &["man in steamy room","steamy","sauna man"]
-}
-,EmojiData {
-    emoji: "🧖‍♀️",
-    tags:  &["woman in steamy room","steamy","sauna woman"]
-}
-,EmojiData {
-    emoji: "🧗",
-    tags:  &["person climbing","bouldering","climbing"]
-}
-,EmojiData {
-    emoji: "🧗‍♂️",
-    tags:  &["man climbing","bouldering","climbing man"]
-}
-,EmojiData {
-    emoji: "🧗‍♀️",
-    tags:  &["woman climbing","bouldering","climbing woman"]
-}
-,EmojiData {
-    emoji: "🤺",
-    tags:  &["person fencing"]
-}
-,EmojiData {
-    emoji: "🏇",
-    tags:  &["horse racing"]
-}
-,EmojiData {
-    emoji: "⛷️",
-    tags:  &["skier"]
-}
-,EmojiData {
-    emoji: "🏂",
-    tags:  &["snowboarder"]
-}
-,EmojiData {
-    emoji: "🏌️",
-    tags:  &["person golfing","golfing"]
-}
-,EmojiData {
-    emoji: "🏌️‍♂️",
-    tags:  &["man golfing","golfing man"]
-}
-,EmojiData {
-    emoji: "🏌️‍♀️",
-    tags:  &["woman golfing","golfing woman"]
-}
-,EmojiData {
-    emoji: "🏄",
-    tags:  &["person surfing","surfer"]
-}
-,EmojiData {
-    emoji: "🏄‍♂️",
-    tags:  &["man surfing","surfing man"]
-}
-,EmojiData {
-    emoji: "🏄‍♀️",
-    tags:  &["woman surfing","surfing woman"]
-}
-,EmojiData {
-    emoji: "🚣",
-    tags:  &["person rowing boat","rowboat"]
-}
-,EmojiData {
-    emoji: "🚣‍♂️",
-    tags:  &["man rowing boat","rowing man"]
-}
-,EmojiData {
-    emoji: "🚣‍♀️",
-    tags:  &["woman rowing boat","rowing woman"]
-}
-,EmojiData {
-    emoji: "🏊",
-    tags:  &["person swimming","swimmer"]
-}
-,EmojiData {
-    emoji: "🏊‍♂️",
-    tags:  &["man swimming","swimming man"]
-}
-,EmojiData {
-    emoji: "🏊‍♀️",
-    tags:  &["woman swimming","swimming woman"]
-}
-,EmojiData {
-    emoji: "⛹️",
-    tags:  &["person bouncing ball","basketball","bouncing ball person"]
-}
-,EmojiData {
-    emoji: "⛹️‍♂️",
-    tags:  &["man bouncing ball","bouncing ball man","basketball man"]
-}
-,EmojiData {
-    emoji: "⛹️‍♀️",
-    tags:  &["woman bouncing ball","bouncing ball woman","basketball woman"]
-}
-,EmojiData {
-    emoji: "🏋️",
-    tags:  &["person lifting weights","gym","workout","weight lifting"]
-}
-,EmojiData {
-    emoji: "🏋️‍♂️",
-    tags:  &["man lifting weights","gym","workout","weight lifting man"]
-}
-,EmojiData {
-    emoji: "🏋️‍♀️",
-    tags:  &["woman lifting weights","gym","workout","weight lifting woman"]
-}
-,EmojiData {
-    emoji: "🚴",
-    tags:  &["person biking","bicyclist"]
-}
-,EmojiData {
-    emoji: "🚴‍♂️",
-    tags:  &["man biking","biking man"]
-}
-,EmojiData {
-    emoji: "🚴‍♀️",
-    tags:  &["woman biking","biking woman"]
-}
-,EmojiData {
-    emoji: "🚵",
-    tags:  &["person mountain biking","mountain bicyclist"]
-}
-,EmojiData {
-    emoji: "🚵‍♂️",
-    tags:  &["man mountain biking","mountain biking man"]
-}
-,EmojiData {
-    emoji: "🚵‍♀️",
-    tags:  &["woman mountain biking","mountain biking woman"]
-}
-,EmojiData {
-    emoji: "🤸",
-    tags:  &["person cartwheeling","cartwheeling"]
-}
-,EmojiData {
-    emoji: "🤸‍♂️",
-    tags:  &["man cartwheeling"]
-}
-,EmojiData {
-    emoji: "🤸‍♀️",
-    tags:  &["woman cartwheeling"]
-}
-,EmojiData {
-    emoji: "🤼",
-    tags:  &["people wrestling","wrestling"]
-}
-,EmojiData {
-    emoji: "🤼‍♂️",
-    tags:  &["men wrestling"]
-}
-,EmojiData {
-    emoji: "🤼‍♀️",
-    tags:  &["women wrestling"]
-}
-,EmojiData {
-    emoji: "🤽",
-    tags:  &["person playing water polo","water polo"]
-}
-,EmojiData {
-    emoji: "🤽‍♂️",
-    tags:  &["man playing water polo"]
-}
-,EmojiData {
-    emoji: "🤽‍♀️",
-    tags:  &["woman playing water polo"]
-}
-,EmojiData {
-    emoji: "🤾",
-    tags:  &["person playing handball","handball person"]
-}
-,EmojiData {
-    emoji: "🤾‍♂️",
-    tags:  &["man playing handball"]
-}
-,EmojiData {
-    emoji: "🤾‍♀️",
-    tags:  &["woman playing handball"]
-}
-,EmojiData {
-    emoji: "🤹",
-    tags:  &["person juggling","juggling person"]
-}
-,EmojiData {
-    emoji: "🤹‍♂️",
-    tags:  &["man juggling"]
-}
-,EmojiData {
-    emoji: "🤹‍♀️",
-    tags:  &["woman juggling"]
-}
-,EmojiData {
-    emoji: "🧘",
-    tags:  &["person in lotus position","meditation","lotus position"]
-}
-,EmojiData {
-    emoji: "🧘‍♂️",
-    tags:  &["man in lotus position","meditation","lotus position man"]
-}
-,EmojiData {
-    emoji: "🧘‍♀️",
-    tags:  &["woman in lotus position","meditation","lotus position woman"]
-}
-,EmojiData {
-    emoji: "🛀",
-    tags:  &["person taking bath","shower","bath"]
-}
-,EmojiData {
-    emoji: "🛌",
-    tags:  &["person in bed","sleeping bed"]
-}
-,EmojiData {
-    emoji: "🧑‍🤝‍🧑",
-    tags:  &["people holding hands","couple","date"]
-}
-,EmojiData {
-    emoji: "👭",
-    tags:  &["women holding hands","couple","date","two women holding hands"]
-}
-,EmojiData {
-    emoji: "👫",
-    tags:  &["woman and man holding hands","date","couple"]
-}
-,EmojiData {
-    emoji: "👬",
-    tags:  &["men holding hands","couple","date","two men holding hands"]
-}
-,EmojiData {
-    emoji: "💏",
-    tags:  &["kiss","couplekiss"]
-}
-,EmojiData {
-    emoji: "👩‍❤️‍💋‍👨",
-    tags:  &["kiss: woman, man","couplekiss man woman"]
-}
-,EmojiData {
-    emoji: "👨‍❤️‍💋‍👨",
-    tags:  &["kiss: man, man","couplekiss man man"]
-}
-,EmojiData {
-    emoji: "👩‍❤️‍💋‍👩",
-    tags:  &["kiss: woman, woman","couplekiss woman woman"]
-}
-,EmojiData {
-    emoji: "💑",
-    tags:  &["couple with heart"]
-}
-,EmojiData {
-    emoji: "👩‍❤️‍👨",
-    tags:  &["couple with heart: woman, man","couple with heart woman man"]
-}
-,EmojiData {
-    emoji: "👨‍❤️‍👨",
-    tags:  &["couple with heart: man, man","couple with heart man man"]
-}
-,EmojiData {
-    emoji: "👩‍❤️‍👩",
-    tags:  &["couple with heart: woman, woman","couple with heart woman woman"]
-}
-,EmojiData {
-    emoji: "👪",
-    tags:  &["family","home","parents","child"]
-}
-,EmojiData {
-    emoji: "👨‍👩‍👦",
-    tags:  &["family: man, woman, boy","family man woman boy"]
-}
-,EmojiData {
-    emoji: "👨‍👩‍👧",
-    tags:  &["family: man, woman, girl","family man woman girl"]
-}
-,EmojiData {
-    emoji: "👨‍👩‍👧‍👦",
-    tags:  &["family: man, woman, girl, boy","family man woman girl boy"]
-}
-,EmojiData {
-    emoji: "👨‍👩‍👦‍👦",
-    tags:  &["family: man, woman, boy, boy","family man woman boy boy"]
-}
-,EmojiData {
-    emoji: "👨‍👩‍👧‍👧",
-    tags:  &["family: man, woman, girl, girl","family man woman girl girl"]
-}
-,EmojiData {
-    emoji: "👨‍👨‍👦",
-    tags:  &["family: man, man, boy","family man man boy"]
-}
-,EmojiData {
-    emoji: "👨‍👨‍👧",
-    tags:  &["family: man, man, girl","family man man girl"]
-}
-,EmojiData {
-    emoji: "👨‍👨‍👧‍👦",
-    tags:  &["family: man, man, girl, boy","family man man girl boy"]
-}
-,EmojiData {
-    emoji: "👨‍👨‍👦‍👦",
-    tags:  &["family: man, man, boy, boy","family man man boy boy"]
-}
-,EmojiData {
-    emoji: "👨‍👨‍👧‍👧",
-    tags:  &["family: man, man, girl, girl","family man man girl girl"]
-}
-,EmojiData {
-    emoji: "👩‍👩‍👦",
-    tags:  &["family: woman, woman, boy","family woman woman boy"]
-}
-,EmojiData {
-    emoji: "👩‍👩‍👧",
-    tags:  &["family: woman, woman, girl","family woman woman girl"]
-}
-,EmojiData {
-    emoji: "👩‍👩‍👧‍👦",
-    tags:  &["family: woman, woman, girl, boy","family woman woman girl boy"]
-}
-,EmojiData {
-    emoji: "👩‍👩‍👦‍👦",
-    tags:  &["family: woman, woman, boy, boy","family woman woman boy boy"]
-}
-,EmojiData {
-    emoji: "👩‍👩‍👧‍👧",
-    tags:  &["family: woman, woman, girl, girl","family woman woman girl girl"]
-}
-,EmojiData {
-    emoji: "👨‍👦",
-    tags:  &["family: man, boy","family man boy"]
-}
-,EmojiData {
-    emoji: "👨‍👦‍👦",
-    tags:  &["family: man, boy, boy","family man boy boy"]
-}
-,EmojiData {
-    emoji: "👨‍👧",
-    tags:  &["family: man, girl","family man girl"]
-}
-,EmojiData {
-    emoji: "👨‍👧‍👦",
-    tags:  &["family: man, girl, boy","family man girl boy"]
-}
-,EmojiData {
-    emoji: "👨‍👧‍👧",
-    tags:  &["family: man, girl, girl","family man girl girl"]
-}
-,EmojiData {
-    emoji: "👩‍👦",
-    tags:  &["family: woman, boy","family woman boy"]
-}
-,EmojiData {
-    emoji: "👩‍👦‍👦",
-    tags:  &["family: woman, boy, boy","family woman boy boy"]
-}
-,EmojiData {
-    emoji: "👩‍👧",
-    tags:  &["family: woman, girl","family woman girl"]
-}
-,EmojiData {
-    emoji: "👩‍👧‍👦",
-    tags:  &["family: woman, girl, boy","family woman girl boy"]
-}
-,EmojiData {
-    emoji: "👩‍👧‍👧",
-    tags:  &["family: woman, girl, girl","family woman girl girl"]
-}
-,EmojiData {
-    emoji: "🗣️",
-    tags:  &["speaking head"]
-}
-,EmojiData {
-    emoji: "👤",
-    tags:  &["bust in silhouette","user"]
-}
-,EmojiData {
-    emoji: "👥",
-    tags:  &["busts in silhouette","users","group","team"]
-}
-,EmojiData {
-    emoji: "👣",
-    tags:  &["footprints","feet","tracks"]
-}
-,EmojiData {
-    emoji: "🐵",
-    tags:  &["monkey face"]
-}
-,EmojiData {
-    emoji: "🐒",
-    tags:  &["monkey"]
-}
-,EmojiData {
-    emoji: "🦍",
-    tags:  &["gorilla"]
-}
-,EmojiData {
-    emoji: "🦧",
-    tags:  &["orangutan"]
-}
-,EmojiData {
-    emoji: "🐶",
-    tags:  &["dog face","pet","dog"]
-}
-,EmojiData {
-    emoji: "🐕",
-    tags:  &["dog","dog2"]
-}
-,EmojiData {
-    emoji: "🦮",
-    tags:  &["guide dog"]
-}
-,EmojiData {
-    emoji: "🐕‍🦺",
-    tags:  &["service dog"]
-}
-,EmojiData {
-    emoji: "🐩",
-    tags:  &["poodle","dog"]
-}
-,EmojiData {
-    emoji: "🐺",
-    tags:  &["wolf"]
-}
-,EmojiData {
-    emoji: "🦊",
-    tags:  &["fox","fox face"]
-}
-,EmojiData {
-    emoji: "🦝",
-    tags:  &["raccoon"]
-}
-,EmojiData {
-    emoji: "🐱",
-    tags:  &["cat face","pet","cat"]
-}
-,EmojiData {
-    emoji: "🐈",
-    tags:  &["cat","cat2"]
-}
-,EmojiData {
-    emoji: "🦁",
-    tags:  &["lion"]
-}
-,EmojiData {
-    emoji: "🐯",
-    tags:  &["tiger face","tiger"]
-}
-,EmojiData {
-    emoji: "🐅",
-    tags:  &["tiger","tiger2"]
-}
-,EmojiData {
-    emoji: "🐆",
-    tags:  &["leopard"]
-}
-,EmojiData {
-    emoji: "🐴",
-    tags:  &["horse face","horse"]
-}
-,EmojiData {
-    emoji: "🐎",
-    tags:  &["horse","speed","racehorse"]
-}
-,EmojiData {
-    emoji: "🦄",
-    tags:  &["unicorn"]
-}
-,EmojiData {
-    emoji: "🦓",
-    tags:  &["zebra"]
-}
-,EmojiData {
-    emoji: "🦌",
-    tags:  &["deer"]
-}
-,EmojiData {
-    emoji: "🐮",
-    tags:  &["cow face","cow"]
-}
-,EmojiData {
-    emoji: "🐂",
-    tags:  &["ox"]
-}
-,EmojiData {
-    emoji: "🐃",
-    tags:  &["water buffalo"]
-}
-,EmojiData {
-    emoji: "🐄",
-    tags:  &["cow","cow2"]
-}
-,EmojiData {
-    emoji: "🐷",
-    tags:  &["pig face","pig"]
-}
-,EmojiData {
-    emoji: "🐖",
-    tags:  &["pig","pig2"]
-}
-,EmojiData {
-    emoji: "🐗",
-    tags:  &["boar"]
-}
-,EmojiData {
-    emoji: "🐽",
-    tags:  &["pig nose"]
-}
-,EmojiData {
-    emoji: "🐏",
-    tags:  &["ram"]
-}
-,EmojiData {
-    emoji: "🐑",
-    tags:  &["ewe","sheep"]
-}
-,EmojiData {
-    emoji: "🐐",
-    tags:  &["goat"]
-}
-,EmojiData {
-    emoji: "🐪",
-    tags:  &["camel","desert","dromedary camel"]
-}
-,EmojiData {
-    emoji: "🐫",
-    tags:  &["two-hump camel","camel"]
-}
-,EmojiData {
-    emoji: "🦙",
-    tags:  &["llama"]
-}
-,EmojiData {
-    emoji: "🦒",
-    tags:  &["giraffe"]
-}
-,EmojiData {
-    emoji: "🐘",
-    tags:  &["elephant"]
-}
-,EmojiData {
-    emoji: "🦏",
-    tags:  &["rhinoceros"]
-}
-,EmojiData {
-    emoji: "🦛",
-    tags:  &["hippopotamus"]
-}
-,EmojiData {
-    emoji: "🐭",
-    tags:  &["mouse face","mouse"]
-}
-,EmojiData {
-    emoji: "🐁",
-    tags:  &["mouse","mouse2"]
-}
-,EmojiData {
-    emoji: "🐀",
-    tags:  &["rat"]
-}
-,EmojiData {
-    emoji: "🐹",
-    tags:  &["hamster","pet"]
-}
-,EmojiData {
-    emoji: "🐰",
-    tags:  &["rabbit face","bunny","rabbit"]
-}
-,EmojiData {
-    emoji: "🐇",
-    tags:  &["rabbit","rabbit2"]
-}
-,EmojiData {
-    emoji: "🐿️",
-    tags:  &["chipmunk"]
-}
-,EmojiData {
-    emoji: "🦔",
-    tags:  &["hedgehog"]
-}
-,EmojiData {
-    emoji: "🦇",
-    tags:  &["bat"]
-}
-,EmojiData {
-    emoji: "🐻",
-    tags:  &["bear"]
-}
-,EmojiData {
-    emoji: "🐨",
-    tags:  &["koala"]
-}
-,EmojiData {
-    emoji: "🐼",
-    tags:  &["panda","panda face"]
-}
-,EmojiData {
-    emoji: "🦥",
-    tags:  &["sloth"]
-}
-,EmojiData {
-    emoji: "🦦",
-    tags:  &["otter"]
-}
-,EmojiData {
-    emoji: "🦨",
-    tags:  &["skunk"]
-}
-,EmojiData {
-    emoji: "🦘",
-    tags:  &["kangaroo"]
-}
-,EmojiData {
-    emoji: "🦡",
-    tags:  &["badger"]
-}
-,EmojiData {
-    emoji: "🐾",
-    tags:  &["paw prints","feet"]
-}
-,EmojiData {
-    emoji: "🦃",
-    tags:  &["turkey","thanksgiving"]
-}
-,EmojiData {
-    emoji: "🐔",
-    tags:  &["chicken"]
-}
-,EmojiData {
-    emoji: "🐓",
-    tags:  &["rooster"]
-}
-,EmojiData {
-    emoji: "🐣",
-    tags:  &["hatching chick"]
-}
-,EmojiData {
-    emoji: "🐤",
-    tags:  &["baby chick"]
-}
-,EmojiData {
-    emoji: "🐥",
-    tags:  &["front-facing baby chick","hatched chick"]
-}
-,EmojiData {
-    emoji: "🐦",
-    tags:  &["bird"]
-}
-,EmojiData {
-    emoji: "🐧",
-    tags:  &["penguin"]
-}
-,EmojiData {
-    emoji: "🕊️",
-    tags:  &["dove","peace"]
-}
-,EmojiData {
-    emoji: "🦅",
-    tags:  &["eagle"]
-}
-,EmojiData {
-    emoji: "🦆",
-    tags:  &["duck"]
-}
-,EmojiData {
-    emoji: "🦢",
-    tags:  &["swan"]
-}
-,EmojiData {
-    emoji: "🦉",
-    tags:  &["owl"]
-}
-,EmojiData {
-    emoji: "🦩",
-    tags:  &["flamingo"]
-}
-,EmojiData {
-    emoji: "🦚",
-    tags:  &["peacock"]
-}
-,EmojiData {
-    emoji: "🦜",
-    tags:  &["parrot"]
-}
-,EmojiData {
-    emoji: "🐸",
-    tags:  &["frog"]
-}
-,EmojiData {
-    emoji: "🐊",
-    tags:  &["crocodile"]
-}
-,EmojiData {
-    emoji: "🐢",
-    tags:  &["turtle","slow"]
-}
-,EmojiData {
-    emoji: "🦎",
-    tags:  &["lizard"]
-}
-,EmojiData {
-    emoji: "🐍",
-    tags:  &["snake"]
-}
-,EmojiData {
-    emoji: "🐲",
-    tags:  &["dragon face"]
-}
-,EmojiData {
-    emoji: "🐉",
-    tags:  &["dragon"]
-}
-,EmojiData {
-    emoji: "🦕",
-    tags:  &["sauropod","dinosaur"]
-}
-,EmojiData {
-    emoji: "🦖",
-    tags:  &["T-Rex","dinosaur","t-rex"]
-}
-,EmojiData {
-    emoji: "🐳",
-    tags:  &["spouting whale","sea","whale"]
-}
-,EmojiData {
-    emoji: "🐋",
-    tags:  &["whale","whale2"]
-}
-,EmojiData {
-    emoji: "🐬",
-    tags:  &["dolphin","flipper"]
-}
-,EmojiData {
-    emoji: "🐟",
-    tags:  &["fish"]
-}
-,EmojiData {
-    emoji: "🐠",
-    tags:  &["tropical fish"]
-}
-,EmojiData {
-    emoji: "🐡",
-    tags:  &["blowfish"]
-}
-,EmojiData {
-    emoji: "🦈",
-    tags:  &["shark"]
-}
-,EmojiData {
-    emoji: "🐙",
-    tags:  &["octopus"]
-}
-,EmojiData {
-    emoji: "🐚",
-    tags:  &["spiral shell","sea","beach","shell"]
-}
-,EmojiData {
-    emoji: "🐌",
-    tags:  &["snail","slow"]
-}
-,EmojiData {
-    emoji: "🦋",
-    tags:  &["butterfly"]
-}
-,EmojiData {
-    emoji: "🐛",
-    tags:  &["bug"]
-}
-,EmojiData {
-    emoji: "🐜",
-    tags:  &["ant"]
-}
-,EmojiData {
-    emoji: "🐝",
-    tags:  &["honeybee","bee"]
-}
-,EmojiData {
-    emoji: "🐞",
-    tags:  &["lady beetle","bug","beetle"]
-}
-,EmojiData {
-    emoji: "🦗",
-    tags:  &["cricket"]
-}
-,EmojiData {
-    emoji: "🕷️",
-    tags:  &["spider"]
-}
-,EmojiData {
-    emoji: "🕸️",
-    tags:  &["spider web"]
-}
-,EmojiData {
-    emoji: "🦂",
-    tags:  &["scorpion"]
-}
-,EmojiData {
-    emoji: "🦟",
-    tags:  &["mosquito"]
-}
-,EmojiData {
-    emoji: "🦠",
-    tags:  &["microbe","germ"]
-}
-,EmojiData {
-    emoji: "💐",
-    tags:  &["bouquet","flowers"]
-}
-,EmojiData {
-    emoji: "🌸",
-    tags:  &["cherry blossom","flower","spring"]
-}
-,EmojiData {
-    emoji: "💮",
-    tags:  &["white flower"]
-}
-,EmojiData {
-    emoji: "🏵️",
-    tags:  &["rosette"]
-}
-,EmojiData {
-    emoji: "🌹",
-    tags:  &["rose","flower"]
-}
-,EmojiData {
-    emoji: "🥀",
-    tags:  &["wilted flower"]
-}
-,EmojiData {
-    emoji: "🌺",
-    tags:  &["hibiscus"]
-}
-,EmojiData {
-    emoji: "🌻",
-    tags:  &["sunflower"]
-}
-,EmojiData {
-    emoji: "🌼",
-    tags:  &["blossom"]
-}
-,EmojiData {
-    emoji: "🌷",
-    tags:  &["tulip","flower"]
-}
-,EmojiData {
-    emoji: "🌱",
-    tags:  &["seedling","plant"]
-}
-,EmojiData {
-    emoji: "🌲",
-    tags:  &["evergreen tree","wood"]
-}
-,EmojiData {
-    emoji: "🌳",
-    tags:  &["deciduous tree","wood"]
-}
-,EmojiData {
-    emoji: "🌴",
-    tags:  &["palm tree"]
-}
-,EmojiData {
-    emoji: "🌵",
-    tags:  &["cactus"]
-}
-,EmojiData {
-    emoji: "🌾",
-    tags:  &["sheaf of rice","ear of rice"]
-}
-,EmojiData {
-    emoji: "🌿",
-    tags:  &["herb"]
-}
-,EmojiData {
-    emoji: "☘️",
-    tags:  &["shamrock"]
-}
-,EmojiData {
-    emoji: "🍀",
-    tags:  &["four leaf clover","luck"]
-}
-,EmojiData {
-    emoji: "🍁",
-    tags:  &["maple leaf","canada"]
-}
-,EmojiData {
-    emoji: "🍂",
-    tags:  &["fallen leaf","autumn"]
-}
-,EmojiData {
-    emoji: "🍃",
-    tags:  &["leaf fluttering in wind","leaf","leaves"]
-}
-,EmojiData {
-    emoji: "🍇",
-    tags:  &["grapes"]
-}
-,EmojiData {
-    emoji: "🍈",
-    tags:  &["melon"]
-}
-,EmojiData {
-    emoji: "🍉",
-    tags:  &["watermelon"]
-}
-,EmojiData {
-    emoji: "🍊",
-    tags:  &["tangerine","orange","mandarin"]
-}
-,EmojiData {
-    emoji: "🍋",
-    tags:  &["lemon"]
-}
-,EmojiData {
-    emoji: "🍌",
-    tags:  &["banana","fruit"]
-}
-,EmojiData {
-    emoji: "🍍",
-    tags:  &["pineapple"]
-}
-,EmojiData {
-    emoji: "🥭",
-    tags:  &["mango"]
-}
-,EmojiData {
-    emoji: "🍎",
-    tags:  &["red apple","apple"]
-}
-,EmojiData {
-    emoji: "🍏",
-    tags:  &["green apple","fruit"]
-}
-,EmojiData {
-    emoji: "🍐",
-    tags:  &["pear"]
-}
-,EmojiData {
-    emoji: "🍑",
-    tags:  &["peach"]
-}
-,EmojiData {
-    emoji: "🍒",
-    tags:  &["cherries","fruit"]
-}
-,EmojiData {
-    emoji: "🍓",
-    tags:  &["strawberry","fruit"]
-}
-,EmojiData {
-    emoji: "🥝",
-    tags:  &["kiwi fruit"]
-}
-,EmojiData {
-    emoji: "🍅",
-    tags:  &["tomato"]
-}
-,EmojiData {
-    emoji: "🥥",
-    tags:  &["coconut"]
-}
-,EmojiData {
-    emoji: "🥑",
-    tags:  &["avocado"]
-}
-,EmojiData {
-    emoji: "🍆",
-    tags:  &["eggplant","aubergine"]
-}
-,EmojiData {
-    emoji: "🥔",
-    tags:  &["potato"]
-}
-,EmojiData {
-    emoji: "🥕",
-    tags:  &["carrot"]
-}
-,EmojiData {
-    emoji: "🌽",
-    tags:  &["ear of corn","corn"]
-}
-,EmojiData {
-    emoji: "🌶️",
-    tags:  &["hot pepper","spicy"]
-}
-,EmojiData {
-    emoji: "🥒",
-    tags:  &["cucumber"]
-}
-,EmojiData {
-    emoji: "🥬",
-    tags:  &["leafy green"]
-}
-,EmojiData {
-    emoji: "🥦",
-    tags:  &["broccoli"]
-}
-,EmojiData {
-    emoji: "🧄",
-    tags:  &["garlic"]
-}
-,EmojiData {
-    emoji: "🧅",
-    tags:  &["onion"]
-}
-,EmojiData {
-    emoji: "🍄",
-    tags:  &["mushroom"]
-}
-,EmojiData {
-    emoji: "🥜",
-    tags:  &["peanuts"]
-}
-,EmojiData {
-    emoji: "🌰",
-    tags:  &["chestnut"]
-}
-,EmojiData {
-    emoji: "🍞",
-    tags:  &["bread","toast"]
-}
-,EmojiData {
-    emoji: "🥐",
-    tags:  &["croissant"]
-}
-,EmojiData {
-    emoji: "🥖",
-    tags:  &["baguette bread"]
-}
-,EmojiData {
-    emoji: "🥨",
-    tags:  &["pretzel"]
-}
-,EmojiData {
-    emoji: "🥯",
-    tags:  &["bagel"]
-}
-,EmojiData {
-    emoji: "🥞",
-    tags:  &["pancakes"]
-}
-,EmojiData {
-    emoji: "🧇",
-    tags:  &["waffle"]
-}
-,EmojiData {
-    emoji: "🧀",
-    tags:  &["cheese wedge","cheese"]
-}
-,EmojiData {
-    emoji: "🍖",
-    tags:  &["meat on bone"]
-}
-,EmojiData {
-    emoji: "🍗",
-    tags:  &["poultry leg","meat","chicken"]
-}
-,EmojiData {
-    emoji: "🥩",
-    tags:  &["cut of meat"]
-}
-,EmojiData {
-    emoji: "🥓",
-    tags:  &["bacon"]
-}
-,EmojiData {
-    emoji: "🍔",
-    tags:  &["hamburger","burger"]
-}
-,EmojiData {
-    emoji: "🍟",
-    tags:  &["french fries","fries"]
-}
-,EmojiData {
-    emoji: "🍕",
-    tags:  &["pizza"]
-}
-,EmojiData {
-    emoji: "🌭",
-    tags:  &["hot dog","hotdog"]
-}
-,EmojiData {
-    emoji: "🥪",
-    tags:  &["sandwich"]
-}
-,EmojiData {
-    emoji: "🌮",
-    tags:  &["taco"]
-}
-,EmojiData {
-    emoji: "🌯",
-    tags:  &["burrito"]
-}
-,EmojiData {
-    emoji: "🥙",
-    tags:  &["stuffed flatbread"]
-}
-,EmojiData {
-    emoji: "🧆",
-    tags:  &["falafel"]
-}
-,EmojiData {
-    emoji: "🥚",
-    tags:  &["egg"]
-}
-,EmojiData {
-    emoji: "🍳",
-    tags:  &["cooking","breakfast","fried egg"]
-}
-,EmojiData {
-    emoji: "🥘",
-    tags:  &["shallow pan of food","paella","curry"]
-}
-,EmojiData {
-    emoji: "🍲",
-    tags:  &["pot of food","stew"]
-}
-,EmojiData {
-    emoji: "🥣",
-    tags:  &["bowl with spoon"]
-}
-,EmojiData {
-    emoji: "🥗",
-    tags:  &["green salad"]
-}
-,EmojiData {
-    emoji: "🍿",
-    tags:  &["popcorn"]
-}
-,EmojiData {
-    emoji: "🧈",
-    tags:  &["butter"]
-}
-,EmojiData {
-    emoji: "🧂",
-    tags:  &["salt"]
-}
-,EmojiData {
-    emoji: "🥫",
-    tags:  &["canned food"]
-}
-,EmojiData {
-    emoji: "🍱",
-    tags:  &["bento box","bento"]
-}
-,EmojiData {
-    emoji: "🍘",
-    tags:  &["rice cracker"]
-}
-,EmojiData {
-    emoji: "🍙",
-    tags:  &["rice ball"]
-}
-,EmojiData {
-    emoji: "🍚",
-    tags:  &["cooked rice","rice"]
-}
-,EmojiData {
-    emoji: "🍛",
-    tags:  &["curry rice","curry"]
-}
-,EmojiData {
-    emoji: "🍜",
-    tags:  &["steaming bowl","noodle","ramen"]
-}
-,EmojiData {
-    emoji: "🍝",
-    tags:  &["spaghetti","pasta"]
-}
-,EmojiData {
-    emoji: "🍠",
-    tags:  &["roasted sweet potato","sweet potato"]
-}
-,EmojiData {
-    emoji: "🍢",
-    tags:  &["oden"]
-}
-,EmojiData {
-    emoji: "🍣",
-    tags:  &["sushi"]
-}
-,EmojiData {
-    emoji: "🍤",
-    tags:  &["fried shrimp","tempura"]
-}
-,EmojiData {
-    emoji: "🍥",
-    tags:  &["fish cake with swirl","fish cake"]
-}
-,EmojiData {
-    emoji: "🥮",
-    tags:  &["moon cake"]
-}
-,EmojiData {
-    emoji: "🍡",
-    tags:  &["dango"]
-}
-,EmojiData {
-    emoji: "🥟",
-    tags:  &["dumpling"]
-}
-,EmojiData {
-    emoji: "🥠",
-    tags:  &["fortune cookie"]
-}
-,EmojiData {
-    emoji: "🥡",
-    tags:  &["takeout box"]
-}
-,EmojiData {
-    emoji: "🦀",
-    tags:  &["crab"]
-}
-,EmojiData {
-    emoji: "🦞",
-    tags:  &["lobster"]
-}
-,EmojiData {
-    emoji: "🦐",
-    tags:  &["shrimp"]
-}
-,EmojiData {
-    emoji: "🦑",
-    tags:  &["squid"]
-}
-,EmojiData {
-    emoji: "🦪",
-    tags:  &["oyster"]
-}
-,EmojiData {
-    emoji: "🍦",
-    tags:  &["soft ice cream","icecream"]
-}
-,EmojiData {
-    emoji: "🍧",
-    tags:  &["shaved ice"]
-}
-,EmojiData {
-    emoji: "🍨",
-    tags:  &["ice cream"]
-}
-,EmojiData {
-    emoji: "🍩",
-    tags:  &["doughnut"]
-}
-,EmojiData {
-    emoji: "🍪",
-    tags:  &["cookie"]
-}
-,EmojiData {
-    emoji: "🎂",
-    tags:  &["birthday cake","party","birthday"]
-}
-,EmojiData {
-    emoji: "🍰",
-    tags:  &["shortcake","dessert","cake"]
-}
-,EmojiData {
-    emoji: "🧁",
-    tags:  &["cupcake"]
-}
-,EmojiData {
-    emoji: "🥧",
-    tags:  &["pie"]
-}
-,EmojiData {
-    emoji: "🍫",
-    tags:  &["chocolate bar"]
-}
-,EmojiData {
-    emoji: "🍬",
-    tags:  &["candy","sweet"]
-}
-,EmojiData {
-    emoji: "🍭",
-    tags:  &["lollipop"]
-}
-,EmojiData {
-    emoji: "🍮",
-    tags:  &["custard"]
-}
-,EmojiData {
-    emoji: "🍯",
-    tags:  &["honey pot"]
-}
-,EmojiData {
-    emoji: "🍼",
-    tags:  &["baby bottle","milk"]
-}
-,EmojiData {
-    emoji: "🥛",
-    tags:  &["glass of milk","milk glass"]
-}
-,EmojiData {
-    emoji: "☕",
-    tags:  &["hot beverage","cafe","espresso","coffee"]
-}
-,EmojiData {
-    emoji: "🍵",
-    tags:  &["teacup without handle","green","breakfast","tea"]
-}
-,EmojiData {
-    emoji: "🍶",
-    tags:  &["sake"]
-}
-,EmojiData {
-    emoji: "🍾",
-    tags:  &["bottle with popping cork","bottle","bubbly","celebration","champagne"]
-}
-,EmojiData {
-    emoji: "🍷",
-    tags:  &["wine glass"]
-}
-,EmojiData {
-    emoji: "🍸",
-    tags:  &["cocktail glass","drink","cocktail"]
-}
-,EmojiData {
-    emoji: "🍹",
-    tags:  &["tropical drink","summer","vacation"]
-}
-,EmojiData {
-    emoji: "🍺",
-    tags:  &["beer mug","drink","beer"]
-}
-,EmojiData {
-    emoji: "🍻",
-    tags:  &["clinking beer mugs","drinks","beers"]
-}
-,EmojiData {
-    emoji: "🥂",
-    tags:  &["clinking glasses","cheers","toast"]
-}
-,EmojiData {
-    emoji: "🥃",
-    tags:  &["tumbler glass","whisky"]
-}
-,EmojiData {
-    emoji: "🥤",
-    tags:  &["cup with straw"]
-}
-,EmojiData {
-    emoji: "🧃",
-    tags:  &["beverage box"]
-}
-,EmojiData {
-    emoji: "🧉",
-    tags:  &["mate"]
-}
-,EmojiData {
-    emoji: "🧊",
-    tags:  &["ice","ice cube"]
-}
-,EmojiData {
-    emoji: "🥢",
-    tags:  &["chopsticks"]
-}
-,EmojiData {
-    emoji: "🍽️",
-    tags:  &["fork and knife with plate","dining","dinner","plate with cutlery"]
-}
-,EmojiData {
-    emoji: "🍴",
-    tags:  &["fork and knife","cutlery"]
-}
-,EmojiData {
-    emoji: "🥄",
-    tags:  &["spoon"]
-}
-,EmojiData {
-    emoji: "🔪",
-    tags:  &["kitchen knife","cut","chop","hocho","knife"]
-}
-,EmojiData {
-    emoji: "🏺",
-    tags:  &["amphora"]
-}
-,EmojiData {
-    emoji: "🌍",
-    tags:  &["globe showing Europe-Africa","globe","world","international","earth africa"]
-}
-,EmojiData {
-    emoji: "🌎",
-    tags:  &["globe showing Americas","globe","world","international","earth americas"]
-}
-,EmojiData {
-    emoji: "🌏",
-    tags:  &["globe showing Asia-Australia","globe","world","international","earth asia"]
-}
-,EmojiData {
-    emoji: "🌐",
-    tags:  &["globe with meridians","world","global","international"]
-}
-,EmojiData {
-    emoji: "🗺️",
-    tags:  &["world map","travel"]
-}
-,EmojiData {
-    emoji: "🗾",
-    tags:  &["map of Japan","japan"]
-}
-,EmojiData {
-    emoji: "🧭",
-    tags:  &["compass"]
-}
-,EmojiData {
-    emoji: "🏔️",
-    tags:  &["snow-capped mountain","mountain snow"]
-}
-,EmojiData {
-    emoji: "⛰️",
-    tags:  &["mountain"]
-}
-,EmojiData {
-    emoji: "🌋",
-    tags:  &["volcano"]
-}
-,EmojiData {
-    emoji: "🗻",
-    tags:  &["mount fuji"]
-}
-,EmojiData {
-    emoji: "🏕️",
-    tags:  &["camping"]
-}
-,EmojiData {
-    emoji: "🏖️",
-    tags:  &["beach with umbrella","beach umbrella"]
-}
-,EmojiData {
-    emoji: "🏜️",
-    tags:  &["desert"]
-}
-,EmojiData {
-    emoji: "🏝️",
-    tags:  &["desert island"]
-}
-,EmojiData {
-    emoji: "🏞️",
-    tags:  &["national park"]
-}
-,EmojiData {
-    emoji: "🏟️",
-    tags:  &["stadium"]
-}
-,EmojiData {
-    emoji: "🏛️",
-    tags:  &["classical building"]
-}
-,EmojiData {
-    emoji: "🏗️",
-    tags:  &["building construction"]
-}
-,EmojiData {
-    emoji: "🧱",
-    tags:  &["brick","bricks"]
-}
-,EmojiData {
-    emoji: "🏘️",
-    tags:  &["houses"]
-}
-,EmojiData {
-    emoji: "🏚️",
-    tags:  &["derelict house"]
-}
-,EmojiData {
-    emoji: "🏠",
-    tags:  &["house"]
-}
-,EmojiData {
-    emoji: "🏡",
-    tags:  &["house with garden"]
-}
-,EmojiData {
-    emoji: "🏢",
-    tags:  &["office building","office"]
-}
-,EmojiData {
-    emoji: "🏣",
-    tags:  &["Japanese post office","post office"]
-}
-,EmojiData {
-    emoji: "🏤",
-    tags:  &["post office","european post office"]
-}
-,EmojiData {
-    emoji: "🏥",
-    tags:  &["hospital"]
-}
-,EmojiData {
-    emoji: "🏦",
-    tags:  &["bank"]
-}
-,EmojiData {
-    emoji: "🏨",
-    tags:  &["hotel"]
-}
-,EmojiData {
-    emoji: "🏩",
-    tags:  &["love hotel"]
-}
-,EmojiData {
-    emoji: "🏪",
-    tags:  &["convenience store"]
-}
-,EmojiData {
-    emoji: "🏫",
-    tags:  &["school"]
-}
-,EmojiData {
-    emoji: "🏬",
-    tags:  &["department store"]
-}
-,EmojiData {
-    emoji: "🏭",
-    tags:  &["factory"]
-}
-,EmojiData {
-    emoji: "🏯",
-    tags:  &["Japanese castle","japanese castle"]
-}
-,EmojiData {
-    emoji: "🏰",
-    tags:  &["castle","european castle"]
-}
-,EmojiData {
-    emoji: "💒",
-    tags:  &["wedding","marriage"]
-}
-,EmojiData {
-    emoji: "🗼",
-    tags:  &["Tokyo tower","tokyo tower"]
-}
-,EmojiData {
-    emoji: "🗽",
-    tags:  &["Statue of Liberty","statue of liberty"]
-}
-,EmojiData {
-    emoji: "⛪",
-    tags:  &["church"]
-}
-,EmojiData {
-    emoji: "🕌",
-    tags:  &["mosque"]
-}
-,EmojiData {
-    emoji: "🛕",
-    tags:  &["hindu temple"]
-}
-,EmojiData {
-    emoji: "🕍",
-    tags:  &["synagogue"]
-}
-,EmojiData {
-    emoji: "⛩️",
-    tags:  &["shinto shrine"]
-}
-,EmojiData {
-    emoji: "🕋",
-    tags:  &["kaaba"]
-}
-,EmojiData {
-    emoji: "⛲",
-    tags:  &["fountain"]
-}
-,EmojiData {
-    emoji: "⛺",
-    tags:  &["tent","camping"]
-}
-,EmojiData {
-    emoji: "🌁",
-    tags:  &["foggy","karl"]
-}
-,EmojiData {
-    emoji: "🌃",
-    tags:  &["night with stars"]
-}
-,EmojiData {
-    emoji: "🏙️",
-    tags:  &["cityscape","skyline"]
-}
-,EmojiData {
-    emoji: "🌄",
-    tags:  &["sunrise over mountains"]
-}
-,EmojiData {
-    emoji: "🌅",
-    tags:  &["sunrise"]
-}
-,EmojiData {
-    emoji: "🌆",
-    tags:  &["cityscape at dusk","city sunset"]
-}
-,EmojiData {
-    emoji: "🌇",
-    tags:  &["sunset","city sunrise"]
-}
-,EmojiData {
-    emoji: "🌉",
-    tags:  &["bridge at night"]
-}
-,EmojiData {
-    emoji: "♨️",
-    tags:  &["hot springs","hotsprings"]
-}
-,EmojiData {
-    emoji: "🎠",
-    tags:  &["carousel horse"]
-}
-,EmojiData {
-    emoji: "🎡",
-    tags:  &["ferris wheel"]
-}
-,EmojiData {
-    emoji: "🎢",
-    tags:  &["roller coaster"]
-}
-,EmojiData {
-    emoji: "💈",
-    tags:  &["barber pole","barber"]
-}
-,EmojiData {
-    emoji: "🎪",
-    tags:  &["circus tent"]
-}
-,EmojiData {
-    emoji: "🚂",
-    tags:  &["locomotive","train","steam locomotive"]
-}
-,EmojiData {
-    emoji: "🚃",
-    tags:  &["railway car"]
-}
-,EmojiData {
-    emoji: "🚄",
-    tags:  &["high-speed train","train","bullettrain side"]
-}
-,EmojiData {
-    emoji: "🚅",
-    tags:  &["bullet train","train","bullettrain front"]
-}
-,EmojiData {
-    emoji: "🚆",
-    tags:  &["train","train2"]
-}
-,EmojiData {
-    emoji: "🚇",
-    tags:  &["metro"]
-}
-,EmojiData {
-    emoji: "🚈",
-    tags:  &["light rail"]
-}
-,EmojiData {
-    emoji: "🚉",
-    tags:  &["station"]
-}
-,EmojiData {
-    emoji: "🚊",
-    tags:  &["tram"]
-}
-,EmojiData {
-    emoji: "🚝",
-    tags:  &["monorail"]
-}
-,EmojiData {
-    emoji: "🚞",
-    tags:  &["mountain railway"]
-}
-,EmojiData {
-    emoji: "🚋",
-    tags:  &["tram car","train"]
-}
-,EmojiData {
-    emoji: "🚌",
-    tags:  &["bus"]
-}
-,EmojiData {
-    emoji: "🚍",
-    tags:  &["oncoming bus"]
-}
-,EmojiData {
-    emoji: "🚎",
-    tags:  &["trolleybus"]
-}
-,EmojiData {
-    emoji: "🚐",
-    tags:  &["minibus"]
-}
-,EmojiData {
-    emoji: "🚑",
-    tags:  &["ambulance"]
-}
-,EmojiData {
-    emoji: "🚒",
-    tags:  &["fire engine"]
-}
-,EmojiData {
-    emoji: "🚓",
-    tags:  &["police car"]
-}
-,EmojiData {
-    emoji: "🚔",
-    tags:  &["oncoming police car"]
-}
-,EmojiData {
-    emoji: "🚕",
-    tags:  &["taxi"]
-}
-,EmojiData {
-    emoji: "🚖",
-    tags:  &["oncoming taxi"]
-}
-,EmojiData {
-    emoji: "🚗",
-    tags:  &["automobile","car","red car"]
-}
-,EmojiData {
-    emoji: "🚘",
-    tags:  &["oncoming automobile"]
-}
-,EmojiData {
-    emoji: "🚙",
-    tags:  &["sport utility vehicle","blue car"]
-}
-,EmojiData {
-    emoji: "🚚",
-    tags:  &["delivery truck","truck"]
-}
-,EmojiData {
-    emoji: "🚛",
-    tags:  &["articulated lorry"]
-}
-,EmojiData {
-    emoji: "🚜",
-    tags:  &["tractor"]
-}
-,EmojiData {
-    emoji: "🏎️",
-    tags:  &["racing car"]
-}
-,EmojiData {
-    emoji: "🏍️",
-    tags:  &["motorcycle"]
-}
-,EmojiData {
-    emoji: "🛵",
-    tags:  &["motor scooter"]
-}
-,EmojiData {
-    emoji: "🦽",
-    tags:  &["manual wheelchair"]
-}
-,EmojiData {
-    emoji: "🦼",
-    tags:  &["motorized wheelchair"]
-}
-,EmojiData {
-    emoji: "🛺",
-    tags:  &["auto rickshaw"]
-}
-,EmojiData {
-    emoji: "🚲",
-    tags:  &["bicycle","bike"]
-}
-,EmojiData {
-    emoji: "🛴",
-    tags:  &["kick scooter"]
-}
-,EmojiData {
-    emoji: "🛹",
-    tags:  &["skateboard"]
-}
-,EmojiData {
-    emoji: "🚏",
-    tags:  &["bus stop","busstop"]
-}
-,EmojiData {
-    emoji: "🛣️",
-    tags:  &["motorway"]
-}
-,EmojiData {
-    emoji: "🛤️",
-    tags:  &["railway track"]
-}
-,EmojiData {
-    emoji: "🛢️",
-    tags:  &["oil drum"]
-}
-,EmojiData {
-    emoji: "⛽",
-    tags:  &["fuel pump","fuelpump"]
-}
-,EmojiData {
-    emoji: "🚨",
-    tags:  &["police car light","911","emergency","rotating light"]
-}
-,EmojiData {
-    emoji: "🚥",
-    tags:  &["horizontal traffic light","traffic light"]
-}
-,EmojiData {
-    emoji: "🚦",
-    tags:  &["vertical traffic light","semaphore"]
-}
-,EmojiData {
-    emoji: "🛑",
-    tags:  &["stop sign"]
-}
-,EmojiData {
-    emoji: "🚧",
-    tags:  &["construction","wip"]
-}
-,EmojiData {
-    emoji: "⚓",
-    tags:  &["anchor","ship"]
-}
-,EmojiData {
-    emoji: "⛵",
-    tags:  &["sailboat","boat"]
-}
-,EmojiData {
-    emoji: "🛶",
-    tags:  &["canoe"]
-}
-,EmojiData {
-    emoji: "🚤",
-    tags:  &["speedboat","ship"]
-}
-,EmojiData {
-    emoji: "🛳️",
-    tags:  &["passenger ship","cruise"]
-}
-,EmojiData {
-    emoji: "⛴️",
-    tags:  &["ferry"]
-}
-,EmojiData {
-    emoji: "🛥️",
-    tags:  &["motor boat"]
-}
-,EmojiData {
-    emoji: "🚢",
-    tags:  &["ship"]
-}
-,EmojiData {
-    emoji: "✈️",
-    tags:  &["airplane","flight"]
-}
-,EmojiData {
-    emoji: "🛩️",
-    tags:  &["small airplane","flight"]
-}
-,EmojiData {
-    emoji: "🛫",
-    tags:  &["airplane departure","flight departure"]
-}
-,EmojiData {
-    emoji: "🛬",
-    tags:  &["airplane arrival","flight arrival"]
-}
-,EmojiData {
-    emoji: "🪂",
-    tags:  &["parachute"]
-}
-,EmojiData {
-    emoji: "💺",
-    tags:  &["seat"]
-}
-,EmojiData {
-    emoji: "🚁",
-    tags:  &["helicopter"]
-}
-,EmojiData {
-    emoji: "🚟",
-    tags:  &["suspension railway"]
-}
-,EmojiData {
-    emoji: "🚠",
-    tags:  &["mountain cableway"]
-}
-,EmojiData {
-    emoji: "🚡",
-    tags:  &["aerial tramway"]
-}
-,EmojiData {
-    emoji: "🛰️",
-    tags:  &["satellite","orbit","space","artificial satellite"]
-}
-,EmojiData {
-    emoji: "🚀",
-    tags:  &["rocket","ship","launch"]
-}
-,EmojiData {
-    emoji: "🛸",
-    tags:  &["flying saucer","ufo"]
-}
-,EmojiData {
-    emoji: "🛎️",
-    tags:  &["bellhop bell"]
-}
-,EmojiData {
-    emoji: "🧳",
-    tags:  &["luggage"]
-}
-,EmojiData {
-    emoji: "⌛",
-    tags:  &["hourglass done","time","hourglass"]
-}
-,EmojiData {
-    emoji: "⏳",
-    tags:  &["hourglass not done","time","hourglass flowing sand"]
-}
-,EmojiData {
-    emoji: "⌚",
-    tags:  &["watch","time"]
-}
-,EmojiData {
-    emoji: "⏰",
-    tags:  &["alarm clock","morning"]
-}
-,EmojiData {
-    emoji: "⏱️",
-    tags:  &["stopwatch"]
-}
-,EmojiData {
-    emoji: "⏲️",
-    tags:  &["timer clock"]
-}
-,EmojiData {
-    emoji: "🕰️",
-    tags:  &["mantelpiece clock"]
-}
-,EmojiData {
-    emoji: "🕛",
-    tags:  &["twelve o’clock","clock12"]
-}
-,EmojiData {
-    emoji: "🕧",
-    tags:  &["twelve-thirty","clock1230"]
-}
-,EmojiData {
-    emoji: "🕐",
-    tags:  &["one o’clock","clock1"]
-}
-,EmojiData {
-    emoji: "🕜",
-    tags:  &["one-thirty","clock130"]
-}
-,EmojiData {
-    emoji: "🕑",
-    tags:  &["two o’clock","clock2"]
-}
-,EmojiData {
-    emoji: "🕝",
-    tags:  &["two-thirty","clock230"]
-}
-,EmojiData {
-    emoji: "🕒",
-    tags:  &["three o’clock","clock3"]
-}
-,EmojiData {
-    emoji: "🕞",
-    tags:  &["three-thirty","clock330"]
-}
-,EmojiData {
-    emoji: "🕓",
-    tags:  &["four o’clock","clock4"]
-}
-,EmojiData {
-    emoji: "🕟",
-    tags:  &["four-thirty","clock430"]
-}
-,EmojiData {
-    emoji: "🕔",
-    tags:  &["five o’clock","clock5"]
-}
-,EmojiData {
-    emoji: "🕠",
-    tags:  &["five-thirty","clock530"]
-}
-,EmojiData {
-    emoji: "🕕",
-    tags:  &["six o’clock","clock6"]
-}
-,EmojiData {
-    emoji: "🕡",
-    tags:  &["six-thirty","clock630"]
-}
-,EmojiData {
-    emoji: "🕖",
-    tags:  &["seven o’clock","clock7"]
-}
-,EmojiData {
-    emoji: "🕢",
-    tags:  &["seven-thirty","clock730"]
-}
-,EmojiData {
-    emoji: "🕗",
-    tags:  &["eight o’clock","clock8"]
-}
-,EmojiData {
-    emoji: "🕣",
-    tags:  &["eight-thirty","clock830"]
-}
-,EmojiData {
-    emoji: "🕘",
-    tags:  &["nine o’clock","clock9"]
-}
-,EmojiData {
-    emoji: "🕤",
-    tags:  &["nine-thirty","clock930"]
-}
-,EmojiData {
-    emoji: "🕙",
-    tags:  &["ten o’clock","clock10"]
-}
-,EmojiData {
-    emoji: "🕥",
-    tags:  &["ten-thirty","clock1030"]
-}
-,EmojiData {
-    emoji: "🕚",
-    tags:  &["eleven o’clock","clock11"]
-}
-,EmojiData {
-    emoji: "🕦",
-    tags:  &["eleven-thirty","clock1130"]
-}
-,EmojiData {
-    emoji: "🌑",
-    tags:  &["new moon"]
-}
-,EmojiData {
-    emoji: "🌒",
-    tags:  &["waxing crescent moon"]
-}
-,EmojiData {
-    emoji: "🌓",
-    tags:  &["first quarter moon"]
-}
-,EmojiData {
-    emoji: "🌔",
-    tags:  &["waxing gibbous moon","moon"]
-}
-,EmojiData {
-    emoji: "🌕",
-    tags:  &["full moon"]
-}
-,EmojiData {
-    emoji: "🌖",
-    tags:  &["waning gibbous moon"]
-}
-,EmojiData {
-    emoji: "🌗",
-    tags:  &["last quarter moon"]
-}
-,EmojiData {
-    emoji: "🌘",
-    tags:  &["waning crescent moon"]
-}
-,EmojiData {
-    emoji: "🌙",
-    tags:  &["crescent moon","night"]
-}
-,EmojiData {
-    emoji: "🌚",
-    tags:  &["new moon face","new moon with face"]
-}
-,EmojiData {
-    emoji: "🌛",
-    tags:  &["first quarter moon face","first quarter moon with face"]
-}
-,EmojiData {
-    emoji: "🌜",
-    tags:  &["last quarter moon face","last quarter moon with face"]
-}
-,EmojiData {
-    emoji: "🌡️",
-    tags:  &["thermometer"]
-}
-,EmojiData {
-    emoji: "☀️",
-    tags:  &["sun","weather","sunny"]
-}
-,EmojiData {
-    emoji: "🌝",
-    tags:  &["full moon face","full moon with face"]
-}
-,EmojiData {
-    emoji: "🌞",
-    tags:  &["sun with face","summer"]
-}
-,EmojiData {
-    emoji: "🪐",
-    tags:  &["ringed planet"]
-}
-,EmojiData {
-    emoji: "⭐",
-    tags:  &["star"]
-}
-,EmojiData {
-    emoji: "🌟",
-    tags:  &["glowing star","star2"]
-}
-,EmojiData {
-    emoji: "🌠",
-    tags:  &["shooting star","stars"]
-}
-,EmojiData {
-    emoji: "🌌",
-    tags:  &["milky way"]
-}
-,EmojiData {
-    emoji: "☁️",
-    tags:  &["cloud"]
-}
-,EmojiData {
-    emoji: "⛅",
-    tags:  &["sun behind cloud","weather","cloud","partly sunny"]
-}
-,EmojiData {
-    emoji: "⛈️",
-    tags:  &["cloud with lightning and rain"]
-}
-,EmojiData {
-    emoji: "🌤️",
-    tags:  &["sun behind small cloud"]
-}
-,EmojiData {
-    emoji: "🌥️",
-    tags:  &["sun behind large cloud"]
-}
-,EmojiData {
-    emoji: "🌦️",
-    tags:  &["sun behind rain cloud"]
-}
-,EmojiData {
-    emoji: "🌧️",
-    tags:  &["cloud with rain"]
-}
-,EmojiData {
-    emoji: "🌨️",
-    tags:  &["cloud with snow"]
-}
-,EmojiData {
-    emoji: "🌩️",
-    tags:  &["cloud with lightning"]
-}
-,EmojiData {
-    emoji: "🌪️",
-    tags:  &["tornado"]
-}
-,EmojiData {
-    emoji: "🌫️",
-    tags:  &["fog"]
-}
-,EmojiData {
-    emoji: "🌬️",
-    tags:  &["wind face"]
-}
-,EmojiData {
-    emoji: "🌀",
-    tags:  &["cyclone","swirl"]
-}
-,EmojiData {
-    emoji: "🌈",
-    tags:  &["rainbow"]
-}
-,EmojiData {
-    emoji: "🌂",
-    tags:  &["closed umbrella","weather","rain"]
-}
-,EmojiData {
-    emoji: "☂️",
-    tags:  &["umbrella","open umbrella"]
-}
-,EmojiData {
-    emoji: "☔",
-    tags:  &["umbrella with rain drops","rain","weather","umbrella"]
-}
-,EmojiData {
-    emoji: "⛱️",
-    tags:  &["umbrella on ground","beach_umbrella","parasol on ground"]
-}
-,EmojiData {
-    emoji: "⚡",
-    tags:  &["high voltage","lightning","thunder","zap"]
-}
-,EmojiData {
-    emoji: "❄️",
-    tags:  &["snowflake","winter","cold","weather"]
-}
-,EmojiData {
-    emoji: "☃️",
-    tags:  &["snowman","winter","christmas","snowman with snow"]
-}
-,EmojiData {
-    emoji: "⛄",
-    tags:  &["snowman without snow","winter","snowman"]
-}
-,EmojiData {
-    emoji: "☄️",
-    tags:  &["comet"]
-}
-,EmojiData {
-    emoji: "🔥",
-    tags:  &["fire","burn"]
-}
-,EmojiData {
-    emoji: "💧",
-    tags:  &["droplet","water"]
-}
-,EmojiData {
-    emoji: "🌊",
-    tags:  &["water wave","sea","ocean"]
-}
-,EmojiData {
-    emoji: "🎃",
-    tags:  &["jack-o-lantern","halloween","jack o lantern"]
-}
-,EmojiData {
-    emoji: "🎄",
-    tags:  &["Christmas tree","christmas tree"]
-}
-,EmojiData {
-    emoji: "🎆",
-    tags:  &["fireworks","festival","celebration"]
-}
-,EmojiData {
-    emoji: "🎇",
-    tags:  &["sparkler"]
-}
-,EmojiData {
-    emoji: "🧨",
-    tags:  &["firecracker"]
-}
-,EmojiData {
-    emoji: "✨",
-    tags:  &["sparkles","shiny"]
-}
-,EmojiData {
-    emoji: "🎈",
-    tags:  &["balloon","party","birthday"]
-}
-,EmojiData {
-    emoji: "🎉",
-    tags:  &["party popper","hooray","party","tada"]
-}
-,EmojiData {
-    emoji: "🎊",
-    tags:  &["confetti ball"]
-}
-,EmojiData {
-    emoji: "🎋",
-    tags:  &["tanabata tree"]
-}
-,EmojiData {
-    emoji: "🎍",
-    tags:  &["pine decoration","bamboo"]
-}
-,EmojiData {
-    emoji: "🎎",
-    tags:  &["Japanese dolls","dolls"]
-}
-,EmojiData {
-    emoji: "🎏",
-    tags:  &["carp streamer","flags"]
-}
-,EmojiData {
-    emoji: "🎐",
-    tags:  &["wind chime"]
-}
-,EmojiData {
-    emoji: "🎑",
-    tags:  &["moon viewing ceremony","rice scene"]
-}
-,EmojiData {
-    emoji: "🧧",
-    tags:  &["red envelope"]
-}
-,EmojiData {
-    emoji: "🎀",
-    tags:  &["ribbon"]
-}
-,EmojiData {
-    emoji: "🎁",
-    tags:  &["wrapped gift","present","birthday","christmas","gift"]
-}
-,EmojiData {
-    emoji: "🎗️",
-    tags:  &["reminder ribbon"]
-}
-,EmojiData {
-    emoji: "🎟️",
-    tags:  &["admission tickets","tickets"]
-}
-,EmojiData {
-    emoji: "🎫",
-    tags:  &["ticket"]
-}
-,EmojiData {
-    emoji: "🎖️",
-    tags:  &["military medal","medal military"]
-}
-,EmojiData {
-    emoji: "🏆",
-    tags:  &["trophy","award","contest","winner"]
-}
-,EmojiData {
-    emoji: "🏅",
-    tags:  &["sports medal","gold","winner","medal sports"]
-}
-,EmojiData {
-    emoji: "🥇",
-    tags:  &["1st place medal","gold"]
-}
-,EmojiData {
-    emoji: "🥈",
-    tags:  &["2nd place medal","silver"]
-}
-,EmojiData {
-    emoji: "🥉",
-    tags:  &["3rd place medal","bronze"]
-}
-,EmojiData {
-    emoji: "⚽",
-    tags:  &["soccer ball","sports","soccer"]
-}
-,EmojiData {
-    emoji: "⚾",
-    tags:  &["baseball","sports"]
-}
-,EmojiData {
-    emoji: "🥎",
-    tags:  &["softball"]
-}
-,EmojiData {
-    emoji: "🏀",
-    tags:  &["basketball","sports"]
-}
-,EmojiData {
-    emoji: "🏐",
-    tags:  &["volleyball"]
-}
-,EmojiData {
-    emoji: "🏈",
-    tags:  &["american football","sports","football"]
-}
-,EmojiData {
-    emoji: "🏉",
-    tags:  &["rugby football"]
-}
-,EmojiData {
-    emoji: "🎾",
-    tags:  &["tennis","sports"]
-}
-,EmojiData {
-    emoji: "🥏",
-    tags:  &["flying disc"]
-}
-,EmojiData {
-    emoji: "🎳",
-    tags:  &["bowling"]
-}
-,EmojiData {
-    emoji: "🏏",
-    tags:  &["cricket game"]
-}
-,EmojiData {
-    emoji: "🏑",
-    tags:  &["field hockey"]
-}
-,EmojiData {
-    emoji: "🏒",
-    tags:  &["ice hockey"]
-}
-,EmojiData {
-    emoji: "🥍",
-    tags:  &["lacrosse"]
-}
-,EmojiData {
-    emoji: "🏓",
-    tags:  &["ping pong"]
-}
-,EmojiData {
-    emoji: "🏸",
-    tags:  &["badminton"]
-}
-,EmojiData {
-    emoji: "🥊",
-    tags:  &["boxing glove"]
-}
-,EmojiData {
-    emoji: "🥋",
-    tags:  &["martial arts uniform"]
-}
-,EmojiData {
-    emoji: "🥅",
-    tags:  &["goal net"]
-}
-,EmojiData {
-    emoji: "⛳",
-    tags:  &["flag in hole","golf"]
-}
-,EmojiData {
-    emoji: "⛸️",
-    tags:  &["ice skate","skating"]
-}
-,EmojiData {
-    emoji: "🎣",
-    tags:  &["fishing pole","fishing pole and fish"]
-}
-,EmojiData {
-    emoji: "🤿",
-    tags:  &["diving mask"]
-}
-,EmojiData {
-    emoji: "🎽",
-    tags:  &["running shirt","marathon","running shirt with sash"]
-}
-,EmojiData {
-    emoji: "🎿",
-    tags:  &["skis","ski"]
-}
-,EmojiData {
-    emoji: "🛷",
-    tags:  &["sled"]
-}
-,EmojiData {
-    emoji: "🥌",
-    tags:  &["curling stone"]
-}
-,EmojiData {
-    emoji: "🎯",
-    tags:  &["direct hit","target","dart"]
-}
-,EmojiData {
-    emoji: "🪀",
-    tags:  &["yo-yo","yo yo"]
-}
-,EmojiData {
-    emoji: "🪁",
-    tags:  &["kite"]
-}
-,EmojiData {
-    emoji: "🎱",
-    tags:  &["pool 8 ball","pool","billiards","8ball"]
-}
-,EmojiData {
-    emoji: "🔮",
-    tags:  &["crystal ball","fortune"]
-}
-,EmojiData {
-    emoji: "🧿",
-    tags:  &["nazar amulet"]
-}
-,EmojiData {
-    emoji: "🎮",
-    tags:  &["video game","play","controller","console"]
-}
-,EmojiData {
-    emoji: "🕹️",
-    tags:  &["joystick"]
-}
-,EmojiData {
-    emoji: "🎰",
-    tags:  &["slot machine"]
-}
-,EmojiData {
-    emoji: "🎲",
-    tags:  &["game die","dice","gambling"]
-}
-,EmojiData {
-    emoji: "🧩",
-    tags:  &["puzzle piece","jigsaw"]
-}
-,EmojiData {
-    emoji: "🧸",
-    tags:  &["teddy bear"]
-}
-,EmojiData {
-    emoji: "♠️",
-    tags:  &["spade suit","spades"]
-}
-,EmojiData {
-    emoji: "♥️",
-    tags:  &["heart suit","hearts"]
-}
-,EmojiData {
-    emoji: "♦️",
-    tags:  &["diamond suit","diamonds"]
-}
-,EmojiData {
-    emoji: "♣️",
-    tags:  &["club suit","clubs"]
-}
-,EmojiData {
-    emoji: "♟️",
-    tags:  &["chess pawn"]
-}
-,EmojiData {
-    emoji: "🃏",
-    tags:  &["joker","black joker"]
-}
-,EmojiData {
-    emoji: "🀄",
-    tags:  &["mahjong red dragon","mahjong"]
-}
-,EmojiData {
-    emoji: "🎴",
-    tags:  &["flower playing cards"]
-}
-,EmojiData {
-    emoji: "🎭",
-    tags:  &["performing arts","theater","drama"]
-}
-,EmojiData {
-    emoji: "🖼️",
-    tags:  &["framed picture"]
-}
-,EmojiData {
-    emoji: "🎨",
-    tags:  &["artist palette","design","paint","art"]
-}
-,EmojiData {
-    emoji: "🧵",
-    tags:  &["thread"]
-}
-,EmojiData {
-    emoji: "🧶",
-    tags:  &["yarn"]
-}
-,EmojiData {
-    emoji: "👓",
-    tags:  &["glasses","eyeglasses"]
-}
-,EmojiData {
-    emoji: "🕶️",
-    tags:  &["sunglasses","dark sunglasses"]
-}
-,EmojiData {
-    emoji: "🥽",
-    tags:  &["goggles"]
-}
-,EmojiData {
-    emoji: "🥼",
-    tags:  &["lab coat"]
-}
-,EmojiData {
-    emoji: "🦺",
-    tags:  &["safety vest"]
-}
-,EmojiData {
-    emoji: "👔",
-    tags:  &["necktie","shirt","formal"]
-}
-,EmojiData {
-    emoji: "👕",
-    tags:  &["t-shirt","shirt","tshirt"]
-}
-,EmojiData {
-    emoji: "👖",
-    tags:  &["jeans","pants"]
-}
-,EmojiData {
-    emoji: "🧣",
-    tags:  &["scarf"]
-}
-,EmojiData {
-    emoji: "🧤",
-    tags:  &["gloves"]
-}
-,EmojiData {
-    emoji: "🧥",
-    tags:  &["coat"]
-}
-,EmojiData {
-    emoji: "🧦",
-    tags:  &["socks"]
-}
-,EmojiData {
-    emoji: "👗",
-    tags:  &["dress"]
-}
-,EmojiData {
-    emoji: "👘",
-    tags:  &["kimono"]
-}
-,EmojiData {
-    emoji: "🥻",
-    tags:  &["sari"]
-}
-,EmojiData {
-    emoji: "🩱",
-    tags:  &["one-piece swimsuit","one piece swimsuit"]
-}
-,EmojiData {
-    emoji: "🩲",
-    tags:  &["briefs","swim brief"]
-}
-,EmojiData {
-    emoji: "🩳",
-    tags:  &["shorts"]
-}
-,EmojiData {
-    emoji: "👙",
-    tags:  &["bikini","beach"]
-}
-,EmojiData {
-    emoji: "👚",
-    tags:  &["woman’s clothes","womans clothes"]
-}
-,EmojiData {
-    emoji: "👛",
-    tags:  &["purse"]
-}
-,EmojiData {
-    emoji: "👜",
-    tags:  &["handbag","bag"]
-}
-,EmojiData {
-    emoji: "👝",
-    tags:  &["clutch bag","bag","pouch"]
-}
-,EmojiData {
-    emoji: "🛍️",
-    tags:  &["shopping bags","bags","shopping"]
-}
-,EmojiData {
-    emoji: "🎒",
-    tags:  &["backpack","school satchel"]
-}
-,EmojiData {
-    emoji: "👞",
-    tags:  &["man’s shoe","mans shoe","shoe"]
-}
-,EmojiData {
-    emoji: "👟",
-    tags:  &["running shoe","sneaker","sport","running","athletic shoe"]
-}
-,EmojiData {
-    emoji: "🥾",
-    tags:  &["hiking boot"]
-}
-,EmojiData {
-    emoji: "🥿",
-    tags:  &["flat shoe"]
-}
-,EmojiData {
-    emoji: "👠",
-    tags:  &["high-heeled shoe","shoe","high heel"]
-}
-,EmojiData {
-    emoji: "👡",
-    tags:  &["woman’s sandal","shoe","sandal"]
-}
-,EmojiData {
-    emoji: "🩰",
-    tags:  &["ballet shoes"]
-}
-,EmojiData {
-    emoji: "👢",
-    tags:  &["woman’s boot","boot"]
-}
-,EmojiData {
-    emoji: "👑",
-    tags:  &["crown","king","queen","royal"]
-}
-,EmojiData {
-    emoji: "👒",
-    tags:  &["woman’s hat","womans hat"]
-}
-,EmojiData {
-    emoji: "🎩",
-    tags:  &["top hat","hat","classy","tophat"]
-}
-,EmojiData {
-    emoji: "🎓",
-    tags:  &["graduation cap","education","college","university","graduation","mortar board"]
-}
-,EmojiData {
-    emoji: "🧢",
-    tags:  &["billed cap"]
-}
-,EmojiData {
-    emoji: "⛑️",
-    tags:  &["rescue worker’s helmet","rescue worker helmet"]
-}
-,EmojiData {
-    emoji: "📿",
-    tags:  &["prayer beads"]
-}
-,EmojiData {
-    emoji: "💄",
-    tags:  &["lipstick","makeup"]
-}
-,EmojiData {
-    emoji: "💍",
-    tags:  &["ring","wedding","marriage","engaged"]
-}
-,EmojiData {
-    emoji: "💎",
-    tags:  &["gem stone","diamond","gem"]
-}
-,EmojiData {
-    emoji: "🔇",
-    tags:  &["muted speaker","sound","volume","mute"]
-}
-,EmojiData {
-    emoji: "🔈",
-    tags:  &["speaker low volume","speaker"]
-}
-,EmojiData {
-    emoji: "🔉",
-    tags:  &["speaker medium volume","volume","sound"]
-}
-,EmojiData {
-    emoji: "🔊",
-    tags:  &["speaker high volume","volume","loud sound"]
-}
-,EmojiData {
-    emoji: "📢",
-    tags:  &["loudspeaker","announcement"]
-}
-,EmojiData {
-    emoji: "📣",
-    tags:  &["megaphone","mega"]
-}
-,EmojiData {
-    emoji: "📯",
-    tags:  &["postal horn"]
-}
-,EmojiData {
-    emoji: "🔔",
-    tags:  &["bell","sound","notification"]
-}
-,EmojiData {
-    emoji: "🔕",
-    tags:  &["bell with slash","volume","off","no bell"]
-}
-,EmojiData {
-    emoji: "🎼",
-    tags:  &["musical score"]
-}
-,EmojiData {
-    emoji: "🎵",
-    tags:  &["musical note"]
-}
-,EmojiData {
-    emoji: "🎶",
-    tags:  &["musical notes","music","notes"]
-}
-,EmojiData {
-    emoji: "🎙️",
-    tags:  &["studio microphone","podcast"]
-}
-,EmojiData {
-    emoji: "🎚️",
-    tags:  &["level slider"]
-}
-,EmojiData {
-    emoji: "🎛️",
-    tags:  &["control knobs"]
-}
-,EmojiData {
-    emoji: "🎤",
-    tags:  &["microphone","sing"]
-}
-,EmojiData {
-    emoji: "🎧",
-    tags:  &["headphone","music","earphones","headphones"]
-}
-,EmojiData {
-    emoji: "📻",
-    tags:  &["radio","podcast"]
-}
-,EmojiData {
-    emoji: "🎷",
-    tags:  &["saxophone"]
-}
-,EmojiData {
-    emoji: "🎸",
-    tags:  &["guitar","rock"]
-}
-,EmojiData {
-    emoji: "🎹",
-    tags:  &["musical keyboard","piano"]
-}
-,EmojiData {
-    emoji: "🎺",
-    tags:  &["trumpet"]
-}
-,EmojiData {
-    emoji: "🎻",
-    tags:  &["violin"]
-}
-,EmojiData {
-    emoji: "🪕",
-    tags:  &["banjo"]
-}
-,EmojiData {
-    emoji: "🥁",
-    tags:  &["drum"]
-}
-,EmojiData {
-    emoji: "📱",
-    tags:  &["mobile phone","smartphone","mobile","iphone"]
-}
-,EmojiData {
-    emoji: "📲",
-    tags:  &["mobile phone with arrow","call","incoming","calling"]
-}
-,EmojiData {
-    emoji: "☎️",
-    tags:  &["telephone","phone"]
-}
-,EmojiData {
-    emoji: "📞",
-    tags:  &["telephone receiver","phone","call"]
-}
-,EmojiData {
-    emoji: "📟",
-    tags:  &["pager"]
-}
-,EmojiData {
-    emoji: "📠",
-    tags:  &["fax machine","fax"]
-}
-,EmojiData {
-    emoji: "🔋",
-    tags:  &["battery","power"]
-}
-,EmojiData {
-    emoji: "🔌",
-    tags:  &["electric plug"]
-}
-,EmojiData {
-    emoji: "💻",
-    tags:  &["laptop","desktop","screen","computer"]
-}
-,EmojiData {
-    emoji: "🖥️",
-    tags:  &["desktop computer"]
-}
-,EmojiData {
-    emoji: "🖨️",
-    tags:  &["printer"]
-}
-,EmojiData {
-    emoji: "⌨️",
-    tags:  &["keyboard"]
-}
-,EmojiData {
-    emoji: "🖱️",
-    tags:  &["computer mouse"]
-}
-,EmojiData {
-    emoji: "🖲️",
-    tags:  &["trackball"]
-}
-,EmojiData {
-    emoji: "💽",
-    tags:  &["computer disk","minidisc"]
-}
-,EmojiData {
-    emoji: "💾",
-    tags:  &["floppy disk","save"]
-}
-,EmojiData {
-    emoji: "💿",
-    tags:  &["optical disk","cd"]
-}
-,EmojiData {
-    emoji: "📀",
-    tags:  &["dvd"]
-}
-,EmojiData {
-    emoji: "🧮",
-    tags:  &["abacus"]
-}
-,EmojiData {
-    emoji: "🎥",
-    tags:  &["movie camera","film","video"]
-}
-,EmojiData {
-    emoji: "🎞️",
-    tags:  &["film frames","film strip"]
-}
-,EmojiData {
-    emoji: "📽️",
-    tags:  &["film projector"]
-}
-,EmojiData {
-    emoji: "🎬",
-    tags:  &["clapper board","film","clapper"]
-}
-,EmojiData {
-    emoji: "📺",
-    tags:  &["television","tv"]
-}
-,EmojiData {
-    emoji: "📷",
-    tags:  &["camera","photo"]
-}
-,EmojiData {
-    emoji: "📸",
-    tags:  &["camera with flash","photo","camera flash"]
-}
-,EmojiData {
-    emoji: "📹",
-    tags:  &["video camera"]
-}
-,EmojiData {
-    emoji: "📼",
-    tags:  &["videocassette","vhs"]
-}
-,EmojiData {
-    emoji: "🔍",
-    tags:  &["magnifying glass tilted left","search","zoom","mag"]
-}
-,EmojiData {
-    emoji: "🔎",
-    tags:  &["magnifying glass tilted right","mag right"]
-}
-,EmojiData {
-    emoji: "🕯️",
-    tags:  &["candle"]
-}
-,EmojiData {
-    emoji: "💡",
-    tags:  &["light bulb","idea","light","bulb"]
-}
-,EmojiData {
-    emoji: "🔦",
-    tags:  &["flashlight"]
-}
-,EmojiData {
-    emoji: "🏮",
-    tags:  &["red paper lantern","izakaya lantern","lantern"]
-}
-,EmojiData {
-    emoji: "🪔",
-    tags:  &["diya lamp"]
-}
-,EmojiData {
-    emoji: "📔",
-    tags:  &["notebook with decorative cover"]
-}
-,EmojiData {
-    emoji: "📕",
-    tags:  &["closed book"]
-}
-,EmojiData {
-    emoji: "📖",
-    tags:  &["open book","book"]
-}
-,EmojiData {
-    emoji: "📗",
-    tags:  &["green book"]
-}
-,EmojiData {
-    emoji: "📘",
-    tags:  &["blue book"]
-}
-,EmojiData {
-    emoji: "📙",
-    tags:  &["orange book"]
-}
-,EmojiData {
-    emoji: "📚",
-    tags:  &["books","library"]
-}
-,EmojiData {
-    emoji: "📓",
-    tags:  &["notebook"]
-}
-,EmojiData {
-    emoji: "📒",
-    tags:  &["ledger"]
-}
-,EmojiData {
-    emoji: "📃",
-    tags:  &["page with curl"]
-}
-,EmojiData {
-    emoji: "📜",
-    tags:  &["scroll","document"]
-}
-,EmojiData {
-    emoji: "📄",
-    tags:  &["page facing up","document"]
-}
-,EmojiData {
-    emoji: "📰",
-    tags:  &["newspaper","press"]
-}
-,EmojiData {
-    emoji: "🗞️",
-    tags:  &["rolled-up newspaper","press","newspaper roll"]
-}
-,EmojiData {
-    emoji: "📑",
-    tags:  &["bookmark tabs"]
-}
-,EmojiData {
-    emoji: "🔖",
-    tags:  &["bookmark"]
-}
-,EmojiData {
-    emoji: "🏷️",
-    tags:  &["label","tag"]
-}
-,EmojiData {
-    emoji: "💰",
-    tags:  &["money bag","dollar","cream","moneybag"]
-}
-,EmojiData {
-    emoji: "💴",
-    tags:  &["yen banknote","yen"]
-}
-,EmojiData {
-    emoji: "💵",
-    tags:  &["dollar banknote","money","dollar"]
-}
-,EmojiData {
-    emoji: "💶",
-    tags:  &["euro banknote","euro"]
-}
-,EmojiData {
-    emoji: "💷",
-    tags:  &["pound banknote","pound"]
-}
-,EmojiData {
-    emoji: "💸",
-    tags:  &["money with wings","dollar"]
-}
-,EmojiData {
-    emoji: "💳",
-    tags:  &["credit card","subscription"]
-}
-,EmojiData {
-    emoji: "🧾",
-    tags:  &["receipt"]
-}
-,EmojiData {
-    emoji: "💹",
-    tags:  &["chart increasing with yen","chart"]
-}
-,EmojiData {
-    emoji: "💱",
-    tags:  &["currency exchange"]
-}
-,EmojiData {
-    emoji: "💲",
-    tags:  &["heavy dollar sign"]
-}
-,EmojiData {
-    emoji: "✉️",
-    tags:  &["envelope","letter","email"]
-}
-,EmojiData {
-    emoji: "📧",
-    tags:  &["e-mail"]
-}
-,EmojiData {
-    emoji: "📨",
-    tags:  &["incoming envelope"]
-}
-,EmojiData {
-    emoji: "📩",
-    tags:  &["envelope with arrow"]
-}
-,EmojiData {
-    emoji: "📤",
-    tags:  &["outbox tray"]
-}
-,EmojiData {
-    emoji: "📥",
-    tags:  &["inbox tray"]
-}
-,EmojiData {
-    emoji: "📦",
-    tags:  &["package","shipping"]
-}
-,EmojiData {
-    emoji: "📫",
-    tags:  &["closed mailbox with raised flag","mailbox"]
-}
-,EmojiData {
-    emoji: "📪",
-    tags:  &["closed mailbox with lowered flag","mailbox closed"]
-}
-,EmojiData {
-    emoji: "📬",
-    tags:  &["open mailbox with raised flag","mailbox with mail"]
-}
-,EmojiData {
-    emoji: "📭",
-    tags:  &["open mailbox with lowered flag","mailbox with no mail"]
-}
-,EmojiData {
-    emoji: "📮",
-    tags:  &["postbox"]
-}
-,EmojiData {
-    emoji: "🗳️",
-    tags:  &["ballot box with ballot","ballot box"]
-}
-,EmojiData {
-    emoji: "✏️",
-    tags:  &["pencil","pencil2"]
-}
-,EmojiData {
-    emoji: "✒️",
-    tags:  &["black nib"]
-}
-,EmojiData {
-    emoji: "🖋️",
-    tags:  &["fountain pen"]
-}
-,EmojiData {
-    emoji: "🖊️",
-    tags:  &["pen"]
-}
-,EmojiData {
-    emoji: "🖌️",
-    tags:  &["paintbrush"]
-}
-,EmojiData {
-    emoji: "🖍️",
-    tags:  &["crayon"]
-}
-,EmojiData {
-    emoji: "📝",
-    tags:  &["memo","document","note","pencil"]
-}
-,EmojiData {
-    emoji: "💼",
-    tags:  &["briefcase","business"]
-}
-,EmojiData {
-    emoji: "📁",
-    tags:  &["file folder","directory"]
-}
-,EmojiData {
-    emoji: "📂",
-    tags:  &["open file folder"]
-}
-,EmojiData {
-    emoji: "🗂️",
-    tags:  &["card index dividers"]
-}
-,EmojiData {
-    emoji: "📅",
-    tags:  &["calendar","schedule","date"]
-}
-,EmojiData {
-    emoji: "📆",
-    tags:  &["tear-off calendar","schedule","calendar"]
-}
-,EmojiData {
-    emoji: "🗒️",
-    tags:  &["spiral notepad"]
-}
-,EmojiData {
-    emoji: "🗓️",
-    tags:  &["spiral calendar"]
-}
-,EmojiData {
-    emoji: "📇",
-    tags:  &["card index"]
-}
-,EmojiData {
-    emoji: "📈",
-    tags:  &["chart increasing","graph","metrics","chart with upwards trend"]
-}
-,EmojiData {
-    emoji: "📉",
-    tags:  &["chart decreasing","graph","metrics","chart with downwards trend"]
-}
-,EmojiData {
-    emoji: "📊",
-    tags:  &["bar chart","stats","metrics"]
-}
-,EmojiData {
-    emoji: "📋",
-    tags:  &["clipboard"]
-}
-,EmojiData {
-    emoji: "📌",
-    tags:  &["pushpin","location"]
-}
-,EmojiData {
-    emoji: "📍",
-    tags:  &["round pushpin","location"]
-}
-,EmojiData {
-    emoji: "📎",
-    tags:  &["paperclip"]
-}
-,EmojiData {
-    emoji: "🖇️",
-    tags:  &["linked paperclips","paperclips"]
-}
-,EmojiData {
-    emoji: "📏",
-    tags:  &["straight ruler"]
-}
-,EmojiData {
-    emoji: "📐",
-    tags:  &["triangular ruler"]
-}
-,EmojiData {
-    emoji: "✂️",
-    tags:  &["scissors","cut"]
-}
-,EmojiData {
-    emoji: "🗃️",
-    tags:  &["card file box"]
-}
-,EmojiData {
-    emoji: "🗄️",
-    tags:  &["file cabinet"]
-}
-,EmojiData {
-    emoji: "🗑️",
-    tags:  &["wastebasket","trash"]
-}
-,EmojiData {
-    emoji: "🔒",
-    tags:  &["locked","security","private","lock"]
-}
-,EmojiData {
-    emoji: "🔓",
-    tags:  &["unlocked","security","unlock"]
-}
-,EmojiData {
-    emoji: "🔏",
-    tags:  &["locked with pen","lock with ink pen"]
-}
-,EmojiData {
-    emoji: "🔐",
-    tags:  &["locked with key","security","closed lock with key"]
-}
-,EmojiData {
-    emoji: "🔑",
-    tags:  &["key","lock","password"]
-}
-,EmojiData {
-    emoji: "🗝️",
-    tags:  &["old key"]
-}
-,EmojiData {
-    emoji: "🔨",
-    tags:  &["hammer","tool"]
-}
-,EmojiData {
-    emoji: "🪓",
-    tags:  &["axe"]
-}
-,EmojiData {
-    emoji: "⛏️",
-    tags:  &["pick"]
-}
-,EmojiData {
-    emoji: "⚒️",
-    tags:  &["hammer and pick"]
-}
-,EmojiData {
-    emoji: "🛠️",
-    tags:  &["hammer and wrench"]
-}
-,EmojiData {
-    emoji: "🗡️",
-    tags:  &["dagger"]
-}
-,EmojiData {
-    emoji: "⚔️",
-    tags:  &["crossed swords"]
-}
-,EmojiData {
-    emoji: "🔫",
-    tags:  &["pistol","shoot","weapon","gun"]
-}
-,EmojiData {
-    emoji: "🏹",
-    tags:  &["bow and arrow","archery"]
-}
-,EmojiData {
-    emoji: "🛡️",
-    tags:  &["shield"]
-}
-,EmojiData {
-    emoji: "🔧",
-    tags:  &["wrench","tool"]
-}
-,EmojiData {
-    emoji: "🔩",
-    tags:  &["nut and bolt"]
-}
-,EmojiData {
-    emoji: "⚙️",
-    tags:  &["gear"]
-}
-,EmojiData {
-    emoji: "🗜️",
-    tags:  &["clamp"]
-}
-,EmojiData {
-    emoji: "⚖️",
-    tags:  &["balance scale"]
-}
-,EmojiData {
-    emoji: "🦯",
-    tags:  &["probing cane"]
-}
-,EmojiData {
-    emoji: "🔗",
-    tags:  &["link"]
-}
-,EmojiData {
-    emoji: "⛓️",
-    tags:  &["chains"]
-}
-,EmojiData {
-    emoji: "🧰",
-    tags:  &["toolbox"]
-}
-,EmojiData {
-    emoji: "🧲",
-    tags:  &["magnet"]
-}
-,EmojiData {
-    emoji: "⚗️",
-    tags:  &["alembic"]
-}
-,EmojiData {
-    emoji: "🧪",
-    tags:  &["test tube"]
-}
-,EmojiData {
-    emoji: "🧫",
-    tags:  &["petri dish"]
-}
-,EmojiData {
-    emoji: "🧬",
-    tags:  &["dna"]
-}
-,EmojiData {
-    emoji: "🔬",
-    tags:  &["microscope","science","laboratory","investigate"]
-}
-,EmojiData {
-    emoji: "🔭",
-    tags:  &["telescope"]
-}
-,EmojiData {
-    emoji: "📡",
-    tags:  &["satellite antenna","signal","satellite"]
-}
-,EmojiData {
-    emoji: "💉",
-    tags:  &["syringe","health","hospital","needle"]
-}
-,EmojiData {
-    emoji: "🩸",
-    tags:  &["drop of blood"]
-}
-,EmojiData {
-    emoji: "💊",
-    tags:  &["pill","health","medicine"]
-}
-,EmojiData {
-    emoji: "🩹",
-    tags:  &["adhesive bandage"]
-}
-,EmojiData {
-    emoji: "🩺",
-    tags:  &["stethoscope"]
-}
-,EmojiData {
-    emoji: "🚪",
-    tags:  &["door"]
-}
-,EmojiData {
-    emoji: "🛏️",
-    tags:  &["bed"]
-}
-,EmojiData {
-    emoji: "🛋️",
-    tags:  &["couch and lamp"]
-}
-,EmojiData {
-    emoji: "🪑",
-    tags:  &["chair"]
-}
-,EmojiData {
-    emoji: "🚽",
-    tags:  &["toilet","wc"]
-}
-,EmojiData {
-    emoji: "🚿",
-    tags:  &["shower","bath"]
-}
-,EmojiData {
-    emoji: "🛁",
-    tags:  &["bathtub"]
-}
-,EmojiData {
-    emoji: "🪒",
-    tags:  &["razor"]
-}
-,EmojiData {
-    emoji: "🧴",
-    tags:  &["lotion bottle"]
-}
-,EmojiData {
-    emoji: "🧷",
-    tags:  &["safety pin"]
-}
-,EmojiData {
-    emoji: "🧹",
-    tags:  &["broom"]
-}
-,EmojiData {
-    emoji: "🧺",
-    tags:  &["basket"]
-}
-,EmojiData {
-    emoji: "🧻",
-    tags:  &["roll of paper","toilet"]
-}
-,EmojiData {
-    emoji: "🧼",
-    tags:  &["soap"]
-}
-,EmojiData {
-    emoji: "🧽",
-    tags:  &["sponge"]
-}
-,EmojiData {
-    emoji: "🧯",
-    tags:  &["fire extinguisher"]
-}
-,EmojiData {
-    emoji: "🛒",
-    tags:  &["shopping cart"]
-}
-,EmojiData {
-    emoji: "🚬",
-    tags:  &["cigarette","smoking"]
-}
-,EmojiData {
-    emoji: "⚰️",
-    tags:  &["coffin","funeral"]
-}
-,EmojiData {
-    emoji: "⚱️",
-    tags:  &["funeral urn"]
-}
-,EmojiData {
-    emoji: "🗿",
-    tags:  &["moai","stone","moyai"]
-}
-,EmojiData {
-    emoji: "🏧",
-    tags:  &["ATM sign","atm"]
-}
-,EmojiData {
-    emoji: "🚮",
-    tags:  &["litter in bin sign","put litter in its place"]
-}
-,EmojiData {
-    emoji: "🚰",
-    tags:  &["potable water"]
-}
-,EmojiData {
-    emoji: "♿",
-    tags:  &["wheelchair symbol","accessibility","wheelchair"]
-}
-,EmojiData {
-    emoji: "🚹",
-    tags:  &["men’s room","mens"]
-}
-,EmojiData {
-    emoji: "🚺",
-    tags:  &["women’s room","womens"]
-}
-,EmojiData {
-    emoji: "🚻",
-    tags:  &["restroom","toilet"]
-}
-,EmojiData {
-    emoji: "🚼",
-    tags:  &["baby symbol"]
-}
-,EmojiData {
-    emoji: "🚾",
-    tags:  &["water closet","toilet","restroom","wc"]
-}
-,EmojiData {
-    emoji: "🛂",
-    tags:  &["passport control"]
-}
-,EmojiData {
-    emoji: "🛃",
-    tags:  &["customs"]
-}
-,EmojiData {
-    emoji: "🛄",
-    tags:  &["baggage claim","airport"]
-}
-,EmojiData {
-    emoji: "🛅",
-    tags:  &["left luggage"]
-}
-,EmojiData {
-    emoji: "⚠️",
-    tags:  &["warning","wip"]
-}
-,EmojiData {
-    emoji: "🚸",
-    tags:  &["children crossing"]
-}
-,EmojiData {
-    emoji: "⛔",
-    tags:  &["no entry","limit"]
-}
-,EmojiData {
-    emoji: "🚫",
-    tags:  &["prohibited","block","forbidden","no entry sign"]
-}
-,EmojiData {
-    emoji: "🚳",
-    tags:  &["no bicycles"]
-}
-,EmojiData {
-    emoji: "🚭",
-    tags:  &["no smoking"]
-}
-,EmojiData {
-    emoji: "🚯",
-    tags:  &["no littering","do not litter"]
-}
-,EmojiData {
-    emoji: "🚱",
-    tags:  &["non-potable water"]
-}
-,EmojiData {
-    emoji: "🚷",
-    tags:  &["no pedestrians"]
-}
-,EmojiData {
-    emoji: "📵",
-    tags:  &["no mobile phones"]
-}
-,EmojiData {
-    emoji: "🔞",
-    tags:  &["no one under eighteen","underage"]
-}
-,EmojiData {
-    emoji: "☢️",
-    tags:  &["radioactive"]
-}
-,EmojiData {
-    emoji: "☣️",
-    tags:  &["biohazard"]
-}
-,EmojiData {
-    emoji: "⬆️",
-    tags:  &["up arrow","arrow up"]
-}
-,EmojiData {
-    emoji: "↗️",
-    tags:  &["up-right arrow","arrow upper right"]
-}
-,EmojiData {
-    emoji: "➡️",
-    tags:  &["right arrow","arrow right"]
-}
-,EmojiData {
-    emoji: "↘️",
-    tags:  &["down-right arrow","arrow lower right"]
-}
-,EmojiData {
-    emoji: "⬇️",
-    tags:  &["down arrow","arrow down"]
-}
-,EmojiData {
-    emoji: "↙️",
-    tags:  &["down-left arrow","arrow lower left"]
-}
-,EmojiData {
-    emoji: "⬅️",
-    tags:  &["left arrow","arrow left"]
-}
-,EmojiData {
-    emoji: "↖️",
-    tags:  &["up-left arrow","arrow upper left"]
-}
-,EmojiData {
-    emoji: "↕️",
-    tags:  &["up-down arrow","arrow up down"]
-}
-,EmojiData {
-    emoji: "↔️",
-    tags:  &["left-right arrow","left right arrow"]
-}
-,EmojiData {
-    emoji: "↩️",
-    tags:  &["right arrow curving left","return","leftwards arrow with hook"]
-}
-,EmojiData {
-    emoji: "↪️",
-    tags:  &["left arrow curving right","arrow right hook"]
-}
-,EmojiData {
-    emoji: "⤴️",
-    tags:  &["right arrow curving up","arrow heading up"]
-}
-,EmojiData {
-    emoji: "⤵️",
-    tags:  &["right arrow curving down","arrow heading down"]
-}
-,EmojiData {
-    emoji: "🔃",
-    tags:  &["clockwise vertical arrows","arrows clockwise"]
-}
-,EmojiData {
-    emoji: "🔄",
-    tags:  &["counterclockwise arrows button","sync","arrows counterclockwise"]
-}
-,EmojiData {
-    emoji: "🔙",
-    tags:  &["BACK arrow","back"]
-}
-,EmojiData {
-    emoji: "🔚",
-    tags:  &["END arrow","end"]
-}
-,EmojiData {
-    emoji: "🔛",
-    tags:  &["ON! arrow","on"]
-}
-,EmojiData {
-    emoji: "🔜",
-    tags:  &["SOON arrow","soon"]
-}
-,EmojiData {
-    emoji: "🔝",
-    tags:  &["TOP arrow","top"]
-}
-,EmojiData {
-    emoji: "🛐",
-    tags:  &["place of worship"]
-}
-,EmojiData {
-    emoji: "⚛️",
-    tags:  &["atom symbol"]
-}
-,EmojiData {
-    emoji: "🕉️",
-    tags:  &["om"]
-}
-,EmojiData {
-    emoji: "✡️",
-    tags:  &["star of David","star of david"]
-}
-,EmojiData {
-    emoji: "☸️",
-    tags:  &["wheel of dharma"]
-}
-,EmojiData {
-    emoji: "☯️",
-    tags:  &["yin yang"]
-}
-,EmojiData {
-    emoji: "✝️",
-    tags:  &["latin cross"]
-}
-,EmojiData {
-    emoji: "☦️",
-    tags:  &["orthodox cross"]
-}
-,EmojiData {
-    emoji: "☪️",
-    tags:  &["star and crescent"]
-}
-,EmojiData {
-    emoji: "☮️",
-    tags:  &["peace symbol"]
-}
-,EmojiData {
-    emoji: "🕎",
-    tags:  &["menorah"]
-}
-,EmojiData {
-    emoji: "🔯",
-    tags:  &["dotted six-pointed star","six pointed star"]
-}
-,EmojiData {
-    emoji: "♈",
-    tags:  &["Aries","aries"]
-}
-,EmojiData {
-    emoji: "♉",
-    tags:  &["Taurus","taurus"]
-}
-,EmojiData {
-    emoji: "♊",
-    tags:  &["Gemini","gemini"]
-}
-,EmojiData {
-    emoji: "♋",
-    tags:  &["Cancer","cancer"]
-}
-,EmojiData {
-    emoji: "♌",
-    tags:  &["Leo","leo"]
-}
-,EmojiData {
-    emoji: "♍",
-    tags:  &["Virgo","virgo"]
-}
-,EmojiData {
-    emoji: "♎",
-    tags:  &["Libra","libra"]
-}
-,EmojiData {
-    emoji: "♏",
-    tags:  &["Scorpio","scorpius"]
-}
-,EmojiData {
-    emoji: "♐",
-    tags:  &["Sagittarius","sagittarius"]
-}
-,EmojiData {
-    emoji: "♑",
-    tags:  &["Capricorn","capricorn"]
-}
-,EmojiData {
-    emoji: "♒",
-    tags:  &["Aquarius","aquarius"]
-}
-,EmojiData {
-    emoji: "♓",
-    tags:  &["Pisces","pisces"]
-}
-,EmojiData {
-    emoji: "⛎",
-    tags:  &["Ophiuchus","ophiuchus"]
-}
-,EmojiData {
-    emoji: "🔀",
-    tags:  &["shuffle tracks button","shuffle","twisted rightwards arrows"]
-}
-,EmojiData {
-    emoji: "🔁",
-    tags:  &["repeat button","loop","repeat"]
-}
-,EmojiData {
-    emoji: "🔂",
-    tags:  &["repeat single button","repeat one"]
-}
-,EmojiData {
-    emoji: "▶️",
-    tags:  &["play button","arrow forward"]
-}
-,EmojiData {
-    emoji: "⏩",
-    tags:  &["fast-forward button","fast forward"]
-}
-,EmojiData {
-    emoji: "⏭️",
-    tags:  &["next track button"]
-}
-,EmojiData {
-    emoji: "⏯️",
-    tags:  &["play or pause button"]
-}
-,EmojiData {
-    emoji: "◀️",
-    tags:  &["reverse button","arrow backward"]
-}
-,EmojiData {
-    emoji: "⏪",
-    tags:  &["fast reverse button","rewind"]
-}
-,EmojiData {
-    emoji: "⏮️",
-    tags:  &["last track button","previous track button"]
-}
-,EmojiData {
-    emoji: "🔼",
-    tags:  &["upwards button","arrow up small"]
-}
-,EmojiData {
-    emoji: "⏫",
-    tags:  &["fast up button","arrow double up"]
-}
-,EmojiData {
-    emoji: "🔽",
-    tags:  &["downwards button","arrow down small"]
-}
-,EmojiData {
-    emoji: "⏬",
-    tags:  &["fast down button","arrow double down"]
-}
-,EmojiData {
-    emoji: "⏸️",
-    tags:  &["pause button"]
-}
-,EmojiData {
-    emoji: "⏹️",
-    tags:  &["stop button"]
-}
-,EmojiData {
-    emoji: "⏺️",
-    tags:  &["record button"]
-}
-,EmojiData {
-    emoji: "⏏️",
-    tags:  &["eject button"]
-}
-,EmojiData {
-    emoji: "🎦",
-    tags:  &["cinema","film","movie"]
-}
-,EmojiData {
-    emoji: "🔅",
-    tags:  &["dim button","low brightness"]
-}
-,EmojiData {
-    emoji: "🔆",
-    tags:  &["bright button","high brightness"]
-}
-,EmojiData {
-    emoji: "📶",
-    tags:  &["antenna bars","wifi","signal strength"]
-}
-,EmojiData {
-    emoji: "📳",
-    tags:  &["vibration mode"]
-}
-,EmojiData {
-    emoji: "📴",
-    tags:  &["mobile phone off","mute","off"]
-}
-,EmojiData {
-    emoji: "♀️",
-    tags:  &["female sign"]
-}
-,EmojiData {
-    emoji: "♂️",
-    tags:  &["male sign"]
-}
-,EmojiData {
-    emoji: "⚕️",
-    tags:  &["medical symbol"]
-}
-,EmojiData {
-    emoji: "♾️",
-    tags:  &["infinity"]
-}
-,EmojiData {
-    emoji: "♻️",
-    tags:  &["recycling symbol","environment","green","recycle"]
-}
-,EmojiData {
-    emoji: "⚜️",
-    tags:  &["fleur-de-lis","fleur de lis"]
-}
-,EmojiData {
-    emoji: "🔱",
-    tags:  &["trident emblem","trident"]
-}
-,EmojiData {
-    emoji: "📛",
-    tags:  &["name badge"]
-}
-,EmojiData {
-    emoji: "🔰",
-    tags:  &["Japanese symbol for beginner","beginner"]
-}
-,EmojiData {
-    emoji: "⭕",
-    tags:  &["hollow red circle","o"]
-}
-,EmojiData {
-    emoji: "✅",
-    tags:  &["check mark button","white check mark"]
-}
-,EmojiData {
-    emoji: "☑️",
-    tags:  &["check box with check","ballot box with check"]
-}
-,EmojiData {
-    emoji: "✔️",
-    tags:  &["check mark","heavy check mark"]
-}
-,EmojiData {
-    emoji: "✖️",
-    tags:  &["multiplication sign","heavy multiplication x"]
-}
-,EmojiData {
-    emoji: "❌",
-    tags:  &["cross mark","x"]
-}
-,EmojiData {
-    emoji: "❎",
-    tags:  &["cross mark button","negative squared cross mark"]
-}
-,EmojiData {
-    emoji: "➕",
-    tags:  &["plus sign","heavy plus sign"]
-}
-,EmojiData {
-    emoji: "➖",
-    tags:  &["minus sign","heavy minus sign"]
-}
-,EmojiData {
-    emoji: "➗",
-    tags:  &["division sign","heavy division sign"]
-}
-,EmojiData {
-    emoji: "➰",
-    tags:  &["curly loop"]
-}
-,EmojiData {
-    emoji: "➿",
-    tags:  &["double curly loop","loop"]
-}
-,EmojiData {
-    emoji: "〽️",
-    tags:  &["part alternation mark"]
-}
-,EmojiData {
-    emoji: "✳️",
-    tags:  &["eight-spoked asterisk","eight spoked asterisk"]
-}
-,EmojiData {
-    emoji: "✴️",
-    tags:  &["eight-pointed star","eight pointed black star"]
-}
-,EmojiData {
-    emoji: "❇️",
-    tags:  &["sparkle"]
-}
-,EmojiData {
-    emoji: "‼️",
-    tags:  &["double exclamation mark","bangbang"]
-}
-,EmojiData {
-    emoji: "⁉️",
-    tags:  &["exclamation question mark","interrobang"]
-}
-,EmojiData {
-    emoji: "❓",
-    tags:  &["question mark","confused","question"]
-}
-,EmojiData {
-    emoji: "❔",
-    tags:  &["white question mark","grey question"]
-}
-,EmojiData {
-    emoji: "❕",
-    tags:  &["white exclamation mark","grey exclamation"]
-}
-,EmojiData {
-    emoji: "❗",
-    tags:  &["exclamation mark","bang","exclamation","heavy exclamation mark"]
-}
-,EmojiData {
-    emoji: "〰️",
-    tags:  &["wavy dash"]
-}
-,EmojiData {
-    emoji: "©️",
-    tags:  &["copyright"]
-}
-,EmojiData {
-    emoji: "®️",
-    tags:  &["registered"]
-}
-,EmojiData {
-    emoji: "™️",
-    tags:  &["trade mark","trademark","tm"]
-}
-,EmojiData {
-    emoji: "#️⃣",
-    tags:  &["keycap: #","number","hash"]
-}
-,EmojiData {
-    emoji: "*️⃣",
-    tags:  &["keycap: *","asterisk"]
-}
-,EmojiData {
-    emoji: "0️⃣",
-    tags:  &["keycap: 0","zero"]
-}
-,EmojiData {
-    emoji: "1️⃣",
-    tags:  &["keycap: 1","one"]
-}
-,EmojiData {
-    emoji: "2️⃣",
-    tags:  &["keycap: 2","two"]
-}
-,EmojiData {
-    emoji: "3️⃣",
-    tags:  &["keycap: 3","three"]
-}
-,EmojiData {
-    emoji: "4️⃣",
-    tags:  &["keycap: 4","four"]
-}
-,EmojiData {
-    emoji: "5️⃣",
-    tags:  &["keycap: 5","five"]
-}
-,EmojiData {
-    emoji: "6️⃣",
-    tags:  &["keycap: 6","six"]
-}
-,EmojiData {
-    emoji: "7️⃣",
-    tags:  &["keycap: 7","seven"]
-}
-,EmojiData {
-    emoji: "8️⃣",
-    tags:  &["keycap: 8","eight"]
-}
-,EmojiData {
-    emoji: "9️⃣",
-    tags:  &["keycap: 9","nine"]
-}
-,EmojiData {
-    emoji: "🔟",
-    tags:  &["keycap: 10","keycap ten"]
-}
-,EmojiData {
-    emoji: "🔠",
-    tags:  &["input latin uppercase","letters","capital abcd"]
-}
-,EmojiData {
-    emoji: "🔡",
-    tags:  &["input latin lowercase","abcd"]
-}
-,EmojiData {
-    emoji: "🔢",
-    tags:  &["input numbers","numbers","1234"]
-}
-,EmojiData {
-    emoji: "🔣",
-    tags:  &["input symbols","symbols"]
-}
-,EmojiData {
-    emoji: "🔤",
-    tags:  &["input latin letters","alphabet","abc"]
-}
-,EmojiData {
-    emoji: "🅰️",
-    tags:  &["A button (blood type)","a"]
-}
-,EmojiData {
-    emoji: "🆎",
-    tags:  &["AB button (blood type)","ab"]
-}
-,EmojiData {
-    emoji: "🅱️",
-    tags:  &["B button (blood type)","b"]
-}
-,EmojiData {
-    emoji: "🆑",
-    tags:  &["CL button","cl"]
-}
-,EmojiData {
-    emoji: "🆒",
-    tags:  &["COOL button","cool"]
-}
-,EmojiData {
-    emoji: "🆓",
-    tags:  &["FREE button","free"]
-}
-,EmojiData {
-    emoji: "ℹ️",
-    tags:  &["information","information source"]
-}
-,EmojiData {
-    emoji: "🆔",
-    tags:  &["ID button","id"]
-}
-,EmojiData {
-    emoji: "Ⓜ️",
-    tags:  &["circled M","m"]
-}
-,EmojiData {
-    emoji: "🆕",
-    tags:  &["NEW button","fresh","new"]
-}
-,EmojiData {
-    emoji: "🆖",
-    tags:  &["NG button","ng"]
-}
-,EmojiData {
-    emoji: "🅾️",
-    tags:  &["O button (blood type)","o2"]
-}
-,EmojiData {
-    emoji: "🆗",
-    tags:  &["OK button","yes","ok"]
-}
-,EmojiData {
-    emoji: "🅿️",
-    tags:  &["P button","parking"]
-}
-,EmojiData {
-    emoji: "🆘",
-    tags:  &["SOS button","help","emergency","sos"]
-}
-,EmojiData {
-    emoji: "🆙",
-    tags:  &["UP! button","up"]
-}
-,EmojiData {
-    emoji: "🆚",
-    tags:  &["VS button","vs"]
-}
-,EmojiData {
-    emoji: "🈁",
-    tags:  &["Japanese “here” button","koko"]
-}
-,EmojiData {
-    emoji: "🈂️",
-    tags:  &["Japanese “service charge” button","sa"]
-}
-,EmojiData {
-    emoji: "🈷️",
-    tags:  &["Japanese “monthly amount” button","u6708"]
-}
-,EmojiData {
-    emoji: "🈶",
-    tags:  &["Japanese “not free of charge” button","u6709"]
-}
-,EmojiData {
-    emoji: "🈯",
-    tags:  &["Japanese “reserved” button","u6307"]
-}
-,EmojiData {
-    emoji: "🉐",
-    tags:  &["Japanese “bargain” button","ideograph advantage"]
-}
-,EmojiData {
-    emoji: "🈹",
-    tags:  &["Japanese “discount” button","u5272"]
-}
-,EmojiData {
-    emoji: "🈚",
-    tags:  &["Japanese “free of charge” button","u7121"]
-}
-,EmojiData {
-    emoji: "🈲",
-    tags:  &["Japanese “prohibited” button","u7981"]
-}
-,EmojiData {
-    emoji: "🉑",
-    tags:  &["Japanese “acceptable” button","accept"]
-}
-,EmojiData {
-    emoji: "🈸",
-    tags:  &["Japanese “application” button","u7533"]
-}
-,EmojiData {
-    emoji: "🈴",
-    tags:  &["Japanese “passing grade” button","u5408"]
-}
-,EmojiData {
-    emoji: "🈳",
-    tags:  &["Japanese “vacancy” button","u7a7a"]
-}
-,EmojiData {
-    emoji: "㊗️",
-    tags:  &["Japanese “congratulations” button","congratulations"]
-}
-,EmojiData {
-    emoji: "㊙️",
-    tags:  &["Japanese “secret” button","secret"]
-}
-,EmojiData {
-    emoji: "🈺",
-    tags:  &["Japanese “open for business” button","u55b6"]
-}
-,EmojiData {
-    emoji: "🈵",
-    tags:  &["Japanese “no vacancy” button","u6e80"]
-}
-,EmojiData {
-    emoji: "🔴",
-    tags:  &["red circle"]
-}
-,EmojiData {
-    emoji: "🟠",
-    tags:  &["orange circle"]
-}
-,EmojiData {
-    emoji: "🟡",
-    tags:  &["yellow circle"]
-}
-,EmojiData {
-    emoji: "🟢",
-    tags:  &["green circle"]
-}
-,EmojiData {
-    emoji: "🔵",
-    tags:  &["blue circle","large blue circle"]
-}
-,EmojiData {
-    emoji: "🟣",
-    tags:  &["purple circle"]
-}
-,EmojiData {
-    emoji: "🟤",
-    tags:  &["brown circle"]
-}
-,EmojiData {
-    emoji: "⚫",
-    tags:  &["black circle"]
-}
-,EmojiData {
-    emoji: "⚪",
-    tags:  &["white circle"]
-}
-,EmojiData {
-    emoji: "🟥",
-    tags:  &["red square"]
-}
-,EmojiData {
-    emoji: "🟧",
-    tags:  &["orange square"]
-}
-,EmojiData {
-    emoji: "🟨",
-    tags:  &["yellow square"]
-}
-,EmojiData {
-    emoji: "🟩",
-    tags:  &["green square"]
-}
-,EmojiData {
-    emoji: "🟦",
-    tags:  &["blue square"]
-}
-,EmojiData {
-    emoji: "🟪",
-    tags:  &["purple square"]
-}
-,EmojiData {
-    emoji: "🟫",
-    tags:  &["brown square"]
-}
-,EmojiData {
-    emoji: "⬛",
-    tags:  &["black large square"]
-}
-,EmojiData {
-    emoji: "⬜",
-    tags:  &["white large square"]
-}
-,EmojiData {
-    emoji: "◼️",
-    tags:  &["black medium square"]
-}
-,EmojiData {
-    emoji: "◻️",
-    tags:  &["white medium square"]
-}
-,EmojiData {
-    emoji: "◾",
-    tags:  &["black medium-small square","black medium small square"]
-}
-,EmojiData {
-    emoji: "◽",
-    tags:  &["white medium-small square","white medium small square"]
-}
-,EmojiData {
-    emoji: "▪️",
-    tags:  &["black small square"]
-}
-,EmojiData {
-    emoji: "▫️",
-    tags:  &["white small square"]
-}
-,EmojiData {
-    emoji: "🔶",
-    tags:  &["large orange diamond"]
-}
-,EmojiData {
-    emoji: "🔷",
-    tags:  &["large blue diamond"]
-}
-,EmojiData {
-    emoji: "🔸",
-    tags:  &["small orange diamond"]
-}
-,EmojiData {
-    emoji: "🔹",
-    tags:  &["small blue diamond"]
-}
-,EmojiData {
-    emoji: "🔺",
-    tags:  &["red triangle pointed up","small red triangle"]
-}
-,EmojiData {
-    emoji: "🔻",
-    tags:  &["red triangle pointed down","small red triangle down"]
-}
-,EmojiData {
-    emoji: "💠",
-    tags:  &["diamond with a dot","diamond shape with a dot inside"]
-}
-,EmojiData {
-    emoji: "🔘",
-    tags:  &["radio button"]
-}
-,EmojiData {
-    emoji: "🔳",
-    tags:  &["white square button"]
-}
-,EmojiData {
-    emoji: "🔲",
-    tags:  &["black square button"]
-}
-,EmojiData {
-    emoji: "🏁",
-    tags:  &["chequered flag","milestone","finish","checkered flag"]
-}
-,EmojiData {
-    emoji: "🚩",
-    tags:  &["triangular flag","triangular flag on post"]
-}
-,EmojiData {
-    emoji: "🎌",
-    tags:  &["crossed flags"]
-}
-,EmojiData {
-    emoji: "🏴",
-    tags:  &["black flag"]
-}
-,EmojiData {
-    emoji: "🏳️",
-    tags:  &["white flag"]
-}
-,EmojiData {
-    emoji: "🏳️‍🌈",
-    tags:  &["rainbow flag","pride"]
-}
-,EmojiData {
-    emoji: "🏴‍☠️",
-    tags:  &["pirate flag"]
-}
-,EmojiData {
-    emoji: "🇦🇨",
-    tags:  &["flag: Ascension Island","ascension island"]
-}
-,EmojiData {
-    emoji: "🇦🇩",
-    tags:  &["flag: Andorra","andorra"]
-}
-,EmojiData {
-    emoji: "🇦🇪",
-    tags:  &["flag: United Arab Emirates","united arab emirates"]
-}
-,EmojiData {
-    emoji: "🇦🇫",
-    tags:  &["flag: Afghanistan","afghanistan"]
-}
-,EmojiData {
-    emoji: "🇦🇬",
-    tags:  &["flag: Antigua & Barbuda","antigua barbuda"]
-}
-,EmojiData {
-    emoji: "🇦🇮",
-    tags:  &["flag: Anguilla","anguilla"]
-}
-,EmojiData {
-    emoji: "🇦🇱",
-    tags:  &["flag: Albania","albania"]
-}
-,EmojiData {
-    emoji: "🇦🇲",
-    tags:  &["flag: Armenia","armenia"]
-}
-,EmojiData {
-    emoji: "🇦🇴",
-    tags:  &["flag: Angola","angola"]
-}
-,EmojiData {
-    emoji: "🇦🇶",
-    tags:  &["flag: Antarctica","antarctica"]
-}
-,EmojiData {
-    emoji: "🇦🇷",
-    tags:  &["flag: Argentina","argentina"]
-}
-,EmojiData {
-    emoji: "🇦🇸",
-    tags:  &["flag: American Samoa","american samoa"]
-}
-,EmojiData {
-    emoji: "🇦🇹",
-    tags:  &["flag: Austria","austria"]
-}
-,EmojiData {
-    emoji: "🇦🇺",
-    tags:  &["flag: Australia","australia"]
-}
-,EmojiData {
-    emoji: "🇦🇼",
-    tags:  &["flag: Aruba","aruba"]
-}
-,EmojiData {
-    emoji: "🇦🇽",
-    tags:  &["flag: Åland Islands","aland islands"]
-}
-,EmojiData {
-    emoji: "🇦🇿",
-    tags:  &["flag: Azerbaijan","azerbaijan"]
-}
-,EmojiData {
-    emoji: "🇧🇦",
-    tags:  &["flag: Bosnia & Herzegovina","bosnia herzegovina"]
-}
-,EmojiData {
-    emoji: "🇧🇧",
-    tags:  &["flag: Barbados","barbados"]
-}
-,EmojiData {
-    emoji: "🇧🇩",
-    tags:  &["flag: Bangladesh","bangladesh"]
-}
-,EmojiData {
-    emoji: "🇧🇪",
-    tags:  &["flag: Belgium","belgium"]
-}
-,EmojiData {
-    emoji: "🇧🇫",
-    tags:  &["flag: Burkina Faso","burkina faso"]
-}
-,EmojiData {
-    emoji: "🇧🇬",
-    tags:  &["flag: Bulgaria","bulgaria"]
-}
-,EmojiData {
-    emoji: "🇧🇭",
-    tags:  &["flag: Bahrain","bahrain"]
-}
-,EmojiData {
-    emoji: "🇧🇮",
-    tags:  &["flag: Burundi","burundi"]
-}
-,EmojiData {
-    emoji: "🇧🇯",
-    tags:  &["flag: Benin","benin"]
-}
-,EmojiData {
-    emoji: "🇧🇱",
-    tags:  &["flag: St. Barthélemy","st barthelemy"]
-}
-,EmojiData {
-    emoji: "🇧🇲",
-    tags:  &["flag: Bermuda","bermuda"]
-}
-,EmojiData {
-    emoji: "🇧🇳",
-    tags:  &["flag: Brunei","brunei"]
-}
-,EmojiData {
-    emoji: "🇧🇴",
-    tags:  &["flag: Bolivia","bolivia"]
-}
-,EmojiData {
-    emoji: "🇧🇶",
-    tags:  &["flag: Caribbean Netherlands","caribbean netherlands"]
-}
-,EmojiData {
-    emoji: "🇧🇷",
-    tags:  &["flag: Brazil","brazil"]
-}
-,EmojiData {
-    emoji: "🇧🇸",
-    tags:  &["flag: Bahamas","bahamas"]
-}
-,EmojiData {
-    emoji: "🇧🇹",
-    tags:  &["flag: Bhutan","bhutan"]
-}
-,EmojiData {
-    emoji: "🇧🇻",
-    tags:  &["flag: Bouvet Island","bouvet island"]
-}
-,EmojiData {
-    emoji: "🇧🇼",
-    tags:  &["flag: Botswana","botswana"]
-}
-,EmojiData {
-    emoji: "🇧🇾",
-    tags:  &["flag: Belarus","belarus"]
-}
-,EmojiData {
-    emoji: "🇧🇿",
-    tags:  &["flag: Belize","belize"]
-}
-,EmojiData {
-    emoji: "🇨🇦",
-    tags:  &["flag: Canada","canada"]
-}
-,EmojiData {
-    emoji: "🇨🇨",
-    tags:  &["flag: Cocos (Keeling) Islands","keeling","cocos islands"]
-}
-,EmojiData {
-    emoji: "🇨🇩",
-    tags:  &["flag: Congo - Kinshasa","congo kinshasa"]
-}
-,EmojiData {
-    emoji: "🇨🇫",
-    tags:  &["flag: Central African Republic","central african republic"]
-}
-,EmojiData {
-    emoji: "🇨🇬",
-    tags:  &["flag: Congo - Brazzaville","congo brazzaville"]
-}
-,EmojiData {
-    emoji: "🇨🇭",
-    tags:  &["flag: Switzerland","switzerland"]
-}
-,EmojiData {
-    emoji: "🇨🇮",
-    tags:  &["flag: Côte d’Ivoire","ivory","cote divoire"]
-}
-,EmojiData {
-    emoji: "🇨🇰",
-    tags:  &["flag: Cook Islands","cook islands"]
-}
-,EmojiData {
-    emoji: "🇨🇱",
-    tags:  &["flag: Chile","chile"]
-}
-,EmojiData {
-    emoji: "🇨🇲",
-    tags:  &["flag: Cameroon","cameroon"]
-}
-,EmojiData {
-    emoji: "🇨🇳",
-    tags:  &["flag: China","china","cn"]
-}
-,EmojiData {
-    emoji: "🇨🇴",
-    tags:  &["flag: Colombia","colombia"]
-}
-,EmojiData {
-    emoji: "🇨🇵",
-    tags:  &["flag: Clipperton Island","clipperton island"]
-}
-,EmojiData {
-    emoji: "🇨🇷",
-    tags:  &["flag: Costa Rica","costa rica"]
-}
-,EmojiData {
-    emoji: "🇨🇺",
-    tags:  &["flag: Cuba","cuba"]
-}
-,EmojiData {
-    emoji: "🇨🇻",
-    tags:  &["flag: Cape Verde","cape verde"]
-}
-,EmojiData {
-    emoji: "🇨🇼",
-    tags:  &["flag: Curaçao","curacao"]
-}
-,EmojiData {
-    emoji: "🇨🇽",
-    tags:  &["flag: Christmas Island","christmas island"]
-}
-,EmojiData {
-    emoji: "🇨🇾",
-    tags:  &["flag: Cyprus","cyprus"]
-}
-,EmojiData {
-    emoji: "🇨🇿",
-    tags:  &["flag: Czechia","czech republic"]
-}
-,EmojiData {
-    emoji: "🇩🇪",
-    tags:  &["flag: Germany","flag","germany","de"]
-}
-,EmojiData {
-    emoji: "🇩🇬",
-    tags:  &["flag: Diego Garcia","diego garcia"]
-}
-,EmojiData {
-    emoji: "🇩🇯",
-    tags:  &["flag: Djibouti","djibouti"]
-}
-,EmojiData {
-    emoji: "🇩🇰",
-    tags:  &["flag: Denmark","denmark"]
-}
-,EmojiData {
-    emoji: "🇩🇲",
-    tags:  &["flag: Dominica","dominica"]
-}
-,EmojiData {
-    emoji: "🇩🇴",
-    tags:  &["flag: Dominican Republic","dominican republic"]
-}
-,EmojiData {
-    emoji: "🇩🇿",
-    tags:  &["flag: Algeria","algeria"]
-}
-,EmojiData {
-    emoji: "🇪🇦",
-    tags:  &["flag: Ceuta & Melilla","ceuta melilla"]
-}
-,EmojiData {
-    emoji: "🇪🇨",
-    tags:  &["flag: Ecuador","ecuador"]
-}
-,EmojiData {
-    emoji: "🇪🇪",
-    tags:  &["flag: Estonia","estonia"]
-}
-,EmojiData {
-    emoji: "🇪🇬",
-    tags:  &["flag: Egypt","egypt"]
-}
-,EmojiData {
-    emoji: "🇪🇭",
-    tags:  &["flag: Western Sahara","western sahara"]
-}
-,EmojiData {
-    emoji: "🇪🇷",
-    tags:  &["flag: Eritrea","eritrea"]
-}
-,EmojiData {
-    emoji: "🇪🇸",
-    tags:  &["flag: Spain","spain","es"]
-}
-,EmojiData {
-    emoji: "🇪🇹",
-    tags:  &["flag: Ethiopia","ethiopia"]
-}
-,EmojiData {
-    emoji: "🇪🇺",
-    tags:  &["flag: European Union","eu","european union"]
-}
-,EmojiData {
-    emoji: "🇫🇮",
-    tags:  &["flag: Finland","finland"]
-}
-,EmojiData {
-    emoji: "🇫🇯",
-    tags:  &["flag: Fiji","fiji"]
-}
-,EmojiData {
-    emoji: "🇫🇰",
-    tags:  &["flag: Falkland Islands","falkland islands"]
-}
-,EmojiData {
-    emoji: "🇫🇲",
-    tags:  &["flag: Micronesia","micronesia"]
-}
-,EmojiData {
-    emoji: "🇫🇴",
-    tags:  &["flag: Faroe Islands","faroe islands"]
-}
-,EmojiData {
-    emoji: "🇫🇷",
-    tags:  &["flag: France","france","french","fr"]
-}
-,EmojiData {
-    emoji: "🇬🇦",
-    tags:  &["flag: Gabon","gabon"]
-}
-,EmojiData {
-    emoji: "🇬🇧",
-    tags:  &["flag: United Kingdom","flag","british","gb","uk"]
-}
-,EmojiData {
-    emoji: "🇬🇩",
-    tags:  &["flag: Grenada","grenada"]
-}
-,EmojiData {
-    emoji: "🇬🇪",
-    tags:  &["flag: Georgia","georgia"]
-}
-,EmojiData {
-    emoji: "🇬🇫",
-    tags:  &["flag: French Guiana","french guiana"]
-}
-,EmojiData {
-    emoji: "🇬🇬",
-    tags:  &["flag: Guernsey","guernsey"]
-}
-,EmojiData {
-    emoji: "🇬🇭",
-    tags:  &["flag: Ghana","ghana"]
-}
-,EmojiData {
-    emoji: "🇬🇮",
-    tags:  &["flag: Gibraltar","gibraltar"]
-}
-,EmojiData {
-    emoji: "🇬🇱",
-    tags:  &["flag: Greenland","greenland"]
-}
-,EmojiData {
-    emoji: "🇬🇲",
-    tags:  &["flag: Gambia","gambia"]
-}
-,EmojiData {
-    emoji: "🇬🇳",
-    tags:  &["flag: Guinea","guinea"]
-}
-,EmojiData {
-    emoji: "🇬🇵",
-    tags:  &["flag: Guadeloupe","guadeloupe"]
-}
-,EmojiData {
-    emoji: "🇬🇶",
-    tags:  &["flag: Equatorial Guinea","equatorial guinea"]
-}
-,EmojiData {
-    emoji: "🇬🇷",
-    tags:  &["flag: Greece","greece"]
-}
-,EmojiData {
-    emoji: "🇬🇸",
-    tags:  &["flag: South Georgia & South Sandwich Islands","south georgia south sandwich islands"]
-}
-,EmojiData {
-    emoji: "🇬🇹",
-    tags:  &["flag: Guatemala","guatemala"]
-}
-,EmojiData {
-    emoji: "🇬🇺",
-    tags:  &["flag: Guam","guam"]
-}
-,EmojiData {
-    emoji: "🇬🇼",
-    tags:  &["flag: Guinea-Bissau","guinea bissau"]
-}
-,EmojiData {
-    emoji: "🇬🇾",
-    tags:  &["flag: Guyana","guyana"]
-}
-,EmojiData {
-    emoji: "🇭🇰",
-    tags:  &["flag: Hong Kong SAR China","hong kong"]
-}
-,EmojiData {
-    emoji: "🇭🇲",
-    tags:  &["flag: Heard & McDonald Islands","heard mcdonald islands"]
-}
-,EmojiData {
-    emoji: "🇭🇳",
-    tags:  &["flag: Honduras","honduras"]
-}
-,EmojiData {
-    emoji: "🇭🇷",
-    tags:  &["flag: Croatia","croatia"]
-}
-,EmojiData {
-    emoji: "🇭🇹",
-    tags:  &["flag: Haiti","haiti"]
-}
-,EmojiData {
-    emoji: "🇭🇺",
-    tags:  &["flag: Hungary","hungary"]
-}
-,EmojiData {
-    emoji: "🇮🇨",
-    tags:  &["flag: Canary Islands","canary islands"]
-}
-,EmojiData {
-    emoji: "🇮🇩",
-    tags:  &["flag: Indonesia","indonesia"]
-}
-,EmojiData {
-    emoji: "🇮🇪",
-    tags:  &["flag: Ireland","ireland"]
-}
-,EmojiData {
-    emoji: "🇮🇱",
-    tags:  &["flag: Israel","israel"]
-}
-,EmojiData {
-    emoji: "🇮🇲",
-    tags:  &["flag: Isle of Man","isle of man"]
-}
-,EmojiData {
-    emoji: "🇮🇳",
-    tags:  &["flag: India","india"]
-}
-,EmojiData {
-    emoji: "🇮🇴",
-    tags:  &["flag: British Indian Ocean Territory","british indian ocean territory"]
-}
-,EmojiData {
-    emoji: "🇮🇶",
-    tags:  &["flag: Iraq","iraq"]
-}
-,EmojiData {
-    emoji: "🇮🇷",
-    tags:  &["flag: Iran","iran"]
-}
-,EmojiData {
-    emoji: "🇮🇸",
-    tags:  &["flag: Iceland","iceland"]
-}
-,EmojiData {
-    emoji: "🇮🇹",
-    tags:  &["flag: Italy","italy","it"]
-}
-,EmojiData {
-    emoji: "🇯🇪",
-    tags:  &["flag: Jersey","jersey"]
-}
-,EmojiData {
-    emoji: "🇯🇲",
-    tags:  &["flag: Jamaica","jamaica"]
-}
-,EmojiData {
-    emoji: "🇯🇴",
-    tags:  &["flag: Jordan","jordan"]
-}
-,EmojiData {
-    emoji: "🇯🇵",
-    tags:  &["flag: Japan","japan","jp"]
-}
-,EmojiData {
-    emoji: "🇰🇪",
-    tags:  &["flag: Kenya","kenya"]
-}
-,EmojiData {
-    emoji: "🇰🇬",
-    tags:  &["flag: Kyrgyzstan","kyrgyzstan"]
-}
-,EmojiData {
-    emoji: "🇰🇭",
-    tags:  &["flag: Cambodia","cambodia"]
-}
-,EmojiData {
-    emoji: "🇰🇮",
-    tags:  &["flag: Kiribati","kiribati"]
-}
-,EmojiData {
-    emoji: "🇰🇲",
-    tags:  &["flag: Comoros","comoros"]
-}
-,EmojiData {
-    emoji: "🇰🇳",
-    tags:  &["flag: St. Kitts & Nevis","st kitts nevis"]
-}
-,EmojiData {
-    emoji: "🇰🇵",
-    tags:  &["flag: North Korea","north korea"]
-}
-,EmojiData {
-    emoji: "🇰🇷",
-    tags:  &["flag: South Korea","korea","kr"]
-}
-,EmojiData {
-    emoji: "🇰🇼",
-    tags:  &["flag: Kuwait","kuwait"]
-}
-,EmojiData {
-    emoji: "🇰🇾",
-    tags:  &["flag: Cayman Islands","cayman islands"]
-}
-,EmojiData {
-    emoji: "🇰🇿",
-    tags:  &["flag: Kazakhstan","kazakhstan"]
-}
-,EmojiData {
-    emoji: "🇱🇦",
-    tags:  &["flag: Laos","laos"]
-}
-,EmojiData {
-    emoji: "🇱🇧",
-    tags:  &["flag: Lebanon","lebanon"]
-}
-,EmojiData {
-    emoji: "🇱🇨",
-    tags:  &["flag: St. Lucia","st lucia"]
-}
-,EmojiData {
-    emoji: "🇱🇮",
-    tags:  &["flag: Liechtenstein","liechtenstein"]
-}
-,EmojiData {
-    emoji: "🇱🇰",
-    tags:  &["flag: Sri Lanka","sri lanka"]
-}
-,EmojiData {
-    emoji: "🇱🇷",
-    tags:  &["flag: Liberia","liberia"]
-}
-,EmojiData {
-    emoji: "🇱🇸",
-    tags:  &["flag: Lesotho","lesotho"]
-}
-,EmojiData {
-    emoji: "🇱🇹",
-    tags:  &["flag: Lithuania","lithuania"]
-}
-,EmojiData {
-    emoji: "🇱🇺",
-    tags:  &["flag: Luxembourg","luxembourg"]
-}
-,EmojiData {
-    emoji: "🇱🇻",
-    tags:  &["flag: Latvia","latvia"]
-}
-,EmojiData {
-    emoji: "🇱🇾",
-    tags:  &["flag: Libya","libya"]
-}
-,EmojiData {
-    emoji: "🇲🇦",
-    tags:  &["flag: Morocco","morocco"]
-}
-,EmojiData {
-    emoji: "🇲🇨",
-    tags:  &["flag: Monaco","monaco"]
-}
-,EmojiData {
-    emoji: "🇲🇩",
-    tags:  &["flag: Moldova","moldova"]
-}
-,EmojiData {
-    emoji: "🇲🇪",
-    tags:  &["flag: Montenegro","montenegro"]
-}
-,EmojiData {
-    emoji: "🇲🇫",
-    tags:  &["flag: St. Martin","st martin"]
-}
-,EmojiData {
-    emoji: "🇲🇬",
-    tags:  &["flag: Madagascar","madagascar"]
-}
-,EmojiData {
-    emoji: "🇲🇭",
-    tags:  &["flag: Marshall Islands","marshall islands"]
-}
-,EmojiData {
-    emoji: "🇲🇰",
-    tags:  &["flag: North Macedonia","macedonia"]
-}
-,EmojiData {
-    emoji: "🇲🇱",
-    tags:  &["flag: Mali","mali"]
-}
-,EmojiData {
-    emoji: "🇲🇲",
-    tags:  &["flag: Myanmar (Burma)","burma","myanmar"]
-}
-,EmojiData {
-    emoji: "🇲🇳",
-    tags:  &["flag: Mongolia","mongolia"]
-}
-,EmojiData {
-    emoji: "🇲🇴",
-    tags:  &["flag: Macao SAR China","macau"]
-}
-,EmojiData {
-    emoji: "🇲🇵",
-    tags:  &["flag: Northern Mariana Islands","northern mariana islands"]
-}
-,EmojiData {
-    emoji: "🇲🇶",
-    tags:  &["flag: Martinique","martinique"]
-}
-,EmojiData {
-    emoji: "🇲🇷",
-    tags:  &["flag: Mauritania","mauritania"]
-}
-,EmojiData {
-    emoji: "🇲🇸",
-    tags:  &["flag: Montserrat","montserrat"]
-}
-,EmojiData {
-    emoji: "🇲🇹",
-    tags:  &["flag: Malta","malta"]
-}
-,EmojiData {
-    emoji: "🇲🇺",
-    tags:  &["flag: Mauritius","mauritius"]
-}
-,EmojiData {
-    emoji: "🇲🇻",
-    tags:  &["flag: Maldives","maldives"]
-}
-,EmojiData {
-    emoji: "🇲🇼",
-    tags:  &["flag: Malawi","malawi"]
-}
-,EmojiData {
-    emoji: "🇲🇽",
-    tags:  &["flag: Mexico","mexico"]
-}
-,EmojiData {
-    emoji: "🇲🇾",
-    tags:  &["flag: Malaysia","malaysia"]
-}
-,EmojiData {
-    emoji: "🇲🇿",
-    tags:  &["flag: Mozambique","mozambique"]
-}
-,EmojiData {
-    emoji: "🇳🇦",
-    tags:  &["flag: Namibia","namibia"]
-}
-,EmojiData {
-    emoji: "🇳🇨",
-    tags:  &["flag: New Caledonia","new caledonia"]
-}
-,EmojiData {
-    emoji: "🇳🇪",
-    tags:  &["flag: Niger","niger"]
-}
-,EmojiData {
-    emoji: "🇳🇫",
-    tags:  &["flag: Norfolk Island","norfolk island"]
-}
-,EmojiData {
-    emoji: "🇳🇬",
-    tags:  &["flag: Nigeria","nigeria"]
-}
-,EmojiData {
-    emoji: "🇳🇮",
-    tags:  &["flag: Nicaragua","nicaragua"]
-}
-,EmojiData {
-    emoji: "🇳🇱",
-    tags:  &["flag: Netherlands","netherlands"]
-}
-,EmojiData {
-    emoji: "🇳🇴",
-    tags:  &["flag: Norway","norway"]
-}
-,EmojiData {
-    emoji: "🇳🇵",
-    tags:  &["flag: Nepal","nepal"]
-}
-,EmojiData {
-    emoji: "🇳🇷",
-    tags:  &["flag: Nauru","nauru"]
-}
-,EmojiData {
-    emoji: "🇳🇺",
-    tags:  &["flag: Niue","niue"]
-}
-,EmojiData {
-    emoji: "🇳🇿",
-    tags:  &["flag: New Zealand","new zealand"]
-}
-,EmojiData {
-    emoji: "🇴🇲",
-    tags:  &["flag: Oman","oman"]
-}
-,EmojiData {
-    emoji: "🇵🇦",
-    tags:  &["flag: Panama","panama"]
-}
-,EmojiData {
-    emoji: "🇵🇪",
-    tags:  &["flag: Peru","peru"]
-}
-,EmojiData {
-    emoji: "🇵🇫",
-    tags:  &["flag: French Polynesia","french polynesia"]
-}
-,EmojiData {
-    emoji: "🇵🇬",
-    tags:  &["flag: Papua New Guinea","papua new guinea"]
-}
-,EmojiData {
-    emoji: "🇵🇭",
-    tags:  &["flag: Philippines","philippines"]
-}
-,EmojiData {
-    emoji: "🇵🇰",
-    tags:  &["flag: Pakistan","pakistan"]
-}
-,EmojiData {
-    emoji: "🇵🇱",
-    tags:  &["flag: Poland","poland"]
-}
-,EmojiData {
-    emoji: "🇵🇲",
-    tags:  &["flag: St. Pierre & Miquelon","st pierre miquelon"]
-}
-,EmojiData {
-    emoji: "🇵🇳",
-    tags:  &["flag: Pitcairn Islands","pitcairn islands"]
-}
-,EmojiData {
-    emoji: "🇵🇷",
-    tags:  &["flag: Puerto Rico","puerto rico"]
-}
-,EmojiData {
-    emoji: "🇵🇸",
-    tags:  &["flag: Palestinian Territories","palestinian territories"]
-}
-,EmojiData {
-    emoji: "🇵🇹",
-    tags:  &["flag: Portugal","portugal"]
-}
-,EmojiData {
-    emoji: "🇵🇼",
-    tags:  &["flag: Palau","palau"]
-}
-,EmojiData {
-    emoji: "🇵🇾",
-    tags:  &["flag: Paraguay","paraguay"]
-}
-,EmojiData {
-    emoji: "🇶🇦",
-    tags:  &["flag: Qatar","qatar"]
-}
-,EmojiData {
-    emoji: "🇷🇪",
-    tags:  &["flag: Réunion","reunion"]
-}
-,EmojiData {
-    emoji: "🇷🇴",
-    tags:  &["flag: Romania","romania"]
-}
-,EmojiData {
-    emoji: "🇷🇸",
-    tags:  &["flag: Serbia","serbia"]
-}
-,EmojiData {
-    emoji: "🇷🇺",
-    tags:  &["flag: Russia","russia","ru"]
-}
-,EmojiData {
-    emoji: "🇷🇼",
-    tags:  &["flag: Rwanda","rwanda"]
-}
-,EmojiData {
-    emoji: "🇸🇦",
-    tags:  &["flag: Saudi Arabia","saudi arabia"]
-}
-,EmojiData {
-    emoji: "🇸🇧",
-    tags:  &["flag: Solomon Islands","solomon islands"]
-}
-,EmojiData {
-    emoji: "🇸🇨",
-    tags:  &["flag: Seychelles","seychelles"]
-}
-,EmojiData {
-    emoji: "🇸🇩",
-    tags:  &["flag: Sudan","sudan"]
-}
-,EmojiData {
-    emoji: "🇸🇪",
-    tags:  &["flag: Sweden","sweden"]
-}
-,EmojiData {
-    emoji: "🇸🇬",
-    tags:  &["flag: Singapore","singapore"]
-}
-,EmojiData {
-    emoji: "🇸🇭",
-    tags:  &["flag: St. Helena","st helena"]
-}
-,EmojiData {
-    emoji: "🇸🇮",
-    tags:  &["flag: Slovenia","slovenia"]
-}
-,EmojiData {
-    emoji: "🇸🇯",
-    tags:  &["flag: Svalbard & Jan Mayen","svalbard jan mayen"]
-}
-,EmojiData {
-    emoji: "🇸🇰",
-    tags:  &["flag: Slovakia","slovakia"]
-}
-,EmojiData {
-    emoji: "🇸🇱",
-    tags:  &["flag: Sierra Leone","sierra leone"]
-}
-,EmojiData {
-    emoji: "🇸🇲",
-    tags:  &["flag: San Marino","san marino"]
-}
-,EmojiData {
-    emoji: "🇸🇳",
-    tags:  &["flag: Senegal","senegal"]
-}
-,EmojiData {
-    emoji: "🇸🇴",
-    tags:  &["flag: Somalia","somalia"]
-}
-,EmojiData {
-    emoji: "🇸🇷",
-    tags:  &["flag: Suriname","suriname"]
-}
-,EmojiData {
-    emoji: "🇸🇸",
-    tags:  &["flag: South Sudan","south sudan"]
-}
-,EmojiData {
-    emoji: "🇸🇹",
-    tags:  &["flag: São Tomé & Príncipe","sao tome principe"]
-}
-,EmojiData {
-    emoji: "🇸🇻",
-    tags:  &["flag: El Salvador","el salvador"]
-}
-,EmojiData {
-    emoji: "🇸🇽",
-    tags:  &["flag: Sint Maarten","sint maarten"]
-}
-,EmojiData {
-    emoji: "🇸🇾",
-    tags:  &["flag: Syria","syria"]
-}
-,EmojiData {
-    emoji: "🇸🇿",
-    tags:  &["flag: Eswatini","swaziland"]
-}
-,EmojiData {
-    emoji: "🇹🇦",
-    tags:  &["flag: Tristan da Cunha","tristan da cunha"]
-}
-,EmojiData {
-    emoji: "🇹🇨",
-    tags:  &["flag: Turks & Caicos Islands","turks caicos islands"]
-}
-,EmojiData {
-    emoji: "🇹🇩",
-    tags:  &["flag: Chad","chad"]
-}
-,EmojiData {
-    emoji: "🇹🇫",
-    tags:  &["flag: French Southern Territories","french southern territories"]
-}
-,EmojiData {
-    emoji: "🇹🇬",
-    tags:  &["flag: Togo","togo"]
-}
-,EmojiData {
-    emoji: "🇹🇭",
-    tags:  &["flag: Thailand","thailand"]
-}
-,EmojiData {
-    emoji: "🇹🇯",
-    tags:  &["flag: Tajikistan","tajikistan"]
-}
-,EmojiData {
-    emoji: "🇹🇰",
-    tags:  &["flag: Tokelau","tokelau"]
-}
-,EmojiData {
-    emoji: "🇹🇱",
-    tags:  &["flag: Timor-Leste","timor leste"]
-}
-,EmojiData {
-    emoji: "🇹🇲",
-    tags:  &["flag: Turkmenistan","turkmenistan"]
-}
-,EmojiData {
-    emoji: "🇹🇳",
-    tags:  &["flag: Tunisia","tunisia"]
-}
-,EmojiData {
-    emoji: "🇹🇴",
-    tags:  &["flag: Tonga","tonga"]
-}
-,EmojiData {
-    emoji: "🇹🇷",
-    tags:  &["flag: Turkey","turkey","tr"]
-}
-,EmojiData {
-    emoji: "🇹🇹",
-    tags:  &["flag: Trinidad & Tobago","trinidad tobago"]
-}
-,EmojiData {
-    emoji: "🇹🇻",
-    tags:  &["flag: Tuvalu","tuvalu"]
-}
-,EmojiData {
-    emoji: "🇹🇼",
-    tags:  &["flag: Taiwan","taiwan"]
-}
-,EmojiData {
-    emoji: "🇹🇿",
-    tags:  &["flag: Tanzania","tanzania"]
-}
-,EmojiData {
-    emoji: "🇺🇦",
-    tags:  &["flag: Ukraine","ukraine"]
-}
-,EmojiData {
-    emoji: "🇺🇬",
-    tags:  &["flag: Uganda","uganda"]
-}
-,EmojiData {
-    emoji: "🇺🇲",
-    tags:  &["flag: U.S. Outlying Islands","us outlying islands"]
-}
-,EmojiData {
-    emoji: "🇺🇳",
-    tags:  &["flag: United Nations","united nations"]
-}
-,EmojiData {
-    emoji: "🇺🇸",
-    tags:  &["flag: United States","flag","united","america","us"]
-}
-,EmojiData {
-    emoji: "🇺🇾",
-    tags:  &["flag: Uruguay","uruguay"]
-}
-,EmojiData {
-    emoji: "🇺🇿",
-    tags:  &["flag: Uzbekistan","uzbekistan"]
-}
-,EmojiData {
-    emoji: "🇻🇦",
-    tags:  &["flag: Vatican City","vatican city"]
-}
-,EmojiData {
-    emoji: "🇻🇨",
-    tags:  &["flag: St. Vincent & Grenadines","st vincent grenadines"]
-}
-,EmojiData {
-    emoji: "🇻🇪",
-    tags:  &["flag: Venezuela","venezuela"]
-}
-,EmojiData {
-    emoji: "🇻🇬",
-    tags:  &["flag: British Virgin Islands","british virgin islands"]
-}
-,EmojiData {
-    emoji: "🇻🇮",
-    tags:  &["flag: U.S. Virgin Islands","us virgin islands"]
-}
-,EmojiData {
-    emoji: "🇻🇳",
-    tags:  &["flag: Vietnam","vietnam"]
-}
-,EmojiData {
-    emoji: "🇻🇺",
-    tags:  &["flag: Vanuatu","vanuatu"]
-}
-,EmojiData {
-    emoji: "🇼🇫",
-    tags:  &["flag: Wallis & Futuna","wallis futuna"]
-}
-,EmojiData {
-    emoji: "🇼🇸",
-    tags:  &["flag: Samoa","samoa"]
-}
-,EmojiData {
-    emoji: "🇽🇰",
-    tags:  &["flag: Kosovo","kosovo"]
-}
-,EmojiData {
-    emoji: "🇾🇪",
-    tags:  &["flag: Yemen","yemen"]
-}
-,EmojiData {
-    emoji: "🇾🇹",
-    tags:  &["flag: Mayotte","mayotte"]
-}
-,EmojiData {
-    emoji: "🇿🇦",
-    tags:  &["flag: South Africa","south africa"]
-}
-,EmojiData {
-    emoji: "🇿🇲",
-    tags:  &["flag: Zambia","zambia"]
-}
-,EmojiData {
-    emoji: "🇿🇼",
-    tags:  &["flag: Zimbabwe","zimbabwe"]
-}
-,EmojiData {
-    emoji: "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
-    tags:  &["flag: England","england"]
-}
-,EmojiData {
-    emoji: "🏴󠁧󠁢󠁳󠁣󠁴󠁿",
-    tags:  &["flag: Scotland","scotland"]
-}
-,EmojiData {
-    emoji: "🏴󠁧󠁢󠁷󠁬󠁳󠁿",
-    tags:  &["flag: Wales","wales"]
-}
+pub static EMOJI_DATA: [EmojiData; 1738] = [
+    EmojiData {
+        emoji: "😀",
+        tags: &["grinning face", "smile", "happy", "grinning"],
+    },
+    EmojiData {
+        emoji: "😃",
+        tags: &[
+            "grinning face with big eyes",
+            "happy",
+            "joy",
+            "haha",
+            "smiley",
+        ],
+    },
+    EmojiData {
+        emoji: "😄",
+        tags: &[
+            "grinning face with smiling eyes",
+            "happy",
+            "joy",
+            "laugh",
+            "pleased",
+            "smile",
+        ],
+    },
+    EmojiData {
+        emoji: "😁",
+        tags: &["beaming face with smiling eyes", "grin"],
+    },
+    EmojiData {
+        emoji: "😆",
+        tags: &[
+            "grinning squinting face",
+            "happy",
+            "haha",
+            "laughing",
+            "satisfied",
+        ],
+    },
+    EmojiData {
+        emoji: "😅",
+        tags: &["grinning face with sweat", "hot", "sweat smile"],
+    },
+    EmojiData {
+        emoji: "🤣",
+        tags: &["rolling on the floor laughing", "lol", "laughing", "rofl"],
+    },
+    EmojiData {
+        emoji: "😂",
+        tags: &["face with tears of joy", "tears", "joy"],
+    },
+    EmojiData {
+        emoji: "🙂",
+        tags: &["slightly smiling face"],
+    },
+    EmojiData {
+        emoji: "🙃",
+        tags: &["upside-down face", "upside down face"],
+    },
+    EmojiData {
+        emoji: "😉",
+        tags: &["winking face", "flirt", "wink"],
+    },
+    EmojiData {
+        emoji: "😊",
+        tags: &["smiling face with smiling eyes", "proud", "blush"],
+    },
+    EmojiData {
+        emoji: "😇",
+        tags: &["smiling face with halo", "angel", "innocent"],
+    },
+    EmojiData {
+        emoji: "🥰",
+        tags: &[
+            "smiling face with hearts",
+            "love",
+            "smiling face with three hearts",
+        ],
+    },
+    EmojiData {
+        emoji: "😍",
+        tags: &[
+            "smiling face with heart-eyes",
+            "love",
+            "crush",
+            "heart eyes",
+        ],
+    },
+    EmojiData {
+        emoji: "🤩",
+        tags: &["star-struck", "eyes", "star struck"],
+    },
+    EmojiData {
+        emoji: "😘",
+        tags: &["face blowing a kiss", "flirt", "kissing heart"],
+    },
+    EmojiData {
+        emoji: "😗",
+        tags: &["kissing face", "kissing"],
+    },
+    EmojiData {
+        emoji: "☺️",
+        tags: &["smiling face", "blush", "pleased", "relaxed"],
+    },
+    EmojiData {
+        emoji: "😚",
+        tags: &["kissing face with closed eyes", "kissing closed eyes"],
+    },
+    EmojiData {
+        emoji: "😙",
+        tags: &["kissing face with smiling eyes", "kissing smiling eyes"],
+    },
+    EmojiData {
+        emoji: "😋",
+        tags: &["face savoring food", "tongue", "lick", "yum"],
+    },
+    EmojiData {
+        emoji: "😛",
+        tags: &["face with tongue", "stuck out tongue"],
+    },
+    EmojiData {
+        emoji: "😜",
+        tags: &[
+            "winking face with tongue",
+            "prank",
+            "silly",
+            "stuck out tongue winking eye",
+        ],
+    },
+    EmojiData {
+        emoji: "🤪",
+        tags: &["zany face", "goofy", "wacky"],
+    },
+    EmojiData {
+        emoji: "😝",
+        tags: &[
+            "squinting face with tongue",
+            "prank",
+            "stuck out tongue closed eyes",
+        ],
+    },
+    EmojiData {
+        emoji: "🤑",
+        tags: &["money-mouth face", "rich", "money mouth face"],
+    },
+    EmojiData {
+        emoji: "🤗",
+        tags: &["hugging face", "hugs"],
+    },
+    EmojiData {
+        emoji: "🤭",
+        tags: &[
+            "face with hand over mouth",
+            "quiet",
+            "whoops",
+            "hand over mouth",
+        ],
+    },
+    EmojiData {
+        emoji: "🤫",
+        tags: &["shushing face", "silence", "quiet"],
+    },
+    EmojiData {
+        emoji: "🤔",
+        tags: &["thinking face", "thinking"],
+    },
+    EmojiData {
+        emoji: "🤐",
+        tags: &["zipper-mouth face", "silence", "hush", "zipper mouth face"],
+    },
+    EmojiData {
+        emoji: "🤨",
+        tags: &["face with raised eyebrow", "suspicious", "raised eyebrow"],
+    },
+    EmojiData {
+        emoji: "😐",
+        tags: &["neutral face", "meh"],
+    },
+    EmojiData {
+        emoji: "😑",
+        tags: &["expressionless face", "expressionless"],
+    },
+    EmojiData {
+        emoji: "😶",
+        tags: &["face without mouth", "mute", "silence", "no mouth"],
+    },
+    EmojiData {
+        emoji: "😏",
+        tags: &["smirking face", "smug", "smirk"],
+    },
+    EmojiData {
+        emoji: "😒",
+        tags: &["unamused face", "meh", "unamused"],
+    },
+    EmojiData {
+        emoji: "🙄",
+        tags: &["face with rolling eyes", "roll eyes"],
+    },
+    EmojiData {
+        emoji: "😬",
+        tags: &["grimacing face", "grimacing"],
+    },
+    EmojiData {
+        emoji: "🤥",
+        tags: &["lying face", "liar"],
+    },
+    EmojiData {
+        emoji: "😌",
+        tags: &["relieved face", "whew", "relieved"],
+    },
+    EmojiData {
+        emoji: "😔",
+        tags: &["pensive face", "pensive"],
+    },
+    EmojiData {
+        emoji: "😪",
+        tags: &["sleepy face", "tired", "sleepy"],
+    },
+    EmojiData {
+        emoji: "🤤",
+        tags: &["drooling face"],
+    },
+    EmojiData {
+        emoji: "😴",
+        tags: &["sleeping face", "zzz", "sleeping"],
+    },
+    EmojiData {
+        emoji: "😷",
+        tags: &["face with medical mask", "sick", "ill", "mask"],
+    },
+    EmojiData {
+        emoji: "🤒",
+        tags: &["face with thermometer", "sick"],
+    },
+    EmojiData {
+        emoji: "🤕",
+        tags: &["face with head-bandage", "hurt", "face with head bandage"],
+    },
+    EmojiData {
+        emoji: "🤢",
+        tags: &["nauseated face", "sick", "barf", "disgusted"],
+    },
+    EmojiData {
+        emoji: "🤮",
+        tags: &["face vomiting", "barf", "sick", "vomiting face"],
+    },
+    EmojiData {
+        emoji: "🤧",
+        tags: &["sneezing face", "achoo", "sick"],
+    },
+    EmojiData {
+        emoji: "🥵",
+        tags: &["hot face", "heat", "sweating"],
+    },
+    EmojiData {
+        emoji: "🥶",
+        tags: &["cold face", "freezing", "ice"],
+    },
+    EmojiData {
+        emoji: "🥴",
+        tags: &["woozy face", "groggy"],
+    },
+    EmojiData {
+        emoji: "😵",
+        tags: &["dizzy face"],
+    },
+    EmojiData {
+        emoji: "🤯",
+        tags: &["exploding head", "mind", "blown"],
+    },
+    EmojiData {
+        emoji: "🤠",
+        tags: &["cowboy hat face"],
+    },
+    EmojiData {
+        emoji: "🥳",
+        tags: &["partying face", "celebration", "birthday"],
+    },
+    EmojiData {
+        emoji: "😎",
+        tags: &["smiling face with sunglasses", "cool", "sunglasses"],
+    },
+    EmojiData {
+        emoji: "🤓",
+        tags: &["nerd face", "geek", "glasses"],
+    },
+    EmojiData {
+        emoji: "🧐",
+        tags: &["face with monocle", "monocle face"],
+    },
+    EmojiData {
+        emoji: "😕",
+        tags: &["confused face", "confused"],
+    },
+    EmojiData {
+        emoji: "😟",
+        tags: &["worried face", "nervous", "worried"],
+    },
+    EmojiData {
+        emoji: "🙁",
+        tags: &["slightly frowning face"],
+    },
+    EmojiData {
+        emoji: "☹️",
+        tags: &["frowning face"],
+    },
+    EmojiData {
+        emoji: "😮",
+        tags: &[
+            "face with open mouth",
+            "surprise",
+            "impressed",
+            "wow",
+            "open mouth",
+        ],
+    },
+    EmojiData {
+        emoji: "😯",
+        tags: &["hushed face", "silence", "speechless", "hushed"],
+    },
+    EmojiData {
+        emoji: "😲",
+        tags: &["astonished face", "amazed", "gasp", "astonished"],
+    },
+    EmojiData {
+        emoji: "😳",
+        tags: &["flushed face", "flushed"],
+    },
+    EmojiData {
+        emoji: "🥺",
+        tags: &["pleading face", "puppy", "eyes"],
+    },
+    EmojiData {
+        emoji: "😦",
+        tags: &["frowning face with open mouth", "frowning"],
+    },
+    EmojiData {
+        emoji: "😧",
+        tags: &["anguished face", "stunned", "anguished"],
+    },
+    EmojiData {
+        emoji: "😨",
+        tags: &["fearful face", "scared", "shocked", "oops", "fearful"],
+    },
+    EmojiData {
+        emoji: "😰",
+        tags: &["anxious face with sweat", "nervous", "cold sweat"],
+    },
+    EmojiData {
+        emoji: "😥",
+        tags: &[
+            "sad but relieved face",
+            "phew",
+            "sweat",
+            "nervous",
+            "disappointed relieved",
+        ],
+    },
+    EmojiData {
+        emoji: "😢",
+        tags: &["crying face", "sad", "tear", "cry"],
+    },
+    EmojiData {
+        emoji: "😭",
+        tags: &["loudly crying face", "sad", "cry", "bawling", "sob"],
+    },
+    EmojiData {
+        emoji: "😱",
+        tags: &["face screaming in fear", "horror", "shocked", "scream"],
+    },
+    EmojiData {
+        emoji: "😖",
+        tags: &["confounded face", "confounded"],
+    },
+    EmojiData {
+        emoji: "😣",
+        tags: &["persevering face", "struggling", "persevere"],
+    },
+    EmojiData {
+        emoji: "😞",
+        tags: &["disappointed face", "sad", "disappointed"],
+    },
+    EmojiData {
+        emoji: "😓",
+        tags: &["downcast face with sweat", "sweat"],
+    },
+    EmojiData {
+        emoji: "😩",
+        tags: &["weary face", "tired", "weary"],
+    },
+    EmojiData {
+        emoji: "😫",
+        tags: &["tired face", "upset", "whine"],
+    },
+    EmojiData {
+        emoji: "🥱",
+        tags: &["yawning face"],
+    },
+    EmojiData {
+        emoji: "😤",
+        tags: &["face with steam from nose", "smug", "triumph"],
+    },
+    EmojiData {
+        emoji: "😡",
+        tags: &["pouting face", "angry", "rage", "pout"],
+    },
+    EmojiData {
+        emoji: "😠",
+        tags: &["angry face", "mad", "annoyed", "angry"],
+    },
+    EmojiData {
+        emoji: "🤬",
+        tags: &["face with symbols on mouth", "foul", "cursing face"],
+    },
+    EmojiData {
+        emoji: "😈",
+        tags: &[
+            "smiling face with horns",
+            "devil",
+            "evil",
+            "horns",
+            "smiling imp",
+        ],
+    },
+    EmojiData {
+        emoji: "👿",
+        tags: &[
+            "angry face with horns",
+            "angry",
+            "devil",
+            "evil",
+            "horns",
+            "imp",
+        ],
+    },
+    EmojiData {
+        emoji: "💀",
+        tags: &["skull", "dead", "danger", "poison"],
+    },
+    EmojiData {
+        emoji: "☠️",
+        tags: &["skull and crossbones", "danger", "pirate"],
+    },
+    EmojiData {
+        emoji: "💩",
+        tags: &["pile of poo", "crap", "hankey", "poop", "shit"],
+    },
+    EmojiData {
+        emoji: "🤡",
+        tags: &["clown face"],
+    },
+    EmojiData {
+        emoji: "👹",
+        tags: &["ogre", "monster", "japanese ogre"],
+    },
+    EmojiData {
+        emoji: "👺",
+        tags: &["goblin", "japanese goblin"],
+    },
+    EmojiData {
+        emoji: "👻",
+        tags: &["ghost", "halloween"],
+    },
+    EmojiData {
+        emoji: "👽",
+        tags: &["alien", "ufo"],
+    },
+    EmojiData {
+        emoji: "👾",
+        tags: &["alien monster", "game", "retro", "space invader"],
+    },
+    EmojiData {
+        emoji: "🤖",
+        tags: &["robot"],
+    },
+    EmojiData {
+        emoji: "😺",
+        tags: &["grinning cat", "smiley cat"],
+    },
+    EmojiData {
+        emoji: "😸",
+        tags: &["grinning cat with smiling eyes", "smile cat"],
+    },
+    EmojiData {
+        emoji: "😹",
+        tags: &["cat with tears of joy", "joy cat"],
+    },
+    EmojiData {
+        emoji: "😻",
+        tags: &["smiling cat with heart-eyes", "heart eyes cat"],
+    },
+    EmojiData {
+        emoji: "😼",
+        tags: &["cat with wry smile", "smirk cat"],
+    },
+    EmojiData {
+        emoji: "😽",
+        tags: &["kissing cat"],
+    },
+    EmojiData {
+        emoji: "🙀",
+        tags: &["weary cat", "horror", "scream cat"],
+    },
+    EmojiData {
+        emoji: "😿",
+        tags: &["crying cat", "sad", "tear", "crying cat face"],
+    },
+    EmojiData {
+        emoji: "😾",
+        tags: &["pouting cat"],
+    },
+    EmojiData {
+        emoji: "🙈",
+        tags: &[
+            "see-no-evil monkey",
+            "monkey",
+            "blind",
+            "ignore",
+            "see no evil",
+        ],
+    },
+    EmojiData {
+        emoji: "🙉",
+        tags: &["hear-no-evil monkey", "monkey", "deaf", "hear no evil"],
+    },
+    EmojiData {
+        emoji: "🙊",
+        tags: &[
+            "speak-no-evil monkey",
+            "monkey",
+            "mute",
+            "hush",
+            "speak no evil",
+        ],
+    },
+    EmojiData {
+        emoji: "💋",
+        tags: &["kiss mark", "lipstick", "kiss"],
+    },
+    EmojiData {
+        emoji: "💌",
+        tags: &["love letter", "email", "envelope"],
+    },
+    EmojiData {
+        emoji: "💘",
+        tags: &["heart with arrow", "love", "heart", "cupid"],
+    },
+    EmojiData {
+        emoji: "💝",
+        tags: &["heart with ribbon", "chocolates", "gift heart"],
+    },
+    EmojiData {
+        emoji: "💖",
+        tags: &["sparkling heart"],
+    },
+    EmojiData {
+        emoji: "💗",
+        tags: &["growing heart", "heartpulse"],
+    },
+    EmojiData {
+        emoji: "💓",
+        tags: &["beating heart", "heartbeat"],
+    },
+    EmojiData {
+        emoji: "💞",
+        tags: &["revolving hearts"],
+    },
+    EmojiData {
+        emoji: "💕",
+        tags: &["two hearts"],
+    },
+    EmojiData {
+        emoji: "💟",
+        tags: &["heart decoration"],
+    },
+    EmojiData {
+        emoji: "❣️",
+        tags: &["heart exclamation", "heavy heart exclamation"],
+    },
+    EmojiData {
+        emoji: "💔",
+        tags: &["broken heart"],
+    },
+    EmojiData {
+        emoji: "❤️",
+        tags: &["red heart", "love", "heart"],
+    },
+    EmojiData {
+        emoji: "🧡",
+        tags: &["orange heart"],
+    },
+    EmojiData {
+        emoji: "💛",
+        tags: &["yellow heart"],
+    },
+    EmojiData {
+        emoji: "💚",
+        tags: &["green heart"],
+    },
+    EmojiData {
+        emoji: "💙",
+        tags: &["blue heart"],
+    },
+    EmojiData {
+        emoji: "💜",
+        tags: &["purple heart"],
+    },
+    EmojiData {
+        emoji: "🤎",
+        tags: &["brown heart"],
+    },
+    EmojiData {
+        emoji: "🖤",
+        tags: &["black heart"],
+    },
+    EmojiData {
+        emoji: "🤍",
+        tags: &["white heart"],
+    },
+    EmojiData {
+        emoji: "💯",
+        tags: &["hundred points", "score", "perfect", "100"],
+    },
+    EmojiData {
+        emoji: "💢",
+        tags: &["anger symbol", "angry", "anger"],
+    },
+    EmojiData {
+        emoji: "💥",
+        tags: &["collision", "explode", "boom"],
+    },
+    EmojiData {
+        emoji: "💫",
+        tags: &["dizzy", "star"],
+    },
+    EmojiData {
+        emoji: "💦",
+        tags: &["sweat droplets", "water", "workout", "sweat drops"],
+    },
+    EmojiData {
+        emoji: "💨",
+        tags: &["dashing away", "wind", "blow", "fast", "dash"],
+    },
+    EmojiData {
+        emoji: "🕳️",
+        tags: &["hole"],
+    },
+    EmojiData {
+        emoji: "💣",
+        tags: &["bomb", "boom"],
+    },
+    EmojiData {
+        emoji: "💬",
+        tags: &["speech balloon", "comment"],
+    },
+    EmojiData {
+        emoji: "👁️‍🗨️",
+        tags: &["eye in speech bubble", "eye speech bubble"],
+    },
+    EmojiData {
+        emoji: "🗨️",
+        tags: &["left speech bubble"],
+    },
+    EmojiData {
+        emoji: "🗯️",
+        tags: &["right anger bubble"],
+    },
+    EmojiData {
+        emoji: "💭",
+        tags: &["thought balloon", "thinking"],
+    },
+    EmojiData {
+        emoji: "💤",
+        tags: &["zzz", "sleeping"],
+    },
+    EmojiData {
+        emoji: "👋",
+        tags: &["waving hand", "goodbye", "wave"],
+    },
+    EmojiData {
+        emoji: "🤚",
+        tags: &["raised back of hand"],
+    },
+    EmojiData {
+        emoji: "🖐️",
+        tags: &[
+            "hand with fingers splayed",
+            "raised hand with fingers splayed",
+        ],
+    },
+    EmojiData {
+        emoji: "✋",
+        tags: &["raised hand", "highfive", "stop", "hand"],
+    },
+    EmojiData {
+        emoji: "🖖",
+        tags: &["vulcan salute", "prosper", "spock"],
+    },
+    EmojiData {
+        emoji: "👌",
+        tags: &["OK hand", "ok hand"],
+    },
+    EmojiData {
+        emoji: "🤏",
+        tags: &["pinching hand"],
+    },
+    EmojiData {
+        emoji: "✌️",
+        tags: &["victory hand", "victory", "peace", "v"],
+    },
+    EmojiData {
+        emoji: "🤞",
+        tags: &["crossed fingers", "luck", "hopeful"],
+    },
+    EmojiData {
+        emoji: "🤟",
+        tags: &["love-you gesture", "love you gesture"],
+    },
+    EmojiData {
+        emoji: "🤘",
+        tags: &["sign of the horns", "metal"],
+    },
+    EmojiData {
+        emoji: "🤙",
+        tags: &["call me hand"],
+    },
+    EmojiData {
+        emoji: "👈",
+        tags: &["backhand index pointing left", "point left"],
+    },
+    EmojiData {
+        emoji: "👉",
+        tags: &["backhand index pointing right", "point right"],
+    },
+    EmojiData {
+        emoji: "👆",
+        tags: &["backhand index pointing up", "point up 2"],
+    },
+    EmojiData {
+        emoji: "🖕",
+        tags: &["middle finger", "fu"],
+    },
+    EmojiData {
+        emoji: "👇",
+        tags: &["backhand index pointing down", "point down"],
+    },
+    EmojiData {
+        emoji: "☝️",
+        tags: &["index pointing up", "point up"],
+    },
+    EmojiData {
+        emoji: "👍",
+        tags: &["thumbs up", "approve", "ok", "+1", "thumbsup"],
+    },
+    EmojiData {
+        emoji: "👎",
+        tags: &["thumbs down", "disapprove", "bury", "-1", "thumbsdown"],
+    },
+    EmojiData {
+        emoji: "✊",
+        tags: &["raised fist", "power", "fist raised", "fist"],
+    },
+    EmojiData {
+        emoji: "👊",
+        tags: &[
+            "oncoming fist",
+            "attack",
+            "fist oncoming",
+            "facepunch",
+            "punch",
+        ],
+    },
+    EmojiData {
+        emoji: "🤛",
+        tags: &["left-facing fist", "fist left"],
+    },
+    EmojiData {
+        emoji: "🤜",
+        tags: &["right-facing fist", "fist right"],
+    },
+    EmojiData {
+        emoji: "👏",
+        tags: &["clapping hands", "praise", "applause", "clap"],
+    },
+    EmojiData {
+        emoji: "🙌",
+        tags: &["raising hands", "hooray", "raised hands"],
+    },
+    EmojiData {
+        emoji: "👐",
+        tags: &["open hands"],
+    },
+    EmojiData {
+        emoji: "🤲",
+        tags: &["palms up together"],
+    },
+    EmojiData {
+        emoji: "🤝",
+        tags: &["handshake", "deal"],
+    },
+    EmojiData {
+        emoji: "🙏",
+        tags: &["folded hands", "please", "hope", "wish", "pray"],
+    },
+    EmojiData {
+        emoji: "✍️",
+        tags: &["writing hand"],
+    },
+    EmojiData {
+        emoji: "💅",
+        tags: &["nail polish", "beauty", "manicure", "nail care"],
+    },
+    EmojiData {
+        emoji: "🤳",
+        tags: &["selfie"],
+    },
+    EmojiData {
+        emoji: "💪",
+        tags: &[
+            "flexed biceps",
+            "flex",
+            "bicep",
+            "strong",
+            "workout",
+            "muscle",
+        ],
+    },
+    EmojiData {
+        emoji: "🦾",
+        tags: &["mechanical arm"],
+    },
+    EmojiData {
+        emoji: "🦿",
+        tags: &["mechanical leg"],
+    },
+    EmojiData {
+        emoji: "🦵",
+        tags: &["leg"],
+    },
+    EmojiData {
+        emoji: "🦶",
+        tags: &["foot"],
+    },
+    EmojiData {
+        emoji: "👂",
+        tags: &["ear", "hear", "sound", "listen"],
+    },
+    EmojiData {
+        emoji: "🦻",
+        tags: &["ear with hearing aid"],
+    },
+    EmojiData {
+        emoji: "👃",
+        tags: &["nose", "smell"],
+    },
+    EmojiData {
+        emoji: "🧠",
+        tags: &["brain"],
+    },
+    EmojiData {
+        emoji: "🦷",
+        tags: &["tooth"],
+    },
+    EmojiData {
+        emoji: "🦴",
+        tags: &["bone"],
+    },
+    EmojiData {
+        emoji: "👀",
+        tags: &["eyes", "look", "see", "watch"],
+    },
+    EmojiData {
+        emoji: "👁️",
+        tags: &["eye"],
+    },
+    EmojiData {
+        emoji: "👅",
+        tags: &["tongue", "taste"],
+    },
+    EmojiData {
+        emoji: "👄",
+        tags: &["mouth", "kiss", "lips"],
+    },
+    EmojiData {
+        emoji: "👶",
+        tags: &["baby", "child", "newborn"],
+    },
+    EmojiData {
+        emoji: "🧒",
+        tags: &["child"],
+    },
+    EmojiData {
+        emoji: "👦",
+        tags: &["boy", "child"],
+    },
+    EmojiData {
+        emoji: "👧",
+        tags: &["girl", "child"],
+    },
+    EmojiData {
+        emoji: "🧑",
+        tags: &["person", "adult"],
+    },
+    EmojiData {
+        emoji: "👱",
+        tags: &["person: blond hair", "blond haired person"],
+    },
+    EmojiData {
+        emoji: "👨",
+        tags: &["man", "mustache", "father", "dad"],
+    },
+    EmojiData {
+        emoji: "🧔",
+        tags: &["man: beard", "bearded person"],
+    },
+    EmojiData {
+        emoji: "👨‍🦰",
+        tags: &["man: red hair", "red haired man"],
+    },
+    EmojiData {
+        emoji: "👨‍🦱",
+        tags: &["man: curly hair", "curly haired man"],
+    },
+    EmojiData {
+        emoji: "👨‍🦳",
+        tags: &["man: white hair", "white haired man"],
+    },
+    EmojiData {
+        emoji: "👨‍🦲",
+        tags: &["man: bald", "bald man"],
+    },
+    EmojiData {
+        emoji: "👩",
+        tags: &["woman", "girls"],
+    },
+    EmojiData {
+        emoji: "👩‍🦰",
+        tags: &["woman: red hair", "red haired woman"],
+    },
+    EmojiData {
+        emoji: "🧑‍🦰",
+        tags: &["person: red hair", "person red hair"],
+    },
+    EmojiData {
+        emoji: "👩‍🦱",
+        tags: &["woman: curly hair", "curly haired woman"],
+    },
+    EmojiData {
+        emoji: "🧑‍🦱",
+        tags: &["person: curly hair", "person curly hair"],
+    },
+    EmojiData {
+        emoji: "👩‍🦳",
+        tags: &["woman: white hair", "white haired woman"],
+    },
+    EmojiData {
+        emoji: "🧑‍🦳",
+        tags: &["person: white hair", "person white hair"],
+    },
+    EmojiData {
+        emoji: "👩‍🦲",
+        tags: &["woman: bald", "bald woman"],
+    },
+    EmojiData {
+        emoji: "🧑‍🦲",
+        tags: &["person: bald", "person bald"],
+    },
+    EmojiData {
+        emoji: "👱‍♀️",
+        tags: &["woman: blond hair", "blond haired woman", "blonde woman"],
+    },
+    EmojiData {
+        emoji: "👱‍♂️",
+        tags: &["man: blond hair", "blond haired man"],
+    },
+    EmojiData {
+        emoji: "🧓",
+        tags: &["older person", "older adult"],
+    },
+    EmojiData {
+        emoji: "👴",
+        tags: &["old man", "older man"],
+    },
+    EmojiData {
+        emoji: "👵",
+        tags: &["old woman", "older woman"],
+    },
+    EmojiData {
+        emoji: "🙍",
+        tags: &["person frowning", "frowning person"],
+    },
+    EmojiData {
+        emoji: "🙍‍♂️",
+        tags: &["man frowning", "frowning man"],
+    },
+    EmojiData {
+        emoji: "🙍‍♀️",
+        tags: &["woman frowning", "frowning woman"],
+    },
+    EmojiData {
+        emoji: "🙎",
+        tags: &["person pouting", "pouting face"],
+    },
+    EmojiData {
+        emoji: "🙎‍♂️",
+        tags: &["man pouting", "pouting man"],
+    },
+    EmojiData {
+        emoji: "🙎‍♀️",
+        tags: &["woman pouting", "pouting woman"],
+    },
+    EmojiData {
+        emoji: "🙅",
+        tags: &["person gesturing NO", "stop", "halt", "denied", "no good"],
+    },
+    EmojiData {
+        emoji: "🙅‍♂️",
+        tags: &[
+            "man gesturing NO",
+            "stop",
+            "halt",
+            "denied",
+            "no good man",
+            "ng man",
+        ],
+    },
+    EmojiData {
+        emoji: "🙅‍♀️",
+        tags: &[
+            "woman gesturing NO",
+            "stop",
+            "halt",
+            "denied",
+            "no good woman",
+            "ng woman",
+        ],
+    },
+    EmojiData {
+        emoji: "🙆",
+        tags: &["person gesturing OK", "ok person"],
+    },
+    EmojiData {
+        emoji: "🙆‍♂️",
+        tags: &["man gesturing OK", "ok man"],
+    },
+    EmojiData {
+        emoji: "🙆‍♀️",
+        tags: &["woman gesturing OK", "ok woman"],
+    },
+    EmojiData {
+        emoji: "💁",
+        tags: &[
+            "person tipping hand",
+            "tipping hand person",
+            "information desk person",
+        ],
+    },
+    EmojiData {
+        emoji: "💁‍♂️",
+        tags: &[
+            "man tipping hand",
+            "information",
+            "tipping hand man",
+            "sassy man",
+        ],
+    },
+    EmojiData {
+        emoji: "💁‍♀️",
+        tags: &[
+            "woman tipping hand",
+            "information",
+            "tipping hand woman",
+            "sassy woman",
+        ],
+    },
+    EmojiData {
+        emoji: "🙋",
+        tags: &["person raising hand", "raising hand"],
+    },
+    EmojiData {
+        emoji: "🙋‍♂️",
+        tags: &["man raising hand", "raising hand man"],
+    },
+    EmojiData {
+        emoji: "🙋‍♀️",
+        tags: &["woman raising hand", "raising hand woman"],
+    },
+    EmojiData {
+        emoji: "🧏",
+        tags: &["deaf person"],
+    },
+    EmojiData {
+        emoji: "🧏‍♂️",
+        tags: &["deaf man"],
+    },
+    EmojiData {
+        emoji: "🧏‍♀️",
+        tags: &["deaf woman"],
+    },
+    EmojiData {
+        emoji: "🙇",
+        tags: &["person bowing", "respect", "thanks", "bow"],
+    },
+    EmojiData {
+        emoji: "🙇‍♂️",
+        tags: &["man bowing", "respect", "thanks", "bowing man"],
+    },
+    EmojiData {
+        emoji: "🙇‍♀️",
+        tags: &["woman bowing", "respect", "thanks", "bowing woman"],
+    },
+    EmojiData {
+        emoji: "🤦",
+        tags: &["person facepalming", "facepalm"],
+    },
+    EmojiData {
+        emoji: "🤦‍♂️",
+        tags: &["man facepalming"],
+    },
+    EmojiData {
+        emoji: "🤦‍♀️",
+        tags: &["woman facepalming"],
+    },
+    EmojiData {
+        emoji: "🤷",
+        tags: &["person shrugging", "shrug"],
+    },
+    EmojiData {
+        emoji: "🤷‍♂️",
+        tags: &["man shrugging"],
+    },
+    EmojiData {
+        emoji: "🤷‍♀️",
+        tags: &["woman shrugging"],
+    },
+    EmojiData {
+        emoji: "🧑‍⚕️",
+        tags: &["health worker"],
+    },
+    EmojiData {
+        emoji: "👨‍⚕️",
+        tags: &["man health worker", "doctor", "nurse"],
+    },
+    EmojiData {
+        emoji: "👩‍⚕️",
+        tags: &["woman health worker", "doctor", "nurse"],
+    },
+    EmojiData {
+        emoji: "🧑‍🎓",
+        tags: &["student"],
+    },
+    EmojiData {
+        emoji: "👨‍🎓",
+        tags: &["man student", "graduation"],
+    },
+    EmojiData {
+        emoji: "👩‍🎓",
+        tags: &["woman student", "graduation"],
+    },
+    EmojiData {
+        emoji: "🧑‍🏫",
+        tags: &["teacher"],
+    },
+    EmojiData {
+        emoji: "👨‍🏫",
+        tags: &["man teacher", "school", "professor"],
+    },
+    EmojiData {
+        emoji: "👩‍🏫",
+        tags: &["woman teacher", "school", "professor"],
+    },
+    EmojiData {
+        emoji: "🧑‍⚖️",
+        tags: &["judge"],
+    },
+    EmojiData {
+        emoji: "👨‍⚖️",
+        tags: &["man judge", "justice"],
+    },
+    EmojiData {
+        emoji: "👩‍⚖️",
+        tags: &["woman judge", "justice"],
+    },
+    EmojiData {
+        emoji: "🧑‍🌾",
+        tags: &["farmer"],
+    },
+    EmojiData {
+        emoji: "👨‍🌾",
+        tags: &["man farmer"],
+    },
+    EmojiData {
+        emoji: "👩‍🌾",
+        tags: &["woman farmer"],
+    },
+    EmojiData {
+        emoji: "🧑‍🍳",
+        tags: &["cook"],
+    },
+    EmojiData {
+        emoji: "👨‍🍳",
+        tags: &["man cook", "chef"],
+    },
+    EmojiData {
+        emoji: "👩‍🍳",
+        tags: &["woman cook", "chef"],
+    },
+    EmojiData {
+        emoji: "🧑‍🔧",
+        tags: &["mechanic"],
+    },
+    EmojiData {
+        emoji: "👨‍🔧",
+        tags: &["man mechanic"],
+    },
+    EmojiData {
+        emoji: "👩‍🔧",
+        tags: &["woman mechanic"],
+    },
+    EmojiData {
+        emoji: "🧑‍🏭",
+        tags: &["factory worker"],
+    },
+    EmojiData {
+        emoji: "👨‍🏭",
+        tags: &["man factory worker"],
+    },
+    EmojiData {
+        emoji: "👩‍🏭",
+        tags: &["woman factory worker"],
+    },
+    EmojiData {
+        emoji: "🧑‍💼",
+        tags: &["office worker"],
+    },
+    EmojiData {
+        emoji: "👨‍💼",
+        tags: &["man office worker", "business"],
+    },
+    EmojiData {
+        emoji: "👩‍💼",
+        tags: &["woman office worker", "business"],
+    },
+    EmojiData {
+        emoji: "🧑‍🔬",
+        tags: &["scientist"],
+    },
+    EmojiData {
+        emoji: "👨‍🔬",
+        tags: &["man scientist", "research"],
+    },
+    EmojiData {
+        emoji: "👩‍🔬",
+        tags: &["woman scientist", "research"],
+    },
+    EmojiData {
+        emoji: "🧑‍💻",
+        tags: &["technologist"],
+    },
+    EmojiData {
+        emoji: "👨‍💻",
+        tags: &["man technologist", "coder"],
+    },
+    EmojiData {
+        emoji: "👩‍💻",
+        tags: &["woman technologist", "coder"],
+    },
+    EmojiData {
+        emoji: "🧑‍🎤",
+        tags: &["singer"],
+    },
+    EmojiData {
+        emoji: "👨‍🎤",
+        tags: &["man singer", "rockstar"],
+    },
+    EmojiData {
+        emoji: "👩‍🎤",
+        tags: &["woman singer", "rockstar"],
+    },
+    EmojiData {
+        emoji: "🧑‍🎨",
+        tags: &["artist"],
+    },
+    EmojiData {
+        emoji: "👨‍🎨",
+        tags: &["man artist", "painter"],
+    },
+    EmojiData {
+        emoji: "👩‍🎨",
+        tags: &["woman artist", "painter"],
+    },
+    EmojiData {
+        emoji: "🧑‍✈️",
+        tags: &["pilot"],
+    },
+    EmojiData {
+        emoji: "👨‍✈️",
+        tags: &["man pilot"],
+    },
+    EmojiData {
+        emoji: "👩‍✈️",
+        tags: &["woman pilot"],
+    },
+    EmojiData {
+        emoji: "🧑‍🚀",
+        tags: &["astronaut"],
+    },
+    EmojiData {
+        emoji: "👨‍🚀",
+        tags: &["man astronaut", "space"],
+    },
+    EmojiData {
+        emoji: "👩‍🚀",
+        tags: &["woman astronaut", "space"],
+    },
+    EmojiData {
+        emoji: "🧑‍🚒",
+        tags: &["firefighter"],
+    },
+    EmojiData {
+        emoji: "👨‍🚒",
+        tags: &["man firefighter"],
+    },
+    EmojiData {
+        emoji: "👩‍🚒",
+        tags: &["woman firefighter"],
+    },
+    EmojiData {
+        emoji: "👮",
+        tags: &["police officer", "law", "cop"],
+    },
+    EmojiData {
+        emoji: "👮‍♂️",
+        tags: &["man police officer", "law", "cop", "policeman"],
+    },
+    EmojiData {
+        emoji: "👮‍♀️",
+        tags: &["woman police officer", "law", "cop", "policewoman"],
+    },
+    EmojiData {
+        emoji: "🕵️",
+        tags: &["detective", "sleuth"],
+    },
+    EmojiData {
+        emoji: "🕵️‍♂️",
+        tags: &["man detective", "sleuth", "male detective"],
+    },
+    EmojiData {
+        emoji: "🕵️‍♀️",
+        tags: &["woman detective", "sleuth", "female detective"],
+    },
+    EmojiData {
+        emoji: "💂",
+        tags: &["guard"],
+    },
+    EmojiData {
+        emoji: "💂‍♂️",
+        tags: &["man guard", "guardsman"],
+    },
+    EmojiData {
+        emoji: "💂‍♀️",
+        tags: &["woman guard", "guardswoman"],
+    },
+    EmojiData {
+        emoji: "👷",
+        tags: &["construction worker", "helmet"],
+    },
+    EmojiData {
+        emoji: "👷‍♂️",
+        tags: &[
+            "man construction worker",
+            "helmet",
+            "construction worker man",
+        ],
+    },
+    EmojiData {
+        emoji: "👷‍♀️",
+        tags: &[
+            "woman construction worker",
+            "helmet",
+            "construction worker woman",
+        ],
+    },
+    EmojiData {
+        emoji: "🤴",
+        tags: &["prince", "crown", "royal"],
+    },
+    EmojiData {
+        emoji: "👸",
+        tags: &["princess", "crown", "royal"],
+    },
+    EmojiData {
+        emoji: "👳",
+        tags: &["person wearing turban", "person with turban"],
+    },
+    EmojiData {
+        emoji: "👳‍♂️",
+        tags: &["man wearing turban", "man with turban"],
+    },
+    EmojiData {
+        emoji: "👳‍♀️",
+        tags: &["woman wearing turban", "woman with turban"],
+    },
+    EmojiData {
+        emoji: "👲",
+        tags: &["man with skullcap", "man with gua pi mao"],
+    },
+    EmojiData {
+        emoji: "🧕",
+        tags: &["woman with headscarf", "hijab"],
+    },
+    EmojiData {
+        emoji: "🤵",
+        tags: &["man in tuxedo", "groom", "marriage", "wedding"],
+    },
+    EmojiData {
+        emoji: "👰",
+        tags: &["bride with veil", "marriage", "wedding"],
+    },
+    EmojiData {
+        emoji: "🤰",
+        tags: &["pregnant woman"],
+    },
+    EmojiData {
+        emoji: "🤱",
+        tags: &["breast-feeding", "nursing", "breast feeding"],
+    },
+    EmojiData {
+        emoji: "👼",
+        tags: &["baby angel", "angel"],
+    },
+    EmojiData {
+        emoji: "🎅",
+        tags: &["Santa Claus", "christmas", "santa"],
+    },
+    EmojiData {
+        emoji: "🤶",
+        tags: &["Mrs. Claus", "santa", "mrs claus"],
+    },
+    EmojiData {
+        emoji: "🦸",
+        tags: &["superhero"],
+    },
+    EmojiData {
+        emoji: "🦸‍♂️",
+        tags: &["man superhero", "superhero man"],
+    },
+    EmojiData {
+        emoji: "🦸‍♀️",
+        tags: &["woman superhero", "superhero woman"],
+    },
+    EmojiData {
+        emoji: "🦹",
+        tags: &["supervillain"],
+    },
+    EmojiData {
+        emoji: "🦹‍♂️",
+        tags: &["man supervillain", "supervillain man"],
+    },
+    EmojiData {
+        emoji: "🦹‍♀️",
+        tags: &["woman supervillain", "supervillain woman"],
+    },
+    EmojiData {
+        emoji: "🧙",
+        tags: &["mage", "wizard"],
+    },
+    EmojiData {
+        emoji: "🧙‍♂️",
+        tags: &["man mage", "wizard", "mage man"],
+    },
+    EmojiData {
+        emoji: "🧙‍♀️",
+        tags: &["woman mage", "wizard", "mage woman"],
+    },
+    EmojiData {
+        emoji: "🧚",
+        tags: &["fairy"],
+    },
+    EmojiData {
+        emoji: "🧚‍♂️",
+        tags: &["man fairy", "fairy man"],
+    },
+    EmojiData {
+        emoji: "🧚‍♀️",
+        tags: &["woman fairy", "fairy woman"],
+    },
+    EmojiData {
+        emoji: "🧛",
+        tags: &["vampire"],
+    },
+    EmojiData {
+        emoji: "🧛‍♂️",
+        tags: &["man vampire", "vampire man"],
+    },
+    EmojiData {
+        emoji: "🧛‍♀️",
+        tags: &["woman vampire", "vampire woman"],
+    },
+    EmojiData {
+        emoji: "🧜",
+        tags: &["merperson"],
+    },
+    EmojiData {
+        emoji: "🧜‍♂️",
+        tags: &["merman"],
+    },
+    EmojiData {
+        emoji: "🧜‍♀️",
+        tags: &["mermaid"],
+    },
+    EmojiData {
+        emoji: "🧝",
+        tags: &["elf"],
+    },
+    EmojiData {
+        emoji: "🧝‍♂️",
+        tags: &["man elf", "elf man"],
+    },
+    EmojiData {
+        emoji: "🧝‍♀️",
+        tags: &["woman elf", "elf woman"],
+    },
+    EmojiData {
+        emoji: "🧞",
+        tags: &["genie"],
+    },
+    EmojiData {
+        emoji: "🧞‍♂️",
+        tags: &["man genie", "genie man"],
+    },
+    EmojiData {
+        emoji: "🧞‍♀️",
+        tags: &["woman genie", "genie woman"],
+    },
+    EmojiData {
+        emoji: "🧟",
+        tags: &["zombie"],
+    },
+    EmojiData {
+        emoji: "🧟‍♂️",
+        tags: &["man zombie", "zombie man"],
+    },
+    EmojiData {
+        emoji: "🧟‍♀️",
+        tags: &["woman zombie", "zombie woman"],
+    },
+    EmojiData {
+        emoji: "💆",
+        tags: &["person getting massage", "spa", "massage"],
+    },
+    EmojiData {
+        emoji: "💆‍♂️",
+        tags: &["man getting massage", "spa", "massage man"],
+    },
+    EmojiData {
+        emoji: "💆‍♀️",
+        tags: &["woman getting massage", "spa", "massage woman"],
+    },
+    EmojiData {
+        emoji: "💇",
+        tags: &["person getting haircut", "beauty", "haircut"],
+    },
+    EmojiData {
+        emoji: "💇‍♂️",
+        tags: &["man getting haircut", "haircut man"],
+    },
+    EmojiData {
+        emoji: "💇‍♀️",
+        tags: &["woman getting haircut", "haircut woman"],
+    },
+    EmojiData {
+        emoji: "🚶",
+        tags: &["person walking", "walking"],
+    },
+    EmojiData {
+        emoji: "🚶‍♂️",
+        tags: &["man walking", "walking man"],
+    },
+    EmojiData {
+        emoji: "🚶‍♀️",
+        tags: &["woman walking", "walking woman"],
+    },
+    EmojiData {
+        emoji: "🧍",
+        tags: &["person standing", "standing person"],
+    },
+    EmojiData {
+        emoji: "🧍‍♂️",
+        tags: &["man standing", "standing man"],
+    },
+    EmojiData {
+        emoji: "🧍‍♀️",
+        tags: &["woman standing", "standing woman"],
+    },
+    EmojiData {
+        emoji: "🧎",
+        tags: &["person kneeling", "kneeling person"],
+    },
+    EmojiData {
+        emoji: "🧎‍♂️",
+        tags: &["man kneeling", "kneeling man"],
+    },
+    EmojiData {
+        emoji: "🧎‍♀️",
+        tags: &["woman kneeling", "kneeling woman"],
+    },
+    EmojiData {
+        emoji: "🧑‍🦯",
+        tags: &["person with probing cane"],
+    },
+    EmojiData {
+        emoji: "👨‍🦯",
+        tags: &["man with probing cane"],
+    },
+    EmojiData {
+        emoji: "👩‍🦯",
+        tags: &["woman with probing cane"],
+    },
+    EmojiData {
+        emoji: "🧑‍🦼",
+        tags: &["person in motorized wheelchair"],
+    },
+    EmojiData {
+        emoji: "👨‍🦼",
+        tags: &["man in motorized wheelchair"],
+    },
+    EmojiData {
+        emoji: "👩‍🦼",
+        tags: &["woman in motorized wheelchair"],
+    },
+    EmojiData {
+        emoji: "🧑‍🦽",
+        tags: &["person in manual wheelchair"],
+    },
+    EmojiData {
+        emoji: "👨‍🦽",
+        tags: &["man in manual wheelchair"],
+    },
+    EmojiData {
+        emoji: "👩‍🦽",
+        tags: &["woman in manual wheelchair"],
+    },
+    EmojiData {
+        emoji: "🏃",
+        tags: &[
+            "person running",
+            "exercise",
+            "workout",
+            "marathon",
+            "runner",
+            "running",
+        ],
+    },
+    EmojiData {
+        emoji: "🏃‍♂️",
+        tags: &[
+            "man running",
+            "exercise",
+            "workout",
+            "marathon",
+            "running man",
+        ],
+    },
+    EmojiData {
+        emoji: "🏃‍♀️",
+        tags: &[
+            "woman running",
+            "exercise",
+            "workout",
+            "marathon",
+            "running woman",
+        ],
+    },
+    EmojiData {
+        emoji: "💃",
+        tags: &["woman dancing", "dress", "dancer"],
+    },
+    EmojiData {
+        emoji: "🕺",
+        tags: &["man dancing", "dancer"],
+    },
+    EmojiData {
+        emoji: "🕴️",
+        tags: &["man in suit levitating", "business suit levitating"],
+    },
+    EmojiData {
+        emoji: "👯",
+        tags: &["people with bunny ears", "bunny", "dancers"],
+    },
+    EmojiData {
+        emoji: "👯‍♂️",
+        tags: &["men with bunny ears", "bunny", "dancing men"],
+    },
+    EmojiData {
+        emoji: "👯‍♀️",
+        tags: &["women with bunny ears", "bunny", "dancing women"],
+    },
+    EmojiData {
+        emoji: "🧖",
+        tags: &["person in steamy room", "steamy", "sauna person"],
+    },
+    EmojiData {
+        emoji: "🧖‍♂️",
+        tags: &["man in steamy room", "steamy", "sauna man"],
+    },
+    EmojiData {
+        emoji: "🧖‍♀️",
+        tags: &["woman in steamy room", "steamy", "sauna woman"],
+    },
+    EmojiData {
+        emoji: "🧗",
+        tags: &["person climbing", "bouldering", "climbing"],
+    },
+    EmojiData {
+        emoji: "🧗‍♂️",
+        tags: &["man climbing", "bouldering", "climbing man"],
+    },
+    EmojiData {
+        emoji: "🧗‍♀️",
+        tags: &["woman climbing", "bouldering", "climbing woman"],
+    },
+    EmojiData {
+        emoji: "🤺",
+        tags: &["person fencing"],
+    },
+    EmojiData {
+        emoji: "🏇",
+        tags: &["horse racing"],
+    },
+    EmojiData {
+        emoji: "⛷️",
+        tags: &["skier"],
+    },
+    EmojiData {
+        emoji: "🏂",
+        tags: &["snowboarder"],
+    },
+    EmojiData {
+        emoji: "🏌️",
+        tags: &["person golfing", "golfing"],
+    },
+    EmojiData {
+        emoji: "🏌️‍♂️",
+        tags: &["man golfing", "golfing man"],
+    },
+    EmojiData {
+        emoji: "🏌️‍♀️",
+        tags: &["woman golfing", "golfing woman"],
+    },
+    EmojiData {
+        emoji: "🏄",
+        tags: &["person surfing", "surfer"],
+    },
+    EmojiData {
+        emoji: "🏄‍♂️",
+        tags: &["man surfing", "surfing man"],
+    },
+    EmojiData {
+        emoji: "🏄‍♀️",
+        tags: &["woman surfing", "surfing woman"],
+    },
+    EmojiData {
+        emoji: "🚣",
+        tags: &["person rowing boat", "rowboat"],
+    },
+    EmojiData {
+        emoji: "🚣‍♂️",
+        tags: &["man rowing boat", "rowing man"],
+    },
+    EmojiData {
+        emoji: "🚣‍♀️",
+        tags: &["woman rowing boat", "rowing woman"],
+    },
+    EmojiData {
+        emoji: "🏊",
+        tags: &["person swimming", "swimmer"],
+    },
+    EmojiData {
+        emoji: "🏊‍♂️",
+        tags: &["man swimming", "swimming man"],
+    },
+    EmojiData {
+        emoji: "🏊‍♀️",
+        tags: &["woman swimming", "swimming woman"],
+    },
+    EmojiData {
+        emoji: "⛹️",
+        tags: &["person bouncing ball", "basketball", "bouncing ball person"],
+    },
+    EmojiData {
+        emoji: "⛹️‍♂️",
+        tags: &["man bouncing ball", "bouncing ball man", "basketball man"],
+    },
+    EmojiData {
+        emoji: "⛹️‍♀️",
+        tags: &[
+            "woman bouncing ball",
+            "bouncing ball woman",
+            "basketball woman",
+        ],
+    },
+    EmojiData {
+        emoji: "🏋️",
+        tags: &["person lifting weights", "gym", "workout", "weight lifting"],
+    },
+    EmojiData {
+        emoji: "🏋️‍♂️",
+        tags: &[
+            "man lifting weights",
+            "gym",
+            "workout",
+            "weight lifting man",
+        ],
+    },
+    EmojiData {
+        emoji: "🏋️‍♀️",
+        tags: &[
+            "woman lifting weights",
+            "gym",
+            "workout",
+            "weight lifting woman",
+        ],
+    },
+    EmojiData {
+        emoji: "🚴",
+        tags: &["person biking", "bicyclist"],
+    },
+    EmojiData {
+        emoji: "🚴‍♂️",
+        tags: &["man biking", "biking man"],
+    },
+    EmojiData {
+        emoji: "🚴‍♀️",
+        tags: &["woman biking", "biking woman"],
+    },
+    EmojiData {
+        emoji: "🚵",
+        tags: &["person mountain biking", "mountain bicyclist"],
+    },
+    EmojiData {
+        emoji: "🚵‍♂️",
+        tags: &["man mountain biking", "mountain biking man"],
+    },
+    EmojiData {
+        emoji: "🚵‍♀️",
+        tags: &["woman mountain biking", "mountain biking woman"],
+    },
+    EmojiData {
+        emoji: "🤸",
+        tags: &["person cartwheeling", "cartwheeling"],
+    },
+    EmojiData {
+        emoji: "🤸‍♂️",
+        tags: &["man cartwheeling"],
+    },
+    EmojiData {
+        emoji: "🤸‍♀️",
+        tags: &["woman cartwheeling"],
+    },
+    EmojiData {
+        emoji: "🤼",
+        tags: &["people wrestling", "wrestling"],
+    },
+    EmojiData {
+        emoji: "🤼‍♂️",
+        tags: &["men wrestling"],
+    },
+    EmojiData {
+        emoji: "🤼‍♀️",
+        tags: &["women wrestling"],
+    },
+    EmojiData {
+        emoji: "🤽",
+        tags: &["person playing water polo", "water polo"],
+    },
+    EmojiData {
+        emoji: "🤽‍♂️",
+        tags: &["man playing water polo"],
+    },
+    EmojiData {
+        emoji: "🤽‍♀️",
+        tags: &["woman playing water polo"],
+    },
+    EmojiData {
+        emoji: "🤾",
+        tags: &["person playing handball", "handball person"],
+    },
+    EmojiData {
+        emoji: "🤾‍♂️",
+        tags: &["man playing handball"],
+    },
+    EmojiData {
+        emoji: "🤾‍♀️",
+        tags: &["woman playing handball"],
+    },
+    EmojiData {
+        emoji: "🤹",
+        tags: &["person juggling", "juggling person"],
+    },
+    EmojiData {
+        emoji: "🤹‍♂️",
+        tags: &["man juggling"],
+    },
+    EmojiData {
+        emoji: "🤹‍♀️",
+        tags: &["woman juggling"],
+    },
+    EmojiData {
+        emoji: "🧘",
+        tags: &["person in lotus position", "meditation", "lotus position"],
+    },
+    EmojiData {
+        emoji: "🧘‍♂️",
+        tags: &["man in lotus position", "meditation", "lotus position man"],
+    },
+    EmojiData {
+        emoji: "🧘‍♀️",
+        tags: &[
+            "woman in lotus position",
+            "meditation",
+            "lotus position woman",
+        ],
+    },
+    EmojiData {
+        emoji: "🛀",
+        tags: &["person taking bath", "shower", "bath"],
+    },
+    EmojiData {
+        emoji: "🛌",
+        tags: &["person in bed", "sleeping bed"],
+    },
+    EmojiData {
+        emoji: "🧑‍🤝‍🧑",
+        tags: &["people holding hands", "couple", "date"],
+    },
+    EmojiData {
+        emoji: "👭",
+        tags: &[
+            "women holding hands",
+            "couple",
+            "date",
+            "two women holding hands",
+        ],
+    },
+    EmojiData {
+        emoji: "👫",
+        tags: &["woman and man holding hands", "date", "couple"],
+    },
+    EmojiData {
+        emoji: "👬",
+        tags: &[
+            "men holding hands",
+            "couple",
+            "date",
+            "two men holding hands",
+        ],
+    },
+    EmojiData {
+        emoji: "💏",
+        tags: &["kiss", "couplekiss"],
+    },
+    EmojiData {
+        emoji: "👩‍❤️‍💋‍👨",
+        tags: &["kiss: woman, man", "couplekiss man woman"],
+    },
+    EmojiData {
+        emoji: "👨‍❤️‍💋‍👨",
+        tags: &["kiss: man, man", "couplekiss man man"],
+    },
+    EmojiData {
+        emoji: "👩‍❤️‍💋‍👩",
+        tags: &["kiss: woman, woman", "couplekiss woman woman"],
+    },
+    EmojiData {
+        emoji: "💑",
+        tags: &["couple with heart"],
+    },
+    EmojiData {
+        emoji: "👩‍❤️‍👨",
+        tags: &[
+            "couple with heart: woman, man",
+            "couple with heart woman man",
+        ],
+    },
+    EmojiData {
+        emoji: "👨‍❤️‍👨",
+        tags: &["couple with heart: man, man", "couple with heart man man"],
+    },
+    EmojiData {
+        emoji: "👩‍❤️‍👩",
+        tags: &[
+            "couple with heart: woman, woman",
+            "couple with heart woman woman",
+        ],
+    },
+    EmojiData {
+        emoji: "👪",
+        tags: &["family", "home", "parents", "child"],
+    },
+    EmojiData {
+        emoji: "👨‍👩‍👦",
+        tags: &["family: man, woman, boy", "family man woman boy"],
+    },
+    EmojiData {
+        emoji: "👨‍👩‍👧",
+        tags: &["family: man, woman, girl", "family man woman girl"],
+    },
+    EmojiData {
+        emoji: "👨‍👩‍👧‍👦",
+        tags: &["family: man, woman, girl, boy", "family man woman girl boy"],
+    },
+    EmojiData {
+        emoji: "👨‍👩‍👦‍👦",
+        tags: &["family: man, woman, boy, boy", "family man woman boy boy"],
+    },
+    EmojiData {
+        emoji: "👨‍👩‍👧‍👧",
+        tags: &[
+            "family: man, woman, girl, girl",
+            "family man woman girl girl",
+        ],
+    },
+    EmojiData {
+        emoji: "👨‍👨‍👦",
+        tags: &["family: man, man, boy", "family man man boy"],
+    },
+    EmojiData {
+        emoji: "👨‍👨‍👧",
+        tags: &["family: man, man, girl", "family man man girl"],
+    },
+    EmojiData {
+        emoji: "👨‍👨‍👧‍👦",
+        tags: &["family: man, man, girl, boy", "family man man girl boy"],
+    },
+    EmojiData {
+        emoji: "👨‍👨‍👦‍👦",
+        tags: &["family: man, man, boy, boy", "family man man boy boy"],
+    },
+    EmojiData {
+        emoji: "👨‍👨‍👧‍👧",
+        tags: &["family: man, man, girl, girl", "family man man girl girl"],
+    },
+    EmojiData {
+        emoji: "👩‍👩‍👦",
+        tags: &["family: woman, woman, boy", "family woman woman boy"],
+    },
+    EmojiData {
+        emoji: "👩‍👩‍👧",
+        tags: &["family: woman, woman, girl", "family woman woman girl"],
+    },
+    EmojiData {
+        emoji: "👩‍👩‍👧‍👦",
+        tags: &[
+            "family: woman, woman, girl, boy",
+            "family woman woman girl boy",
+        ],
+    },
+    EmojiData {
+        emoji: "👩‍👩‍👦‍👦",
+        tags: &[
+            "family: woman, woman, boy, boy",
+            "family woman woman boy boy",
+        ],
+    },
+    EmojiData {
+        emoji: "👩‍👩‍👧‍👧",
+        tags: &[
+            "family: woman, woman, girl, girl",
+            "family woman woman girl girl",
+        ],
+    },
+    EmojiData {
+        emoji: "👨‍👦",
+        tags: &["family: man, boy", "family man boy"],
+    },
+    EmojiData {
+        emoji: "👨‍👦‍👦",
+        tags: &["family: man, boy, boy", "family man boy boy"],
+    },
+    EmojiData {
+        emoji: "👨‍👧",
+        tags: &["family: man, girl", "family man girl"],
+    },
+    EmojiData {
+        emoji: "👨‍👧‍👦",
+        tags: &["family: man, girl, boy", "family man girl boy"],
+    },
+    EmojiData {
+        emoji: "👨‍👧‍👧",
+        tags: &["family: man, girl, girl", "family man girl girl"],
+    },
+    EmojiData {
+        emoji: "👩‍👦",
+        tags: &["family: woman, boy", "family woman boy"],
+    },
+    EmojiData {
+        emoji: "👩‍👦‍👦",
+        tags: &["family: woman, boy, boy", "family woman boy boy"],
+    },
+    EmojiData {
+        emoji: "👩‍👧",
+        tags: &["family: woman, girl", "family woman girl"],
+    },
+    EmojiData {
+        emoji: "👩‍👧‍👦",
+        tags: &["family: woman, girl, boy", "family woman girl boy"],
+    },
+    EmojiData {
+        emoji: "👩‍👧‍👧",
+        tags: &["family: woman, girl, girl", "family woman girl girl"],
+    },
+    EmojiData {
+        emoji: "🗣️",
+        tags: &["speaking head"],
+    },
+    EmojiData {
+        emoji: "👤",
+        tags: &["bust in silhouette", "user"],
+    },
+    EmojiData {
+        emoji: "👥",
+        tags: &["busts in silhouette", "users", "group", "team"],
+    },
+    EmojiData {
+        emoji: "👣",
+        tags: &["footprints", "feet", "tracks"],
+    },
+    EmojiData {
+        emoji: "🐵",
+        tags: &["monkey face"],
+    },
+    EmojiData {
+        emoji: "🐒",
+        tags: &["monkey"],
+    },
+    EmojiData {
+        emoji: "🦍",
+        tags: &["gorilla"],
+    },
+    EmojiData {
+        emoji: "🦧",
+        tags: &["orangutan"],
+    },
+    EmojiData {
+        emoji: "🐶",
+        tags: &["dog face", "pet", "dog"],
+    },
+    EmojiData {
+        emoji: "🐕",
+        tags: &["dog", "dog2"],
+    },
+    EmojiData {
+        emoji: "🦮",
+        tags: &["guide dog"],
+    },
+    EmojiData {
+        emoji: "🐕‍🦺",
+        tags: &["service dog"],
+    },
+    EmojiData {
+        emoji: "🐩",
+        tags: &["poodle", "dog"],
+    },
+    EmojiData {
+        emoji: "🐺",
+        tags: &["wolf"],
+    },
+    EmojiData {
+        emoji: "🦊",
+        tags: &["fox", "fox face"],
+    },
+    EmojiData {
+        emoji: "🦝",
+        tags: &["raccoon"],
+    },
+    EmojiData {
+        emoji: "🐱",
+        tags: &["cat face", "pet", "cat"],
+    },
+    EmojiData {
+        emoji: "🐈",
+        tags: &["cat", "cat2"],
+    },
+    EmojiData {
+        emoji: "🦁",
+        tags: &["lion"],
+    },
+    EmojiData {
+        emoji: "🐯",
+        tags: &["tiger face", "tiger"],
+    },
+    EmojiData {
+        emoji: "🐅",
+        tags: &["tiger", "tiger2"],
+    },
+    EmojiData {
+        emoji: "🐆",
+        tags: &["leopard"],
+    },
+    EmojiData {
+        emoji: "🐴",
+        tags: &["horse face", "horse"],
+    },
+    EmojiData {
+        emoji: "🐎",
+        tags: &["horse", "speed", "racehorse"],
+    },
+    EmojiData {
+        emoji: "🦄",
+        tags: &["unicorn"],
+    },
+    EmojiData {
+        emoji: "🦓",
+        tags: &["zebra"],
+    },
+    EmojiData {
+        emoji: "🦌",
+        tags: &["deer"],
+    },
+    EmojiData {
+        emoji: "🐮",
+        tags: &["cow face", "cow"],
+    },
+    EmojiData {
+        emoji: "🐂",
+        tags: &["ox"],
+    },
+    EmojiData {
+        emoji: "🐃",
+        tags: &["water buffalo"],
+    },
+    EmojiData {
+        emoji: "🐄",
+        tags: &["cow", "cow2"],
+    },
+    EmojiData {
+        emoji: "🐷",
+        tags: &["pig face", "pig"],
+    },
+    EmojiData {
+        emoji: "🐖",
+        tags: &["pig", "pig2"],
+    },
+    EmojiData {
+        emoji: "🐗",
+        tags: &["boar"],
+    },
+    EmojiData {
+        emoji: "🐽",
+        tags: &["pig nose"],
+    },
+    EmojiData {
+        emoji: "🐏",
+        tags: &["ram"],
+    },
+    EmojiData {
+        emoji: "🐑",
+        tags: &["ewe", "sheep"],
+    },
+    EmojiData {
+        emoji: "🐐",
+        tags: &["goat"],
+    },
+    EmojiData {
+        emoji: "🐪",
+        tags: &["camel", "desert", "dromedary camel"],
+    },
+    EmojiData {
+        emoji: "🐫",
+        tags: &["two-hump camel", "camel"],
+    },
+    EmojiData {
+        emoji: "🦙",
+        tags: &["llama"],
+    },
+    EmojiData {
+        emoji: "🦒",
+        tags: &["giraffe"],
+    },
+    EmojiData {
+        emoji: "🐘",
+        tags: &["elephant"],
+    },
+    EmojiData {
+        emoji: "🦏",
+        tags: &["rhinoceros"],
+    },
+    EmojiData {
+        emoji: "🦛",
+        tags: &["hippopotamus"],
+    },
+    EmojiData {
+        emoji: "🐭",
+        tags: &["mouse face", "mouse"],
+    },
+    EmojiData {
+        emoji: "🐁",
+        tags: &["mouse", "mouse2"],
+    },
+    EmojiData {
+        emoji: "🐀",
+        tags: &["rat"],
+    },
+    EmojiData {
+        emoji: "🐹",
+        tags: &["hamster", "pet"],
+    },
+    EmojiData {
+        emoji: "🐰",
+        tags: &["rabbit face", "bunny", "rabbit"],
+    },
+    EmojiData {
+        emoji: "🐇",
+        tags: &["rabbit", "rabbit2"],
+    },
+    EmojiData {
+        emoji: "🐿️",
+        tags: &["chipmunk"],
+    },
+    EmojiData {
+        emoji: "🦔",
+        tags: &["hedgehog"],
+    },
+    EmojiData {
+        emoji: "🦇",
+        tags: &["bat"],
+    },
+    EmojiData {
+        emoji: "🐻",
+        tags: &["bear"],
+    },
+    EmojiData {
+        emoji: "🐨",
+        tags: &["koala"],
+    },
+    EmojiData {
+        emoji: "🐼",
+        tags: &["panda", "panda face"],
+    },
+    EmojiData {
+        emoji: "🦥",
+        tags: &["sloth"],
+    },
+    EmojiData {
+        emoji: "🦦",
+        tags: &["otter"],
+    },
+    EmojiData {
+        emoji: "🦨",
+        tags: &["skunk"],
+    },
+    EmojiData {
+        emoji: "🦘",
+        tags: &["kangaroo"],
+    },
+    EmojiData {
+        emoji: "🦡",
+        tags: &["badger"],
+    },
+    EmojiData {
+        emoji: "🐾",
+        tags: &["paw prints", "feet"],
+    },
+    EmojiData {
+        emoji: "🦃",
+        tags: &["turkey", "thanksgiving"],
+    },
+    EmojiData {
+        emoji: "🐔",
+        tags: &["chicken"],
+    },
+    EmojiData {
+        emoji: "🐓",
+        tags: &["rooster"],
+    },
+    EmojiData {
+        emoji: "🐣",
+        tags: &["hatching chick"],
+    },
+    EmojiData {
+        emoji: "🐤",
+        tags: &["baby chick"],
+    },
+    EmojiData {
+        emoji: "🐥",
+        tags: &["front-facing baby chick", "hatched chick"],
+    },
+    EmojiData {
+        emoji: "🐦",
+        tags: &["bird"],
+    },
+    EmojiData {
+        emoji: "🐧",
+        tags: &["penguin"],
+    },
+    EmojiData {
+        emoji: "🕊️",
+        tags: &["dove", "peace"],
+    },
+    EmojiData {
+        emoji: "🦅",
+        tags: &["eagle"],
+    },
+    EmojiData {
+        emoji: "🦆",
+        tags: &["duck"],
+    },
+    EmojiData {
+        emoji: "🦢",
+        tags: &["swan"],
+    },
+    EmojiData {
+        emoji: "🦉",
+        tags: &["owl"],
+    },
+    EmojiData {
+        emoji: "🦩",
+        tags: &["flamingo"],
+    },
+    EmojiData {
+        emoji: "🦚",
+        tags: &["peacock"],
+    },
+    EmojiData {
+        emoji: "🦜",
+        tags: &["parrot"],
+    },
+    EmojiData {
+        emoji: "🐸",
+        tags: &["frog"],
+    },
+    EmojiData {
+        emoji: "🐊",
+        tags: &["crocodile"],
+    },
+    EmojiData {
+        emoji: "🐢",
+        tags: &["turtle", "slow"],
+    },
+    EmojiData {
+        emoji: "🦎",
+        tags: &["lizard"],
+    },
+    EmojiData {
+        emoji: "🐍",
+        tags: &["snake"],
+    },
+    EmojiData {
+        emoji: "🐲",
+        tags: &["dragon face"],
+    },
+    EmojiData {
+        emoji: "🐉",
+        tags: &["dragon"],
+    },
+    EmojiData {
+        emoji: "🦕",
+        tags: &["sauropod", "dinosaur"],
+    },
+    EmojiData {
+        emoji: "🦖",
+        tags: &["T-Rex", "dinosaur", "t-rex"],
+    },
+    EmojiData {
+        emoji: "🐳",
+        tags: &["spouting whale", "sea", "whale"],
+    },
+    EmojiData {
+        emoji: "🐋",
+        tags: &["whale", "whale2"],
+    },
+    EmojiData {
+        emoji: "🐬",
+        tags: &["dolphin", "flipper"],
+    },
+    EmojiData {
+        emoji: "🐟",
+        tags: &["fish"],
+    },
+    EmojiData {
+        emoji: "🐠",
+        tags: &["tropical fish"],
+    },
+    EmojiData {
+        emoji: "🐡",
+        tags: &["blowfish"],
+    },
+    EmojiData {
+        emoji: "🦈",
+        tags: &["shark"],
+    },
+    EmojiData {
+        emoji: "🐙",
+        tags: &["octopus"],
+    },
+    EmojiData {
+        emoji: "🐚",
+        tags: &["spiral shell", "sea", "beach", "shell"],
+    },
+    EmojiData {
+        emoji: "🐌",
+        tags: &["snail", "slow"],
+    },
+    EmojiData {
+        emoji: "🦋",
+        tags: &["butterfly"],
+    },
+    EmojiData {
+        emoji: "🐛",
+        tags: &["bug"],
+    },
+    EmojiData {
+        emoji: "🐜",
+        tags: &["ant"],
+    },
+    EmojiData {
+        emoji: "🐝",
+        tags: &["honeybee", "bee"],
+    },
+    EmojiData {
+        emoji: "🐞",
+        tags: &["lady beetle", "bug", "beetle"],
+    },
+    EmojiData {
+        emoji: "🦗",
+        tags: &["cricket"],
+    },
+    EmojiData {
+        emoji: "🕷️",
+        tags: &["spider"],
+    },
+    EmojiData {
+        emoji: "🕸️",
+        tags: &["spider web"],
+    },
+    EmojiData {
+        emoji: "🦂",
+        tags: &["scorpion"],
+    },
+    EmojiData {
+        emoji: "🦟",
+        tags: &["mosquito"],
+    },
+    EmojiData {
+        emoji: "🦠",
+        tags: &["microbe", "germ"],
+    },
+    EmojiData {
+        emoji: "💐",
+        tags: &["bouquet", "flowers"],
+    },
+    EmojiData {
+        emoji: "🌸",
+        tags: &["cherry blossom", "flower", "spring"],
+    },
+    EmojiData {
+        emoji: "💮",
+        tags: &["white flower"],
+    },
+    EmojiData {
+        emoji: "🏵️",
+        tags: &["rosette"],
+    },
+    EmojiData {
+        emoji: "🌹",
+        tags: &["rose", "flower"],
+    },
+    EmojiData {
+        emoji: "🥀",
+        tags: &["wilted flower"],
+    },
+    EmojiData {
+        emoji: "🌺",
+        tags: &["hibiscus"],
+    },
+    EmojiData {
+        emoji: "🌻",
+        tags: &["sunflower"],
+    },
+    EmojiData {
+        emoji: "🌼",
+        tags: &["blossom"],
+    },
+    EmojiData {
+        emoji: "🌷",
+        tags: &["tulip", "flower"],
+    },
+    EmojiData {
+        emoji: "🌱",
+        tags: &["seedling", "plant"],
+    },
+    EmojiData {
+        emoji: "🌲",
+        tags: &["evergreen tree", "wood"],
+    },
+    EmojiData {
+        emoji: "🌳",
+        tags: &["deciduous tree", "wood"],
+    },
+    EmojiData {
+        emoji: "🌴",
+        tags: &["palm tree"],
+    },
+    EmojiData {
+        emoji: "🌵",
+        tags: &["cactus"],
+    },
+    EmojiData {
+        emoji: "🌾",
+        tags: &["sheaf of rice", "ear of rice"],
+    },
+    EmojiData {
+        emoji: "🌿",
+        tags: &["herb"],
+    },
+    EmojiData {
+        emoji: "☘️",
+        tags: &["shamrock"],
+    },
+    EmojiData {
+        emoji: "🍀",
+        tags: &["four leaf clover", "luck"],
+    },
+    EmojiData {
+        emoji: "🍁",
+        tags: &["maple leaf", "canada"],
+    },
+    EmojiData {
+        emoji: "🍂",
+        tags: &["fallen leaf", "autumn"],
+    },
+    EmojiData {
+        emoji: "🍃",
+        tags: &["leaf fluttering in wind", "leaf", "leaves"],
+    },
+    EmojiData {
+        emoji: "🍇",
+        tags: &["grapes"],
+    },
+    EmojiData {
+        emoji: "🍈",
+        tags: &["melon"],
+    },
+    EmojiData {
+        emoji: "🍉",
+        tags: &["watermelon"],
+    },
+    EmojiData {
+        emoji: "🍊",
+        tags: &["tangerine", "orange", "mandarin"],
+    },
+    EmojiData {
+        emoji: "🍋",
+        tags: &["lemon"],
+    },
+    EmojiData {
+        emoji: "🍌",
+        tags: &["banana", "fruit"],
+    },
+    EmojiData {
+        emoji: "🍍",
+        tags: &["pineapple"],
+    },
+    EmojiData {
+        emoji: "🥭",
+        tags: &["mango"],
+    },
+    EmojiData {
+        emoji: "🍎",
+        tags: &["red apple", "apple"],
+    },
+    EmojiData {
+        emoji: "🍏",
+        tags: &["green apple", "fruit"],
+    },
+    EmojiData {
+        emoji: "🍐",
+        tags: &["pear"],
+    },
+    EmojiData {
+        emoji: "🍑",
+        tags: &["peach"],
+    },
+    EmojiData {
+        emoji: "🍒",
+        tags: &["cherries", "fruit"],
+    },
+    EmojiData {
+        emoji: "🍓",
+        tags: &["strawberry", "fruit"],
+    },
+    EmojiData {
+        emoji: "🥝",
+        tags: &["kiwi fruit"],
+    },
+    EmojiData {
+        emoji: "🍅",
+        tags: &["tomato"],
+    },
+    EmojiData {
+        emoji: "🥥",
+        tags: &["coconut"],
+    },
+    EmojiData {
+        emoji: "🥑",
+        tags: &["avocado"],
+    },
+    EmojiData {
+        emoji: "🍆",
+        tags: &["eggplant", "aubergine"],
+    },
+    EmojiData {
+        emoji: "🥔",
+        tags: &["potato"],
+    },
+    EmojiData {
+        emoji: "🥕",
+        tags: &["carrot"],
+    },
+    EmojiData {
+        emoji: "🌽",
+        tags: &["ear of corn", "corn"],
+    },
+    EmojiData {
+        emoji: "🌶️",
+        tags: &["hot pepper", "spicy"],
+    },
+    EmojiData {
+        emoji: "🥒",
+        tags: &["cucumber"],
+    },
+    EmojiData {
+        emoji: "🥬",
+        tags: &["leafy green"],
+    },
+    EmojiData {
+        emoji: "🥦",
+        tags: &["broccoli"],
+    },
+    EmojiData {
+        emoji: "🧄",
+        tags: &["garlic"],
+    },
+    EmojiData {
+        emoji: "🧅",
+        tags: &["onion"],
+    },
+    EmojiData {
+        emoji: "🍄",
+        tags: &["mushroom"],
+    },
+    EmojiData {
+        emoji: "🥜",
+        tags: &["peanuts"],
+    },
+    EmojiData {
+        emoji: "🌰",
+        tags: &["chestnut"],
+    },
+    EmojiData {
+        emoji: "🍞",
+        tags: &["bread", "toast"],
+    },
+    EmojiData {
+        emoji: "🥐",
+        tags: &["croissant"],
+    },
+    EmojiData {
+        emoji: "🥖",
+        tags: &["baguette bread"],
+    },
+    EmojiData {
+        emoji: "🥨",
+        tags: &["pretzel"],
+    },
+    EmojiData {
+        emoji: "🥯",
+        tags: &["bagel"],
+    },
+    EmojiData {
+        emoji: "🥞",
+        tags: &["pancakes"],
+    },
+    EmojiData {
+        emoji: "🧇",
+        tags: &["waffle"],
+    },
+    EmojiData {
+        emoji: "🧀",
+        tags: &["cheese wedge", "cheese"],
+    },
+    EmojiData {
+        emoji: "🍖",
+        tags: &["meat on bone"],
+    },
+    EmojiData {
+        emoji: "🍗",
+        tags: &["poultry leg", "meat", "chicken"],
+    },
+    EmojiData {
+        emoji: "🥩",
+        tags: &["cut of meat"],
+    },
+    EmojiData {
+        emoji: "🥓",
+        tags: &["bacon"],
+    },
+    EmojiData {
+        emoji: "🍔",
+        tags: &["hamburger", "burger"],
+    },
+    EmojiData {
+        emoji: "🍟",
+        tags: &["french fries", "fries"],
+    },
+    EmojiData {
+        emoji: "🍕",
+        tags: &["pizza"],
+    },
+    EmojiData {
+        emoji: "🌭",
+        tags: &["hot dog", "hotdog"],
+    },
+    EmojiData {
+        emoji: "🥪",
+        tags: &["sandwich"],
+    },
+    EmojiData {
+        emoji: "🌮",
+        tags: &["taco"],
+    },
+    EmojiData {
+        emoji: "🌯",
+        tags: &["burrito"],
+    },
+    EmojiData {
+        emoji: "🥙",
+        tags: &["stuffed flatbread"],
+    },
+    EmojiData {
+        emoji: "🧆",
+        tags: &["falafel"],
+    },
+    EmojiData {
+        emoji: "🥚",
+        tags: &["egg"],
+    },
+    EmojiData {
+        emoji: "🍳",
+        tags: &["cooking", "breakfast", "fried egg"],
+    },
+    EmojiData {
+        emoji: "🥘",
+        tags: &["shallow pan of food", "paella", "curry"],
+    },
+    EmojiData {
+        emoji: "🍲",
+        tags: &["pot of food", "stew"],
+    },
+    EmojiData {
+        emoji: "🥣",
+        tags: &["bowl with spoon"],
+    },
+    EmojiData {
+        emoji: "🥗",
+        tags: &["green salad"],
+    },
+    EmojiData {
+        emoji: "🍿",
+        tags: &["popcorn"],
+    },
+    EmojiData {
+        emoji: "🧈",
+        tags: &["butter"],
+    },
+    EmojiData {
+        emoji: "🧂",
+        tags: &["salt"],
+    },
+    EmojiData {
+        emoji: "🥫",
+        tags: &["canned food"],
+    },
+    EmojiData {
+        emoji: "🍱",
+        tags: &["bento box", "bento"],
+    },
+    EmojiData {
+        emoji: "🍘",
+        tags: &["rice cracker"],
+    },
+    EmojiData {
+        emoji: "🍙",
+        tags: &["rice ball"],
+    },
+    EmojiData {
+        emoji: "🍚",
+        tags: &["cooked rice", "rice"],
+    },
+    EmojiData {
+        emoji: "🍛",
+        tags: &["curry rice", "curry"],
+    },
+    EmojiData {
+        emoji: "🍜",
+        tags: &["steaming bowl", "noodle", "ramen"],
+    },
+    EmojiData {
+        emoji: "🍝",
+        tags: &["spaghetti", "pasta"],
+    },
+    EmojiData {
+        emoji: "🍠",
+        tags: &["roasted sweet potato", "sweet potato"],
+    },
+    EmojiData {
+        emoji: "🍢",
+        tags: &["oden"],
+    },
+    EmojiData {
+        emoji: "🍣",
+        tags: &["sushi"],
+    },
+    EmojiData {
+        emoji: "🍤",
+        tags: &["fried shrimp", "tempura"],
+    },
+    EmojiData {
+        emoji: "🍥",
+        tags: &["fish cake with swirl", "fish cake"],
+    },
+    EmojiData {
+        emoji: "🥮",
+        tags: &["moon cake"],
+    },
+    EmojiData {
+        emoji: "🍡",
+        tags: &["dango"],
+    },
+    EmojiData {
+        emoji: "🥟",
+        tags: &["dumpling"],
+    },
+    EmojiData {
+        emoji: "🥠",
+        tags: &["fortune cookie"],
+    },
+    EmojiData {
+        emoji: "🥡",
+        tags: &["takeout box"],
+    },
+    EmojiData {
+        emoji: "🦀",
+        tags: &["crab"],
+    },
+    EmojiData {
+        emoji: "🦞",
+        tags: &["lobster"],
+    },
+    EmojiData {
+        emoji: "🦐",
+        tags: &["shrimp"],
+    },
+    EmojiData {
+        emoji: "🦑",
+        tags: &["squid"],
+    },
+    EmojiData {
+        emoji: "🦪",
+        tags: &["oyster"],
+    },
+    EmojiData {
+        emoji: "🍦",
+        tags: &["soft ice cream", "icecream"],
+    },
+    EmojiData {
+        emoji: "🍧",
+        tags: &["shaved ice"],
+    },
+    EmojiData {
+        emoji: "🍨",
+        tags: &["ice cream"],
+    },
+    EmojiData {
+        emoji: "🍩",
+        tags: &["doughnut"],
+    },
+    EmojiData {
+        emoji: "🍪",
+        tags: &["cookie"],
+    },
+    EmojiData {
+        emoji: "🎂",
+        tags: &["birthday cake", "party", "birthday"],
+    },
+    EmojiData {
+        emoji: "🍰",
+        tags: &["shortcake", "dessert", "cake"],
+    },
+    EmojiData {
+        emoji: "🧁",
+        tags: &["cupcake"],
+    },
+    EmojiData {
+        emoji: "🥧",
+        tags: &["pie"],
+    },
+    EmojiData {
+        emoji: "🍫",
+        tags: &["chocolate bar"],
+    },
+    EmojiData {
+        emoji: "🍬",
+        tags: &["candy", "sweet"],
+    },
+    EmojiData {
+        emoji: "🍭",
+        tags: &["lollipop"],
+    },
+    EmojiData {
+        emoji: "🍮",
+        tags: &["custard"],
+    },
+    EmojiData {
+        emoji: "🍯",
+        tags: &["honey pot"],
+    },
+    EmojiData {
+        emoji: "🍼",
+        tags: &["baby bottle", "milk"],
+    },
+    EmojiData {
+        emoji: "🥛",
+        tags: &["glass of milk", "milk glass"],
+    },
+    EmojiData {
+        emoji: "☕",
+        tags: &["hot beverage", "cafe", "espresso", "coffee"],
+    },
+    EmojiData {
+        emoji: "🍵",
+        tags: &["teacup without handle", "green", "breakfast", "tea"],
+    },
+    EmojiData {
+        emoji: "🍶",
+        tags: &["sake"],
+    },
+    EmojiData {
+        emoji: "🍾",
+        tags: &[
+            "bottle with popping cork",
+            "bottle",
+            "bubbly",
+            "celebration",
+            "champagne",
+        ],
+    },
+    EmojiData {
+        emoji: "🍷",
+        tags: &["wine glass"],
+    },
+    EmojiData {
+        emoji: "🍸",
+        tags: &["cocktail glass", "drink", "cocktail"],
+    },
+    EmojiData {
+        emoji: "🍹",
+        tags: &["tropical drink", "summer", "vacation"],
+    },
+    EmojiData {
+        emoji: "🍺",
+        tags: &["beer mug", "drink", "beer"],
+    },
+    EmojiData {
+        emoji: "🍻",
+        tags: &["clinking beer mugs", "drinks", "beers"],
+    },
+    EmojiData {
+        emoji: "🥂",
+        tags: &["clinking glasses", "cheers", "toast"],
+    },
+    EmojiData {
+        emoji: "🥃",
+        tags: &["tumbler glass", "whisky"],
+    },
+    EmojiData {
+        emoji: "🥤",
+        tags: &["cup with straw"],
+    },
+    EmojiData {
+        emoji: "🧃",
+        tags: &["beverage box"],
+    },
+    EmojiData {
+        emoji: "🧉",
+        tags: &["mate"],
+    },
+    EmojiData {
+        emoji: "🧊",
+        tags: &["ice", "ice cube"],
+    },
+    EmojiData {
+        emoji: "🥢",
+        tags: &["chopsticks"],
+    },
+    EmojiData {
+        emoji: "🍽️",
+        tags: &[
+            "fork and knife with plate",
+            "dining",
+            "dinner",
+            "plate with cutlery",
+        ],
+    },
+    EmojiData {
+        emoji: "🍴",
+        tags: &["fork and knife", "cutlery"],
+    },
+    EmojiData {
+        emoji: "🥄",
+        tags: &["spoon"],
+    },
+    EmojiData {
+        emoji: "🔪",
+        tags: &["kitchen knife", "cut", "chop", "hocho", "knife"],
+    },
+    EmojiData {
+        emoji: "🏺",
+        tags: &["amphora"],
+    },
+    EmojiData {
+        emoji: "🌍",
+        tags: &[
+            "globe showing Europe-Africa",
+            "globe",
+            "world",
+            "international",
+            "earth africa",
+        ],
+    },
+    EmojiData {
+        emoji: "🌎",
+        tags: &[
+            "globe showing Americas",
+            "globe",
+            "world",
+            "international",
+            "earth americas",
+        ],
+    },
+    EmojiData {
+        emoji: "🌏",
+        tags: &[
+            "globe showing Asia-Australia",
+            "globe",
+            "world",
+            "international",
+            "earth asia",
+        ],
+    },
+    EmojiData {
+        emoji: "🌐",
+        tags: &["globe with meridians", "world", "global", "international"],
+    },
+    EmojiData {
+        emoji: "🗺️",
+        tags: &["world map", "travel"],
+    },
+    EmojiData {
+        emoji: "🗾",
+        tags: &["map of Japan", "japan"],
+    },
+    EmojiData {
+        emoji: "🧭",
+        tags: &["compass"],
+    },
+    EmojiData {
+        emoji: "🏔️",
+        tags: &["snow-capped mountain", "mountain snow"],
+    },
+    EmojiData {
+        emoji: "⛰️",
+        tags: &["mountain"],
+    },
+    EmojiData {
+        emoji: "🌋",
+        tags: &["volcano"],
+    },
+    EmojiData {
+        emoji: "🗻",
+        tags: &["mount fuji"],
+    },
+    EmojiData {
+        emoji: "🏕️",
+        tags: &["camping"],
+    },
+    EmojiData {
+        emoji: "🏖️",
+        tags: &["beach with umbrella", "beach umbrella"],
+    },
+    EmojiData {
+        emoji: "🏜️",
+        tags: &["desert"],
+    },
+    EmojiData {
+        emoji: "🏝️",
+        tags: &["desert island"],
+    },
+    EmojiData {
+        emoji: "🏞️",
+        tags: &["national park"],
+    },
+    EmojiData {
+        emoji: "🏟️",
+        tags: &["stadium"],
+    },
+    EmojiData {
+        emoji: "🏛️",
+        tags: &["classical building"],
+    },
+    EmojiData {
+        emoji: "🏗️",
+        tags: &["building construction"],
+    },
+    EmojiData {
+        emoji: "🧱",
+        tags: &["brick", "bricks"],
+    },
+    EmojiData {
+        emoji: "🏘️",
+        tags: &["houses"],
+    },
+    EmojiData {
+        emoji: "🏚️",
+        tags: &["derelict house"],
+    },
+    EmojiData {
+        emoji: "🏠",
+        tags: &["house"],
+    },
+    EmojiData {
+        emoji: "🏡",
+        tags: &["house with garden"],
+    },
+    EmojiData {
+        emoji: "🏢",
+        tags: &["office building", "office"],
+    },
+    EmojiData {
+        emoji: "🏣",
+        tags: &["Japanese post office", "post office"],
+    },
+    EmojiData {
+        emoji: "🏤",
+        tags: &["post office", "european post office"],
+    },
+    EmojiData {
+        emoji: "🏥",
+        tags: &["hospital"],
+    },
+    EmojiData {
+        emoji: "🏦",
+        tags: &["bank"],
+    },
+    EmojiData {
+        emoji: "🏨",
+        tags: &["hotel"],
+    },
+    EmojiData {
+        emoji: "🏩",
+        tags: &["love hotel"],
+    },
+    EmojiData {
+        emoji: "🏪",
+        tags: &["convenience store"],
+    },
+    EmojiData {
+        emoji: "🏫",
+        tags: &["school"],
+    },
+    EmojiData {
+        emoji: "🏬",
+        tags: &["department store"],
+    },
+    EmojiData {
+        emoji: "🏭",
+        tags: &["factory"],
+    },
+    EmojiData {
+        emoji: "🏯",
+        tags: &["Japanese castle", "japanese castle"],
+    },
+    EmojiData {
+        emoji: "🏰",
+        tags: &["castle", "european castle"],
+    },
+    EmojiData {
+        emoji: "💒",
+        tags: &["wedding", "marriage"],
+    },
+    EmojiData {
+        emoji: "🗼",
+        tags: &["Tokyo tower", "tokyo tower"],
+    },
+    EmojiData {
+        emoji: "🗽",
+        tags: &["Statue of Liberty", "statue of liberty"],
+    },
+    EmojiData {
+        emoji: "⛪",
+        tags: &["church"],
+    },
+    EmojiData {
+        emoji: "🕌",
+        tags: &["mosque"],
+    },
+    EmojiData {
+        emoji: "🛕",
+        tags: &["hindu temple"],
+    },
+    EmojiData {
+        emoji: "🕍",
+        tags: &["synagogue"],
+    },
+    EmojiData {
+        emoji: "⛩️",
+        tags: &["shinto shrine"],
+    },
+    EmojiData {
+        emoji: "🕋",
+        tags: &["kaaba"],
+    },
+    EmojiData {
+        emoji: "⛲",
+        tags: &["fountain"],
+    },
+    EmojiData {
+        emoji: "⛺",
+        tags: &["tent", "camping"],
+    },
+    EmojiData {
+        emoji: "🌁",
+        tags: &["foggy", "karl"],
+    },
+    EmojiData {
+        emoji: "🌃",
+        tags: &["night with stars"],
+    },
+    EmojiData {
+        emoji: "🏙️",
+        tags: &["cityscape", "skyline"],
+    },
+    EmojiData {
+        emoji: "🌄",
+        tags: &["sunrise over mountains"],
+    },
+    EmojiData {
+        emoji: "🌅",
+        tags: &["sunrise"],
+    },
+    EmojiData {
+        emoji: "🌆",
+        tags: &["cityscape at dusk", "city sunset"],
+    },
+    EmojiData {
+        emoji: "🌇",
+        tags: &["sunset", "city sunrise"],
+    },
+    EmojiData {
+        emoji: "🌉",
+        tags: &["bridge at night"],
+    },
+    EmojiData {
+        emoji: "♨️",
+        tags: &["hot springs", "hotsprings"],
+    },
+    EmojiData {
+        emoji: "🎠",
+        tags: &["carousel horse"],
+    },
+    EmojiData {
+        emoji: "🎡",
+        tags: &["ferris wheel"],
+    },
+    EmojiData {
+        emoji: "🎢",
+        tags: &["roller coaster"],
+    },
+    EmojiData {
+        emoji: "💈",
+        tags: &["barber pole", "barber"],
+    },
+    EmojiData {
+        emoji: "🎪",
+        tags: &["circus tent"],
+    },
+    EmojiData {
+        emoji: "🚂",
+        tags: &["locomotive", "train", "steam locomotive"],
+    },
+    EmojiData {
+        emoji: "🚃",
+        tags: &["railway car"],
+    },
+    EmojiData {
+        emoji: "🚄",
+        tags: &["high-speed train", "train", "bullettrain side"],
+    },
+    EmojiData {
+        emoji: "🚅",
+        tags: &["bullet train", "train", "bullettrain front"],
+    },
+    EmojiData {
+        emoji: "🚆",
+        tags: &["train", "train2"],
+    },
+    EmojiData {
+        emoji: "🚇",
+        tags: &["metro"],
+    },
+    EmojiData {
+        emoji: "🚈",
+        tags: &["light rail"],
+    },
+    EmojiData {
+        emoji: "🚉",
+        tags: &["station"],
+    },
+    EmojiData {
+        emoji: "🚊",
+        tags: &["tram"],
+    },
+    EmojiData {
+        emoji: "🚝",
+        tags: &["monorail"],
+    },
+    EmojiData {
+        emoji: "🚞",
+        tags: &["mountain railway"],
+    },
+    EmojiData {
+        emoji: "🚋",
+        tags: &["tram car", "train"],
+    },
+    EmojiData {
+        emoji: "🚌",
+        tags: &["bus"],
+    },
+    EmojiData {
+        emoji: "🚍",
+        tags: &["oncoming bus"],
+    },
+    EmojiData {
+        emoji: "🚎",
+        tags: &["trolleybus"],
+    },
+    EmojiData {
+        emoji: "🚐",
+        tags: &["minibus"],
+    },
+    EmojiData {
+        emoji: "🚑",
+        tags: &["ambulance"],
+    },
+    EmojiData {
+        emoji: "🚒",
+        tags: &["fire engine"],
+    },
+    EmojiData {
+        emoji: "🚓",
+        tags: &["police car"],
+    },
+    EmojiData {
+        emoji: "🚔",
+        tags: &["oncoming police car"],
+    },
+    EmojiData {
+        emoji: "🚕",
+        tags: &["taxi"],
+    },
+    EmojiData {
+        emoji: "🚖",
+        tags: &["oncoming taxi"],
+    },
+    EmojiData {
+        emoji: "🚗",
+        tags: &["automobile", "car", "red car"],
+    },
+    EmojiData {
+        emoji: "🚘",
+        tags: &["oncoming automobile"],
+    },
+    EmojiData {
+        emoji: "🚙",
+        tags: &["sport utility vehicle", "blue car"],
+    },
+    EmojiData {
+        emoji: "🚚",
+        tags: &["delivery truck", "truck"],
+    },
+    EmojiData {
+        emoji: "🚛",
+        tags: &["articulated lorry"],
+    },
+    EmojiData {
+        emoji: "🚜",
+        tags: &["tractor"],
+    },
+    EmojiData {
+        emoji: "🏎️",
+        tags: &["racing car"],
+    },
+    EmojiData {
+        emoji: "🏍️",
+        tags: &["motorcycle"],
+    },
+    EmojiData {
+        emoji: "🛵",
+        tags: &["motor scooter"],
+    },
+    EmojiData {
+        emoji: "🦽",
+        tags: &["manual wheelchair"],
+    },
+    EmojiData {
+        emoji: "🦼",
+        tags: &["motorized wheelchair"],
+    },
+    EmojiData {
+        emoji: "🛺",
+        tags: &["auto rickshaw"],
+    },
+    EmojiData {
+        emoji: "🚲",
+        tags: &["bicycle", "bike"],
+    },
+    EmojiData {
+        emoji: "🛴",
+        tags: &["kick scooter"],
+    },
+    EmojiData {
+        emoji: "🛹",
+        tags: &["skateboard"],
+    },
+    EmojiData {
+        emoji: "🚏",
+        tags: &["bus stop", "busstop"],
+    },
+    EmojiData {
+        emoji: "🛣️",
+        tags: &["motorway"],
+    },
+    EmojiData {
+        emoji: "🛤️",
+        tags: &["railway track"],
+    },
+    EmojiData {
+        emoji: "🛢️",
+        tags: &["oil drum"],
+    },
+    EmojiData {
+        emoji: "⛽",
+        tags: &["fuel pump", "fuelpump"],
+    },
+    EmojiData {
+        emoji: "🚨",
+        tags: &["police car light", "911", "emergency", "rotating light"],
+    },
+    EmojiData {
+        emoji: "🚥",
+        tags: &["horizontal traffic light", "traffic light"],
+    },
+    EmojiData {
+        emoji: "🚦",
+        tags: &["vertical traffic light", "semaphore"],
+    },
+    EmojiData {
+        emoji: "🛑",
+        tags: &["stop sign"],
+    },
+    EmojiData {
+        emoji: "🚧",
+        tags: &["construction", "wip"],
+    },
+    EmojiData {
+        emoji: "⚓",
+        tags: &["anchor", "ship"],
+    },
+    EmojiData {
+        emoji: "⛵",
+        tags: &["sailboat", "boat"],
+    },
+    EmojiData {
+        emoji: "🛶",
+        tags: &["canoe"],
+    },
+    EmojiData {
+        emoji: "🚤",
+        tags: &["speedboat", "ship"],
+    },
+    EmojiData {
+        emoji: "🛳️",
+        tags: &["passenger ship", "cruise"],
+    },
+    EmojiData {
+        emoji: "⛴️",
+        tags: &["ferry"],
+    },
+    EmojiData {
+        emoji: "🛥️",
+        tags: &["motor boat"],
+    },
+    EmojiData {
+        emoji: "🚢",
+        tags: &["ship"],
+    },
+    EmojiData {
+        emoji: "✈️",
+        tags: &["airplane", "flight"],
+    },
+    EmojiData {
+        emoji: "🛩️",
+        tags: &["small airplane", "flight"],
+    },
+    EmojiData {
+        emoji: "🛫",
+        tags: &["airplane departure", "flight departure"],
+    },
+    EmojiData {
+        emoji: "🛬",
+        tags: &["airplane arrival", "flight arrival"],
+    },
+    EmojiData {
+        emoji: "🪂",
+        tags: &["parachute"],
+    },
+    EmojiData {
+        emoji: "💺",
+        tags: &["seat"],
+    },
+    EmojiData {
+        emoji: "🚁",
+        tags: &["helicopter"],
+    },
+    EmojiData {
+        emoji: "🚟",
+        tags: &["suspension railway"],
+    },
+    EmojiData {
+        emoji: "🚠",
+        tags: &["mountain cableway"],
+    },
+    EmojiData {
+        emoji: "🚡",
+        tags: &["aerial tramway"],
+    },
+    EmojiData {
+        emoji: "🛰️",
+        tags: &["satellite", "orbit", "space", "artificial satellite"],
+    },
+    EmojiData {
+        emoji: "🚀",
+        tags: &["rocket", "ship", "launch"],
+    },
+    EmojiData {
+        emoji: "🛸",
+        tags: &["flying saucer", "ufo"],
+    },
+    EmojiData {
+        emoji: "🛎️",
+        tags: &["bellhop bell"],
+    },
+    EmojiData {
+        emoji: "🧳",
+        tags: &["luggage"],
+    },
+    EmojiData {
+        emoji: "⌛",
+        tags: &["hourglass done", "time", "hourglass"],
+    },
+    EmojiData {
+        emoji: "⏳",
+        tags: &["hourglass not done", "time", "hourglass flowing sand"],
+    },
+    EmojiData {
+        emoji: "⌚",
+        tags: &["watch", "time"],
+    },
+    EmojiData {
+        emoji: "⏰",
+        tags: &["alarm clock", "morning"],
+    },
+    EmojiData {
+        emoji: "⏱️",
+        tags: &["stopwatch"],
+    },
+    EmojiData {
+        emoji: "⏲️",
+        tags: &["timer clock"],
+    },
+    EmojiData {
+        emoji: "🕰️",
+        tags: &["mantelpiece clock"],
+    },
+    EmojiData {
+        emoji: "🕛",
+        tags: &["twelve o’clock", "clock12"],
+    },
+    EmojiData {
+        emoji: "🕧",
+        tags: &["twelve-thirty", "clock1230"],
+    },
+    EmojiData {
+        emoji: "🕐",
+        tags: &["one o’clock", "clock1"],
+    },
+    EmojiData {
+        emoji: "🕜",
+        tags: &["one-thirty", "clock130"],
+    },
+    EmojiData {
+        emoji: "🕑",
+        tags: &["two o’clock", "clock2"],
+    },
+    EmojiData {
+        emoji: "🕝",
+        tags: &["two-thirty", "clock230"],
+    },
+    EmojiData {
+        emoji: "🕒",
+        tags: &["three o’clock", "clock3"],
+    },
+    EmojiData {
+        emoji: "🕞",
+        tags: &["three-thirty", "clock330"],
+    },
+    EmojiData {
+        emoji: "🕓",
+        tags: &["four o’clock", "clock4"],
+    },
+    EmojiData {
+        emoji: "🕟",
+        tags: &["four-thirty", "clock430"],
+    },
+    EmojiData {
+        emoji: "🕔",
+        tags: &["five o’clock", "clock5"],
+    },
+    EmojiData {
+        emoji: "🕠",
+        tags: &["five-thirty", "clock530"],
+    },
+    EmojiData {
+        emoji: "🕕",
+        tags: &["six o’clock", "clock6"],
+    },
+    EmojiData {
+        emoji: "🕡",
+        tags: &["six-thirty", "clock630"],
+    },
+    EmojiData {
+        emoji: "🕖",
+        tags: &["seven o’clock", "clock7"],
+    },
+    EmojiData {
+        emoji: "🕢",
+        tags: &["seven-thirty", "clock730"],
+    },
+    EmojiData {
+        emoji: "🕗",
+        tags: &["eight o’clock", "clock8"],
+    },
+    EmojiData {
+        emoji: "🕣",
+        tags: &["eight-thirty", "clock830"],
+    },
+    EmojiData {
+        emoji: "🕘",
+        tags: &["nine o’clock", "clock9"],
+    },
+    EmojiData {
+        emoji: "🕤",
+        tags: &["nine-thirty", "clock930"],
+    },
+    EmojiData {
+        emoji: "🕙",
+        tags: &["ten o’clock", "clock10"],
+    },
+    EmojiData {
+        emoji: "🕥",
+        tags: &["ten-thirty", "clock1030"],
+    },
+    EmojiData {
+        emoji: "🕚",
+        tags: &["eleven o’clock", "clock11"],
+    },
+    EmojiData {
+        emoji: "🕦",
+        tags: &["eleven-thirty", "clock1130"],
+    },
+    EmojiData {
+        emoji: "🌑",
+        tags: &["new moon"],
+    },
+    EmojiData {
+        emoji: "🌒",
+        tags: &["waxing crescent moon"],
+    },
+    EmojiData {
+        emoji: "🌓",
+        tags: &["first quarter moon"],
+    },
+    EmojiData {
+        emoji: "🌔",
+        tags: &["waxing gibbous moon", "moon"],
+    },
+    EmojiData {
+        emoji: "🌕",
+        tags: &["full moon"],
+    },
+    EmojiData {
+        emoji: "🌖",
+        tags: &["waning gibbous moon"],
+    },
+    EmojiData {
+        emoji: "🌗",
+        tags: &["last quarter moon"],
+    },
+    EmojiData {
+        emoji: "🌘",
+        tags: &["waning crescent moon"],
+    },
+    EmojiData {
+        emoji: "🌙",
+        tags: &["crescent moon", "night"],
+    },
+    EmojiData {
+        emoji: "🌚",
+        tags: &["new moon face", "new moon with face"],
+    },
+    EmojiData {
+        emoji: "🌛",
+        tags: &["first quarter moon face", "first quarter moon with face"],
+    },
+    EmojiData {
+        emoji: "🌜",
+        tags: &["last quarter moon face", "last quarter moon with face"],
+    },
+    EmojiData {
+        emoji: "🌡️",
+        tags: &["thermometer"],
+    },
+    EmojiData {
+        emoji: "☀️",
+        tags: &["sun", "weather", "sunny"],
+    },
+    EmojiData {
+        emoji: "🌝",
+        tags: &["full moon face", "full moon with face"],
+    },
+    EmojiData {
+        emoji: "🌞",
+        tags: &["sun with face", "summer"],
+    },
+    EmojiData {
+        emoji: "🪐",
+        tags: &["ringed planet"],
+    },
+    EmojiData {
+        emoji: "⭐",
+        tags: &["star"],
+    },
+    EmojiData {
+        emoji: "🌟",
+        tags: &["glowing star", "star2"],
+    },
+    EmojiData {
+        emoji: "🌠",
+        tags: &["shooting star", "stars"],
+    },
+    EmojiData {
+        emoji: "🌌",
+        tags: &["milky way"],
+    },
+    EmojiData {
+        emoji: "☁️",
+        tags: &["cloud"],
+    },
+    EmojiData {
+        emoji: "⛅",
+        tags: &["sun behind cloud", "weather", "cloud", "partly sunny"],
+    },
+    EmojiData {
+        emoji: "⛈️",
+        tags: &["cloud with lightning and rain"],
+    },
+    EmojiData {
+        emoji: "🌤️",
+        tags: &["sun behind small cloud"],
+    },
+    EmojiData {
+        emoji: "🌥️",
+        tags: &["sun behind large cloud"],
+    },
+    EmojiData {
+        emoji: "🌦️",
+        tags: &["sun behind rain cloud"],
+    },
+    EmojiData {
+        emoji: "🌧️",
+        tags: &["cloud with rain"],
+    },
+    EmojiData {
+        emoji: "🌨️",
+        tags: &["cloud with snow"],
+    },
+    EmojiData {
+        emoji: "🌩️",
+        tags: &["cloud with lightning"],
+    },
+    EmojiData {
+        emoji: "🌪️",
+        tags: &["tornado"],
+    },
+    EmojiData {
+        emoji: "🌫️",
+        tags: &["fog"],
+    },
+    EmojiData {
+        emoji: "🌬️",
+        tags: &["wind face"],
+    },
+    EmojiData {
+        emoji: "🌀",
+        tags: &["cyclone", "swirl"],
+    },
+    EmojiData {
+        emoji: "🌈",
+        tags: &["rainbow"],
+    },
+    EmojiData {
+        emoji: "🌂",
+        tags: &["closed umbrella", "weather", "rain"],
+    },
+    EmojiData {
+        emoji: "☂️",
+        tags: &["umbrella", "open umbrella"],
+    },
+    EmojiData {
+        emoji: "☔",
+        tags: &["umbrella with rain drops", "rain", "weather", "umbrella"],
+    },
+    EmojiData {
+        emoji: "⛱️",
+        tags: &["umbrella on ground", "beach_umbrella", "parasol on ground"],
+    },
+    EmojiData {
+        emoji: "⚡",
+        tags: &["high voltage", "lightning", "thunder", "zap"],
+    },
+    EmojiData {
+        emoji: "❄️",
+        tags: &["snowflake", "winter", "cold", "weather"],
+    },
+    EmojiData {
+        emoji: "☃️",
+        tags: &["snowman", "winter", "christmas", "snowman with snow"],
+    },
+    EmojiData {
+        emoji: "⛄",
+        tags: &["snowman without snow", "winter", "snowman"],
+    },
+    EmojiData {
+        emoji: "☄️",
+        tags: &["comet"],
+    },
+    EmojiData {
+        emoji: "🔥",
+        tags: &["fire", "burn"],
+    },
+    EmojiData {
+        emoji: "💧",
+        tags: &["droplet", "water"],
+    },
+    EmojiData {
+        emoji: "🌊",
+        tags: &["water wave", "sea", "ocean"],
+    },
+    EmojiData {
+        emoji: "🎃",
+        tags: &["jack-o-lantern", "halloween", "jack o lantern"],
+    },
+    EmojiData {
+        emoji: "🎄",
+        tags: &["Christmas tree", "christmas tree"],
+    },
+    EmojiData {
+        emoji: "🎆",
+        tags: &["fireworks", "festival", "celebration"],
+    },
+    EmojiData {
+        emoji: "🎇",
+        tags: &["sparkler"],
+    },
+    EmojiData {
+        emoji: "🧨",
+        tags: &["firecracker"],
+    },
+    EmojiData {
+        emoji: "✨",
+        tags: &["sparkles", "shiny"],
+    },
+    EmojiData {
+        emoji: "🎈",
+        tags: &["balloon", "party", "birthday"],
+    },
+    EmojiData {
+        emoji: "🎉",
+        tags: &["party popper", "hooray", "party", "tada"],
+    },
+    EmojiData {
+        emoji: "🎊",
+        tags: &["confetti ball"],
+    },
+    EmojiData {
+        emoji: "🎋",
+        tags: &["tanabata tree"],
+    },
+    EmojiData {
+        emoji: "🎍",
+        tags: &["pine decoration", "bamboo"],
+    },
+    EmojiData {
+        emoji: "🎎",
+        tags: &["Japanese dolls", "dolls"],
+    },
+    EmojiData {
+        emoji: "🎏",
+        tags: &["carp streamer", "flags"],
+    },
+    EmojiData {
+        emoji: "🎐",
+        tags: &["wind chime"],
+    },
+    EmojiData {
+        emoji: "🎑",
+        tags: &["moon viewing ceremony", "rice scene"],
+    },
+    EmojiData {
+        emoji: "🧧",
+        tags: &["red envelope"],
+    },
+    EmojiData {
+        emoji: "🎀",
+        tags: &["ribbon"],
+    },
+    EmojiData {
+        emoji: "🎁",
+        tags: &["wrapped gift", "present", "birthday", "christmas", "gift"],
+    },
+    EmojiData {
+        emoji: "🎗️",
+        tags: &["reminder ribbon"],
+    },
+    EmojiData {
+        emoji: "🎟️",
+        tags: &["admission tickets", "tickets"],
+    },
+    EmojiData {
+        emoji: "🎫",
+        tags: &["ticket"],
+    },
+    EmojiData {
+        emoji: "🎖️",
+        tags: &["military medal", "medal military"],
+    },
+    EmojiData {
+        emoji: "🏆",
+        tags: &["trophy", "award", "contest", "winner"],
+    },
+    EmojiData {
+        emoji: "🏅",
+        tags: &["sports medal", "gold", "winner", "medal sports"],
+    },
+    EmojiData {
+        emoji: "🥇",
+        tags: &["1st place medal", "gold"],
+    },
+    EmojiData {
+        emoji: "🥈",
+        tags: &["2nd place medal", "silver"],
+    },
+    EmojiData {
+        emoji: "🥉",
+        tags: &["3rd place medal", "bronze"],
+    },
+    EmojiData {
+        emoji: "⚽",
+        tags: &["soccer ball", "sports", "soccer"],
+    },
+    EmojiData {
+        emoji: "⚾",
+        tags: &["baseball", "sports"],
+    },
+    EmojiData {
+        emoji: "🥎",
+        tags: &["softball"],
+    },
+    EmojiData {
+        emoji: "🏀",
+        tags: &["basketball", "sports"],
+    },
+    EmojiData {
+        emoji: "🏐",
+        tags: &["volleyball"],
+    },
+    EmojiData {
+        emoji: "🏈",
+        tags: &["american football", "sports", "football"],
+    },
+    EmojiData {
+        emoji: "🏉",
+        tags: &["rugby football"],
+    },
+    EmojiData {
+        emoji: "🎾",
+        tags: &["tennis", "sports"],
+    },
+    EmojiData {
+        emoji: "🥏",
+        tags: &["flying disc"],
+    },
+    EmojiData {
+        emoji: "🎳",
+        tags: &["bowling"],
+    },
+    EmojiData {
+        emoji: "🏏",
+        tags: &["cricket game"],
+    },
+    EmojiData {
+        emoji: "🏑",
+        tags: &["field hockey"],
+    },
+    EmojiData {
+        emoji: "🏒",
+        tags: &["ice hockey"],
+    },
+    EmojiData {
+        emoji: "🥍",
+        tags: &["lacrosse"],
+    },
+    EmojiData {
+        emoji: "🏓",
+        tags: &["ping pong"],
+    },
+    EmojiData {
+        emoji: "🏸",
+        tags: &["badminton"],
+    },
+    EmojiData {
+        emoji: "🥊",
+        tags: &["boxing glove"],
+    },
+    EmojiData {
+        emoji: "🥋",
+        tags: &["martial arts uniform"],
+    },
+    EmojiData {
+        emoji: "🥅",
+        tags: &["goal net"],
+    },
+    EmojiData {
+        emoji: "⛳",
+        tags: &["flag in hole", "golf"],
+    },
+    EmojiData {
+        emoji: "⛸️",
+        tags: &["ice skate", "skating"],
+    },
+    EmojiData {
+        emoji: "🎣",
+        tags: &["fishing pole", "fishing pole and fish"],
+    },
+    EmojiData {
+        emoji: "🤿",
+        tags: &["diving mask"],
+    },
+    EmojiData {
+        emoji: "🎽",
+        tags: &["running shirt", "marathon", "running shirt with sash"],
+    },
+    EmojiData {
+        emoji: "🎿",
+        tags: &["skis", "ski"],
+    },
+    EmojiData {
+        emoji: "🛷",
+        tags: &["sled"],
+    },
+    EmojiData {
+        emoji: "🥌",
+        tags: &["curling stone"],
+    },
+    EmojiData {
+        emoji: "🎯",
+        tags: &["direct hit", "target", "dart"],
+    },
+    EmojiData {
+        emoji: "🪀",
+        tags: &["yo-yo", "yo yo"],
+    },
+    EmojiData {
+        emoji: "🪁",
+        tags: &["kite"],
+    },
+    EmojiData {
+        emoji: "🎱",
+        tags: &["pool 8 ball", "pool", "billiards", "8ball"],
+    },
+    EmojiData {
+        emoji: "🔮",
+        tags: &["crystal ball", "fortune"],
+    },
+    EmojiData {
+        emoji: "🧿",
+        tags: &["nazar amulet"],
+    },
+    EmojiData {
+        emoji: "🎮",
+        tags: &["video game", "play", "controller", "console"],
+    },
+    EmojiData {
+        emoji: "🕹️",
+        tags: &["joystick"],
+    },
+    EmojiData {
+        emoji: "🎰",
+        tags: &["slot machine"],
+    },
+    EmojiData {
+        emoji: "🎲",
+        tags: &["game die", "dice", "gambling"],
+    },
+    EmojiData {
+        emoji: "🧩",
+        tags: &["puzzle piece", "jigsaw"],
+    },
+    EmojiData {
+        emoji: "🧸",
+        tags: &["teddy bear"],
+    },
+    EmojiData {
+        emoji: "♠️",
+        tags: &["spade suit", "spades"],
+    },
+    EmojiData {
+        emoji: "♥️",
+        tags: &["heart suit", "hearts"],
+    },
+    EmojiData {
+        emoji: "♦️",
+        tags: &["diamond suit", "diamonds"],
+    },
+    EmojiData {
+        emoji: "♣️",
+        tags: &["club suit", "clubs"],
+    },
+    EmojiData {
+        emoji: "♟️",
+        tags: &["chess pawn"],
+    },
+    EmojiData {
+        emoji: "🃏",
+        tags: &["joker", "black joker"],
+    },
+    EmojiData {
+        emoji: "🀄",
+        tags: &["mahjong red dragon", "mahjong"],
+    },
+    EmojiData {
+        emoji: "🎴",
+        tags: &["flower playing cards"],
+    },
+    EmojiData {
+        emoji: "🎭",
+        tags: &["performing arts", "theater", "drama"],
+    },
+    EmojiData {
+        emoji: "🖼️",
+        tags: &["framed picture"],
+    },
+    EmojiData {
+        emoji: "🎨",
+        tags: &["artist palette", "design", "paint", "art"],
+    },
+    EmojiData {
+        emoji: "🧵",
+        tags: &["thread"],
+    },
+    EmojiData {
+        emoji: "🧶",
+        tags: &["yarn"],
+    },
+    EmojiData {
+        emoji: "👓",
+        tags: &["glasses", "eyeglasses"],
+    },
+    EmojiData {
+        emoji: "🕶️",
+        tags: &["sunglasses", "dark sunglasses"],
+    },
+    EmojiData {
+        emoji: "🥽",
+        tags: &["goggles"],
+    },
+    EmojiData {
+        emoji: "🥼",
+        tags: &["lab coat"],
+    },
+    EmojiData {
+        emoji: "🦺",
+        tags: &["safety vest"],
+    },
+    EmojiData {
+        emoji: "👔",
+        tags: &["necktie", "shirt", "formal"],
+    },
+    EmojiData {
+        emoji: "👕",
+        tags: &["t-shirt", "shirt", "tshirt"],
+    },
+    EmojiData {
+        emoji: "👖",
+        tags: &["jeans", "pants"],
+    },
+    EmojiData {
+        emoji: "🧣",
+        tags: &["scarf"],
+    },
+    EmojiData {
+        emoji: "🧤",
+        tags: &["gloves"],
+    },
+    EmojiData {
+        emoji: "🧥",
+        tags: &["coat"],
+    },
+    EmojiData {
+        emoji: "🧦",
+        tags: &["socks"],
+    },
+    EmojiData {
+        emoji: "👗",
+        tags: &["dress"],
+    },
+    EmojiData {
+        emoji: "👘",
+        tags: &["kimono"],
+    },
+    EmojiData {
+        emoji: "🥻",
+        tags: &["sari"],
+    },
+    EmojiData {
+        emoji: "🩱",
+        tags: &["one-piece swimsuit", "one piece swimsuit"],
+    },
+    EmojiData {
+        emoji: "🩲",
+        tags: &["briefs", "swim brief"],
+    },
+    EmojiData {
+        emoji: "🩳",
+        tags: &["shorts"],
+    },
+    EmojiData {
+        emoji: "👙",
+        tags: &["bikini", "beach"],
+    },
+    EmojiData {
+        emoji: "👚",
+        tags: &["woman’s clothes", "womans clothes"],
+    },
+    EmojiData {
+        emoji: "👛",
+        tags: &["purse"],
+    },
+    EmojiData {
+        emoji: "👜",
+        tags: &["handbag", "bag"],
+    },
+    EmojiData {
+        emoji: "👝",
+        tags: &["clutch bag", "bag", "pouch"],
+    },
+    EmojiData {
+        emoji: "🛍️",
+        tags: &["shopping bags", "bags", "shopping"],
+    },
+    EmojiData {
+        emoji: "🎒",
+        tags: &["backpack", "school satchel"],
+    },
+    EmojiData {
+        emoji: "👞",
+        tags: &["man’s shoe", "mans shoe", "shoe"],
+    },
+    EmojiData {
+        emoji: "👟",
+        tags: &[
+            "running shoe",
+            "sneaker",
+            "sport",
+            "running",
+            "athletic shoe",
+        ],
+    },
+    EmojiData {
+        emoji: "🥾",
+        tags: &["hiking boot"],
+    },
+    EmojiData {
+        emoji: "🥿",
+        tags: &["flat shoe"],
+    },
+    EmojiData {
+        emoji: "👠",
+        tags: &["high-heeled shoe", "shoe", "high heel"],
+    },
+    EmojiData {
+        emoji: "👡",
+        tags: &["woman’s sandal", "shoe", "sandal"],
+    },
+    EmojiData {
+        emoji: "🩰",
+        tags: &["ballet shoes"],
+    },
+    EmojiData {
+        emoji: "👢",
+        tags: &["woman’s boot", "boot"],
+    },
+    EmojiData {
+        emoji: "👑",
+        tags: &["crown", "king", "queen", "royal"],
+    },
+    EmojiData {
+        emoji: "👒",
+        tags: &["woman’s hat", "womans hat"],
+    },
+    EmojiData {
+        emoji: "🎩",
+        tags: &["top hat", "hat", "classy", "tophat"],
+    },
+    EmojiData {
+        emoji: "🎓",
+        tags: &[
+            "graduation cap",
+            "education",
+            "college",
+            "university",
+            "graduation",
+            "mortar board",
+        ],
+    },
+    EmojiData {
+        emoji: "🧢",
+        tags: &["billed cap"],
+    },
+    EmojiData {
+        emoji: "⛑️",
+        tags: &["rescue worker’s helmet", "rescue worker helmet"],
+    },
+    EmojiData {
+        emoji: "📿",
+        tags: &["prayer beads"],
+    },
+    EmojiData {
+        emoji: "💄",
+        tags: &["lipstick", "makeup"],
+    },
+    EmojiData {
+        emoji: "💍",
+        tags: &["ring", "wedding", "marriage", "engaged"],
+    },
+    EmojiData {
+        emoji: "💎",
+        tags: &["gem stone", "diamond", "gem"],
+    },
+    EmojiData {
+        emoji: "🔇",
+        tags: &["muted speaker", "sound", "volume", "mute"],
+    },
+    EmojiData {
+        emoji: "🔈",
+        tags: &["speaker low volume", "speaker"],
+    },
+    EmojiData {
+        emoji: "🔉",
+        tags: &["speaker medium volume", "volume", "sound"],
+    },
+    EmojiData {
+        emoji: "🔊",
+        tags: &["speaker high volume", "volume", "loud sound"],
+    },
+    EmojiData {
+        emoji: "📢",
+        tags: &["loudspeaker", "announcement"],
+    },
+    EmojiData {
+        emoji: "📣",
+        tags: &["megaphone", "mega"],
+    },
+    EmojiData {
+        emoji: "📯",
+        tags: &["postal horn"],
+    },
+    EmojiData {
+        emoji: "🔔",
+        tags: &["bell", "sound", "notification"],
+    },
+    EmojiData {
+        emoji: "🔕",
+        tags: &["bell with slash", "volume", "off", "no bell"],
+    },
+    EmojiData {
+        emoji: "🎼",
+        tags: &["musical score"],
+    },
+    EmojiData {
+        emoji: "🎵",
+        tags: &["musical note"],
+    },
+    EmojiData {
+        emoji: "🎶",
+        tags: &["musical notes", "music", "notes"],
+    },
+    EmojiData {
+        emoji: "🎙️",
+        tags: &["studio microphone", "podcast"],
+    },
+    EmojiData {
+        emoji: "🎚️",
+        tags: &["level slider"],
+    },
+    EmojiData {
+        emoji: "🎛️",
+        tags: &["control knobs"],
+    },
+    EmojiData {
+        emoji: "🎤",
+        tags: &["microphone", "sing"],
+    },
+    EmojiData {
+        emoji: "🎧",
+        tags: &["headphone", "music", "earphones", "headphones"],
+    },
+    EmojiData {
+        emoji: "📻",
+        tags: &["radio", "podcast"],
+    },
+    EmojiData {
+        emoji: "🎷",
+        tags: &["saxophone"],
+    },
+    EmojiData {
+        emoji: "🎸",
+        tags: &["guitar", "rock"],
+    },
+    EmojiData {
+        emoji: "🎹",
+        tags: &["musical keyboard", "piano"],
+    },
+    EmojiData {
+        emoji: "🎺",
+        tags: &["trumpet"],
+    },
+    EmojiData {
+        emoji: "🎻",
+        tags: &["violin"],
+    },
+    EmojiData {
+        emoji: "🪕",
+        tags: &["banjo"],
+    },
+    EmojiData {
+        emoji: "🥁",
+        tags: &["drum"],
+    },
+    EmojiData {
+        emoji: "📱",
+        tags: &["mobile phone", "smartphone", "mobile", "iphone"],
+    },
+    EmojiData {
+        emoji: "📲",
+        tags: &["mobile phone with arrow", "call", "incoming", "calling"],
+    },
+    EmojiData {
+        emoji: "☎️",
+        tags: &["telephone", "phone"],
+    },
+    EmojiData {
+        emoji: "📞",
+        tags: &["telephone receiver", "phone", "call"],
+    },
+    EmojiData {
+        emoji: "📟",
+        tags: &["pager"],
+    },
+    EmojiData {
+        emoji: "📠",
+        tags: &["fax machine", "fax"],
+    },
+    EmojiData {
+        emoji: "🔋",
+        tags: &["battery", "power"],
+    },
+    EmojiData {
+        emoji: "🔌",
+        tags: &["electric plug"],
+    },
+    EmojiData {
+        emoji: "💻",
+        tags: &["laptop", "desktop", "screen", "computer"],
+    },
+    EmojiData {
+        emoji: "🖥️",
+        tags: &["desktop computer"],
+    },
+    EmojiData {
+        emoji: "🖨️",
+        tags: &["printer"],
+    },
+    EmojiData {
+        emoji: "⌨️",
+        tags: &["keyboard"],
+    },
+    EmojiData {
+        emoji: "🖱️",
+        tags: &["computer mouse"],
+    },
+    EmojiData {
+        emoji: "🖲️",
+        tags: &["trackball"],
+    },
+    EmojiData {
+        emoji: "💽",
+        tags: &["computer disk", "minidisc"],
+    },
+    EmojiData {
+        emoji: "💾",
+        tags: &["floppy disk", "save"],
+    },
+    EmojiData {
+        emoji: "💿",
+        tags: &["optical disk", "cd"],
+    },
+    EmojiData {
+        emoji: "📀",
+        tags: &["dvd"],
+    },
+    EmojiData {
+        emoji: "🧮",
+        tags: &["abacus"],
+    },
+    EmojiData {
+        emoji: "🎥",
+        tags: &["movie camera", "film", "video"],
+    },
+    EmojiData {
+        emoji: "🎞️",
+        tags: &["film frames", "film strip"],
+    },
+    EmojiData {
+        emoji: "📽️",
+        tags: &["film projector"],
+    },
+    EmojiData {
+        emoji: "🎬",
+        tags: &["clapper board", "film", "clapper"],
+    },
+    EmojiData {
+        emoji: "📺",
+        tags: &["television", "tv"],
+    },
+    EmojiData {
+        emoji: "📷",
+        tags: &["camera", "photo"],
+    },
+    EmojiData {
+        emoji: "📸",
+        tags: &["camera with flash", "photo", "camera flash"],
+    },
+    EmojiData {
+        emoji: "📹",
+        tags: &["video camera"],
+    },
+    EmojiData {
+        emoji: "📼",
+        tags: &["videocassette", "vhs"],
+    },
+    EmojiData {
+        emoji: "🔍",
+        tags: &["magnifying glass tilted left", "search", "zoom", "mag"],
+    },
+    EmojiData {
+        emoji: "🔎",
+        tags: &["magnifying glass tilted right", "mag right"],
+    },
+    EmojiData {
+        emoji: "🕯️",
+        tags: &["candle"],
+    },
+    EmojiData {
+        emoji: "💡",
+        tags: &["light bulb", "idea", "light", "bulb"],
+    },
+    EmojiData {
+        emoji: "🔦",
+        tags: &["flashlight"],
+    },
+    EmojiData {
+        emoji: "🏮",
+        tags: &["red paper lantern", "izakaya lantern", "lantern"],
+    },
+    EmojiData {
+        emoji: "🪔",
+        tags: &["diya lamp"],
+    },
+    EmojiData {
+        emoji: "📔",
+        tags: &["notebook with decorative cover"],
+    },
+    EmojiData {
+        emoji: "📕",
+        tags: &["closed book"],
+    },
+    EmojiData {
+        emoji: "📖",
+        tags: &["open book", "book"],
+    },
+    EmojiData {
+        emoji: "📗",
+        tags: &["green book"],
+    },
+    EmojiData {
+        emoji: "📘",
+        tags: &["blue book"],
+    },
+    EmojiData {
+        emoji: "📙",
+        tags: &["orange book"],
+    },
+    EmojiData {
+        emoji: "📚",
+        tags: &["books", "library"],
+    },
+    EmojiData {
+        emoji: "📓",
+        tags: &["notebook"],
+    },
+    EmojiData {
+        emoji: "📒",
+        tags: &["ledger"],
+    },
+    EmojiData {
+        emoji: "📃",
+        tags: &["page with curl"],
+    },
+    EmojiData {
+        emoji: "📜",
+        tags: &["scroll", "document"],
+    },
+    EmojiData {
+        emoji: "📄",
+        tags: &["page facing up", "document"],
+    },
+    EmojiData {
+        emoji: "📰",
+        tags: &["newspaper", "press"],
+    },
+    EmojiData {
+        emoji: "🗞️",
+        tags: &["rolled-up newspaper", "press", "newspaper roll"],
+    },
+    EmojiData {
+        emoji: "📑",
+        tags: &["bookmark tabs"],
+    },
+    EmojiData {
+        emoji: "🔖",
+        tags: &["bookmark"],
+    },
+    EmojiData {
+        emoji: "🏷️",
+        tags: &["label", "tag"],
+    },
+    EmojiData {
+        emoji: "💰",
+        tags: &["money bag", "dollar", "cream", "moneybag"],
+    },
+    EmojiData {
+        emoji: "💴",
+        tags: &["yen banknote", "yen"],
+    },
+    EmojiData {
+        emoji: "💵",
+        tags: &["dollar banknote", "money", "dollar"],
+    },
+    EmojiData {
+        emoji: "💶",
+        tags: &["euro banknote", "euro"],
+    },
+    EmojiData {
+        emoji: "💷",
+        tags: &["pound banknote", "pound"],
+    },
+    EmojiData {
+        emoji: "💸",
+        tags: &["money with wings", "dollar"],
+    },
+    EmojiData {
+        emoji: "💳",
+        tags: &["credit card", "subscription"],
+    },
+    EmojiData {
+        emoji: "🧾",
+        tags: &["receipt"],
+    },
+    EmojiData {
+        emoji: "💹",
+        tags: &["chart increasing with yen", "chart"],
+    },
+    EmojiData {
+        emoji: "💱",
+        tags: &["currency exchange"],
+    },
+    EmojiData {
+        emoji: "💲",
+        tags: &["heavy dollar sign"],
+    },
+    EmojiData {
+        emoji: "✉️",
+        tags: &["envelope", "letter", "email"],
+    },
+    EmojiData {
+        emoji: "📧",
+        tags: &["e-mail"],
+    },
+    EmojiData {
+        emoji: "📨",
+        tags: &["incoming envelope"],
+    },
+    EmojiData {
+        emoji: "📩",
+        tags: &["envelope with arrow"],
+    },
+    EmojiData {
+        emoji: "📤",
+        tags: &["outbox tray"],
+    },
+    EmojiData {
+        emoji: "📥",
+        tags: &["inbox tray"],
+    },
+    EmojiData {
+        emoji: "📦",
+        tags: &["package", "shipping"],
+    },
+    EmojiData {
+        emoji: "📫",
+        tags: &["closed mailbox with raised flag", "mailbox"],
+    },
+    EmojiData {
+        emoji: "📪",
+        tags: &["closed mailbox with lowered flag", "mailbox closed"],
+    },
+    EmojiData {
+        emoji: "📬",
+        tags: &["open mailbox with raised flag", "mailbox with mail"],
+    },
+    EmojiData {
+        emoji: "📭",
+        tags: &["open mailbox with lowered flag", "mailbox with no mail"],
+    },
+    EmojiData {
+        emoji: "📮",
+        tags: &["postbox"],
+    },
+    EmojiData {
+        emoji: "🗳️",
+        tags: &["ballot box with ballot", "ballot box"],
+    },
+    EmojiData {
+        emoji: "✏️",
+        tags: &["pencil", "pencil2"],
+    },
+    EmojiData {
+        emoji: "✒️",
+        tags: &["black nib"],
+    },
+    EmojiData {
+        emoji: "🖋️",
+        tags: &["fountain pen"],
+    },
+    EmojiData {
+        emoji: "🖊️",
+        tags: &["pen"],
+    },
+    EmojiData {
+        emoji: "🖌️",
+        tags: &["paintbrush"],
+    },
+    EmojiData {
+        emoji: "🖍️",
+        tags: &["crayon"],
+    },
+    EmojiData {
+        emoji: "📝",
+        tags: &["memo", "document", "note", "pencil"],
+    },
+    EmojiData {
+        emoji: "💼",
+        tags: &["briefcase", "business"],
+    },
+    EmojiData {
+        emoji: "📁",
+        tags: &["file folder", "directory"],
+    },
+    EmojiData {
+        emoji: "📂",
+        tags: &["open file folder"],
+    },
+    EmojiData {
+        emoji: "🗂️",
+        tags: &["card index dividers"],
+    },
+    EmojiData {
+        emoji: "📅",
+        tags: &["calendar", "schedule", "date"],
+    },
+    EmojiData {
+        emoji: "📆",
+        tags: &["tear-off calendar", "schedule", "calendar"],
+    },
+    EmojiData {
+        emoji: "🗒️",
+        tags: &["spiral notepad"],
+    },
+    EmojiData {
+        emoji: "🗓️",
+        tags: &["spiral calendar"],
+    },
+    EmojiData {
+        emoji: "📇",
+        tags: &["card index"],
+    },
+    EmojiData {
+        emoji: "📈",
+        tags: &[
+            "chart increasing",
+            "graph",
+            "metrics",
+            "chart with upwards trend",
+        ],
+    },
+    EmojiData {
+        emoji: "📉",
+        tags: &[
+            "chart decreasing",
+            "graph",
+            "metrics",
+            "chart with downwards trend",
+        ],
+    },
+    EmojiData {
+        emoji: "📊",
+        tags: &["bar chart", "stats", "metrics"],
+    },
+    EmojiData {
+        emoji: "📋",
+        tags: &["clipboard"],
+    },
+    EmojiData {
+        emoji: "📌",
+        tags: &["pushpin", "location"],
+    },
+    EmojiData {
+        emoji: "📍",
+        tags: &["round pushpin", "location"],
+    },
+    EmojiData {
+        emoji: "📎",
+        tags: &["paperclip"],
+    },
+    EmojiData {
+        emoji: "🖇️",
+        tags: &["linked paperclips", "paperclips"],
+    },
+    EmojiData {
+        emoji: "📏",
+        tags: &["straight ruler"],
+    },
+    EmojiData {
+        emoji: "📐",
+        tags: &["triangular ruler"],
+    },
+    EmojiData {
+        emoji: "✂️",
+        tags: &["scissors", "cut"],
+    },
+    EmojiData {
+        emoji: "🗃️",
+        tags: &["card file box"],
+    },
+    EmojiData {
+        emoji: "🗄️",
+        tags: &["file cabinet"],
+    },
+    EmojiData {
+        emoji: "🗑️",
+        tags: &["wastebasket", "trash"],
+    },
+    EmojiData {
+        emoji: "🔒",
+        tags: &["locked", "security", "private", "lock"],
+    },
+    EmojiData {
+        emoji: "🔓",
+        tags: &["unlocked", "security", "unlock"],
+    },
+    EmojiData {
+        emoji: "🔏",
+        tags: &["locked with pen", "lock with ink pen"],
+    },
+    EmojiData {
+        emoji: "🔐",
+        tags: &["locked with key", "security", "closed lock with key"],
+    },
+    EmojiData {
+        emoji: "🔑",
+        tags: &["key", "lock", "password"],
+    },
+    EmojiData {
+        emoji: "🗝️",
+        tags: &["old key"],
+    },
+    EmojiData {
+        emoji: "🔨",
+        tags: &["hammer", "tool"],
+    },
+    EmojiData {
+        emoji: "🪓",
+        tags: &["axe"],
+    },
+    EmojiData {
+        emoji: "⛏️",
+        tags: &["pick"],
+    },
+    EmojiData {
+        emoji: "⚒️",
+        tags: &["hammer and pick"],
+    },
+    EmojiData {
+        emoji: "🛠️",
+        tags: &["hammer and wrench"],
+    },
+    EmojiData {
+        emoji: "🗡️",
+        tags: &["dagger"],
+    },
+    EmojiData {
+        emoji: "⚔️",
+        tags: &["crossed swords"],
+    },
+    EmojiData {
+        emoji: "🔫",
+        tags: &["pistol", "shoot", "weapon", "gun"],
+    },
+    EmojiData {
+        emoji: "🏹",
+        tags: &["bow and arrow", "archery"],
+    },
+    EmojiData {
+        emoji: "🛡️",
+        tags: &["shield"],
+    },
+    EmojiData {
+        emoji: "🔧",
+        tags: &["wrench", "tool"],
+    },
+    EmojiData {
+        emoji: "🔩",
+        tags: &["nut and bolt"],
+    },
+    EmojiData {
+        emoji: "⚙️",
+        tags: &["gear"],
+    },
+    EmojiData {
+        emoji: "🗜️",
+        tags: &["clamp"],
+    },
+    EmojiData {
+        emoji: "⚖️",
+        tags: &["balance scale"],
+    },
+    EmojiData {
+        emoji: "🦯",
+        tags: &["probing cane"],
+    },
+    EmojiData {
+        emoji: "🔗",
+        tags: &["link"],
+    },
+    EmojiData {
+        emoji: "⛓️",
+        tags: &["chains"],
+    },
+    EmojiData {
+        emoji: "🧰",
+        tags: &["toolbox"],
+    },
+    EmojiData {
+        emoji: "🧲",
+        tags: &["magnet"],
+    },
+    EmojiData {
+        emoji: "⚗️",
+        tags: &["alembic"],
+    },
+    EmojiData {
+        emoji: "🧪",
+        tags: &["test tube"],
+    },
+    EmojiData {
+        emoji: "🧫",
+        tags: &["petri dish"],
+    },
+    EmojiData {
+        emoji: "🧬",
+        tags: &["dna"],
+    },
+    EmojiData {
+        emoji: "🔬",
+        tags: &["microscope", "science", "laboratory", "investigate"],
+    },
+    EmojiData {
+        emoji: "🔭",
+        tags: &["telescope"],
+    },
+    EmojiData {
+        emoji: "📡",
+        tags: &["satellite antenna", "signal", "satellite"],
+    },
+    EmojiData {
+        emoji: "💉",
+        tags: &["syringe", "health", "hospital", "needle"],
+    },
+    EmojiData {
+        emoji: "🩸",
+        tags: &["drop of blood"],
+    },
+    EmojiData {
+        emoji: "💊",
+        tags: &["pill", "health", "medicine"],
+    },
+    EmojiData {
+        emoji: "🩹",
+        tags: &["adhesive bandage"],
+    },
+    EmojiData {
+        emoji: "🩺",
+        tags: &["stethoscope"],
+    },
+    EmojiData {
+        emoji: "🚪",
+        tags: &["door"],
+    },
+    EmojiData {
+        emoji: "🛏️",
+        tags: &["bed"],
+    },
+    EmojiData {
+        emoji: "🛋️",
+        tags: &["couch and lamp"],
+    },
+    EmojiData {
+        emoji: "🪑",
+        tags: &["chair"],
+    },
+    EmojiData {
+        emoji: "🚽",
+        tags: &["toilet", "wc"],
+    },
+    EmojiData {
+        emoji: "🚿",
+        tags: &["shower", "bath"],
+    },
+    EmojiData {
+        emoji: "🛁",
+        tags: &["bathtub"],
+    },
+    EmojiData {
+        emoji: "🪒",
+        tags: &["razor"],
+    },
+    EmojiData {
+        emoji: "🧴",
+        tags: &["lotion bottle"],
+    },
+    EmojiData {
+        emoji: "🧷",
+        tags: &["safety pin"],
+    },
+    EmojiData {
+        emoji: "🧹",
+        tags: &["broom"],
+    },
+    EmojiData {
+        emoji: "🧺",
+        tags: &["basket"],
+    },
+    EmojiData {
+        emoji: "🧻",
+        tags: &["roll of paper", "toilet"],
+    },
+    EmojiData {
+        emoji: "🧼",
+        tags: &["soap"],
+    },
+    EmojiData {
+        emoji: "🧽",
+        tags: &["sponge"],
+    },
+    EmojiData {
+        emoji: "🧯",
+        tags: &["fire extinguisher"],
+    },
+    EmojiData {
+        emoji: "🛒",
+        tags: &["shopping cart"],
+    },
+    EmojiData {
+        emoji: "🚬",
+        tags: &["cigarette", "smoking"],
+    },
+    EmojiData {
+        emoji: "⚰️",
+        tags: &["coffin", "funeral"],
+    },
+    EmojiData {
+        emoji: "⚱️",
+        tags: &["funeral urn"],
+    },
+    EmojiData {
+        emoji: "🗿",
+        tags: &["moai", "stone", "moyai"],
+    },
+    EmojiData {
+        emoji: "🏧",
+        tags: &["ATM sign", "atm"],
+    },
+    EmojiData {
+        emoji: "🚮",
+        tags: &["litter in bin sign", "put litter in its place"],
+    },
+    EmojiData {
+        emoji: "🚰",
+        tags: &["potable water"],
+    },
+    EmojiData {
+        emoji: "♿",
+        tags: &["wheelchair symbol", "accessibility", "wheelchair"],
+    },
+    EmojiData {
+        emoji: "🚹",
+        tags: &["men’s room", "mens"],
+    },
+    EmojiData {
+        emoji: "🚺",
+        tags: &["women’s room", "womens"],
+    },
+    EmojiData {
+        emoji: "🚻",
+        tags: &["restroom", "toilet"],
+    },
+    EmojiData {
+        emoji: "🚼",
+        tags: &["baby symbol"],
+    },
+    EmojiData {
+        emoji: "🚾",
+        tags: &["water closet", "toilet", "restroom", "wc"],
+    },
+    EmojiData {
+        emoji: "🛂",
+        tags: &["passport control"],
+    },
+    EmojiData {
+        emoji: "🛃",
+        tags: &["customs"],
+    },
+    EmojiData {
+        emoji: "🛄",
+        tags: &["baggage claim", "airport"],
+    },
+    EmojiData {
+        emoji: "🛅",
+        tags: &["left luggage"],
+    },
+    EmojiData {
+        emoji: "⚠️",
+        tags: &["warning", "wip"],
+    },
+    EmojiData {
+        emoji: "🚸",
+        tags: &["children crossing"],
+    },
+    EmojiData {
+        emoji: "⛔",
+        tags: &["no entry", "limit"],
+    },
+    EmojiData {
+        emoji: "🚫",
+        tags: &["prohibited", "block", "forbidden", "no entry sign"],
+    },
+    EmojiData {
+        emoji: "🚳",
+        tags: &["no bicycles"],
+    },
+    EmojiData {
+        emoji: "🚭",
+        tags: &["no smoking"],
+    },
+    EmojiData {
+        emoji: "🚯",
+        tags: &["no littering", "do not litter"],
+    },
+    EmojiData {
+        emoji: "🚱",
+        tags: &["non-potable water"],
+    },
+    EmojiData {
+        emoji: "🚷",
+        tags: &["no pedestrians"],
+    },
+    EmojiData {
+        emoji: "📵",
+        tags: &["no mobile phones"],
+    },
+    EmojiData {
+        emoji: "🔞",
+        tags: &["no one under eighteen", "underage"],
+    },
+    EmojiData {
+        emoji: "☢️",
+        tags: &["radioactive"],
+    },
+    EmojiData {
+        emoji: "☣️",
+        tags: &["biohazard"],
+    },
+    EmojiData {
+        emoji: "⬆️",
+        tags: &["up arrow", "arrow up"],
+    },
+    EmojiData {
+        emoji: "↗️",
+        tags: &["up-right arrow", "arrow upper right"],
+    },
+    EmojiData {
+        emoji: "➡️",
+        tags: &["right arrow", "arrow right"],
+    },
+    EmojiData {
+        emoji: "↘️",
+        tags: &["down-right arrow", "arrow lower right"],
+    },
+    EmojiData {
+        emoji: "⬇️",
+        tags: &["down arrow", "arrow down"],
+    },
+    EmojiData {
+        emoji: "↙️",
+        tags: &["down-left arrow", "arrow lower left"],
+    },
+    EmojiData {
+        emoji: "⬅️",
+        tags: &["left arrow", "arrow left"],
+    },
+    EmojiData {
+        emoji: "↖️",
+        tags: &["up-left arrow", "arrow upper left"],
+    },
+    EmojiData {
+        emoji: "↕️",
+        tags: &["up-down arrow", "arrow up down"],
+    },
+    EmojiData {
+        emoji: "↔️",
+        tags: &["left-right arrow", "left right arrow"],
+    },
+    EmojiData {
+        emoji: "↩️",
+        tags: &[
+            "right arrow curving left",
+            "return",
+            "leftwards arrow with hook",
+        ],
+    },
+    EmojiData {
+        emoji: "↪️",
+        tags: &["left arrow curving right", "arrow right hook"],
+    },
+    EmojiData {
+        emoji: "⤴️",
+        tags: &["right arrow curving up", "arrow heading up"],
+    },
+    EmojiData {
+        emoji: "⤵️",
+        tags: &["right arrow curving down", "arrow heading down"],
+    },
+    EmojiData {
+        emoji: "🔃",
+        tags: &["clockwise vertical arrows", "arrows clockwise"],
+    },
+    EmojiData {
+        emoji: "🔄",
+        tags: &[
+            "counterclockwise arrows button",
+            "sync",
+            "arrows counterclockwise",
+        ],
+    },
+    EmojiData {
+        emoji: "🔙",
+        tags: &["BACK arrow", "back"],
+    },
+    EmojiData {
+        emoji: "🔚",
+        tags: &["END arrow", "end"],
+    },
+    EmojiData {
+        emoji: "🔛",
+        tags: &["ON! arrow", "on"],
+    },
+    EmojiData {
+        emoji: "🔜",
+        tags: &["SOON arrow", "soon"],
+    },
+    EmojiData {
+        emoji: "🔝",
+        tags: &["TOP arrow", "top"],
+    },
+    EmojiData {
+        emoji: "🛐",
+        tags: &["place of worship"],
+    },
+    EmojiData {
+        emoji: "⚛️",
+        tags: &["atom symbol"],
+    },
+    EmojiData {
+        emoji: "🕉️",
+        tags: &["om"],
+    },
+    EmojiData {
+        emoji: "✡️",
+        tags: &["star of David", "star of david"],
+    },
+    EmojiData {
+        emoji: "☸️",
+        tags: &["wheel of dharma"],
+    },
+    EmojiData {
+        emoji: "☯️",
+        tags: &["yin yang"],
+    },
+    EmojiData {
+        emoji: "✝️",
+        tags: &["latin cross"],
+    },
+    EmojiData {
+        emoji: "☦️",
+        tags: &["orthodox cross"],
+    },
+    EmojiData {
+        emoji: "☪️",
+        tags: &["star and crescent"],
+    },
+    EmojiData {
+        emoji: "☮️",
+        tags: &["peace symbol"],
+    },
+    EmojiData {
+        emoji: "🕎",
+        tags: &["menorah"],
+    },
+    EmojiData {
+        emoji: "🔯",
+        tags: &["dotted six-pointed star", "six pointed star"],
+    },
+    EmojiData {
+        emoji: "♈",
+        tags: &["Aries", "aries"],
+    },
+    EmojiData {
+        emoji: "♉",
+        tags: &["Taurus", "taurus"],
+    },
+    EmojiData {
+        emoji: "♊",
+        tags: &["Gemini", "gemini"],
+    },
+    EmojiData {
+        emoji: "♋",
+        tags: &["Cancer", "cancer"],
+    },
+    EmojiData {
+        emoji: "♌",
+        tags: &["Leo", "leo"],
+    },
+    EmojiData {
+        emoji: "♍",
+        tags: &["Virgo", "virgo"],
+    },
+    EmojiData {
+        emoji: "♎",
+        tags: &["Libra", "libra"],
+    },
+    EmojiData {
+        emoji: "♏",
+        tags: &["Scorpio", "scorpius"],
+    },
+    EmojiData {
+        emoji: "♐",
+        tags: &["Sagittarius", "sagittarius"],
+    },
+    EmojiData {
+        emoji: "♑",
+        tags: &["Capricorn", "capricorn"],
+    },
+    EmojiData {
+        emoji: "♒",
+        tags: &["Aquarius", "aquarius"],
+    },
+    EmojiData {
+        emoji: "♓",
+        tags: &["Pisces", "pisces"],
+    },
+    EmojiData {
+        emoji: "⛎",
+        tags: &["Ophiuchus", "ophiuchus"],
+    },
+    EmojiData {
+        emoji: "🔀",
+        tags: &[
+            "shuffle tracks button",
+            "shuffle",
+            "twisted rightwards arrows",
+        ],
+    },
+    EmojiData {
+        emoji: "🔁",
+        tags: &["repeat button", "loop", "repeat"],
+    },
+    EmojiData {
+        emoji: "🔂",
+        tags: &["repeat single button", "repeat one"],
+    },
+    EmojiData {
+        emoji: "▶️",
+        tags: &["play button", "arrow forward"],
+    },
+    EmojiData {
+        emoji: "⏩",
+        tags: &["fast-forward button", "fast forward"],
+    },
+    EmojiData {
+        emoji: "⏭️",
+        tags: &["next track button"],
+    },
+    EmojiData {
+        emoji: "⏯️",
+        tags: &["play or pause button"],
+    },
+    EmojiData {
+        emoji: "◀️",
+        tags: &["reverse button", "arrow backward"],
+    },
+    EmojiData {
+        emoji: "⏪",
+        tags: &["fast reverse button", "rewind"],
+    },
+    EmojiData {
+        emoji: "⏮️",
+        tags: &["last track button", "previous track button"],
+    },
+    EmojiData {
+        emoji: "🔼",
+        tags: &["upwards button", "arrow up small"],
+    },
+    EmojiData {
+        emoji: "⏫",
+        tags: &["fast up button", "arrow double up"],
+    },
+    EmojiData {
+        emoji: "🔽",
+        tags: &["downwards button", "arrow down small"],
+    },
+    EmojiData {
+        emoji: "⏬",
+        tags: &["fast down button", "arrow double down"],
+    },
+    EmojiData {
+        emoji: "⏸️",
+        tags: &["pause button"],
+    },
+    EmojiData {
+        emoji: "⏹️",
+        tags: &["stop button"],
+    },
+    EmojiData {
+        emoji: "⏺️",
+        tags: &["record button"],
+    },
+    EmojiData {
+        emoji: "⏏️",
+        tags: &["eject button"],
+    },
+    EmojiData {
+        emoji: "🎦",
+        tags: &["cinema", "film", "movie"],
+    },
+    EmojiData {
+        emoji: "🔅",
+        tags: &["dim button", "low brightness"],
+    },
+    EmojiData {
+        emoji: "🔆",
+        tags: &["bright button", "high brightness"],
+    },
+    EmojiData {
+        emoji: "📶",
+        tags: &["antenna bars", "wifi", "signal strength"],
+    },
+    EmojiData {
+        emoji: "📳",
+        tags: &["vibration mode"],
+    },
+    EmojiData {
+        emoji: "📴",
+        tags: &["mobile phone off", "mute", "off"],
+    },
+    EmojiData {
+        emoji: "♀️",
+        tags: &["female sign"],
+    },
+    EmojiData {
+        emoji: "♂️",
+        tags: &["male sign"],
+    },
+    EmojiData {
+        emoji: "⚕️",
+        tags: &["medical symbol"],
+    },
+    EmojiData {
+        emoji: "♾️",
+        tags: &["infinity"],
+    },
+    EmojiData {
+        emoji: "♻️",
+        tags: &["recycling symbol", "environment", "green", "recycle"],
+    },
+    EmojiData {
+        emoji: "⚜️",
+        tags: &["fleur-de-lis", "fleur de lis"],
+    },
+    EmojiData {
+        emoji: "🔱",
+        tags: &["trident emblem", "trident"],
+    },
+    EmojiData {
+        emoji: "📛",
+        tags: &["name badge"],
+    },
+    EmojiData {
+        emoji: "🔰",
+        tags: &["Japanese symbol for beginner", "beginner"],
+    },
+    EmojiData {
+        emoji: "⭕",
+        tags: &["hollow red circle", "o"],
+    },
+    EmojiData {
+        emoji: "✅",
+        tags: &["check mark button", "white check mark"],
+    },
+    EmojiData {
+        emoji: "☑️",
+        tags: &["check box with check", "ballot box with check"],
+    },
+    EmojiData {
+        emoji: "✔️",
+        tags: &["check mark", "heavy check mark"],
+    },
+    EmojiData {
+        emoji: "✖️",
+        tags: &["multiplication sign", "heavy multiplication x"],
+    },
+    EmojiData {
+        emoji: "❌",
+        tags: &["cross mark", "x"],
+    },
+    EmojiData {
+        emoji: "❎",
+        tags: &["cross mark button", "negative squared cross mark"],
+    },
+    EmojiData {
+        emoji: "➕",
+        tags: &["plus sign", "heavy plus sign"],
+    },
+    EmojiData {
+        emoji: "➖",
+        tags: &["minus sign", "heavy minus sign"],
+    },
+    EmojiData {
+        emoji: "➗",
+        tags: &["division sign", "heavy division sign"],
+    },
+    EmojiData {
+        emoji: "➰",
+        tags: &["curly loop"],
+    },
+    EmojiData {
+        emoji: "➿",
+        tags: &["double curly loop", "loop"],
+    },
+    EmojiData {
+        emoji: "〽️",
+        tags: &["part alternation mark"],
+    },
+    EmojiData {
+        emoji: "✳️",
+        tags: &["eight-spoked asterisk", "eight spoked asterisk"],
+    },
+    EmojiData {
+        emoji: "✴️",
+        tags: &["eight-pointed star", "eight pointed black star"],
+    },
+    EmojiData {
+        emoji: "❇️",
+        tags: &["sparkle"],
+    },
+    EmojiData {
+        emoji: "‼️",
+        tags: &["double exclamation mark", "bangbang"],
+    },
+    EmojiData {
+        emoji: "⁉️",
+        tags: &["exclamation question mark", "interrobang"],
+    },
+    EmojiData {
+        emoji: "❓",
+        tags: &["question mark", "confused", "question"],
+    },
+    EmojiData {
+        emoji: "❔",
+        tags: &["white question mark", "grey question"],
+    },
+    EmojiData {
+        emoji: "❕",
+        tags: &["white exclamation mark", "grey exclamation"],
+    },
+    EmojiData {
+        emoji: "❗",
+        tags: &[
+            "exclamation mark",
+            "bang",
+            "exclamation",
+            "heavy exclamation mark",
+        ],
+    },
+    EmojiData {
+        emoji: "〰️",
+        tags: &["wavy dash"],
+    },
+    EmojiData {
+        emoji: "©️",
+        tags: &["copyright"],
+    },
+    EmojiData {
+        emoji: "®️",
+        tags: &["registered"],
+    },
+    EmojiData {
+        emoji: "™️",
+        tags: &["trade mark", "trademark", "tm"],
+    },
+    EmojiData {
+        emoji: "#️⃣",
+        tags: &["keycap: #", "number", "hash"],
+    },
+    EmojiData {
+        emoji: "*️⃣",
+        tags: &["keycap: *", "asterisk"],
+    },
+    EmojiData {
+        emoji: "0️⃣",
+        tags: &["keycap: 0", "zero"],
+    },
+    EmojiData {
+        emoji: "1️⃣",
+        tags: &["keycap: 1", "one"],
+    },
+    EmojiData {
+        emoji: "2️⃣",
+        tags: &["keycap: 2", "two"],
+    },
+    EmojiData {
+        emoji: "3️⃣",
+        tags: &["keycap: 3", "three"],
+    },
+    EmojiData {
+        emoji: "4️⃣",
+        tags: &["keycap: 4", "four"],
+    },
+    EmojiData {
+        emoji: "5️⃣",
+        tags: &["keycap: 5", "five"],
+    },
+    EmojiData {
+        emoji: "6️⃣",
+        tags: &["keycap: 6", "six"],
+    },
+    EmojiData {
+        emoji: "7️⃣",
+        tags: &["keycap: 7", "seven"],
+    },
+    EmojiData {
+        emoji: "8️⃣",
+        tags: &["keycap: 8", "eight"],
+    },
+    EmojiData {
+        emoji: "9️⃣",
+        tags: &["keycap: 9", "nine"],
+    },
+    EmojiData {
+        emoji: "🔟",
+        tags: &["keycap: 10", "keycap ten"],
+    },
+    EmojiData {
+        emoji: "🔠",
+        tags: &["input latin uppercase", "letters", "capital abcd"],
+    },
+    EmojiData {
+        emoji: "🔡",
+        tags: &["input latin lowercase", "abcd"],
+    },
+    EmojiData {
+        emoji: "🔢",
+        tags: &["input numbers", "numbers", "1234"],
+    },
+    EmojiData {
+        emoji: "🔣",
+        tags: &["input symbols", "symbols"],
+    },
+    EmojiData {
+        emoji: "🔤",
+        tags: &["input latin letters", "alphabet", "abc"],
+    },
+    EmojiData {
+        emoji: "🅰️",
+        tags: &["A button (blood type)", "a"],
+    },
+    EmojiData {
+        emoji: "🆎",
+        tags: &["AB button (blood type)", "ab"],
+    },
+    EmojiData {
+        emoji: "🅱️",
+        tags: &["B button (blood type)", "b"],
+    },
+    EmojiData {
+        emoji: "🆑",
+        tags: &["CL button", "cl"],
+    },
+    EmojiData {
+        emoji: "🆒",
+        tags: &["COOL button", "cool"],
+    },
+    EmojiData {
+        emoji: "🆓",
+        tags: &["FREE button", "free"],
+    },
+    EmojiData {
+        emoji: "ℹ️",
+        tags: &["information", "information source"],
+    },
+    EmojiData {
+        emoji: "🆔",
+        tags: &["ID button", "id"],
+    },
+    EmojiData {
+        emoji: "Ⓜ️",
+        tags: &["circled M", "m"],
+    },
+    EmojiData {
+        emoji: "🆕",
+        tags: &["NEW button", "fresh", "new"],
+    },
+    EmojiData {
+        emoji: "🆖",
+        tags: &["NG button", "ng"],
+    },
+    EmojiData {
+        emoji: "🅾️",
+        tags: &["O button (blood type)", "o2"],
+    },
+    EmojiData {
+        emoji: "🆗",
+        tags: &["OK button", "yes", "ok"],
+    },
+    EmojiData {
+        emoji: "🅿️",
+        tags: &["P button", "parking"],
+    },
+    EmojiData {
+        emoji: "🆘",
+        tags: &["SOS button", "help", "emergency", "sos"],
+    },
+    EmojiData {
+        emoji: "🆙",
+        tags: &["UP! button", "up"],
+    },
+    EmojiData {
+        emoji: "🆚",
+        tags: &["VS button", "vs"],
+    },
+    EmojiData {
+        emoji: "🈁",
+        tags: &["Japanese “here” button", "koko"],
+    },
+    EmojiData {
+        emoji: "🈂️",
+        tags: &["Japanese “service charge” button", "sa"],
+    },
+    EmojiData {
+        emoji: "🈷️",
+        tags: &["Japanese “monthly amount” button", "u6708"],
+    },
+    EmojiData {
+        emoji: "🈶",
+        tags: &["Japanese “not free of charge” button", "u6709"],
+    },
+    EmojiData {
+        emoji: "🈯",
+        tags: &["Japanese “reserved” button", "u6307"],
+    },
+    EmojiData {
+        emoji: "🉐",
+        tags: &["Japanese “bargain” button", "ideograph advantage"],
+    },
+    EmojiData {
+        emoji: "🈹",
+        tags: &["Japanese “discount” button", "u5272"],
+    },
+    EmojiData {
+        emoji: "🈚",
+        tags: &["Japanese “free of charge” button", "u7121"],
+    },
+    EmojiData {
+        emoji: "🈲",
+        tags: &["Japanese “prohibited” button", "u7981"],
+    },
+    EmojiData {
+        emoji: "🉑",
+        tags: &["Japanese “acceptable” button", "accept"],
+    },
+    EmojiData {
+        emoji: "🈸",
+        tags: &["Japanese “application” button", "u7533"],
+    },
+    EmojiData {
+        emoji: "🈴",
+        tags: &["Japanese “passing grade” button", "u5408"],
+    },
+    EmojiData {
+        emoji: "🈳",
+        tags: &["Japanese “vacancy” button", "u7a7a"],
+    },
+    EmojiData {
+        emoji: "㊗️",
+        tags: &["Japanese “congratulations” button", "congratulations"],
+    },
+    EmojiData {
+        emoji: "㊙️",
+        tags: &["Japanese “secret” button", "secret"],
+    },
+    EmojiData {
+        emoji: "🈺",
+        tags: &["Japanese “open for business” button", "u55b6"],
+    },
+    EmojiData {
+        emoji: "🈵",
+        tags: &["Japanese “no vacancy” button", "u6e80"],
+    },
+    EmojiData {
+        emoji: "🔴",
+        tags: &["red circle"],
+    },
+    EmojiData {
+        emoji: "🟠",
+        tags: &["orange circle"],
+    },
+    EmojiData {
+        emoji: "🟡",
+        tags: &["yellow circle"],
+    },
+    EmojiData {
+        emoji: "🟢",
+        tags: &["green circle"],
+    },
+    EmojiData {
+        emoji: "🔵",
+        tags: &["blue circle", "large blue circle"],
+    },
+    EmojiData {
+        emoji: "🟣",
+        tags: &["purple circle"],
+    },
+    EmojiData {
+        emoji: "🟤",
+        tags: &["brown circle"],
+    },
+    EmojiData {
+        emoji: "⚫",
+        tags: &["black circle"],
+    },
+    EmojiData {
+        emoji: "⚪",
+        tags: &["white circle"],
+    },
+    EmojiData {
+        emoji: "🟥",
+        tags: &["red square"],
+    },
+    EmojiData {
+        emoji: "🟧",
+        tags: &["orange square"],
+    },
+    EmojiData {
+        emoji: "🟨",
+        tags: &["yellow square"],
+    },
+    EmojiData {
+        emoji: "🟩",
+        tags: &["green square"],
+    },
+    EmojiData {
+        emoji: "🟦",
+        tags: &["blue square"],
+    },
+    EmojiData {
+        emoji: "🟪",
+        tags: &["purple square"],
+    },
+    EmojiData {
+        emoji: "🟫",
+        tags: &["brown square"],
+    },
+    EmojiData {
+        emoji: "⬛",
+        tags: &["black large square"],
+    },
+    EmojiData {
+        emoji: "⬜",
+        tags: &["white large square"],
+    },
+    EmojiData {
+        emoji: "◼️",
+        tags: &["black medium square"],
+    },
+    EmojiData {
+        emoji: "◻️",
+        tags: &["white medium square"],
+    },
+    EmojiData {
+        emoji: "◾",
+        tags: &["black medium-small square", "black medium small square"],
+    },
+    EmojiData {
+        emoji: "◽",
+        tags: &["white medium-small square", "white medium small square"],
+    },
+    EmojiData {
+        emoji: "▪️",
+        tags: &["black small square"],
+    },
+    EmojiData {
+        emoji: "▫️",
+        tags: &["white small square"],
+    },
+    EmojiData {
+        emoji: "🔶",
+        tags: &["large orange diamond"],
+    },
+    EmojiData {
+        emoji: "🔷",
+        tags: &["large blue diamond"],
+    },
+    EmojiData {
+        emoji: "🔸",
+        tags: &["small orange diamond"],
+    },
+    EmojiData {
+        emoji: "🔹",
+        tags: &["small blue diamond"],
+    },
+    EmojiData {
+        emoji: "🔺",
+        tags: &["red triangle pointed up", "small red triangle"],
+    },
+    EmojiData {
+        emoji: "🔻",
+        tags: &["red triangle pointed down", "small red triangle down"],
+    },
+    EmojiData {
+        emoji: "💠",
+        tags: &["diamond with a dot", "diamond shape with a dot inside"],
+    },
+    EmojiData {
+        emoji: "🔘",
+        tags: &["radio button"],
+    },
+    EmojiData {
+        emoji: "🔳",
+        tags: &["white square button"],
+    },
+    EmojiData {
+        emoji: "🔲",
+        tags: &["black square button"],
+    },
+    EmojiData {
+        emoji: "🏁",
+        tags: &["chequered flag", "milestone", "finish", "checkered flag"],
+    },
+    EmojiData {
+        emoji: "🚩",
+        tags: &["triangular flag", "triangular flag on post"],
+    },
+    EmojiData {
+        emoji: "🎌",
+        tags: &["crossed flags"],
+    },
+    EmojiData {
+        emoji: "🏴",
+        tags: &["black flag"],
+    },
+    EmojiData {
+        emoji: "🏳️",
+        tags: &["white flag"],
+    },
+    EmojiData {
+        emoji: "🏳️‍🌈",
+        tags: &["rainbow flag", "pride"],
+    },
+    EmojiData {
+        emoji: "🏴‍☠️",
+        tags: &["pirate flag"],
+    },
+    EmojiData {
+        emoji: "🇦🇨",
+        tags: &["flag: Ascension Island", "ascension island"],
+    },
+    EmojiData {
+        emoji: "🇦🇩",
+        tags: &["flag: Andorra", "andorra"],
+    },
+    EmojiData {
+        emoji: "🇦🇪",
+        tags: &["flag: United Arab Emirates", "united arab emirates"],
+    },
+    EmojiData {
+        emoji: "🇦🇫",
+        tags: &["flag: Afghanistan", "afghanistan"],
+    },
+    EmojiData {
+        emoji: "🇦🇬",
+        tags: &["flag: Antigua & Barbuda", "antigua barbuda"],
+    },
+    EmojiData {
+        emoji: "🇦🇮",
+        tags: &["flag: Anguilla", "anguilla"],
+    },
+    EmojiData {
+        emoji: "🇦🇱",
+        tags: &["flag: Albania", "albania"],
+    },
+    EmojiData {
+        emoji: "🇦🇲",
+        tags: &["flag: Armenia", "armenia"],
+    },
+    EmojiData {
+        emoji: "🇦🇴",
+        tags: &["flag: Angola", "angola"],
+    },
+    EmojiData {
+        emoji: "🇦🇶",
+        tags: &["flag: Antarctica", "antarctica"],
+    },
+    EmojiData {
+        emoji: "🇦🇷",
+        tags: &["flag: Argentina", "argentina"],
+    },
+    EmojiData {
+        emoji: "🇦🇸",
+        tags: &["flag: American Samoa", "american samoa"],
+    },
+    EmojiData {
+        emoji: "🇦🇹",
+        tags: &["flag: Austria", "austria"],
+    },
+    EmojiData {
+        emoji: "🇦🇺",
+        tags: &["flag: Australia", "australia"],
+    },
+    EmojiData {
+        emoji: "🇦🇼",
+        tags: &["flag: Aruba", "aruba"],
+    },
+    EmojiData {
+        emoji: "🇦🇽",
+        tags: &["flag: Åland Islands", "aland islands"],
+    },
+    EmojiData {
+        emoji: "🇦🇿",
+        tags: &["flag: Azerbaijan", "azerbaijan"],
+    },
+    EmojiData {
+        emoji: "🇧🇦",
+        tags: &["flag: Bosnia & Herzegovina", "bosnia herzegovina"],
+    },
+    EmojiData {
+        emoji: "🇧🇧",
+        tags: &["flag: Barbados", "barbados"],
+    },
+    EmojiData {
+        emoji: "🇧🇩",
+        tags: &["flag: Bangladesh", "bangladesh"],
+    },
+    EmojiData {
+        emoji: "🇧🇪",
+        tags: &["flag: Belgium", "belgium"],
+    },
+    EmojiData {
+        emoji: "🇧🇫",
+        tags: &["flag: Burkina Faso", "burkina faso"],
+    },
+    EmojiData {
+        emoji: "🇧🇬",
+        tags: &["flag: Bulgaria", "bulgaria"],
+    },
+    EmojiData {
+        emoji: "🇧🇭",
+        tags: &["flag: Bahrain", "bahrain"],
+    },
+    EmojiData {
+        emoji: "🇧🇮",
+        tags: &["flag: Burundi", "burundi"],
+    },
+    EmojiData {
+        emoji: "🇧🇯",
+        tags: &["flag: Benin", "benin"],
+    },
+    EmojiData {
+        emoji: "🇧🇱",
+        tags: &["flag: St. Barthélemy", "st barthelemy"],
+    },
+    EmojiData {
+        emoji: "🇧🇲",
+        tags: &["flag: Bermuda", "bermuda"],
+    },
+    EmojiData {
+        emoji: "🇧🇳",
+        tags: &["flag: Brunei", "brunei"],
+    },
+    EmojiData {
+        emoji: "🇧🇴",
+        tags: &["flag: Bolivia", "bolivia"],
+    },
+    EmojiData {
+        emoji: "🇧🇶",
+        tags: &["flag: Caribbean Netherlands", "caribbean netherlands"],
+    },
+    EmojiData {
+        emoji: "🇧🇷",
+        tags: &["flag: Brazil", "brazil"],
+    },
+    EmojiData {
+        emoji: "🇧🇸",
+        tags: &["flag: Bahamas", "bahamas"],
+    },
+    EmojiData {
+        emoji: "🇧🇹",
+        tags: &["flag: Bhutan", "bhutan"],
+    },
+    EmojiData {
+        emoji: "🇧🇻",
+        tags: &["flag: Bouvet Island", "bouvet island"],
+    },
+    EmojiData {
+        emoji: "🇧🇼",
+        tags: &["flag: Botswana", "botswana"],
+    },
+    EmojiData {
+        emoji: "🇧🇾",
+        tags: &["flag: Belarus", "belarus"],
+    },
+    EmojiData {
+        emoji: "🇧🇿",
+        tags: &["flag: Belize", "belize"],
+    },
+    EmojiData {
+        emoji: "🇨🇦",
+        tags: &["flag: Canada", "canada"],
+    },
+    EmojiData {
+        emoji: "🇨🇨",
+        tags: &["flag: Cocos (Keeling) Islands", "keeling", "cocos islands"],
+    },
+    EmojiData {
+        emoji: "🇨🇩",
+        tags: &["flag: Congo - Kinshasa", "congo kinshasa"],
+    },
+    EmojiData {
+        emoji: "🇨🇫",
+        tags: &["flag: Central African Republic", "central african republic"],
+    },
+    EmojiData {
+        emoji: "🇨🇬",
+        tags: &["flag: Congo - Brazzaville", "congo brazzaville"],
+    },
+    EmojiData {
+        emoji: "🇨🇭",
+        tags: &["flag: Switzerland", "switzerland"],
+    },
+    EmojiData {
+        emoji: "🇨🇮",
+        tags: &["flag: Côte d’Ivoire", "ivory", "cote divoire"],
+    },
+    EmojiData {
+        emoji: "🇨🇰",
+        tags: &["flag: Cook Islands", "cook islands"],
+    },
+    EmojiData {
+        emoji: "🇨🇱",
+        tags: &["flag: Chile", "chile"],
+    },
+    EmojiData {
+        emoji: "🇨🇲",
+        tags: &["flag: Cameroon", "cameroon"],
+    },
+    EmojiData {
+        emoji: "🇨🇳",
+        tags: &["flag: China", "china", "cn"],
+    },
+    EmojiData {
+        emoji: "🇨🇴",
+        tags: &["flag: Colombia", "colombia"],
+    },
+    EmojiData {
+        emoji: "🇨🇵",
+        tags: &["flag: Clipperton Island", "clipperton island"],
+    },
+    EmojiData {
+        emoji: "🇨🇷",
+        tags: &["flag: Costa Rica", "costa rica"],
+    },
+    EmojiData {
+        emoji: "🇨🇺",
+        tags: &["flag: Cuba", "cuba"],
+    },
+    EmojiData {
+        emoji: "🇨🇻",
+        tags: &["flag: Cape Verde", "cape verde"],
+    },
+    EmojiData {
+        emoji: "🇨🇼",
+        tags: &["flag: Curaçao", "curacao"],
+    },
+    EmojiData {
+        emoji: "🇨🇽",
+        tags: &["flag: Christmas Island", "christmas island"],
+    },
+    EmojiData {
+        emoji: "🇨🇾",
+        tags: &["flag: Cyprus", "cyprus"],
+    },
+    EmojiData {
+        emoji: "🇨🇿",
+        tags: &["flag: Czechia", "czech republic"],
+    },
+    EmojiData {
+        emoji: "🇩🇪",
+        tags: &["flag: Germany", "flag", "germany", "de"],
+    },
+    EmojiData {
+        emoji: "🇩🇬",
+        tags: &["flag: Diego Garcia", "diego garcia"],
+    },
+    EmojiData {
+        emoji: "🇩🇯",
+        tags: &["flag: Djibouti", "djibouti"],
+    },
+    EmojiData {
+        emoji: "🇩🇰",
+        tags: &["flag: Denmark", "denmark"],
+    },
+    EmojiData {
+        emoji: "🇩🇲",
+        tags: &["flag: Dominica", "dominica"],
+    },
+    EmojiData {
+        emoji: "🇩🇴",
+        tags: &["flag: Dominican Republic", "dominican republic"],
+    },
+    EmojiData {
+        emoji: "🇩🇿",
+        tags: &["flag: Algeria", "algeria"],
+    },
+    EmojiData {
+        emoji: "🇪🇦",
+        tags: &["flag: Ceuta & Melilla", "ceuta melilla"],
+    },
+    EmojiData {
+        emoji: "🇪🇨",
+        tags: &["flag: Ecuador", "ecuador"],
+    },
+    EmojiData {
+        emoji: "🇪🇪",
+        tags: &["flag: Estonia", "estonia"],
+    },
+    EmojiData {
+        emoji: "🇪🇬",
+        tags: &["flag: Egypt", "egypt"],
+    },
+    EmojiData {
+        emoji: "🇪🇭",
+        tags: &["flag: Western Sahara", "western sahara"],
+    },
+    EmojiData {
+        emoji: "🇪🇷",
+        tags: &["flag: Eritrea", "eritrea"],
+    },
+    EmojiData {
+        emoji: "🇪🇸",
+        tags: &["flag: Spain", "spain", "es"],
+    },
+    EmojiData {
+        emoji: "🇪🇹",
+        tags: &["flag: Ethiopia", "ethiopia"],
+    },
+    EmojiData {
+        emoji: "🇪🇺",
+        tags: &["flag: European Union", "eu", "european union"],
+    },
+    EmojiData {
+        emoji: "🇫🇮",
+        tags: &["flag: Finland", "finland"],
+    },
+    EmojiData {
+        emoji: "🇫🇯",
+        tags: &["flag: Fiji", "fiji"],
+    },
+    EmojiData {
+        emoji: "🇫🇰",
+        tags: &["flag: Falkland Islands", "falkland islands"],
+    },
+    EmojiData {
+        emoji: "🇫🇲",
+        tags: &["flag: Micronesia", "micronesia"],
+    },
+    EmojiData {
+        emoji: "🇫🇴",
+        tags: &["flag: Faroe Islands", "faroe islands"],
+    },
+    EmojiData {
+        emoji: "🇫🇷",
+        tags: &["flag: France", "france", "french", "fr"],
+    },
+    EmojiData {
+        emoji: "🇬🇦",
+        tags: &["flag: Gabon", "gabon"],
+    },
+    EmojiData {
+        emoji: "🇬🇧",
+        tags: &["flag: United Kingdom", "flag", "british", "gb", "uk"],
+    },
+    EmojiData {
+        emoji: "🇬🇩",
+        tags: &["flag: Grenada", "grenada"],
+    },
+    EmojiData {
+        emoji: "🇬🇪",
+        tags: &["flag: Georgia", "georgia"],
+    },
+    EmojiData {
+        emoji: "🇬🇫",
+        tags: &["flag: French Guiana", "french guiana"],
+    },
+    EmojiData {
+        emoji: "🇬🇬",
+        tags: &["flag: Guernsey", "guernsey"],
+    },
+    EmojiData {
+        emoji: "🇬🇭",
+        tags: &["flag: Ghana", "ghana"],
+    },
+    EmojiData {
+        emoji: "🇬🇮",
+        tags: &["flag: Gibraltar", "gibraltar"],
+    },
+    EmojiData {
+        emoji: "🇬🇱",
+        tags: &["flag: Greenland", "greenland"],
+    },
+    EmojiData {
+        emoji: "🇬🇲",
+        tags: &["flag: Gambia", "gambia"],
+    },
+    EmojiData {
+        emoji: "🇬🇳",
+        tags: &["flag: Guinea", "guinea"],
+    },
+    EmojiData {
+        emoji: "🇬🇵",
+        tags: &["flag: Guadeloupe", "guadeloupe"],
+    },
+    EmojiData {
+        emoji: "🇬🇶",
+        tags: &["flag: Equatorial Guinea", "equatorial guinea"],
+    },
+    EmojiData {
+        emoji: "🇬🇷",
+        tags: &["flag: Greece", "greece"],
+    },
+    EmojiData {
+        emoji: "🇬🇸",
+        tags: &[
+            "flag: South Georgia & South Sandwich Islands",
+            "south georgia south sandwich islands",
+        ],
+    },
+    EmojiData {
+        emoji: "🇬🇹",
+        tags: &["flag: Guatemala", "guatemala"],
+    },
+    EmojiData {
+        emoji: "🇬🇺",
+        tags: &["flag: Guam", "guam"],
+    },
+    EmojiData {
+        emoji: "🇬🇼",
+        tags: &["flag: Guinea-Bissau", "guinea bissau"],
+    },
+    EmojiData {
+        emoji: "🇬🇾",
+        tags: &["flag: Guyana", "guyana"],
+    },
+    EmojiData {
+        emoji: "🇭🇰",
+        tags: &["flag: Hong Kong SAR China", "hong kong"],
+    },
+    EmojiData {
+        emoji: "🇭🇲",
+        tags: &["flag: Heard & McDonald Islands", "heard mcdonald islands"],
+    },
+    EmojiData {
+        emoji: "🇭🇳",
+        tags: &["flag: Honduras", "honduras"],
+    },
+    EmojiData {
+        emoji: "🇭🇷",
+        tags: &["flag: Croatia", "croatia"],
+    },
+    EmojiData {
+        emoji: "🇭🇹",
+        tags: &["flag: Haiti", "haiti"],
+    },
+    EmojiData {
+        emoji: "🇭🇺",
+        tags: &["flag: Hungary", "hungary"],
+    },
+    EmojiData {
+        emoji: "🇮🇨",
+        tags: &["flag: Canary Islands", "canary islands"],
+    },
+    EmojiData {
+        emoji: "🇮🇩",
+        tags: &["flag: Indonesia", "indonesia"],
+    },
+    EmojiData {
+        emoji: "🇮🇪",
+        tags: &["flag: Ireland", "ireland"],
+    },
+    EmojiData {
+        emoji: "🇮🇱",
+        tags: &["flag: Israel", "israel"],
+    },
+    EmojiData {
+        emoji: "🇮🇲",
+        tags: &["flag: Isle of Man", "isle of man"],
+    },
+    EmojiData {
+        emoji: "🇮🇳",
+        tags: &["flag: India", "india"],
+    },
+    EmojiData {
+        emoji: "🇮🇴",
+        tags: &[
+            "flag: British Indian Ocean Territory",
+            "british indian ocean territory",
+        ],
+    },
+    EmojiData {
+        emoji: "🇮🇶",
+        tags: &["flag: Iraq", "iraq"],
+    },
+    EmojiData {
+        emoji: "🇮🇷",
+        tags: &["flag: Iran", "iran"],
+    },
+    EmojiData {
+        emoji: "🇮🇸",
+        tags: &["flag: Iceland", "iceland"],
+    },
+    EmojiData {
+        emoji: "🇮🇹",
+        tags: &["flag: Italy", "italy", "it"],
+    },
+    EmojiData {
+        emoji: "🇯🇪",
+        tags: &["flag: Jersey", "jersey"],
+    },
+    EmojiData {
+        emoji: "🇯🇲",
+        tags: &["flag: Jamaica", "jamaica"],
+    },
+    EmojiData {
+        emoji: "🇯🇴",
+        tags: &["flag: Jordan", "jordan"],
+    },
+    EmojiData {
+        emoji: "🇯🇵",
+        tags: &["flag: Japan", "japan", "jp"],
+    },
+    EmojiData {
+        emoji: "🇰🇪",
+        tags: &["flag: Kenya", "kenya"],
+    },
+    EmojiData {
+        emoji: "🇰🇬",
+        tags: &["flag: Kyrgyzstan", "kyrgyzstan"],
+    },
+    EmojiData {
+        emoji: "🇰🇭",
+        tags: &["flag: Cambodia", "cambodia"],
+    },
+    EmojiData {
+        emoji: "🇰🇮",
+        tags: &["flag: Kiribati", "kiribati"],
+    },
+    EmojiData {
+        emoji: "🇰🇲",
+        tags: &["flag: Comoros", "comoros"],
+    },
+    EmojiData {
+        emoji: "🇰🇳",
+        tags: &["flag: St. Kitts & Nevis", "st kitts nevis"],
+    },
+    EmojiData {
+        emoji: "🇰🇵",
+        tags: &["flag: North Korea", "north korea"],
+    },
+    EmojiData {
+        emoji: "🇰🇷",
+        tags: &["flag: South Korea", "korea", "kr"],
+    },
+    EmojiData {
+        emoji: "🇰🇼",
+        tags: &["flag: Kuwait", "kuwait"],
+    },
+    EmojiData {
+        emoji: "🇰🇾",
+        tags: &["flag: Cayman Islands", "cayman islands"],
+    },
+    EmojiData {
+        emoji: "🇰🇿",
+        tags: &["flag: Kazakhstan", "kazakhstan"],
+    },
+    EmojiData {
+        emoji: "🇱🇦",
+        tags: &["flag: Laos", "laos"],
+    },
+    EmojiData {
+        emoji: "🇱🇧",
+        tags: &["flag: Lebanon", "lebanon"],
+    },
+    EmojiData {
+        emoji: "🇱🇨",
+        tags: &["flag: St. Lucia", "st lucia"],
+    },
+    EmojiData {
+        emoji: "🇱🇮",
+        tags: &["flag: Liechtenstein", "liechtenstein"],
+    },
+    EmojiData {
+        emoji: "🇱🇰",
+        tags: &["flag: Sri Lanka", "sri lanka"],
+    },
+    EmojiData {
+        emoji: "🇱🇷",
+        tags: &["flag: Liberia", "liberia"],
+    },
+    EmojiData {
+        emoji: "🇱🇸",
+        tags: &["flag: Lesotho", "lesotho"],
+    },
+    EmojiData {
+        emoji: "🇱🇹",
+        tags: &["flag: Lithuania", "lithuania"],
+    },
+    EmojiData {
+        emoji: "🇱🇺",
+        tags: &["flag: Luxembourg", "luxembourg"],
+    },
+    EmojiData {
+        emoji: "🇱🇻",
+        tags: &["flag: Latvia", "latvia"],
+    },
+    EmojiData {
+        emoji: "🇱🇾",
+        tags: &["flag: Libya", "libya"],
+    },
+    EmojiData {
+        emoji: "🇲🇦",
+        tags: &["flag: Morocco", "morocco"],
+    },
+    EmojiData {
+        emoji: "🇲🇨",
+        tags: &["flag: Monaco", "monaco"],
+    },
+    EmojiData {
+        emoji: "🇲🇩",
+        tags: &["flag: Moldova", "moldova"],
+    },
+    EmojiData {
+        emoji: "🇲🇪",
+        tags: &["flag: Montenegro", "montenegro"],
+    },
+    EmojiData {
+        emoji: "🇲🇫",
+        tags: &["flag: St. Martin", "st martin"],
+    },
+    EmojiData {
+        emoji: "🇲🇬",
+        tags: &["flag: Madagascar", "madagascar"],
+    },
+    EmojiData {
+        emoji: "🇲🇭",
+        tags: &["flag: Marshall Islands", "marshall islands"],
+    },
+    EmojiData {
+        emoji: "🇲🇰",
+        tags: &["flag: North Macedonia", "macedonia"],
+    },
+    EmojiData {
+        emoji: "🇲🇱",
+        tags: &["flag: Mali", "mali"],
+    },
+    EmojiData {
+        emoji: "🇲🇲",
+        tags: &["flag: Myanmar (Burma)", "burma", "myanmar"],
+    },
+    EmojiData {
+        emoji: "🇲🇳",
+        tags: &["flag: Mongolia", "mongolia"],
+    },
+    EmojiData {
+        emoji: "🇲🇴",
+        tags: &["flag: Macao SAR China", "macau"],
+    },
+    EmojiData {
+        emoji: "🇲🇵",
+        tags: &["flag: Northern Mariana Islands", "northern mariana islands"],
+    },
+    EmojiData {
+        emoji: "🇲🇶",
+        tags: &["flag: Martinique", "martinique"],
+    },
+    EmojiData {
+        emoji: "🇲🇷",
+        tags: &["flag: Mauritania", "mauritania"],
+    },
+    EmojiData {
+        emoji: "🇲🇸",
+        tags: &["flag: Montserrat", "montserrat"],
+    },
+    EmojiData {
+        emoji: "🇲🇹",
+        tags: &["flag: Malta", "malta"],
+    },
+    EmojiData {
+        emoji: "🇲🇺",
+        tags: &["flag: Mauritius", "mauritius"],
+    },
+    EmojiData {
+        emoji: "🇲🇻",
+        tags: &["flag: Maldives", "maldives"],
+    },
+    EmojiData {
+        emoji: "🇲🇼",
+        tags: &["flag: Malawi", "malawi"],
+    },
+    EmojiData {
+        emoji: "🇲🇽",
+        tags: &["flag: Mexico", "mexico"],
+    },
+    EmojiData {
+        emoji: "🇲🇾",
+        tags: &["flag: Malaysia", "malaysia"],
+    },
+    EmojiData {
+        emoji: "🇲🇿",
+        tags: &["flag: Mozambique", "mozambique"],
+    },
+    EmojiData {
+        emoji: "🇳🇦",
+        tags: &["flag: Namibia", "namibia"],
+    },
+    EmojiData {
+        emoji: "🇳🇨",
+        tags: &["flag: New Caledonia", "new caledonia"],
+    },
+    EmojiData {
+        emoji: "🇳🇪",
+        tags: &["flag: Niger", "niger"],
+    },
+    EmojiData {
+        emoji: "🇳🇫",
+        tags: &["flag: Norfolk Island", "norfolk island"],
+    },
+    EmojiData {
+        emoji: "🇳🇬",
+        tags: &["flag: Nigeria", "nigeria"],
+    },
+    EmojiData {
+        emoji: "🇳🇮",
+        tags: &["flag: Nicaragua", "nicaragua"],
+    },
+    EmojiData {
+        emoji: "🇳🇱",
+        tags: &["flag: Netherlands", "netherlands"],
+    },
+    EmojiData {
+        emoji: "🇳🇴",
+        tags: &["flag: Norway", "norway"],
+    },
+    EmojiData {
+        emoji: "🇳🇵",
+        tags: &["flag: Nepal", "nepal"],
+    },
+    EmojiData {
+        emoji: "🇳🇷",
+        tags: &["flag: Nauru", "nauru"],
+    },
+    EmojiData {
+        emoji: "🇳🇺",
+        tags: &["flag: Niue", "niue"],
+    },
+    EmojiData {
+        emoji: "🇳🇿",
+        tags: &["flag: New Zealand", "new zealand"],
+    },
+    EmojiData {
+        emoji: "🇴🇲",
+        tags: &["flag: Oman", "oman"],
+    },
+    EmojiData {
+        emoji: "🇵🇦",
+        tags: &["flag: Panama", "panama"],
+    },
+    EmojiData {
+        emoji: "🇵🇪",
+        tags: &["flag: Peru", "peru"],
+    },
+    EmojiData {
+        emoji: "🇵🇫",
+        tags: &["flag: French Polynesia", "french polynesia"],
+    },
+    EmojiData {
+        emoji: "🇵🇬",
+        tags: &["flag: Papua New Guinea", "papua new guinea"],
+    },
+    EmojiData {
+        emoji: "🇵🇭",
+        tags: &["flag: Philippines", "philippines"],
+    },
+    EmojiData {
+        emoji: "🇵🇰",
+        tags: &["flag: Pakistan", "pakistan"],
+    },
+    EmojiData {
+        emoji: "🇵🇱",
+        tags: &["flag: Poland", "poland"],
+    },
+    EmojiData {
+        emoji: "🇵🇲",
+        tags: &["flag: St. Pierre & Miquelon", "st pierre miquelon"],
+    },
+    EmojiData {
+        emoji: "🇵🇳",
+        tags: &["flag: Pitcairn Islands", "pitcairn islands"],
+    },
+    EmojiData {
+        emoji: "🇵🇷",
+        tags: &["flag: Puerto Rico", "puerto rico"],
+    },
+    EmojiData {
+        emoji: "🇵🇸",
+        tags: &["flag: Palestinian Territories", "palestinian territories"],
+    },
+    EmojiData {
+        emoji: "🇵🇹",
+        tags: &["flag: Portugal", "portugal"],
+    },
+    EmojiData {
+        emoji: "🇵🇼",
+        tags: &["flag: Palau", "palau"],
+    },
+    EmojiData {
+        emoji: "🇵🇾",
+        tags: &["flag: Paraguay", "paraguay"],
+    },
+    EmojiData {
+        emoji: "🇶🇦",
+        tags: &["flag: Qatar", "qatar"],
+    },
+    EmojiData {
+        emoji: "🇷🇪",
+        tags: &["flag: Réunion", "reunion"],
+    },
+    EmojiData {
+        emoji: "🇷🇴",
+        tags: &["flag: Romania", "romania"],
+    },
+    EmojiData {
+        emoji: "🇷🇸",
+        tags: &["flag: Serbia", "serbia"],
+    },
+    EmojiData {
+        emoji: "🇷🇺",
+        tags: &["flag: Russia", "russia", "ru"],
+    },
+    EmojiData {
+        emoji: "🇷🇼",
+        tags: &["flag: Rwanda", "rwanda"],
+    },
+    EmojiData {
+        emoji: "🇸🇦",
+        tags: &["flag: Saudi Arabia", "saudi arabia"],
+    },
+    EmojiData {
+        emoji: "🇸🇧",
+        tags: &["flag: Solomon Islands", "solomon islands"],
+    },
+    EmojiData {
+        emoji: "🇸🇨",
+        tags: &["flag: Seychelles", "seychelles"],
+    },
+    EmojiData {
+        emoji: "🇸🇩",
+        tags: &["flag: Sudan", "sudan"],
+    },
+    EmojiData {
+        emoji: "🇸🇪",
+        tags: &["flag: Sweden", "sweden"],
+    },
+    EmojiData {
+        emoji: "🇸🇬",
+        tags: &["flag: Singapore", "singapore"],
+    },
+    EmojiData {
+        emoji: "🇸🇭",
+        tags: &["flag: St. Helena", "st helena"],
+    },
+    EmojiData {
+        emoji: "🇸🇮",
+        tags: &["flag: Slovenia", "slovenia"],
+    },
+    EmojiData {
+        emoji: "🇸🇯",
+        tags: &["flag: Svalbard & Jan Mayen", "svalbard jan mayen"],
+    },
+    EmojiData {
+        emoji: "🇸🇰",
+        tags: &["flag: Slovakia", "slovakia"],
+    },
+    EmojiData {
+        emoji: "🇸🇱",
+        tags: &["flag: Sierra Leone", "sierra leone"],
+    },
+    EmojiData {
+        emoji: "🇸🇲",
+        tags: &["flag: San Marino", "san marino"],
+    },
+    EmojiData {
+        emoji: "🇸🇳",
+        tags: &["flag: Senegal", "senegal"],
+    },
+    EmojiData {
+        emoji: "🇸🇴",
+        tags: &["flag: Somalia", "somalia"],
+    },
+    EmojiData {
+        emoji: "🇸🇷",
+        tags: &["flag: Suriname", "suriname"],
+    },
+    EmojiData {
+        emoji: "🇸🇸",
+        tags: &["flag: South Sudan", "south sudan"],
+    },
+    EmojiData {
+        emoji: "🇸🇹",
+        tags: &["flag: São Tomé & Príncipe", "sao tome principe"],
+    },
+    EmojiData {
+        emoji: "🇸🇻",
+        tags: &["flag: El Salvador", "el salvador"],
+    },
+    EmojiData {
+        emoji: "🇸🇽",
+        tags: &["flag: Sint Maarten", "sint maarten"],
+    },
+    EmojiData {
+        emoji: "🇸🇾",
+        tags: &["flag: Syria", "syria"],
+    },
+    EmojiData {
+        emoji: "🇸🇿",
+        tags: &["flag: Eswatini", "swaziland"],
+    },
+    EmojiData {
+        emoji: "🇹🇦",
+        tags: &["flag: Tristan da Cunha", "tristan da cunha"],
+    },
+    EmojiData {
+        emoji: "🇹🇨",
+        tags: &["flag: Turks & Caicos Islands", "turks caicos islands"],
+    },
+    EmojiData {
+        emoji: "🇹🇩",
+        tags: &["flag: Chad", "chad"],
+    },
+    EmojiData {
+        emoji: "🇹🇫",
+        tags: &[
+            "flag: French Southern Territories",
+            "french southern territories",
+        ],
+    },
+    EmojiData {
+        emoji: "🇹🇬",
+        tags: &["flag: Togo", "togo"],
+    },
+    EmojiData {
+        emoji: "🇹🇭",
+        tags: &["flag: Thailand", "thailand"],
+    },
+    EmojiData {
+        emoji: "🇹🇯",
+        tags: &["flag: Tajikistan", "tajikistan"],
+    },
+    EmojiData {
+        emoji: "🇹🇰",
+        tags: &["flag: Tokelau", "tokelau"],
+    },
+    EmojiData {
+        emoji: "🇹🇱",
+        tags: &["flag: Timor-Leste", "timor leste"],
+    },
+    EmojiData {
+        emoji: "🇹🇲",
+        tags: &["flag: Turkmenistan", "turkmenistan"],
+    },
+    EmojiData {
+        emoji: "🇹🇳",
+        tags: &["flag: Tunisia", "tunisia"],
+    },
+    EmojiData {
+        emoji: "🇹🇴",
+        tags: &["flag: Tonga", "tonga"],
+    },
+    EmojiData {
+        emoji: "🇹🇷",
+        tags: &["flag: Turkey", "turkey", "tr"],
+    },
+    EmojiData {
+        emoji: "🇹🇹",
+        tags: &["flag: Trinidad & Tobago", "trinidad tobago"],
+    },
+    EmojiData {
+        emoji: "🇹🇻",
+        tags: &["flag: Tuvalu", "tuvalu"],
+    },
+    EmojiData {
+        emoji: "🇹🇼",
+        tags: &["flag: Taiwan", "taiwan"],
+    },
+    EmojiData {
+        emoji: "🇹🇿",
+        tags: &["flag: Tanzania", "tanzania"],
+    },
+    EmojiData {
+        emoji: "🇺🇦",
+        tags: &["flag: Ukraine", "ukraine"],
+    },
+    EmojiData {
+        emoji: "🇺🇬",
+        tags: &["flag: Uganda", "uganda"],
+    },
+    EmojiData {
+        emoji: "🇺🇲",
+        tags: &["flag: U.S. Outlying Islands", "us outlying islands"],
+    },
+    EmojiData {
+        emoji: "🇺🇳",
+        tags: &["flag: United Nations", "united nations"],
+    },
+    EmojiData {
+        emoji: "🇺🇸",
+        tags: &["flag: United States", "flag", "united", "america", "us"],
+    },
+    EmojiData {
+        emoji: "🇺🇾",
+        tags: &["flag: Uruguay", "uruguay"],
+    },
+    EmojiData {
+        emoji: "🇺🇿",
+        tags: &["flag: Uzbekistan", "uzbekistan"],
+    },
+    EmojiData {
+        emoji: "🇻🇦",
+        tags: &["flag: Vatican City", "vatican city"],
+    },
+    EmojiData {
+        emoji: "🇻🇨",
+        tags: &["flag: St. Vincent & Grenadines", "st vincent grenadines"],
+    },
+    EmojiData {
+        emoji: "🇻🇪",
+        tags: &["flag: Venezuela", "venezuela"],
+    },
+    EmojiData {
+        emoji: "🇻🇬",
+        tags: &["flag: British Virgin Islands", "british virgin islands"],
+    },
+    EmojiData {
+        emoji: "🇻🇮",
+        tags: &["flag: U.S. Virgin Islands", "us virgin islands"],
+    },
+    EmojiData {
+        emoji: "🇻🇳",
+        tags: &["flag: Vietnam", "vietnam"],
+    },
+    EmojiData {
+        emoji: "🇻🇺",
+        tags: &["flag: Vanuatu", "vanuatu"],
+    },
+    EmojiData {
+        emoji: "🇼🇫",
+        tags: &["flag: Wallis & Futuna", "wallis futuna"],
+    },
+    EmojiData {
+        emoji: "🇼🇸",
+        tags: &["flag: Samoa", "samoa"],
+    },
+    EmojiData {
+        emoji: "🇽🇰",
+        tags: &["flag: Kosovo", "kosovo"],
+    },
+    EmojiData {
+        emoji: "🇾🇪",
+        tags: &["flag: Yemen", "yemen"],
+    },
+    EmojiData {
+        emoji: "🇾🇹",
+        tags: &["flag: Mayotte", "mayotte"],
+    },
+    EmojiData {
+        emoji: "🇿🇦",
+        tags: &["flag: South Africa", "south africa"],
+    },
+    EmojiData {
+        emoji: "🇿🇲",
+        tags: &["flag: Zambia", "zambia"],
+    },
+    EmojiData {
+        emoji: "🇿🇼",
+        tags: &["flag: Zimbabwe", "zimbabwe"],
+    },
+    EmojiData {
+        emoji: "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
+        tags: &["flag: England", "england"],
+    },
+    EmojiData {
+        emoji: "🏴󠁧󠁢󠁳󠁣󠁴󠁿",
+        tags: &["flag: Scotland", "scotland"],
+    },
+    EmojiData {
+        emoji: "🏴󠁧󠁢󠁷󠁬󠁳󠁿",
+        tags: &["flag: Wales", "wales"],
+    },
 ];
