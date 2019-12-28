@@ -3,10 +3,10 @@ import QtQuick.Controls 2.12
 import LibHerald 1.0
 import QtGraphicalEffects 1.13
 
-Row {
+Flow {
     spacing: CmnCfg.microMargin
-
-    height: 20
+    width: bubbleRoot.defaultWidth - avatar.width - CmnCfg.smallMargin * 2
+    height: implicitHeight
     Repeater {
         id: emojiRepeater
         model: JSON.parse(messageModelData.reactions)
