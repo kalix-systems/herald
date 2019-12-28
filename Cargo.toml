@@ -1,7 +1,6 @@
 [workspace]
 
 members = [
- "libherald/emoji_scraper",
   "channel_ratchet",
   "herald_common",
   "herald_server",
