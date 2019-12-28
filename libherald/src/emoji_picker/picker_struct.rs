@@ -1504,7 +1504,7 @@ pub static EMOJI_DATA: [EmojiData; 1738] = [
         tags: &["woman fairy", "fairy woman"],
     },
     EmojiData {
-        emoji: "🧛",
+        emoji: "🧛 ",
         tags: &["vampire"],
     },
     EmojiData {
