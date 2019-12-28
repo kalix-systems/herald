@@ -2,14 +2,12 @@ use super::*;
 
 #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
 pub enum Recips {
-    Groups(Vec<ConversationId>),
     Users(Vec<UserId>),
     Keys(Vec<sig::PublicKey>),
 }
 
 #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
 pub enum SingleRecip {
-    Group(ConversationId),
     User(UserId),
     Key(sig::PublicKey),
 }
@@ -23,10 +21,8 @@ pub enum Recip {
 impl Recip {
     pub fn tag(&self) -> PushTag {
         match self {
-            Recip::One(SingleRecip::Group(_)) => PushTag::Group,
             Recip::One(SingleRecip::User(_)) => PushTag::User,
             Recip::One(SingleRecip::Key(_)) => PushTag::Key,
-            Recip::Many(Recips::Groups(_)) => PushTag::Group,
             Recip::Many(Recips::Users(_)) => PushTag::User,
             Recip::Many(Recips::Keys(_)) => PushTag::Key,
         }

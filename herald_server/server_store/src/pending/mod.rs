@@ -33,7 +33,6 @@ impl Conn {
                 use SingleRecip::*;
 
                 match single {
-                    Group(cid) => self.one_group(cid, msg, *tag, *timestamp, *gid).await,
                     User(uid) => self.one_user(uid, msg, *tag, *timestamp, *gid).await,
                     Key(key) => self.one_key(key, msg, *tag, *timestamp, *gid).await,
                 }
@@ -42,7 +41,6 @@ impl Conn {
                 use Recips::*;
 
                 match recips {
-                    Groups(cids) => self.many_groups(cids, msg, *tag, *timestamp, *gid).await,
                     Users(uids) => self.many_users(uids, msg, *tag, *timestamp, *gid).await,
                     Keys(keys) => self.many_keys(keys, msg, *tag, *timestamp, *gid).await,
                 }

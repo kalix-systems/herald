@@ -13,7 +13,6 @@ use tokio_postgres::{
 
 type Res<T> = std::result::Result<T, Error>;
 
-mod group_change;
 mod macros;
 mod pending;
 mod pool;
