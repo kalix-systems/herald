@@ -94,7 +94,9 @@ ListView {
 
             MenuItem {
                 text: "Archive"
-                onTriggered: conversationData.status = 1
+                //NOTE: unimplemented for now while backend changes are made, do not uncomment
+                //or try to use
+                // onTriggered: conversationData.status = 1
             }
         }
     }
