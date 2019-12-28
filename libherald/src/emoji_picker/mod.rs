@@ -7,7 +7,7 @@ use picker_struct::EMOJI_DATA;
 /// The underlying struct of the emoji keyboard
 pub struct EmojiPicker {
     emit: Emitter,
-    list: List,
+    _list: List,
 }
 
 impl Interface for EmojiPicker {
@@ -15,7 +15,7 @@ impl Interface for EmojiPicker {
         emit: Emitter,
         model: List,
     ) -> Self {
-        EmojiPicker { emit, list: model }
+        EmojiPicker { emit, _list: model }
     }
 
     fn emit(&mut self) -> &mut Emitter {
@@ -30,12 +30,13 @@ impl Interface for EmojiPicker {
         &mut self,
         value: Option<String>,
     ) {
+        if let Some(search_string) = value {}
     }
 
     fn clear_search(&mut self) {}
 
     fn row_count(&self) -> usize {
-        1738 // fix later
+        EMOJI_DATA.len()
     }
 
     fn fetch_more(&mut self) {

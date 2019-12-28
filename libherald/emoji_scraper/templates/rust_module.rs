@@ -5,4 +5,14 @@ pub struct EmojiData {{
     pub tags: &'static [&'static str]
 }}
 
+pub static SMILEYS_&_EMOTION: usize = {sne_index};
+pub static PEOPLE_&_BODY: usize = {pnb_index};
+pub static ANIMALS_&_NATURE: usize = {ann_index};
+pub static FOOD_&_DRINK: usize = {fnd_index};
+pub static TRAVEL_&_PLACES: usize = {tnp_index};
+pub static ACTIVITIES: usize = {a_index};
+pub static OBJECTS: usize = {o_index};
+pub static SYMBOLS: usize = {s_index};
+pub static FLAGS: usize = {f_index};
+
 pub static EMOJI_DATA: [EmojiData; {length}]  = {emoji_data};

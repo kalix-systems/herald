@@ -5,6 +5,16 @@ pub struct EmojiData {
     pub tags: &'static [&'static str]
 }
 
+pub static SMILEYS_&_EMOTION: usize = 0;
+pub static PEOPLE_&_BODY: usize = 149;
+pub static ANIMALS_&_NATURE: usize = 483;
+pub static FOOD_&_DRINK: usize = 610;
+pub static TRAVEL_&_PLACES: usize = 731;
+pub static ACTIVITIES: usize = 941;
+pub static OBJECTS: usize = 1020;
+pub static SYMBOLS: usize = 1253;
+pub static FLAGS: usize = 1470;
+
 pub static EMOJI_DATA: [EmojiData; 1738]  = [
 EmojiData {
     emoji: "😀",
