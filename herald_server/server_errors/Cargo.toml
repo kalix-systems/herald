@@ -19,3 +19,6 @@ features = ["time"]
 
 [dependencies.kson]
 path = "../../kson"
+
+[dependencies.herald_common]
+path = "../../herald_common"

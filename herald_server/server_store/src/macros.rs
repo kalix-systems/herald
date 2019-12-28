@@ -1,7 +1,12 @@
 #[macro_export]
 macro_rules! sql {
     ($path: literal) => {
-        include_str!(concat!("sql/", $path, ".sql"))
+        include_str!(concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/src/sql/",
+            $path,
+            ".sql"
+        ))
     };
 }
 

@@ -21,10 +21,12 @@ CREATE TABLE sigchain (
 );
 
 CREATE TABLE pushes (
-    push_id     BIGSERIAL   PRIMARY   KEY,
-    push_ts     BIGINT      NOT NULL,
-    push_data   BYTEA       NOT NULL,
-    push_tag    BYTEA       NOT NULL
+    push_id      BIGSERIAL   PRIMARY   KEY,
+    push_ts      BIGINT      NOT NULL,
+    push_data    BYTEA       NOT NULL,
+    push_tag     BYTEA       NOT NULL,
+    push_user_id TEXT        NOT NULL,
+    push_key     BYTEA       NOT NULL
 );
 
 CREATE INDEX push_ts_ix ON pushes(push_ts);

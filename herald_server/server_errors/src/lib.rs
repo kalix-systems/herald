@@ -21,6 +21,8 @@ pub enum Error {
     LoginFailed,
     #[error("Uncategorized error. Please downcast")]
     Underscore(#[from] Box<dyn std::error::Error + Send + Sync + 'static>),
+    #[error("Invalid user id")]
+    InvalidUserId(#[from] herald_common::InvalidUserId),
 }
 
 pub use Error::*;

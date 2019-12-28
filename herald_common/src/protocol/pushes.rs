@@ -12,6 +12,7 @@ pub struct Push {
     pub tag: PushTag,
     pub timestamp: Time,
     pub msg: Bytes,
+    pub gid: GlobalId,
 }
 
 #[derive(Ser, De, Debug, Clone, Copy, PartialEq, Eq)]
