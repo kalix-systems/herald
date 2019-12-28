@@ -7,7 +7,6 @@ import "qrc:/imports/js/utils.mjs" as Utils
 import "qrc:/imports" as Imports
 import "qrc:/imports/ChatBubble/ReplyBubble"
 import "qrc:/imports/ChatBubble" as ChatBubble
-import "qrc:/imports/ChatBubble/ReplyBubble/dyn"
 
 Rectangle {
     id: wrapper
@@ -70,8 +69,8 @@ Rectangle {
             break
         default:
             fileClipLoader.sourceComponent = fileClipComponent
-            fileClipLoader.item.nameMetrics = doc.items[0].name
-            fileClipLoader.item.fileSize = Utils.friendlyFileSize(
+            fileClipLoader.item.nameMetrics.text = doc.items[0].name
+            fileClipLoader.item.fileSize.text = Utils.friendlyFileSize(
                         doc.items[0].size)
         }
     }
