@@ -9,6 +9,7 @@ pub async fn handle_conn<S, P>(
 where
     S: KrpcServer<P>,
     P: Protocol,
+    for<'a> &'a S::ServePush: Into<&'a P::Push>,
 {
     let (tx, rx) = incoming
         .next()
@@ -21,11 +22,11 @@ where
 
     let send_pushes = server
         .pushes(&cinfo)
-        .await
+        .await?
         .for_each_concurrent(P::MAX_CONCURRENT_PUSHES, |push| {
             async {
                 let (mut push_tx, push_rx) = conn.open_bi().await?;
-                let bytes = kson::to_vec(&push);
+                let bytes = kson::to_vec((&push).into());
 
                 push_tx.write_all(&bytes).await?;
                 push_tx.finish().await?;
@@ -76,6 +77,7 @@ pub async fn serve_static<S, P>(
 where
     S: KrpcServer<P> + Send + Sync,
     P: Protocol,
+    for<'a> &'a S::ServePush: Into<&'a P::Push>,
 {
     let mut endpoint_builder = quinn::EndpointBuilder::new(endpoint_config);
     endpoint_builder.listen(server_config);
@@ -117,6 +119,7 @@ pub async fn serve_arc<S, P>(
 where
     S: KrpcServer<P> + Send + Sync + 'static,
     P: Protocol,
+    for<'a> &'a S::ServePush: Into<&'a P::Push>,
 {
     let mut endpoint_builder = quinn::EndpointBuilder::new(endpoint_config);
     endpoint_builder.listen(server_config);

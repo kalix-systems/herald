@@ -6,6 +6,7 @@ pub mod pushes;
 pub mod requests;
 
 pub struct HeraldProtocol {}
+pub type PushAck = u32;
 
 impl Protocol for HeraldProtocol {
     type Req = requests::Request;

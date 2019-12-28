@@ -58,7 +58,7 @@ version = "0.21"
 optional = true
 
 [features]
-default = ["quic", "ws"]
+default = []
 quic = ["quinn","quinn-proto", "tokio/rt-threaded"]
 ws-sync = ["tungstenite", "rustls", "webpki"]
 ws = ["ws-sync", "tokio-tungstenite", "tokio-rustls", "tokio/io-util", "tokio/sync"]

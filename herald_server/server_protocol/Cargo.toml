@@ -13,10 +13,11 @@ futures = "0.3"
 lazy_static     = "1.4"
 tokio-postgres  = "0.5.0-alpha.2"
 crossbeam-channel = "0.3.9"
+scopeguard = "1.0"
 stream-cancel = "0.5.0-alpha.5"
 
 [dependencies.tokio]
-version = "0.2"
+version = "0.2.6"
 features = ["macros", "rt-threaded",  "sync", "time", "stream"]
 
 [dependencies.herald_common]

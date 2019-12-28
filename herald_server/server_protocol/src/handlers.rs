@@ -1,5 +1,5 @@
 use super::*;
-use futures::stream::TryStreamExt;
+use futures::{future::TryFutureExt, stream::StreamExt};
 
 impl State {
     pub async fn get_sigchain(
@@ -84,6 +84,7 @@ impl State {
     }
 
     // FIXME: verify that user adding to group is part of the group
+    // TODO: send push to users in group
     pub async fn add_to_group(
         &self,
         requester: UserId,
@@ -97,6 +98,7 @@ impl State {
             .await?)
     }
 
+    // TODO: send push to users in group
     pub async fn leave_groups(
         &self,
         requester: UserId,
@@ -132,21 +134,21 @@ impl State {
             PushedTo::Missing(m) => Ok(push::Res::Missing(m)),
             PushedTo::PushedTo { devs, push_id } => {
                 stream::iter(devs)
-                    .map(Ok)
-                    .try_for_each_concurrent(10, {
+                    .for_each_concurrent(10, {
                         let psh = &psh;
                         move |d| {
                             async move {
-                                self.active
-                                    .async_get(d)
-                                    .await
-                                    .map(|s| s.push(psh.clone(), push_id))
-                                    .transpose()
-                                    .map(drop)
+                                if let Some(sess) = self.active.async_get(d).await {
+                                    sess.push(psh.clone(), push_id).await
+                                } else {
+                                    Ok(())
+                                }
                             }
+                            // TODO: more sensible error handling here?
+                            .unwrap_or_else(|e| eprintln!("failed to sink push with error: {}", e))
                         }
                     })
-                    .await?;
+                    .await;
                 Ok(push::Res::Success)
             }
         }

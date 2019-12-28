@@ -4,7 +4,6 @@ use futures::{future::*, stream::*};
 use kcl::random::UQ;
 use krpc::*;
 use kson::prelude::*;
-use kson_channel::*;
 use std::{
     collections::{HashMap, HashSet},
     iter,
@@ -107,12 +106,13 @@ impl KrpcServer<ChatProtocol> for Server {
         Ok(rx.read_de().await?)
     }
 
+    type ServePush = Push;
     type Pushes = Receiver<Push>;
 
     async fn pushes(
         &self,
         meta: &Self::ConnInfo,
-    ) -> Self::Pushes {
+    ) -> Result<Self::Pushes, Error> {
         let (tx, rx) = unbounded();
 
         let mut sess = self.sessions.lock().await;
@@ -126,7 +126,7 @@ impl KrpcServer<ChatProtocol> for Server {
 
         sess.insert(*meta, tx);
 
-        rx
+        Ok(rx)
     }
 
     #[allow(clippy::unit_arg)]
@@ -235,6 +235,7 @@ impl KrpcClient<ChatProtocol> for Chatter {
 
 const DELAY: Duration = Duration::from_millis(10);
 
+#[cfg(feature = "quic")]
 mod quic_ {
     use super::*;
     use quic::*;
@@ -384,6 +385,7 @@ mod quic_ {
     }
 }
 
+#[cfg(feature = "ws")]
 mod ws_ {
     use super::*;
     use ws::*;

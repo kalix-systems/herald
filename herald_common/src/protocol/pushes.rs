@@ -18,7 +18,7 @@ pub struct Push {
 #[derive(Ser, De, Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PushMeta {
     pub tag: PushTag,
-    pub timestamp: Time,
+    pub gid: GlobalId,
 }
 
 pub mod catchup {

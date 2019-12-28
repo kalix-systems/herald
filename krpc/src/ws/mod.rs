@@ -46,7 +46,7 @@ pub async fn handle_conn<P, S, Conn>(
 where
     S: KrpcServer<P>,
     P: Protocol,
-    P::Push: Clone,
+    S::ServePush: Into<P::Push> + Clone,
     Conn: AsyncRead + AsyncWrite + Unpin + Send,
 {
     let (mut rx, mut tx) = Framed::new(conn).split();
@@ -62,7 +62,7 @@ where
     let ws = WebSocketStream::from_raw_socket(conn, Role::Server, Some(ws_config)).await;
     let (wtx, wrx) = ws.split();
 
-    let awaiting_acks: Slab<P::Push> = Slab::new();
+    let awaiting_acks: Slab<_> = Slab::new();
     let (sframe_tx, sframe_rx) = channel::<ServerFrame<P::Res, P::Push>>(max(
         P::MAX_CONCURRENT_PUSHES,
         P::MAX_CONCURRENT_REQS,
@@ -78,13 +78,13 @@ where
         let cinfo = &cinfo;
         let awaiting_acks = &awaiting_acks;
         async move {
-            let mut pushes = server.pushes(cinfo).await;
+            let mut pushes = server.pushes(cinfo).await?;
             while let Some(p) = pushes.next().await {
                 let u = awaiting_acks
                     .insert(p.clone())
                     .ok_or_else(|| anyhow!("failed to insert push into slab"))?
                     as u64;
-                let frame = ServerFrame::Psh(u, p);
+                let frame = ServerFrame::Psh(u, p.into());
                 sframe_tx.send(frame).await?;
             }
 
@@ -176,6 +176,7 @@ where
     P: Protocol,
     S: KrpcServer<P>,
     P::Push: Clone,
+    S::ServePush: Into<P::Push> + Clone,
 {
     serve_body!(server, socket, tls)
 }
@@ -189,6 +190,7 @@ where
     P: Protocol,
     S: KrpcServer<P>,
     P::Push: Clone,
+    S::ServePush: Into<P::Push> + Clone,
 {
     serve_body!(server.clone(), socket, tls.clone())
 }

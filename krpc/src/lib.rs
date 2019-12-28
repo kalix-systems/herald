@@ -1,13 +1,13 @@
-use anyhow::*;
-use async_trait::*;
+pub use anyhow::*;
+pub use async_trait::*;
 use futures::{
     future::{self, FutureExt, TryFutureExt},
     stream::{Stream, StreamExt},
 };
-use kson::prelude::*;
+pub use kson::prelude::*;
 pub use kson_channel::*;
 use std::{cmp::max, fmt::Debug, net::SocketAddr};
-use tokio::prelude::*;
+pub use tokio::prelude::*;
 
 #[cfg(feature = "quic")]
 pub mod quic;
@@ -41,15 +41,16 @@ pub trait KrpcServer<P: Protocol>: Sync {
         rx: &mut Framed<Rx>,
     ) -> Result<Self::ConnInfo, Error>;
 
-    type Pushes: Stream<Item = P::Push> + Send + Unpin;
+    type ServePush: Send + Sync;
+    type Pushes: Stream<Item = Self::ServePush> + Send + Unpin;
     async fn pushes(
         &self,
         meta: &Self::ConnInfo,
-    ) -> Self::Pushes;
+    ) -> Result<Self::Pushes, Error>;
 
     async fn on_push_ack(
         &self,
-        push: P::Push,
+        push: Self::ServePush,
         ack: P::PushAck,
     );
 

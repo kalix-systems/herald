@@ -1,13 +1,15 @@
 #![allow(unused_imports)]
 
-use anyhow::*;
 use dashmap::DashMap;
-use futures::stream::{self, Stream, StreamExt};
-use herald_common::protocol::auth::*;
-use herald_common::*;
+use futures::stream::{self, BoxStream, Stream, StreamExt};
+use herald_common::{
+    protocol::{auth::*, *},
+    *,
+};
 use krpc::*;
 use server_errors::Error as ServerError;
 use server_store::*;
+use std::sync::Arc;
 use std::time::Duration;
 use stream_cancel::{Trigger, Tripwire, Valved};
 use tokio::{
@@ -16,8 +18,9 @@ use tokio::{
         mpsc::{
             unbounded_channel as channel, UnboundedReceiver as Receiver, UnboundedSender as Sender,
         },
-        oneshot,
+        oneshot, Semaphore,
     },
+    time,
 };
 
 mod handlers;
@@ -25,29 +28,28 @@ mod login;
 
 pub struct ActiveSession {
     interrupt: Trigger,
-    done: Tripwire,
-    emitter: Sender<(Push, i64)>,
+    emitter: Sender<TaggedPush>,
+    ready: Option<Arc<Semaphore>>,
 }
 
 impl ActiveSession {
-    #[allow(clippy::unneeded_field_pattern)]
-    pub async fn interrupt(self) -> bool {
-        let ActiveSession {
-            interrupt,
-            done,
-            emitter: _,
-        } = self;
-
-        interrupt.cancel();
-        done.await
+    pub fn interrupt(self) {
+        self.interrupt.cancel()
     }
 
-    pub fn push(
+    pub async fn push(
         &self,
         push: Push,
         id: i64,
-    ) -> Result<(), tokio::sync::mpsc::error::SendError<(Push, i64)>> {
-        self.emitter.clone().send((push, id))
+    ) -> Result<(), tokio::sync::mpsc::error::SendError<TaggedPush>> {
+        if let Some(s) = &self.ready {
+            s.acquire().await;
+        }
+        self.emitter.clone().send(TaggedPush { push, id })
+    }
+
+    pub fn ready(&mut self) {
+        self.ready = None;
     }
 }
 
@@ -104,13 +106,14 @@ impl State {
         Rx: AsyncRead + Unpin,
     {
         const CATCHUP_CHUNK_SIZE: usize = 100;
-        let mut pending = self.new_connection().await?.get_pending(pk).await?;
+        let pending = self.new_connection().await?.get_pending(pk).await?;
+        let mut unsent = &pending[..];
 
-        while !pending.is_empty() {
-            let rest = pending.split_off(CATCHUP_CHUNK_SIZE);
+        while !unsent.is_empty() {
+            let to_send = &unsent[..CATCHUP_CHUNK_SIZE];
 
             tx.write_ser(&KsonIterator::new(
-                pending.iter().map(|(p, _): &(Push, i64)| p),
+                to_send.iter().map(|(p, _): &(Push, i64)| p),
             ))
             .await?;
             if rx.read_u8().await? != 1 {
@@ -120,13 +123,103 @@ impl State {
                 .await?
                 .del_pending(
                     pk,
-                    stream::iter(pending.iter().map(|(_, id): &(Push, i64)| *id)),
+                    stream::iter(to_send.iter().map(|(_, id): &(Push, i64)| *id)),
                 )
                 .await?;
 
-            pending = rest;
+            unsent = &unsent[CATCHUP_CHUNK_SIZE..];
         }
 
         Ok(())
+    }
+}
+
+#[derive(Debug)]
+pub struct TaggedPush {
+    id: i64,
+    push: Push,
+}
+
+impl From<TaggedPush> for Push {
+    fn from(t: TaggedPush) -> Push {
+        t.push
+    }
+}
+
+#[async_trait]
+impl KrpcServer<HeraldProtocol> for State {
+    type ConnInfo = GlobalId;
+
+    async fn init<Tx: AsyncWrite + Send + Unpin, Rx: AsyncRead + Send + Unpin>(
+        &self,
+        tx: &mut Framed<Tx>,
+        rx: &mut Framed<Rx>,
+    ) -> Result<Self::ConnInfo, Error> {
+        let g = self.handle_login(tx, rx).await?;
+        self.catchup(g.did, tx, rx).await?;
+        Ok(g)
+    }
+
+    type ServePush = TaggedPush;
+    type Pushes = Valved<Receiver<TaggedPush>>;
+
+    async fn pushes(
+        &self,
+        meta: &Self::ConnInfo,
+    ) -> Result<Self::Pushes, Error> {
+        let (mut sender, receiver) = channel();
+        let (interrupt, output) = Valved::new(receiver);
+        let sem = Arc::new(Semaphore::new(0));
+        let sess = ActiveSession {
+            interrupt,
+            emitter: sender.clone(),
+            ready: Some(sem.clone()),
+        };
+        self.active.insert(meta.did, sess);
+
+        let catchup = async {
+            for (push, id) in self.new_connection().await?.get_pending(meta.did).await? {
+                sender.send(TaggedPush { push, id })?;
+            }
+            Ok(())
+        };
+
+        match catchup.await {
+            Err(e) => {
+                sem.add_permits(usize::max_value());
+                self.active.remove(&meta.did).map(|(_, s)| s.interrupt());
+                Err(e)
+            }
+            Ok(()) => {
+                sem.add_permits(1);
+                self.active.async_get_mut(meta.did).await.map(|mut s| {
+                    s.ready();
+                });
+                Ok(output)
+            }
+        }
+    }
+
+    async fn on_push_ack(
+        &self,
+        push: Self::ServePush,
+        ack: PushAck,
+    ) {
+        todo!()
+    }
+
+    async fn handle_req(
+        &self,
+        conn: &Self::ConnInfo,
+        req: Request,
+    ) -> Response {
+        todo!()
+    }
+
+    async fn on_close(
+        &self,
+        cinfo: Self::ConnInfo,
+    ) {
+        todo!()
     }
 }
