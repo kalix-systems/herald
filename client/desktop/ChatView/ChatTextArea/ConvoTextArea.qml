@@ -83,9 +83,9 @@ Rectangle {
                 active: ownedConversation.builder.isReply
                 height: item ? item.height : 0
                 sourceComponent: ReplyComponent {
-                    startColor: CmnCfg.avatarColors[Herald.users.colorById(
-                                                        replyUid)]
+                    builderData: ownedConversation.builder
                 }
+
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.leftMargin: CmnCfg.smallMargin

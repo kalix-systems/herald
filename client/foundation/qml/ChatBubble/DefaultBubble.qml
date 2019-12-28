@@ -155,6 +155,7 @@ Rectangle {
 
         BubbleLabel {
             id: authorLabel
+            timestamp: friendlyTimestamp
         }
 
         //reply bubble loader

@@ -1,54 +1,49 @@
 import QtQuick 2.13
 import QtQuick.Controls 2.13
-import QtGraphicalEffects 1.13
 import QtQuick.Layouts 1.12
 import "qrc:/common" as Common
 import LibHerald 1.0
 import "qrc:/imports/js/utils.mjs" as Utils
 import "qrc:/imports" as Imports
 import "qrc:/imports/ChatBubble/ReplyBubble"
+import "qrc:/imports/ChatBubble" as ChatBubble
 
 Rectangle {
     id: wrapper
-    color: CmnCfg.palette.lightGrey
-    border.color: CmnCfg.palette.black
-    border.width: 1
     height: Math.max(wrapperRow.height + label.height, 20)
+    color: CmnCfg.palette.medGrey
+    property var builderData
+
+    property color authorColor: CmnCfg.palette.avatarColors[Herald.users.colorById(
+                                                                builderData.opAuthor)]
+    property string authorName: Herald.users.nameById(builderData.opAuthor)
+    property string friendlyTimestamp: Utils.friendlyTimestamp(
+                                           builderData.opTime)
+    property var maxWidth: wrapper.width - CmnCfg.smallMargin
 
     Connections {
         target: appRoot.globalTimer
-        onRefreshTime: timestamp.text = Utils.friendlyTimestamp(
-                           ownedConversation.builder.opTime)
+        onRefreshTime: friendlyTimestamp = Utils.friendlyTimestamp(
+                           builderData.opTime)
+    }
+    Connections {
+        target: builderData
+        onOpIdChanged: if (builderData.isReply) {
+                           loadMedia()
+                           loadDocs()
+                           friendlyTimestamp = Utils.friendlyTimestamp(
+                                       builderData.opTime)
+                       }
     }
 
-    Label {
-        id: label
-        anchors.top: parent.top
-        anchors.left: parent.left
-        width: parent.width
-        font.family: CmnCfg.chatFont.name
-        font.weight: Font.Bold
-        padding: 2
-        leftPadding: CmnCfg.microMargin
-
-        color: CmnCfg.palette.white
-        text: Herald.users.nameById(ownedConversation.builder.opAuthor)
-        background: Rectangle {
-            color: CmnCfg.palette.avatarColors[Herald.users.colorById(
-                                                   ownedConversation.builder.opAuthor)]
-            border.color: Qt.darker(color, 1.3)
-            border.width: 1
-        }
+    Component.onCompleted: {
+        loadMedia()
+        loadDocs()
     }
-
-    property color startColor
-    property string opText: parent.opText
-    property string opName: parent.opName
 
     function loadMedia() {
-        const media = ownedConversation.builder.opMediaAttachments.length
-                    === 0 ? "" : JSON.parse(
-                                ownedConversation.builder.opMediaAttachments)
+        const media = builderData.opMediaAttachments.length
+                    === 0 ? "" : JSON.parse(builderData.opMediaAttachments)
         switch (media.length) {
         case 0:
             imageClipLoader.sourceComponent = undefined
@@ -64,9 +59,8 @@ Rectangle {
     }
 
     function loadDocs() {
-        const doc = ownedConversation.builder.opDocAttachments.length
-                  === 0 ? "" : JSON.parse(
-                              ownedConversation.builder.opDocAttachments)
+        const doc = builderData.opDocAttachments.length === 0 ? "" : JSON.parse(
+                                                                    builderData.opDocAttachments)
         switch (doc.length) {
         case 0:
             fileClipLoader.sourceComponent = undefined
@@ -79,18 +73,6 @@ Rectangle {
         }
     }
 
-    Component.onCompleted: {
-        loadMedia()
-        loadDocs()
-    }
-    Connections {
-        target: ownedConversation.builder
-        onOpIdChanged: if (ownedConversation.builder.isReply) {
-                           loadMedia()
-                           loadDocs()
-                       }
-    }
-
     Imports.IconButton {
         id: exitButton
         anchors {
@@ -99,18 +81,41 @@ Rectangle {
         }
         source: "qrc:/x-icon.svg"
         scale: 0.8
-        fill: CmnCfg.palette.white
-        onClicked: ownedConversation.builder.clearReply()
+        fill: CmnCfg.palette.black
+        onClicked: builderData.clearReply()
     }
 
+    Rectangle {
+        id: accent
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
+
+        width: CmnCfg.accentBarWidth
+        color: authorColor
+        anchors.left: parent.left
+    }
+
+    ChatBubble.BubbleLabel {
+        id: label
+        topPadding: CmnCfg.smallMargin
+        anchors.left: accent.right
+        anchors.leftMargin: CmnCfg.smallMargin
+
+        timestamp: friendlyTimestamp
+        name: authorName
+    }
     Row {
-        width: wrapper.width - CmnCfg.smallMargin
+        width: maxWidth
         id: wrapperRow
         clip: true
         padding: CmnCfg.smallMargin
+        leftPadding: 0
         spacing: CmnCfg.smallMargin
 
         anchors.top: label.bottom
+        anchors.left: accent.right
+
+        anchors.leftMargin: CmnCfg.smallMargin
         ColumnLayout {
             id: textCol
             width: parent.width - imageClipLoader.width - CmnCfg.smallMargin * 2
@@ -130,8 +135,8 @@ Rectangle {
 
                 TextMetrics {
                     id: opTextMetrics
-                    text: ownedConversation.builder.opBody
-                    elideWidth: (wrapper.width - CmnCfg.smallMargin) * 2
+                    text: builderData.opBody
+                    elideWidth: maxWidth * 2
                     elide: Text.ElideRight
                 }
 
@@ -145,15 +150,6 @@ Rectangle {
                 selectByKeyboard: true
                 readOnly: true
                 color: CmnCfg.palette.black
-            }
-
-            Label {
-                id: timestamp
-                Layout.topMargin: 0
-                Layout.rightMargin: CmnCfg.smallMargin
-                font.pixelSize: 10
-                text: Utils.friendlyTimestamp(ownedConversation.builder.opTime)
-                color: CmnCfg.palette.darkGrey
             }
         }
 
