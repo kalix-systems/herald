@@ -67,13 +67,10 @@ impl Messages {
                 remove,
             } => {
                 let model = &mut self.model;
-                none!(&self.container.handle_reaction(
-                    msg_id,
-                    reactionary,
-                    content,
-                    remove,
-                    |ix| model.data_changed(ix, ix)
-                ));
+                self.container
+                    .handle_reaction(msg_id, reactionary, content, remove, |ix| {
+                        model.data_changed(ix, ix)
+                    });
             }
             MsgUpdate::StoreDone(mid, meta) => {
                 let model = &mut self.model;
