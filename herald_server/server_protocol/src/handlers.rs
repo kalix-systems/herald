@@ -2,14 +2,14 @@ use super::*;
 use futures::stream::TryStreamExt;
 
 impl State {
-    pub(super) async fn get_sigchain(
+    pub async fn get_sigchain(
         &self,
         of: UserId,
     ) -> Result<Option<sig::SigChain>, Error> {
         Ok(self.new_connection().await?.get_sigchain(of).await?)
     }
 
-    pub(super) async fn recip_exists(
+    pub async fn recip_exists(
         &self,
         recip: Recip,
     ) -> Result<bool, Error> {
@@ -17,7 +17,7 @@ impl State {
     }
 
     //FIXME: interrupt deprecated sessions
-    pub(super) async fn new_sig(
+    pub async fn new_sig(
         &self,
         sig: Signed<sig::SigUpdate>,
     ) -> Result<PKIResponse, Error> {
