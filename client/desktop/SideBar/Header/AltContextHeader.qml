@@ -22,12 +22,13 @@ Component {
             anchors {
                 left: parent.left
                 leftMargin: CmnCfg.smallMargin
-                 verticalCenter: parent.verticalCenter
+                verticalCenter: parent.verticalCenter
             }
             spacing: CmnCfg.defaultMargin
 
             HeaderAvatar {
                 anchors.verticalCenter: parent.verticalCenter
+                visible: sideBar.sideBarState.state !== "archivedState"
             }
 
             Text {
@@ -42,14 +43,12 @@ Component {
             }
         }
 
-
         Imports.IconButton {
             anchors {
                 verticalCenter: parent.verticalCenter
                 right: parent.right
                 rightMargin: CmnCfg.smallMargin
             }
-
 
             id: xButton
             fill: CmnCfg.palette.lightGrey

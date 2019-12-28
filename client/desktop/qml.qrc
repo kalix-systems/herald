@@ -69,5 +69,7 @@
         <file>SideBar/popups/ImageCropPopup.qml</file>
         <file>SideBar/popups/js/SettingsPopupSubmission.mjs</file>
         <file>ChatView/Popups/MoreInfoPopup.qml</file>
+        <file>SideBar/Pane/ArchiveView.qml</file>
+        <file>SideBar/Pane/ConversationRectangle.qml</file>
     </qresource>
 </RCC>

@@ -38,9 +38,9 @@ Item {
     // FONTS
 
     /// standard header size
-    readonly property real headerTextSize: units.dp(18)
+    readonly property real headerFontSize: units.dp(18)
     /// size of labels
-    readonly property real labelSize: units.dp(18)
+    readonly property real labelFontSize: units.dp(18)
     /// standard chat text size
     readonly property real chatTextSize: units.dp(16)
     /// size for contact/group name labels in lists
@@ -57,6 +57,13 @@ Item {
     readonly property font defaultFont: Qt.font({
         family: chatFont.name,
         pixelSize: units.dp(17)
+    })
+
+    readonly property font headerFont: Qt.font({
+        'family': labelFont.name,
+        'pixelSize': headerFontSize,
+        'weight': Font.DemiBold,
+        'letterSpacing': 1
     })
 
 

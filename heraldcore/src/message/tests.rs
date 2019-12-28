@@ -319,3 +319,36 @@ fn delete_op() {
 
     assert!(msg.op.is_dangling());
 }
+
+#[test]
+fn add_delete_reaction() {
+    let mut conn = Database::in_memory_with_config().expect(womp!());
+    let mid = [0; 32].into();
+    let author = crate::user::db::test_user(&mut conn, "author");
+
+    let conv = author.pairwise_conversation;
+    let mut builder = InboundMessageBuilder::default();
+
+    builder
+        .id(mid)
+        .author(author.id)
+        .conversation_id(conv)
+        .timestamp(Time::now())
+        .body("test".try_into().expect(womp!()));
+
+    builder.store_db(&mut conn).expect(womp!());
+
+    db::add_reaction(&conn, &mid, &author.id, ":)").expect(womp!("failed to add react"));
+
+    //make sure adding the same react from the same userdoes not get registered
+    db::add_reaction(&conn, &mid, &author.id, ":)".try_into().expect(womp!()))
+        .expect(womp!("failed to add react"));
+    let reacts = db::reactions(&conn, &mid).unwrap().expect(womp!());
+    assert_eq!(reacts.content[0].content, ":)");
+    assert_eq!(reacts.content.len(), 1);
+    assert_eq!(reacts.content[0].reactionaries[0], author.id);
+    db::remove_reaction(&conn, &mid, &author.id, ":)").expect(womp!("failed to delete react"));
+
+    let reacts = db::reactions(&conn, &mid).expect(womp!());
+    assert!(reacts.is_none());
+}
