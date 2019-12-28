@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 57.1 (83088) - https://sketch.com -->
+    <title>read-receipt-sending-icon</title>
+    <desc>Created with Sketch.</desc>
+    <g id="read-receipt-sending-icon" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <polygon id="Shape" points="0 0 24 0 24 24 0 24"></polygon>
+        <path d="M4.5,16 L7.5,16 L7.5,19 L4.5,19 L4.5,16 Z M10.5,16 L13.5,16 L13.5,19 L10.5,19 L10.5,16 Z M16.5,16 L19.5,16 L19.5,19 L16.5,19 L16.5,16 Z" id="..." fill="#000000" fill-rule="nonzero"></path>
+    </g>
+</svg>

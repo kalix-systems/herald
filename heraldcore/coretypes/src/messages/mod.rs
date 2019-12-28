@@ -20,8 +20,8 @@ pub struct Message {
     pub author: UserId,
     /// Recipient user id
     pub conversation: ConversationId,
-    /// Body of message
-    pub body: Option<MessageBody>,
+    /// Content of message
+    pub content: Option<Item>,
     /// Message time information
     pub time: MessageTime,
     /// Message id of the message being replied to
@@ -32,14 +32,22 @@ pub struct Message {
     pub receipts: HashMap<UserId, MessageReceiptStatus>,
     /// Messages that replied to this message
     pub replies: HashSet<MsgId>,
+    /// Reactions to this message
+    pub reactions: Option<Reactions>,
     /// Attachment metadata
     pub attachments: AttachmentMeta,
+}
+
+impl Message {
+    pub fn text(&self) -> Option<&str> {
+        self.content.as_ref().and_then(Item::as_str)
+    }
 }
 
 /// An isolated message receipt.
 #[derive(Clone, Copy, Debug)]
 pub struct MessageReceipt {
-    /// The message id
+    /// The message id the receipt is associated with
     pub msg_id: MsgId,
     /// The conversation id the original message is associated with
     pub cid: ConversationId,
@@ -49,9 +57,88 @@ pub struct MessageReceipt {
     pub status: MessageReceiptStatus,
 }
 
+/// An isolated message reaction
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Reaction {
+    /// The reactionary
+    pub reactionary: UserId,
+    /// The text of the receipt
+    pub react_content: ReactContent,
+    /// The time the react arrived at the client
+    pub time: Time,
+}
+
+pub type ReactContent = String;
+
+/// A `ReactContent` with an ordered list of
+/// reactionaries
+#[derive(Clone, Debug, PartialEq, Eq, Ord, PartialOrd)]
+pub struct TaggedReact {
+    pub content: ReactContent,
+    pub reactionaries: Vec<UserId>,
+}
+
+/// A collection of message reactions
+#[derive(Clone, Debug, Default)]
+pub struct Reactions {
+    pub content: Vec<TaggedReact>,
+}
+
+impl Reactions {
+    pub fn add(
+        &mut self,
+        react: ReactContent,
+        reactionary: UserId,
+    ) -> bool {
+        match self
+            .content
+            .iter()
+            .position(|tagged| tagged.content == react)
+        {
+            Some(ix) => {
+                if let Some(tagged) = self.content.get_mut(ix) {
+                    if !tagged.reactionaries.contains(&reactionary) {
+                        tagged.reactionaries.push(reactionary);
+                        return true;
+                    }
+                }
+                false
+            }
+            None => {
+                self.content.push(TaggedReact {
+                    content: react,
+                    reactionaries: vec![reactionary],
+                });
+                true
+            }
+        }
+    }
+
+    pub fn remove(
+        &mut self,
+        react: ReactContent,
+        reactionary: UserId,
+    ) -> bool {
+        if let Some(ix) = self
+            .content
+            .iter()
+            .position(|tagged| tagged.content == react)
+        {
+            if let Some(tagged) = self.content.get_mut(ix) {
+                if let Some(position) = tagged.reactionaries.iter().position(|u| u == &reactionary)
+                {
+                    tagged.reactionaries.remove(position);
+                    return true;
+                }
+            }
+        };
+        false
+    }
+}
+
 #[derive(Clone, Copy, Debug, Ser, De, Eq, PartialEq, Hash)]
 /// In order to support expiring messages, it is necessary to indicate
-/// that a message is a reply without necessarily knowing
+/// that a message is a reply without necessarily knowing the message
 pub enum ReplyId {
     /// Not a reply
     None,
@@ -80,6 +167,38 @@ impl ReplyId {
             false
         }
     }
+}
+
+/// An item in the message history
+#[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
+pub enum Item {
+    Plain(MessageBody),
+    Update(Update),
+}
+
+impl Item {
+    pub fn as_str(&self) -> Option<&str> {
+        match self {
+            Item::Plain(body) => Some(body.as_str()),
+            _ => None,
+        }
+    }
+
+    pub fn body(&self) -> Option<&MessageBody> {
+        match self {
+            Item::Plain(body) => Some(&body),
+            _ => None,
+        }
+    }
+}
+
+/// An update that appears appears in the message history
+#[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
+pub enum Update {
+    Color(u32),
+    Title(String),
+    Picture(String),
+    Expiration(crate::conversation::ExpirationPeriod),
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -165,25 +284,30 @@ pub enum MessageSendStatus {
 /// Receipt status of a message
 pub enum MessageReceiptStatus {
     /// Not acknowledged
-    NoAck = 0,
+    Nil = 0,
     /// Received by user
     Received = 1,
     /// Read by the recipient
     Read = 2,
-    /// The user has read receipts turned off
-    AckTerminal = 3,
+}
+
+impl Default for MessageReceiptStatus {
+    fn default() -> Self {
+        MessageReceiptStatus::Nil
+    }
 }
 
 #[derive(Clone, Debug)]
 pub struct MsgData {
     pub author: UserId,
-    pub body: Option<MessageBody>,
+    pub content: Option<Item>,
     pub time: MessageTime,
     pub op: ReplyId,
     pub receipts: HashMap<UserId, MessageReceiptStatus>,
     pub attachments: crate::attachments::AttachmentMeta,
     pub send_status: MessageSendStatus,
     pub replies: HashSet<MsgId>,
+    pub reactions: Option<Reactions>,
 }
 
 #[repr(u8)]
@@ -205,9 +329,9 @@ impl MsgData {
         &self,
         pattern: &search_pattern::SearchPattern,
     ) -> bool {
-        match self.body.as_ref() {
-            Some(body) => pattern.is_match(body.as_str()),
-            None => false,
+        match self.content.as_ref() {
+            Some(Item::Plain(body)) => pattern.is_match(body.as_str()),
+            _ => false,
         }
     }
 
@@ -223,6 +347,10 @@ impl MsgData {
 
         self.attachments.save_all(dest.as_ref().join(ext))
     }
+
+    pub fn text(&self) -> Option<&str> {
+        self.content.as_ref().and_then(Item::as_str)
+    }
 }
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
@@ -237,12 +365,13 @@ pub fn split_msg(msg: Message) -> (MessageMeta, MsgData) {
     let Message {
         message_id,
         author,
-        body,
+        content,
         time,
         op,
         receipts,
         attachments,
         send_status,
+        reactions,
         replies,
         ..
     } = msg;
@@ -250,12 +379,13 @@ pub fn split_msg(msg: Message) -> (MessageMeta, MsgData) {
     let data = MsgData {
         author,
         receipts,
-        body,
+        content,
         op,
         attachments,
         time,
         send_status,
         replies,
+        reactions,
     };
 
     let message = MessageMeta {
@@ -347,7 +477,7 @@ impl Elider {
 
     pub fn elided_body(
         &self,
-        body: MessageBody,
+        body: String,
     ) -> String {
         let graphemes = UnicodeSegmentation::graphemes(body.as_str(), true);
 
@@ -364,7 +494,7 @@ impl Elider {
         }
 
         if char_count < self.char_count && line_count < self.line_count {
-            return body.inner();
+            return body;
         }
 
         let chars_to_take = self.char_count.min(self.line_count * self.char_per_line);

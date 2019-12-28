@@ -17,7 +17,7 @@ ToolBar {
             leftMargin: CmnCfg.defaultMargin
         }
 
-        IconButton {
+        AnimIconButton {
             id: drawerButton
             Layout.alignment: Qt.AlignLeft
             color: CmnCfg.palette.iconFill
@@ -31,7 +31,7 @@ ToolBar {
             text: qsTr("Settings")
             Layout.alignment: Qt.AlignCenter
             Layout.fillWidth: true
-            font.pixelSize: CmnCfg.chatPreviewSize
+            font.pixelSize: CmnCfg.headerFontSize
             font.family: CmnCfg.chatFont.name
             color: CmnCfg.palette.iconFill
         }

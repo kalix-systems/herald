@@ -5,16 +5,18 @@ use crate::{
     toasts::new_msg_toast,
 };
 use herald_common::UserId;
-use heraldcore::{conversation, errors::HErr, message::MessageReceiptStatus, types::*};
-use im::vector::Vector;
-use messages_helper::search::SearchState;
+use heraldcore::{
+    conversation,
+    errors::HErr,
+    message::{Elider, MessageReceiptStatus},
+    types::*,
+};
+use messages_helper::{container::Container, search::SearchState};
 use search_pattern::SearchPattern;
 
-mod container;
-use container::*;
-mod imp;
+mod helpers;
+pub(crate) mod imp;
 mod trait_imp;
-pub(crate) mod underscore;
 
 /// Implementation of `crate::interface::MessageBuilderTrait`.
 pub mod builder;
@@ -58,6 +60,18 @@ impl Messages {
                     .container
                     .handle_receipt(msg_id, status, recipient, |ix| model.data_changed(ix, ix)));
             }
+            MsgUpdate::Reaction {
+                msg_id,
+                reactionary,
+                content,
+                remove,
+            } => {
+                let model = &mut self.model;
+                self.container
+                    .handle_reaction(msg_id, reactionary, content, remove, |ix| {
+                        model.data_changed(ix, ix)
+                    });
+            }
             MsgUpdate::StoreDone(mid, meta) => {
                 let model = &mut self.model;
 
@@ -98,6 +112,13 @@ pub(crate) enum MsgUpdate {
         msg_id: MsgId,
         recipient: UserId,
         status: MessageReceiptStatus,
+    },
+    /// A reaction has been added or removed
+    Reaction {
+        msg_id: MsgId,
+        reactionary: UserId,
+        content: heraldcore::message::ReactContent,
+        remove: bool,
     },
     /// A rendered message from the `MessageBuilder`
     BuilderMsg(Box<heraldcore::message::Message>),

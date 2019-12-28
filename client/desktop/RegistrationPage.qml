@@ -76,6 +76,7 @@ Rectangle {
             width: 150
             height: 25
             placeholderText: qsTr("Server address")
+            text: '54.213.103.80'
         }
 
         TextField {
@@ -84,6 +85,7 @@ Rectangle {
             width: 150
             height: 25
             placeholderText: qsTr("Server port")
+            text: '8080'
         }
 
         Button {

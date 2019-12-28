@@ -67,7 +67,8 @@ impl Conversations {
         color_inner, color, u32,
         pairwise_inner, pairwise, bool,
         muted_inner, muted, bool,
-        expiration_inner, expiration_period, ExpirationPeriod
+        expiration_inner, expiration_period, ExpirationPeriod,
+        status_inner, status, heraldcore::conversation::Status
     }
 
     imp_clone! {
@@ -80,7 +81,8 @@ impl Conversations {
         set_color_inner, color, u32,
         set_picture_inner, picture, Option<String>,
         set_expiration_inner, expiration_period, ExpirationPeriod,
-        set_title_inner, title, Option<String>
+        set_title_inner, title, Option<String>,
+        set_status_inner, status, heraldcore::conversation::Status
     }
 }
 

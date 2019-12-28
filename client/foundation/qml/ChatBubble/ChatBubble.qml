@@ -4,12 +4,10 @@ import QtQuick.Controls 2.13
 import LibHerald 1.0
 import "./ReplyBubble"
 import "../js/utils.mjs" as Utils
-import "../Avatar"
+import "../Entity"
 
 Rectangle {
     id: bubbleRoot
-
-    signal attachmentsLoaded
 
     property real defaultWidth
     property bool elided: body.length !== messageModelData.fullBody.length
@@ -27,6 +25,7 @@ Rectangle {
     readonly property string authorName: messageModelData.authorName
 
     readonly property string medAttachments: messageModelData.mediaAttachments
+    readonly property string fullMedAttachments: messageModelData.fullMediaAttachments
     readonly property string documentAttachments: messageModelData.docAttachments
     readonly property bool imageAttach: medAttachments.length !== 0
     readonly property bool docAttach: documentAttachments.length !== 0
@@ -37,20 +36,37 @@ Rectangle {
     readonly property bool isHead: messageModelData.isHead
     readonly property bool isTail: messageModelData.isTail
 
-    readonly property real maxWidth: defaultWidth * 0.75
-    property string friendlyTimestamp: Utils.friendlyTimestamp(
-                                           messageModelData.insertionTime)
-    readonly property string receiptImage: Utils.receiptCodeSwitch(
-                                               messageModelData.receiptStatus)
+    readonly property real maxWidth: defaultWidth * 0.72
+    property string friendlyTimestamp: outbound ? Utils.friendlyTimestamp(
+                                                      messageModelData.insertionTime) : Utils.friendlyTimestamp(
+                                                      messageModelData.serverTime)
+
+    property string timerIcon: expirationTime !== undefined ? Utils.timerIcon(
+                                                                  expirationTime,
+                                                                  insertionTime) : ""
+    readonly property string receiptImage: outbound ? Utils.receiptCodeSwitch(
+                                                          messageModelData.receiptStatus) : ""
     readonly property color authorColor: CmnCfg.avatarColors[messageModelData.authorColor]
 
     readonly property string pfpUrl: messageModelData.authorProfilePicture
     property bool hoverHighlight: false
+    property alias expireInfo: expireInfo
+    property int bubbleIndex
+    property bool moreInfo: false
 
     Connections {
         target: appRoot.globalTimer
-        onRefreshTime: friendlyTimestamp = Utils.friendlyTimestamp(
-                           messageModelData.insertionTime)
+        onRefreshTime: {
+            friendlyTimestamp = Utils.friendlyTimestamp(
+                        messageModelData.insertionTime)
+            timerIcon = (expirationTime !== undefined) ? (Utils.timerIcon(
+                                                              expirationTime,
+                                                              insertionTime)) : ""
+            expireInfo.expireTime = (expirationTime
+                                     !== undefined) ? (Utils.expireTimeShort(
+                                                           expirationTime,
+                                                           insertionTime)) : ""
+        }
     }
     height: contentRoot.height
     width: defaultWidth
@@ -83,7 +99,7 @@ Rectangle {
         id: avatar
         color: authorColor
         initials: authorName[0].toUpperCase()
-        diameter: 36
+        size: 36
         visible: isHead ? true : false
         anchors {
             left: parent.left
@@ -120,6 +136,11 @@ Rectangle {
         background: Item {}
     }
 
+    BubbleExpireInfo {
+        id: expireInfo
+        visible: isHead
+    }
+
     Column {
         z: highlight.z + 1
         id: contentRoot
@@ -133,8 +154,9 @@ Rectangle {
         bottomPadding: isTail ? CmnCfg.defaultMargin : CmnCfg.smallMargin
 
         BubbleLabel {
-            id: authorLabel
             visible: isHead
+
+            id: authorLabel
         }
 
         //reply bubble loader
@@ -225,5 +247,11 @@ Rectangle {
         }
 
         ElideHandler {}
+
+        Loader {
+            active: messageModelData.reactions.length > 0
+
+            sourceComponent: BubbleReacts {}
+        }
     }
 }

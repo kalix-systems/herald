@@ -17,7 +17,7 @@ ColumnLayout {
             font.pixelSize: CmnCfg.chatTextSize
         }
 
-        ButtonForm {
+        IconButton {
             source: "qrc:/dropdown-arrow-icon.svg"
             onClicked: expirationMenu.open()
         }

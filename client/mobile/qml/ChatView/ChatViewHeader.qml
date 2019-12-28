@@ -22,7 +22,7 @@ ToolBar {
             leftMargin: CmnCfg.defaultMargin
         }
 
-        IconButton {
+        AnimIconButton {
             id: backButton
             Layout.alignment: Qt.AlignLeft
             color: CmnCfg.palette.iconFill
@@ -40,7 +40,7 @@ ToolBar {
                 font {
                     pixelSize: CmnCfg.headerTextSize
                     family: CmnCfg.labelFont.name
-                    bold: true
+                    weight: Font.DemiBold
                 }
 
                 anchors.verticalCenter: parent.verticalCenter
@@ -48,7 +48,7 @@ ToolBar {
             }
         }
 
-        IconButton {
+        AnimIconButton {
             id: searchButton
             Layout.alignment: Qt.AlignRight
             color: CmnCfg.palette.iconFill

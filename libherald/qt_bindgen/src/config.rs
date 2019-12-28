@@ -130,7 +130,8 @@ fn conversations() -> Object {
        expirationPeriod: ItemProp::new(QUint8).write(),
        matched: matched_item_prop(),
        picture: picture_item_prop().get_by_value(),
-       color: color_item_prop().write()
+       color: color_item_prop().write(),
+       status: ItemProp::new(QUint8).write()
     };
 
     let funcs = functions! {
@@ -255,12 +256,17 @@ fn messages() -> Object {
         authorColor: ItemProp::new(QUint32).optional(),
         // User name
         authorName: ItemProp::new(QString).optional().get_by_value(),
+        // Message reactions
+        reactions: ItemProp::new(QString).get_by_value(),
 
         // Media attachments metadata, serialized as JSON
         mediaAttachments: ItemProp::new(QString).get_by_value(),
+        // Full media attachments metadata, serialized as JSON
+        fullMediaAttachments: ItemProp::new(QString).get_by_value(),
         // Document attachments metadata, serialized as JSON
         docAttachments: ItemProp::new(QString).get_by_value(),
 
+        userReceipts: ItemProp::new(QString).get_by_value(),
         receiptStatus: ItemProp::new(QUint32).optional(),
         isHead: ItemProp::new(Bool).optional(),
         isTail: ItemProp::new(Bool).optional(),
@@ -292,6 +298,7 @@ fn messages() -> Object {
 
     let funcs = functions! {
         mut deleteMessage(row_index: QUint64) => Bool,
+        mut markRead(index: QUint64) => Void,
         mut clearConversationHistory() => Bool,
         mut clearSearch() => Void,
         mut nextSearchMatch() => Qint64,
@@ -300,6 +307,8 @@ fn messages() -> Object {
         mut setElisionLineCount(line_count: QUint8) => Void,
         mut setElisionCharCount(char_count: QUint16) => Void,
         mut setElisionCharsPerLine(chars_per_line: QUint8) => Void,
+        mut addReaction(index: QUint64, content: QString) => Void,
+        mut removeReaction(index: QUint64, content: QString) => Void,
         const indexById(msg_id: QByteArray) => Qint64,
         const saveAllAttachments(index: QUint64, dest: QString) => Bool,
     };

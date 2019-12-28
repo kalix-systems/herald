@@ -18,6 +18,7 @@ Column {
     property alias groupTitle: titleText.text
     spacing: CmnCfg.units.dp(12)
     topPadding: CmnCfg.units.dp(24)
+
     Rectangle {
         anchors.horizontalCenter: parent.horizontalCenter
         id: cameraSection
@@ -38,7 +39,7 @@ Column {
             }
         }
 
-        IconButton {
+        AnimIconButton {
             anchors.centerIn: parent
             imageSource: "qrc:/camera-icon.svg"
             color: CmnCfg.palette.iconFill

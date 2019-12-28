@@ -17,7 +17,8 @@ Page {
     //TODO: rename this to something sane
     property var conversationItem
     //TODO: rename to something sane and not a shadow
-    property Messages ownedConversation
+    property var ownedConversation
+    property var conversationMembers
 
     background: Rectangle {
         color: CmnCfg.palette.white
@@ -61,12 +62,12 @@ Page {
                                   requestedMsgId)
 
                 // early return on out of bounds
-                if (msg_idx < 0)
+                if ((msg_idx < 0) || (msg_idx >= convWindow.count))
                     return
 
                 convWindow.positionViewAtIndex(msg_idx, ListView.Center)
                 convWindow.highlightAnimation.target = convWindow.itemAtIndex(
-                            msg_idx).highlight
+                            msg_idx).highlightItem
                 convWindow.highlightAnimation.start()
             }
         }

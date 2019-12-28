@@ -17,6 +17,7 @@ members = [
   "heraldcore/image_utils",
   "libherald",
   "libherald/messages_helper",
+  "libherald/revec",
   "libherald/message_cache",
   "libherald/qt_bindgen",
   "location",

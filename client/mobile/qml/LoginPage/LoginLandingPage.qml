@@ -32,8 +32,9 @@ Page {
             bottom: serverPortTextField.top
             bottomMargin: CmnCfg.units.dp(30)
         }
-        width: CmnCfg.units.gu(15)
+        width: parent.width - 2 * CmnCfg.megaMargin
         placeholderText: qsTr("Server address")
+        text: "54.213.103.80"
     }
 
     TextField {
@@ -43,8 +44,9 @@ Page {
             bottom: newAccButton.top
             bottomMargin: CmnCfg.units.dp(30)
         }
-        width: CmnCfg.units.gu(15)
+        width: parent.width - 2 * CmnCfg.megaMargin
         placeholderText: qsTr("Server port")
+        text: "8080"
     }
 
     LoginButton {

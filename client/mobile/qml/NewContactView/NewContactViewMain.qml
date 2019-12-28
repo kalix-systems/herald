@@ -3,11 +3,9 @@ import QtQuick.Layouts 1.12
 import QtQuick 2.12
 import LibHerald 1.0
 import "../Common" as Common
-import "Controls"
+import "qrc:/imports" as Imports
 
 Page {
-
-    header: NewContactHeader {}
 
     ColumnLayout {
         anchors.fill: parent
@@ -15,16 +13,15 @@ Page {
         anchors.leftMargin: parent.width * 0.1
 
         Label {
-            text: qsTr("Request a New Contact")
+            text: qsTr("Request a new contact")
         }
 
-        TextArea {
+        Imports.BorderedTextField {
             id: usernameTextArea
             Layout.preferredWidth: parent.width * 0.8
-            background: Rectangle {
-                border.color: CmnCfg.palette.borderColor
-            }
-            placeholderText: qsTr("Enter a UID")
+            placeholderText: qsTr("Enter a username")
+            color: CmnCfg.palette.black
+            borderColor: CmnCfg.palette.black
         }
 
         TextArea {

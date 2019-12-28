@@ -6,7 +6,7 @@ import "../../common" as Common
 import "qrc:/imports/js/utils.mjs" as Utils
 import "./../js/ContactView.mjs" as JS
 import "../popups" as Popups
-import "qrc:/imports/Avatar" as Av
+import "qrc:/imports/Entity" as Av
 import "../../ChatView" as CV
 import QtQuick.Layouts 1.3
 
@@ -34,17 +34,21 @@ ListView {
             boxTitle: messageData.conversationTitle
             picture: Utils.safeStringOrDefault(messageData.conversationPicture,
                                                "")
-            groupPicture: !messageData.conversationPairwise
+            isGroupPicture: !messageData.conversationPairwise
+            isMessageResult: true
 
             MouseArea {
                 id: hoverHandler
                 hoverEnabled: true
                 z: CmnCfg.overlayZ
                 anchors.fill: parent
+
                 onClicked: messageSearchList.messageClicked(
                                messageData.conversation, messageData.msgId)
             }
 
+            // TODO spacing is awkward
+            // TODO possible to handle this case in ConversationLabel?
             labelComponent: GridLayout {
                 id: labelGrid
                 rows: bodyText.lineCount > 1 ? 3 : 2

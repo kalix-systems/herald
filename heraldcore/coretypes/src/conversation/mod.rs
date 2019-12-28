@@ -28,6 +28,8 @@ pub struct ConversationMeta {
     pub last_active: Time,
     /// Time until message expiration
     pub expiration_period: ExpirationPeriod,
+    /// Conversation status
+    pub status: Status,
 }
 
 impl ConversationMeta {
@@ -79,7 +81,14 @@ pub enum ExpirationPeriod {
     OneYear = 9,
 }
 
+#[cfg(test)]
+// To make expiration easier to test,
+// we speed up time by a factor of 60.
+const MIN_SECS: u64 = 1;
+
+#[cfg(not(test))]
 const MIN_SECS: u64 = 60;
+
 const THIRTY_MIN_SECS: u64 = MIN_SECS * 30;
 const HOUR_SECS: u64 = MIN_SECS * 60;
 const TWELVE_HOUR_SECS: u64 = HOUR_SECS * 12;
@@ -143,6 +152,44 @@ impl ToSql for ExpirationPeriod {
         use types::*;
 
         Ok(ToSqlOutput::Owned(Value::Blob(kson::to_vec(self))))
+    }
+}
+
+#[repr(u8)]
+#[derive(Clone, Copy, Debug, Ser, De, Eq, PartialEq, Hash)]
+pub enum Status {
+    Active = 0,
+    Archived = 1,
+}
+
+impl Default for Status {
+    fn default() -> Self {
+        Status::Active
+    }
+}
+
+impl FromSql for Status {
+    fn column_result(value: types::ValueRef) -> FromSqlResult<Self> {
+        kson::from_slice(value.as_blob().map_err(|_| FromSqlError::InvalidType)?)
+            .map_err(|_| FromSqlError::InvalidType)
+    }
+}
+
+impl ToSql for Status {
+    fn to_sql(&self) -> Result<types::ToSqlOutput, rusqlite::Error> {
+        use types::*;
+
+        Ok(ToSqlOutput::Owned(Value::Blob(kson::to_vec(self))))
+    }
+}
+
+impl Status {
+    pub fn from_u8(s: u8) -> Option<Self> {
+        match s {
+            0 => Some(Status::Active),
+            1 => Some(Status::Archived),
+            _ => None,
+        }
     }
 }
 

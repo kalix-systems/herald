@@ -18,7 +18,7 @@ ToolBar {
             leftMargin: CmnCfg.defaultMargin
         }
 
-        IconButton {
+        AnimIconButton {
             id: drawerButton
             Layout.alignment: Qt.AlignLeft
             color: CmnCfg.palette.iconFill
@@ -32,7 +32,7 @@ ToolBar {
             text: qsTr("New Contact")
             Layout.alignment: Qt.AlignCenter
             Layout.fillWidth: true
-            font.pixelSize: CmnCfg.chatPreviewSize
+            font.pixelSize: CmnCfg.headerTextSize
             font.family: CmnCfg.labelFont.name
             color: CmnCfg.palette.iconFill
         }

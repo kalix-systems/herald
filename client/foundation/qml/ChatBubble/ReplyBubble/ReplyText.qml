@@ -17,8 +17,10 @@ Rectangle {
     color: CmnCfg.palette.medGrey
     width: bubbleRoot.maxWidth
     height: replyWrapperCol.height
+    property alias mouseEnabled: mouseArea.enabled
 
-    ReplyMouseArea {}
+
+    ReplyMouseArea {id: mouseArea}
 
     Rectangle {
         id: accent

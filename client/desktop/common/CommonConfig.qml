@@ -31,30 +31,39 @@ Item {
     readonly property FontLoader chatFont: metaTheme.chatFont
     readonly property FontLoader labelFont: metaTheme.cairo
 
+    // default font for basic UI text
+    readonly property font defaultFont: Qt.font({
+                                                    "family": chatFont.name,
+                                                    "pixelSize": 14
+                                                })
+
+    // default font for text in top bar headers
     readonly property font headerBarFont: Qt.font({
-        family: labelFont.name,
-        weight: Font.DemiBold,
-        letterSpacing: 1,
-        pixelSize: 16
-    })
+                                                      "family": labelFont.name,
+                                                      "weight": Font.DemiBold,
+                                                      "letterSpacing": 1,
+                                                      "pixelSize": 16
+                                                  })
 
     /// standard chat text size
     readonly property int chatTextSize: 12
     /// standard header size
-    readonly property int headerSize: 16
-
+    readonly property int headerFontSize: 16
+    /// size for contact/group name labels in lists
+    readonly property int entityLabelSize: 14
+    /// size for contact/group name labels in lists
+    readonly property int entitySubLabelSize: 13
 
     // STANDARD COMPONENT SIZES
 
     /// standard avatar size
-    readonly property int avatarDiameter: 44
+    readonly property int avatarSize: 44
     /// standard conversation/contact height
     readonly property int convoHeight: 56
     /// standard toolbar height
     readonly property int toolbarHeight: 40
     /// width of chat bubble left accent bar
     readonly property int accentBarWidth: 4
-
 
     /// standard popup height and width
     readonly property int popupWidth: 200
@@ -66,7 +75,6 @@ Item {
     readonly property real minChatViewWidth: 300
     readonly property real minContactsWidth: 300
 
-
     // MISC
 
     /// standard z values
@@ -76,11 +84,10 @@ Item {
     readonly property int bottomZ: 1
     readonly property int underlayZ: -1
 
-
     /// fitzpatrick emoji swatch codes
     readonly property var skinSwatchList: ["", "🏻", "🏼", "🏽", "🏾", "🏿"]
     /// emoji skin color
-    readonly property int skinSwatchIndex: 0
+    property int skinSwatchIndex: 0
     /// persistent most common emojis
     readonly property var emojiModel: JSON.emojiJson
 
