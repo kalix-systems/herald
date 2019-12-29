@@ -22,7 +22,7 @@ path = "../platform_dirs"
 path = "../image_utils"
 
 [dependencies.search_pattern]
-path = "../search_pattern"
+path = "../../search_pattern"
 
 [dependencies.location]
 path = "../../location"

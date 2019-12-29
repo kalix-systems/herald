@@ -21,7 +21,7 @@ path    = "../../heraldcore"
 path    = "../../heraldcore/coretypes"
 
 [dependencies.search_pattern]
-path    = "../../heraldcore/search_pattern"
+path    = "../../search_pattern"
 
 [dependencies.message_cache]
 path = "../message_cache"

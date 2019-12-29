@@ -36,7 +36,7 @@ path = "./network_types"
 path = "../location"
 
 [dependencies.search_pattern]
-path = "./search_pattern"
+path = "../search_pattern"
 
 [dependencies.platform_dirs]
 path = "./platform_dirs"
