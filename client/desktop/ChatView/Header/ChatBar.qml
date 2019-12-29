@@ -132,6 +132,9 @@ ToolBar {
                         onTriggered: ownedConversation.clearConversationHistory(
                                          )
                     }
+                    MenuItem {
+                        text: conversationItem.pairwise ? "Conversation settings" : "Group settings"
+                    }
                 }
             }
         }

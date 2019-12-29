@@ -57,6 +57,21 @@ Item {
         }
     }
 
+    Loader {
+        id: convoSettingsLoader
+        width: active ? chatView.width : 0
+        height: active ? chatView.height : 0
+        anchors.top: active ? parent.top : undefined
+        anchors.right: active ? parent.right : undefined
+        property var convoMembers
+        property var messageData
+        property var ownedMessages
+        active: false
+        sourceComponent: CvPopups.ConversationSettingsPopup {
+            id: convoSettings
+        }
+    }
+
     Popups.ColorPicker {
         id: avatarColorPicker
     }

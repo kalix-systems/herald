@@ -137,7 +137,8 @@ Page {
                             "height": Math.round(parsed.height),
                             "x": 0,
                             "y": 0,
-                            "path": imageSelector.imageSource
+                            "path": Herald.utils.stripUrlPrefix(
+                                        imageSelector.imageSource)
                         }
 
                         Herald.conversationBuilder.setProfilePicture(
