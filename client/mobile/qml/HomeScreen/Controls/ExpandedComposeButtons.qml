@@ -4,22 +4,21 @@ import LibHerald 1.0
 import QtQuick 2.12
 
 Column {
-    width: CmnCfg.units.dp(48)
-    spacing: CmnCfg.units.dp(16)
+    width: CmnCfg.fabDiameter
+    spacing: CmnCfg.largeMargin
 
     Button {
-        id: button
-        height: CmnCfg.units.dp(48)
+        height: CmnCfg.miniFabDiameter
         width: height
 
         Label {
-            id: label
             anchors.right: parent.left
             anchors.verticalCenter: parent.verticalCenter
-            anchors.rightMargin: CmnCfg.units.dp(16)
+            anchors.rightMargin: CmnCfg.defaultMargin + (CmnCfg.fabDiameter
+                                                         - CmnCfg.miniFabDiameter) / 2
             text: qsTr("New contact")
             font.pointSize: 12
-            padding: CmnCfg.units.dp(4)
+            padding: CmnCfg.smallMargin
             background: Rectangle {
                 anchors.fill: parent
                 color: CmnCfg.palette.lightGrey
@@ -32,8 +31,8 @@ Column {
         }
         icon.source: "qrc:/add-contact-icon.svg"
         icon.color: CmnCfg.palette.black
-        icon.height: CmnCfg.units.dp(36)
-        icon.width: CmnCfg.units.dp(36)
+        icon.height: CmnCfg.iconSize
+        icon.width: CmnCfg.iconSize
         anchors.horizontalCenter: parent.horizontalCenter
 
         background: Rectangle {
@@ -45,15 +44,17 @@ Column {
     }
 
     Button {
-        height: CmnCfg.units.dp(48)
+        height: CmnCfg.miniFabDiameter
         width: height
+
         Label {
             anchors.right: parent.left
             anchors.verticalCenter: parent.verticalCenter
-            anchors.rightMargin: CmnCfg.units.dp(16)
+            anchors.rightMargin: CmnCfg.defaultMargin + (CmnCfg.fabDiameter
+                                                         - CmnCfg.miniFabDiameter) / 2
             text: qsTr("New group")
             font.pointSize: 12
-            padding: CmnCfg.units.dp(4)
+            padding: CmnCfg.smallMargin
             background: Rectangle {
                 anchors.fill: parent
                 anchors.margins: -CmnCfg.units.dp(3)
@@ -63,8 +64,8 @@ Column {
 
         icon.source: "qrc:/contacts-icon.svg"
         icon.color: CmnCfg.palette.black
-        icon.height: CmnCfg.units.dp(36)
-        icon.width: CmnCfg.units.dp(36)
+        icon.height: CmnCfg.iconSize
+        icon.width: CmnCfg.iconSize
         anchors.horizontalCenter: parent.horizontalCenter
 
         background: Rectangle {
@@ -83,27 +84,27 @@ Column {
     }
 
     Button {
+        height: CmnCfg.fabDiameter
+        width: height
 
         Label {
             anchors.right: parent.left
             anchors.verticalCenter: parent.verticalCenter
-            anchors.rightMargin: CmnCfg.units.dp(16)
+            anchors.rightMargin: CmnCfg.defaultMargin
             text: qsTr("New conversation")
             font.pointSize: 12
-            padding: CmnCfg.units.dp(4)
+            padding: CmnCfg.smallMargin
             background: Rectangle {
                 anchors.fill: parent
                 color: CmnCfg.palette.lightGrey
             }
         }
 
-        height: CmnCfg.units.dp(54)
-        width: height
 
         icon.source: "qrc:/pencil-icon-black.svg"
         icon.color: CmnCfg.palette.black
-        icon.height: CmnCfg.units.dp(48)
-        icon.width: CmnCfg.units.dp(48)
+        icon.height: CmnCfg.iconSize
+        icon.width: CmnCfg.iconSize
 
         background: Rectangle {
             color: parent.pressed ? Qt.darker(CmnCfg.palette.lightGrey,

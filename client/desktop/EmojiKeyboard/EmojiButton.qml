@@ -7,17 +7,27 @@ Button {
     property bool takesModifier: false
     property string baseEmoji: ""
     property string emoji: takesModifier ? baseEmoji + CmnCfg.skinSwatchList[CmnCfg.skinSwatchIndex] : baseEmoji
-    property color lowlight: "light gray"
+    property color lowlight: CmnCfg.palette.darkGrey
 
     onClicked: maskShape.send(emoji)
 
     height: selector.height
     width: selector.width
 
+    MouseArea {
+        id: hoverHandler
+        anchors.fill: parent
+        hoverEnabled: true
+        propagateComposedEvents: true
+        onClicked: mouse.accepted = false
+        onReleased: mouse.accepted = false
+        onPressed: mouse.accepted = false
+        onPressAndHold: mouse.accepted = false
+    }
+
     background: Rectangle {
         id: bg
-        radius: 5
-        opacity: parent.pressed ? 1.0 : 0.0
+        opacity: parent.pressed || hoverHandler.containsMouse ? 1.0 : 0.0
         anchors.fill: parent
         color: lowlight
     }

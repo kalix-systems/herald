@@ -34,7 +34,7 @@ fn setup() -> (Push, UserId, sig::KeyPair) {
         Push {
             msg: Bytes::from_static(b"test"),
             timestamp: Time::now(),
-            tag: PushTag::Device,
+            tag: PushTag::Key,
             gid,
         },
         uid,
@@ -141,40 +141,6 @@ async fn one_user() {
 
 #[tokio::test]
 #[serial]
-async fn one_group() {
-    let mut client = wa!(get_client());
-
-    let (push, a_uid, a_kp) = setup();
-    let a_init = a_kp.sign(a_uid);
-    wa!(client.new_user(a_init));
-
-    let b_uid: UserId = "b".try_into().expect(womp!());
-    let b_kp = sig::KeyPair::gen_new();
-    let b_init = b_kp.sign(b_uid);
-    wa!(client.new_user(b_init));
-
-    let cid = ConversationId::gen_new();
-
-    let recip = Recip::One(SingleRecip::Group(cid));
-
-    assert!(wa!(client.add_to_pending_and_get_valid_devs(&recip, &push)).no_recips());
-
-    wa!(client.init_group(a_uid, cid));
-    wa!(client.add_to_group(a_uid, iter(vec![b_uid]), cid));
-
-    let devs = match wa!(client.add_to_pending_and_get_valid_devs(&recip, &push)) {
-        PushedTo::PushedTo { devs, .. } => {
-            assert_eq!(&devs, &[*b_kp.public_key()]);
-            devs
-        }
-        _ => panic!(),
-    };
-
-    check_pending(&mut client, &push, devs).await;
-}
-
-#[tokio::test]
-#[serial]
 async fn many_keys() {
     let mut client = wa!(get_client());
 
@@ -239,80 +205,6 @@ async fn many_users() {
         client.new_user(c_init).await.expect(womp!()),
         ServeEvent::Success
     );
-
-    let devs = match wa!(client.add_to_pending_and_get_valid_devs(&recip, &push)) {
-        PushedTo::PushedTo { devs, .. } => {
-            same_devs(&devs, &keys);
-            devs
-        }
-        _ => panic!(),
-    };
-
-    check_pending(&mut client, &push, devs).await;
-}
-
-#[tokio::test]
-#[serial]
-async fn many_groups() {
-    use futures::stream::iter;
-    let mut client = wa!(get_client());
-    let (push, a_uid, a_kp) = setup();
-    let a_init = a_kp.sign(a_uid);
-    assert_eq!(
-        client.new_user(a_init).await.expect(womp!()),
-        ServeEvent::Success
-    );
-
-    let b_uid: UserId = "b".try_into().expect(womp!());
-
-    let b_kp = sig::KeyPair::gen_new();
-    let b_init = b_kp.sign(b_uid);
-    assert_eq!(
-        client.new_user(b_init).await.expect(womp!()),
-        ServeEvent::Success
-    );
-
-    let c_uid: UserId = "c".try_into().expect(womp!());
-    let c_kp = sig::KeyPair::gen_new();
-    let c_init = c_kp.sign(c_uid);
-    assert_eq!(
-        client.new_user(c_init).await.expect(womp!()),
-        ServeEvent::Success
-    );
-
-    let d_uid: UserId = "d".try_into().expect(womp!());
-    let d_kp = sig::KeyPair::gen_new();
-    let d_init = d_kp.sign(d_uid);
-    assert_eq!(
-        client.new_user(d_init).await.expect(womp!()),
-        ServeEvent::Success
-    );
-
-    let cid1 = ConversationId::gen_new();
-    let cid2 = ConversationId::gen_new();
-
-    let uids1 = vec![b_uid, c_uid];
-    let uids2 = vec![d_uid];
-
-    let cids = vec![cid1, cid2];
-
-    let recip = Recip::Many(Recips::Groups(cids.clone()));
-
-    match wa!(client.add_to_pending_and_get_valid_devs(&recip, &push)) {
-        PushedTo::PushedTo { devs, .. } => assert!(devs.is_empty()),
-        _ => panic!(),
-    };
-
-    wa!(client.init_group(a_uid, cid1));
-    wa!(client.init_group(a_uid, cid2));
-
-    wa!(client.add_to_group(a_uid, iter(uids1.clone()), cid1));
-    wa!(client.add_to_group(a_uid, iter(uids2.clone()), cid2));
-
-    let keys = [b_kp, c_kp, d_kp]
-        .iter()
-        .map(|k| *k.public_key())
-        .collect::<Vec<_>>();
 
     let devs = match wa!(client.add_to_pending_and_get_valid_devs(&recip, &push)) {
         PushedTo::PushedTo { devs, .. } => {

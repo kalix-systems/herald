@@ -40,6 +40,8 @@ ApplicationWindow {
         }
     }
 
+
+
     Loader {
         id: appLoader
         active: Herald.configInit

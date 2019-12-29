@@ -5,13 +5,10 @@ import LibHerald 1.0
 import "../Common" as Common
 
 Page {
+    id: chatPage
     //swappable message model, set by the appstate
     property Messages ownedMessages
     property string headerTitle
-
-    header: ChatViewHeader {
-        title: headerTitle
-    }
 
     background: Rectangle {
         color: CmnCfg.palette.white
@@ -21,8 +18,16 @@ Page {
         id: chatScrollView
         clip: true
         contentWidth: parent.width
+        height: chatPage.height - chatTextArea.height
         topPadding: CmnCfg.smallMargin
         bottomPadding: CmnCfg.smallMargin
+
+        anchors {
+            top: parent.top
+            right: parent.right
+            left: parent.left
+        }
+
         ScrollBar.vertical: ScrollBar {
             id: scrollControl
         }
@@ -31,13 +36,6 @@ Page {
             messageListModel: ownedMessages
             width: parent.width
             anchors.top: parent.top
-        }
-
-        anchors {
-            top: parent.top
-            right: parent.right
-            left: parent.left
-            bottom: chatTextArea.top
         }
 
         Connections {
@@ -55,10 +53,12 @@ Page {
 
     ChatTextArea {
         id: chatTextArea
+        chatName: headerTitle
+        property bool risen: false
         anchors {
-            bottom: parent.bottom
             right: parent.right
             left: parent.left
+            top: chatScrollView.bottom
         }
     }
 }

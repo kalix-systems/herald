@@ -48,7 +48,7 @@ Rectangle {
             text: currentItem
             anchors.verticalCenter: parent.verticalCenter
             font.family: CmnCfg.labelFont.name
-            font.pixelSize: CmnCfg.headerSize
+            font.pixelSize: CmnCfg.headerFontSize
         }
 
         //TODO: use an SVG image here

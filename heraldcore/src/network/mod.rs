@@ -42,6 +42,19 @@ pub enum Notification {
     NewMsg(Box<message::Message>),
     /// A message has been received.
     MsgReceipt(message::MessageReceipt),
+    /// A message reaction has been received
+    Reaction {
+        /// Conversation id
+        cid: ConversationId,
+        /// Message being reacted to
+        msg_id: MsgId,
+        /// The user that reacted
+        reactionary: UserId,
+        /// The content of the react
+        content: message::ReactContent,
+        /// Is this reaction update an addition or a removal?
+        remove: bool,
+    },
     /// A new user has been added
     NewUser(Box<(coretypes::user::User, ConversationMeta)>),
     /// A new conversation has been added
@@ -93,6 +106,20 @@ pub fn register(
     Ok(res)
 }
 
+/// Sends a message read receipt
+pub fn send_read_receipt(
+    cid: ConversationId,
+    msg_id: MsgId,
+) -> Result<(), HErr> {
+    send_cmessage(
+        cid,
+        &ConversationMessage::Receipt(cmessages::Receipt {
+            of: msg_id,
+            stat: MessageReceiptStatus::Read,
+        }),
+    )
+}
+
 /// Sends a user request to `uid` with a proposed conversation id `cid`.
 pub fn send_user_req(
     uid: UserId,
@@ -113,6 +140,35 @@ pub(crate) fn send_normal_message(
     send_cmessage(cid, &ConversationMessage::Msg(msg))
 }
 
+/// Sends a reaction
+pub fn send_reaction(
+    cid: ConversationId,
+    msg_id: MsgId,
+    react_content: crate::message::ReactContent,
+) -> Result<(), HErr> {
+    send_cmessage(
+        cid,
+        &ConversationMessage::Reaction(cmessages::Reaction::Add {
+            msg_id,
+            react_content,
+        }),
+    )
+}
+
+/// Sends a reaction removal update
+pub fn send_reaction_removal(
+    cid: ConversationId,
+    msg_id: MsgId,
+    react_content: crate::message::ReactContent,
+) -> Result<(), HErr> {
+    send_cmessage(
+        cid,
+        &ConversationMessage::Reaction(cmessages::Reaction::Remove {
+            msg_id,
+            react_content,
+        }),
+    )
+}
 pub(crate) fn send_conversation_settings_update(
     cid: ConversationId,
     update: settings::SettingsUpdate,

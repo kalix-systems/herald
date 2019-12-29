@@ -26,7 +26,7 @@ ScrollView {
             delegate: RowLayout {
                 clip: true
                 spacing: CmnCfg.microMargin
-                Imports.ButtonForm {
+                Imports.IconButton {
                     id: clearFile
                     source: "qrc:/x-icon.svg"
                     Layout.alignment: Qt.AlignVCenter

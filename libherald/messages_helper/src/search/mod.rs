@@ -136,11 +136,11 @@ impl SearchState {
         Ok(())
     }
 
-    pub fn initial_next_index(&self) -> usize {
-        self.start_index.unwrap_or(0)
+    pub fn initial_prev_index(&self) -> usize {
+        self.start_index.unwrap_or(1)
     }
 
-    pub fn initial_prev_index(&self) -> usize {
+    pub fn initial_next_index(&self) -> usize {
         self.start_index
             .unwrap_or_else(|| self.num_matches().saturating_sub(1))
     }
@@ -150,7 +150,7 @@ impl SearchState {
         self.matches.get(ix).copied()
     }
 
-    pub fn next_match(&mut self) -> Option<Match> {
+    pub fn prev_match(&mut self) -> Option<Match> {
         if self.active.not() {
             return None;
         }
@@ -171,7 +171,7 @@ impl SearchState {
         }
     }
 
-    pub fn prev_match(&mut self) -> Option<Match> {
+    pub fn next_match(&mut self) -> Option<Match> {
         if self.active.not() {
             return None;
         }
@@ -250,14 +250,15 @@ impl SearchState {
         mut num_matches_changed: N,
         mut data_changed: D,
     ) -> Option<()> {
+        // early return if search is inactive or message doesn't match
         if self.active.not() || self.msg_matches(&msg_id)?.not() {
             return Some(());
         }
 
         let message = from_msg_id(msg_id)?;
-        let ix = self.index;
+        let focus_ix = self.index;
 
-        let pos = if self
+        let match_pos = if self
             .matches
             .last()
             .map(|Match(last)| last.insertion_time)
@@ -266,25 +267,33 @@ impl SearchState {
         {
             self.matches.len()
         } else {
-            match container.binary_search(&message) {
+            match self.matches.binary_search(&Match(message)) {
                 Ok(_) => {
+                    // early return if already matched
                     return Some(());
                 }
                 Err(ix) => ix,
             }
         };
 
-        self.matches.insert(pos, Match(message));
-
-        container.list.get_mut(pos)?.match_status = MatchStatus::Matched;
-
-        data_changed(pos);
+        // insertion into matches
+        self.matches.insert(match_pos, Match(message));
         num_matches_changed();
 
-        if let Some(ix) = ix {
-            if (0..=ix).contains(&pos) {
-                self.index.replace((ix + 1) % self.matches.len());
-                data_changed(model_ix);
+        // update match status
+        container.list.get_mut(model_ix)?.match_status = MatchStatus::Matched;
+        data_changed(model_ix);
+
+        if let Some(focus_ix) = focus_ix {
+            // if the match was in the first part, adjust the focus
+            if (0..=focus_ix).contains(&match_pos) {
+                let new_focus_ix = (focus_ix + 1) % self.matches.len();
+                self.index.replace(new_focus_ix);
+
+                let Match(MessageMeta { msg_id, .. }) = self.matches.get(new_focus_ix)?;
+                let model_focused_ix = container.index_by_id(*msg_id)?;
+
+                data_changed(model_focused_ix);
             }
         }
 

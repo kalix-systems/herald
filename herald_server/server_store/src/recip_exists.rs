@@ -13,17 +13,6 @@ impl Conn {
         }
     }
 
-    async fn one_group_exists(
-        &mut self,
-        cid: &ConversationId,
-    ) -> Res<bool> {
-        let stmt = self
-            .prepare_typed(sql!("group_exists"), types![BYTEA])
-            .await?;
-
-        Ok(self.query_one(&stmt, params![cid.as_slice()]).await?.get(0))
-    }
-
     async fn one_user_exists(
         &mut self,
         uid: &UserId,
@@ -54,30 +43,9 @@ impl Conn {
     ) -> Res<bool> {
         use SingleRecip::*;
         match single {
-            Group(ref cid) => self.one_group_exists(cid).await,
             User(ref uid) => self.one_user_exists(uid).await,
             Key(ref key) => self.one_key_exists(key).await,
         }
-    }
-
-    async fn many_groups_exist(
-        &mut self,
-        cids: Vec<ConversationId>,
-    ) -> Res<bool> {
-        let stmt = self
-            .prepare_typed(sql!("group_exists"), types![BYTEA])
-            .await?;
-
-        for cid in cids {
-            let cid_slice = cid.as_slice();
-            let row = self.query_one(&stmt, params![cid_slice]).await?;
-
-            if !row.get::<_, bool>(0) {
-                return Ok(false);
-            }
-        }
-
-        Ok(true)
     }
 
     async fn many_users_exist(
@@ -128,7 +96,6 @@ impl Conn {
         use Recips::*;
 
         match many {
-            Groups(cids) => self.many_groups_exist(cids).await,
             Users(uids) => self.many_users_exist(uids).await,
             Keys(keys) => self.many_keys_exist(keys).await,
         }
@@ -154,10 +121,6 @@ mod tests {
         let kp = sig::KeyPair::gen_new();
         assert!(!wa!(client.one_key_exists(kp.public_key())));
         assert!(!wa!(client.many_keys_exist(vec![*kp.public_key()])));
-
-        let cid = ConversationId::gen_new();
-        assert!(!wa!(client.one_group_exists(&cid)));
-        assert!(!wa!(client.many_groups_exist(vec![cid])));
 
         let uid = "a".try_into().expect(womp!());
         assert!(!wa!(client.one_user_exists(&uid)));
@@ -209,58 +172,5 @@ mod tests {
 
         let c_kp = sig::KeyPair::gen_new();
         assert!(!wa!(client.one_key_exists(c_kp.public_key())));
-    }
-
-    #[tokio::test]
-    #[serial]
-    async fn groups() {
-        use futures::stream::iter;
-        let mut client = wa!(get_client());
-
-        let a_uid: UserId = "a".try_into().expect(womp!());
-        let a_kp = sig::KeyPair::gen_new();
-        let a_init = a_kp.sign(a_uid);
-        wa!(client.new_user(a_init));
-
-        let b_uid: UserId = "b".try_into().expect(womp!());
-        let b_kp = sig::KeyPair::gen_new();
-        let b_init = b_kp.sign(b_uid);
-        wa!(client.new_user(b_init));
-
-        let c_uid: UserId = "c".try_into().expect(womp!());
-
-        let c_kp = sig::KeyPair::gen_new();
-        let c_init = c_kp.sign(c_uid);
-        wa!(client.new_user(c_init));
-
-        let cid1 = ConversationId::gen_new();
-
-        let uids = vec![a_uid, b_uid, c_uid];
-
-        assert_eq!(
-            wa!(client.init_group(a_uid, cid1)),
-            init_group::Res::Success
-        );
-
-        assert_eq!(
-            wa!(client.add_to_group(a_uid, iter(uids.clone()), cid1)),
-            add_to_group::Res::Success
-        );
-
-        assert!(wa!(client.one_group_exists(&cid1)));
-
-        let cid2 = ConversationId::gen_new();
-
-        assert_eq!(
-            wa!(client.init_group(a_uid, cid2)),
-            init_group::Res::Success
-        );
-
-        assert_eq!(
-            wa!(client.add_to_group(a_uid, iter(uids.clone()), cid2)),
-            add_to_group::Res::Success
-        );
-
-        assert!(wa!(client.many_groups_exist(vec![cid1, cid2])));
     }
 }

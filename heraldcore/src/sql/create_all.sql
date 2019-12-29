@@ -7,6 +7,8 @@ CREATE TABLE IF NOT EXISTS messages (
   conversation_id BLOB NOT NULL,
   -- text of message
   body TEXT,
+  -- message history update
+  update_item BLOB,
   -- timestamp associated with message
   insertion_ts INTEGER NOT NULL,
   -- timestamp the message was inserted into the database
@@ -34,6 +36,21 @@ CREATE TABLE IF NOT EXISTS read_receipts (
 );
 
 CREATE INDEX IF NOT EXISTS msg_id_receipt_ix ON read_receipts(msg_id);
+
+CREATE TABLE IF NOT EXISTS message_reactions (
+  -- message id reacts is associated with
+  msg_id BLOB NOT NULL,
+  -- user id of the user that sent the reacts
+  reactionary TEXT NOT NULL,
+  -- text of the reacts
+  react_content TEXT NOT NULL,
+  -- time react was received
+  insertion_ts INTEGER NOT NULL,
+  PRIMARY KEY(msg_id, reactionary, react_content),
+  FOREIGN KEY(msg_id) REFERENCES messages(msg_id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS msg_id_react_ix ON read_receipts(msg_id);
 
 CREATE TABLE IF NOT EXISTS replies (
   -- message id
@@ -153,5 +170,7 @@ CREATE TABLE IF NOT EXISTS conversations (
   -- Duration in milliseconds until a message in this conversation expires.
   expiration_period INTEGER DEFAULT NULL,
   -- Time of last important activity
-  last_active_ts INTEGER NOT NULL
+  last_active_ts INTEGER NOT NULL,
+  -- conversation status
+  status BLOB NOT NULL
 );

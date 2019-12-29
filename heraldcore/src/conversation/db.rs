@@ -1,5 +1,5 @@
 use super::*;
-use crate::message::MessageTime;
+use crate::message::{Item as MsgItem, MessageBody, MessageTime, Update as UpdateMsg};
 use crate::w;
 use rusqlite::named_params;
 
@@ -30,6 +30,7 @@ pub(crate) fn conversation_messages(
             let receipts = crate::message::db::get_receipts(conn, &message_id)?;
             let replies = crate::message::db::replies(conn, &message_id)?;
             let attachments = crate::message::attachments::db::get(conn, &message_id)?;
+            let reactions = crate::message::db::reactions(conn, &message_id)?;
 
             let time = MessageTime {
                 insertion: row.get("insertion_ts")?,
@@ -42,17 +43,22 @@ pub(crate) fn conversation_messages(
 
             let op = (op, is_reply).into();
 
+            let body: Option<MessageBody> = row.get("body")?;
+            let update: Option<UpdateMsg> = row.get("update_item")?;
+            let content = MsgItem::from_parts(body, update);
+
             Ok(Message {
                 message_id,
                 author: row.get("author")?,
                 conversation: *conversation_id,
-                body: row.get("body")?,
+                content,
                 op,
                 time,
                 send_status: row.get("send_status")?,
                 attachments,
                 receipts,
                 replies,
+                reactions,
             })
         },
     ));
@@ -154,9 +160,22 @@ pub(crate) fn set_muted(
     conversation_id: &ConversationId,
     muted: bool,
 ) -> Result<(), HErr> {
-    w!(conn.execute(
+    w!(conn.execute_named(
         include_str!("sql/update_muted.sql"),
-        params![muted, conversation_id],
+        named_params!["@muted": muted, "@conversation_id": conversation_id],
+    ));
+    Ok(())
+}
+
+/// Sets archive status of a conversation
+pub(crate) fn set_status(
+    conn: &rusqlite::Connection,
+    conversation_id: &ConversationId,
+    status: Status,
+) -> Result<(), HErr> {
+    w!(conn.execute(
+        include_str!("sql/update_status.sql"),
+        params![status, conversation_id],
     ));
     Ok(())
 }
@@ -253,5 +272,6 @@ fn from_db(row: &rusqlite::Row) -> Result<ConversationMeta, rusqlite::Error> {
         pairwise: row.get("pairwise")?,
         last_active: row.get("last_active_ts")?,
         expiration_period: row.get("expiration_period")?,
+        status: row.get("status")?,
     })
 }

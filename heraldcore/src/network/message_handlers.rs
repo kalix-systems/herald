@@ -90,11 +90,11 @@ pub(super) fn handle_cmessage(
             }
             ev.replies.push((cid, form_ack(mid)?));
         }
-        Ack(ack) => {
-            let cmessages::Ack {
+        Receipt(receipt) => {
+            let cmessages::Receipt {
                 of: msg_id,
                 stat: status,
-            } = ack;
+            } = receipt;
 
             crate::message::add_receipt(msg_id, uid, status)?;
             ev.notifications
@@ -104,6 +104,32 @@ pub(super) fn handle_cmessage(
                     recipient: uid,
                     status,
                 }));
+        }
+        Reaction(cmessages::Reaction::Add {
+            react_content,
+            msg_id,
+        }) => {
+            crate::message::add_reaction(&msg_id, &uid, &react_content)?;
+            ev.notifications.push(Notification::Reaction {
+                cid,
+                msg_id,
+                reactionary: uid,
+                content: react_content,
+                remove: false,
+            });
+        }
+        Reaction(cmessages::Reaction::Remove {
+            react_content,
+            msg_id,
+        }) => {
+            crate::message::add_reaction(&msg_id, &uid, &react_content)?;
+            ev.notifications.push(Notification::Reaction {
+                cid,
+                msg_id,
+                reactionary: uid,
+                content: react_content,
+                remove: true,
+            });
         }
         Settings(update) => {
             conversation::settings::apply(&update, &cid)?;
@@ -148,7 +174,7 @@ pub(super) fn handle_dmessage(
 }
 
 fn form_ack(mid: MsgId) -> Result<ConversationMessage, HErr> {
-    Ok(ConversationMessage::Ack(cmessages::Ack {
+    Ok(ConversationMessage::Receipt(cmessages::Receipt {
         of: mid,
         stat: MessageReceiptStatus::Received,
     }))

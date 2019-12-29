@@ -340,6 +340,28 @@ fn pairwise_cids() {
 }
 
 #[test]
+fn conversation_set_expiration() {
+    let mut conn = Database::in_memory_with_config().expect(womp!());
+
+    let conv_id = ConversationId::from([0; 32]);
+
+    let mut conv = super::ConversationBuilder::new();
+    conv.conversation_id(conv_id);
+
+    conv.add_db(&mut conn)
+        .expect(womp!("Failed to add conversation"));
+
+    let meta = super::db::meta(&conn, &conv_id).expect(womp!("Failed to get metadata"));
+    assert_eq!(meta.expiration_period, ExpirationPeriod::OneYear);
+
+    super::db::set_expiration_period(&conn, &conv_id, ExpirationPeriod::ThirtySeconds)
+        .expect(womp!("Failed to set expiration period"));
+
+    let meta = super::db::meta(&conn, &conv_id).expect(womp!("Failed to get metadata"));
+    assert_eq!(meta.expiration_period, ExpirationPeriod::ThirtySeconds);
+}
+
+#[test]
 fn conversation_order() {
     let mut conn = Database::in_memory_with_config().expect(womp!());
     // this is our time resolution

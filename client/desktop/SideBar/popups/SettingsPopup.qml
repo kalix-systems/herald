@@ -38,9 +38,9 @@ Window {
 
             Label {
                 id: label
-                text: qsTr("Settings")
+                text: qsTr("General settings")
                 color: CmnCfg.palette.white
-                font.pixelSize: CmnCfg.headerSize
+                font.pixelSize: CmnCfg.headerFontSize
                 font.family: CmnCfg.labelFont.name
                 font.weight: Font.DemiBold
                 anchors.verticalCenter: parent.verticalCenter
@@ -58,6 +58,9 @@ Window {
 
         ListModel {
             id: settingsModel
+            ListElement {
+                name: qsTr("Profile information")
+            }
             ListElement {
                 name: qsTr("Notifications")
             }
@@ -133,6 +136,11 @@ Window {
                     anchors.left: parent.left
                     SetsComps.SettingsListItem {
                         id: notifications
+                        headerText: qsTr("Profile information")
+                        settingsContent: SetsComps.Profile {}
+                    }
+                    SetsComps.SettingsListItem {
+                        id: profile
                         headerText: qsTr("Notifications")
                         settingsContent: SetsComps.Notifications {}
                     }

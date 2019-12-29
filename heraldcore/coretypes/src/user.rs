@@ -15,9 +15,7 @@ impl std::fmt::Display for Error {
     ) -> std::fmt::Result {
         use Error::*;
         match self {
-            UnknownStatus(n) => {
-                write!(out, "Unknown user status: found {}, expected 0, 1, or 2", n)
-            }
+            UnknownStatus(n) => write!(out, "Unknown user status: found {}, expected 0 or 1", n),
             UnknownUserType(n) => write!(out, "Unknown user type: found {}, expected 0 or 1", n),
         }
     }
@@ -80,10 +78,8 @@ impl User {
 pub enum UserStatus {
     /// The user is active
     Active = 0,
-    /// The user is archived
-    Archived = 1,
     /// The user is deleted
-    Deleted = 2,
+    Deleted = 1,
 }
 
 #[derive(Clone, Copy, PartialEq, Debug)]
@@ -161,8 +157,7 @@ impl std::convert::TryFrom<u8> for UserStatus {
         use UserStatus::*;
         match n {
             0 => Ok(Active),
-            1 => Ok(Archived),
-            2 => Ok(Deleted),
+            1 => Ok(Deleted),
             unknown => Err(Error::UnknownStatus(unknown as i64)),
         }
     }
@@ -175,8 +170,7 @@ impl std::convert::TryFrom<i64> for UserStatus {
         use UserStatus::*;
         match n {
             0 => Ok(Active),
-            1 => Ok(Archived),
-            2 => Ok(Deleted),
+            1 => Ok(Deleted),
             unknown => Err(Error::UnknownStatus(unknown)),
         }
     }

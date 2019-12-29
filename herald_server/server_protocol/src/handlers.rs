@@ -83,34 +83,6 @@ impl State {
             .collect())
     }
 
-    // FIXME: verify that user adding to group is part of the group
-    // TODO: send push to users in group
-    pub async fn add_to_group(
-        &self,
-        requester: UserId,
-        cid: ConversationId,
-        users: Vec<UserId>,
-    ) -> Result<add_to_group::Res, Error> {
-        Ok(self
-            .new_connection()
-            .await?
-            .add_to_group(requester, stream::iter(users), cid)
-            .await?)
-    }
-
-    // TODO: send push to users in group
-    pub async fn leave_groups(
-        &self,
-        requester: UserId,
-        convs: Vec<ConversationId>,
-    ) -> Result<leave_groups::Res, Error> {
-        Ok(self
-            .new_connection()
-            .await?
-            .leave_groups(requester, stream::iter(convs))
-            .await?)
-    }
-
     // FIXME: check that a user is part of a group before they push to it
     pub async fn send_push(
         &self,

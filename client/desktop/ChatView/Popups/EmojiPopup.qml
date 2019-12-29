@@ -7,13 +7,18 @@ Loader {
     id: emoKeysPopup
     clip: true
     active: false
+    property bool isReactPopup: false
     sourceComponent: EK.EmojiPicker {
         id: emojiPicker
         z: exit.z + 2
         window: convWindow
         Component.onCompleted: {
             emojiPicker.send.connect(function (emoji) {
-                JS.appendToTextArea(emoji, chatTextArea.chatText)
+                if (!isReactPopup) {
+                    JS.appendToTextArea(emoji, chatTextArea.chatText)
+                } else {
+                    ownedConversation.addReaction(index, emoji)
+                }
             })
         }
         MouseArea {

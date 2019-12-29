@@ -33,7 +33,7 @@ fn delete_get_message() {
 
     let message = db::get_message(&conn, &msg_id).expect(womp!("unable to get message"));
 
-    assert_eq!(message.body.expect(womp!()).as_str(), "hi");
+    assert_eq!(message.text().expect(womp!()), "hi");
 
     db::delete_message(&conn, &msg_id).expect(womp!("failed to delete message"));
 
@@ -62,6 +62,40 @@ fn message_meta() {
     let meta = db::message_meta(&conn, &msg_id).expect(womp!("unable to get message"));
 
     assert_eq!(stored_meta.time.insertion, meta.insertion_time);
+}
+
+#[test]
+fn reaction() {
+    let mut conn = Database::in_memory_with_config().expect(womp!());
+
+    let receiver = crate::user::db::test_user(&mut conn, "receiver");
+
+    let conv = receiver.pairwise_conversation;
+
+    let mut builder = InboundMessageBuilder::default();
+    let msg_id = [0; 32].into();
+    builder
+        .id(msg_id)
+        .author(receiver.id)
+        .conversation_id(conv)
+        .timestamp(Time::now())
+        .body("hi".try_into().expect(womp!()));
+
+    builder.store_db(&mut conn).expect(womp!()).expect(womp!());
+
+    assert!(db::reactions(&conn, &msg_id).expect(womp!()).is_none());
+
+    db::add_reaction(&conn, &msg_id, &receiver.id, "++").expect(womp!());
+
+    let reactions = db::reactions(&conn, &msg_id)
+        .expect(womp!())
+        .expect(womp!());
+    assert_eq!(reactions.content.len(), 1);
+
+    db::remove_reaction(&conn, &msg_id, &receiver.id, "++").expect(womp!());
+
+    let reactions = db::reactions(&conn, &msg_id).expect(womp!());
+    assert!(reactions.is_none());
 }
 
 #[test]
@@ -163,10 +197,8 @@ fn message_send_status_updates() {
 
     assert_eq!(
         by_send_status(MessageSendStatus::Ack).expect(womp!())[0]
-            .body
-            .as_ref()
-            .expect(womp!())
-            .as_str(),
+            .text()
+            .expect(womp!()),
         "test"
     );
 
@@ -286,4 +318,37 @@ fn delete_op() {
     let msg = db::get_message(&conn, &mid1).expect(womp!());
 
     assert!(msg.op.is_dangling());
+}
+
+#[test]
+fn add_delete_reaction() {
+    let mut conn = Database::in_memory_with_config().expect(womp!());
+    let mid = [0; 32].into();
+    let author = crate::user::db::test_user(&mut conn, "author");
+
+    let conv = author.pairwise_conversation;
+    let mut builder = InboundMessageBuilder::default();
+
+    builder
+        .id(mid)
+        .author(author.id)
+        .conversation_id(conv)
+        .timestamp(Time::now())
+        .body("test".try_into().expect(womp!()));
+
+    builder.store_db(&mut conn).expect(womp!());
+
+    db::add_reaction(&conn, &mid, &author.id, ":)").expect(womp!("failed to add react"));
+
+    //make sure adding the same react from the same userdoes not get registered
+    db::add_reaction(&conn, &mid, &author.id, ":)".try_into().expect(womp!()))
+        .expect(womp!("failed to add react"));
+    let reacts = db::reactions(&conn, &mid).unwrap().expect(womp!());
+    assert_eq!(reacts.content[0].content, ":)");
+    assert_eq!(reacts.content.len(), 1);
+    assert_eq!(reacts.content[0].reactionaries[0], author.id);
+    db::remove_reaction(&conn, &mid, &author.id, ":)").expect(womp!("failed to delete react"));
+
+    let reacts = db::reactions(&conn, &mid).expect(womp!());
+    assert!(reacts.is_none());
 }

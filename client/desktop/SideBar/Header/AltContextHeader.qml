@@ -6,7 +6,7 @@ import "../../common" as Common
 import "qrc:/imports/js/utils.mjs" as Utils
 import "qrc:/imports" as Imports
 import "../../SideBar" as SideBar
-import "qrc:/imports/Avatar"
+import "qrc:/imports/Entity"
 import "../popups" as Popups
 import QtGraphicalEffects 1.0
 
@@ -22,12 +22,13 @@ Component {
             anchors {
                 left: parent.left
                 leftMargin: CmnCfg.smallMargin
-                 verticalCenter: parent.verticalCenter
+                verticalCenter: parent.verticalCenter
             }
             spacing: CmnCfg.defaultMargin
 
             HeaderAvatar {
                 anchors.verticalCenter: parent.verticalCenter
+                visible: sideBar.sideBarState.state !== "archivedState"
             }
 
             Text {
@@ -42,14 +43,12 @@ Component {
             }
         }
 
-
-        Imports.ButtonForm {
+        Imports.IconButton {
             anchors {
                 verticalCenter: parent.verticalCenter
                 right: parent.right
                 rightMargin: CmnCfg.smallMargin
             }
-
 
             id: xButton
             fill: CmnCfg.palette.lightGrey

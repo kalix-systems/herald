@@ -1,8 +1,9 @@
 use super::*;
-use crate::interface::MessagesTrait as Interface;
 use crate::push;
+use crate::{content_push, spawn};
 use heraldcore::{errors::HErr, message::Message as Msg, NE};
 use messages_helper::search::Match;
+pub use messages_helper::{container::*, types::*};
 
 impl Messages {
     pub(super) fn emit_last_changed(&mut self) {
@@ -90,8 +91,6 @@ impl Messages {
 
         let len = self.container.len();
 
-        let (was_tail, was_head) = (self.is_tail(ix), self.is_head(ix));
-
         self.model.begin_remove_rows(ix, ix);
         let data = self.container.remove(ix);
         self.model.end_remove_rows();
@@ -102,24 +101,23 @@ impl Messages {
                 .set_dangling(replies, |ix| model.data_changed(ix, ix));
         }
 
-        if was_tail.unwrap_or(false) && (ix > 0) {
+        if ix > 0 {
             self.entry_changed(ix - 1);
         }
 
-        if was_head.unwrap_or(false) && (ix < self.container.len()) {
-            self.entry_changed(ix);
+        if ix + 1 < self.container.len() {
+            self.entry_changed(ix + 1);
         }
 
         if len == 1 {
             self.emit.is_empty_changed();
         }
 
-        if ix + 1 == len {
+        if ix == 0 {
             self.emit_last_changed();
         }
     }
 
-    // FIXME: The flurry logic might not be sound here
     pub(super) fn insert_helper(
         &mut self,
         msg: Msg,
@@ -129,29 +127,8 @@ impl Messages {
         let cid = self.conversation_id.ok_or(NE!())?;
 
         let msg_id = message.msg_id;
-        let ix = if self
-            .container
-            .last()
-            .map(|last| last.insertion_time)
-            .unwrap_or(message.insertion_time)
-            <= message.insertion_time
-        {
-            self.container.len()
-        } else {
-            match self.container.binary_search(&message) {
-                Ok(_) => {
-                    return Ok(());
-                }
-                Err(ix) => ix,
-            }
-        };
 
-        let prev_state = if ix > 0 { self.is_tail(ix - 1) } else { None };
-
-        let succ_state = self.is_tail(ix);
-
-        self.container.insert(ix, message, data).ok_or(NE!())?;
-
+        let ix = self.container.insert_ord(message, data);
         self.model.begin_insert_rows(ix, ix);
         self.model.end_insert_rows();
 
@@ -167,7 +144,7 @@ impl Messages {
             );
         }
 
-        if ix + 1 == self.container.len() {
+        if ix == 0 {
             self.emit_last_changed();
         }
 
@@ -175,11 +152,11 @@ impl Messages {
             self.emit.is_empty_changed();
         }
 
-        if ix > 0 && prev_state != self.is_tail(ix - 1) {
+        if ix > 0 {
             self.entry_changed(ix - 1);
         }
 
-        if ix + 1 < self.container.len() && succ_state != self.is_tail(ix + 1) {
+        if ix + 1 < self.container.len() {
             self.entry_changed(ix + 1);
         }
 
@@ -208,6 +185,21 @@ impl Messages {
         self.conversation_id = Some(id);
         self.builder.set_conversation_id(id);
 
-        container::fill(id);
+        spawn!({
+            let list: Vec<MessageMeta> = err!(conversation::conversation_message_meta(&id));
+
+            let last = match list.last().as_ref() {
+                Some(MessageMeta { ref msg_id, .. }) => {
+                    let msg = err!(heraldcore::message::get_message(msg_id));
+                    Some(heraldcore::message::split_msg(msg).1)
+                }
+                None => None,
+            };
+
+            err!(content_push(
+                id,
+                MsgUpdate::Container(Box::new(Container::new(list, last)))
+            ));
+        });
     }
 }

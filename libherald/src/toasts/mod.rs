@@ -27,8 +27,8 @@ mod imp {
             .appname(super::DESKTOP_APP_NAME)
             .summary(&format!("New message from {}", msg.author));
 
-        if let Some(body) = &msg.body {
-            notif.body(body.as_str());
+        if let Some(body) = msg.text() {
+            notif.body(body);
         }
 
         drop(
@@ -50,8 +50,8 @@ mod imp {
 
             notif.summary(&format!("New message from {}", msg.author));
 
-            if let Some(body) = &msg.body {
-                notif.body(body.as_str());
+            if let Some(body) = msg.text() {
+                notif.body(body);
             }
 
             drop(notif.show());

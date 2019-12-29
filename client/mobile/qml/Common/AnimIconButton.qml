@@ -3,6 +3,7 @@ import QtQuick 2.12
 import QtQuick.Layouts 1.12
 import LibHerald 1.0
 
+// TODO this should use IconButton in foundation
 ToolButton {
 
     property var tapCallback: function anon() {
@@ -11,8 +12,8 @@ ToolButton {
     property string imageSource: ""
     property color color: CmnCfg.palette.iconMatte
 
-    property size iconSize: Qt.size(CmnCfg.iconSizes.smallMedium,
-                                    CmnCfg.iconSizes.smallMedium)
+    property size iconSize: Qt.size(CmnCfg.iconSize,
+                                    CmnCfg.iconSize)
     background: Rectangle {
         id: splash
         color: CmnCfg.palette.iconMatte

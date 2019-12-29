@@ -10,7 +10,9 @@ QtObject {
     //    readonly property color secondaryTextColor: "#676C6F"
     //    readonly property color activeTextColor: "light blue"
     //    readonly property color visitedColor: "purple"
-    //    readonly property color alertTextColor: "red"
+
+    // TODO "iconFill" is used for font colors a bunch (at least in mobile),
+    // rename something to indicate it's a default color for both icon & text
     readonly property color iconFill: "white"
     readonly property color iconMatte: "black"
     readonly property color borderColor: "black"
@@ -23,6 +25,7 @@ QtObject {
     property color highlightColor: "lightsteelblue"
     property color highlightedTextColor: "white"
     property color backgroundColor: "white"
+    readonly property color alertColor: "#C9404B"
 
     property color iconPressedFill: Qt.darker(iconFill, 1.4)
     property color iconPressedMatte: Qt.lighter(iconMatte, 1.4)
@@ -40,7 +43,5 @@ QtObject {
     //    property color tooltipTextColor: mainTextColor
     //    property color tooltipColor: tertiaryColor
 
-    //    property font defaultFont: fontMetrics.font
-    //    property font markdownFont: fontMetrics.font
     property var avatarColors: ["#9C2E38", "#ce8054", "#9da86f", "#7498a4", "#bfb35a", "#32a198", "#5e8c6a", "#729eb8", "#CB8C9D"]
 }
