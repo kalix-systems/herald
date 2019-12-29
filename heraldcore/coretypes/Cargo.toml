@@ -21,6 +21,9 @@ path = "../platform_dirs"
 [dependencies.herald_ids]
 path = "../herald_ids"
 
+[dependencies.herald_attachments]
+path = "../herald_attachments"
+
 [dependencies.image_utils]
 path = "../image_utils"
 

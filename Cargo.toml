@@ -11,6 +11,7 @@ members = [
   "heraldcore/chainkeys",
   "heraldcore/coremacros",
   "heraldcore/coretypes",
+  "heraldcore/herald_attachments",
   "heraldcore/herald_ids",
   "heraldcore/image_utils",
   "heraldcore/network_types",

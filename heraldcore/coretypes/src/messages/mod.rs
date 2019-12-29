@@ -1,4 +1,4 @@
-use crate::attachments::AttachmentMeta;
+use herald_attachments::AttachmentMeta;
 use herald_common::*;
 use herald_ids::*;
 use std::{
@@ -305,7 +305,7 @@ pub struct MsgData {
     pub time: MessageTime,
     pub op: ReplyId,
     pub receipts: HashMap<UserId, MessageReceiptStatus>,
-    pub attachments: crate::attachments::AttachmentMeta,
+    pub attachments: herald_attachments::AttachmentMeta,
     pub send_status: MessageSendStatus,
     pub replies: HashSet<MsgId>,
     pub reactions: Option<Reactions>,
@@ -339,7 +339,7 @@ impl MsgData {
     pub fn save_all_attachments<P: AsRef<std::path::Path>>(
         &self,
         dest: P,
-    ) -> Result<(), crate::attachments::Error> {
+    ) -> Result<(), herald_attachments::Error> {
         let ext = format!(
             "{author}_{time}",
             author = self.author,

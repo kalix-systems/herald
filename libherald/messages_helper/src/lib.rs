@@ -5,7 +5,7 @@ pub mod search;
 pub mod types;
 
 pub fn media_attachments_json(
-    attachments: &heraldcore::message::attachments::AttachmentMeta,
+    attachments: &herald_attachments::AttachmentMeta,
     limit: Option<usize>,
 ) -> Option<String> {
     if attachments.is_empty() {
@@ -22,7 +22,7 @@ pub fn media_attachments_json(
 }
 
 pub fn doc_attachments_json(
-    attachments: &heraldcore::message::attachments::AttachmentMeta,
+    attachments: &herald_attachments::AttachmentMeta,
     limit: Option<usize>,
 ) -> Option<String> {
     if attachments.is_empty() {

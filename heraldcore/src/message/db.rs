@@ -1,5 +1,7 @@
 use super::*;
-use crate::{conversation::db::expiration_period, message::MessageTime, w};
+use crate::{conversation::db::expiration_period, message::MessageTime};
+use coremacros::w;
+use herald_attachments::Attachment;
 use rusqlite::{named_params, Connection as Conn};
 use std::collections::HashSet;
 

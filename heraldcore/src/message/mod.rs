@@ -9,7 +9,6 @@ pub mod attachments;
 pub(crate) mod db;
 /// Runs message garbage collection tasks such as removing expired messages
 pub mod gc;
-use attachments::*;
 pub use coretypes::messages::*;
 mod builder;
 pub use builder::*;

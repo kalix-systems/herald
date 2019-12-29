@@ -47,7 +47,7 @@ pub enum HErr {
     /// Malformed path
     BadPath(std::ffi::OsString),
     /// Attachments error
-    Attachment(coretypes::attachments::Error),
+    Attachment(herald_attachments::Error),
     /// An empty message body,
     EmptyMessageBody(EmptyMessageBody),
     /// Bad socket address
@@ -117,7 +117,7 @@ herr!(KsonError, KsonError);
 herr!(websocket::result::WebSocketError, WebsocketError);
 herr!(search_pattern::SearchPatternError, RegexError);
 herr!(std::ffi::OsString, BadPath);
-herr!(coretypes::attachments::Error, Attachment);
+herr!(herald_attachments::Error, Attachment);
 herr!(std::net::AddrParseError, BadSocketAddr);
 
 impl From<image_utils::ImageError> for HErr {

@@ -1,4 +1,5 @@
 use super::*;
+use herald_attachments::{Attachment, AttachmentMeta};
 use location::Location;
 
 #[derive(Default)]
@@ -104,7 +105,7 @@ pub(crate) struct InboundMessageBuilder {
     /// Message id of the message being replied to
     pub(crate) op: Option<MsgId>,
     /// Message attachments
-    pub(crate) attachments: Vec<attachments::Attachment>,
+    pub(crate) attachments: Vec<Attachment>,
 }
 
 impl InboundMessageBuilder {
@@ -160,7 +161,7 @@ impl InboundMessageBuilder {
 
     pub(crate) fn attachments(
         &mut self,
-        attachments: Vec<attachments::Attachment>,
+        attachments: Vec<Attachment>,
     ) -> &mut Self {
         self.attachments = attachments;
         self

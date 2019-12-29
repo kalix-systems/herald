@@ -1,9 +1,9 @@
 use channel_ratchet::*;
 use coretypes::{
-    attachments::Attachment,
     conversation,
     messages::{MessageBody, MessageReceiptStatus, ReactContent},
 };
+use herald_attachments::Attachment;
 use herald_common::*;
 use herald_ids::*;
 
