@@ -52,10 +52,6 @@ impl Interface for EmojiPicker {
         }
     }
 
-    fn fetch_more(&mut self) {
-        //never called
-    }
-
     fn emoji(
         &self,
         index: usize,
