@@ -155,6 +155,8 @@ impl super::Conversations {
         // FIXME exception safety
         let path = err!(conversation::set_picture(&cid, profile_picture));
 
+        self.model.data_changed(index, index);
+
         self.set_picture_inner(index, path);
     }
 
