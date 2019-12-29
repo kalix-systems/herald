@@ -156,14 +156,3 @@ macro_rules! NE {
         $crate::errors::HErr::NoneError(loc!())
     }};
 }
-
-#[macro_export]
-/// Convenience macro
-macro_rules! w {
-    ($maybe: expr) => {{
-        match $maybe {
-            Ok(val) => val,
-            Err(e) => return Err(e.into()),
-        }
-    }};
-}

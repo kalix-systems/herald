@@ -32,3 +32,6 @@ pub use platform_dirs::set_data_dir;
 #[cfg(test)]
 #[macro_use]
 extern crate coremacros;
+
+#[cfg(not(test))]
+use coremacros::w;
