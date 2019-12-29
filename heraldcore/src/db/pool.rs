@@ -1,5 +1,5 @@
 use super::*;
-use crate::w;
+use coremacros::w;
 use crossbeam_channel::{bounded, Receiver, Sender};
 use std::ops::{Deref, DerefMut, Drop};
 

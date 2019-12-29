@@ -56,7 +56,7 @@ pub enum Notification {
         remove: bool,
     },
     /// A new user has been added
-    NewUser(Box<(coretypes::user::User, ConversationMeta)>),
+    NewUser(Box<(herald_user::User, ConversationMeta)>),
     /// A new conversation has been added
     NewConversation(ConversationMeta),
     /// Response to user request.

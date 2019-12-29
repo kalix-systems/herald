@@ -4,10 +4,9 @@ use crate::{
     none, spawn,
 };
 use herald_common::UserId;
-use heraldcore::{
-    network,
-    user::{self, UserBuilder, UserStatus},
-};
+use herald_user::UserStatus;
+use heraldcore::network;
+use heraldcore::user::{self, UserBuilder};
 use search_pattern::SearchPattern;
 use std::convert::{TryFrom, TryInto};
 

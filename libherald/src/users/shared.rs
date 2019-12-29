@@ -1,6 +1,6 @@
 use herald_common::UserId;
+use herald_user as user;
 use heraldcore::types::ConversationId;
-use heraldcore::user;
 use once_cell::sync::OnceCell;
 use parking_lot::RwLock;
 use search_pattern::SearchPattern;
@@ -71,7 +71,7 @@ pub fn user_ids() -> Vec<UserId> {
 /// User list update
 pub enum UserUpdate {
     /// A new user has been added
-    NewUser(heraldcore::user::User),
+    NewUser(herald_user::User),
     /// A user request has been responded to
     ReqResp(UserId, bool),
     /// Data has changed for this user

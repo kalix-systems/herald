@@ -32,6 +32,9 @@ path = "./herald_ids"
 [dependencies.herald_attachments]
 path = "./herald_attachments"
 
+[dependencies.herald_user]
+path = "./herald_user"
+
 [dependencies.coremacros]
 path = "./coremacros"
 

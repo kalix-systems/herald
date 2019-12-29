@@ -23,6 +23,9 @@ path    = "../heraldcore"
 [dependencies.herald_attachments]
 path    = "../heraldcore/herald_attachments"
 
+[dependencies.herald_user]
+path    = "../heraldcore/herald_user"
+
 [dependencies.search_pattern]
 path    = "../search_pattern"
 

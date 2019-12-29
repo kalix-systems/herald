@@ -1,5 +1,5 @@
 use super::*;
-use crate::w;
+use coremacros::w;
 use coretypes::conversation::Conversation;
 use rusqlite::named_params;
 

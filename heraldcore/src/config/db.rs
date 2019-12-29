@@ -1,6 +1,6 @@
 use super::*;
 use crate::conversation::ExpirationPeriod;
-use crate::w;
+use coremacros::w;
 use rusqlite::named_params;
 use std::net::SocketAddr;
 

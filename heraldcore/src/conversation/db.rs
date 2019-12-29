@@ -1,6 +1,6 @@
 use super::*;
 use crate::message::{Item as MsgItem, MessageBody, MessageTime, Update as UpdateMsg};
-use crate::w;
+use coremacros::w;
 use rusqlite::named_params;
 
 /// Deletes all messages in a conversation.
