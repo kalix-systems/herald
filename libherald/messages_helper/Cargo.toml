@@ -21,13 +21,13 @@ path    = "../../heraldcore"
 path    = "../../heraldcore/coretypes"
 
 [dependencies.search_pattern]
-path    = "../../heraldcore/search_pattern"
+path    = "../../search_pattern"
 
 [dependencies.message_cache]
 path = "../message_cache"
 
 [dependencies.revec]
-path = "../revec"
+path = "../../revec"
 
 [dev-dependencies.coremacros]
 path = "../../heraldcore/coremacros"

@@ -33,10 +33,10 @@ path = "./coremacros"
 path = "./network_types"
 
 [dependencies.location]
-path = "./location"
+path = "../location"
 
 [dependencies.search_pattern]
-path = "./search_pattern"
+path = "../search_pattern"
 
 [dependencies.platform_dirs]
 path = "./platform_dirs"
