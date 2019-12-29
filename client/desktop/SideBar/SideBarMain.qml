@@ -65,14 +65,6 @@ Page {
         id: newContactComponent
     }
 
-    Component {
-
-        id: archiveViewComponent
-        Pane.ArchiveView {
-            model: Herald.conversations
-        }
-    }
-
     SideBarState {
         id: sideBarState
         anchors.fill: parent

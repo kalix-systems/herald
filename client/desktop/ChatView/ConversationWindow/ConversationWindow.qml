@@ -89,7 +89,10 @@ ListView {
         defaultWidth: chatListView.width
         width: parent.width
         messageModelData: model
-        ListView.onAdd: chatScrollBarInner.setPosition(1.0)
+        ListView.onAdd: {
+            chatScrollBarInner.setPosition(1.0)
+            conversationItem.status = 0
+        }
         bubbleIndex: index
 
         ChatBubbleHover {

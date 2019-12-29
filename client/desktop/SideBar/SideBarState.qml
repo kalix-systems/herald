@@ -58,17 +58,12 @@ Item {
             name: "archivedState"
             PropertyChanges {
                 target: headerLoader
-            }
-
-            PropertyChanges {
-                target: headerLoader
                 sourceComponent: altContextHeader
                 headerText: qsTr("Archive")
             }
-
             PropertyChanges {
                 target: sideBarPane.sideBarBodyLoader
-                sourceComponent: archiveViewComponent
+                archiveState: true
             }
         }
     ]

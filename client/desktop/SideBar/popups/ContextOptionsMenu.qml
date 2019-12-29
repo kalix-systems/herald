@@ -5,7 +5,9 @@ Menu {
 
     MenuItem {
         text: qsTr("Archived")
-        onTriggered: sideBar.sideBarState.state = "archivedState"
+        onTriggered: {
+            sideBar.sideBarState.state = "archivedState"
+        }
     }
 
     MenuItem {
