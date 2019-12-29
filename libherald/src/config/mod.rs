@@ -127,14 +127,8 @@ impl ConfigTrait for Config {
         picture_json: String,
     ) {
         spawn!({
-            let profile_picture = heraldcore::image_utils::ProfilePicture::from_json_string(
-                picture_json,
-            )
-            .and_then(|mut p| {
-                let stripped = crate::utils::strip_qrc(std::mem::take(&mut p.path))?;
-                p.path = stripped;
-                Some(p)
-            });
+            let profile_picture =
+                heraldcore::image_utils::ProfilePicture::from_json_string(picture_json);
 
             crate::push((
                 core::set_profile_picture(profile_picture).map(ConfUpdate::Picture),

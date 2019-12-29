@@ -147,14 +147,8 @@ impl ConversationBuilderTrait for ConversationBuilder {
         &mut self,
         picture_json: String,
     ) {
-        self.inner.picture = heraldcore::image_utils::ProfilePicture::from_json_string(
-            picture_json,
-        )
-        .and_then(|mut p| {
-            let stripped = crate::utils::strip_qrc(std::mem::take(&mut p.path))?;
-            p.path = stripped;
-            Some(p)
-        });
+        self.inner.picture =
+            heraldcore::image_utils::ProfilePicture::from_json_string(picture_json);
         self.emit.picture_changed();
     }
 

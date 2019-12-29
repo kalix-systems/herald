@@ -182,14 +182,8 @@ impl Interface for Users {
         let uid = none!(self.list.get(index)).id;
 
         spawn!({
-            let profile_picture = heraldcore::image_utils::ProfilePicture::from_json_string(
-                picture_json,
-            )
-            .and_then(|mut p| {
-                let stripped = crate::utils::strip_qrc(std::mem::take(&mut p.path))?;
-                p.path = stripped;
-                Some(p)
-            });
+            let profile_picture =
+                heraldcore::image_utils::ProfilePicture::from_json_string(picture_json);
 
             let path = err!(user::set_profile_picture(uid, profile_picture));
 

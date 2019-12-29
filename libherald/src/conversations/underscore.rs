@@ -149,14 +149,8 @@ impl super::Conversations {
 
         let cid = none!(self.id(index));
 
-        let profile_picture = heraldcore::image_utils::ProfilePicture::from_json_string(
-            picture_json,
-        )
-        .and_then(|mut p| {
-            let stripped = crate::utils::strip_qrc(std::mem::take(&mut p.path))?;
-            p.path = stripped;
-            Some(p)
-        });
+        let profile_picture =
+            heraldcore::image_utils::ProfilePicture::from_json_string(picture_json);
 
         // FIXME exception safety
         let path = err!(conversation::set_picture(&cid, profile_picture));
