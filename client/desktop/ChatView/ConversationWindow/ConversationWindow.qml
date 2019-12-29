@@ -161,7 +161,6 @@ ListView {
             }
         }
 
-        //TODO: this doesn't actually produce the desired behavior
         Component.onCompleted: {
             markReadLoader.active = true
         }

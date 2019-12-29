@@ -142,7 +142,7 @@ ColumnLayout {
                 "height": Math.round(parsed.height),
                 "x": 0,
                 "y": 0,
-                "path": fileUrl
+                "path": Herald.utils.stripUrlPrefix(fileUrl)
             }
 
             Herald.config.setProfilePicture(JSON.stringify(picture))
@@ -158,7 +158,6 @@ ColumnLayout {
         height: 1
         Layout.fillWidth: true
     }
-
 
     // TODO add location information
 }
