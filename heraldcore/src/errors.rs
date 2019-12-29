@@ -1,10 +1,10 @@
 use chainkeys::ChainKeysError;
 use coremacros::from_fn;
-use coretypes::{
-    ids::InvalidRandomIdLength,
-    messages::{EmptyMessageBody, MissingInboundMessageField, MissingOutboundMessageField},
+use coretypes::messages::{
+    EmptyMessageBody, MissingInboundMessageField, MissingOutboundMessageField,
 };
 use herald_common::*;
+use herald_ids::*;
 use location::Location;
 use std::fmt;
 

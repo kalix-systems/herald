@@ -1,5 +1,5 @@
 [package]
-name = "network_types"
+name = "herald_ids"
 version = "0.1.0"
 authors = ["Baeo Maltinsky <baeo.maltinsky@gmail.com>"]
 edition = "2018"
@@ -9,19 +9,10 @@ path             = "../../herald_common"
 default_features = false
 features         = ["rusqlite_"]
 
-[dependencies.channel_ratchet]
-path = "../../channel_ratchet"
-
-[dependencies.kson]
-path = "../../kson"
-
-[dependencies.coretypes]
-path = "../coretypes"
-
-[dependencies.herald_ids]
-path = "../herald_ids"
-
 [dependencies.rusqlite]
 version          = "0.21"
 default_features = false
-features         = ["bundled"]
+features         = ["functions", "bundled"]
+
+[dependencies.kson]
+path = "../../kson"

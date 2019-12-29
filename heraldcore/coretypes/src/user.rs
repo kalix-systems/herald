@@ -1,5 +1,5 @@
-use crate::ids::ConversationId;
 use herald_common::*;
+use herald_ids::ConversationId;
 use std::convert::TryInto;
 
 #[derive(Debug, Clone, Copy)]

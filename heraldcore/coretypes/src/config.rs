@@ -1,7 +1,7 @@
 use crate::*;
 use conversation::ExpirationPeriod;
 use herald_common::*;
-use ids::ConversationId;
+use herald_ids::ConversationId;
 use std::net::SocketAddr;
 
 /// User configuration

@@ -1,7 +1,7 @@
 use bytes::*;
 use coremacros::{exit_err, from_fn};
-use coretypes::ids::ConversationId;
 use herald_common::*;
+use herald_ids::ConversationId;
 use once_cell::sync::OnceCell;
 use parking_lot::Mutex;
 use platform_dirs::db_dir;

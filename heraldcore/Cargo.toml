@@ -26,6 +26,9 @@ path = "../channel_ratchet"
 [dependencies.coretypes]
 path = "./coretypes"
 
+[dependencies.herald_ids]
+path = "./herald_ids"
+
 [dependencies.coremacros]
 path = "./coremacros"
 

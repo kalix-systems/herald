@@ -18,6 +18,9 @@ features         = ["rusqlite_"]
 [dependencies.platform_dirs]
 path = "../platform_dirs"
 
+[dependencies.herald_ids]
+path = "../herald_ids"
+
 [dependencies.image_utils]
 path = "../image_utils"
 
