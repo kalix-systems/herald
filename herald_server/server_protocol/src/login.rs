@@ -50,15 +50,18 @@ impl State {
             Done(g) => Ok(Done(g)),
             Rejected => Err(anyhow!("login rejected")),
             AwaitClaim => {
-                let mut conn = self.new_connection().await?;
                 let did: sig::PublicKey = rx.read_de().await?;
+                let mut conn = self.new_connection().await?;
                 if !conn.key_is_valid(did).await? {
+                    drop(conn);
                     tx.write_ser(&ClaimResponse::KeyInvalid).await?;
                     Ok(AwaitClaim)
                 } else if let Some(uid) = conn.user_of(did).await? {
+                    drop(conn);
                     tx.write_ser(&ClaimResponse::Challenge).await?;
                     Ok(Challenge(GlobalId { uid, did }))
                 } else {
+                    drop(conn);
                     tx.write_ser(&ClaimResponse::MissingUID).await?;
                     Ok(AwaitClaim)
                 }
@@ -66,10 +69,14 @@ impl State {
             Challenge(g) => {
                 let challenge = UQ::gen_new();
                 tx.write_all(challenge.as_ref()).await?;
-                let sig = rx.read_de().await?;
+                let mut sigbuf = [0u8; kcl::sign::SIGNATURE_LEN];
+                rx.read_exact(&mut sigbuf).await?;
+                let sig = kcl::sign::Signature(sigbuf);
                 if g.did.verify(challenge.as_ref(), sig) {
+                    tx.write_ser(&ChallengeResult::Success).await?;
                     Ok(Done(g))
                 } else {
+                    tx.write_ser(&ChallengeResult::Failed).await?;
                     Ok(Rejected)
                 }
             }

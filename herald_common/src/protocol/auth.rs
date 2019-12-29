@@ -53,4 +53,10 @@ pub mod login_types {
         KeyInvalid,
         MissingUID,
     }
+
+    #[derive(Ser, De, Debug, Clone, Copy, PartialEq, Eq)]
+    pub enum ChallengeResult {
+        Success,
+        Failed,
+    }
 }

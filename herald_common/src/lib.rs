@@ -7,7 +7,7 @@ pub use types::*;
 mod time;
 pub use time::*;
 
-pub use kcl::random::UQ;
+pub use kcl::{self, random::UQ};
 pub use kson::{self, prelude::*};
 
 pub mod protocol;
