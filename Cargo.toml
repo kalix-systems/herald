@@ -21,8 +21,8 @@ members = [
   "libherald/message_cache",
   "libherald/messages_helper",
   "libherald/qt_bindgen",
-  "libherald/revec",
   "location",
+  "revec",
   "search_pattern"
 ]
 

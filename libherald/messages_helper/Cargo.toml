@@ -27,7 +27,7 @@ path    = "../../search_pattern"
 path = "../message_cache"
 
 [dependencies.revec]
-path = "../revec"
+path = "../../revec"
 
 [dev-dependencies.coremacros]
 path = "../../heraldcore/coremacros"
