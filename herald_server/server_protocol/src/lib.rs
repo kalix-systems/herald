@@ -117,6 +117,7 @@ impl State {
         while !unsent.is_empty() {
             let to_send = &unsent[..CATCHUP_CHUNK_SIZE];
 
+            tx.write_u8(0).await?;
             tx.write_ser(&KsonIterator::new(
                 to_send.iter().map(|(p, _): &(Push, i64)| p),
             ))
@@ -134,6 +135,8 @@ impl State {
 
             unsent = &unsent[CATCHUP_CHUNK_SIZE..];
         }
+
+        tx.write_u8(1).await?;
 
         Ok(())
     }

@@ -72,6 +72,58 @@ impl TestClient {
             receiver,
         ))
     }
+
+    async fn register<Tx: AsyncWrite + Send + Unpin, Rx: AsyncRead + Send + Unpin>(
+        my_uid: UserId,
+        my_keys: sig::KeyPair,
+        tx: &mut Framed<Tx>,
+        rx: &mut Framed<Rx>,
+    ) -> Result<(Self, Receiver<Push>), Error> {
+        use register::*;
+
+        tx.write_u8(REGISTER)
+            .await
+            .context("failed to write auth method")?;
+
+        tx.write_ser(&ClientEvent::Check(my_uid)).await?;
+        ensure!(
+            ServeEvent::Available == rx.read_de().await?,
+            "username taken"
+        );
+
+        let signed = my_keys.sign(my_uid);
+        tx.write_ser(&ClientEvent::Claim(signed)).await?;
+        ensure!(
+            ServeEvent::Success == rx.read_de().await?,
+            "registration failed"
+        );
+
+        let (sender, receiver) = channel();
+        Ok((
+            TestClient {
+                sender,
+                my_uid,
+                my_keys,
+            },
+            receiver,
+        ))
+    }
+
+    async fn catchup<Tx: AsyncWrite + Send + Unpin, Rx: AsyncRead + Send + Unpin>(
+        &self,
+        tx: &mut Framed<Tx>,
+        rx: &mut Framed<Rx>,
+    ) -> Result<(), Error> {
+        while rx.read_u8().await? == 0 {
+            let pushes: Vec<Push> = rx.read_de().await?;
+            for push in pushes {
+                self.sender.send(push)?;
+            }
+            tx.write_u8(1).await?;
+        }
+
+        Ok(())
+    }
 }
 
 enum ClientInit {
@@ -88,7 +140,15 @@ impl KrpcClient<HeraldProtocol> for TestClient {
         tx: &mut Framed<Tx>,
         rx: &mut Framed<Rx>,
     ) -> Result<Self, Error> {
-        todo!()
+        // TODO: something with _recv
+        let (this, _recv) = match info {
+            ClientInit::Reg(uid, keys) => TestClient::register(uid, keys, tx, rx).await?,
+            ClientInit::Login(uid, keys) => TestClient::login(uid, keys, tx, rx).await?,
+        };
+
+        this.catchup(tx, rx).await?;
+
+        Ok(this)
     }
 
     async fn handle_push(
