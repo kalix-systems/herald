@@ -12,6 +12,7 @@ use herald_common::{
     *,
 };
 use krpc::*;
+use serial_test_derive::serial;
 use server_protocol::*;
 use std::{
     collections::HashSet, convert::TryFrom, net::SocketAddr, ops::Deref, sync::Arc, time::Duration,
@@ -28,6 +29,7 @@ use tokio::{
 };
 
 #[tokio::test(threaded_scheduler)]
+#[serial]
 async fn register() {
     let (server_config, server_cert) = tls::configure_server().expect("failed to configure server");
     let client_config =
@@ -115,7 +117,8 @@ async fn register() {
     future::join(run_server, run_clients).await;
 }
 
-#[tokio::test]
+#[tokio::test(threaded_scheduler)]
+#[serial]
 async fn ping_pong() {
     let (server_config, server_cert) = tls::configure_server().expect("failed to configure server");
     let client_config =
@@ -139,9 +142,9 @@ async fn ping_pong() {
         let mut futs = ws::serve_arc(state, s_socket, server_config)
             .await
             .map(Ok)
-            .try_buffer_unordered(2)
+            .try_buffer_unordered(4)
             .boxed();
-        for i in 0u8..2 {
+        for i in 0u8..4 {
             dbg!(i);
             futs.next()
                 .await
@@ -153,7 +156,7 @@ async fn ping_pong() {
 
     let run_clients = async {
         time::delay_for(Duration::from_secs(1)).await;
-        let uid_strs = vec!["u1", "u2"];
+        let uid_strs = vec!["u1", "u2", "u3", "u4"];
         let uids = uid_strs
             .into_iter()
             .map(UserId::try_from)
@@ -175,7 +178,7 @@ async fn ping_pong() {
         let clients: Vec<ws::Client<HeraldProtocol, TestClient<_>>> = stream::iter(cinits)
             .map(Ok)
             .and_then(|cinit| {
-                dbg!();
+                dbg!(cinit.uid.as_str());
                 ws::Client::connect(
                     cinit,
                     &client_config,
@@ -185,7 +188,9 @@ async fn ping_pong() {
                 )
             })
             .map_ok(|(c, d)| {
+                dbg!();
                 tokio::spawn(d.map(drop));
+                dbg!();
                 c
             })
             .boxed()
@@ -197,6 +202,8 @@ async fn ping_pong() {
         let recip = Recip::Many(Recips::Users(uids.clone()));
 
         for client in &clients {
+            dbg!(client.uid.as_str());
+
             let push = Request::Push(push::Req {
                 to: recip.clone(),
                 msg: Bytes::copy_from_slice(client.uid.as_str().as_bytes()),
@@ -213,14 +220,12 @@ async fn ping_pong() {
                     "client {} failed to receive response",
                     client.deref().uid
                 ));
-            dbg!();
+            dbg!(&res);
         }
 
-        dbg!();
         for client in clients {
             client.quit().expect("client failed to quit");
         }
-        dbg!();
 
         let mut pushsets: Vec<Vec<_>> = Vec::with_capacity(uids.len());
         for recv in crecvs {
