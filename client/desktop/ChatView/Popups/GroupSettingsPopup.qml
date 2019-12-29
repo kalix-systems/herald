@@ -106,7 +106,7 @@ Popup {
                         MouseArea {
                             anchors.fill: parent
                             cursorShape: Qt.PointingHandCursor
-                            //onClicked: cfgPfp.open()
+                            onClicked: picturePopup.open()
                         }
                     }
 
@@ -170,6 +170,7 @@ Popup {
                             title.borderColor = CmnCfg.palette.white
                             title.Layout.fillWidth = false
                             titleEditButton.source = "qrc:/pencil-icon.svg"
+                            convoData.title = title.text
                         } else {
                             titleEditButton.editing = true
                             title.readOnly = false
@@ -231,6 +232,31 @@ Popup {
                     }
                 }
             }
+        }
+    }
+    FileDialog {
+        id: picturePopup
+        property bool pfpValid: true
+        folder: shortcuts.desktop
+        nameFilters: ["(*.jpg *.png *.jpeg)"]
+        onSelectionAccepted: {
+            var parsed = JSON.parse(Herald.utils.imageDimensions(fileUrl))
+
+            const picture = {
+                "width": Math.round(parsed.width),
+                "height": Math.round(parsed.height),
+                "x": 0,
+                "y": 0,
+                "path": Herald.utils.stripUrlPrefix(fileUrl)
+            }
+
+            Herald.conversations.setProfilePicture(
+                        Herald.conversations.indexById(
+                            convoData.conversationId), JSON.stringify(picture))
+            //            imageCrop.imageWidth = parsed.width
+            //            imageCrop.imageHeight = parsed.height
+            //            imageCrop.imageSource = fileUrl
+            //            imageCrop.show()
         }
     }
 }
