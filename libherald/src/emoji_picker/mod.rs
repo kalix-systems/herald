@@ -1,13 +1,13 @@
 use crate::interface::{
     EmojiPickerEmitter as Emitter, EmojiPickerList as List, EmojiPickerTrait as Interface,
 };
-mod picker_struct;
-use picker_struct::EMOJI_DATA;
-
+extern crate emoji_utils;
+use emoji_utils::{EmojiUtil, Language};
 /// The underlying struct of the emoji keyboard
 pub struct EmojiPicker {
     emit: Emitter,
-    _list: List,
+    list: List,
+    inner: EmojiUtil,
 }
 
 impl Interface for EmojiPicker {
@@ -15,7 +15,11 @@ impl Interface for EmojiPicker {
         emit: Emitter,
         model: List,
     ) -> Self {
-        EmojiPicker { emit, _list: model }
+        EmojiPicker {
+            emit,
+            list: model,
+            inner: EmojiUtil::new(Language::En),
+        }
     }
 
     fn emit(&mut self) -> &mut Emitter {
@@ -24,19 +28,28 @@ impl Interface for EmojiPicker {
 
     fn search_string(&self) -> Option<&str> {
         None
+        //self.inner.search_string.as_deref()
     }
 
     fn set_search_string(
         &mut self,
         value: Option<String>,
     ) {
-        if let Some(search_string) = value {}
+        if let Some(search_string) = value {
+            self.list.begin_reset_model();
+            self.inner.search(search_string);
+            self.list.end_reset_model();
+        }
     }
 
     fn clear_search(&mut self) {}
 
     fn row_count(&self) -> usize {
-        EMOJI_DATA.len()
+        if let Some(list) = &self.inner.current_emojis {
+            list.len()
+        } else {
+            0
+        }
     }
 
     fn fetch_more(&mut self) {
@@ -47,6 +60,10 @@ impl Interface for EmojiPicker {
         &self,
         index: usize,
     ) -> String {
-        String::from(EMOJI_DATA[index].emoji)
+        if let Some(emoji_list) = &self.inner.current_emojis {
+            String::from(emoji_list[index])
+        } else {
+            String::from("")
+        }
     }
 }
