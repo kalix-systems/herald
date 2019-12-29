@@ -20,6 +20,9 @@ path    = "../../heraldcore"
 [dependencies.coretypes]
 path    = "../../heraldcore/coretypes"
 
+[dependencies.herald_attachments]
+path    = "../../heraldcore/herald_attachments"
+
 [dependencies.search_pattern]
 path    = "../../search_pattern"
 

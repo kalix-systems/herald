@@ -10,59 +10,9 @@ use std::{
 };
 use tar::{Archive, Builder};
 
-#[derive(Debug)]
-pub enum Error {
-    Read(std::io::Error, Location),
-    Write(std::io::Error, Location),
-    StripPrefixError(std::path::StripPrefixError, Location),
-    Hash,
-    InvalidPathComponent(OsString),
-    NonUnicodePath(OsString),
-    Image(image_utils::ImageError),
-}
-
-impl fmt::Display for Error {
-    fn fmt(
-        &self,
-        f: &mut fmt::Formatter<'_>,
-    ) -> fmt::Result {
-        use Error::*;
-        match self {
-            Read(e, loc) => write!(
-                f,
-                "Read error processing attachment at {location}:  {error}",
-                location = loc,
-                error = e
-            ),
-            Write(e, loc) => write!(
-                f,
-                "Write error processing attachment at {location}: {error}",
-                location = loc,
-                error = e,
-            ),
-            NonUnicodePath(os_str) => write!(
-                f,
-                "Encountered non-unicode path while converting to Strings, path bytes were: {:x?}",
-                os_str
-            ),
-            StripPrefixError(e, loc) => write!(
-                f,
-                "Strip prefix error saving attachment at {location}: {error}",
-                location = loc,
-                error = e,
-            ),
-            InvalidPathComponent(os_str) => write!(
-                f,
-                "Encountered invalid filename while creating attachment, path bytes were: {:x?}",
-                os_str
-            ),
-            Hash => write!(f, "Couldn't hash attachment data"),
-            Image(e) => write!(f, "Couldn't read image dimensions: {}", e),
-        }
-    }
-}
-
-impl std::error::Error for Error {}
+mod errors;
+pub use errors::Error;
+mod convert;
 
 /// A message attachmentent
 #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
@@ -117,12 +67,6 @@ impl Attachment {
 /// Attachments
 #[derive(Debug, Clone, Default)]
 pub struct AttachmentMeta(Vec<String>);
-
-impl From<Vec<String>> for AttachmentMeta {
-    fn from(v: Vec<String>) -> AttachmentMeta {
-        Self(v)
-    }
-}
 
 impl AttachmentMeta {
     pub fn new(paths: Vec<String>) -> Self {
@@ -312,64 +256,6 @@ pub struct DocMeta {
     pub path: String,
     pub name: String,
     pub size: u64,
-}
-
-impl From<MediaMeta> for json::JsonValue {
-    fn from(meta: MediaMeta) -> json::JsonValue {
-        use json::object;
-
-        let MediaMeta {
-            path,
-            width,
-            height,
-            name,
-        } = meta;
-
-        object! {
-            "path" => path,
-            "width" => width,
-            "height" => height,
-            "name" => name,
-        }
-    }
-}
-
-impl From<Docs> for json::JsonValue {
-    fn from(docs: Docs) -> json::JsonValue {
-        use json::object;
-        let Docs { items, num_more } = docs;
-
-        object! {
-            "items" => items,
-            "num_more" => num_more,
-        }
-    }
-}
-
-impl From<Media> for json::JsonValue {
-    fn from(media: Media) -> json::JsonValue {
-        use json::object;
-        let Media { items, num_more } = media;
-
-        object! {
-            "items" => items,
-            "num_more" => num_more,
-        }
-    }
-}
-
-impl From<DocMeta> for json::JsonValue {
-    fn from(meta: DocMeta) -> json::JsonValue {
-        let DocMeta { path, name, size } = meta;
-
-        use json::object;
-
-        object! {
-            "path" => path,
-            "name" => name,
-            "size" => size
-        }
-    }
 }
 
 const IMG_EXT: [&str; 8] = ["BMP", "GIF", "JPG", "JPEG", "PNG", "PGM", "PBM", "PPM"];

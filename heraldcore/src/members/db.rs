@@ -1,5 +1,5 @@
 use super::*;
-use crate::w;
+use coremacros::w;
 
 pub(crate) fn add_members_with_tx(
     tx: &rusqlite::Transaction,

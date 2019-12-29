@@ -1,6 +1,6 @@
 use channel_ratchet::*;
-use coretypes::ids::ConversationId;
 use herald_common::*;
+use herald_ids::ConversationId;
 use kcl::box_;
 
 #[derive(Ser, De, Hash, Debug, Clone, PartialEq, Eq)]

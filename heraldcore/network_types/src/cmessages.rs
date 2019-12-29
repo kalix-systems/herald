@@ -1,11 +1,11 @@
 use channel_ratchet::*;
 use coretypes::{
-    attachments::Attachment,
     conversation,
-    ids::*,
     messages::{MessageBody, MessageReceiptStatus, ReactContent},
 };
+use herald_attachments::Attachment;
 use herald_common::*;
+use herald_ids::*;
 
 #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
 /// A message in a conversation

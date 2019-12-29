@@ -26,6 +26,9 @@ path = "../../location"
 [dependencies.coremacros]
 path = "../coremacros"
 
+[dependencies.herald_ids]
+path = "../herald_ids"
+
 [dependencies.kcl]
 path = "../../kcl"
 

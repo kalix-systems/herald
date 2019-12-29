@@ -38,7 +38,7 @@ impl Container {
     pub fn handle_store_done<F: FnMut(usize)>(
         &self,
         mid: MsgId,
-        meta: heraldcore::message::attachments::AttachmentMeta,
+        meta: herald_attachments::AttachmentMeta,
         mut data_changed: F,
     ) -> Option<()> {
         update(&mid, move |data| {
