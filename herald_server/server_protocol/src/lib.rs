@@ -142,7 +142,7 @@ impl State {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct TaggedPush {
     id: i64,
     push: Push,

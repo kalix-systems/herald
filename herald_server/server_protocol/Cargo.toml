@@ -36,3 +36,13 @@ path = "../server_store"
 serial_test        = "0.2.0"
 serial_test_derive = "0.2.0"
 womp = { git  = "https://github.com/kalix-systems/womp"}
+portpicker = "0.1"
+rcgen = "0.7"
+rustls = "0.16"
+rustls-native-certs = "0.1"
+tokio-rustls = "0.12"
+webpki = "0.21"
+
+[dev-dependencies.krpc]
+path = "../../krpc"
+features = ["ws"]

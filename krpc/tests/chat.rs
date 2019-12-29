@@ -235,7 +235,7 @@ impl KrpcClient<ChatProtocol> for Chatter {
     fn on_close(&self) {}
 }
 
-const DELAY: Duration = Duration::from_millis(10);
+const DELAY: Duration = Duration::from_millis(100);
 
 #[cfg(feature = "quic")]
 mod quic_ {
@@ -417,7 +417,7 @@ mod ws_ {
         let c_config = tls::configure_client(&[cert]).expect("failed to generate client config");
         // let c_config = tls::configure_client(&[]).expect("failed to generate client config");
 
-        Client::connect(
+        let (c, d) = Client::connect(
             info,
             &c_config,
             webpki::DNSNameRef::try_from_ascii_str("localhost")
@@ -425,7 +425,10 @@ mod ws_ {
             s_socket,
         )
         .await
-        .expect("failed to connect client")
+        .expect("failed to connect client");
+
+        tokio::spawn(d.unwrap_or_else(|e| eprintln!("{}", e)));
+        c
     }
 
     #[tokio::test(threaded_scheduler)]
@@ -450,14 +453,12 @@ mod ws_ {
 
         let c1_found_online = c1
             .req(Req::CheckOnline)
-            .await
             .expect("c1 failed to check who was online")
             .await
             .expect("c1 failed to check who was online");
 
         let c1_send_res = c1
             .req(Req::Send("msg1".into()))
-            .await
             .expect("c1 failed to send msg")
             .await
             .expect("c1 failed to send msg");
@@ -466,14 +467,12 @@ mod ws_ {
 
         let c2_found_online = c2
             .req(Req::CheckOnline)
-            .await
             .expect("c2 failed to check who was online")
             .await
             .expect("c2 failed to check who was online");
 
         let c2_send_res = c2
             .req(Req::Send("msg2".into()))
-            .await
             .expect("c2 failed to send msg")
             .await
             .expect("c2 failed to send msg");
@@ -493,6 +492,11 @@ mod ws_ {
 
         assert_eq!(c1_log, c2_log);
         assert_eq!(c1_log, vec![(u1, "msg1".into()), (u2, "msg2".into())]);
+
+        time::delay_for(DELAY).await;
+
+        c1.quit().expect("failed to quit c1");
+        c2.quit().expect("failed to quit c2");
     }
 
     mod tls {

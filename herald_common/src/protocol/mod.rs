@@ -6,14 +6,14 @@ pub mod pushes;
 pub mod requests;
 
 pub struct HeraldProtocol {}
-pub type PushAck = u32;
+pub type PushAck = bool;
 
 impl Protocol for HeraldProtocol {
     type Req = requests::Request;
     type Res = requests::Response;
 
     type Push = pushes::Push;
-    type PushAck = u32;
+    type PushAck = PushAck;
 
     const MAX_CONCURRENT_REQS: usize = 10;
     const MAX_CONCURRENT_PUSHES: usize = 1;

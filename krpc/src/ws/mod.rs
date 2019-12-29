@@ -5,7 +5,10 @@ use futures::{
 };
 use sharded_slab::*;
 use std::{cmp::min, ops::Deref, sync::Arc};
-use tokio::sync::{mpsc::*, oneshot};
+use tokio::sync::{
+    mpsc::{unbounded_channel as channel, UnboundedSender as Sender},
+    oneshot,
+};
 use tokio_tungstenite::WebSocketStream;
 use tungstenite::{protocol::*, Message};
 
@@ -23,8 +26,8 @@ trait WsProtocol: Protocol {
 
 impl<P: Protocol> WsProtocol for P {}
 
-#[derive(Debug)]
-struct ConnectionClosed(Option<CloseFrame<'static>>);
+#[derive(Debug, Eq, PartialEq)]
+pub struct ConnectionClosed(pub Option<CloseFrame<'static>>);
 
 impl std::fmt::Display for ConnectionClosed {
     fn fmt(
@@ -63,10 +66,7 @@ where
     let (wtx, wrx) = ws.split();
 
     let awaiting_acks: Slab<_> = Slab::new();
-    let (sframe_tx, sframe_rx) = channel::<ServerFrame<P::Res, P::Push>>(max(
-        P::MAX_CONCURRENT_PUSHES,
-        P::MAX_CONCURRENT_REQS,
-    ));
+    let (sframe_tx, sframe_rx) = channel::<ServerFrame<P::Res, P::Push>>();
 
     let send_sframes = sframe_rx
         .map(|s| Ok(Message::Binary(s.to_vec())))
@@ -74,7 +74,7 @@ where
         .map(|r| r.context("failed to send server frame over websocket"));
 
     let sink_pushes = {
-        let mut sframe_tx = sframe_tx.clone();
+        let sframe_tx = &sframe_tx;
         let cinfo = &cinfo;
         let awaiting_acks = &awaiting_acks;
         async move {
@@ -85,7 +85,7 @@ where
                     .ok_or_else(|| anyhow!("failed to insert push into slab"))?
                     as u64;
                 let frame = ServerFrame::Psh(u, p.into());
-                sframe_tx.send(frame).await?;
+                sframe_tx.send(frame)?;
             }
 
             Ok::<(), Error>(())
@@ -109,13 +109,13 @@ where
             let cinfo = &cinfo;
             let awaiting = &awaiting_acks;
             move |c| {
-                let mut sframe_tx = sframe_tx.clone();
+                let sframe_tx = sframe_tx.clone();
                 async move {
                     match c {
                         ClientFrame::Req(u, r) => {
                             let r = server.handle_req(cinfo, r).await;
                             let frame = ServerFrame::Res(u, r);
-                            sframe_tx.send(frame).await.with_context(|| {
+                            sframe_tx.send(frame).with_context(|| {
                                 format!(
                                     "failed to sink response to query {} with cinfo {:?}",
                                     u, cinfo
@@ -131,13 +131,16 @@ where
                                 Ok(())
                             }
                         }
+                        ClientFrame::Quit => Err(anyhow!(ConnectionClosed(None))),
                     }
                 }
             }
         })
         .boxed();
 
-    future::try_join3(recv_cframes, sink_pushes, send_sframes).await?;
+    if let Err(e) = future::try_join3(recv_cframes, sink_pushes, send_sframes).await {
+        let ConnectionClosed(_) = e.downcast()?;
+    }
 
     Ok(())
 }
@@ -237,7 +240,7 @@ where
         connector: &tokio_rustls::TlsConnector,
         server_name: webpki::DNSNameRef<'_>,
         server_sock: &SocketAddr,
-    ) -> Result<Self, Error> {
+    ) -> Result<(Self, impl TryFuture<Ok = (), Error = Error>), Error> {
         let tcp = tokio::net::TcpStream::connect(server_sock).await?;
         let tls = connector.connect(server_name, tcp).await?;
         let (mut rx, mut tx) = Framed::new(tls).split();
@@ -253,10 +256,7 @@ where
         let ws = WebSocketStream::from_raw_socket(tls, Role::Client, Some(ws_config)).await;
         let (wtx, wrx) = ws.split();
 
-        let (cframe_tx, cframe_rx) = channel::<ClientFrame<P::Req, P::PushAck>>(max(
-            P::MAX_CONCURRENT_PUSHES,
-            P::MAX_CONCURRENT_REQS,
-        ));
+        let (cframe_tx, cframe_rx) = channel::<ClientFrame<P::Req, P::PushAck>>();
 
         let acli = Client {
             rtx: cframe_tx.clone(),
@@ -301,8 +301,9 @@ where
                             }
                             ServerFrame::Psh(u, p) => {
                                 let ack = client.inner.handle_push(p).await;
-                                cframe_tx.clone().send(ClientFrame::Ack(u, ack)).await?;
+                                cframe_tx.clone().send(ClientFrame::Ack(u, ack))?;
                             }
+                            ServerFrame::Quit => bail!(ConnectionClosed(None)),
                         }
 
                         Ok(())
@@ -311,19 +312,24 @@ where
             });
 
         let driver = future::try_join(send_cframes, recv_sframes).map_ok(drop);
-        tokio::spawn(driver.unwrap_or_else(|e| eprintln!("{}", e)));
+        // tokio::spawn(driver.unwrap_or_else(|e| eprintln!("{}", e)));
 
-        Ok(acli)
+        Ok((acli, driver))
     }
+}
 
-    pub async fn req(
+impl<P, K> Client<P, K>
+where
+    P: Protocol,
+    K: KrpcClient<P>,
+{
+    pub fn req(
         &self,
         req: P::Req,
     ) -> Result<oneshot::Receiver<P::Res>, Error>
     where
         P::Req: Clone,
     {
-        let mut rtx = self.rtx.clone();
         let (tx, rx) = oneshot::channel();
         let u = self
             .awaiting
@@ -333,11 +339,23 @@ where
             })
             .ok_or(anyhow!("requests slab was at capacity"))?;
 
-        if let Err(e) = rtx.send(ClientFrame::Req(u as u64, req.clone())).await {
+        if let Err(e) = self.rtx.send(ClientFrame::Req(u as u64, req.clone())) {
             self.awaiting.remove(u);
             Err(e).with_context(|| format!("failed to sink request {:?}", req))?
         }
 
         Ok(rx)
     }
+
+    pub fn quit(&self) -> Result<(), Error> {
+        self.rtx.send(ClientFrame::Quit)?;
+        Ok(())
+    }
 }
+
+// impl<P: Protocol, K: KrpcClient<P>> Drop for Client<P, K> {
+//     fn drop(&mut self) {
+//         self.inner.on_close();
+//         drop(self.quit())
+//     }
+// }

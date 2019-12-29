@@ -951,7 +951,6 @@ dependencies = [
  "rustls-native-certs 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "sharded-slab 0.0.7 (registry+https://github.com/rust-lang/crates.io-index)",
  "tokio 0.2.6 (registry+https://github.com/rust-lang/crates.io-index)",
- "tokio-macros 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "tokio-rustls 0.12.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "tokio-tungstenite 0.10.0 (git+https://github.com/dbcfd/tokio-tungstenite/?rev=6dc2018cbfe8fe7ddd75ff977343086503135b38)",
  "tungstenite 0.9.2 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -2097,6 +2096,10 @@ dependencies = [
  "herald_common 0.1.0",
  "krpc 0.1.0",
  "lazy_static 1.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "portpicker 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "rcgen 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "rustls 0.16.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "rustls-native-certs 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "scopeguard 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "serial_test 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "serial_test_derive 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -2105,6 +2108,8 @@ dependencies = [
  "stream-cancel 0.5.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "tokio 0.2.6 (registry+https://github.com/rust-lang/crates.io-index)",
  "tokio-postgres 0.5.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "tokio-rustls 0.12.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "webpki 0.21.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "womp 0.1.0 (git+https://github.com/kalix-systems/womp)",
 ]
 

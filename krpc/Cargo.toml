@@ -68,7 +68,6 @@ portpicker = "0.1"
 rcgen = "0.7"
 rustls = "0.16"
 rustls-native-certs = "0.1"
-tokio-macros = "0.2"
 
 [dev-dependencies.tokio]
 version = "0.2.4"

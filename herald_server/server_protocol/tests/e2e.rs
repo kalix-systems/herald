@@ -1,11 +1,19 @@
+#![allow(unused_variables)]
+#![allow(unused_imports)]
+#![allow(dead_code)]
+
 use dashmap::DashMap;
-use futures::future::{BoxFuture, FutureExt};
+use futures::{
+    future::{self, BoxFuture, FutureExt},
+    stream::{self, StreamExt, TryStreamExt},
+};
 use herald_common::{
     protocol::{auth::*, *},
     *,
 };
 use krpc::*;
 use server_protocol::*;
+use std::{convert::TryFrom, net::SocketAddr, sync::Arc, time::Duration};
 use tokio::{
     prelude::*,
     sync::{
@@ -17,18 +25,125 @@ use tokio::{
     time,
 };
 
-type OnPush = Box<dyn Fn(Push) -> BoxFuture<'static, PushAck> + Send + Sync + 'static>;
+#[tokio::test(threaded_scheduler)]
+async fn ping_pong_ws() {
+    let (server_config, server_cert) = tls::configure_server().expect("failed to configure server");
+    let client_config =
+        tls::configure_client(&[server_cert.as_ref()]).expect("failed to configure client");
+
+    let s_port = portpicker::pick_unused_port().expect("failed to pick port");
+    let s_socket: SocketAddr = ([127u8, 0, 0, 1], s_port).into();
+
+    let run_server = async move {
+        let state = Arc::new(State::default());
+        dbg!();
+        state
+            .new_connection()
+            .await
+            .expect("failed to get postgres connection")
+            .reset_all()
+            .await
+            .expect("failed to reset db");
+
+        dbg!();
+        let mut futs = ws::serve_arc(state, s_socket, server_config)
+            .await
+            .map(Ok)
+            .try_buffer_unordered(2)
+            .boxed();
+        for i in 0u8..2 {
+            dbg!(i);
+            futs.next()
+                .await
+                .expect(&format!("never received connection {}", i))
+                .with_context(|| format!("server failed in connection {}", i))
+                .unwrap();
+        }
+    };
+
+    let run_clients = async {
+        time::delay_for(Duration::from_secs(1)).await;
+        let uid_strs = vec!["u1", "u2"];
+        let uids = uid_strs
+            .into_iter()
+            .map(UserId::try_from)
+            .collect::<Result<Vec<_>, _>>()
+            .expect("failed to make userids");
+
+        let (cinits, crecvs) = uids
+            .iter()
+            .map(|u| {
+                let (tx, rx) = channel();
+                let cinit = ClientInit::new_reg(*u, move |p| {
+                    let tx = tx.clone();
+                    Box::pin(async move { tx.clone().send(p).is_ok() })
+                });
+                (cinit, rx)
+            })
+            .unzip::<_, _, Vec<_>, Vec<_>>();
+
+        let clients: Vec<ws::Client<HeraldProtocol, TestClient<_>>> = stream::iter(cinits)
+            .map(Ok)
+            .and_then(|cinit| {
+                dbg!();
+                ws::Client::connect(
+                    cinit,
+                    &client_config,
+                    webpki::DNSNameRef::try_from_ascii_str("localhost")
+                        .expect("failed to parse localhost as dns name"),
+                    &s_socket,
+                )
+            })
+            .map_ok(|(c, d)| {
+                tokio::spawn(d.map(drop));
+                c
+            })
+            .boxed()
+            .try_collect()
+            .await
+            .expect("failed to connect clients");
+
+        dbg!();
+        for client in clients {
+            client.quit().expect("client failed to quit");
+        }
+        dbg!();
+    };
+
+    future::join(run_server, run_clients).await;
+}
 
 struct TestClient<F> {
     on_push: F,
-    my_uid: UserId,
-    my_keys: sig::KeyPair,
+    uid: UserId,
+    keys: sig::KeyPair,
+}
+
+struct ClientInit<F> {
+    typ: ClientInitType,
+    uid: UserId,
+    keys: sig::KeyPair,
+    on_push: F,
+}
+
+impl<F: Fn(Push) -> BoxFuture<'static, PushAck> + Send + Sync + 'static> ClientInit<F> {
+    fn new_reg(
+        uid: UserId,
+        on_push: F,
+    ) -> Self {
+        ClientInit {
+            typ: ClientInitType::Register,
+            keys: sig::KeyPair::gen_new(),
+            on_push,
+            uid,
+        }
+    }
 }
 
 impl<F> TestClient<F> {
     async fn login<Tx: AsyncWrite + Send + Unpin, Rx: AsyncRead + Send + Unpin>(
-        my_uid: UserId,
-        my_keys: sig::KeyPair,
+        uid: UserId,
+        keys: sig::KeyPair,
         on_push: F,
         tx: &mut Framed<Tx>,
         rx: &mut Framed<Rx>,
@@ -39,7 +154,7 @@ impl<F> TestClient<F> {
             .await
             .context("failed to write auth method")?;
 
-        tx.write_ser(my_keys.public_key())
+        tx.write_ser(keys.public_key())
             .await
             .context("failed to write public key")?;
         let res: ClaimResponse = rx.read_de().await.context("failed to read ClaimResponse")?;
@@ -52,7 +167,7 @@ impl<F> TestClient<F> {
         rx.read_exact(&mut cbuf)
             .await
             .context("failed to read challenge")?;
-        let sig = my_keys.secret_key().sign(&cbuf);
+        let sig = keys.secret_key().sign(&cbuf);
         tx.write_all(sig.as_ref())
             .await
             .context("failed to write challenge response")?;
@@ -66,16 +181,12 @@ impl<F> TestClient<F> {
             "ChallengeResult was not Success"
         );
 
-        Ok(TestClient {
-            on_push,
-            my_uid,
-            my_keys,
-        })
+        Ok(TestClient { on_push, uid, keys })
     }
 
     async fn register<Tx: AsyncWrite + Send + Unpin, Rx: AsyncRead + Send + Unpin>(
-        my_uid: UserId,
-        my_keys: sig::KeyPair,
+        uid: UserId,
+        keys: sig::KeyPair,
         on_push: F,
         tx: &mut Framed<Tx>,
         rx: &mut Framed<Rx>,
@@ -86,24 +197,20 @@ impl<F> TestClient<F> {
             .await
             .context("failed to write auth method")?;
 
-        tx.write_ser(&ClientEvent::Check(my_uid)).await?;
+        tx.write_ser(&ClientEvent::Check(uid)).await?;
         ensure!(
             ServeEvent::Available == rx.read_de().await?,
             "username taken"
         );
 
-        let signed = my_keys.sign(my_uid);
+        let signed = keys.sign(uid);
         tx.write_ser(&ClientEvent::Claim(signed)).await?;
         ensure!(
             ServeEvent::Success == rx.read_de().await?,
             "registration failed"
         );
 
-        Ok(TestClient {
-            on_push,
-            my_uid,
-            my_keys,
-        })
+        Ok(TestClient { on_push, uid, keys })
     }
 
     async fn catchup<Tx: AsyncWrite + Send + Unpin, Rx: AsyncRead + Send + Unpin>(
@@ -127,20 +234,15 @@ impl<F> TestClient<F> {
 }
 
 enum ClientInitType {
-    Reg,
+    Register,
     Login,
 }
 
-struct ClientInit {
-    typ: ClientInitType,
-    uid: UserId,
-    keys: sig::KeyPair,
-    on_push: OnPush,
-}
-
 #[async_trait]
-impl KrpcClient<HeraldProtocol> for TestClient<OnPush> {
-    type InitInfo = ClientInit;
+impl<F: Fn(Push) -> BoxFuture<'static, PushAck> + Send + Sync + 'static> KrpcClient<HeraldProtocol>
+    for TestClient<F>
+{
+    type InitInfo = ClientInit<F>;
 
     async fn init<Tx: AsyncWrite + Send + Unpin, Rx: AsyncRead + Send + Unpin>(
         info: Self::InitInfo,
@@ -155,7 +257,7 @@ impl KrpcClient<HeraldProtocol> for TestClient<OnPush> {
         } = info;
 
         let this = match typ {
-            ClientInitType::Reg => TestClient::register(uid, keys, on_push, tx, rx).await?,
+            ClientInitType::Register => TestClient::register(uid, keys, on_push, tx, rx).await?,
             ClientInitType::Login => TestClient::login(uid, keys, on_push, tx, rx).await?,
         };
 
@@ -203,4 +305,44 @@ impl KrpcClient<HeraldProtocol> for TestClient<OnPush> {
     }
 
     fn on_close(&self) {}
+}
+
+mod tls {
+    use super::*;
+    use rustls::*;
+    use tokio_rustls::*;
+
+    /// Builds default rustls client config and trusts given certificates.
+    ///
+    /// ## Args
+    ///
+    /// - server_certs: a list of trusted certificates in DER format.
+    pub(super) fn configure_client(server_certs: &[&[u8]]) -> Result<TlsConnector, Error> {
+        let mut config = rustls::ClientConfig::default();
+        // config.root_store = rustls_native_certs::load_native_certs()?;
+
+        let anchors: Result<Vec<_>, _> = server_certs
+            .iter()
+            .map(|cert| webpki::trust_anchor_util::cert_der_as_trust_anchor(cert))
+            .collect();
+
+        config
+            .root_store
+            .add_server_trust_anchors(&webpki::TLSServerTrustAnchors(anchors?.as_slice()));
+
+        Ok(Arc::new(config).into())
+    }
+
+    /// Returns default server configuration along with its certificate.
+    pub(super) fn configure_server() -> Result<(TlsAcceptor, Vec<u8>), Error> {
+        let cert = rcgen::generate_simple_self_signed(vec!["localhost".into()]).unwrap();
+        let cert_der = cert.serialize_der().unwrap();
+        let priv_key = cert.serialize_private_key_der();
+        let priv_key = PrivateKey(priv_key);
+
+        let mut config = rustls::ServerConfig::new(Arc::new(NoClientAuth));
+        config.set_single_cert(vec![Certificate(cert_der.clone())], priv_key)?;
+
+        Ok((Arc::new(config).into(), cert_der))
+    }
 }
