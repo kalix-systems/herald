@@ -302,16 +302,12 @@ dependencies = [
  "herald_attachments 0.1.0",
  "herald_common 0.1.0",
  "herald_ids 0.1.0",
- "hex 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "image_utils 0.1.0",
  "json 0.12.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "kcl 0.1.0",
  "kson 0.1.0",
  "location 0.1.0",
- "platform_dirs 0.1.0",
  "rusqlite 0.21.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "search_pattern 0.1.0",
- "tar 0.4.26 (registry+https://github.com/rust-lang/crates.io-index)",
  "unicode-segmentation 1.6.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
