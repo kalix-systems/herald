@@ -1,4 +1,5 @@
 use dashmap::DashMap;
+use futures::future::{BoxFuture, FutureExt};
 use herald_common::{
     protocol::{auth::*, *},
     *,
@@ -16,19 +17,22 @@ use tokio::{
     time,
 };
 
-struct TestClient {
-    sender: Sender<Push>,
+type OnPush = Box<dyn Fn(Push) -> BoxFuture<'static, PushAck> + Send + Sync + 'static>;
+
+struct TestClient<F> {
+    on_push: F,
     my_uid: UserId,
     my_keys: sig::KeyPair,
 }
 
-impl TestClient {
+impl<F> TestClient<F> {
     async fn login<Tx: AsyncWrite + Send + Unpin, Rx: AsyncRead + Send + Unpin>(
         my_uid: UserId,
         my_keys: sig::KeyPair,
+        on_push: F,
         tx: &mut Framed<Tx>,
         rx: &mut Framed<Rx>,
-    ) -> Result<(Self, Receiver<Push>), Error> {
+    ) -> Result<Self, Error> {
         use login_types::*;
 
         tx.write_u8(LOGIN)
@@ -62,23 +66,20 @@ impl TestClient {
             "ChallengeResult was not Success"
         );
 
-        let (sender, receiver) = channel();
-        Ok((
-            TestClient {
-                sender,
-                my_uid,
-                my_keys,
-            },
-            receiver,
-        ))
+        Ok(TestClient {
+            on_push,
+            my_uid,
+            my_keys,
+        })
     }
 
     async fn register<Tx: AsyncWrite + Send + Unpin, Rx: AsyncRead + Send + Unpin>(
         my_uid: UserId,
         my_keys: sig::KeyPair,
+        on_push: F,
         tx: &mut Framed<Tx>,
         rx: &mut Framed<Rx>,
-    ) -> Result<(Self, Receiver<Push>), Error> {
+    ) -> Result<Self, Error> {
         use register::*;
 
         tx.write_u8(REGISTER)
@@ -98,26 +99,25 @@ impl TestClient {
             "registration failed"
         );
 
-        let (sender, receiver) = channel();
-        Ok((
-            TestClient {
-                sender,
-                my_uid,
-                my_keys,
-            },
-            receiver,
-        ))
+        Ok(TestClient {
+            on_push,
+            my_uid,
+            my_keys,
+        })
     }
 
     async fn catchup<Tx: AsyncWrite + Send + Unpin, Rx: AsyncRead + Send + Unpin>(
         &self,
         tx: &mut Framed<Tx>,
         rx: &mut Framed<Rx>,
-    ) -> Result<(), Error> {
+    ) -> Result<(), Error>
+    where
+        F: Fn(Push) -> BoxFuture<'static, PushAck>,
+    {
         while rx.read_u8().await? == 0 {
             let pushes: Vec<Push> = rx.read_de().await?;
             for push in pushes {
-                self.sender.send(push)?;
+                (self.on_push)(push).await;
             }
             tx.write_u8(1).await?;
         }
@@ -126,13 +126,20 @@ impl TestClient {
     }
 }
 
-enum ClientInit {
-    Reg(UserId, sig::KeyPair),
-    Login(UserId, sig::KeyPair),
+enum ClientInitType {
+    Reg,
+    Login,
+}
+
+struct ClientInit {
+    typ: ClientInitType,
+    uid: UserId,
+    keys: sig::KeyPair,
+    on_push: OnPush,
 }
 
 #[async_trait]
-impl KrpcClient<HeraldProtocol> for TestClient {
+impl KrpcClient<HeraldProtocol> for TestClient<OnPush> {
     type InitInfo = ClientInit;
 
     async fn init<Tx: AsyncWrite + Send + Unpin, Rx: AsyncRead + Send + Unpin>(
@@ -140,10 +147,16 @@ impl KrpcClient<HeraldProtocol> for TestClient {
         tx: &mut Framed<Tx>,
         rx: &mut Framed<Rx>,
     ) -> Result<Self, Error> {
-        // TODO: something with _recv
-        let (this, _recv) = match info {
-            ClientInit::Reg(uid, keys) => TestClient::register(uid, keys, tx, rx).await?,
-            ClientInit::Login(uid, keys) => TestClient::login(uid, keys, tx, rx).await?,
+        let ClientInit {
+            typ,
+            uid,
+            keys,
+            on_push,
+        } = info;
+
+        let this = match typ {
+            ClientInitType::Reg => TestClient::register(uid, keys, on_push, tx, rx).await?,
+            ClientInitType::Login => TestClient::login(uid, keys, on_push, tx, rx).await?,
         };
 
         this.catchup(tx, rx).await?;
@@ -155,7 +168,7 @@ impl KrpcClient<HeraldProtocol> for TestClient {
         &self,
         push: <HeraldProtocol as Protocol>::Push,
     ) -> <HeraldProtocol as Protocol>::PushAck {
-        todo!()
+        (self.on_push)(push).await
     }
 
     async fn on_res(
@@ -163,10 +176,31 @@ impl KrpcClient<HeraldProtocol> for TestClient {
         req: &<HeraldProtocol as Protocol>::Req,
         res: &<HeraldProtocol as Protocol>::Res,
     ) -> Result<(), Error> {
-        todo!()
+        match (req, res) {
+            (req, Response::Err(e)) => {
+                return Err(anyhow!(e.clone()))
+                    .with_context(|| format!("error handling request {:#?}", req));
+            }
+            (Request::GetSigchain(_), Response::GetSigchain(_)) => {}
+            (Request::RecipExists(_), Response::RecipExists(_)) => {}
+            (Request::NewSig(_), Response::NewSig(_)) => {}
+            (Request::NewPrekey(_), Response::NewPrekey(_)) => {}
+            (Request::GetPrekey(_), Response::GetPrekey(_)) => {}
+            (Request::Push(_), Response::Push(_)) => {}
+            (req, res) => {
+                return Err(anyhow!("type mismatch")).with_context(|| {
+                    format!(
+                        "request was:\n\
+                         {:#?}\n\
+                         response was:\n\
+                         {:#?}",
+                        req, res
+                    )
+                });
+            }
+        }
+        Ok(())
     }
 
-    fn on_close(&self) {
-        todo!()
-    }
+    fn on_close(&self) {}
 }
