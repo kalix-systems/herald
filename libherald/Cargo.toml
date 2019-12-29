@@ -24,7 +24,7 @@ path    = "../heraldcore"
 path    = "../heraldcore/search_pattern"
 
 [dependencies.location]
-path    = "../heraldcore/location"
+path    = "../location"
 
 [dependencies.messages_helper]
 path = "./messages_helper"

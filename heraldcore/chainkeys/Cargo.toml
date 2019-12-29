@@ -21,7 +21,7 @@ path = "../../channel_ratchet"
 path = "../coretypes"
 
 [dependencies.location]
-path = "../location"
+path = "../../location"
 
 [dependencies.coremacros]
 path = "../coremacros"
