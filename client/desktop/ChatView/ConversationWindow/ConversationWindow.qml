@@ -147,11 +147,20 @@ ListView {
             }
         }
 
+        Loader {
+            id: markReadLoader
+            active: false
+            Connections {
+                target: root
+                onActiveChanged: if (root.active) {
+                                     ownedConversation.markRead(index)
+                                 }
+            }
+        }
+
         //TODO: this doesn't actually produce the desired behavior
         Component.onCompleted: {
-            if (root.active) {
-                ownedConversation.markRead(index)
-            }
+            markReadLoader.active = true
         }
     }
 }
