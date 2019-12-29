@@ -14,7 +14,7 @@ import QtQuick.Layouts 1.3
 import QtQuick.Shapes 1.12
 
 Popup {
-    id: conversationSettingsPopup
+    id: groupSettingsPopup
     property var convoData: parent.convoData
     property var convoMembers: parent.convoMembers
 
@@ -22,7 +22,7 @@ Popup {
     height: chatView.height
     width: chatView.width
     anchors.centerIn: parent
-    onClosed: convoSettingsLoader.active = false
+    onClosed: groupSettingsLoader.active = false
 
     background: Rectangle {
         id: background
@@ -36,8 +36,8 @@ Popup {
         icon.source: "qrc:/x-icon.svg"
         fill: CmnCfg.palette.white
         onClicked: {
-            conversationSettingsPopup.close()
-            convoSettingsLoader.active = false
+            groupSettingsPopup.close()
+            groupSettingsLoader.active = false
         }
         z: header.z + 1
     }
