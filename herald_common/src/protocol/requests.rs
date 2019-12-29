@@ -81,46 +81,6 @@ pub mod get_prekeys {
     pub type Res = Vec<(sig::PublicKey, Signed<Prekey>)>;
 }
 
-pub mod add_to_group {
-    use super::*;
-
-    #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
-    pub struct Req {
-        users: Vec<UserId>,
-        conversation: ConversationId,
-    }
-
-    #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
-    pub enum Res {
-        Success,
-        AddedByMissing(UserId),
-        MissingUser(UserId),
-    }
-}
-
-pub mod init_group {
-    use super::*;
-
-    #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
-    pub enum Res {
-        Success,
-        GroupAlreadyExists(ConversationId),
-        MissingUser(UserId),
-    }
-}
-
-pub mod leave_groups {
-    use super::*;
-
-    pub type Req = Vec<ConversationId>;
-
-    #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
-    pub enum Res {
-        Success,
-        Missing(ConversationId),
-    }
-}
-
 pub mod push {
     use super::*;
 
@@ -132,7 +92,7 @@ pub mod push {
 
     #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
     pub enum Res {
-        Success,
+        Success(Time),
         Missing(SingleRecip),
     }
 }

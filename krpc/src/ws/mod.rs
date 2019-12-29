@@ -353,6 +353,7 @@ where
     }
 }
 
+// TODO: figure out why this causes crashes
 // impl<P: Protocol, K: KrpcClient<P>> Drop for Client<P, K> {
 //     fn drop(&mut self) {
 //         self.inner.on_close();

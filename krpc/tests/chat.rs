@@ -431,7 +431,7 @@ mod ws_ {
         c
     }
 
-    #[tokio::test(threaded_scheduler)]
+    #[tokio::test]
     async fn ping_pong() {
         kcl::init();
 
@@ -494,6 +494,8 @@ mod ws_ {
         assert_eq!(c1_log, vec![(u1, "msg1".into()), (u2, "msg2".into())]);
 
         time::delay_for(DELAY).await;
+
+        time::delay_for(DELAY * 100).await;
 
         c1.quit().expect("failed to quit c1");
         c2.quit().expect("failed to quit c2");

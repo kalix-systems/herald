@@ -13,7 +13,9 @@ use herald_common::{
 };
 use krpc::*;
 use server_protocol::*;
-use std::{convert::TryFrom, net::SocketAddr, sync::Arc, time::Duration};
+use std::{
+    collections::HashSet, convert::TryFrom, net::SocketAddr, ops::Deref, sync::Arc, time::Duration,
+};
 use tokio::{
     prelude::*,
     sync::{
@@ -26,7 +28,7 @@ use tokio::{
 };
 
 #[tokio::test(threaded_scheduler)]
-async fn ping_pong_ws() {
+async fn register() {
     let (server_config, server_cert) = tls::configure_server().expect("failed to configure server");
     let client_config =
         tls::configure_client(&[server_cert.as_ref()]).expect("failed to configure client");
@@ -108,6 +110,126 @@ async fn ping_pong_ws() {
             client.quit().expect("client failed to quit");
         }
         dbg!();
+    };
+
+    future::join(run_server, run_clients).await;
+}
+
+#[tokio::test]
+async fn ping_pong() {
+    let (server_config, server_cert) = tls::configure_server().expect("failed to configure server");
+    let client_config =
+        tls::configure_client(&[server_cert.as_ref()]).expect("failed to configure client");
+
+    let s_port = portpicker::pick_unused_port().expect("failed to pick port");
+    let s_socket: SocketAddr = ([127u8, 0, 0, 1], s_port).into();
+
+    let run_server = async move {
+        let state = Arc::new(State::default());
+        dbg!();
+        state
+            .new_connection()
+            .await
+            .expect("failed to get postgres connection")
+            .reset_all()
+            .await
+            .expect("failed to reset db");
+
+        dbg!();
+        let mut futs = ws::serve_arc(state, s_socket, server_config)
+            .await
+            .map(Ok)
+            .try_buffer_unordered(2)
+            .boxed();
+        for i in 0u8..2 {
+            dbg!(i);
+            futs.next()
+                .await
+                .expect(&format!("never received connection {}", i))
+                .with_context(|| format!("server failed in connection {}", i))
+                .unwrap();
+        }
+    };
+
+    let run_clients = async {
+        time::delay_for(Duration::from_secs(1)).await;
+        let uid_strs = vec!["u1", "u2"];
+        let uids = uid_strs
+            .into_iter()
+            .map(UserId::try_from)
+            .collect::<Result<Vec<_>, _>>()
+            .expect("failed to make userids");
+
+        let (cinits, crecvs) = uids
+            .iter()
+            .map(|u| {
+                let (tx, rx) = channel();
+                let cinit = ClientInit::new_reg(*u, move |p| {
+                    let tx = tx.clone();
+                    Box::pin(async move { tx.clone().send(p).is_ok() })
+                });
+                (cinit, rx)
+            })
+            .unzip::<_, _, Vec<_>, Vec<_>>();
+
+        let clients: Vec<ws::Client<HeraldProtocol, TestClient<_>>> = stream::iter(cinits)
+            .map(Ok)
+            .and_then(|cinit| {
+                dbg!();
+                ws::Client::connect(
+                    cinit,
+                    &client_config,
+                    webpki::DNSNameRef::try_from_ascii_str("localhost")
+                        .expect("failed to parse localhost as dns name"),
+                    &s_socket,
+                )
+            })
+            .map_ok(|(c, d)| {
+                tokio::spawn(d.map(drop));
+                c
+            })
+            .boxed()
+            .try_collect()
+            .await
+            .expect("failed to connect clients");
+
+        dbg!();
+        let recip = Recip::Many(Recips::Users(uids.clone()));
+
+        for client in &clients {
+            let push = Request::Push(push::Req {
+                to: recip.clone(),
+                msg: Bytes::copy_from_slice(client.uid.as_str().as_bytes()),
+            });
+
+            let res = client
+                .req(push)
+                .expect(&format!(
+                    "client {} failed to sink push",
+                    client.deref().uid
+                ))
+                .await
+                .expect(&format!(
+                    "client {} failed to receive response",
+                    client.deref().uid
+                ));
+            dbg!();
+        }
+
+        dbg!();
+        for client in clients {
+            client.quit().expect("client failed to quit");
+        }
+        dbg!();
+
+        let mut pushsets: Vec<Vec<_>> = Vec::with_capacity(uids.len());
+        for recv in crecvs {
+            pushsets.push(recv.collect().await);
+        }
+
+        for (p1, p2) in pushsets.iter().zip(&pushsets[1..]) {
+            assert_eq!(p1, p2);
+        }
     };
 
     future::join(run_server, run_clients).await;
@@ -288,7 +410,20 @@ impl<F: Fn(Push) -> BoxFuture<'static, PushAck> + Send + Sync + 'static> KrpcCli
             (Request::NewSig(_), Response::NewSig(_)) => {}
             (Request::NewPrekey(_), Response::NewPrekey(_)) => {}
             (Request::GetPrekey(_), Response::GetPrekey(_)) => {}
-            (Request::Push(_), Response::Push(_)) => {}
+            (Request::Push(push::Req { to, msg }), Response::Push(push::Res::Success(ts))) => {
+                let push = Push {
+                    tag: to.tag(),
+                    timestamp: *ts,
+                    msg: msg.clone(),
+                    gid: GlobalId {
+                        uid: self.uid,
+                        did: *self.keys.public_key(),
+                    },
+                };
+
+                (self.on_push)(push).await;
+            }
+            // (Request::Push(_), Response::Push(_)) => {}
             (req, res) => {
                 return Err(anyhow!("type mismatch")).with_context(|| {
                     format!(

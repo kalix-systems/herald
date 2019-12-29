@@ -90,9 +90,10 @@ impl State {
         to: Recip,
         msg: Bytes,
     ) -> Result<push::Res, Error> {
+        let timestamp = Time::now();
         let psh = Push {
             tag: to.tag(),
-            timestamp: Time::now(),
+            timestamp,
             gid: from,
             msg,
         };
@@ -102,7 +103,7 @@ impl State {
             .add_to_pending_and_get_valid_devs(&to, &psh)
             .await?
         {
-            PushedTo::NoRecipients => Ok(push::Res::Success),
+            PushedTo::NoRecipients => Ok(push::Res::Success(timestamp)),
             PushedTo::Missing(m) => Ok(push::Res::Missing(m)),
             PushedTo::PushedTo { devs, push_id } => {
                 stream::iter(devs)
@@ -121,7 +122,7 @@ impl State {
                         }
                     })
                     .await;
-                Ok(push::Res::Success)
+                Ok(push::Res::Success(timestamp))
             }
         }
     }
