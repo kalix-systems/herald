@@ -6,5 +6,3 @@ WHERE
   msg_id = ?
 GROUP BY
   read_receipts.user_id
-LIMIT
-  1
