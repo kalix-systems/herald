@@ -58,5 +58,6 @@
         <file>regex-search-icon.svg</file>
         <file>lenny-icon.svg</file>
         <file>emoji-categories/recents.svg</file>
+        <file>herald.png</file>
     </qresource>
 </RCC>

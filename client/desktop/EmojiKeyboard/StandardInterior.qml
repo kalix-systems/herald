@@ -22,7 +22,7 @@ ListView {
     ScrollBar.vertical: ScrollBar {}
     maximumFlickVelocity: 700
     flickDeceleration: emojiList.height * 10
-    model: emoji_boundaries.length // the number of sections
+    model: emoji_boundaries.length - 1 // the number of sections
     delegate: Column {
         spacing: 1
         width: parent.width
