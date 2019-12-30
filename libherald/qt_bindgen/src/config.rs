@@ -113,6 +113,8 @@ fn utils() -> Object {
         const saveFile(fpath: QString, target_path: QString) => Bool,
         // Returns image dimensions of the image at `path`, serialized as JSON
         const imageDimensions(path: QString) => QString,
+        // Strips QML URL prefix
+        const stripUrlPrefix(path: QString) => QString,
     };
 
     obj! {

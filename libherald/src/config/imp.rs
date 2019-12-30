@@ -27,11 +27,16 @@ impl Config {
     ) -> Option<()> {
         use super::ConfUpdate::*;
         match update {
-            Picture(maybe_path) => {
-                self.inner.as_mut()?.profile_picture = maybe_path;
+            Picture(path) => {
+                use crate::conversations::shared::{ConvItemUpdate, ConvItemUpdateVariant};
+                self.inner.as_mut()?.profile_picture = path.clone();
 
-                // TODO update note to self conversation picture
                 self.emit.profile_picture_changed();
+
+                crate::push(ConvItemUpdate {
+                    cid: self.inner.as_ref()?.nts_conversation,
+                    variant: ConvItemUpdateVariant::PictureChanged(path),
+                });
             }
         }
 

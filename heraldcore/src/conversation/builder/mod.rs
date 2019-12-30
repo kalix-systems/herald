@@ -12,7 +12,8 @@ pub struct ConversationBuilder {
     /// Conversation title
     pub title: Option<String>,
     /// Conversation picture
-    pub picture: Option<ProfilePicture>,
+    pub tagged_picture: Option<ProfilePicture>,
+    pub(crate) picture: Option<String>,
     /// Conversation color,
     pub color: Option<u32>,
     /// Indicates whether the conversation is muted
@@ -58,11 +59,11 @@ impl ConversationBuilder {
     }
 
     /// Sets picture
-    pub fn picture(
+    pub fn tagged_picture(
         &mut self,
         picture: ProfilePicture,
     ) -> &mut Self {
-        self.picture.replace(picture);
+        self.tagged_picture.replace(picture);
         self
     }
 

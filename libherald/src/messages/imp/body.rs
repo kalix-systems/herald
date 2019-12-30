@@ -9,14 +9,15 @@ impl Messages {
         let pattern = &self.search.pattern;
         let match_status = self.container.get(index).as_ref()?.match_status;
 
-        let body = self
+        let body: String = self
             .container
-            .access_by_index(index, |data| data.body.clone())?;
+            .access_by_index(index, |data| data.text().map(ToString::to_string))
+            .flatten()?;
 
         if match_status.is_match() {
-            messages_helper::search::highlight_message(pattern.as_ref()?, body.as_ref()?).into()
+            messages_helper::search::highlight_message(pattern.as_ref()?, &body).into()
         } else {
-            elider.elided_body(body?).into()
+            elider.elided_body(body).into()
         }
     }
 
@@ -31,10 +32,10 @@ impl Messages {
             if match_status.is_match() {
                 Some(messages_helper::search::highlight_message(
                     pattern.as_ref()?,
-                    data.body.as_ref()?,
+                    data.text()?,
                 ))
             } else {
-                data.body.as_ref().map(MessageBody::to_string)
+                data.text().map(ToString::to_string)
             }
         })?
     }

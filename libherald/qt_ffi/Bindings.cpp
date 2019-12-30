@@ -3179,6 +3179,8 @@ void utils_image_dimensions(const Utils::Private*, const ushort*, int, QString*,
 bool utils_is_valid_rand_id(const Utils::Private*, const char*, int);
 bool utils_save_file(const Utils::Private*, const ushort*, int, const ushort*,
                      int);
+void utils_strip_url_prefix(const Utils::Private*, const ushort*, int, QString*,
+                            qstring_set);
 }
 
 Config::Config(bool /*owned*/, QObject* parent)
@@ -5195,4 +5197,10 @@ bool Utils::saveFile(const QString& fpath, const QString& target_path) const
 {
   return utils_save_file(m_d, fpath.utf16(), fpath.size(), target_path.utf16(),
                          target_path.size());
+}
+QString Utils::stripUrlPrefix(const QString& path) const
+{
+  QString s;
+  utils_strip_url_prefix(m_d, path.utf16(), path.size(), &s, set_qstring);
+  return s;
 }

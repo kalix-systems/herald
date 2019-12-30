@@ -67,13 +67,10 @@ impl Messages {
                 remove,
             } => {
                 let model = &mut self.model;
-                none!(&self.container.handle_reaction(
-                    msg_id,
-                    reactionary,
-                    content,
-                    remove,
-                    |ix| model.data_changed(ix, ix)
-                ));
+                self.container
+                    .handle_reaction(msg_id, reactionary, content, remove, |ix| {
+                        model.data_changed(ix, ix)
+                    });
             }
             MsgUpdate::StoreDone(mid, meta) => {
                 let model = &mut self.model;
@@ -126,7 +123,7 @@ pub(crate) enum MsgUpdate {
     /// A rendered message from the `MessageBuilder`
     BuilderMsg(Box<heraldcore::message::Message>),
     /// An outbound message has been saved
-    StoreDone(MsgId, heraldcore::message::attachments::AttachmentMeta),
+    StoreDone(MsgId, herald_attachments::AttachmentMeta),
     /// There are expired messages that need to be pruned
     ExpiredMessages(Vec<MsgId>),
     /// The container contents, sent when the conversation id is first set.

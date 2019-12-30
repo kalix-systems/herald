@@ -63,6 +63,7 @@ Rectangle {
             ReplyFileClip {
                 id: replyFileClip
                 constraint: imageSize
+                elideWidth: bubbleRoot.maxWidth
             }
 
             ReplyFileSurplus {}

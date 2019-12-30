@@ -35,6 +35,7 @@ Page {
     }
 
     Component {
+        id: settingsMain
         SettingsMenu.SettingsMenuMain {
             readonly property string stateName: "config"
         }

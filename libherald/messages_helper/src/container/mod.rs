@@ -12,7 +12,7 @@ const FLURRY_FUZZ: i64 = 5 * 60_000;
 pub mod handlers;
 pub use cache::{access, get, update};
 
-#[derive(Default)]
+#[derive(Default, Debug)]
 /// Container type for messages
 pub struct Container {
     pub list: Revec<MessageMeta>,
@@ -236,7 +236,7 @@ impl Container {
     ) -> Option<String> {
         let mid = self.op_msg_id(index)?;
 
-        access(&mid, |m| m.body.clone())
+        access(&mid, |m| m.text().map(ToString::to_string))
             .flatten()
             .map(|b| self.op_body_elider.elided_body(b))
     }
@@ -371,3 +371,6 @@ impl Container {
         ((a_author == b_author) && a_ts.within(FLURRY_FUZZ, b_ts)).into()
     }
 }
+
+#[cfg(test)]
+mod tests;

@@ -8,6 +8,7 @@ import "qrc:/imports/js/utils.mjs" as Utils
 import "../../ChatView" as CV
 import ".././js/ContactView.mjs" as JS
 import "../popups" as Popups
+import Qt.labs.platform 1.1
 
 /// --- displays a list of conversations
 /// TODO: fix bounds bounds behavior
@@ -20,6 +21,7 @@ ListView {
     // this needs to be uninteractive so that they scroll together
     interactive: false
     height: contentHeight
+    property bool archiveView: false
 
     signal messagePositionRequested(var requestedMsgId)
 
@@ -63,40 +65,55 @@ ListView {
             }
         }
 
-        visible: conversationData.matched
+        visible: !archiveView ? conversationData.matched
+                                && conversationData.status !== 1 : conversationData.status === 1
         height: visible ? CmnCfg.convoHeight : 0
         width: parent.width
 
-        Common.PlatonicRectangle {
-            id: convoRectangle
-            boxTitle: title
-            boxColor: conversationData.color
-            picture: Utils.safeStringOrDefault(conversationData.picture, "")
-            isGroupPicture: !conversationData.pairwise
-            labelComponent: Av.ConversationLabel {
-                contactName: title
-                lastBody: !convContent.messages.isEmpty ? lastAuthor + ": "
-                                                          + convContent.messages.lastBody : ""
-                lastAuthor: outbound ? qsTr("You") : convContent.messages.lastAuthor
-                lastTimestamp: !convContent.messages.isEmpty ? Utils.friendlyTimestamp(
-                                                                   convContent.messages.lastTime) : ""
-                labelColor: convoRectangle.state
-                            !== "" ? CmnCfg.palette.black : CmnCfg.palette.lightGrey
-                secondaryLabelColor: convoRectangle.state
-                                     !== "" ? CmnCfg.palette.offBlack : CmnCfg.palette.medGrey
-                labelFontSize: CmnCfg.entityLabelSize
-            }
-
+        ConversationRectangle {
             MouseArea {
                 id: hoverHandler
                 hoverEnabled: true
                 z: CmnCfg.overlayZ
                 anchors.fill: parent
+                acceptedButtons: Qt.LeftButton | Qt.RightButton
                 onClicked: {
-                    chatView.sourceComponent = childChatView
-                    conversationList.currentIndex = index
+                    if (mouse.button == Qt.RightButton) {
+                        !archiveView ? convOptionsMenu.open(
+                                           ) : unarchiveMenu.open()
+                    } else {
+                        chatView.sourceComponent = childChatView
+                        conversationList.currentIndex = index
+                    }
                 }
             }
+        }
+
+        Menu {
+            id: convOptionsMenu
+            MenuItem {
+                text: "Mute notifications"
+            }
+
+            MenuItem {
+                text: "Archive"
+                onTriggered: conversationData.status = 1
+            }
+        }
+        Menu {
+            id: unarchiveMenu
+            MenuItem {
+                text: "Unarchive conversation"
+                onTriggered: conversationData.status = 0
+            }
+        }
+    }
+
+    states: State {
+        name: "archivestate"
+        PropertyChanges {
+            target: conversationList
+            archiveView: true
         }
     }
 }

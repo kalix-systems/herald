@@ -87,7 +87,7 @@ Component {
                         "height": Math.round(parsed.height),
                         "x": 0,
                         "y": 0,
-                        "path": topRect.profPic
+                        "path": Herald.utils.stripUrlPrefix(topRect.profPic)
                     }
 
                     Herald.conversationBuilder.setProfilePicture(

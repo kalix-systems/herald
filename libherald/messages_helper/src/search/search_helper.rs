@@ -62,12 +62,12 @@ impl SearchState {
 
 pub fn highlight_message(
     search: &SearchPattern,
-    body: &MessageBody,
+    body: &str,
 ) -> String {
     let start_tag = "<span style = \"background-color: #F0C80C\">";
     let end_tag = "</span>";
 
-    let replace_pattern = search.replace_all(body.as_str(), |caps: &Captures| {
+    let replace_pattern = search.replace_all(body, |caps: &Captures| {
         format!(
             "{}{}{}",
             start_tag,

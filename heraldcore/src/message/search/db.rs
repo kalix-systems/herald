@@ -1,5 +1,5 @@
 use super::*;
-use crate::w;
+use coremacros::w;
 use rusqlite::named_params;
 
 impl Search {

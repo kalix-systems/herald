@@ -69,3 +69,14 @@ macro_rules! from_fn {
         }
     };
 }
+
+#[macro_export]
+/// Convenience macro
+macro_rules! w {
+    ($maybe: expr) => {{
+        match $maybe {
+            Ok(val) => val,
+            Err(e) => return Err(e.into()),
+        }
+    }};
+}

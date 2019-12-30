@@ -17,8 +17,17 @@ path = "../herald_common"
 [dependencies.heraldcore]
 path = "../heraldcore"
 
+[dependencies.herald_attachments]
+path    = "../heraldcore/herald_attachments"
+
+[dependencies.herald_user]
+path    = "../heraldcore/herald_user"
+
+[dependencies.search_pattern]
+path    = "../search_pattern"
+
 [dependencies.location]
-path = "../heraldcore/location"
+path    = "../location"
 
 [dependencies.messages_helper]
 path = "./messages_helper"
@@ -26,9 +35,6 @@ path = "./messages_helper"
 [dependencies.riqtshaw_types]
 git = "https://github.com/kalix-systems/riqtshaw_types"
 rev = "ee0af86c4db49f9c554aef9c122255d3230d3b99"
-
-[dependencies.search_pattern]
-path = "../heraldcore/search_pattern"
 
 [dev-dependencies]
 serial_test = "0.2.0"

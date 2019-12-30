@@ -1963,6 +1963,7 @@ public:
   Q_INVOKABLE bool    isValidRandId(const QByteArray& bs) const;
   Q_INVOKABLE bool    saveFile(const QString& fpath,
                                const QString& target_path) const;
+  Q_INVOKABLE QString stripUrlPrefix(const QString& path) const;
 Q_SIGNALS:
 };
 #endif // BINDINGS_H

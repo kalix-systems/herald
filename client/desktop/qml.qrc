@@ -44,7 +44,6 @@
         <file>ChatView/ChatTextArea/ts/ChatViewTypes.d.ts</file>
         <file>ChatView/ChatTextArea/ImageAttachmentsComponent.qml</file>
         <file>ChatView/ChatTextArea/ConvoTextArea.qml</file>
-        <file>ChatView/ChatTextArea/ReplyComponent.qml</file>
         <file>ChatView/ConversationWindow/ChatBubbleHover.qml</file>
         <file>ChatView/ConversationWindow/ConversationWindow.qml</file>
         <file>ChatView/Header/ChatSearchComponent.qml</file>
@@ -69,5 +68,7 @@
         <file>SideBar/popups/ImageCropPopup.qml</file>
         <file>SideBar/popups/js/SettingsPopupSubmission.mjs</file>
         <file>ChatView/Popups/MoreInfoPopup.qml</file>
+        <file>SideBar/Pane/ConversationRectangle.qml</file>
+        <file>ChatView/Popups/GroupSettingsPopup.qml</file>
     </qresource>
 </RCC>

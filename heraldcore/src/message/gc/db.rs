@@ -1,5 +1,5 @@
 use super::*;
-use crate::w;
+use coremacros::w;
 use rusqlite::{named_params, Connection as Conn};
 
 pub(crate) fn get_stale_conversations(conn: &Conn) -> Result<ConvMessages, HErr> {

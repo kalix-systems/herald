@@ -4,9 +4,10 @@ use crate::{
     interface::*,
     none, push, spawn,
 };
+use herald_attachments::is_media;
 use herald_common::{Time, UserId};
 use heraldcore::{
-    message::{attachments::is_media, *},
+    message::*,
     types::{ConversationId, MsgId},
 };
 use std::{convert::TryInto, path::PathBuf};
