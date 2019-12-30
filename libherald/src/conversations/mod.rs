@@ -1,4 +1,4 @@
-use crate::{cont_none, err, interface::*, none};
+use crate::{cont_none, err, interface::*};
 use heraldcore::{
     conversation::{self, ConversationMeta, ExpirationPeriod},
     types::ConversationId,

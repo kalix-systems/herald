@@ -152,12 +152,14 @@ impl super::Conversations {
         let profile_picture =
             heraldcore::image_utils::ProfilePicture::from_json_string(picture_json);
 
-        // FIXME exception safety
-        let path = err!(conversation::set_picture(&cid, profile_picture));
-
-        self.model.data_changed(index, index);
-
-        self.set_picture_inner(index, path);
+        spawn!({
+            use crate::conversations::shared::{ConvItemUpdate, ConvItemUpdateVariant};
+            let path = err!(conversation::set_picture(&cid, profile_picture));
+            crate::push(ConvItemUpdate {
+                cid,
+                variant: ConvItemUpdateVariant::PictureChanged(path),
+            });
+        });
     }
 
     pub(crate) fn title_(
