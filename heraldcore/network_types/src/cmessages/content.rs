@@ -32,13 +32,10 @@ pub struct Msg {
     pub mid: MsgId,
     /// The content of the message.
     pub content: Message,
-    /// The message id of the message being replied to, if this
-    /// message is a reply.
-    pub op: Option<MsgId>,
 }
 
 #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
-/// Variants of messages.
+/// Normal message.
 pub struct Message {
     /// Body of the message
     pub body: Option<MessageBody>,
@@ -46,6 +43,9 @@ pub struct Message {
     pub attachments: Vec<Attachment>,
     /// Expiration time of the message
     pub expiration: Option<Time>,
+    /// The message id of the message being replied to, if this
+    /// message is a reply.
+    pub op: Option<MsgId>,
 }
 
 #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
@@ -59,21 +59,13 @@ pub struct Receipt {
 
 /// A message reaction
 #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
-pub enum Reaction {
-    /// Add a react
-    Add {
-        /// The message being reacted to
-        msg_id: MsgId,
-        /// The text of the receipt
-        react_content: ReactContent,
-    },
-    /// Remove a react
-    Remove {
-        /// The message being reacted to
-        msg_id: MsgId,
-        /// The text of the receipt
-        react_content: ReactContent,
-    },
+pub struct Reaction {
+    /// The message being reacted to
+    pub msg_id: MsgId,
+    /// The text of the receipt
+    pub react_content: ReactContent,
+    /// Whether this is a removal or addition
+    pub remove: bool,
 }
 
 #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]

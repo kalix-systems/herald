@@ -148,9 +148,10 @@ pub fn send_reaction(
 ) -> Result<(), HErr> {
     send_cmessage(
         cid,
-        &ConversationMessage::Message(NetContent::Reaction(cmessages::Reaction::Add {
+        &ConversationMessage::Message(NetContent::Reaction(cmessages::Reaction {
             msg_id,
             react_content,
+            remove: false,
         })),
     )
 }
@@ -163,9 +164,10 @@ pub fn send_reaction_removal(
 ) -> Result<(), HErr> {
     send_cmessage(
         cid,
-        &ConversationMessage::Message(NetContent::Reaction(cmessages::Reaction::Remove {
+        &ConversationMessage::Message(NetContent::Reaction(cmessages::Reaction {
             msg_id,
             react_content,
+            remove: true,
         })),
     )
 }
