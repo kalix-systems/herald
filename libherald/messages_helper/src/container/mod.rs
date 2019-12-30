@@ -371,3 +371,6 @@ impl Container {
         ((a_author == b_author) && a_ts.within(FLURRY_FUZZ, b_ts)).into()
     }
 }
+
+#[cfg(test)]
+mod tests;
