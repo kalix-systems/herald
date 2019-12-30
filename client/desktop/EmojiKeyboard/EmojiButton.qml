@@ -4,13 +4,12 @@ import LibHerald 1.0
 
 //PAUL: demagic all numbers and colors
 Button {
-    property bool takesModifier: false
-    property string baseEmoji: ""
-    property string emoji: takesModifier ? baseEmoji + CmnCfg.skinSwatchList[CmnCfg.skinSwatchIndex] : baseEmoji
+    property bool takesModifier
+    property string baseEmoji
+    // consider this a private field
+    property string resultEmoji: takesModifier ? baseEmoji + CmnCfg.skinSwatchList[CmnCfg.skinSwatchIndex] : baseEmoji
     property color lowlight: CmnCfg.palette.darkGrey
-
-    onClicked: maskShape.send(emoji)
-
+    onClicked: maskShape.send(resultEmoji, takesModifier)
     height: selector.height
     width: selector.width
 
@@ -38,6 +37,7 @@ Button {
         anchors.centerIn: parent
         color: "white"
         font.pixelSize: 15
-        text: emoji
+        text: resultEmoji
+        elide: Text.ElideLeft
     }
 }

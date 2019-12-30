@@ -29,6 +29,10 @@ ApplicationWindow {
         }
     }
 
+    EmojiPicker {
+        id: emojiPickerModel
+    }
+
     Loader {
         id: galleryLoader
         anchors.fill: active ? parent : undefined
@@ -39,8 +43,6 @@ ApplicationWindow {
             id: galleryView
         }
     }
-
-
 
     Loader {
         id: appLoader

@@ -7,6 +7,7 @@ Loader {
     id: emoKeysPopup
     clip: true
     active: false
+    onActiveChanged: emojiPickerModel.clearSearch()
     property bool isReactPopup: false
     sourceComponent: EK.EmojiPicker {
         id: emojiPicker

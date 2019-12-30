@@ -19,7 +19,7 @@ fn add_get_delete() {
         stat: MessageReceiptStatus::Nil,
     };
 
-    let body = ConversationMessage::Receipt(msg);
+    let body = ConversationMessage::Message(network_types::cmessages::Content::Receipt(msg));
 
     db::add_to_pending(&conn, conv_id, &body).expect(womp!());
     let pending = db::get_pending(&conn).expect(womp!());
