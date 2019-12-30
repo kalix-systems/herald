@@ -67,7 +67,7 @@ fn test_container_search() {
 
     let (msgmeta1, msgdata1) = msg_constructor("test");
     std::thread::sleep(std::time::Duration::from_millis(2));
-    let (msgmeta2, msgdata2) = msg_constructor("testing");
+    let (msgmeta2, msgdata2) = msg_constructor("retesting");
     std::thread::sleep(std::time::Duration::from_millis(2));
     let (msgmeta3, msgdata3) = msg_constructor("tost");
     let mut container = Container::new(vec![], None);
@@ -81,10 +81,21 @@ fn test_container_search() {
     searchstate
         .set_pattern("te".to_string(), || ())
         .expect(womp!());
+    searchstate.active = true;
 
-    // let matches = container
-    //   .apply_search(&searchstate, |_i| (), || ())
-    //     .expect(womp!("Failed to apply search"));
+    let matches = container
+        .apply_search(&searchstate, |_| (), || ())
+        .expect(womp!("Failed to apply search"));
 
-    //assert_eq!(matches.len(), 2);
+    assert_eq!(matches.len(), 2);
+
+    assert_eq!(msgmeta3.match_status, MatchStatus::NotMatched);
+
+    container.clear_search(|_| ());
+
+    assert_eq!(msgmeta1.match_status, MatchStatus::NotMatched);
+
+    assert_eq!(msgmeta2.match_status, MatchStatus::NotMatched);
+
+    assert_eq!(msgmeta3.match_status, MatchStatus::NotMatched);
 }
