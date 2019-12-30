@@ -20,7 +20,7 @@ impl SearchChanged {
     }
 }
 
-#[derive(Copy, Clone, PartialEq, Eq, Ord, PartialOrd)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Ord, PartialOrd)]
 pub struct Match(pub MessageMeta);
 
 pub struct SearchState {

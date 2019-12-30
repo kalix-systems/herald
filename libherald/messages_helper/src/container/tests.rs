@@ -16,7 +16,7 @@ fn msg_constructor(body: &str) -> (MessageMeta, MsgData) {
 
 #[serial]
 #[test]
-fn test_container() {
+fn test_insertion_flurry_deletion() {
     heraldcore::db::reset_all().expect(womp!());
 
     let convid = [0; 32].into();
@@ -40,6 +40,8 @@ fn test_container() {
     assert_ne!(msgmeta1, msgmeta2);
 
     assert_eq!(container.len(), 2);
+
+    assert_eq!(container.same_flurry(0, 1).expect(womp!()), true);
 
     let ix1 = container.index_of(&msgmeta1);
     assert!(ix1.is_some());
@@ -87,9 +89,13 @@ fn test_container_search() {
         .apply_search(&searchstate, |_| (), || ())
         .expect(womp!("Failed to apply search"));
 
-    assert_eq!(matches.len(), 2);
+    searchstate.set_matches(matches, || (), || ());
+
+    assert_eq!(searchstate.num_matches(), 2);
 
     assert_eq!(msgmeta3.match_status, MatchStatus::NotMatched);
+    // assert_eq!(msgmeta1.match_status, MatchStatus::Matched);
+    // assert_eq!(searchstate.next_match().expect(womp!()).0, msgmeta1);
 
     container.clear_search(|_| ());
 
