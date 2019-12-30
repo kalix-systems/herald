@@ -36,7 +36,7 @@ Rectangle {
     readonly property bool isHead: messageModelData.isHead
     readonly property bool isTail: messageModelData.isTail
 
-    readonly property real maxWidth: defaultWidth * 0.75
+    readonly property real maxWidth: defaultWidth * 0.72
     property string friendlyTimestamp: outbound ? Utils.friendlyTimestamp(
                                                       messageModelData.insertionTime) : Utils.friendlyTimestamp(
                                                       messageModelData.serverTime)
@@ -50,9 +50,9 @@ Rectangle {
 
     readonly property string pfpUrl: messageModelData.authorProfilePicture
     property bool hoverHighlight: false
-    property bool moreInfo: false
     property alias expireInfo: expireInfo
     property int bubbleIndex
+    property bool moreInfo: false
 
     Connections {
         target: appRoot.globalTimer
@@ -155,6 +155,7 @@ Rectangle {
 
         BubbleLabel {
             visible: isHead
+            timestamp: friendlyTimestamp
 
             id: authorLabel
         }

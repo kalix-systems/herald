@@ -7,6 +7,8 @@ CREATE TABLE IF NOT EXISTS messages (
   conversation_id BLOB NOT NULL,
   -- text of message
   body TEXT,
+  -- message history update
+  update_item BLOB,
   -- timestamp associated with message
   insertion_ts INTEGER NOT NULL,
   -- timestamp the message was inserted into the database
@@ -44,6 +46,7 @@ CREATE TABLE IF NOT EXISTS message_reactions (
   react_content TEXT NOT NULL,
   -- time react was received
   insertion_ts INTEGER NOT NULL,
+  PRIMARY KEY(msg_id, reactionary, react_content),
   FOREIGN KEY(msg_id) REFERENCES messages(msg_id) ON DELETE CASCADE
 );
 

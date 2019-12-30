@@ -1,9 +1,7 @@
 use crate::{db::Database, errors::HErr, image_utils, types::*};
-pub use coretypes::{
-    conversation::Conversation,
-    user::{User, UserStatus, UserType},
-};
+pub use coretypes::conversation::Conversation;
 use herald_common::*;
+use herald_user::{User, UserStatus, UserType};
 use rusqlite::{params, NO_PARAMS};
 
 pub(crate) mod db;

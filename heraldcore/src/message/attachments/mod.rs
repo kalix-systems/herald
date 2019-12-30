@@ -1,5 +1,5 @@
 use super::*;
-pub use coretypes::attachments::*;
+use herald_attachments::AttachmentMeta;
 
 pub(crate) mod db;
 

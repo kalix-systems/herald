@@ -67,6 +67,13 @@ impl UtilsTrait for Utils {
         .dump()
     }
 
+    fn strip_url_prefix(
+        &self,
+        url: String,
+    ) -> String {
+        crate::utils::strip_qrc(url).unwrap_or_default()
+    }
+
     fn emit(&mut self) -> &mut UtilsEmitter {
         &mut self.emit
     }

@@ -1,4 +1,5 @@
 use super::*;
+use herald_attachments::{Attachment, AttachmentMeta};
 use location::Location;
 
 #[derive(Default)]
@@ -80,6 +81,13 @@ impl OutboundMessageBuilder {
         Ok(())
     }
 
+    /// Stores the message without sending it. This function is meant for testing
+    /// and not intended to be used outside of this workspace.
+    pub fn store(self) -> Result<Message, HErr> {
+        let mut db = Database::get()?;
+        self.store_db(&mut db)
+    }
+
     #[cfg(test)]
     pub(crate) fn store_and_send_blocking(self) -> Result<Message, HErr> {
         let mut db = Database::get()?;
@@ -104,7 +112,7 @@ pub(crate) struct InboundMessageBuilder {
     /// Message id of the message being replied to
     pub(crate) op: Option<MsgId>,
     /// Message attachments
-    pub(crate) attachments: Vec<attachments::Attachment>,
+    pub(crate) attachments: Vec<Attachment>,
 }
 
 impl InboundMessageBuilder {
@@ -160,7 +168,7 @@ impl InboundMessageBuilder {
 
     pub(crate) fn attachments(
         &mut self,
-        attachments: Vec<attachments::Attachment>,
+        attachments: Vec<Attachment>,
     ) -> &mut Self {
         self.attachments = attachments;
         self

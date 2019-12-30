@@ -89,7 +89,10 @@ ListView {
         defaultWidth: chatListView.width
         width: parent.width
         messageModelData: model
-        ListView.onAdd: chatScrollBarInner.setPosition(1.0)
+        ListView.onAdd: {
+            chatScrollBarInner.setPosition(1.0)
+            conversationItem.status = 0
+        }
         bubbleIndex: index
 
         ChatBubbleHover {
@@ -147,11 +150,19 @@ ListView {
             }
         }
 
-        //TODO: this doesn't actually produce the desired behavior
-        Component.onCompleted: {
-            if (root.active) {
-                ownedConversation.markRead(index)
+        Loader {
+            id: markReadLoader
+            active: false
+            Connections {
+                target: root
+                onActiveChanged: if (root.active) {
+                                     ownedConversation.markRead(index)
+                                 }
             }
+        }
+
+        Component.onCompleted: {
+            markReadLoader.active = true
         }
     }
 }

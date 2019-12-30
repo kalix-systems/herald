@@ -1,5 +1,5 @@
 use crate::errors::*;
-use crate::w;
+use coremacros::w;
 use once_cell::sync::OnceCell;
 use platform_dirs::db_dir;
 use rusqlite::{Connection, NO_PARAMS};

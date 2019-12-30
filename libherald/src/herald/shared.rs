@@ -25,7 +25,7 @@ pub enum Update {
     User(crate::users::shared::UserUpdate),
     Conf(crate::config::ConfUpdate),
     Error(String),
-    // This is here because rust doesn't have specializatoin
+    // This is here because rust doesn't have specialization
     Nil,
 }
 

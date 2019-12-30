@@ -1,5 +1,5 @@
 use super::*;
-use crate::w;
+use coremacros::w;
 use rusqlite::named_params;
 
 impl ConversationBuilder {
@@ -10,7 +10,8 @@ impl ConversationBuilder {
         let Self {
             conversation_id,
             title,
-            mut picture,
+            picture,
+            tagged_picture,
             color,
             muted,
             pairwise,
@@ -33,13 +34,10 @@ impl ConversationBuilder {
         let expiration_period = expiration_period
             .unwrap_or_else(|| crate::config::db::preferred_expiration(tx).unwrap_or_default());
 
-        let picture = match picture.take() {
-            Some(picture) => {
-                let path: std::path::PathBuf =
-                    crate::image_utils::update_picture(picture, None::<&str>)?;
-                path.into_os_string().into_string().ok()
-            }
-            None => None,
+        let picture = match (tagged_picture, picture) {
+            (Some(tagged), _) => Some(image_utils::update_picture(tagged, None::<&str>)?),
+            (_, Some(path)) => Some(image_utils::update_picture_autocrop(path, None::<&str>)?),
+            _ => None,
         };
 
         let last_active = Time::now();

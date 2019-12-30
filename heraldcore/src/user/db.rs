@@ -1,5 +1,5 @@
 use super::*;
-use crate::w;
+use coremacros::w;
 use coretypes::conversation::Conversation;
 use rusqlite::named_params;
 
@@ -61,12 +61,7 @@ pub fn set_profile_picture(
     let old_path = self::profile_picture(conn, id)?;
 
     let profile_picture = match profile_picture {
-        Some(picture) => {
-            let path_string = image_utils::update_picture(picture, old_path)?
-                .into_os_string()
-                .into_string()?;
-            Some(path_string)
-        }
+        Some(picture) => Some(image_utils::update_picture(picture, old_path)?),
         None => {
             if let Some(old) = old_path {
                 std::fs::remove_file(old).ok();

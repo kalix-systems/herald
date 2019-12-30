@@ -77,7 +77,7 @@ Rectangle {
 
         onCurrentFileChanged: {
             groupImageLoader.active = true
-            groupImageLoader.imageSource = fileUrl
+            groupImageLoader.imageSource = currentFile
         }
     }
 }

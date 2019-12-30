@@ -5,9 +5,7 @@ authors = ["Baeo Maltinsky <baeo.maltinsky@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-hex = "0.4.0"
-tar = "0.4.26"
-json = "0.12.0"
+json = "0.12"
 unicode-segmentation = "1.6.0"
 
 [dependencies.herald_common]
@@ -15,17 +13,17 @@ path             = "../../herald_common"
 default_features = false
 features         = ["rusqlite_"]
 
-[dependencies.platform_dirs]
-path = "../platform_dirs"
+[dependencies.herald_ids]
+path = "../herald_ids"
 
-[dependencies.image_utils]
-path = "../image_utils"
+[dependencies.herald_attachments]
+path = "../herald_attachments"
 
 [dependencies.search_pattern]
-path = "../search_pattern"
+path = "../../search_pattern"
 
 [dependencies.location]
-path = "../location"
+path = "../../location"
 
 [dependencies.kson]
 path = "../../kson"
@@ -36,4 +34,3 @@ path = "../../kcl"
 [dependencies.rusqlite]
 version          = "0.21"
 default_features = false
-features         = ["functions", "bundled"]

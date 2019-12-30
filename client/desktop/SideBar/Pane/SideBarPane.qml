@@ -39,10 +39,12 @@ Flickable {
 
         Loader {
             id: sideBarBodyLoader
+            property bool archiveState: false
             sourceComponent: Component {
                 ConversationViewMain {
                     id: convosLvComponent
                     model: Herald.conversations
+                    state: sideBarBodyLoader.archiveState ? "archivestate" : ""
                 }
             }
             width: parent.width

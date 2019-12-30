@@ -33,7 +33,6 @@
         <file>ChatBubble/ReplyBubble/ReplyImage.qml</file>
         <file>ChatBubble/ReplyBubble/ReplyText.qml</file>
         <file>ChatBubble/ReplyBubble/dyn/ReplyElidedBody.qml</file>
-        <file>ChatBubble/ReplyBubble/dyn/ReplyFileClip.qml</file>
         <file>ChatBubble/ReplyBubble/dyn/ReplyFileSurplus.qml</file>
         <file>ChatBubble/ReplyBubble/dyn/ReplyMouseArea.qml</file>
         <file>ChatBubble/ReplyBubble/dyn/ReplyTimeInfo.qml</file>
@@ -61,5 +60,7 @@
         <file>ChatBubble/DefaultBubble.qml</file>
         <file>ChatBubble/BubbleExpireInfo.qml</file>
         <file>ChatBubble/BubbleReacts.qml</file>
+        <file>ChatBubble/ComposeReplyComponent.qml</file>
+        <file>ChatBubble/ReplyBubble/ReplyFileClip.qml</file>
     </qresource>
 </RCC>

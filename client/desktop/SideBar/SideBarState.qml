@@ -52,6 +52,19 @@ Item {
                 target: sideBarPane.messageSearchLoader
                 searchModel: Herald.messageSearch
             }
+        },
+
+        State {
+            name: "archivedState"
+            PropertyChanges {
+                target: headerLoader
+                sourceComponent: altContextHeader
+                headerText: qsTr("Archive")
+            }
+            PropertyChanges {
+                target: sideBarPane.sideBarBodyLoader
+                archiveState: true
+            }
         }
     ]
 }

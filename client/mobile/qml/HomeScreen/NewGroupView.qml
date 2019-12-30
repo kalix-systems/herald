@@ -41,7 +41,7 @@ Page {
             id: stateLabel
             text: qsTr("New group")
             font {
-                pixelSize: CmnCfg.headerTextSize
+                pixelSize: CmnCfg.headerFontSize
                 family: CmnCfg.labelFont.name
             }
             Layout.alignment: Layout.verticalCenter
@@ -137,7 +137,8 @@ Page {
                             "height": Math.round(parsed.height),
                             "x": 0,
                             "y": 0,
-                            "path": imageSelector.imageSource
+                            "path": Herald.utils.stripUrlPrefix(
+                                        imageSelector.imageSource)
                         }
 
                         Herald.conversationBuilder.setProfilePicture(

@@ -1,5 +1,6 @@
 use super::*;
 use crate::config::test_config;
+use herald_attachments::Attachment;
 use platform_dirs::attachments_dir;
 use serial_test_derive::serial;
 use std::{convert::TryInto, str::FromStr};

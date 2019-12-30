@@ -6,6 +6,8 @@ import "../js/utils.mjs" as Utils
 
 Row {
     spacing: CmnCfg.microMargin
+    property alias timestamp: time.text
+    property alias name: authorNameTM.text
     Label {
         id: authorLabel
         text: authorNameTM.elidedText
@@ -21,29 +23,17 @@ Row {
             text: authorName
             font.weight: Font.Bold
             font.family: CmnCfg.chatFont.name
-            elideWidth: bubbleRoot.maxWidth
+            elideWidth: maxWidth
             elide: Text.ElideRight
         }
     }
 
     Label {
-        id: timestamp
+        id: time
         font.pixelSize: 12
-        text: friendlyTimestamp
+        text: timestamp
         color: CmnCfg.palette.darkGrey
         font.family: CmnCfg.chatFont.name
         anchors.bottom: authorLabel.bottom
     }
-
-//    Button {
-//        id: clock
-//        icon.source: timerIcon
-//        icon.height: 16
-//        icon.width: 16
-//        icon.color: "grey"
-//        padding: 0
-//        anchors.margins: 0
-//        background: Item {}
-//        anchors.verticalCenter: timestamp.verticalCenter
-//    }
 }

@@ -12,7 +12,7 @@ impl Messages {
     }
 
     pub(crate) fn last_body_(&self) -> Option<&str> {
-        Some(self.container.last_msg()?.body.as_ref()?.as_str())
+        self.container.last_msg()?.text()
     }
 
     pub(crate) fn last_time_(&self) -> Option<i64> {

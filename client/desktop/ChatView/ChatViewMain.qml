@@ -112,7 +112,8 @@ Page {
             leftMargin: 0
             rightMargin: 0
         }
-
+        //to handle jumping behavior in bubbles caused when the page is small
+        onHeightChanged: convWindow.height = convWindow.contentHeight
         keysProxy: Item {
             Keys.onReturnPressed: TextJs.enterKeyHandler(
                                       event, chatTextArea.chatText,
