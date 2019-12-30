@@ -1,6 +1,22 @@
 use super::*;
 
 #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
+pub enum Content {
+    /// Members just added to a conversation
+    NewMembers(NewMembers),
+    /// An acknowledgement of a contact request.
+    UserReqAck(UserReqAck),
+    /// A normal message.
+    Msg(Msg),
+    /// An acknowledgement of a normal message.
+    Receipt(Receipt),
+    /// A message reaction
+    Reaction(Reaction),
+    /// An update to the conversation settings
+    Settings(conversation::settings::SettingsUpdate),
+}
+
+#[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
 /// Members that have just been added to a conversation.
 pub struct NewMembers(pub Vec<UserId>);
 
@@ -15,14 +31,30 @@ pub struct Msg {
     /// The message id. Globally unique.
     pub mid: MsgId,
     /// The content of the message.
-    pub content: Message,
-    /// The message id of the message being replied to, if this
-    /// message is a reply.
-    pub op: Option<MsgId>,
+    pub content: MsgContent,
 }
 
 #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
-/// Variants of messages.
+/// A normal message to the conversation.
+pub enum MsgContent {
+    Normal(Message),
+    GroupSettings(GroupSettingsUpdate),
+}
+
+#[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
+pub enum GroupSettingsUpdate {
+    /// Expiring messages setting
+    Expiration(conversation::ExpirationPeriod),
+    /// The title of the group
+    Title(Option<String>),
+    /// The color of the group
+    Color(u32),
+    /// The group picture, as a buffer
+    Picture(Vec<u8>),
+}
+
+#[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
+/// Normal message.
 pub struct Message {
     /// Body of the message
     pub body: Option<MessageBody>,
@@ -30,6 +62,9 @@ pub struct Message {
     pub attachments: Vec<Attachment>,
     /// Expiration time of the message
     pub expiration: Option<Time>,
+    /// The message id of the message being replied to, if this
+    /// message is a reply.
+    pub op: Option<MsgId>,
 }
 
 #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
@@ -43,21 +78,13 @@ pub struct Receipt {
 
 /// A message reaction
 #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
-pub enum Reaction {
-    /// Add a react
-    Add {
-        /// The message being reacted to
-        msg_id: MsgId,
-        /// The text of the receipt
-        react_content: ReactContent,
-    },
-    /// Remove a react
-    Remove {
-        /// The message being reacted to
-        msg_id: MsgId,
-        /// The text of the receipt
-        react_content: ReactContent,
-    },
+pub struct Reaction {
+    /// The message being reacted to
+    pub msg_id: MsgId,
+    /// The text of the receipt
+    pub react_content: ReactContent,
+    /// Whether this is a removal or addition
+    pub remove: bool,
 }
 
 #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]

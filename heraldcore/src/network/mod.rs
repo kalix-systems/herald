@@ -113,10 +113,10 @@ pub fn send_read_receipt(
 ) -> Result<(), HErr> {
     send_cmessage(
         cid,
-        &ConversationMessage::Receipt(cmessages::Receipt {
+        &ConversationMessage::Message(NetContent::Receipt(cmessages::Receipt {
             of: msg_id,
             stat: MessageReceiptStatus::Read,
-        }),
+        })),
     )
 }
 
@@ -137,7 +137,7 @@ pub(crate) fn send_normal_message(
     cid: ConversationId,
     msg: cmessages::Msg,
 ) -> Result<(), HErr> {
-    send_cmessage(cid, &ConversationMessage::Msg(msg))
+    send_cmessage(cid, &ConversationMessage::Message(NetContent::Msg(msg)))
 }
 
 /// Sends a reaction
@@ -148,10 +148,11 @@ pub fn send_reaction(
 ) -> Result<(), HErr> {
     send_cmessage(
         cid,
-        &ConversationMessage::Reaction(cmessages::Reaction::Add {
+        &ConversationMessage::Message(NetContent::Reaction(cmessages::Reaction {
             msg_id,
             react_content,
-        }),
+            remove: false,
+        })),
     )
 }
 
@@ -163,17 +164,21 @@ pub fn send_reaction_removal(
 ) -> Result<(), HErr> {
     send_cmessage(
         cid,
-        &ConversationMessage::Reaction(cmessages::Reaction::Remove {
+        &ConversationMessage::Message(NetContent::Reaction(cmessages::Reaction {
             msg_id,
             react_content,
-        }),
+            remove: true,
+        })),
     )
 }
 pub(crate) fn send_conversation_settings_update(
     cid: ConversationId,
     update: settings::SettingsUpdate,
 ) -> Result<(), HErr> {
-    send_cmessage(cid, &ConversationMessage::Settings(update))
+    send_cmessage(
+        cid,
+        &ConversationMessage::Message(NetContent::Settings(update)),
+    )
 }
 
 pub(crate) fn server_url(ext: &str) -> String {

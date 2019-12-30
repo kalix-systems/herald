@@ -51,6 +51,42 @@ impl Message {
     pub fn text(&self) -> Option<&str> {
         self.content.as_ref().and_then(Item::as_str)
     }
+
+    pub fn split(self) -> (MessageMeta, MsgData) {
+        let Message {
+            message_id,
+            author,
+            content,
+            time,
+            op,
+            receipts,
+            attachments,
+            send_status,
+            reactions,
+            replies,
+            ..
+        } = self;
+
+        let data = MsgData {
+            author,
+            receipts,
+            content,
+            op,
+            attachments,
+            time,
+            send_status,
+            replies,
+            reactions,
+        };
+
+        let message = MessageMeta {
+            msg_id: message_id,
+            insertion_time: time.insertion,
+            match_status: MatchStatus::NotMatched,
+        };
+
+        (message, data)
+    }
 }
 
 /// An isolated message receipt.
@@ -220,42 +256,6 @@ pub struct MessageMeta {
     pub msg_id: MsgId,
     pub insertion_time: Time,
     pub match_status: MatchStatus,
-}
-
-pub fn split_msg(msg: Message) -> (MessageMeta, MsgData) {
-    let Message {
-        message_id,
-        author,
-        content,
-        time,
-        op,
-        receipts,
-        attachments,
-        send_status,
-        reactions,
-        replies,
-        ..
-    } = msg;
-
-    let data = MsgData {
-        author,
-        receipts,
-        content,
-        op,
-        attachments,
-        time,
-        send_status,
-        replies,
-        reactions,
-    };
-
-    let message = MessageMeta {
-        msg_id: message_id,
-        insertion_time: time.insertion,
-        match_status: MatchStatus::NotMatched,
-    };
-
-    (message, data)
 }
 
 #[repr(u8)]
