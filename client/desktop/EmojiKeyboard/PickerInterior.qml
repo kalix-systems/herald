@@ -136,22 +136,28 @@ Item {
             margins: CmnCfg.smallMargin
         }
 
-        GridView {
-            id: emojiList
+        Loader {
+            id: listLoader
+            asynchronous: true
             anchors.fill: parent
-            boundsBehavior: Flickable.StopAtBounds
-            clip: true
-            ScrollBar.vertical: ScrollBar {}
-            maximumFlickVelocity: 700
-            flickDeceleration: emojiList.height * 10
-            cellWidth: listView.width / 8
-            cellHeight: cellWidth
-            cacheBuffer: emojiList.height * 10
-            model: emojiPickerModel
-            delegate: EmojiButton {
-                baseEmoji: model.emoji
-                takesModifier: model.skintone_modifier
+            sourceComponent: StandardInterior {
+                id: emojiList
             }
+            Component {
+                id: searchComp
+                SearchInteriorComponent {}
+            }
+
+            states: [
+                State {
+                    name: "default"
+                    when: searchTextArea.text.length != 0
+                    PropertyChanges {
+                        target: listLoader
+                        sourceComponent: searchComp
+                    }
+                }
+            ]
         }
     }
     // footer and anchor links

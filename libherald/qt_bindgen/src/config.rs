@@ -223,11 +223,13 @@ fn emoji_picker() -> Object {
     let props = props! {
         smileys_index: Prop::new().simple(QUint32),
         nature_index: Prop::new().simple(QUint32),
+        body_index: Prop::new().simple(QUint32),
         food_index: Prop::new().simple(QUint32),
         locations_index: Prop::new().simple(QUint32),
         activities_index: Prop::new().simple(QUint32),
         symbols_index: Prop::new().simple(QUint32),
-        flags_index: Prop::new().simple(QUint32)
+        flags_index: Prop::new().simple(QUint32),
+        objects_index: Prop::new().simple(QUint32)
     };
 
     let funcs = functions! {

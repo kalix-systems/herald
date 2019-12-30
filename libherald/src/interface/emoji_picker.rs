@@ -5,10 +5,12 @@ pub struct EmojiPickerQObject;
 pub struct EmojiPickerEmitter {
     pub(super) qobject: Arc<AtomicPtr<EmojiPickerQObject>>,
     pub(super) activities_index_changed: fn(*mut EmojiPickerQObject),
+    pub(super) body_index_changed: fn(*mut EmojiPickerQObject),
     pub(super) flags_index_changed: fn(*mut EmojiPickerQObject),
     pub(super) food_index_changed: fn(*mut EmojiPickerQObject),
     pub(super) locations_index_changed: fn(*mut EmojiPickerQObject),
     pub(super) nature_index_changed: fn(*mut EmojiPickerQObject),
+    pub(super) objects_index_changed: fn(*mut EmojiPickerQObject),
     pub(super) smileys_index_changed: fn(*mut EmojiPickerQObject),
     pub(super) symbols_index_changed: fn(*mut EmojiPickerQObject),
     pub(super) new_data_ready: fn(*mut EmojiPickerQObject),
@@ -25,10 +27,12 @@ impl EmojiPickerEmitter {
         EmojiPickerEmitter {
             qobject: self.qobject.clone(),
             activities_index_changed: self.activities_index_changed,
+            body_index_changed: self.body_index_changed,
             flags_index_changed: self.flags_index_changed,
             food_index_changed: self.food_index_changed,
             locations_index_changed: self.locations_index_changed,
             nature_index_changed: self.nature_index_changed,
+            objects_index_changed: self.objects_index_changed,
             smileys_index_changed: self.smileys_index_changed,
             symbols_index_changed: self.symbols_index_changed,
             new_data_ready: self.new_data_ready,
@@ -46,6 +50,14 @@ impl EmojiPickerEmitter {
 
         if !ptr.is_null() {
             (self.activities_index_changed)(ptr);
+        }
+    }
+
+    pub fn body_index_changed(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+
+        if !ptr.is_null() {
+            (self.body_index_changed)(ptr);
         }
     }
 
@@ -78,6 +90,14 @@ impl EmojiPickerEmitter {
 
         if !ptr.is_null() {
             (self.nature_index_changed)(ptr);
+        }
+    }
+
+    pub fn objects_index_changed(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+
+        if !ptr.is_null() {
+            (self.objects_index_changed)(ptr);
         }
     }
 
@@ -216,6 +236,8 @@ pub trait EmojiPickerTrait {
 
     fn activities_index(&self) -> u32;
 
+    fn body_index(&self) -> u32;
+
     fn flags_index(&self) -> u32;
 
     fn food_index(&self) -> u32;
@@ -223,6 +245,8 @@ pub trait EmojiPickerTrait {
     fn locations_index(&self) -> u32;
 
     fn nature_index(&self) -> u32;
+
+    fn objects_index(&self) -> u32;
 
     fn smileys_index(&self) -> u32;
 
@@ -291,10 +315,12 @@ pub unsafe fn emoji_picker_new_inner(ptr_bundle: *mut EmojiPickerPtrBundle) -> E
     let EmojiPickerPtrBundle {
         emoji_picker,
         emoji_picker_activities_index_changed,
+        emoji_picker_body_index_changed,
         emoji_picker_flags_index_changed,
         emoji_picker_food_index_changed,
         emoji_picker_locations_index_changed,
         emoji_picker_nature_index_changed,
+        emoji_picker_objects_index_changed,
         emoji_picker_smileys_index_changed,
         emoji_picker_symbols_index_changed,
         emoji_picker_new_data_ready,
@@ -313,10 +339,12 @@ pub unsafe fn emoji_picker_new_inner(ptr_bundle: *mut EmojiPickerPtrBundle) -> E
     let emoji_picker_emit = EmojiPickerEmitter {
         qobject: Arc::new(AtomicPtr::new(emoji_picker)),
         activities_index_changed: emoji_picker_activities_index_changed,
+        body_index_changed: emoji_picker_body_index_changed,
         flags_index_changed: emoji_picker_flags_index_changed,
         food_index_changed: emoji_picker_food_index_changed,
         locations_index_changed: emoji_picker_locations_index_changed,
         nature_index_changed: emoji_picker_nature_index_changed,
+        objects_index_changed: emoji_picker_objects_index_changed,
         smileys_index_changed: emoji_picker_smileys_index_changed,
         symbols_index_changed: emoji_picker_symbols_index_changed,
         new_data_ready: emoji_picker_new_data_ready,
@@ -368,6 +396,11 @@ pub unsafe extern "C" fn emoji_picker_activities_index_get(ptr: *const EmojiPick
 }
 
 #[no_mangle]
+pub unsafe extern "C" fn emoji_picker_body_index_get(ptr: *const EmojiPicker) -> u32 {
+    (&*ptr).body_index()
+}
+
+#[no_mangle]
 pub unsafe extern "C" fn emoji_picker_flags_index_get(ptr: *const EmojiPicker) -> u32 {
     (&*ptr).flags_index()
 }
@@ -385,6 +418,11 @@ pub unsafe extern "C" fn emoji_picker_locations_index_get(ptr: *const EmojiPicke
 #[no_mangle]
 pub unsafe extern "C" fn emoji_picker_nature_index_get(ptr: *const EmojiPicker) -> u32 {
     (&*ptr).nature_index()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn emoji_picker_objects_index_get(ptr: *const EmojiPicker) -> u32 {
+    (&*ptr).objects_index()
 }
 
 #[no_mangle]
@@ -472,10 +510,12 @@ pub unsafe extern "C" fn emoji_picker_data_skintone_modifier(
 pub struct EmojiPickerPtrBundle {
     emoji_picker: *mut EmojiPickerQObject,
     emoji_picker_activities_index_changed: fn(*mut EmojiPickerQObject),
+    emoji_picker_body_index_changed: fn(*mut EmojiPickerQObject),
     emoji_picker_flags_index_changed: fn(*mut EmojiPickerQObject),
     emoji_picker_food_index_changed: fn(*mut EmojiPickerQObject),
     emoji_picker_locations_index_changed: fn(*mut EmojiPickerQObject),
     emoji_picker_nature_index_changed: fn(*mut EmojiPickerQObject),
+    emoji_picker_objects_index_changed: fn(*mut EmojiPickerQObject),
     emoji_picker_smileys_index_changed: fn(*mut EmojiPickerQObject),
     emoji_picker_symbols_index_changed: fn(*mut EmojiPickerQObject),
     emoji_picker_new_data_ready: fn(*mut EmojiPickerQObject),

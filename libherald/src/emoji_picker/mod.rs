@@ -27,6 +27,10 @@ impl Interface for EmojiPicker {
         emoji_utils::ACTIVITIES as u32
     }
 
+    fn body_index(&self) -> u32 {
+        emoji_utils::PEOPLE_BODY as u32
+    }
+
     fn flags_index(&self) -> u32 {
         emoji_utils::FLAGS as u32
     }
@@ -49,6 +53,9 @@ impl Interface for EmojiPicker {
 
     fn symbols_index(&self) -> u32 {
         emoji_utils::SYMBOLS as u32
+    }
+    fn objects_index(&self) -> u32 {
+        emoji_utils::OBJECTS as u32
     }
 
     fn emit(&mut self) -> &mut Emitter {

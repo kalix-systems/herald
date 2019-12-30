@@ -144,6 +144,10 @@ inline void emojiPickerActivities_indexChanged(EmojiPicker* o)
 {
   Q_EMIT o->activities_indexChanged();
 }
+inline void emojiPickerBody_indexChanged(EmojiPicker* o)
+{
+  Q_EMIT o->body_indexChanged();
+}
 inline void emojiPickerFlags_indexChanged(EmojiPicker* o)
 {
   Q_EMIT o->flags_indexChanged();
@@ -159,6 +163,10 @@ inline void emojiPickerLocations_indexChanged(EmojiPicker* o)
 inline void emojiPickerNature_indexChanged(EmojiPicker* o)
 {
   Q_EMIT o->nature_indexChanged();
+}
+inline void emojiPickerObjects_indexChanged(EmojiPicker* o)
+{
+  Q_EMIT o->objects_indexChanged();
 }
 inline void emojiPickerSmileys_indexChanged(EmojiPicker* o)
 {
@@ -1271,10 +1279,12 @@ extern "C" {
 EmojiPicker::Private* emoji_picker_new(EmojiPickerPtrBundle*);
 void                  emoji_picker_free(EmojiPicker::Private*);
 quint32 emoji_picker_activities_index_get(const EmojiPicker::Private*);
+quint32 emoji_picker_body_index_get(const EmojiPicker::Private*);
 quint32 emoji_picker_flags_index_get(const EmojiPicker::Private*);
 quint32 emoji_picker_food_index_get(const EmojiPicker::Private*);
 quint32 emoji_picker_locations_index_get(const EmojiPicker::Private*);
 quint32 emoji_picker_nature_index_get(const EmojiPicker::Private*);
+quint32 emoji_picker_objects_index_get(const EmojiPicker::Private*);
 quint32 emoji_picker_smileys_index_get(const EmojiPicker::Private*);
 quint32 emoji_picker_symbols_index_get(const EmojiPicker::Private*);
 void    emoji_picker_clear_search(EmojiPicker::Private*);
@@ -3784,10 +3794,12 @@ EmojiPicker::EmojiPicker(QObject* parent)
       m_d(emoji_picker_new(new EmojiPickerPtrBundle{
           this,
           emojiPickerActivities_indexChanged,
+          emojiPickerBody_indexChanged,
           emojiPickerFlags_indexChanged,
           emojiPickerFood_indexChanged,
           emojiPickerLocations_indexChanged,
           emojiPickerNature_indexChanged,
+          emojiPickerObjects_indexChanged,
           emojiPickerSmileys_indexChanged,
           emojiPickerSymbols_indexChanged,
           [](const EmojiPicker* o) { Q_EMIT o->newDataReady(QModelIndex()); },
@@ -3837,6 +3849,11 @@ quint32 EmojiPicker::activities_index() const
   return emoji_picker_activities_index_get(m_d);
 }
 
+quint32 EmojiPicker::body_index() const
+{
+  return emoji_picker_body_index_get(m_d);
+}
+
 quint32 EmojiPicker::flags_index() const
 {
   return emoji_picker_flags_index_get(m_d);
@@ -3855,6 +3872,11 @@ quint32 EmojiPicker::locations_index() const
 quint32 EmojiPicker::nature_index() const
 {
   return emoji_picker_nature_index_get(m_d);
+}
+
+quint32 EmojiPicker::objects_index() const
+{
+  return emoji_picker_objects_index_get(m_d);
 }
 
 quint32 EmojiPicker::smileys_index() const

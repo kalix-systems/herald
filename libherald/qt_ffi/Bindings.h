@@ -229,10 +229,12 @@ struct DocumentAttachmentsPtrBundle {
 struct EmojiPickerPtrBundle {
   EmojiPicker* emoji_picker;
   void (*emoji_picker_activities_index_changed)(EmojiPicker*);
+  void (*emoji_picker_body_index_changed)(EmojiPicker*);
   void (*emoji_picker_flags_index_changed)(EmojiPicker*);
   void (*emoji_picker_food_index_changed)(EmojiPicker*);
   void (*emoji_picker_locations_index_changed)(EmojiPicker*);
   void (*emoji_picker_nature_index_changed)(EmojiPicker*);
+  void (*emoji_picker_objects_index_changed)(EmojiPicker*);
   void (*emoji_picker_smileys_index_changed)(EmojiPicker*);
   void (*emoji_picker_symbols_index_changed)(EmojiPicker*);
 
@@ -1009,6 +1011,7 @@ private:
   bool     m_ownsPrivate;
   Q_PROPERTY(quint32 activities_index READ activities_index NOTIFY
                  activities_indexChanged FINAL)
+  Q_PROPERTY(quint32 body_index READ body_index NOTIFY body_indexChanged FINAL)
   Q_PROPERTY(
       quint32 flags_index READ flags_index NOTIFY flags_indexChanged FINAL)
   Q_PROPERTY(quint32 food_index READ food_index NOTIFY food_indexChanged FINAL)
@@ -1016,6 +1019,8 @@ private:
                  locations_indexChanged FINAL)
   Q_PROPERTY(
       quint32 nature_index READ nature_index NOTIFY nature_indexChanged FINAL)
+  Q_PROPERTY(quint32 objects_index READ objects_index NOTIFY
+                 objects_indexChanged FINAL)
   Q_PROPERTY(quint32 smileys_index READ smileys_index NOTIFY
                  smileys_indexChanged FINAL)
   Q_PROPERTY(quint32 symbols_index READ symbols_index NOTIFY
@@ -1026,10 +1031,12 @@ public:
   explicit EmojiPicker(QObject* parent = nullptr);
   ~EmojiPicker() override;
   quint32          activities_index() const;
+  quint32          body_index() const;
   quint32          flags_index() const;
   quint32          food_index() const;
   quint32          locations_index() const;
   quint32          nature_index() const;
+  quint32          objects_index() const;
   quint32          smileys_index() const;
   quint32          symbols_index() const;
   Q_INVOKABLE void clearSearch();
@@ -1072,10 +1079,12 @@ private:
   void                                          updatePersistentIndexes();
 Q_SIGNALS:
   void activities_indexChanged();
+  void body_indexChanged();
   void flags_indexChanged();
   void food_indexChanged();
   void locations_indexChanged();
   void nature_indexChanged();
+  void objects_indexChanged();
   void smileys_indexChanged();
   void symbols_indexChanged();
 };

@@ -7,7 +7,7 @@ Button {
     property string imageSource: ""
     property int anchorIndex
 
-    onClicked: emojiList.contentY = innerRepeater.itemAt(anchorIndex).y
+    onClicked: listLoader.sourceComponent.contentY = 0
     padding: 0
     background: Item {}
     icon.source: imageSource
