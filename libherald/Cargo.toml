@@ -1,24 +1,21 @@
 [package]
-name = "herald"
-version = "0.1.0"
 authors = ["Baeo Maltinksy <baeo.maltinsky@gmail.com>", "mobile-bungalow <pwmay@ucsc.edu>", "Kaavya Jayram <kaavya@berkeley.edu>"]
 edition = "2018"
-
-[lib]
-crate-type = ["cdylib", "staticlib"]
-
+name = "herald"
+version = "0.1.0"
 [dependencies]
 crossbeam-channel = "0.4"
-im                = "14.0.0"
-once_cell         = "1.2.0"
-parking_lot       = "0.10.0"
+emoji_utils = "0.2.0"
+im = "14.0.0"
 json = "0.12.0"
+once_cell = "1.2.0"
+parking_lot = "0.10.0"
 
 [dependencies.herald_common]
-path    = "../herald_common"
+path = "../herald_common"
 
 [dependencies.heraldcore]
-path    = "../heraldcore"
+path = "../heraldcore"
 
 [dependencies.herald_attachments]
 path    = "../heraldcore/herald_attachments"
@@ -39,11 +36,8 @@ path = "./messages_helper"
 git = "https://github.com/kalix-systems/riqtshaw_types"
 rev = "ee0af86c4db49f9c554aef9c122255d3230d3b99"
 
-[target.'cfg( all( target_family = "unix", not( any( target_os = "android", target_os="ios" ) ) ) )'.dependencies.notify-rust]
-version = "3.6.2"
-
 [dev-dependencies]
-serial_test        = "0.2.0"
+serial_test = "0.2.0"
 serial_test_derive = "0.2.0"
 
 [dev-dependencies.coremacros]
@@ -51,3 +45,12 @@ path = "../heraldcore/coremacros"
 
 [features]
 deploy = ["heraldcore/deploy"]
+
+[lib]
+crate-type = ["cdylib", "staticlib"]
+
+[target]
+[target."cfg( all( target_family = \"unix\", not( any( target_os = \"android\", target_os=\"ios\" ) ) ) )"]
+[target."cfg( all( target_family = \"unix\", not( any( target_os = \"android\", target_os=\"ios\" ) ) ) )".dependencies]
+[target."cfg( all( target_family = \"unix\", not( any( target_os = \"android\", target_os=\"ios\" ) ) ) )".dependencies.notify-rust]
+version = "3.6.2"

@@ -46,6 +46,7 @@ int main(int argc, char* argv[])
   qmlRegisterAnonymousType<MessageBuilder>("LibHerald", 1);
   qmlRegisterAnonymousType<MediaAttachments>("LibHerald", 1);
   qmlRegisterAnonymousType<DocumentAttachments>("LibHerald", 1);
+  qmlRegisterType<EmojiPicker>("LibHerald", 1, 0, "EmojiPicker");
 
   qmlRegisterSingletonType(QUrl("qrc:///common/CommonConfig.qml"), "LibHerald",
                            1, 0, "CmnCfg");

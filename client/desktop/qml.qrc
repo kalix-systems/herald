@@ -35,7 +35,6 @@
         <file>common/CommonConfig.qml</file>
         <file>SideBar/Header/HeaderAvatar.qml</file>
         <file>common/Divider.qml</file>
-        <file>common/EmojiJson.js</file>
         <file>common/PlatonicRectangle.qml</file>
         <file>main.qml</file>
         <file>ChatView/js/KeyNavigation.mjs</file>
@@ -70,5 +69,7 @@
         <file>ChatView/Popups/MoreInfoPopup.qml</file>
         <file>SideBar/Pane/ConversationRectangle.qml</file>
         <file>ChatView/Popups/GroupSettingsPopup.qml</file>
+        <file>EmojiKeyboard/SearchInteriorComponent.qml</file>
+        <file>EmojiKeyboard/StandardInterior.qml</file>
     </qresource>
 </RCC>

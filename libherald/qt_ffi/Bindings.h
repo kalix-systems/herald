@@ -11,6 +11,7 @@ class ConversationBuilder;
 class ConversationContent;
 class Conversations;
 class DocumentAttachments;
+class EmojiPicker;
 class Errors;
 class Herald;
 class MediaAttachments;
@@ -27,6 +28,7 @@ using ConversationBuilderPtrBundle = struct ConversationBuilderPtrBundle;
 using ConversationContentPtrBundle = struct ConversationContentPtrBundle;
 using ConversationsPtrBundle = struct ConversationsPtrBundle;
 using DocumentAttachmentsPtrBundle = struct DocumentAttachmentsPtrBundle;
+using EmojiPickerPtrBundle = struct EmojiPickerPtrBundle;
 using ErrorsPtrBundle = struct ErrorsPtrBundle;
 using HeraldPtrBundle = struct HeraldPtrBundle;
 using MediaAttachmentsPtrBundle = struct MediaAttachmentsPtrBundle;
@@ -228,6 +230,31 @@ struct DocumentAttachmentsPtrBundle {
   void (*document_attachments_begin_remove_rows)(DocumentAttachments *, int,
                                                  int);
   void (*document_attachments_end_remove_rows)(DocumentAttachments *);
+};
+struct EmojiPickerPtrBundle {
+  EmojiPicker *emoji_picker;
+  void (*emoji_picker_activities_index_changed)(EmojiPicker *);
+  void (*emoji_picker_body_index_changed)(EmojiPicker *);
+  void (*emoji_picker_flags_index_changed)(EmojiPicker *);
+  void (*emoji_picker_food_index_changed)(EmojiPicker *);
+  void (*emoji_picker_locations_index_changed)(EmojiPicker *);
+  void (*emoji_picker_nature_index_changed)(EmojiPicker *);
+  void (*emoji_picker_objects_index_changed)(EmojiPicker *);
+  void (*emoji_picker_smileys_index_changed)(EmojiPicker *);
+  void (*emoji_picker_symbols_index_changed)(EmojiPicker *);
+
+  void (*emoji_picker_new_data_ready)(const EmojiPicker *);
+  void (*emoji_picker_layout_about_to_be_changed)(EmojiPicker *);
+  void (*emoji_picker_layout_changed)(EmojiPicker *);
+  void (*emoji_picker_data_changed)(EmojiPicker *, quintptr, quintptr);
+  void (*emoji_picker_begin_reset_model)(EmojiPicker *);
+  void (*emoji_picker_end_reset_model)(EmojiPicker *);
+  void (*emoji_picker_begin_insert_rows)(EmojiPicker *, int, int);
+  void (*emoji_picker_end_insert_rows)(EmojiPicker *);
+  void (*emoji_picker_begin_move_rows)(EmojiPicker *, int, int, int);
+  void (*emoji_picker_end_move_rows)(EmojiPicker *);
+  void (*emoji_picker_begin_remove_rows)(EmojiPicker *, int, int);
+  void (*emoji_picker_end_remove_rows)(EmojiPicker *);
 };
 struct ErrorsPtrBundle {
   Errors *errors;
@@ -591,6 +618,7 @@ class Config : public QObject {
   friend class ConversationContent;
   friend class Conversations;
   friend class DocumentAttachments;
+  friend class EmojiPicker;
   friend class Errors;
   friend class Herald;
   friend class MediaAttachments;
@@ -651,6 +679,7 @@ class ConversationBuilder : public QAbstractItemModel {
   friend class ConversationContent;
   friend class Conversations;
   friend class DocumentAttachments;
+  friend class EmojiPicker;
   friend class Errors;
   friend class Herald;
   friend class MediaAttachments;
@@ -730,6 +759,7 @@ class ConversationContent : public QAbstractItemModel {
   friend class ConversationBuilder;
   friend class Conversations;
   friend class DocumentAttachments;
+  friend class EmojiPicker;
   friend class Errors;
   friend class Herald;
   friend class MediaAttachments;
@@ -808,6 +838,7 @@ class Conversations : public QAbstractItemModel {
   friend class ConversationBuilder;
   friend class ConversationContent;
   friend class DocumentAttachments;
+  friend class EmojiPicker;
   friend class Errors;
   friend class Herald;
   friend class MediaAttachments;
@@ -904,6 +935,7 @@ class DocumentAttachments : public QAbstractItemModel {
   friend class ConversationBuilder;
   friend class ConversationContent;
   friend class Conversations;
+  friend class EmojiPicker;
   friend class Errors;
   friend class Herald;
   friend class MediaAttachments;
@@ -964,6 +996,109 @@ private:
   void updatePersistentIndexes();
 Q_SIGNALS:
 };
+class EmojiPicker : public QAbstractItemModel {
+  Q_OBJECT
+  friend class Config;
+  friend class ConversationBuilder;
+  friend class ConversationContent;
+  friend class Conversations;
+  friend class DocumentAttachments;
+  friend class Errors;
+  friend class Herald;
+  friend class MediaAttachments;
+  friend class Members;
+  friend class MessageBuilder;
+  friend class MessageSearch;
+  friend class Messages;
+  friend class Users;
+  friend class UsersSearch;
+  friend class Utils;
+
+public:
+  class Private;
+
+private:
+  Private *m_d;
+  bool m_ownsPrivate;
+  Q_PROPERTY(quint32 activities_index READ activities_index NOTIFY
+                 activities_indexChanged FINAL)
+  Q_PROPERTY(quint32 body_index READ body_index NOTIFY body_indexChanged FINAL)
+  Q_PROPERTY(
+      quint32 flags_index READ flags_index NOTIFY flags_indexChanged FINAL)
+  Q_PROPERTY(quint32 food_index READ food_index NOTIFY food_indexChanged FINAL)
+  Q_PROPERTY(quint32 locations_index READ locations_index NOTIFY
+                 locations_indexChanged FINAL)
+  Q_PROPERTY(
+      quint32 nature_index READ nature_index NOTIFY nature_indexChanged FINAL)
+  Q_PROPERTY(quint32 objects_index READ objects_index NOTIFY
+                 objects_indexChanged FINAL)
+  Q_PROPERTY(quint32 smileys_index READ smileys_index NOTIFY
+                 smileys_indexChanged FINAL)
+  Q_PROPERTY(quint32 symbols_index READ symbols_index NOTIFY
+                 symbols_indexChanged FINAL)
+  explicit EmojiPicker(bool owned, QObject *parent);
+
+public:
+  explicit EmojiPicker(QObject *parent = nullptr);
+  ~EmojiPicker() override;
+  quint32 activities_index() const;
+  quint32 body_index() const;
+  quint32 flags_index() const;
+  quint32 food_index() const;
+  quint32 locations_index() const;
+  quint32 nature_index() const;
+  quint32 objects_index() const;
+  quint32 smileys_index() const;
+  quint32 symbols_index() const;
+  Q_INVOKABLE void clearSearch();
+  Q_INVOKABLE void setSearchString(const QString &search_string);
+  int columnCount(const QModelIndex &parent = QModelIndex()) const override;
+  QVariant data(const QModelIndex &index,
+                int role = Qt::DisplayRole) const override;
+  QModelIndex index(int row, int column,
+                    const QModelIndex &parent = QModelIndex()) const override;
+  QModelIndex parent(const QModelIndex &index) const override;
+  bool hasChildren(const QModelIndex &parent = QModelIndex()) const override;
+  int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+  bool canFetchMore(const QModelIndex &parent) const override;
+  void fetchMore(const QModelIndex &parent) override;
+  Qt::ItemFlags flags(const QModelIndex &index) const override;
+  void sort(int column, Qt::SortOrder order = Qt::AscendingOrder) override;
+  int role(const char *name) const;
+  QHash<int, QByteArray> roleNames() const override;
+  QVariant headerData(int section, Qt::Orientation orientation,
+                      int role = Qt::DisplayRole) const override;
+  bool setHeaderData(int section, Qt::Orientation orientation,
+                     const QVariant &value, int role = Qt::EditRole) override;
+  Q_INVOKABLE bool
+  insertRows(int row, int count,
+             const QModelIndex &parent = QModelIndex()) override;
+  Q_INVOKABLE bool
+  removeRows(int row, int count,
+             const QModelIndex &parent = QModelIndex()) override;
+
+  Q_INVOKABLE QString emoji(int row) const;
+  Q_INVOKABLE bool skintone_modifier(int row) const;
+
+Q_SIGNALS:
+  // new data is ready to be made available to the model with fetchMore()
+  void newDataReady(const QModelIndex &parent) const;
+
+private:
+  QHash<QPair<int, Qt::ItemDataRole>, QVariant> m_headerData;
+  void initHeaderData();
+  void updatePersistentIndexes();
+Q_SIGNALS:
+  void activities_indexChanged();
+  void body_indexChanged();
+  void flags_indexChanged();
+  void food_indexChanged();
+  void locations_indexChanged();
+  void nature_indexChanged();
+  void objects_indexChanged();
+  void smileys_indexChanged();
+  void symbols_indexChanged();
+};
 class Errors : public QObject {
   Q_OBJECT
   friend class Config;
@@ -971,6 +1106,7 @@ class Errors : public QObject {
   friend class ConversationContent;
   friend class Conversations;
   friend class DocumentAttachments;
+  friend class EmojiPicker;
   friend class Herald;
   friend class MediaAttachments;
   friend class Members;
@@ -1005,6 +1141,7 @@ class Herald : public QAbstractItemModel {
   friend class ConversationContent;
   friend class Conversations;
   friend class DocumentAttachments;
+  friend class EmojiPicker;
   friend class Errors;
   friend class MediaAttachments;
   friend class Members;
@@ -1131,6 +1268,7 @@ class MediaAttachments : public QAbstractItemModel {
   friend class ConversationContent;
   friend class Conversations;
   friend class DocumentAttachments;
+  friend class EmojiPicker;
   friend class Errors;
   friend class Herald;
   friend class Members;
@@ -1196,6 +1334,7 @@ class Members : public QAbstractItemModel {
   friend class ConversationContent;
   friend class Conversations;
   friend class DocumentAttachments;
+  friend class EmojiPicker;
   friend class Errors;
   friend class Herald;
   friend class MediaAttachments;
@@ -1280,6 +1419,7 @@ class MessageBuilder : public QAbstractItemModel {
   friend class ConversationContent;
   friend class Conversations;
   friend class DocumentAttachments;
+  friend class EmojiPicker;
   friend class Errors;
   friend class Herald;
   friend class MediaAttachments;
@@ -1400,6 +1540,7 @@ class MessageSearch : public QAbstractItemModel {
   friend class ConversationContent;
   friend class Conversations;
   friend class DocumentAttachments;
+  friend class EmojiPicker;
   friend class Errors;
   friend class Herald;
   friend class MediaAttachments;
@@ -1486,6 +1627,7 @@ class Messages : public QAbstractItemModel {
   friend class ConversationContent;
   friend class Conversations;
   friend class DocumentAttachments;
+  friend class EmojiPicker;
   friend class Errors;
   friend class Herald;
   friend class MediaAttachments;
@@ -1637,6 +1779,7 @@ class Users : public QAbstractItemModel {
   friend class ConversationContent;
   friend class Conversations;
   friend class DocumentAttachments;
+  friend class EmojiPicker;
   friend class Errors;
   friend class Herald;
   friend class MediaAttachments;
@@ -1731,6 +1874,7 @@ class UsersSearch : public QAbstractItemModel {
   friend class ConversationContent;
   friend class Conversations;
   friend class DocumentAttachments;
+  friend class EmojiPicker;
   friend class Errors;
   friend class Herald;
   friend class MediaAttachments;
@@ -1811,6 +1955,7 @@ class Utils : public QObject {
   friend class ConversationContent;
   friend class Conversations;
   friend class DocumentAttachments;
+  friend class EmojiPicker;
   friend class Errors;
   friend class Herald;
   friend class MediaAttachments;

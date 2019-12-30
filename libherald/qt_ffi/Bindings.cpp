@@ -123,6 +123,33 @@ inline void conversationsFilterChanged(Conversations *o) {
 inline void conversationsFilterRegexChanged(Conversations *o) {
   Q_EMIT o->filterRegexChanged();
 }
+inline void emojiPickerActivities_indexChanged(EmojiPicker *o) {
+  Q_EMIT o->activities_indexChanged();
+}
+inline void emojiPickerBody_indexChanged(EmojiPicker *o) {
+  Q_EMIT o->body_indexChanged();
+}
+inline void emojiPickerFlags_indexChanged(EmojiPicker *o) {
+  Q_EMIT o->flags_indexChanged();
+}
+inline void emojiPickerFood_indexChanged(EmojiPicker *o) {
+  Q_EMIT o->food_indexChanged();
+}
+inline void emojiPickerLocations_indexChanged(EmojiPicker *o) {
+  Q_EMIT o->locations_indexChanged();
+}
+inline void emojiPickerNature_indexChanged(EmojiPicker *o) {
+  Q_EMIT o->nature_indexChanged();
+}
+inline void emojiPickerObjects_indexChanged(EmojiPicker *o) {
+  Q_EMIT o->objects_indexChanged();
+}
+inline void emojiPickerSmileys_indexChanged(EmojiPicker *o) {
+  Q_EMIT o->smileys_indexChanged();
+}
+inline void emojiPickerSymbols_indexChanged(EmojiPicker *o) {
+  Q_EMIT o->symbols_indexChanged();
+}
 inline void errorsTryPollChanged(Errors *o) { Q_EMIT o->tryPollChanged(); }
 inline void heraldConfigInitChanged(Herald *o) {
   Q_EMIT o->configInitChanged();
@@ -975,6 +1002,147 @@ extern "C" {
 DocumentAttachments::Private *
 document_attachments_new(DocumentAttachmentsPtrBundle *);
 void document_attachments_free(DocumentAttachments::Private *);
+}
+extern "C" {
+void emoji_picker_data_emoji(const EmojiPicker::Private *, int, QString *,
+                             qstring_set);
+bool emoji_picker_data_skintone_modifier(const EmojiPicker::Private *, int);
+void emoji_picker_sort(EmojiPicker::Private *, unsigned char column,
+                       Qt::SortOrder order = Qt::AscendingOrder);
+int emoji_picker_row_count(const EmojiPicker::Private *);
+bool emoji_picker_insert_rows(EmojiPicker::Private *, int, int);
+bool emoji_picker_remove_rows(EmojiPicker::Private *, int, int);
+bool emoji_picker_can_fetch_more(const EmojiPicker::Private *);
+void emoji_picker_fetch_more(EmojiPicker::Private *);
+}
+int EmojiPicker::columnCount(const QModelIndex &parent) const {
+  return (parent.isValid()) ? 0 : 1;
+}
+
+bool EmojiPicker::hasChildren(const QModelIndex &parent) const {
+  return rowCount(parent) > 0;
+}
+
+int EmojiPicker::rowCount(const QModelIndex &parent) const {
+  return (parent.isValid()) ? 0 : emoji_picker_row_count(m_d);
+}
+
+bool EmojiPicker::insertRows(int row, int count, const QModelIndex &) {
+  return emoji_picker_insert_rows(m_d, row, count);
+}
+
+bool EmojiPicker::removeRows(int row, int count, const QModelIndex &) {
+  return emoji_picker_remove_rows(m_d, row, count);
+}
+
+QModelIndex EmojiPicker::index(int row, int column,
+                               const QModelIndex &parent) const {
+  if (!parent.isValid() && row >= 0 && row < rowCount(parent) && column >= 0 &&
+      column < 1) {
+    return createIndex(row, column, static_cast<quintptr>(row));
+  }
+  return {};
+}
+
+QModelIndex EmojiPicker::parent(const QModelIndex &) const { return {}; }
+
+bool EmojiPicker::canFetchMore(const QModelIndex &parent) const {
+  return (parent.isValid()) ? false : emoji_picker_can_fetch_more(m_d);
+}
+
+void EmojiPicker::fetchMore(const QModelIndex &parent) {
+  if (!parent.isValid()) {
+    emoji_picker_fetch_more(m_d);
+  }
+}
+void EmojiPicker::updatePersistentIndexes() {}
+
+void EmojiPicker::sort(int column, Qt::SortOrder order) {
+  emoji_picker_sort(m_d, column, order);
+}
+
+Qt::ItemFlags EmojiPicker::flags(const QModelIndex &i) const {
+  auto flags = QAbstractItemModel::flags(i);
+  return flags;
+}
+
+QString EmojiPicker::emoji(int row) const {
+  QString s;
+  emoji_picker_data_emoji(m_d, row, &s, set_qstring);
+  return s;
+}
+
+bool EmojiPicker::skintone_modifier(int row) const {
+  return emoji_picker_data_skintone_modifier(m_d, row);
+}
+
+QVariant EmojiPicker::data(const QModelIndex &index, int role) const {
+  Q_ASSERT(rowCount(index.parent()) > index.row());
+  switch (index.column()) {
+  case 0:
+    switch (role) {
+    case Qt::UserRole + 0:
+      return QVariant::fromValue(emoji(index.row()));
+    case Qt::UserRole + 1:
+      return QVariant::fromValue(skintone_modifier(index.row()));
+    }
+    break;
+  }
+  return QVariant();
+}
+int EmojiPicker::role(const char *name) const {
+  auto names = roleNames();
+  auto i = names.constBegin();
+  while (i != names.constEnd()) {
+    if (i.value() == name) {
+      return i.key();
+    }
+    ++i;
+  }
+  return -1;
+}
+QHash<int, QByteArray> EmojiPicker::roleNames() const {
+  QHash<int, QByteArray> names = QAbstractItemModel::roleNames();
+  names.insert(Qt::UserRole + 0, "emoji");
+  names.insert(Qt::UserRole + 1, "skintone_modifier");
+  return names;
+}
+
+QVariant EmojiPicker::headerData(int section, Qt::Orientation orientation,
+                                 int role) const {
+  if (orientation != Qt::Horizontal) {
+    return QVariant();
+  }
+  return m_headerData.value(
+      qMakePair(section, static_cast<Qt::ItemDataRole>(role)),
+      role == Qt::DisplayRole ? QString::number(section + 1) : QVariant());
+}
+
+bool EmojiPicker::setHeaderData(int section, Qt::Orientation orientation,
+                                const QVariant &value, int role) {
+  if (orientation != Qt::Horizontal) {
+    return false;
+  }
+  m_headerData.insert(qMakePair(section, static_cast<Qt::ItemDataRole>(role)),
+                      value);
+  return true;
+}
+
+extern "C" {
+EmojiPicker::Private *emoji_picker_new(EmojiPickerPtrBundle *);
+void emoji_picker_free(EmojiPicker::Private *);
+quint32 emoji_picker_activities_index_get(const EmojiPicker::Private *);
+quint32 emoji_picker_body_index_get(const EmojiPicker::Private *);
+quint32 emoji_picker_flags_index_get(const EmojiPicker::Private *);
+quint32 emoji_picker_food_index_get(const EmojiPicker::Private *);
+quint32 emoji_picker_locations_index_get(const EmojiPicker::Private *);
+quint32 emoji_picker_nature_index_get(const EmojiPicker::Private *);
+quint32 emoji_picker_objects_index_get(const EmojiPicker::Private *);
+quint32 emoji_picker_smileys_index_get(const EmojiPicker::Private *);
+quint32 emoji_picker_symbols_index_get(const EmojiPicker::Private *);
+void emoji_picker_clear_search(EmojiPicker::Private *);
+void emoji_picker_set_search_string(EmojiPicker::Private *, const ushort *,
+                                    int);
 }
 extern "C" {
 Errors::Private *errors_new(ErrorsPtrBundle *);
@@ -3249,6 +3417,105 @@ DocumentAttachments::~DocumentAttachments() {
   }
 }
 void DocumentAttachments::initHeaderData() {}
+
+EmojiPicker::EmojiPicker(bool /*owned*/, QObject *parent)
+    : QAbstractItemModel(parent), m_d(nullptr), m_ownsPrivate(false) {
+  initHeaderData();
+}
+
+EmojiPicker::EmojiPicker(QObject *parent)
+    : QAbstractItemModel(parent),
+      m_d(emoji_picker_new(new EmojiPickerPtrBundle{
+          this,
+          emojiPickerActivities_indexChanged,
+          emojiPickerBody_indexChanged,
+          emojiPickerFlags_indexChanged,
+          emojiPickerFood_indexChanged,
+          emojiPickerLocations_indexChanged,
+          emojiPickerNature_indexChanged,
+          emojiPickerObjects_indexChanged,
+          emojiPickerSmileys_indexChanged,
+          emojiPickerSymbols_indexChanged,
+          [](const EmojiPicker *o) { Q_EMIT o->newDataReady(QModelIndex()); },
+          [](EmojiPicker *o) { Q_EMIT o->layoutAboutToBeChanged(); },
+          [](EmojiPicker *o) {
+            o->updatePersistentIndexes();
+            Q_EMIT o->layoutChanged();
+          },
+          [](EmojiPicker *o, quintptr first, quintptr last) {
+            o->dataChanged(o->createIndex(first, 0, first),
+                           o->createIndex(last, 0, last));
+          },
+          [](EmojiPicker *o) { o->beginResetModel(); },
+          [](EmojiPicker *o) { o->endResetModel(); },
+          [](EmojiPicker *o, int first, int last) {
+            o->beginInsertRows(QModelIndex(), first, last);
+          },
+          [](EmojiPicker *o) { o->endInsertRows(); },
+          [](EmojiPicker *o, int first, int last, int destination) {
+            o->beginMoveRows(QModelIndex(), first, last, QModelIndex(),
+                             destination);
+          },
+          [](EmojiPicker *o) { o->endMoveRows(); },
+          [](EmojiPicker *o, int first, int last) {
+            o->beginRemoveRows(QModelIndex(), first, last);
+          },
+          [](EmojiPicker *o) { o->endRemoveRows(); }})),
+      m_ownsPrivate(true) {
+  connect(
+      this, &EmojiPicker::newDataReady, this,
+      [this](const QModelIndex &i) { this->fetchMore(i); },
+      Qt::QueuedConnection);
+  initHeaderData();
+}
+
+EmojiPicker::~EmojiPicker() {
+  if (m_ownsPrivate) {
+    emoji_picker_free(m_d);
+  }
+}
+void EmojiPicker::initHeaderData() {}
+
+quint32 EmojiPicker::activities_index() const {
+  return emoji_picker_activities_index_get(m_d);
+}
+
+quint32 EmojiPicker::body_index() const {
+  return emoji_picker_body_index_get(m_d);
+}
+
+quint32 EmojiPicker::flags_index() const {
+  return emoji_picker_flags_index_get(m_d);
+}
+
+quint32 EmojiPicker::food_index() const {
+  return emoji_picker_food_index_get(m_d);
+}
+
+quint32 EmojiPicker::locations_index() const {
+  return emoji_picker_locations_index_get(m_d);
+}
+
+quint32 EmojiPicker::nature_index() const {
+  return emoji_picker_nature_index_get(m_d);
+}
+
+quint32 EmojiPicker::objects_index() const {
+  return emoji_picker_objects_index_get(m_d);
+}
+
+quint32 EmojiPicker::smileys_index() const {
+  return emoji_picker_smileys_index_get(m_d);
+}
+
+quint32 EmojiPicker::symbols_index() const {
+  return emoji_picker_symbols_index_get(m_d);
+}
+void EmojiPicker::clearSearch() { return emoji_picker_clear_search(m_d); }
+void EmojiPicker::setSearchString(const QString &search_string) {
+  return emoji_picker_set_search_string(m_d, search_string.utf16(),
+                                        search_string.size());
+}
 
 Errors::Errors(bool /*owned*/, QObject *parent)
     : QObject(parent), m_d(nullptr), m_ownsPrivate(false) {}

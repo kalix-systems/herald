@@ -24,6 +24,8 @@ pub mod conversation_builder;
 pub mod conversation_content;
 /// Conversations object
 pub mod conversations;
+/// Emoji Picker backend Object
+pub mod emoji_picker;
 /// Error queue
 pub mod errors;
 /// FFI type aliases.
