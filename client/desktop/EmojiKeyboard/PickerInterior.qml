@@ -126,63 +126,31 @@ Item {
     // actual interior
     Item {
         id: listView
-        width: parent.width
 
         anchors {
             top: header.bottom
             bottom: footer.top
+            right: parent.right
+            left: parent.left
+            margins: CmnCfg.smallMargin
         }
 
-        Flickable {
+        GridView {
             id: emojiList
             anchors.fill: parent
             boundsBehavior: Flickable.StopAtBounds
             clip: true
             ScrollBar.vertical: ScrollBar {}
-            contentHeight: innerCol.height
-
             maximumFlickVelocity: 700
             flickDeceleration: emojiList.height * 10
-            Column {
-                id: innerCol
-                Repeater {
-                    id: innerRepeater
-                    model: searchTextArea.text.length ? [] : CmnCfg.emojiModel
-                    Column {
-                        padding: CmnCfg.smallMargin
-                        Label {
-                            text: modelData.sectionName
-                            color: CmnCfg.palette.medGrey
-                            font.bold: true
-                            font.family: CmnCfg.chatFont.name
-                            bottomPadding: CmnCfg.smallMargin
-                        }
-
-                        Loader {
-                            asynchronous: index > 1
-                            sourceComponent: Grid {
-                                id: emojiGrid
-                                columns: 10
-                                spacing: 10
-                                width: listView.width
-                                horizontalItemAlignment: Grid.AlignHCenter
-                                verticalItemAlignment: Grid.AlignVCenter
-                                Repeater {
-                                    id: self
-                                    model: modelData.List
-                                    EmojiButton {
-                                        baseEmoji: self.model[index][0]
-                                        takesModifier: self.model[index].length === 3
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+            cellWidth: listView.width / 8
+            cellHeight: cellWidth
+            model: emojiPickerModel
+            delegate: EmojiButton {
+                emoji: model.emoji
             }
         }
     }
-
     // footer and anchor links
     Item {
         id: footer

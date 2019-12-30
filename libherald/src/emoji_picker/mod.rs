@@ -1,7 +1,8 @@
+extern crate emoji_utils;
 use crate::interface::{
     EmojiPickerEmitter as Emitter, EmojiPickerList as List, EmojiPickerTrait as Interface,
 };
-extern crate emoji_utils;
+use crate::{err, spawn};
 use emoji_utils::{EmojiUtil, Language};
 /// The underlying struct of the emoji keyboard
 pub struct EmojiPicker {
