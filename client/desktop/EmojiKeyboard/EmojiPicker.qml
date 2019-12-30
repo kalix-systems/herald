@@ -43,5 +43,7 @@ Rectangle {
             }
             CmnCfg.recentEmojis.unshift(emoji_data)
         }
+
+        CmnCfg.settings.recentEmojisJson = JSON.stringify(CmnCfg.recentEmojis)
     }
 }

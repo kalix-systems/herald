@@ -103,7 +103,10 @@ Item {
         id: settings
         readonly property alias theme: cfg.colorScheme
         readonly property alias skinSwatchIndex: cfg.skinSwatchIndex
-        readonly property alias recentEmojis: cfg.recentEmojis
+        property string recentEmojisJson
+        Component.onCompleted: {
+            recentEmojis = JSON.parse(recentEmojisJson)
+        }
     }
 
     readonly property int colorScheme: 0
