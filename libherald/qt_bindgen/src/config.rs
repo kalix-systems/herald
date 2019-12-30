@@ -238,8 +238,8 @@ fn emoji_picker() -> Object {
     };
 
     let item_props = item_props! {
-     emoji: ItemProp::new(QString).get_by_value(),
-     skintone_modifier: ItemProp::new(Bool).get_by_value()
+     emoji: ItemProp::new(QString),
+     skintone_modifier: ItemProp::new(Bool)
     };
 
     obj! {

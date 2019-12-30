@@ -293,7 +293,7 @@ pub trait EmojiPickerTrait {
     fn emoji(
         &self,
         index: usize,
-    ) -> String;
+    ) -> &str;
 
     fn skintone_modifier(
         &self,
