@@ -93,9 +93,24 @@ fn test_container_search() {
 
     assert_eq!(searchstate.num_matches(), 2);
 
-    assert_eq!(msgmeta3.match_status, MatchStatus::NotMatched);
-    // assert_eq!(msgmeta1.match_status, MatchStatus::Matched);
-    // assert_eq!(searchstate.next_match().expect(womp!()).0, msgmeta1);
+    assert_eq!(
+        container.get(0).expect(womp!()).match_status,
+        MatchStatus::NotMatched
+    );
+    assert_eq!(
+        container.get(1).expect(womp!()).match_status,
+        MatchStatus::Matched
+    );
+
+    assert_eq!(
+        &searchstate.next_match().expect(womp!()).0,
+        container.get(2).expect(womp!())
+    );
+
+    assert_eq!(
+        &searchstate.prev_match().expect(womp!()).0,
+        container.get(1).expect(womp!())
+    );
 
     container.clear_search(|_| ());
 
