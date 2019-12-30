@@ -26,9 +26,13 @@ fn test_container() {
     .expect(womp!("Failed to add config"));
     let (msgmeta1, msgdata1) = msg_constructor();
     let (msgmeta2, msgdata2) = msg_constructor();
-    let container = Container::new(vec![msgmeta1, msgmeta2], Some(msgdata2.clone()));
+    let container = Container::new(vec![msgmeta2, msgmeta1], Some(msgdata2.clone()));
 
     assert_eq!(container.len(), 2);
+
+    assert_eq!(container.index_of(&msgmeta1).expect(womp!()), 0);
+
+    // assert_eq!(container.index_of(&msgmeta2).expect(womp!()), 1);
 
     std::fs::remove_dir_all(".data_dir").expect(womp!());
 }
