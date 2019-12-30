@@ -219,15 +219,23 @@ fn members() -> Object {
 
 fn emoji_picker() -> Object {
     let props = props! {
-        searchString: Prop::new().simple(QString).optional().write()
+        smileys_index: Prop::new().simple(QUint32),
+        nature_index: Prop::new().simple(QUint32),
+        food_index: Prop::new().simple(QUint32),
+        locations_index: Prop::new().simple(QUint32),
+        activities_index: Prop::new().simple(QUint32),
+        symbols_index: Prop::new().simple(QUint32),
+        flags_index: Prop::new().simple(QUint32)
     };
 
     let funcs = functions! {
         mut clearSearch() => Void,
+        mut setSearchString(search_string: QString) => Void,
     };
 
     let item_props = item_props! {
-     emoji: ItemProp::new(QString).get_by_value()
+     emoji: ItemProp::new(QString).get_by_value(),
+     skintone_modifier: ItemProp::new(Bool).get_by_value()
     };
 
     obj! {

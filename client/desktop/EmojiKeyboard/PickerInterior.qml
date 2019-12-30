@@ -147,7 +147,8 @@ Item {
             cellHeight: cellWidth
             model: emojiPickerModel
             delegate: EmojiButton {
-                emoji: model.emoji
+                baseEmoji: model.emoji
+                takesModifier: model.skintone_modifier
             }
         }
     }

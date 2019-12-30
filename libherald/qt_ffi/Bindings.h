@@ -228,7 +228,13 @@ struct DocumentAttachmentsPtrBundle {
 };
 struct EmojiPickerPtrBundle {
   EmojiPicker* emoji_picker;
-  void (*emoji_picker_search_string_changed)(EmojiPicker*);
+  void (*emoji_picker_activities_index_changed)(EmojiPicker*);
+  void (*emoji_picker_flags_index_changed)(EmojiPicker*);
+  void (*emoji_picker_food_index_changed)(EmojiPicker*);
+  void (*emoji_picker_locations_index_changed)(EmojiPicker*);
+  void (*emoji_picker_nature_index_changed)(EmojiPicker*);
+  void (*emoji_picker_smileys_index_changed)(EmojiPicker*);
+  void (*emoji_picker_symbols_index_changed)(EmojiPicker*);
 
   void (*emoji_picker_new_data_ready)(const EmojiPicker*);
   void (*emoji_picker_layout_about_to_be_changed)(EmojiPicker*);
@@ -1001,16 +1007,33 @@ public:
 private:
   Private* m_d;
   bool     m_ownsPrivate;
-  Q_PROPERTY(QString searchString READ searchString WRITE setSearchString NOTIFY
-                 searchStringChanged FINAL)
+  Q_PROPERTY(quint32 activities_index READ activities_index NOTIFY
+                 activities_indexChanged FINAL)
+  Q_PROPERTY(
+      quint32 flags_index READ flags_index NOTIFY flags_indexChanged FINAL)
+  Q_PROPERTY(quint32 food_index READ food_index NOTIFY food_indexChanged FINAL)
+  Q_PROPERTY(quint32 locations_index READ locations_index NOTIFY
+                 locations_indexChanged FINAL)
+  Q_PROPERTY(
+      quint32 nature_index READ nature_index NOTIFY nature_indexChanged FINAL)
+  Q_PROPERTY(quint32 smileys_index READ smileys_index NOTIFY
+                 smileys_indexChanged FINAL)
+  Q_PROPERTY(quint32 symbols_index READ symbols_index NOTIFY
+                 symbols_indexChanged FINAL)
   explicit EmojiPicker(bool owned, QObject* parent);
 
 public:
   explicit EmojiPicker(QObject* parent = nullptr);
   ~EmojiPicker() override;
-  QString          searchString() const;
-  void             setSearchString(const QString& v);
+  quint32          activities_index() const;
+  quint32          flags_index() const;
+  quint32          food_index() const;
+  quint32          locations_index() const;
+  quint32          nature_index() const;
+  quint32          smileys_index() const;
+  quint32          symbols_index() const;
   Q_INVOKABLE void clearSearch();
+  Q_INVOKABLE void setSearchString(const QString& search_string);
   int columnCount(const QModelIndex& parent = QModelIndex()) const override;
   QVariant    data(const QModelIndex& index,
                    int                role = Qt::DisplayRole) const override;
@@ -1037,6 +1060,7 @@ public:
              const QModelIndex& parent = QModelIndex()) override;
 
   Q_INVOKABLE QString emoji(int row) const;
+  Q_INVOKABLE bool    skintone_modifier(int row) const;
 
 Q_SIGNALS:
   // new data is ready to be made available to the model with fetchMore()
@@ -1047,7 +1071,13 @@ private:
   void                                          initHeaderData();
   void                                          updatePersistentIndexes();
 Q_SIGNALS:
-  void searchStringChanged();
+  void activities_indexChanged();
+  void flags_indexChanged();
+  void food_indexChanged();
+  void locations_indexChanged();
+  void nature_indexChanged();
+  void smileys_indexChanged();
+  void symbols_indexChanged();
 };
 class Errors : public QObject {
   Q_OBJECT

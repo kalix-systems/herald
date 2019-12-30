@@ -2,7 +2,7 @@ extern crate emoji_utils;
 use crate::interface::{
     EmojiPickerEmitter as Emitter, EmojiPickerList as List, EmojiPickerTrait as Interface,
 };
-use crate::{err, spawn};
+
 use emoji_utils::{EmojiUtil, Language};
 /// The underlying struct of the emoji keyboard
 pub struct EmojiPicker {
@@ -23,27 +23,52 @@ impl Interface for EmojiPicker {
         }
     }
 
+    fn activities_index(&self) -> u32 {
+        emoji_utils::ACTIVITIES as u32
+    }
+
+    fn flags_index(&self) -> u32 {
+        emoji_utils::FLAGS as u32
+    }
+
+    fn food_index(&self) -> u32 {
+        emoji_utils::FOOD_DRINK as u32
+    }
+
+    fn locations_index(&self) -> u32 {
+        emoji_utils::TRAVEL_PLACES as u32
+    }
+
+    fn nature_index(&self) -> u32 {
+        emoji_utils::ANIMALS_NATURE as u32
+    }
+
+    fn smileys_index(&self) -> u32 {
+        emoji_utils::SMILEYS_EMOTION as u32
+    }
+
+    fn symbols_index(&self) -> u32 {
+        emoji_utils::SYMBOLS as u32
+    }
+
     fn emit(&mut self) -> &mut Emitter {
         &mut self.emit
     }
 
-    fn search_string(&self) -> Option<&str> {
-        None
-        //self.inner.search_string.as_deref()
-    }
-
     fn set_search_string(
         &mut self,
-        value: Option<String>,
+        search_string: String,
     ) {
-        if let Some(search_string) = value {
-            self.list.begin_reset_model();
-            self.inner.search(search_string);
-            self.list.end_reset_model();
-        }
+        self.list.begin_reset_model();
+        self.inner.search(search_string);
+        self.list.end_reset_model();
     }
 
-    fn clear_search(&mut self) {}
+    fn clear_search(&mut self) {
+        self.list.begin_reset_model();
+        self.inner.clear_search();
+        self.list.end_reset_model();
+    }
 
     fn row_count(&self) -> usize {
         if let Some(list) = &self.inner.current_emojis {
@@ -58,9 +83,20 @@ impl Interface for EmojiPicker {
         index: usize,
     ) -> String {
         if let Some(emoji_list) = &self.inner.current_emojis {
-            String::from(emoji_list[index])
+            String::from(emoji_list[index].emoji)
         } else {
             String::from("")
+        }
+    }
+
+    fn skintone_modifier(
+        &self,
+        index: usize,
+    ) -> bool {
+        if let Some(emoji_list) = &self.inner.current_emojis {
+            emoji_list[index].skintone_modifier
+        } else {
+            false
         }
     }
 }
