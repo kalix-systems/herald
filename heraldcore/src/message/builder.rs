@@ -81,6 +81,13 @@ impl OutboundMessageBuilder {
         Ok(())
     }
 
+    /// Stores the message without sending it. This function is meant for testing
+    /// and not intended to be used outside of this workspace.
+    pub fn store(self) -> Result<Message, HErr> {
+        let mut db = Database::get()?;
+        self.store_db(&mut db)
+    }
+
     #[cfg(test)]
     pub(crate) fn store_and_send_blocking(self) -> Result<Message, HErr> {
         let mut db = Database::get()?;

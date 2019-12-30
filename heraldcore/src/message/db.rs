@@ -541,6 +541,107 @@ impl OutboundMessageBuilder {
             }
         }
     }
+
+    pub(crate) fn store_db(
+        self,
+        conn: &mut rusqlite::Connection,
+    ) -> Result<Message, HErr> {
+        let Self {
+            conversation,
+            body,
+            op,
+            attachments,
+        } = self;
+
+        use MissingOutboundMessageField::*;
+
+        if attachments.is_empty() && body.is_none() {
+            return Err(MissingBody.into());
+        }
+
+        let conversation_id = conversation.ok_or(MissingConversationId)?;
+        let msg_id = MsgId::gen_new();
+        let timestamp = Time::now();
+        let author = crate::config::db::id(&conn)?;
+        let expiration_period = expiration_period(&conn, &conversation_id)?;
+
+        let expiration = match expiration_period.into_millis() {
+            Some(period) => Some(timestamp + period),
+            None => None,
+        };
+
+        let send_status = MessageSendStatus::NoAck;
+
+        let time = MessageTime {
+            server: None,
+            expiration,
+            insertion: timestamp,
+        };
+
+        let attachments: Result<Vec<Attachment>, HErr> = attachments
+            .into_iter()
+            .map(|path| {
+                let attach: Attachment = Attachment::new(&path)?;
+
+                attach.save()?;
+
+                Ok(attach)
+            })
+            .collect();
+
+        let attachments = attachments?;
+
+        let tx = conn.transaction()?;
+
+        tx.execute_named(
+            include_str!("sql/add.sql"),
+            named_params![
+                "@msg_id": msg_id,
+                "@author": author,
+                "@conversation_id": conversation_id,
+                "@body": body,
+                "@send_status": send_status,
+                "@insertion_ts": time.insertion,
+                "@server_ts": time.server,
+                "@expiration_ts": time.expiration,
+                "@is_reply": op.is_some()
+            ],
+        )?;
+
+        tx.execute(
+            include_str!("../conversation/sql/update_last_active.sql"),
+            params![timestamp, conversation_id],
+        )?;
+
+        if let Some(op) = op {
+            tx.execute_named(
+                include_str!("sql/add_reply.sql"),
+                named_params! { "@msg_id": msg_id, "@op": op },
+            )?;
+        }
+
+        let attachment_meta = if !attachments.is_empty() {
+            attachments::db::add(&tx, &msg_id, attachments.iter().map(Attachment::hash_dir))?
+        } else {
+            Default::default()
+        };
+
+        tx.commit()?;
+
+        Ok(Message {
+            message_id: msg_id,
+            author,
+            content: body.map(Item::Plain),
+            op: op.into(),
+            conversation: conversation_id,
+            time,
+            send_status,
+            attachments: attachment_meta,
+            receipts: HashMap::new(),
+            replies: HashSet::new(),
+            reactions: None,
+        })
+    }
 }
 
 impl InboundMessageBuilder {
