@@ -49,6 +49,7 @@ Item {
                     Keys.onReturnPressed: event.accepted = true
                     width: 185
                     height: parent.height
+                    onTextChanged: emojiPickerModel.setSearchString(text)
                 }
 
                 Button {
@@ -145,6 +146,7 @@ Item {
             flickDeceleration: emojiList.height * 10
             cellWidth: listView.width / 8
             cellHeight: cellWidth
+            cacheBuffer: emojiList.height * 10
             model: emojiPickerModel
             delegate: EmojiButton {
                 baseEmoji: model.emoji
@@ -162,8 +164,9 @@ Item {
 
         Rectangle {
             id: hr
-            width: parent.width
+            width: parent.width - 2
             height: 1
+            anchors.horizontalCenter: parent.horizontalCenter
             color: CmnCfg.palette.darkGrey
         }
 
