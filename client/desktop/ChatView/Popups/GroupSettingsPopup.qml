@@ -85,12 +85,11 @@ Popup {
             padding: CmnCfg.smallMargin
 
             RowLayout {
-
                 Rectangle {
                     height: 60
                     width: height
 
-                    Layout.bottomMargin: CmnCfg.smallMargin
+                    Layout.alignment: Qt.AlignVCenter
 
                     Entity.Avatar {
                         id: avatar
