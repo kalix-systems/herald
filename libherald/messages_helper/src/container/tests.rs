@@ -14,7 +14,7 @@ fn msg_constructor() -> (MessageMeta, MsgData) {
 }
 #[test]
 fn test_container() {
-    std::fs::remove_dir_all(".data_dir").expect(womp!());
+    drop(std::fs::remove_dir_all(".data_dir"));
     heraldcore::db::init().expect(womp!("Failed to initialize database"));
 
     let convid = [0; 32].into();
