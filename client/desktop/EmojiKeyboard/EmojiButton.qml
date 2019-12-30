@@ -7,7 +7,15 @@ Button {
     property bool takesModifier
     property string baseEmoji
     // consider this a private field
-    property string resultEmoji: takesModifier ? baseEmoji + CmnCfg.skinSwatchList[CmnCfg.skinSwatchIndex] : baseEmoji
+    property string resultEmoji: if (takesModifier) {
+                                     baseEmoji.slice(
+                                                 0,
+                                                 2) + CmnCfg.skinSwatchList[CmnCfg.skinSwatchIndex]
+                                             + baseEmoji.slice(2,
+                                                               baseEmoji.length)
+                                 } else {
+                                     baseEmoji
+                                 }
     property color lowlight: CmnCfg.palette.darkGrey
     onClicked: maskShape.send(resultEmoji, takesModifier)
     height: selector.height

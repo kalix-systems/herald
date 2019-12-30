@@ -23,9 +23,7 @@ ListView {
     ScrollBar.vertical: ScrollBar {
         id: chatScrollBarInner
         width: CmnCfg.smallSpacer
-
         policy: ScrollBar.AsNeeded
-
         stepSize: 0.01
         minimumSize: 0.1
     }
