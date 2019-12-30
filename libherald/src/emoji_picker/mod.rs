@@ -54,6 +54,7 @@ impl Interface for EmojiPicker {
     fn symbols_index(&self) -> u32 {
         emoji_utils::SYMBOLS as u32
     }
+
     fn objects_index(&self) -> u32 {
         emoji_utils::OBJECTS as u32
     }

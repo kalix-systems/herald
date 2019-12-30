@@ -140,8 +140,15 @@ Item {
             id: listLoader
             asynchronous: true
             anchors.fill: parent
+            signal position(int index)
             sourceComponent: StandardInterior {
                 id: emojiList
+                Connections {
+                    target: parent
+                    onPosition: {
+                        emojiList.positionViewAtIndex(index, 0)
+                    }
+                }
             }
             Component {
                 id: searchComp

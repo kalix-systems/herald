@@ -7,7 +7,7 @@ Button {
     property string imageSource: ""
     property int anchorIndex
 
-    onClicked: listLoader.sourceComponent.contentY = 0
+    onClicked: listLoader.position(anchorIndex - 1)
     padding: 0
     background: Item {}
     icon.source: imageSource
