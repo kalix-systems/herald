@@ -129,13 +129,13 @@ impl OutboundMessageBuilder {
         let content = cmessages::MsgContent::Normal(cmessages::Message {
             body,
             attachments,
-            expiration,
             op,
         });
 
         let msg = cmessages::Msg {
             mid: msg_id,
             content,
+            expiration,
         };
 
         e!(crate::network::send_normal_message(conversation_id, msg));

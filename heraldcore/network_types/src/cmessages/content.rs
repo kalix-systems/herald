@@ -32,6 +32,8 @@ pub struct Msg {
     pub mid: MsgId,
     /// The content of the message.
     pub content: MsgContent,
+    /// Expiration time of the message
+    pub expiration: Option<Time>,
 }
 
 #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
@@ -60,8 +62,6 @@ pub struct Message {
     pub body: Option<MessageBody>,
     /// Attachments
     pub attachments: Vec<Attachment>,
-    /// Expiration time of the message
-    pub expiration: Option<Time>,
     /// The message id of the message being replied to, if this
     /// message is a reply.
     pub op: Option<MsgId>,

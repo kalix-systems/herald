@@ -72,12 +72,15 @@ fn handle_content(
             tx.commit()?;
         }
         Msg(msg) => {
-            let cmessages::Msg { mid, content } = msg;
+            let cmessages::Msg {
+                mid,
+                content,
+                expiration,
+            } = msg;
 
             if let cmessages::MsgContent::Normal(cmessages::Message {
                 body,
                 attachments,
-                expiration,
                 op,
             }) = content
             {
