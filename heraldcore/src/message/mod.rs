@@ -52,7 +52,7 @@ pub fn update_send_status(
 /// Get message read receipts by message id
 pub fn get_message_receipts(msg_id: &MsgId) -> Result<HashMap<UserId, MessageReceiptStatus>, HErr> {
     let db = Database::get()?;
-    Ok(db::get_receipts(&db, msg_id)?)
+    Ok(db::receipts::get_receipts(&db, msg_id)?)
 }
 
 /// Adds a message receipt
@@ -62,7 +62,7 @@ pub fn add_receipt(
     receipt_status: MessageReceiptStatus,
 ) -> Result<(), HErr> {
     let db = Database::get()?;
-    db::add_receipt(&db, msg_id, recip, receipt_status)
+    db::receipts::add_receipt(&db, msg_id, recip, receipt_status)
 }
 
 /// Adds a reaction to a message
@@ -72,7 +72,7 @@ pub fn add_reaction(
     react_content: &str,
 ) -> Result<(), HErr> {
     let db = Database::get()?;
-    db::add_reaction(&db, msg_id, reactionary, react_content).map_err(HErr::from)
+    db::reactions::add_reaction(&db, msg_id, reactionary, react_content).map_err(HErr::from)
 }
 
 /// Removes a reaction from a message
@@ -82,7 +82,7 @@ pub fn remove_reaction(
     react_content: &str,
 ) -> Result<(), HErr> {
     let db = Database::get()?;
-    db::remove_reaction(&db, msg_id, reactionary, react_content).map_err(HErr::from)
+    db::reactions::remove_reaction(&db, msg_id, reactionary, react_content).map_err(HErr::from)
 }
 
 /// Gets messages by `MessageSendStatus`
