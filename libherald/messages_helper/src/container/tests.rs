@@ -11,7 +11,7 @@ fn msg_constructor(body: &str) -> (MessageMeta, MsgData) {
         .body(body.try_into().expect(womp!()))
         .conversation_id(convid);
 
-    coretypes::messages::split_msg(builder.store().expect(womp!()))
+    builder.store().expect(womp!()).split()
 }
 
 #[serial]

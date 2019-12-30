@@ -122,7 +122,7 @@ impl Messages {
         &mut self,
         msg: Msg,
     ) -> Result<(), HErr> {
-        let (message, data) = split_msg(msg);
+        let (message, data) = msg.split();
 
         let cid = self.conversation_id.ok_or(NE!())?;
 
@@ -194,7 +194,7 @@ impl Messages {
             let last = match list.last().as_ref() {
                 Some(MessageMeta { ref msg_id, .. }) => {
                     let msg = err!(heraldcore::message::get_message(msg_id));
-                    Some(heraldcore::message::split_msg(msg).1)
+                    Some(msg.split().1)
                 }
                 None => None,
             };
