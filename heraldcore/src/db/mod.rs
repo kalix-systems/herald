@@ -53,6 +53,20 @@ pub fn init() -> Result<(), HErr> {
     Ok(())
 }
 
+/// Resets all tables in database.
+pub fn reset_all() -> Result<(), HErr> {
+    let mut db = w!(Database::get());
+    let tx = w!(db.transaction());
+
+    // drop
+    w!(tx.execute_batch(include_str!("../sql/drop_all.sql")));
+
+    // create
+    w!(tx.execute_batch(include_str!("../sql/create_all.sql")));
+    w!(tx.commit());
+    Ok(())
+}
+
 impl Database {
     /// Connect to database at path `P`.
     /// Creates a database if one does not exist.

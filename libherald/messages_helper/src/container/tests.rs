@@ -14,11 +14,10 @@ fn msg_constructor(body: &str) -> (MessageMeta, MsgData) {
     coretypes::messages::split_msg(builder.store().expect(womp!()))
 }
 
-#[test]
 #[serial]
+#[test]
 fn test_container() {
-    drop(std::fs::remove_dir_all(".data_dir"));
-    heraldcore::db::init().expect(womp!("Failed to initialize database"));
+    heraldcore::db::reset_all().expect(womp!());
 
     let convid = [0; 32].into();
 
@@ -51,12 +50,10 @@ fn test_container() {
     assert_eq!(ix2, Some(0));
 }
 
-#[test]
 #[serial]
+#[test]
 fn test_container_search() {
-    drop(std::fs::remove_dir_all(".data_dir"));
-
-    heraldcore::db::init().expect(womp!("Failed to initialize database"));
+    heraldcore::db::reset_all().expect(womp!());
 
     let convid = [0; 32].into();
 
