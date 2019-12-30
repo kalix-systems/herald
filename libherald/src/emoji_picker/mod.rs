@@ -79,32 +79,32 @@ impl Interface for EmojiPicker {
     }
 
     fn row_count(&self) -> usize {
-        if let Some(list) = &self.inner.current_emojis {
-            list.len()
-        } else {
-            0
-        }
+        self.inner
+            .current_emojis
+            .as_ref()
+            .map(Vec::len)
+            .unwrap_or(0)
     }
 
     fn emoji(
         &self,
         index: usize,
-    ) -> String {
-        if let Some(emoji_list) = &self.inner.current_emojis {
-            String::from(emoji_list[index].emoji)
-        } else {
-            String::from("")
-        }
+    ) -> &str {
+        self.inner
+            .current_emojis
+            .as_ref()
+            .and_then(|list| list.get(index)?.emoji.into())
+            .unwrap_or("")
     }
 
     fn skintone_modifier(
         &self,
         index: usize,
     ) -> bool {
-        if let Some(emoji_list) = &self.inner.current_emojis {
-            emoji_list[index].skintone_modifier
-        } else {
-            false
-        }
+        self.inner
+            .current_emojis
+            .as_ref()
+            .and_then(|list| list.get(index)?.skintone_modifier.into())
+            .unwrap_or(false)
     }
 }
