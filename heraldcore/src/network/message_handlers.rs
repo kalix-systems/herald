@@ -73,30 +73,32 @@ fn handle_content(
         }
         Msg(msg) => {
             let cmessages::Msg { mid, content } = msg;
-            let cmessages::Message {
+
+            if let cmessages::MsgContent::Normal(cmessages::Message {
                 body,
                 attachments,
                 expiration,
                 op,
-            } = content;
+            }) = content
+            {
+                let mut builder = crate::message::InboundMessageBuilder::default();
 
-            let mut builder = crate::message::InboundMessageBuilder::default();
+                builder
+                    .id(mid)
+                    .author(uid)
+                    .conversation_id(cid)
+                    .attachments(attachments)
+                    .timestamp(ts);
 
-            builder
-                .id(mid)
-                .author(uid)
-                .conversation_id(cid)
-                .attachments(attachments)
-                .timestamp(ts);
+                builder.body = body;
+                builder.op = op;
+                builder.expiration = expiration;
 
-            builder.body = body;
-            builder.op = op;
-            builder.expiration = expiration;
-
-            if let Some(msg) = builder.store()? {
-                ev.notifications.push(Notification::NewMsg(Box::new(msg)));
+                if let Some(msg) = builder.store()? {
+                    ev.notifications.push(Notification::NewMsg(Box::new(msg)));
+                }
+                ev.replies.push((cid, form_ack(mid)?));
             }
-            ev.replies.push((cid, form_ack(mid)?));
         }
         Receipt(receipt) => {
             let cmessages::Receipt {
