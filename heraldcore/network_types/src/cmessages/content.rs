@@ -1,6 +1,22 @@
 use super::*;
 
 #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
+pub enum Content {
+    /// Members just added to a conversation
+    NewMembers(NewMembers),
+    /// An acknowledgement of a contact request.
+    UserReqAck(UserReqAck),
+    /// A normal message.
+    Msg(Msg),
+    /// An acknowledgement of a normal message.
+    Receipt(Receipt),
+    /// A message reaction
+    Reaction(Reaction),
+    /// An update to the conversation settings
+    Settings(conversation::settings::SettingsUpdate),
+}
+
+#[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
 /// Members that have just been added to a conversation.
 pub struct NewMembers(pub Vec<UserId>);
 
