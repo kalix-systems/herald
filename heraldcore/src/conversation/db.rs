@@ -27,10 +27,10 @@ pub(crate) fn conversation_messages(
         },
         |row| {
             let message_id = row.get("msg_id")?;
-            let receipts = crate::message::db::get_receipts(conn, &message_id)?;
-            let replies = crate::message::db::replies(conn, &message_id)?;
+            let receipts = crate::message::db::receipts::get_receipts(conn, &message_id)?;
+            let replies = crate::message::db::replies::replies(conn, &message_id)?;
             let attachments = crate::message::attachments::db::get(conn, &message_id)?;
-            let reactions = crate::message::db::reactions(conn, &message_id)?;
+            let reactions = crate::message::db::reactions::reactions(conn, &message_id)?;
 
             let time = MessageTime {
                 insertion: row.get("insertion_ts")?,

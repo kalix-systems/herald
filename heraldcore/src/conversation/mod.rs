@@ -37,13 +37,13 @@ pub fn start(conversation: Conversation) -> Result<(), HErr> {
     let pairwise = get_pairwise_conversations(&members)?;
 
     let body = ConversationMessage::AddedToConvo {
-        info: cmessages::AddedToConvo {
+        info: Box::new(cmessages::AddedToConvo {
             members,
             cid,
             title,
             expiration_period,
             picture,
-        },
+        }),
 
         ratchet,
     };

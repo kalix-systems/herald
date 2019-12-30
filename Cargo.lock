@@ -1326,6 +1326,7 @@ dependencies = [
  "parking_lot 0.10.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "revec 0.1.0",
  "search_pattern 0.1.0",
+ "serial_test 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "serial_test_derive 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 

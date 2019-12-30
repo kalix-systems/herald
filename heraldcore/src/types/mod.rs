@@ -4,7 +4,9 @@ use chainkeys::*;
 use herald_common::*;
 
 pub use herald_ids::*;
-pub use network_types::{cmessages::ConversationMessage, dmessages::DeviceMessageBody};
+pub use network_types::{
+    cmessages::Content as NetContent, cmessages::ConversationMessage, dmessages::DeviceMessageBody,
+};
 
 /// Types relevant to [`ConversationMessage`]s
 pub(crate) mod cmessages;
