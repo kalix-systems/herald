@@ -5,7 +5,7 @@ name = "herald"
 version = "0.1.0"
 [dependencies]
 crossbeam-channel = "0.4"
-emoji_utils = "0.1.0"
+emoji_utils = "0.1.1"
 im = "14.0.0"
 json = "0.12.0"
 once_cell = "1.2.0"
