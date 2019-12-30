@@ -9,7 +9,7 @@ Button {
     // consider this a private field
     property string resultEmoji: takesModifier ? baseEmoji + CmnCfg.skinSwatchList[CmnCfg.skinSwatchIndex] : baseEmoji
     property color lowlight: CmnCfg.palette.darkGrey
-    onClicked: maskShape.send(resultEmoji)
+    onClicked: maskShape.send(resultEmoji, takesModifier)
     height: selector.height
     width: selector.width
 

@@ -6,7 +6,49 @@ import LibHerald 1.0
 
 Item {
     property color lowlight: "light gray"
+
     // header and search bar
+    ListModel {
+        id: anchorModel
+        ListElement {
+            sectionName: "Recents"
+            imageSource: "qrc:/emoji-categories/recents.svg"
+        }
+
+        ListElement {
+            sectionName: "Smileys & Emotion"
+            imageSource: "qrc:/emoji-categories/gestural.svg"
+        }
+        ListElement {
+            sectionName: "Animals & Nature"
+            imageSource: "qrc:/emoji-categories/nature.svg"
+        }
+        ListElement {
+            sectionName: "Food & Drink"
+            imageSource: "qrc:/emoji-categories/food.svg"
+        }
+        ListElement {
+            sectionName: "Travel & Places"
+            imageSource: "qrc:/emoji-categories/transport.svg"
+        }
+        ListElement {
+            sectionName: "Activities"
+            imageSource: "qrc:/emoji-categories/sports.svg"
+        }
+        ListElement {
+            sectionName: "Objects"
+            imageSource: "qrc:/emoji-categories/items.svg"
+        }
+        ListElement {
+            sectionName: "Symbols"
+            imageSource: "qrc:/emoji-categories/symbols.svg"
+        }
+        ListElement {
+            sectionName: "Flags"
+            imageSource: "qrc:/emoji-categories/flags.svg"
+        }
+    }
+
     Item {
         id: header
         height: 30 //enough for search bar of default size w/ margins
@@ -184,46 +226,16 @@ Item {
         }
 
         RowLayout {
+            id: anchorRow
             anchors.fill: parent
             anchors.margins: 8
             spacing: CmnCfg.smallMargin
-
-            AnchorButton {
-                anchorIndex: 0
-                imageSource: "qrc:/emoji-categories/gestural.svg"
-            }
-
-            AnchorButton {
-                anchorIndex: 1
-                imageSource: "qrc:/emoji-categories/gestural.svg"
-            }
-            AnchorButton {
-                anchorIndex: 2
-                imageSource: "qrc:/emoji-categories/nature.svg"
-            }
-            AnchorButton {
-                anchorIndex: 3
-                imageSource: "qrc:/emoji-categories/food.svg"
-            }
-            AnchorButton {
-                anchorIndex: 4
-                imageSource: "qrc:/emoji-categories/transport.svg"
-            }
-            AnchorButton {
-                anchorIndex: 5
-                imageSource: "qrc:/emoji-categories/sports.svg"
-            }
-            AnchorButton {
-                anchorIndex: 6
-                imageSource: "qrc:/emoji-categories/items.svg"
-            }
-            AnchorButton {
-                anchorIndex: 7
-                imageSource: "qrc:/emoji-categories/symbols.svg"
-            }
-            AnchorButton {
-                anchorIndex: 8
-                imageSource: "qrc:/emoji-categories/flags.svg"
+            Repeater {
+                model: anchorModel
+                AnchorButton {
+                    sectionName: model.sectionName
+                    imageSource: model.imageSource
+                }
             }
         }
     }

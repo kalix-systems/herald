@@ -35,7 +35,6 @@
         <file>common/CommonConfig.qml</file>
         <file>SideBar/Header/HeaderAvatar.qml</file>
         <file>common/Divider.qml</file>
-        <file>common/EmojiJson.js</file>
         <file>common/PlatonicRectangle.qml</file>
         <file>main.qml</file>
         <file>ChatView/js/KeyNavigation.mjs</file>
