@@ -19,4 +19,17 @@ GridView {
         baseEmoji: model.emoji
         takesModifier: model.skintone_modifier
     }
+    Connections {
+        // the regex actually updates
+        // the rowcount too quickly.
+        // this causes out of bounds errors
+        // these slots cause a softer reset
+        target: emojiPickerModel
+        onModelAboutToBeReset: {
+            emojiList.model = []
+        }
+        onModelReset: {
+            emojiList.model = emojiPickerModel
+        }
+    }
 }
