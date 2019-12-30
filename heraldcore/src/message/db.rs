@@ -490,12 +490,12 @@ impl OutboundMessageBuilder {
 
         f(StoreAndSend::StoreDone(msg_id, attachment_meta));
 
-        let content = cmessages::Message {
+        let content = cmessages::MsgContent::Normal(cmessages::Message {
             body,
             attachments,
             expiration,
             op,
-        };
+        });
 
         let msg = cmessages::Msg {
             mid: msg_id,

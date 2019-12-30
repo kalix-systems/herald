@@ -31,7 +31,26 @@ pub struct Msg {
     /// The message id. Globally unique.
     pub mid: MsgId,
     /// The content of the message.
-    pub content: Message,
+    pub content: MsgContent,
+}
+
+#[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
+/// A normal message to the conversation.
+pub enum MsgContent {
+    Normal(Message),
+    GroupSettings(GroupSettingsUpdate),
+}
+
+#[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
+pub enum GroupSettingsUpdate {
+    /// Expiring messages setting
+    Expiration(conversation::ExpirationPeriod),
+    /// The title of the group
+    Title(Option<String>),
+    /// The color of the group
+    Color(u32),
+    /// The group picture, as a buffer
+    Picture(Vec<u8>),
 }
 
 #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
