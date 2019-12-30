@@ -140,14 +140,14 @@ impl ConversationBuilderTrait for ConversationBuilder {
     }
 
     fn picture(&self) -> Option<&str> {
-        Some(self.inner.picture.as_ref()?.path.as_str())
+        Some(self.inner.tagged_picture.as_ref()?.path.as_str())
     }
 
     fn set_profile_picture(
         &mut self,
         picture_json: String,
     ) {
-        self.inner.picture =
+        self.inner.tagged_picture =
             heraldcore::image_utils::ProfilePicture::from_json_string(picture_json);
         self.emit.picture_changed();
     }

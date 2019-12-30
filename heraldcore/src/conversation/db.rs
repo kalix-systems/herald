@@ -202,11 +202,10 @@ pub(crate) fn set_picture(
     let old_picture = self::picture(&conn, conversation_id)?;
 
     let path = match picture {
-        Some(picture) => Some(
-            image_utils::update_picture(picture, old_picture.as_ref().map(String::as_str))?
-                .into_os_string()
-                .into_string()?,
-        ),
+        Some(picture) => Some(image_utils::update_picture(
+            picture,
+            old_picture.as_ref().map(String::as_str),
+        )?),
         None => {
             if let Some(old) = old_picture {
                 std::fs::remove_file(old).ok();

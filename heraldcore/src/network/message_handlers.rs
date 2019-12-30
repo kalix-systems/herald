@@ -16,8 +16,7 @@ pub(super) fn handle_cmessage(
         NewKey(nk) => crate::user_keys::add_keys(uid, &[nk.0])?,
         DepKey(dk) => crate::user_keys::deprecate_keys(&[dk.0])?,
         AddedToConvo(ac) => {
-            use crate::{image_utils::image_path, types::cmessages::AddedToConvo};
-            use std::fs;
+            use crate::types::cmessages::AddedToConvo;
 
             let AddedToConvo {
                 members,
@@ -37,13 +36,7 @@ pub(super) fn handle_cmessage(
             conv_builder.title = title;
 
             conv_builder.picture = match picture {
-                Some(bytes) => {
-                    let image_path = image_path();
-                    fs::write(&image_path, bytes)?;
-                    Some(image_utils::ProfilePicture::autocrop(
-                        image_path.into_os_string().into_string()?,
-                    ))
-                }
+                Some(bytes) => Some(image_utils::update_picture_buf(&bytes, None::<&str>)?),
                 None => None,
             };
 
