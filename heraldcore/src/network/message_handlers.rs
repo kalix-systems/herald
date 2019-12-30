@@ -24,7 +24,7 @@ pub(super) fn handle_cmessage(
                 title,
                 picture,
                 expiration_period,
-            } = info;
+            } = *info;
 
             let mut conv_builder = crate::conversation::ConversationBuilder::new();
             conv_builder
@@ -47,6 +47,21 @@ pub(super) fn handle_cmessage(
             ev.notifications
                 .push(Notification::NewConversation(conv.meta));
         }
+        Message(content) => handle_content(cid, uid, ts, &mut ev, content)?,
+    }
+
+    Ok(ev)
+}
+
+fn handle_content(
+    cid: ConversationId,
+    uid: UserId,
+    ts: Time,
+    ev: &mut Event,
+    content: NetContent,
+) -> Result<(), HErr> {
+    use NetContent::*;
+    match content {
         UserReqAck(cr) => ev
             .notifications
             .push(Notification::AddUserResponse(cid, uid, cr.0)),
@@ -128,9 +143,9 @@ pub(super) fn handle_cmessage(
 
             ev.notifications.push(Notification::Settings(cid, update));
         }
-    }
+    };
 
-    Ok(ev)
+    Ok(())
 }
 
 pub(super) fn handle_dmessage(
@@ -157,7 +172,7 @@ pub(super) fn handle_dmessage(
 
             ev.replies.push((
                 cid,
-                ConversationMessage::UserReqAck(cmessages::UserReqAck(true)),
+                ConversationMessage::Message(NetContent::UserReqAck(cmessages::UserReqAck(true))),
             ))
         }
     }
@@ -166,8 +181,10 @@ pub(super) fn handle_dmessage(
 }
 
 fn form_ack(mid: MsgId) -> Result<ConversationMessage, HErr> {
-    Ok(ConversationMessage::Receipt(cmessages::Receipt {
-        of: mid,
-        stat: MessageReceiptStatus::Received,
-    }))
+    Ok(ConversationMessage::Message(NetContent::Receipt(
+        cmessages::Receipt {
+            of: mid,
+            stat: MessageReceiptStatus::Received,
+        },
+    )))
 }

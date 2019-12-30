@@ -19,22 +19,12 @@ pub enum ConversationMessage {
     NewKey(NewKey),
     /// A key to be marked as deprecated
     DepKey(DepKey),
-    /// Members just added to a conversation
-    NewMembers(NewMembers),
     /// A message a user receives upon being added to a conversation
     AddedToConvo {
-        info: AddedToConvo,
+        info: Box<AddedToConvo>,
         /// The genesis block for the new conversation
         ratchet: RatchetState,
     },
-    /// An acknowledgement of a contact request.
-    UserReqAck(UserReqAck),
-    /// A normal message.
-    Msg(Msg),
-    /// An acknowledgement of a normal message.
-    Receipt(Receipt),
-    /// A message reaction
-    Reaction(Reaction),
-    /// An update to the conversation settings
-    Settings(conversation::settings::SettingsUpdate),
+    /// User content
+    Message(Content),
 }
