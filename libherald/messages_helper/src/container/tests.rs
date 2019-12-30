@@ -14,7 +14,9 @@ fn msg_constructor() -> (MessageMeta, MsgData) {
 }
 #[test]
 fn test_container() {
+    std::fs::remove_dir_all(".data_dir").expect(womp!());
     heraldcore::db::init().expect(womp!("Failed to initialize database"));
+
     let convid = [0; 32].into();
 
     heraldcore::config::ConfigBuilder::new(
@@ -24,15 +26,24 @@ fn test_container() {
     .nts_conversation(convid)
     .add()
     .expect(womp!("Failed to add config"));
+
     let (msgmeta1, msgdata1) = msg_constructor();
+    std::thread::sleep(std::time::Duration::from_millis(2));
     let (msgmeta2, msgdata2) = msg_constructor();
-    let container = Container::new(vec![msgmeta2, msgmeta1], Some(msgdata2.clone()));
+    let mut container = Container::new(vec![], None);
+
+    let _ = container.insert_ord(msgmeta1, msgdata1);
+    let _ = container.insert_ord(msgmeta2, msgdata2);
+
+    assert_ne!(msgmeta1, msgmeta2);
 
     assert_eq!(container.len(), 2);
 
-    assert_eq!(container.index_of(&msgmeta1).expect(womp!()), 0);
+    let ix1 = container.index_of(&msgmeta1);
+    assert!(ix1.is_some());
+    assert_eq!(ix1, Some(1));
 
-    // assert_eq!(container.index_of(&msgmeta2).expect(womp!()), 1);
-
-    std::fs::remove_dir_all(".data_dir").expect(womp!());
+    let ix2 = container.index_of(&msgmeta2);
+    assert!(ix2.is_some());
+    assert_eq!(ix2, Some(0));
 }

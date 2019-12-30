@@ -1,5 +1,6 @@
 use unicode_segmentation::UnicodeSegmentation;
 
+#[derive(Debug)]
 pub struct Elider {
     pub line_count: usize,
     pub char_count: usize,

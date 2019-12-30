@@ -12,7 +12,7 @@ const FLURRY_FUZZ: i64 = 5 * 60_000;
 pub mod handlers;
 pub use cache::{access, get, update};
 
-#[derive(Default)]
+#[derive(Default, Debug)]
 /// Container type for messages
 pub struct Container {
     pub list: Revec<MessageMeta>,
