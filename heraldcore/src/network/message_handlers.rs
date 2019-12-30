@@ -15,17 +15,16 @@ pub(super) fn handle_cmessage(
     match msg {
         NewKey(nk) => crate::user_keys::add_keys(uid, &[nk.0])?,
         DepKey(dk) => crate::user_keys::deprecate_keys(&[dk.0])?,
-        AddedToConvo(ac) => {
+        AddedToConvo { info, ratchet } => {
             use crate::types::cmessages::AddedToConvo;
 
             let AddedToConvo {
                 members,
                 cid,
-                ratchet,
                 title,
                 picture,
                 expiration_period,
-            } = *ac;
+            } = info;
 
             let mut conv_builder = crate::conversation::ConversationBuilder::new();
             conv_builder

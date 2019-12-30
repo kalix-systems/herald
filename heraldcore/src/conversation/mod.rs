@@ -36,14 +36,17 @@ pub fn start(conversation: Conversation) -> Result<(), HErr> {
 
     let pairwise = get_pairwise_conversations(&members)?;
 
-    let body = ConversationMessage::AddedToConvo(Box::new(cmessages::AddedToConvo {
-        members,
+    let body = ConversationMessage::AddedToConvo {
+        info: cmessages::AddedToConvo {
+            members,
+            cid,
+            title,
+            expiration_period,
+            picture,
+        },
+
         ratchet,
-        cid,
-        title,
-        expiration_period,
-        picture,
-    }));
+    };
 
     for pw_cid in pairwise {
         crate::network::send_cmessage(pw_cid, &body)?;
