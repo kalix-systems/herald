@@ -1,5 +1,4 @@
 use super::*;
-use conversation::settings::SettingsUpdate;
 
 impl Conversations {
     pub(crate) fn handle_update(
@@ -9,88 +8,74 @@ impl Conversations {
         use ConvUpdate::*;
 
         match update {
-            NewConversation(inner) => self.handle_new_conversation(inner),
-            BuilderFinished(inner) => self.handle_builder_finished(inner),
-            NewActivity(cid) => self.handle_new_activity(cid),
-            Settings(cid, update) => none!(self.handle_settings_update(cid, update)),
-            Init(contents) => self.handle_init(contents),
+            Global(update) => self.handle_global_update(update),
+            Item(ConvItemUpdate { cid, variant }) => {
+                self.handle_item_update(cid, variant);
+            }
         }
     }
 
-    pub(super) fn handle_settings_update(
+    fn handle_item_update(
         &mut self,
         cid: ConversationId,
-        update: SettingsUpdate,
+        variant: ConvItemUpdateVariant,
     ) -> Option<()> {
+        use ConvItemUpdateVariant::*;
+
         let pos = self
             .list
             .iter()
             .position(|Conversation { id, .. }| id == &cid)?;
 
-        match update {
-            SettingsUpdate::Expiration(period) => {
-                self.set_expiration_inner(pos, period)?;
+        match variant {
+            PictureChanged(path) => {
+                self.set_picture_inner(pos, path);
+                self.model.data_changed(pos, pos);
             }
-            SettingsUpdate::Color(color) => {
+            ColorChanged(color) => {
                 self.set_color_inner(pos, color)?;
+                self.model.data_changed(pos, pos);
             }
-            SettingsUpdate::Title(title) => {
-                self.set_title_inner(pos, title)?;
+            TitleChanged(title) => {
+                self.set_title_inner(pos, title);
+                self.model.data_changed(pos, pos);
+            }
+            ExpirationChanged(period) => {
+                self.set_expiration_inner(pos, period)?;
+                self.model.data_changed(pos, pos);
+            }
+            NewActivity => {
+                // NOTE: If this check isn't here,
+                // the program will segfault.
+                if pos == 0 {
+                    return Some(());
+                }
+
+                self.model.begin_move_rows(pos, pos, 0);
+                let conv = self.list.remove(pos);
+                self.list.push_front(conv);
+                self.model.end_move_rows();
             }
         }
-
-        self.model.data_changed(pos, pos);
 
         Some(())
     }
 
-    pub(super) fn handle_init(
+    fn handle_global_update(
         &mut self,
-        contents: Vector<Conversation>,
+        update: GlobalConvUpdate,
     ) {
-        self.model.begin_reset_model();
-        self.list = contents;
-        self.loaded = true;
-        self.model.end_reset_model();
-    }
-
-    pub(super) fn handle_new_activity(
-        &mut self,
-        cid: ConversationId,
-    ) {
-        let pos = match self
-            .list
-            .iter()
-            .position(|Conversation { id, .. }| id == &cid)
-        {
-            Some(pos) => pos,
-            None => return,
-        };
-
-        // FIXME: If this check isn't here,
-        // the program will segfault.
-        if pos == 0 {
-            return;
+        use GlobalConvUpdate::*;
+        match update {
+            Init(contents) => {
+                self.model.begin_reset_model();
+                self.list = contents;
+                self.loaded = true;
+                self.model.end_reset_model();
+            }
+            BuilderFinished(meta) => self.insert_new_conversation(meta),
+            NewConversation(meta) => self.insert_new_conversation(meta),
         }
-
-        self.model.begin_move_rows(pos, pos, 0);
-        let conv = self.list.remove(pos);
-        self.list.push_front(conv);
-        self.model.end_move_rows();
-    }
-
-    pub(super) fn handle_builder_finished(
-        &mut self,
-        inner: ConversationMeta,
-    ) {
-        self.insert_new_conversation(inner)
-    }
-
-    pub(super) fn handle_new_conversation(
-        &mut self,
-        inner: ConversationMeta,
-    ) {
-        self.insert_new_conversation(inner)
     }
 
     fn insert_new_conversation(

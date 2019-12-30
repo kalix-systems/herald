@@ -1,5 +1,5 @@
 use crate::{
-    conversations::shared::ConvUpdate, err, ffi, interface::*, none, push, spawn,
+    conversations::shared::GlobalConvUpdate, err, ffi, interface::*, none, push, spawn,
     users::shared::user_in_cache,
 };
 use herald_common::UserId;
@@ -120,7 +120,7 @@ impl ConversationBuilderTrait for ConversationBuilder {
             let conv = err!(inner.add());
 
             // send update to Conversations list
-            push(ConvUpdate::BuilderFinished(conv.meta.clone()));
+            push(GlobalConvUpdate::BuilderFinished(conv.meta.clone()));
 
             err!(start(conv));
         });

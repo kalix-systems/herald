@@ -67,10 +67,10 @@ impl NotifHandler {
                 push(UserUpdate::NewUser(user));
 
                 // add pairwise conversation
-                push(ConvUpdate::NewConversation(meta));
+                push(GlobalConvUpdate::NewConversation(meta));
             }
             NewConversation(meta) => {
-                push(ConvUpdate::NewConversation(meta));
+                push(GlobalConvUpdate::NewConversation(meta));
             }
             AddUserResponse(cid, uid, accepted) => {
                 // handle response
@@ -80,7 +80,7 @@ impl NotifHandler {
                 if accepted {
                     let meta = err!(heraldcore::conversation::meta(&cid));
 
-                    push(ConvUpdate::NewConversation(meta));
+                    push(GlobalConvUpdate::NewConversation(meta));
                 }
             }
             AddConversationResponse(cid, uid, accepted) => {
@@ -88,7 +88,7 @@ impl NotifHandler {
                 err!(content_push(cid, MemberUpdate::ReqResp(uid, accepted)));
             }
             Settings(cid, settings) => {
-                push(ConvUpdate::Settings(cid, settings));
+                push((cid, settings));
             }
         }
     }
