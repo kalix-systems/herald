@@ -72,11 +72,12 @@ fn handle_content(
             tx.commit()?;
         }
         Msg(msg) => {
-            let cmessages::Msg { mid, content, op } = msg;
+            let cmessages::Msg { mid, content } = msg;
             let cmessages::Message {
                 body,
                 attachments,
                 expiration,
+                op,
             } = content;
 
             let mut builder = crate::message::InboundMessageBuilder::default();
@@ -112,30 +113,22 @@ fn handle_content(
                     status,
                 }));
         }
-        Reaction(cmessages::Reaction::Add {
+        Reaction(cmessages::Reaction {
             react_content,
             msg_id,
+            remove,
         }) => {
-            crate::message::add_reaction(&msg_id, &uid, &react_content)?;
+            if remove {
+                crate::message::remove_reaction(&msg_id, &uid, &react_content)?;
+            } else {
+                crate::message::add_reaction(&msg_id, &uid, &react_content)?;
+            }
             ev.notifications.push(Notification::Reaction {
                 cid,
                 msg_id,
                 reactionary: uid,
                 content: react_content,
-                remove: false,
-            });
-        }
-        Reaction(cmessages::Reaction::Remove {
-            react_content,
-            msg_id,
-        }) => {
-            crate::message::add_reaction(&msg_id, &uid, &react_content)?;
-            ev.notifications.push(Notification::Reaction {
-                cid,
-                msg_id,
-                reactionary: uid,
-                content: react_content,
-                remove: true,
+                remove,
             });
         }
         Settings(update) => {

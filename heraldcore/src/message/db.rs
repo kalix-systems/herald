@@ -368,14 +368,15 @@ impl OutboundMessageBuilder {
     pub(crate) fn store_and_send_db<F: FnMut(StoreAndSend) + Send + 'static>(
         self,
         db: &mut Conn,
-        mut callback: F,
+        mut f: F,
     ) {
+        // this is a macro rather than a closure to provide a line number
         macro_rules! e {
             ($res: expr) => {
                 match $res {
                     Ok(val) => val,
                     Err(e) => {
-                        callback(StoreAndSend::Error {
+                        f(StoreAndSend::Error {
                             error: e.into(),
                             location: loc!(),
                         });
@@ -431,7 +432,7 @@ impl OutboundMessageBuilder {
             reactions: None,
         };
 
-        callback(StoreAndSend::Msg(Box::new(msg)));
+        f(StoreAndSend::Msg(Box::new(msg)));
 
         let attachments: Result<Vec<Attachment>, HErr> = attachments
             .into_iter()
@@ -487,23 +488,23 @@ impl OutboundMessageBuilder {
 
         e!(tx.commit());
 
-        callback(StoreAndSend::StoreDone(msg_id, attachment_meta));
+        f(StoreAndSend::StoreDone(msg_id, attachment_meta));
 
         let content = cmessages::Message {
             body,
             attachments,
             expiration,
+            op,
         };
 
         let msg = cmessages::Msg {
             mid: msg_id,
             content,
-            op,
         };
 
         e!(crate::network::send_normal_message(conversation_id, msg));
 
-        callback(StoreAndSend::SendDone(msg_id));
+        f(StoreAndSend::SendDone(msg_id));
     }
 
     #[cfg(test)]
