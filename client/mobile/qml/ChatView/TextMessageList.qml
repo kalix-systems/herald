@@ -29,7 +29,6 @@ ListView {
     }
 
     model: messageListModel
-
     // TODO: Delegate should just be the ChatBubble
     delegate: Column {
         id: containerCol
@@ -46,9 +45,20 @@ ListView {
         topPadding: 0
 
         CB.ChatBubble {
+            id: chatBubble
             defaultWidth: chatListView.width
             messageModelData: containerCol.messageModelData
             convContainer: parent
+            MessageMouseArea {
+                cb: parent
+                dropdown: dropdown
+                anchors.fill: parent
+            }
+        }
+
+        OptionsDropdown {
+            id: dropdown
+            cb: chatBubble
         }
     }
 }
