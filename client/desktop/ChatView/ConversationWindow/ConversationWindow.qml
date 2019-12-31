@@ -83,8 +83,17 @@ ListView {
 
     delegate: Loader {
         property var modelData: model
-        sourceComponent: model.auxData.length === 0 ? msgBubble : undefined
+        sourceComponent: model.auxData.length === 0 ? msgBubble : auxBubble
         width: parent.width
+
+        Component {
+            id: auxBubble
+            CB.AuxBubble {
+                auxData: JSON.parse(model.auxData)
+                messageModelData: model
+            }
+        }
+
         Component {
             id: msgBubble
             CB.ChatBubble {
