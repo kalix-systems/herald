@@ -2,16 +2,7 @@ use super::*;
 
 /// Attempts to login to the server, spawning a long-lived thread to handle messages pushed from
 /// the server.
-///
-/// Takes a callback as an argument that is called whenever a message is received.
-pub fn login<F, G>(
-    mut f: F,
-    mut g: G,
-) -> Result<(), HErr>
-where
-    F: FnMut(Notification) + Send + 'static,
-    G: FnMut(HErr) + Send + 'static,
-{
+pub fn login() -> Result<(), HErr> {
     use login::*;
 
     kcl::init();
@@ -58,12 +49,12 @@ where
     }
 
     // send read receipts, etc
-    ev.execute(&mut f, &mut g)?;
+    ev.execute()?;
 
     std::thread::spawn(move || {
         move || -> Result<(), HErr> {
             loop {
-                catchup(&mut ws)?.execute(&mut f, &mut g)?;
+                catchup(&mut ws)?.execute()?;
             }
         }()
         .unwrap_or_else(|e| eprintln!("login connection closed with message: {}", e));

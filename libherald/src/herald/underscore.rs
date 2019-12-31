@@ -14,12 +14,24 @@ impl Herald {
         users_search: UsersSearch,
         utils: Utils,
     ) -> Self {
-        let global_emit = emit.clone();
-        shared::set_emitter(global_emit);
+        shared::set_emitter(emit.clone());
+
+        let mut handler = notif_handler::NotifHandler::new();
+
+        push_err!(
+            heraldcore::updates::register_handlers(
+                move |notif: Notification| {
+                    handler.send(notif);
+                },
+                move |err: heraldcore::errors::HErr| {
+                    err!(Err::<(), _>(err));
+                },
+            ),
+            "Failed to register event handlers"
+        );
 
         Herald {
             emit,
-            effects_flags: Arc::new(EffectsFlags::new()),
             message_search,
             load_props: imp::LoadProps {
                 config,
@@ -83,30 +95,17 @@ impl Herald {
         self.process_updates()
     }
 
+    // TODO these need to come back
     pub(crate) fn connection_up_(&self) -> bool {
-        self.effects_flags.net_online.load(Ordering::Relaxed)
+        false
     }
 
     pub(crate) fn connection_pending_(&self) -> bool {
-        self.effects_flags.net_pending.load(Ordering::Relaxed)
+        false
     }
 
     pub(crate) fn login_(&mut self) -> bool {
-        use heraldcore::errors::HErr;
-
-        let mut handler = NotifHandler::new(self.emit.clone(), self.effects_flags.clone());
-
-        spawn!(
-            err!(net::login(
-                move |notif: Notification| {
-                    handler.send(notif);
-                },
-                move |herr: HErr| {
-                    push_err!(Err::<(), HErr>(herr), "Problem in login thread");
-                }
-            )),
-            false
-        );
+        spawn!(err!(net::login()), false);
 
         true
     }

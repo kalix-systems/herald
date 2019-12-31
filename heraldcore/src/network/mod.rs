@@ -1,3 +1,4 @@
+use crate::updates::Notification;
 use crate::{
     conversation::settings,
     errors::HErr::{self, *},
@@ -8,7 +9,6 @@ use crate::{
 };
 use chainkeys;
 use channel_ratchet::RatchetState;
-use coretypes::conversation::ConversationMeta;
 use herald_common::*;
 use std::{
     net::SocketAddr,
@@ -34,38 +34,6 @@ mod event;
 use event::*;
 
 mod helper;
-
-#[derive(Clone, Debug)]
-/// `Notification`s contain info about what updates were made to the client's database.
-pub enum Notification {
-    /// A new message has been received.
-    NewMsg(Box<message::Message>),
-    /// A message has been received.
-    MsgReceipt(message::MessageReceipt),
-    /// A message reaction has been received
-    Reaction {
-        /// Conversation id
-        cid: ConversationId,
-        /// Message being reacted to
-        msg_id: MsgId,
-        /// The user that reacted
-        reactionary: UserId,
-        /// The content of the react
-        content: message::ReactContent,
-        /// Is this reaction update an addition or a removal?
-        remove: bool,
-    },
-    /// A new user has been added
-    NewUser(Box<(herald_user::User, ConversationMeta)>),
-    /// A new conversation has been added
-    NewConversation(ConversationMeta),
-    /// Response to user request.
-    AddUserResponse(ConversationId, UserId, bool),
-    /// Response to request to join conversation.
-    AddConversationResponse(ConversationId, UserId, bool),
-    /// The conversation settings have been updated
-    Settings(ConversationId, settings::SettingsUpdate),
-}
 
 /// Deprecates key on server.
 pub fn dep_key(to_dep: sig::PublicKey) -> Result<PKIResponse, HErr> {
