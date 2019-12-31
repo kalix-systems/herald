@@ -13,7 +13,7 @@ MouseArea {
     property bool download: false
     propagateComposedEvents: true
     hoverEnabled: true
-    anchors.fill: bubbleActual
+    anchors.fill: parent
     z: CmnCfg.overlayZ + 1
     onClicked: mouse.accepted = false
     onPressed: mouse.accepted = false
@@ -28,7 +28,7 @@ MouseArea {
         height: buttonRow.height
         z: CmnCfg.overlayZ
         color: "transparent"
-        visible: chatBubbleHitbox.containsMouse || bubbleActual.hoverHighlight
+        visible: chatBubbleHitbox.containsMouse || parentBubble.hoverHighlight
 
         anchors {
             right: parent.right

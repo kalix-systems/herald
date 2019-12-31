@@ -33,6 +33,7 @@ Rectangle {
     property alias expireInfo: expireInfo
     property int bubbleIndex
     property bool moreInfo: false
+    property bool aux: true
 
     Connections {
         target: appRoot.globalTimer

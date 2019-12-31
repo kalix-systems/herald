@@ -89,8 +89,13 @@ ListView {
         Component {
             id: auxBubble
             CB.AuxBubble {
+                id: bubbleAux
                 auxData: JSON.parse(model.auxData)
                 messageModelData: model
+
+                BubbleDecoration {
+                    parentBubble: parent
+                }
             }
         }
 
@@ -108,66 +113,8 @@ ListView {
                     conversationItem.status = 0
                 }
                 bubbleIndex: index
-
-                ChatBubbleHover {
-                    id: bubbleHoverHandler
-                    download: bubbleActual.imageAttach || bubbleActual.docAttach
-                    onEntered: {
-                        bubbleActual.hoverHighlight = true
-                        bubbleActual.expireInfo.visible = false
-                    }
-                    onExited: {
-                        if (reactPopup.active == true) {
-                            bubbleActual.hoverHighlight = true
-                        }
-
-                        bubbleActual.hoverHighlight = false
-                        if (isHead)
-                            bubbleActual.expireInfo.visible = true
-                    }
-                }
-
-                Popup {
-                    id: emojiMenu
-                    width: reactPopup.width
-                    height: reactPopup.height
-
-                    x: chatListView.width - width
-                    y: if (bubbleActual.y - chatListView.contentY > height) {
-                           return -height
-                       } else {
-                           return CmnCfg.largeMargin * 2
-                       }
-
-                    onClosed: reactPopup.active = false
-                    onOpened: bubbleActual.hoverHighlight = true
-
-                    Popups.EmojiPopup {
-                        id: reactPopup
-                        anchors.centerIn: parent
-                        isReactPopup: true
-                        x: chatListView.width - width
-                        z: CmnCfg.overlayZ
-                        onActiveChanged: if (!active) {
-                                             emojiMenu.close()
-                                         }
-                        anchors.margins: CmnCfg.smallMargin
-                    }
-                }
-
-                Loader {
-                    id: markReadLoader
-                    active: false
-                    Connections {
-                        target: root
-                        onActiveChanged: if (root.active) {
-                                             ownedConversation.markRead(index)
-                                         }
-                    }
-                }
-
-                Component.onCompleted: {
-                    markReadLoader.active = true
+                BubbleDecoration {
+                    parentBubble: parent
                 }
             }
         }
