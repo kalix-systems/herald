@@ -35,6 +35,35 @@ pub(crate) mod db {
             Expiration(period) => Ok(set_expiration_period(&conn, cid, *period)?),
             Title(title) => Ok(set_title(&conn, cid, title.as_ref().map(String::as_str))?),
             Color(color) => Ok(set_color(&conn, cid, *color)?),
+            _ => Ok(()),
+        }
+    }
+
+    pub(crate) fn apply_inbound(
+        conn: &rusqlite::Connection,
+        update: cmessages::GroupSettingsUpdate,
+        cid: &ConversationId,
+    ) -> Result<SettingsUpdate, HErr> {
+        use crate::conversation::db::*;
+        use cmessages::GroupSettingsUpdate::*;
+
+        match update {
+            Expiration(period) => {
+                set_expiration_period(&conn, cid, period)?;
+                Ok(SettingsUpdate::Expiration(period))
+            }
+            Title(title) => {
+                set_title(&conn, cid, title.as_ref().map(String::as_str))?;
+                Ok(SettingsUpdate::Title(title))
+            }
+            Color(color) => {
+                set_color(&conn, cid, color)?;
+                Ok(SettingsUpdate::Color(color))
+            }
+            Picture(bytes) => {
+                let path = set_picture_buf(&conn, cid, bytes.as_ref().map(Vec::as_slice))?;
+                Ok(SettingsUpdate::Pictire(path))
+            }
         }
     }
 }

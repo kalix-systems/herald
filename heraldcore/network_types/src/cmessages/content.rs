@@ -52,7 +52,7 @@ pub enum GroupSettingsUpdate {
     /// The color of the group
     Color(u32),
     /// The group picture, as a buffer
-    Picture(Vec<u8>),
+    Picture(Option<Vec<u8>>),
 }
 
 #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]

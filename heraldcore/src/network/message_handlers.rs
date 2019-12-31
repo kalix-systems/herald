@@ -78,29 +78,37 @@ fn handle_content(
                 expiration,
             } = msg;
 
-            if let cmessages::MsgContent::Normal(cmessages::Message {
-                body,
-                attachments,
-                op,
-            }) = content
-            {
-                let mut builder = crate::message::InboundMessageBuilder::default();
+            match content {
+                cmessages::MsgContent::Normal(cmessages::Message {
+                    body,
+                    attachments,
+                    op,
+                }) => {
+                    let mut builder = crate::message::InboundMessageBuilder::default();
 
-                builder
-                    .id(mid)
-                    .author(uid)
-                    .conversation_id(cid)
-                    .attachments(attachments)
-                    .timestamp(ts);
+                    builder
+                        .id(mid)
+                        .author(uid)
+                        .conversation_id(cid)
+                        .attachments(attachments)
+                        .timestamp(ts);
 
-                builder.body = body;
-                builder.op = op;
-                builder.expiration = expiration;
+                    builder.body = body;
+                    builder.op = op;
+                    builder.expiration = expiration;
 
-                if let Some(msg) = builder.store()? {
-                    ev.notifications.push(Notification::NewMsg(Box::new(msg)));
+                    if let Some(msg) = builder.store()? {
+                        ev.notifications.push(Notification::NewMsg(Box::new(msg)));
+                    }
+                    ev.replies.push((cid, form_ack(mid)?));
                 }
-                ev.replies.push((cid, form_ack(mid)?));
+                cmessages::MsgContent::GroupSettings(settings) => {
+                    let conn = crate::db::Database::get()?;
+                    let update =
+                        crate::conversation::settings::db::apply_inbound(&conn, settings, &cid)?;
+
+                    ev.notifications.push(Notification::Settings(cid, update));
+                }
             }
         }
         Receipt(receipt) => {
