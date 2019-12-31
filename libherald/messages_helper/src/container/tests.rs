@@ -120,3 +120,46 @@ fn test_container_search() {
 
     assert_eq!(msgmeta3.match_status, MatchStatus::NotMatched);
 }
+
+#[test]
+#[serial]
+fn test_handle_receipt() {
+    heraldcore::db::reset_all().expect(womp!());
+
+    let convid = [0; 32].into();
+
+    heraldcore::config::ConfigBuilder::new(
+        "TEST".try_into().expect(womp!()),
+        herald_common::sig::KeyPair::gen_new(),
+    )
+    .nts_conversation(convid)
+    .add()
+    .expect(womp!("Failed to add config"));
+
+    let (msgmeta1, msgdata1) = msg_constructor("test");
+    std::thread::sleep(std::time::Duration::from_millis(2));
+    let (msgmeta2, msgdata2) = msg_constructor("123");
+    let mut container = Container::new(vec![], None);
+
+    let _ = container.insert_ord(msgmeta1, msgdata1);
+    let _ = container.insert_ord(msgmeta2, msgdata2);
+
+    let mut vec = Vec::new();
+
+    container.handle_receipt(
+        msgmeta2.msg_id,
+        coretypes::messages::MessageReceiptStatus::Read,
+        "TEST".try_into().expect(womp!()),
+        |i: usize| vec.push(i),
+    );
+
+    assert_eq!(vec.len(), 1);
+    assert_eq!(vec[0], 0);
+    assert_eq!(
+        container
+            .get_data(&msgmeta2.msg_id)
+            .expect(womp!())
+            .receipts[&"TEST".try_into().expect(womp!())],
+        coretypes::messages::MessageReceiptStatus::Read
+    );
+}
