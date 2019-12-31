@@ -68,7 +68,7 @@ pub(crate) fn inbound_group_settings(
         receipts,
         reactions,
         replies,
-        content: coretypes::messages::Item::Update(update).into(),
+        content: coretypes::messages::Item::Aux(update).into(),
         time,
     }))
 }
@@ -131,7 +131,7 @@ pub(crate) fn outbound_group_settings(
         receipts,
         reactions,
         replies,
-        content: coretypes::messages::Item::Update(update).into(),
+        content: coretypes::messages::Item::Aux(update).into(),
         time,
     })
 }

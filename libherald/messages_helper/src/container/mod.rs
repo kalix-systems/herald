@@ -153,8 +153,16 @@ impl Container {
         &self,
         ix: usize,
     ) -> Option<String> {
-        let update = self.access_by_index(ix, |data| match data.content.as_ref()? {
-            Item::Update(update) => Some(update.clone()),
+        let mid = self.msg_id(ix)?;
+        self.aux_data_json_by_id(&mid)
+    }
+
+    pub fn aux_data_json_by_id(
+        &self,
+        msg_id: &MsgId,
+    ) -> Option<String> {
+        let update = cache::access(msg_id, |data| match data.content.as_ref()? {
+            Item::Aux(update) => Some(update.clone()),
             _ => None,
         })??;
 
@@ -291,6 +299,14 @@ impl Container {
         self.get_media_attachments_data_json(&mid, Some(4))
     }
 
+    pub fn op_aux_data_json(
+        &self,
+        index: usize,
+    ) -> Option<String> {
+        let mid = self.op_msg_id(index)?;
+        self.aux_data_json_by_id(&mid)
+    }
+
     pub fn clear_search<F: FnMut(usize)>(
         &mut self,
         mut data_changed: F,
@@ -383,10 +399,20 @@ impl Container {
         a_ix: usize,
         b_ix: usize,
     ) -> Option<bool> {
-        let flurry_info = |data: &MsgData| (data.author, data.time.insertion);
+        let flurry_info = |data: &MsgData| {
+            (
+                data.author,
+                data.time.insertion,
+                data.content.as_ref().map(Item::is_plain).unwrap_or(false),
+            )
+        };
 
-        let (a_author, a_ts) = self.access_by_index(a_ix, flurry_info)?;
-        let (b_author, b_ts) = self.access_by_index(b_ix, flurry_info)?;
+        let (a_author, a_ts, a_is_plain) = self.access_by_index(a_ix, flurry_info)?;
+        let (b_author, b_ts, b_is_plain) = self.access_by_index(b_ix, flurry_info)?;
+
+        if !a_is_plain || !b_is_plain {
+            return Some(false);
+        }
 
         ((a_author == b_author) && a_ts.within(FLURRY_FUZZ, b_ts)).into()
     }

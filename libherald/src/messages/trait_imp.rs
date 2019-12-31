@@ -186,6 +186,13 @@ impl Interface for Messages {
         self.op_body_(index).unwrap_or_default()
     }
 
+    fn op_aux_data(
+        &self,
+        index: usize,
+    ) -> String {
+        self.op_aux_data_(index).unwrap_or_default()
+    }
+
     fn insertion_time(
         &self,
         index: usize,

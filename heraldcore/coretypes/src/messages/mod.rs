@@ -138,7 +138,7 @@ impl ReplyId {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Item {
     Plain(PlainItem),
-    Update(crate::conversation::settings::SettingsUpdate),
+    Aux(crate::conversation::settings::SettingsUpdate),
 }
 
 /// An normal item in the message history

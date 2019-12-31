@@ -1738,6 +1738,7 @@ public:
   Q_INVOKABLE QString mediaAttachments(int row) const;
   Q_INVOKABLE QByteArray msgId(int row) const;
   Q_INVOKABLE QString opAuthor(int row) const;
+  Q_INVOKABLE QString opAuxData(int row) const;
   Q_INVOKABLE QString opBody(int row) const;
   Q_INVOKABLE QVariant opColor(int row) const;
   Q_INVOKABLE QString opDocAttachments(int row) const;

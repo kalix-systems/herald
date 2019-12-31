@@ -152,7 +152,7 @@ impl Item {
                 op,
             })
             .into(),
-            (None, Some(update)) => Item::Update(update).into(),
+            (None, Some(update)) => Item::Aux(update).into(),
             _ => None,
         }
     }
