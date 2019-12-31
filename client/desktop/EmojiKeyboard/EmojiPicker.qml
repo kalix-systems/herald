@@ -23,6 +23,8 @@ Rectangle {
             centerIn: parent
         }
     }
+    // Updates the recent emojis as if it
+    // were a stupid LRU cache
     onSend: {
         const emoji_data = {
             "emoji": emoji,
