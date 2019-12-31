@@ -1,4 +1,5 @@
 use crate::*;
+use coretypes::messages::{Item, PlainItem};
 use herald_common::{Time, UserId};
 use heraldcore::message::Elider;
 use message_cache as cache;
@@ -104,7 +105,8 @@ impl Container {
         mid: &MsgId,
         limit: Option<usize>,
     ) -> Option<String> {
-        access(mid, |m| m.attachments.clone())
+        access(mid, |m| m.attachments().map(Clone::clone))
+            .flatten()
             .and_then(|attachments| crate::media_attachments_json(&attachments, limit))
     }
 
@@ -122,7 +124,8 @@ impl Container {
         mid: &MsgId,
         limit: Option<usize>,
     ) -> Option<String> {
-        access(mid, |m| m.attachments.clone())
+        access(mid, |m| m.attachments().map(Clone::clone))
+            .flatten()
             .and_then(|attachments| crate::doc_attachments_json(&attachments, limit))
     }
 
@@ -179,7 +182,7 @@ impl Container {
     ) -> usize {
         let mid = msg.msg_id;
 
-        if let ReplyId::Known(op) = &data.op {
+        if let ReplyId::Known(op) = &data.op() {
             cache::update(op, |m| {
                 m.replies.insert(mid);
             });
@@ -209,14 +212,16 @@ impl Container {
         &self,
         index: usize,
     ) -> Option<ReplyType> {
-        Some(reply_type(&cache::access(self.msg_id(index)?, |m| m.op)?))
+        Some(reply_type(&cache::access(self.msg_id(index)?, |m| {
+            *m.op()
+        })?))
     }
 
     pub fn op_msg_id(
         &self,
         index: usize,
     ) -> Option<MsgId> {
-        match cache::access(self.msg_id(index)?, |m| m.op)? {
+        match cache::access(self.msg_id(index)?, |m| *m.op())? {
             ReplyId::Known(mid) => Some(mid),
             _ => None,
         }
@@ -339,13 +344,16 @@ impl Container {
         mut data_changed: F,
     ) -> Option<()> {
         for id in ids.into_iter() {
-            let changed = update(&id, |data| {
-                if data.op != ReplyId::Dangling {
-                    data.op = ReplyId::Dangling;
-                    true
-                } else {
-                    false
+            let changed = update(&id, |data| match data.content {
+                Some(Item::Plain(PlainItem { ref mut op, .. })) => {
+                    if *op != ReplyId::Dangling {
+                        *op = ReplyId::Dangling;
+                        true
+                    } else {
+                        false
+                    }
                 }
+                _ => false,
             });
 
             if changed.unwrap_or(false) {

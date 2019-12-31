@@ -176,7 +176,7 @@ fn reply() {
 
     let reply = db::get_message(&conn, &mid2).expect(womp!());
 
-    assert_eq!(ReplyId::Known(mid1), reply.op);
+    assert_eq!(ReplyId::Known(mid1), *reply.content.unwrap().op());
 }
 
 #[test]
@@ -276,7 +276,7 @@ fn reply_to_unknown_message() {
 
     let msg = db::get_message(&conn, &msg_id).expect(womp!());
 
-    assert!(msg.op.is_dangling());
+    assert!(msg.content.unwrap().op().is_dangling());
 }
 
 #[test]
@@ -314,13 +314,13 @@ fn delete_op() {
 
     let msg = db::get_message(&conn, &mid1).expect(womp!());
 
-    assert!(msg.op.is_known());
+    assert!(msg.op().is_known());
 
     db::delete_message(&conn, &mid0).expect(womp!());
 
     let msg = db::get_message(&conn, &mid1).expect(womp!());
 
-    assert!(msg.op.is_dangling());
+    assert!(msg.op().is_dangling());
 }
 
 #[test]

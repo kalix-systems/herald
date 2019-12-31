@@ -1,4 +1,5 @@
 use super::*;
+use coretypes::messages::PlainItem;
 
 impl OutboundMessageBuilder {
     pub(crate) fn store_and_send_db(
@@ -53,12 +54,15 @@ impl OutboundMessageBuilder {
         let msg = Message {
             message_id: msg_id,
             author,
-            content: body.clone().map(Item::Plain),
-            op: op.into(),
+            content: Item::Plain(PlainItem {
+                body: body.clone(),
+                op: op.into(),
+                attachments: vec![].into(),
+            })
+            .into(),
             conversation: conversation_id,
             time,
             send_status,
-            attachments: vec![].into(),
             receipts: HashMap::new(),
             replies: HashSet::new(),
             reactions: None,
@@ -237,12 +241,15 @@ impl OutboundMessageBuilder {
         Ok(Message {
             message_id: msg_id,
             author,
-            content: body.map(Item::Plain),
-            op: op.into(),
+            content: Item::Plain(PlainItem {
+                body,
+                attachments: attachment_meta,
+                op: op.into(),
+            })
+            .into(),
             conversation: conversation_id,
             time,
             send_status,
-            attachments: attachment_meta,
             receipts: HashMap::new(),
             replies: HashSet::new(),
             reactions: None,
@@ -369,11 +376,14 @@ impl InboundMessageBuilder {
         Ok(Some(Message {
             message_id: msg_id,
             author,
-            content: body.map(Item::Plain),
-            attachments,
+            content: Item::Plain(PlainItem {
+                body,
+                attachments,
+                op,
+            })
+            .into(),
             conversation: conversation_id,
             send_status: MessageSendStatus::Ack,
-            op,
             time,
             receipts,
             replies,
