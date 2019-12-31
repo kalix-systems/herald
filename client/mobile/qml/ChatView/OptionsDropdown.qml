@@ -10,21 +10,18 @@ Rectangle {
     signal deactivate
     signal activate
     width: parent.width
-    height: 0
     visible: height != 0
     color: CmnCfg.palette.lightGrey
-    onActivate: {
-        height = 50
-    }
-    onDeactivate: {
-        height = 0
-    }
+    onActivate: height = 50
+    onDeactivate: height = 0
+
     Behavior on height {
         NumberAnimation {
             easing.type: Easing.InOutQuad
             duration: 100
         }
     }
+
     RowLayout {
         anchors.fill: parent
         clip: true

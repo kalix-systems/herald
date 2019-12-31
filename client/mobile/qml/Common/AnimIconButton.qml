@@ -23,6 +23,7 @@ ToolButton {
     TapHandler {
         onTapped: {
             tapAnim.running = true
+            clicked()
         }
     }
 
