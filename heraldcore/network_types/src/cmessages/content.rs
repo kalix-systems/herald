@@ -12,8 +12,6 @@ pub enum Content {
     Receipt(Receipt),
     /// A message reaction
     Reaction(Reaction),
-    /// An update to the conversation settings
-    Settings(conversation::settings::SettingsUpdate),
 }
 
 #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]

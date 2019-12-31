@@ -158,11 +158,6 @@ fn handle_content(
                 remove,
             });
         }
-        Settings(update) => {
-            conversation::settings::apply(&update, &cid)?;
-
-            ev.notifications.push(Notification::Settings(cid, update));
-        }
     };
 
     Ok(())

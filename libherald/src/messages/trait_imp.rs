@@ -89,6 +89,13 @@ impl Interface for Messages {
         self.receipt_status_(index)
     }
 
+    fn aux_data(
+        &self,
+        index: usize,
+    ) -> String {
+        self.aux_data_(index)
+    }
+
     fn is_head(
         &self,
         index: usize,

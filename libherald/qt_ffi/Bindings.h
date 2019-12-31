@@ -1725,6 +1725,7 @@ public:
   Q_INVOKABLE QVariant authorColor(int row) const;
   Q_INVOKABLE QString authorName(int row) const;
   Q_INVOKABLE QString authorProfilePicture(int row) const;
+  Q_INVOKABLE QString auxData(int row) const;
   Q_INVOKABLE QString body(int row) const;
   Q_INVOKABLE QString docAttachments(int row) const;
   Q_INVOKABLE QVariant expirationTime(int row) const;

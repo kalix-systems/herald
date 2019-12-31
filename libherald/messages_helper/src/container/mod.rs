@@ -149,6 +149,18 @@ impl Container {
         self.list.binary_search(&m).ok()
     }
 
+    pub fn aux_data_json(
+        &self,
+        ix: usize,
+    ) -> Option<String> {
+        let update = self.access_by_index(ix, |data| match data.content.as_ref()? {
+            Item::Update(update) => Some(update.clone()),
+            _ => None,
+        })??;
+
+        json::JsonValue::from(update).dump().into()
+    }
+
     /// Removes the item from the container. *Does not modify disk storage*.
     pub fn remove(
         &mut self,

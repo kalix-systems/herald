@@ -397,6 +397,11 @@ pub trait MessagesTrait {
         index: usize,
     ) -> String;
 
+    fn aux_data(
+        &self,
+        index: usize,
+    ) -> String;
+
     fn body(
         &self,
         index: usize,
@@ -1068,6 +1073,19 @@ pub unsafe extern "C" fn messages_data_author_profile_picture(
 ) {
     let obj = &*ptr;
     let data = obj.author_profile_picture(to_usize(row).unwrap_or(0));
+    let str_: *const c_char = data.as_ptr() as *const c_char;
+    set(d, str_, to_c_int(data.len()));
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn messages_data_aux_data(
+    ptr: *const Messages,
+    row: c_int,
+    d: *mut QString,
+    set: fn(*mut QString, *const c_char, len: c_int),
+) {
+    let obj = &*ptr;
+    let data = obj.aux_data(to_usize(row).unwrap_or(0));
     let str_: *const c_char = data.as_ptr() as *const c_char;
     set(d, str_, to_c_int(data.len()));
 }

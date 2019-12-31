@@ -1,4 +1,5 @@
 use crate::{db::Database, errors::HErr, types::*};
+use coremacros::from_fn;
 use herald_common::*;
 use rusqlite::params;
 use std::{collections::HashMap, path::PathBuf};
@@ -14,6 +15,21 @@ mod builder;
 pub use builder::*;
 mod search;
 pub use search::{ResultBody, Search, SearchResult};
+
+/// Outbound settings send updates
+#[derive(Clone, Debug)]
+pub enum OutboundAux {
+    /// Finished store
+    StoreDone(Box<Message>),
+    /// Finished send
+    SendDone(ConversationId, MsgId),
+}
+
+from_fn!(
+    crate::updates::Notification,
+    OutboundAux,
+    crate::updates::Notification::OutboundAux
+);
 
 /// Get message by message id
 pub fn get_message(msg_id: &MsgId) -> Result<Message, HErr> {
