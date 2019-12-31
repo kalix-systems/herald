@@ -13,8 +13,8 @@ pub(crate) mod reactions;
 use reactions::*;
 pub(crate) mod replies;
 use replies::*;
-mod aux;
-pub(crate) use aux::{inbound_group_settings, outbound_group_settings};
+mod auxil;
+pub(crate) use auxil::{inbound_group_settings, outbound_group_settings};
 
 /// Get message by message id
 pub(crate) fn get_message(
