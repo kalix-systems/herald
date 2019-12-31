@@ -139,7 +139,7 @@ impl ReplyId {
 #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
 pub enum Item {
     Plain(MessageBody),
-    Update(Update),
+    Update(crate::conversation::settings::SettingsUpdate),
 }
 
 impl Item {
@@ -156,15 +156,6 @@ impl Item {
             _ => None,
         }
     }
-}
-
-/// An update that appears appears in the message history
-#[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
-pub enum Update {
-    Color(u32),
-    Title(String),
-    Picture(String),
-    Expiration(crate::conversation::ExpirationPeriod),
 }
 
 #[derive(Clone, Copy, Debug)]
