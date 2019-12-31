@@ -99,8 +99,8 @@ fn handle_content(
 
                     if let Some(msg) = builder.store()? {
                         ev.notifications.push(Notification::NewMsg(Box::new(msg)));
+                        ev.replies.push((cid, form_ack(mid)?));
                     }
-                    ev.replies.push((cid, form_ack(mid)?));
                 }
                 cmessages::MsgContent::GroupSettings(settings) => {
                     let mut conn = crate::db::Database::get()?;
@@ -118,8 +118,10 @@ fn handle_content(
                         expiration,
                     )?;
 
-                    ev.notifications.push(Notification::NewMsg(Box::new(msg)));
-                    ev.notifications.push(Notification::Settings(cid, update));
+                    if let Some(msg) = msg {
+                        ev.notifications.push(Notification::NewMsg(Box::new(msg)));
+                        ev.notifications.push(Notification::Settings(cid, update));
+                    }
                 }
             }
         }
