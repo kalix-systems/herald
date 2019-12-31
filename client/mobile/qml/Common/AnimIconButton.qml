@@ -6,14 +6,11 @@ import LibHerald 1.0
 // TODO this should use IconButton in foundation
 ToolButton {
 
-    property var tapCallback: function anon() {
-        throw "undefined callback"
-    }
     property string imageSource: ""
     property color color: CmnCfg.palette.iconMatte
 
-    property size iconSize: Qt.size(CmnCfg.iconSize,
-                                    CmnCfg.iconSize)
+    property size iconSize: Qt.size(CmnCfg.iconSize, CmnCfg.iconSize)
+
     background: Rectangle {
         id: splash
         color: CmnCfg.palette.iconMatte
@@ -52,9 +49,6 @@ ToolButton {
             to: 0
             duration: CmnCfg.units.shortDuration
             easing.type: Easing.InQuad
-        }
-        onFinished: {
-            tapCallback()
         }
     }
 }

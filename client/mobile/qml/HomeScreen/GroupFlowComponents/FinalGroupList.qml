@@ -34,7 +34,7 @@ ListView {
             anchors.rightMargin: CmnCfg.defaultMargin / 2
             anchors.verticalCenter: parent.verticalCenter
             imageSource: "qrc:/x-icon.svg"
-            tapCallback: function () {
+            onClicked : {
                 Herald.conversationBuilder.removeMemberById(memberId)
             }
         }

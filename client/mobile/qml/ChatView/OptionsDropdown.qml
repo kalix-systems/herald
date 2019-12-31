@@ -37,6 +37,9 @@ Rectangle {
             Layout.alignment: Qt.AlignRight
             iconSize: Qt.size(CmnCfg.units.dp(24), CmnCfg.units.dp(24))
             imageSource: "qrc:/reply-icon.svg"
+            onClicked: {
+                ownedMessages.builder.opId = msgId
+            }
         }
         CMN.AnimIconButton {
             Layout.alignment: Qt.AlignRight
@@ -54,7 +57,7 @@ Rectangle {
             Layout.alignment: Qt.AlignRight
             Layout.rightMargin: CmnCfg.largeMargin
             iconSize: Qt.size(CmnCfg.units.dp(24), CmnCfg.units.dp(24))
-            tapCallback: deactivate
+            onClicked: deactivate()
             imageSource: "qrc:/x-icon.svg"
         }
     }

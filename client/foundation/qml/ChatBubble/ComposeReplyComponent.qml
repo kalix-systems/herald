@@ -1,7 +1,6 @@
 import QtQuick 2.13
 import QtQuick.Controls 2.13
 import QtQuick.Layouts 1.12
-import "qrc:/common" as Common
 import LibHerald 1.0
 import "qrc:/imports/js/utils.mjs" as Utils
 import "qrc:/imports" as Imports

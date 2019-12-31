@@ -16,7 +16,7 @@ RowLayout {
         Layout.alignment: Qt.AlignLeft
         color: CmnCfg.palette.iconFill
         imageSource: "qrc:/back-arrow-icon.svg"
-        tapCallback: function () {
+        onClicked : {
             mainView.pop()
         }
     }
