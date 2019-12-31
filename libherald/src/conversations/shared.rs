@@ -60,7 +60,7 @@ impl From<(ConversationId, CoreSettingsUpdate)> for crate::Update {
                 cid,
                 variant: TitleChanged(title),
             },
-            CoreSettingsUpdate::Pictire(path) => ConvItemUpdate {
+            CoreSettingsUpdate::Picture(path) => ConvItemUpdate {
                 cid,
                 variant: PictureChanged(path),
             },

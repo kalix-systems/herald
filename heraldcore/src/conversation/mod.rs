@@ -87,7 +87,8 @@ pub fn set_color(
     color: u32,
 ) -> Result<(), HErr> {
     let db = Database::get()?;
-    db::set_color(&db, conversation_id, color)
+    settings::db::update_color(&db, color, conversation_id)?;
+    Ok(())
 }
 
 /// Sets muted status of a conversation
@@ -114,7 +115,8 @@ pub fn set_title(
     title: Option<&str>,
 ) -> Result<(), HErr> {
     let db = Database::get()?;
-    db::set_title(&db, conversation_id, title)
+    settings::db::update_title(&db, title.map(ToString::to_string), conversation_id)?;
+    Ok(())
 }
 
 /// Sets picture for a conversation
@@ -123,7 +125,8 @@ pub fn set_picture(
     picture: Option<image_utils::ProfilePicture>,
 ) -> Result<Option<String>, HErr> {
     let db = Database::get()?;
-    db::set_picture(&db, conversation_id, picture)
+    let (_, path) = settings::db::update_picture(&db, picture, conversation_id)?;
+    Ok(path)
 }
 
 /// Sets expiration period for a conversation
@@ -132,7 +135,8 @@ pub fn set_expiration_period(
     expiration_period: ExpirationPeriod,
 ) -> Result<(), HErr> {
     let db = Database::get()?;
-    db::set_expiration_period(&db, conversation_id, expiration_period)
+    settings::db::update_expiration(&db, expiration_period, conversation_id)?;
+    Ok(())
 }
 
 /// Get metadata of all conversations

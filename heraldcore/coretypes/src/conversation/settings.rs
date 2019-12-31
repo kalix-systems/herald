@@ -10,5 +10,5 @@ pub enum SettingsUpdate {
     /// The color of the conversation
     Color(u32),
     /// Group picture
-    Pictire(Option<String>),
+    Picture(Option<String>),
 }
