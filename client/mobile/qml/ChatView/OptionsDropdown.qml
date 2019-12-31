@@ -39,6 +39,7 @@ Rectangle {
             imageSource: "qrc:/reply-icon.svg"
             onClicked: {
                 ownedMessages.builder.opId = msgId
+                deactivate()
             }
         }
         CMN.AnimIconButton {
