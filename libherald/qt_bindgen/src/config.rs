@@ -289,6 +289,8 @@ fn messages() -> Object {
         authorName: ItemProp::new(QString).optional().get_by_value(),
         // Message reactions
         reactions: ItemProp::new(QString).get_by_value(),
+        // Auxiliary message data, serialized as JSON
+        auxData: ItemProp::new(QString).get_by_value(),
 
         // Media attachments metadata, serialized as JSON
         mediaAttachments: ItemProp::new(QString).get_by_value(),

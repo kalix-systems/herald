@@ -71,6 +71,13 @@ impl Messages {
         true
     }
 
+    pub(crate) fn aux_data_(
+        &self,
+        index: usize,
+    ) -> String {
+        self.container.aux_data_json(index).unwrap_or_default()
+    }
+
     pub(crate) fn is_empty_(&self) -> bool {
         self.container.is_empty()
     }
