@@ -33,8 +33,6 @@ pub struct Message {
     pub content: Option<Item>,
     /// Message time information
     pub time: MessageTime,
-    /// Message id of the message being replied to
-    pub op: ReplyId,
     /// Send status
     pub send_status: MessageSendStatus,
     /// Receipts
@@ -43,13 +41,18 @@ pub struct Message {
     pub replies: HashSet<MsgId>,
     /// Reactions to this message
     pub reactions: Option<Reactions>,
-    /// Attachment metadata
-    pub attachments: AttachmentMeta,
 }
 
 impl Message {
     pub fn text(&self) -> Option<&str> {
-        self.content.as_ref().and_then(Item::as_str)
+        self.content.as_ref()?.as_str()
+    }
+
+    pub fn op(&self) -> &ReplyId {
+        self.content
+            .as_ref()
+            .map(Item::op)
+            .unwrap_or(&ReplyId::None)
     }
 
     pub fn split(self) -> (MessageMeta, MsgData) {
@@ -58,9 +61,7 @@ impl Message {
             author,
             content,
             time,
-            op,
             receipts,
-            attachments,
             send_status,
             reactions,
             replies,
@@ -71,8 +72,6 @@ impl Message {
             author,
             receipts,
             content,
-            op,
-            attachments,
             time,
             send_status,
             replies,
@@ -136,23 +135,54 @@ impl ReplyId {
 }
 
 /// An item in the message history
-#[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Item {
-    Plain(MessageBody),
+    Plain(PlainItem),
     Update(crate::conversation::settings::SettingsUpdate),
 }
 
+/// An normal item in the message history
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct PlainItem {
+    pub body: Option<MessageBody>,
+    pub attachments: AttachmentMeta,
+    pub op: ReplyId,
+}
+
 impl Item {
+    pub fn is_plain(&self) -> bool {
+        match self {
+            Item::Plain(_) => true,
+            _ => false,
+        }
+    }
+
     pub fn as_str(&self) -> Option<&str> {
         match self {
-            Item::Plain(body) => Some(body.as_str()),
+            Item::Plain(PlainItem {
+                body: Some(body), ..
+            }) => Some(body.as_str()),
             _ => None,
         }
     }
 
     pub fn body(&self) -> Option<&MessageBody> {
         match self {
-            Item::Plain(body) => Some(&body),
+            Item::Plain(PlainItem { body, .. }) => body.as_ref(),
+            _ => None,
+        }
+    }
+
+    pub fn op(&self) -> &ReplyId {
+        match self {
+            Item::Plain(PlainItem { op, .. }) => op,
+            _ => &ReplyId::None,
+        }
+    }
+
+    pub fn attachments(&self) -> Option<&AttachmentMeta> {
+        match self {
+            Item::Plain(PlainItem { attachments, .. }) => Some(attachments),
             _ => None,
         }
     }
@@ -204,9 +234,7 @@ pub struct MsgData {
     pub author: UserId,
     pub content: Option<Item>,
     pub time: MessageTime,
-    pub op: ReplyId,
     pub receipts: HashMap<UserId, MessageReceiptStatus>,
-    pub attachments: herald_attachments::AttachmentMeta,
     pub send_status: MessageSendStatus,
     pub replies: HashSet<MsgId>,
     pub reactions: Option<Reactions>,
@@ -217,8 +245,10 @@ impl MsgData {
         &self,
         pattern: &search_pattern::SearchPattern,
     ) -> bool {
-        match self.content.as_ref() {
-            Some(Item::Plain(body)) => pattern.is_match(body.as_str()),
+        match &self.content {
+            Some(Item::Plain(PlainItem {
+                body: Some(body), ..
+            })) => pattern.is_match(body.as_str()),
             _ => false,
         }
     }
@@ -227,17 +257,32 @@ impl MsgData {
         &self,
         dest: P,
     ) -> Result<(), herald_attachments::Error> {
-        let ext = format!(
-            "{author}_{time}",
-            author = self.author,
-            time = self.time.insertion.as_i64()
-        );
+        if let Some(Item::Plain(ref plain)) = self.content {
+            let ext = format!(
+                "{author}_{time}",
+                author = self.author,
+                time = self.time.insertion.as_i64()
+            );
 
-        self.attachments.save_all(dest.as_ref().join(ext))
+            plain.attachments.save_all(dest.as_ref().join(ext))?;
+        }
+
+        Ok(())
     }
 
     pub fn text(&self) -> Option<&str> {
-        self.content.as_ref().and_then(Item::as_str)
+        self.content.as_ref()?.as_str()
+    }
+
+    pub fn attachments(&self) -> Option<&AttachmentMeta> {
+        self.content.as_ref().and_then(Item::attachments)
+    }
+
+    pub fn op(&self) -> &ReplyId {
+        self.content
+            .as_ref()
+            .map(Item::op)
+            .unwrap_or(&ReplyId::None)
     }
 }
 

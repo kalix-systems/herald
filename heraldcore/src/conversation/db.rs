@@ -46,17 +46,15 @@ pub(crate) fn conversation_messages(
             let body: Option<MessageBody> = row.get("body")?;
             let update: Option<coretypes::conversation::settings::SettingsUpdate> =
                 row.get("update_item")?;
-            let content = MsgItem::from_parts(body, update);
+            let content = MsgItem::from_parts(body, Some(attachments), op, update);
 
             Ok(Message {
                 message_id,
                 author: row.get("author")?,
                 conversation: *conversation_id,
                 content,
-                op,
                 time,
                 send_status: row.get("send_status")?,
-                attachments,
                 receipts,
                 replies,
                 reactions,

@@ -65,7 +65,7 @@ impl Attachment {
 }
 
 /// Attachments
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, Eq, PartialEq)]
 pub struct AttachmentMeta(Vec<String>);
 
 impl AttachmentMeta {
