@@ -19,5 +19,5 @@ VALUES(
   @insertion_ts,
   @server_ts,
   @expiration_ts,
-  0,
+  0
 )

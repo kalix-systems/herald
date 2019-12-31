@@ -358,3 +358,14 @@ fn add_delete_reaction() {
     let reacts = db::reactions::reactions(&conn, &mid).expect(womp!());
     assert!(reacts.is_none());
 }
+
+#[test]
+fn outbound_aux() {
+    let mut conn = Database::in_memory_with_config().expect(womp!());
+    let receiver = crate::user::db::test_user(&mut conn, "receiver");
+
+    let conv = receiver.pairwise_conversation;
+
+    let update = coretypes::conversation::settings::SettingsUpdate::Color(1);
+    db::outbound_group_settings(&mut conn, update, &conv).expect(womp!());
+}
