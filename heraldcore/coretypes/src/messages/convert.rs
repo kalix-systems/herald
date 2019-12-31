@@ -141,7 +141,7 @@ impl std::convert::TryFrom<i64> for MessageReceiptStatus {
 impl Item {
     pub fn from_parts(
         body: Option<MessageBody>,
-        update: Option<Update>,
+        update: Option<crate::conversation::settings::SettingsUpdate>,
     ) -> Option<Item> {
         match (body, update) {
             (Some(body), None) => Item::Plain(body).into(),
