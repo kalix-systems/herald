@@ -103,10 +103,22 @@ fn handle_content(
                     ev.replies.push((cid, form_ack(mid)?));
                 }
                 cmessages::MsgContent::GroupSettings(settings) => {
-                    let conn = crate::db::Database::get()?;
+                    let mut conn = crate::db::Database::get()?;
+
                     let update =
                         crate::conversation::settings::db::apply_inbound(&conn, settings, &cid)?;
 
+                    let msg = crate::message::db::inbound_group_settings(
+                        &mut conn,
+                        update.clone(),
+                        cid,
+                        mid,
+                        uid,
+                        ts,
+                        expiration,
+                    )?;
+
+                    ev.notifications.push(Notification::NewMsg(Box::new(msg)));
                     ev.notifications.push(Notification::Settings(cid, update));
                 }
             }

@@ -81,7 +81,7 @@ impl OutboundMessageBuilder {
 
         let tx = e!(db.transaction());
 
-        e!(tx.execute_named(
+        let num_updated = e!(tx.execute_named(
             include_str!("../sql/add.sql"),
             named_params![
                 "@msg_id": msg_id,
@@ -95,6 +95,11 @@ impl OutboundMessageBuilder {
                 "@is_reply": op.is_some()
             ],
         ));
+
+        // early return on redundant insert
+        if num_updated != 1 {
+            return;
+        }
 
         e!(tx.execute(
             include_str!("../../conversation/sql/update_last_active.sql"),
@@ -296,7 +301,7 @@ impl InboundMessageBuilder {
 
         let mut tx = w!(conn.transaction());
 
-        w!(tx.execute_named(
+        let num_updated = w!(tx.execute_named(
             include_str!("../sql/add.sql"),
             named_params! {
                 "@msg_id": msg_id,
@@ -310,6 +315,11 @@ impl InboundMessageBuilder {
                 "@is_reply": op.is_some()
             },
         ));
+
+        // early return on redundant insert
+        if num_updated != 1 {
+            return Ok(None);
+        }
 
         w!(tx.execute(
             include_str!("../../conversation/sql/update_last_active.sql"),
