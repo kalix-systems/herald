@@ -14,6 +14,7 @@ import "../Popups" as Popups
 Item {
     anchors.fill: parent
 
+    anchors.centerIn: parent
     property var parentBubble
     ChatBubbleHover {
         id: bubbleHoverHandler

@@ -85,17 +85,19 @@ ListView {
         property var modelData: model
         sourceComponent: model.auxData.length === 0 ? msgBubble : auxBubble
         width: parent.width
+        height: active ? item.height : undefined
 
         property var highlightItem: active ? item.highlightItem : undefined
 
         Component {
             id: auxBubble
             CB.AuxBubble {
-                id: bubbleAux
+                id: bubbleActual
                 auxData: JSON.parse(model.auxData)
                 messageModelData: model
                 width: parent.width
                 defaultWidth: chatListView.width
+                bubbleIndex: index
 
                 BubbleDecoration {
                     parentBubble: parent
