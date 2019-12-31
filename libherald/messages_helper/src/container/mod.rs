@@ -154,7 +154,7 @@ impl Container {
         ix: usize,
     ) -> Option<String> {
         let update = self.access_by_index(ix, |data| match data.content.as_ref()? {
-            Item::Update(update) => Some(update.clone()),
+            Item::Aux(update) => Some(update.clone()),
             _ => None,
         })??;
 
