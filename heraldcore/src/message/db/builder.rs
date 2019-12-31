@@ -1,10 +1,9 @@
 use super::*;
 
 impl OutboundMessageBuilder {
-    pub(crate) fn store_and_send_db<F: FnMut(StoreAndSend) + Send + 'static>(
+    pub(crate) fn store_and_send_db(
         self,
         db: &mut Conn,
-        mut f: F,
     ) {
         // this is a macro rather than a closure to provide a line number
         macro_rules! e {
@@ -12,10 +11,7 @@ impl OutboundMessageBuilder {
                 match $res {
                     Ok(val) => val,
                     Err(e) => {
-                        f(StoreAndSend::Error {
-                            error: e.into(),
-                            location: loc!(),
-                        });
+                        $crate::err(e);
                         return;
                     }
                 }
@@ -68,7 +64,7 @@ impl OutboundMessageBuilder {
             reactions: None,
         };
 
-        f(StoreAndSend::Msg(Box::new(msg)));
+        crate::push(StoreAndSend::Msg(conversation_id, Box::new(msg)));
 
         let attachments: Result<Vec<Attachment>, HErr> = attachments
             .into_iter()
@@ -124,7 +120,11 @@ impl OutboundMessageBuilder {
 
         e!(tx.commit());
 
-        f(StoreAndSend::StoreDone(msg_id, attachment_meta));
+        crate::push(StoreAndSend::StoreDone(
+            conversation_id,
+            msg_id,
+            attachment_meta,
+        ));
 
         let content = cmessages::MsgContent::Normal(cmessages::Message {
             body,
@@ -140,43 +140,7 @@ impl OutboundMessageBuilder {
 
         e!(crate::network::send_normal_message(conversation_id, msg));
 
-        f(StoreAndSend::SendDone(msg_id));
-    }
-
-    #[cfg(test)]
-    pub(crate) fn store_and_send_blocking_db(
-        self,
-        db: &mut Conn,
-    ) -> Result<Message, HErr> {
-        use crate::channel_recv_err;
-        use crossbeam_channel::*;
-
-        let (tx, rx) = unbounded();
-        self.store_and_send_db(db, move |m| {
-            tx.send(m).unwrap_or_else(|_| panic!("Send error"));
-        });
-
-        let out = match rx.recv().map_err(|_| channel_recv_err!())? {
-            StoreAndSend::Msg(msg) => msg,
-            StoreAndSend::Error { error, .. } => return Err(error),
-            other => {
-                panic!("Unexpected  variant {:?}", other);
-            }
-        };
-
-        match rx.recv().map_err(|_| channel_recv_err!())? {
-            StoreAndSend::StoreDone(..) => {}
-            other => {
-                panic!("Unexpected variant {:?}", other);
-            }
-        }
-
-        match rx.recv().map_err(|_| channel_recv_err!())? {
-            StoreAndSend::SendDone(_) => Ok(*out),
-            other => {
-                panic!("Unexpected variant {:?}", other);
-            }
-        }
+        crate::push(StoreAndSend::SendDone(conversation_id, msg_id));
     }
 
     pub(crate) fn store_db(

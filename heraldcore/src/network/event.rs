@@ -20,11 +20,7 @@ impl Event {
 
     /// Sends replies to inbound messages and calls `f`, passing each notification in as an
     /// argument.
-    pub fn execute<F: FnMut(Notification), G: FnMut(HErr)>(
-        self,
-        f: &mut F,
-        g: &mut G,
-    ) -> Result<(), HErr> {
+    pub fn execute(self) -> Result<(), HErr> {
         let Event {
             notifications,
             errors,
@@ -32,11 +28,11 @@ impl Event {
         } = self;
 
         for note in notifications {
-            f(note);
+            crate::push(note);
         }
 
         for herr in errors {
-            g(herr);
+            crate::err(herr);
         }
 
         for (cid, content) in replies {

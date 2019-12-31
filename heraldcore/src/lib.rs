@@ -19,6 +19,8 @@ pub mod network;
 pub mod pending;
 /// Types
 pub mod types;
+/// Notification stream
+pub mod updates;
 /// Functions and data structures related to users.
 pub mod user;
 /// User keys
@@ -28,6 +30,7 @@ pub mod utils;
 
 pub use image_utils;
 pub use platform_dirs::set_data_dir;
+pub(crate) use updates::{err, push};
 
 #[cfg(test)]
 #[macro_use]
