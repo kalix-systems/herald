@@ -35,23 +35,25 @@ Rectangle {
 
         CMN.AnimIconButton {
             Layout.alignment: Qt.AlignRight
-            iconSize: CmnCfg.units.dp(24)
+            iconSize: Qt.size(CmnCfg.units.dp(24), CmnCfg.units.dp(24))
             imageSource: "qrc:/reply-icon.svg"
         }
         CMN.AnimIconButton {
             Layout.alignment: Qt.AlignRight
-            iconSize: CmnCfg.units.dp(24)
+            iconSize: Qt.size(CmnCfg.units.dp(24), CmnCfg.units.dp(24))
+
             imageSource: "qrc:/lenny-icon.svg"
         }
         CMN.AnimIconButton {
             Layout.alignment: Qt.AlignRight
-            iconSize: CmnCfg.units.dp(24)
+            iconSize: Qt.size(CmnCfg.units.dp(24), CmnCfg.units.dp(24))
+
             imageSource: "qrc:/options-icon.svg"
         }
         CMN.AnimIconButton {
             Layout.alignment: Qt.AlignRight
             Layout.rightMargin: CmnCfg.largeMargin
-            iconSize: CmnCfg.units.dp(24)
+            iconSize: Qt.size(CmnCfg.units.dp(24), CmnCfg.units.dp(24))
             tapCallback: deactivate
             imageSource: "qrc:/x-icon.svg"
         }
