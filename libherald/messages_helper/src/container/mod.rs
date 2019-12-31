@@ -383,10 +383,20 @@ impl Container {
         a_ix: usize,
         b_ix: usize,
     ) -> Option<bool> {
-        let flurry_info = |data: &MsgData| (data.author, data.time.insertion);
+        let flurry_info = |data: &MsgData| {
+            (
+                data.author,
+                data.time.insertion,
+                data.content.as_ref().map(Item::is_plain).unwrap_or(false),
+            )
+        };
 
-        let (a_author, a_ts) = self.access_by_index(a_ix, flurry_info)?;
-        let (b_author, b_ts) = self.access_by_index(b_ix, flurry_info)?;
+        let (a_author, a_ts, a_is_plain) = self.access_by_index(a_ix, flurry_info)?;
+        let (b_author, b_ts, b_is_plain) = self.access_by_index(b_ix, flurry_info)?;
+
+        if !a_is_plain || !b_is_plain {
+            return Some(false);
+        }
 
         ((a_author == b_author) && a_ts.within(FLURRY_FUZZ, b_ts)).into()
     }
