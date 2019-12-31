@@ -68,6 +68,10 @@ RowLayout {
             Layout.alignment: Qt.AlignRight
             color: CmnCfg.palette.black
             imageSource: "qrc:/camera-icon.svg"
+            onClicked: {
+
+                /// cross platform camera logic
+            }
         }
 
         AnimIconButton {
@@ -79,6 +83,7 @@ RowLayout {
                            cta.clear()
                        } else {
 
+                           /// cross platform attachments logic
                        }
 
             imageSource: send ? "qrc:/send-icon.svg" : "qrc:/plus-icon.svg"
