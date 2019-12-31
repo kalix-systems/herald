@@ -153,7 +153,15 @@ impl Container {
         &self,
         ix: usize,
     ) -> Option<String> {
-        let update = self.access_by_index(ix, |data| match data.content.as_ref()? {
+        let mid = self.msg_id(ix)?;
+        self.aux_data_json_by_id(&mid)
+    }
+
+    pub fn aux_data_json_by_id(
+        &self,
+        msg_id: &MsgId,
+    ) -> Option<String> {
+        let update = cache::access(msg_id, |data| match data.content.as_ref()? {
             Item::Aux(update) => Some(update.clone()),
             _ => None,
         })??;
@@ -289,6 +297,14 @@ impl Container {
     ) -> Option<String> {
         let mid = self.op_msg_id(index)?;
         self.get_media_attachments_data_json(&mid, Some(4))
+    }
+
+    pub fn op_aux_data_json(
+        &self,
+        index: usize,
+    ) -> Option<String> {
+        let mid = self.op_msg_id(index)?;
+        self.aux_data_json_by_id(&mid)
     }
 
     pub fn clear_search<F: FnMut(usize)>(
