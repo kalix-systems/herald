@@ -36,7 +36,7 @@ use event::*;
 mod helper;
 
 #[derive(Clone, Debug)]
-/// `Notification`s contain info about what updates were made to the database.
+/// `Notification`s contain info about what updates were made to the client's database.
 pub enum Notification {
     /// A new message has been received.
     NewMsg(Box<message::Message>),
