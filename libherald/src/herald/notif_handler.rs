@@ -88,6 +88,21 @@ impl NotifHandler {
                     );
                 }
             }
+            OutboundMsg(update) => {
+                use heraldcore::message::StoreAndSend::*;
+
+                match update {
+                    Msg(cid, msg) => {
+                        err!(content_push(cid, MsgUpdate::BuilderMsg(msg)));
+                    }
+                    StoreDone(cid, mid, meta) => {
+                        err!(content_push(cid, MsgUpdate::StoreDone(mid, meta)));
+                    }
+                    SendDone(cid, mid) => {
+                        err!(content_push(cid, MsgUpdate::SendDone(mid)));
+                    }
+                }
+            }
         }
     }
 

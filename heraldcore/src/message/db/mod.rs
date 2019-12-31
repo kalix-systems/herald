@@ -273,7 +273,7 @@ pub(crate) fn test_outbound_text(
             .unwrap_or_else(|_| panic!("{}:{}:{}", file!(), line!(), column!())),
     );
     let out = builder
-        .store_and_send_blocking_db(db)
+        .store_db(db)
         .unwrap_or_else(|_| panic!("{}:{}:{}", file!(), line!(), column!()));
 
     (out.message_id, out.time.insertion)

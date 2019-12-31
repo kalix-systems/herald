@@ -39,6 +39,8 @@ pub enum Notification {
     Settings(ConversationId, settings::SettingsUpdate),
     /// Message GC thread updates
     GC(crate::message::gc::ConvMessages),
+    /// Incremental updates to oubound message sending
+    OutboundMsg(crate::message::StoreAndSend),
 }
 
 /// Registers handlers for notifications

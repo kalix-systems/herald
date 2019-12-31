@@ -1,6 +1,6 @@
 use super::*;
+use coremacros::from_fn;
 use herald_attachments::{Attachment, AttachmentMeta};
-use location::Location;
 
 #[derive(Default)]
 /// Builder for storing outbound messages
@@ -15,24 +15,24 @@ pub struct OutboundMessageBuilder {
     pub attachments: Vec<PathBuf>,
 }
 
-/// Values `OutboundMessageBuilder`'s `store_and_send` function
-/// can pass into the callback.
-#[derive(Debug)]
+/// Values `OutboundMessageBuilder`'s `store_and_send` function produces
+/// while sending the message
+#[derive(Debug, Clone)]
 pub enum StoreAndSend {
     /// The message being stored and sent
-    Msg(Box<Message>),
-    /// An error accompanied by the line number it occured on
-    Error {
-        /// The error
-        error: HErr,
-        /// The location the error was thrown at
-        location: Location,
-    },
+    Msg(ConversationId, Box<Message>),
     /// A signal that the message has been stored successfully
-    StoreDone(MsgId, AttachmentMeta),
+    StoreDone(ConversationId, MsgId, AttachmentMeta),
     /// A signal that the message has been sent
-    SendDone(MsgId),
+    SendDone(ConversationId, MsgId),
 }
+
+// implement conversion
+from_fn!(
+    crate::updates::Notification,
+    StoreAndSend,
+    crate::updates::Notification::OutboundMsg
+);
 
 impl OutboundMessageBuilder {
     /// Set conversation id
@@ -72,12 +72,9 @@ impl OutboundMessageBuilder {
     }
 
     /// Stores and sends the message
-    pub fn store_and_send<F: FnMut(StoreAndSend) + Send + 'static>(
-        self,
-        callback: F,
-    ) -> Result<(), HErr> {
+    pub fn store_and_send(self) -> Result<(), HErr> {
         let mut db = Database::get()?;
-        self.store_and_send_db(&mut db, callback);
+        self.store_and_send_db(&mut db);
         Ok(())
     }
 
@@ -86,12 +83,6 @@ impl OutboundMessageBuilder {
     pub fn store(self) -> Result<Message, HErr> {
         let mut db = Database::get()?;
         self.store_db(&mut db)
-    }
-
-    #[cfg(test)]
-    pub(crate) fn store_and_send_blocking(self) -> Result<Message, HErr> {
-        let mut db = Database::get()?;
-        self.store_and_send_blocking_db(&mut db)
     }
 }
 
