@@ -1,6 +1,5 @@
 use crate::updates::Notification;
 use crate::{
-    conversation::settings,
     errors::HErr::{self, *},
     message::MessageReceiptStatus,
     pending,
@@ -108,6 +107,25 @@ pub(crate) fn send_normal_message(
     send_cmessage(cid, &ConversationMessage::Message(NetContent::Msg(msg)))
 }
 
+pub(crate) fn send_group_settings_message(
+    mid: MsgId,
+    cid: ConversationId,
+    expiration: Option<Time>,
+    update: cmessages::GroupSettingsUpdate,
+) -> Result<(), HErr> {
+    crate::network::send_normal_message(
+        cid,
+        network_types::cmessages::Msg {
+            mid,
+            expiration,
+            content: network_types::cmessages::MsgContent::GroupSettings(update),
+        },
+    )?;
+
+    crate::push(crate::message::OutboundAux::SendDone(cid, mid));
+    Ok(())
+}
+
 /// Sends a reaction
 pub fn send_reaction(
     cid: ConversationId,
@@ -137,15 +155,6 @@ pub fn send_reaction_removal(
             react_content,
             remove: true,
         })),
-    )
-}
-pub(crate) fn send_conversation_settings_update(
-    cid: ConversationId,
-    update: settings::SettingsUpdate,
-) -> Result<(), HErr> {
-    send_cmessage(
-        cid,
-        &ConversationMessage::Message(NetContent::Settings(update)),
     )
 }
 

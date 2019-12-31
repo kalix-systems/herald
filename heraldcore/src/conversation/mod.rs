@@ -86,8 +86,86 @@ pub fn set_color(
     conversation_id: &ConversationId,
     color: u32,
 ) -> Result<(), HErr> {
-    let db = Database::get()?;
-    settings::db::update_color(&db, color, conversation_id)?;
+    let mut db = Database::get()?;
+
+    let update = settings::db::update_color(&db, color, conversation_id)?;
+
+    let msg = crate::message::db::outbound_group_settings(
+        &mut db,
+        settings::SettingsUpdate::Color(color),
+        conversation_id,
+    )?;
+    let mid = msg.message_id;
+    let expiration = msg.time.expiration;
+
+    crate::push(crate::message::OutboundAux::StoreDone(Box::new(msg)));
+    crate::network::send_group_settings_message(mid, *conversation_id, expiration, update)?;
+
+    Ok(())
+}
+
+/// Sets title for a conversation
+pub fn set_title(
+    conversation_id: &ConversationId,
+    title: Option<String>,
+) -> Result<(), HErr> {
+    let mut db = Database::get()?;
+    let update = settings::db::update_title(&db, title.clone(), conversation_id)?;
+    let msg = crate::message::db::outbound_group_settings(
+        &mut db,
+        settings::SettingsUpdate::Title(title),
+        conversation_id,
+    )?;
+    let mid = msg.message_id;
+    let expiration = msg.time.expiration;
+
+    crate::push(crate::message::OutboundAux::StoreDone(Box::new(msg)));
+    crate::network::send_group_settings_message(mid, *conversation_id, expiration, update)?;
+    Ok(())
+}
+
+/// Sets picture for a conversation
+pub fn set_picture(
+    conversation_id: &ConversationId,
+    picture: Option<image_utils::ProfilePicture>,
+) -> Result<Option<String>, HErr> {
+    let mut db = Database::get()?;
+
+    let (update, path) = settings::db::update_picture(&db, picture, conversation_id)?;
+
+    let msg = crate::message::db::outbound_group_settings(
+        &mut db,
+        settings::SettingsUpdate::Picture(path.clone()),
+        conversation_id,
+    )?;
+
+    let mid = msg.message_id;
+    let expiration = msg.time.expiration;
+
+    crate::push(crate::message::OutboundAux::StoreDone(Box::new(msg)));
+    crate::network::send_group_settings_message(mid, *conversation_id, expiration, update)?;
+
+    Ok(path)
+}
+
+/// Sets expiration period for a conversation
+pub fn set_expiration_period(
+    conversation_id: &ConversationId,
+    expiration_period: ExpirationPeriod,
+) -> Result<(), HErr> {
+    let mut db = Database::get()?;
+
+    let update = settings::db::update_expiration(&db, expiration_period, conversation_id)?;
+    let msg = crate::message::db::outbound_group_settings(
+        &mut db,
+        settings::SettingsUpdate::Expiration(expiration_period),
+        conversation_id,
+    )?;
+    let mid = msg.message_id;
+    let expiration = msg.time.expiration;
+
+    crate::push(crate::message::OutboundAux::StoreDone(Box::new(msg)));
+    crate::network::send_group_settings_message(mid, *conversation_id, expiration, update)?;
     Ok(())
 }
 
@@ -107,36 +185,6 @@ pub fn set_status(
 ) -> Result<(), HErr> {
     let db = Database::get()?;
     db::set_status(&db, conversation_id, status)
-}
-
-/// Sets title for a conversation
-pub fn set_title(
-    conversation_id: &ConversationId,
-    title: Option<&str>,
-) -> Result<(), HErr> {
-    let db = Database::get()?;
-    settings::db::update_title(&db, title.map(ToString::to_string), conversation_id)?;
-    Ok(())
-}
-
-/// Sets picture for a conversation
-pub fn set_picture(
-    conversation_id: &ConversationId,
-    picture: Option<image_utils::ProfilePicture>,
-) -> Result<Option<String>, HErr> {
-    let db = Database::get()?;
-    let (_, path) = settings::db::update_picture(&db, picture, conversation_id)?;
-    Ok(path)
-}
-
-/// Sets expiration period for a conversation
-pub fn set_expiration_period(
-    conversation_id: &ConversationId,
-    expiration_period: ExpirationPeriod,
-) -> Result<(), HErr> {
-    let db = Database::get()?;
-    settings::db::update_expiration(&db, expiration_period, conversation_id)?;
-    Ok(())
 }
 
 /// Get metadata of all conversations

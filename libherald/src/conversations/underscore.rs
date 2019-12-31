@@ -50,11 +50,8 @@ impl super::Conversations {
 
         spawn!(
             {
-                use heraldcore::conversation::settings::*;
-                let update = SettingsUpdate::Color(color);
-
-                err!(apply(&update, &cid));
-                err!(send_update(update, &cid));
+                use heraldcore::conversation::*;
+                err!(set_color(&cid, color));
             },
             false
         );
@@ -91,11 +88,8 @@ impl super::Conversations {
 
         spawn!(
             {
-                use conversation::settings::*;
-                let update = SettingsUpdate::Expiration(period);
-
-                err!(apply(&update, &cid));
-                err!(send_update(update, &cid));
+                use conversation::*;
+                err!(set_expiration_period(&cid, period));
             },
             false
         );
@@ -179,11 +173,8 @@ impl super::Conversations {
             let title = title.clone();
             spawn!(
                 {
-                    use heraldcore::conversation::settings::*;
-                    let update = SettingsUpdate::Title(title);
-
-                    err!(apply(&update, &cid));
-                    err!(send_update(update, &cid));
+                    use heraldcore::conversation::*;
+                    err!(set_title(&cid, title));
                 },
                 false
             );

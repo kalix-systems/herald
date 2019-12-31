@@ -41,6 +41,8 @@ pub enum Notification {
     GC(crate::message::gc::ConvMessages),
     /// Incremental updates to oubound message sending
     OutboundMsg(crate::message::StoreAndSend),
+    /// Incremental updates to outbound auxilliary message sending
+    OutboundAux(crate::message::OutboundAux),
 }
 
 /// Registers handlers for notifications
