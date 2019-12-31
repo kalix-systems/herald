@@ -1,5 +1,5 @@
 use super::*;
-use crate::message::{Item as MsgItem, MessageBody, MessageTime, Update as UpdateMsg};
+use crate::message::{Item as MsgItem, MessageBody, MessageTime};
 use coremacros::w;
 use rusqlite::named_params;
 
@@ -44,7 +44,8 @@ pub(crate) fn conversation_messages(
             let op = (op, is_reply).into();
 
             let body: Option<MessageBody> = row.get("body")?;
-            let update: Option<UpdateMsg> = row.get("update_item")?;
+            let update: Option<coretypes::conversation::settings::SettingsUpdate> =
+                row.get("update_item")?;
             let content = MsgItem::from_parts(body, update);
 
             Ok(Message {
@@ -206,12 +207,31 @@ pub(crate) fn set_picture(
             picture,
             old_picture.as_ref().map(String::as_str),
         )?),
-        None => {
-            if let Some(old) = old_picture {
-                std::fs::remove_file(old).ok();
-            }
-            None
-        }
+        None => None,
+    };
+
+    conn.execute(
+        include_str!("sql/update_picture.sql"),
+        params![path, conversation_id],
+    )?;
+
+    Ok(path)
+}
+
+/// Sets picture for a conversation given a raw buffer
+pub(crate) fn set_picture_buf(
+    conn: &rusqlite::Connection,
+    conversation_id: &ConversationId,
+    buf: Option<&[u8]>,
+) -> Result<Option<String>, HErr> {
+    let old_picture = self::picture(&conn, conversation_id)?;
+
+    let path = match buf {
+        Some(bytes) => Some(image_utils::update_picture_buf(
+            bytes,
+            old_picture.as_ref().map(String::as_str),
+        )?),
+        None => None,
     };
 
     conn.execute(

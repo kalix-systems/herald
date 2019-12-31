@@ -2,7 +2,6 @@ pragma Singleton
 
 import QtQuick 2.13
 import Qt.labs.settings 1.0
-import "EmojiJson.js" as JSON
 import "qrc:/imports/themes" as Themes
 import "qrc:/imports" as Imports
 
@@ -10,6 +9,7 @@ Item {
     id: cfg
 
     property alias units: importUnits
+    property alias settings: settings
 
     Imports.Units {
         id: units
@@ -84,12 +84,12 @@ Item {
     readonly property int bottomZ: 1
     readonly property int underlayZ: -1
 
+    /// list of recent emojis
+    property var recentEmojis: []
     /// fitzpatrick emoji swatch codes
     readonly property var skinSwatchList: ["", "🏻", "🏼", "🏽", "🏾", "🏿"]
     /// emoji skin color
     property int skinSwatchIndex: 0
-    /// persistent most common emojis
-    readonly property var emojiModel: JSON.emojiJson
 
     Imports.Units {
         id: importUnits
@@ -103,6 +103,10 @@ Item {
         id: settings
         readonly property alias theme: cfg.colorScheme
         readonly property alias skinSwatchIndex: cfg.skinSwatchIndex
+        property string recentEmojisJson: "[]"
+        Component.onCompleted: {
+            recentEmojis = JSON.parse(recentEmojisJson)
+        }
     }
 
     readonly property int colorScheme: 0

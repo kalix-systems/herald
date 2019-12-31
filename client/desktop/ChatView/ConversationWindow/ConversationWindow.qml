@@ -27,12 +27,11 @@ ListView {
         duration: 800
         easing.type: Easing.InCubic
     }
-    spacing: 0
 
+    spacing: 0
     // disable these, we're handling them differently
     keyNavigationEnabled: false
     keyNavigationWraps: false
-
     maximumFlickVelocity: 1500
     flickDeceleration: chatListView.height * 10
 
@@ -67,7 +66,6 @@ ListView {
         model.setElisionLineCount(38)
         model.setElisionCharCount(38 * 40)
         model.setElisionCharsPerLine(40)
-
         chatScrollBarInner.setPosition(1.0)
         cacheBuffer = chatListView.height * 5
         if (chatListView.count === 0) {
@@ -117,36 +115,27 @@ ListView {
             id: emojiMenu
             width: reactPopup.width
             height: reactPopup.height
-            x: chatListView.width - width
-            onClosed: {
-                reactPopup.active = false
-            }
-            onOpened: {
-                bubbleActual.hoverHighlight = true
-            }
 
-            y: {
-                if (bubbleActual.y - chatListView.contentY > height) {
-                    return -height
-                }
-                return CmnCfg.largeMargin * 2
-            }
+            x: chatListView.width - width
+            y: if (bubbleActual.y - chatListView.contentY > height) {
+                   return -height
+               } else {
+                   return CmnCfg.largeMargin * 2
+               }
+
+            onClosed: reactPopup.active = false
+            onOpened: bubbleActual.hoverHighlight = true
 
             Popups.EmojiPopup {
                 id: reactPopup
                 anchors.centerIn: parent
                 isReactPopup: true
                 x: chatListView.width - width
-
-                z: convWindow.z + 1000
-                onActiveChanged: {
-                    if (!active)
-                        emojiMenu.close()
-                }
-
-                anchors {
-                    margins: CmnCfg.smallMargin
-                }
+                z: CmnCfg.overlayZ
+                onActiveChanged: if (!active) {
+                                     emojiMenu.close()
+                                 }
+                anchors.margins: CmnCfg.smallMargin
             }
         }
 
@@ -161,8 +150,6 @@ ListView {
             }
         }
 
-        Component.onCompleted: {
-            markReadLoader.active = true
-        }
+        Component.onCompleted: markReadLoader.active = true
     }
 }

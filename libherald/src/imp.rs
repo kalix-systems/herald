@@ -3,6 +3,7 @@ pub use crate::config::Config;
 pub use crate::conversation_builder::ConversationBuilder;
 pub use crate::conversation_content::ConversationContent;
 pub use crate::conversations::Conversations;
+pub use crate::emoji_picker::EmojiPicker;
 pub use crate::errors::Errors;
 pub use crate::herald::utils::Utils;
 pub use crate::herald::Herald;

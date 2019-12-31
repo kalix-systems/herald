@@ -4,6 +4,7 @@ pub use conversation_builder::*;
 pub use conversation_content::*;
 pub use conversations::*;
 pub use document_attachments::*;
+pub use emoji_picker::*;
 pub use errors::*;
 pub use herald::*;
 pub use media_attachments::*;
@@ -27,6 +28,8 @@ mod conversation_content;
 mod conversations;
 
 mod document_attachments;
+
+mod emoji_picker;
 
 mod errors;
 

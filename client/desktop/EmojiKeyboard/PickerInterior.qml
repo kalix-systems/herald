@@ -6,7 +6,49 @@ import LibHerald 1.0
 
 Item {
     property color lowlight: "light gray"
+
     // header and search bar
+    ListModel {
+        id: anchorModel
+        ListElement {
+            sectionName: "Recents"
+            imageSource: "qrc:/emoji-categories/recents.svg"
+        }
+
+        ListElement {
+            sectionName: "Smileys & Emotion"
+            imageSource: "qrc:/emoji-categories/gestural.svg"
+        }
+        ListElement {
+            sectionName: "Animals & Nature"
+            imageSource: "qrc:/emoji-categories/nature.svg"
+        }
+        ListElement {
+            sectionName: "Food & Drink"
+            imageSource: "qrc:/emoji-categories/food.svg"
+        }
+        ListElement {
+            sectionName: "Travel & Places"
+            imageSource: "qrc:/emoji-categories/transport.svg"
+        }
+        ListElement {
+            sectionName: "Activities"
+            imageSource: "qrc:/emoji-categories/sports.svg"
+        }
+        ListElement {
+            sectionName: "Objects"
+            imageSource: "qrc:/emoji-categories/items.svg"
+        }
+        ListElement {
+            sectionName: "Symbols"
+            imageSource: "qrc:/emoji-categories/symbols.svg"
+        }
+        ListElement {
+            sectionName: "Flags"
+            imageSource: "qrc:/emoji-categories/flags.svg"
+        }
+    }
+
     Item {
         id: header
         height: 30 //enough for search bar of default size w/ margins
@@ -49,6 +91,7 @@ Item {
                     Keys.onReturnPressed: event.accepted = true
                     width: 185
                     height: parent.height
+                    onTextChanged: emojiPickerModel.setSearchString(text)
                 }
 
                 Button {
@@ -126,63 +169,46 @@ Item {
     // actual interior
     Item {
         id: listView
-        width: parent.width
 
         anchors {
             top: header.bottom
             bottom: footer.top
+            right: parent.right
+            left: parent.left
+            margins: CmnCfg.smallMargin
         }
 
-        Flickable {
-            id: emojiList
+        Loader {
+            id: listLoader
+            asynchronous: true
             anchors.fill: parent
-            boundsBehavior: Flickable.StopAtBounds
-            clip: true
-            ScrollBar.vertical: ScrollBar {}
-            contentHeight: innerCol.height
-
-            maximumFlickVelocity: 700
-            flickDeceleration: emojiList.height * 10
-            Column {
-                id: innerCol
-                Repeater {
-                    id: innerRepeater
-                    model: searchTextArea.text.length ? [] : CmnCfg.emojiModel
-                    Column {
-                        padding: CmnCfg.smallMargin
-                        Label {
-                            text: modelData.sectionName
-                            color: CmnCfg.palette.medGrey
-                            font.bold: true
-                            font.family: CmnCfg.chatFont.name
-                            bottomPadding: CmnCfg.smallMargin
-                        }
-
-                        Loader {
-                            asynchronous: index > 1
-                            sourceComponent: Grid {
-                                id: emojiGrid
-                                columns: 10
-                                spacing: 10
-                                width: listView.width
-                                horizontalItemAlignment: Grid.AlignHCenter
-                                verticalItemAlignment: Grid.AlignVCenter
-                                Repeater {
-                                    id: self
-                                    model: modelData.List
-                                    EmojiButton {
-                                        baseEmoji: self.model[index][0]
-                                        takesModifier: self.model[index].length === 3
-                                    }
-                                }
-                            }
-                        }
+            signal position(int index)
+            sourceComponent: StandardInterior {
+                id: emojiList
+                Connections {
+                    target: parent
+                    onPosition: {
+                        emojiList.positionViewAtIndex(index, 0)
                     }
                 }
             }
+            Component {
+                id: searchComp
+                SearchInteriorComponent {}
+            }
+
+            states: [
+                State {
+                    name: "default"
+                    when: searchTextArea.text.length != 0
+                    PropertyChanges {
+                        target: listLoader
+                        sourceComponent: searchComp
+                    }
+                }
+            ]
         }
     }
-
     // footer and anchor links
     Item {
         id: footer
@@ -193,52 +219,23 @@ Item {
 
         Rectangle {
             id: hr
-            width: parent.width
+            width: parent.width - 2
             height: 1
+            anchors.horizontalCenter: parent.horizontalCenter
             color: CmnCfg.palette.darkGrey
         }
 
         RowLayout {
+            id: anchorRow
             anchors.fill: parent
             anchors.margins: 8
             spacing: CmnCfg.smallMargin
-
-            AnchorButton {
-                anchorIndex: 0
-                imageSource: "qrc:/emoji-categories/gestural.svg"
-            }
-
-            AnchorButton {
-                anchorIndex: 1
-                imageSource: "qrc:/emoji-categories/gestural.svg"
-            }
-            AnchorButton {
-                anchorIndex: 2
-                imageSource: "qrc:/emoji-categories/nature.svg"
-            }
-            AnchorButton {
-                anchorIndex: 3
-                imageSource: "qrc:/emoji-categories/food.svg"
-            }
-            AnchorButton {
-                anchorIndex: 4
-                imageSource: "qrc:/emoji-categories/transport.svg"
-            }
-            AnchorButton {
-                anchorIndex: 5
-                imageSource: "qrc:/emoji-categories/sports.svg"
-            }
-            AnchorButton {
-                anchorIndex: 6
-                imageSource: "qrc:/emoji-categories/items.svg"
-            }
-            AnchorButton {
-                anchorIndex: 7
-                imageSource: "qrc:/emoji-categories/symbols.svg"
-            }
-            AnchorButton {
-                anchorIndex: 8
-                imageSource: "qrc:/emoji-categories/flags.svg"
+            Repeater {
+                model: anchorModel
+                AnchorButton {
+                    sectionName: model.sectionName
+                    imageSource: model.imageSource
+                }
             }
         }
     }

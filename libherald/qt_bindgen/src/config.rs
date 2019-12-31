@@ -52,7 +52,8 @@ fn objects() -> BTreeMap<String, Rc<Object>> {
        message_builder(),
 
        media_attachments(),
-       document_attachments()
+       document_attachments(),
+       emoji_picker()
     }
 }
 
@@ -215,6 +216,34 @@ fn members() -> Object {
 
     obj! {
         Members: Obj::new().list().props(props).funcs(funcs).item_props(item_props)
+    }
+}
+
+fn emoji_picker() -> Object {
+    let props = props! {
+        smileys_index: Prop::new().simple(QUint32),
+        nature_index: Prop::new().simple(QUint32),
+        body_index: Prop::new().simple(QUint32),
+        food_index: Prop::new().simple(QUint32),
+        locations_index: Prop::new().simple(QUint32),
+        activities_index: Prop::new().simple(QUint32),
+        symbols_index: Prop::new().simple(QUint32),
+        flags_index: Prop::new().simple(QUint32),
+        objects_index: Prop::new().simple(QUint32)
+    };
+
+    let funcs = functions! {
+        mut clearSearch() => Void,
+        mut setSearchString(search_string: QString) => Void,
+    };
+
+    let item_props = item_props! {
+     emoji: ItemProp::new(QString),
+     skintone_modifier: ItemProp::new(Bool)
+    };
+
+    obj! {
+        EmojiPicker: Obj::new().list().funcs(funcs).props(props).item_props(item_props)
     }
 }
 

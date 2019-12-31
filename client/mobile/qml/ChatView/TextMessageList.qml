@@ -23,15 +23,12 @@ ListView {
     ScrollBar.vertical: ScrollBar {
         id: chatScrollBarInner
         width: CmnCfg.smallSpacer
-
         policy: ScrollBar.AsNeeded
-
         stepSize: 0.01
         minimumSize: 0.1
     }
 
     model: messageListModel
-
     // TODO: Delegate should just be the ChatBubble
     delegate: Column {
         id: containerCol
@@ -48,9 +45,20 @@ ListView {
         topPadding: 0
 
         CB.ChatBubble {
+            id: chatBubble
             defaultWidth: chatListView.width
             messageModelData: containerCol.messageModelData
             convContainer: parent
+            MessageMouseArea {
+                cb: parent
+                dropdown: dropdown
+                anchors.fill: parent
+            }
+        }
+
+        OptionsDropdown {
+            id: dropdown
+            cb: chatBubble
         }
     }
 }

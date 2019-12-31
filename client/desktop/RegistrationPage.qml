@@ -40,7 +40,7 @@ Rectangle {
                 anchors.centerIn: rect
                 height: rect.height
                 width: rect.width
-                source: "qrc:/land.png"
+                source: "qrc:/herald.png"
                 fillMode: Image.PreserveAspectCrop
                 layer.enabled: true
                 layer.effect: OpacityMask {

@@ -1,6 +1,7 @@
 use super::*;
 use crate::{conversation::db::expiration_period, message::MessageTime};
 use coremacros::w;
+use coretypes::conversation::settings::SettingsUpdate as Update;
 use herald_attachments::Attachment;
 use rusqlite::{named_params, Connection as Conn};
 use std::collections::HashSet;
@@ -256,6 +257,34 @@ pub(crate) fn delete_message(
     Ok(())
 }
 
+pub(crate) fn inbound_group_settings(
+    _db: &mut Conn,
+    update: coretypes::conversation::settings::SettingsUpdate,
+    cid: ConversationId,
+    mid: MsgId,
+    uid: UserId,
+    server_ts: Time,
+    expiration: Option<Time>,
+) -> Result<Message, HErr> {
+    Ok(Message {
+        message_id: mid,
+        author: uid,
+        conversation: cid,
+        op: ReplyId::None,
+        send_status: MessageSendStatus::Ack,
+        receipts: Default::default(),
+        attachments: Default::default(),
+        reactions: Default::default(),
+        replies: Default::default(),
+        content: coretypes::messages::Item::Update(update).into(),
+        time: MessageTime {
+            server: server_ts.into(),
+            expiration,
+            insertion: Time::now(),
+        },
+    })
+}
+
 /// Testing utility
 #[cfg(test)]
 pub(crate) fn test_outbound_text(
@@ -272,7 +301,7 @@ pub(crate) fn test_outbound_text(
             .unwrap_or_else(|_| panic!("{}:{}:{}", file!(), line!(), column!())),
     );
     let out = builder
-        .store_and_send_blocking_db(db)
+        .store_db(db)
         .unwrap_or_else(|_| panic!("{}:{}:{}", file!(), line!(), column!()));
 
     (out.message_id, out.time.insertion)

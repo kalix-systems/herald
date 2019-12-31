@@ -215,13 +215,13 @@ Rectangle {
             }
         }
 
-        //media and file column loader
+        // media and file column loader
         Column {
             spacing: CmnCfg.defaultMargin
             Loader {
                 id: imageLoader
                 sourceComponent: imageAttach ? image : undefined
-                //image component
+                // image component
                 Component {
                     id: image
                     AttachmentContent {}
@@ -241,7 +241,7 @@ Rectangle {
             }
         }
 
-        //message body
+        // message body
         StandardTextEdit {
             id: messageBody
             maximumWidth: bubbleRoot.maxWidth

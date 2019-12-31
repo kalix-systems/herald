@@ -5,9 +5,13 @@ import LibHerald 1.0
 
 Button {
     property string imageSource: ""
-    property int anchorIndex
+    // the sections names are kept in the anchor buttons
+    // as an impromptu list model.
+    // TODO: make a real list model which initializes
+    // the anchor buttons
+    property string sectionName: ""
 
-    onClicked: emojiList.contentY = innerRepeater.itemAt(anchorIndex).y
+    onClicked: listLoader.position(index)
     padding: 0
     background: Item {}
     icon.source: imageSource

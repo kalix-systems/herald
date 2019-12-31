@@ -60,7 +60,6 @@ Page {
             onMessagePositionRequested: {
                 const msg_idx = chatPage.ownedConversation.indexById(
                                   requestedMsgId)
-
                 // early return on out of bounds
                 if ((msg_idx < 0) || (msg_idx >= convWindow.count))
                     return

@@ -72,32 +72,55 @@ fn handle_content(
             tx.commit()?;
         }
         Msg(msg) => {
-            let cmessages::Msg { mid, content } = msg;
-
-            if let cmessages::MsgContent::Normal(cmessages::Message {
-                body,
-                attachments,
+            let cmessages::Msg {
+                mid,
+                content,
                 expiration,
-                op,
-            }) = content
-            {
-                let mut builder = crate::message::InboundMessageBuilder::default();
+            } = msg;
 
-                builder
-                    .id(mid)
-                    .author(uid)
-                    .conversation_id(cid)
-                    .attachments(attachments)
-                    .timestamp(ts);
+            match content {
+                cmessages::MsgContent::Normal(cmessages::Message {
+                    body,
+                    attachments,
+                    op,
+                }) => {
+                    let mut builder = crate::message::InboundMessageBuilder::default();
 
-                builder.body = body;
-                builder.op = op;
-                builder.expiration = expiration;
+                    builder
+                        .id(mid)
+                        .author(uid)
+                        .conversation_id(cid)
+                        .attachments(attachments)
+                        .timestamp(ts);
 
-                if let Some(msg) = builder.store()? {
-                    ev.notifications.push(Notification::NewMsg(Box::new(msg)));
+                    builder.body = body;
+                    builder.op = op;
+                    builder.expiration = expiration;
+
+                    if let Some(msg) = builder.store()? {
+                        ev.notifications.push(Notification::NewMsg(Box::new(msg)));
+                    }
+                    ev.replies.push((cid, form_ack(mid)?));
                 }
-                ev.replies.push((cid, form_ack(mid)?));
+                cmessages::MsgContent::GroupSettings(settings) => {
+                    let mut conn = crate::db::Database::get()?;
+
+                    let update =
+                        crate::conversation::settings::db::apply_inbound(&conn, settings, &cid)?;
+
+                    let msg = crate::message::db::inbound_group_settings(
+                        &mut conn,
+                        update.clone(),
+                        cid,
+                        mid,
+                        uid,
+                        ts,
+                        expiration,
+                    )?;
+
+                    ev.notifications.push(Notification::NewMsg(Box::new(msg)));
+                    ev.notifications.push(Notification::Settings(cid, update));
+                }
             }
         }
         Receipt(receipt) => {
