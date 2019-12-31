@@ -266,3 +266,31 @@ export function userTime(timestamp: number): string {
 
         return time
     }
+
+export function auxString(code: number, content: string): string {
+switch (code) {
+    case 0: {
+        return " set the expiration time"
+        break;
+    }
+
+    case 1: {
+        return " set the title to " + content
+        break;
+    }
+
+    case 2: {
+        return " set the color"
+        break;
+}
+ case 3: {
+      return " set the picture"
+      break;
+ }
+
+ default : {
+     return ""
+     break;
+ }
+}
+}

@@ -28,6 +28,7 @@ Rectangle {
     readonly property string receiptImage: outbound ? Utils.receiptCodeSwitch(
                                                           messageModelData.receiptStatus) : ""
     readonly property color authorColor: CmnCfg.avatarColors[messageModelData.authorColor]
+    property string authorName: Herald.users.nameById(messageModelData.author)
 
     property bool hoverHighlight: false
     property alias expireInfo: expireInfo
@@ -69,7 +70,7 @@ Rectangle {
         color: CmnCfg.palette.medGrey
     }
     Avatar {
-        id: fillerAvatar
+        id: avatar
         visible: false
         size: 36
         anchors {
@@ -94,7 +95,7 @@ Rectangle {
         width: CmnCfg.accentBarWidth
 
         color: CmnCfg.palette.medGrey
-        anchors.left: fillerAvatar.right
+        anchors.left: avatar.right
         anchors.leftMargin: CmnCfg.smallMargin
     }
 
@@ -128,9 +129,14 @@ Rectangle {
         bottomPadding: isTail ? CmnCfg.defaultMargin : CmnCfg.smallMargin
 
         Label {
-            text: auxData.content
+            text: authorName + Utils.auxString(auxData.code, auxData.content)
             font.family: CmnCfg.chatFont.name
             font.italic: true
+        }
+        Loader {
+            active: messageModelData.reactions.length > 0
+
+            sourceComponent: BubbleReacts {}
         }
     }
 }
