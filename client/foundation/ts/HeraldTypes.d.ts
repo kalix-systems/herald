@@ -4,6 +4,13 @@ declare class ConversationID extends ByteArray {}
 declare class MsgId extends ByteArray {}
 declare class MessageSearch {}
 
+declare const enum AuxMessageCode {
+  ExpirationChange = 0,
+  TitleChange = 1,
+  ColorChange = 2,
+  PictureChange = 3
+}
+
 declare const enum ExpirationPeriod {
   // Messages never expire
   Never = 0,

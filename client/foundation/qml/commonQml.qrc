@@ -62,5 +62,6 @@
         <file>ChatBubble/BubbleReacts.qml</file>
         <file>ChatBubble/ComposeReplyComponent.qml</file>
         <file>ChatBubble/ReplyBubble/ReplyFileClip.qml</file>
+        <file>ChatBubble/AuxBubble.qml</file>
     </qresource>
 </RCC>

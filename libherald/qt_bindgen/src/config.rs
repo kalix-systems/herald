@@ -322,6 +322,8 @@ fn messages() -> Object {
         opExpirationTime: ItemProp::new(Qint64).optional(),
         opColor: ItemProp::new(QUint32).optional(),
         opName: ItemProp::new(QString).optional().get_by_value(),
+        // Auxiliary message data, serialized as JSON
+        opAuxData: ItemProp::new(QString).get_by_value(),
 
         // Media attachments metadata, serialized as JSON
         opMediaAttachments: ItemProp::new(QString).get_by_value(),
