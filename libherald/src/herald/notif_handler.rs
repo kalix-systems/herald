@@ -80,14 +80,9 @@ impl NotifHandler {
             Settings(cid, settings) => {
                 push((cid, settings));
             }
-            GC(convs) => {
-                for (cid, mids) in convs {
-                    push_err!(
-                        content_push(cid, MsgUpdate::ExpiredMessages(mids)),
-                        "Couldn't expire messages"
-                    );
-                }
-            }
+            GC(convs) => convs.into_iter().for_each(|(cid, mids)| {
+                err!(content_push(cid, MsgUpdate::ExpiredMessages(mids)));
+            }),
             OutboundMsg(update) => {
                 use heraldcore::message::StoreAndSend::*;
 
