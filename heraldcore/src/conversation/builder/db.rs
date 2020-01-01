@@ -35,8 +35,8 @@ impl ConversationBuilder {
             .unwrap_or_else(|| crate::config::db::preferred_expiration(tx).unwrap_or_default());
 
         let picture = match (tagged_picture, picture) {
-            (Some(tagged), _) => Some(image_utils::update_picture(tagged, None::<&str>)?),
-            (_, Some(path)) => Some(image_utils::update_picture_autocrop(path, None::<&str>)?),
+            (Some(tagged), _) => Some(image_utils::update_picture(tagged)?),
+            (_, Some(path)) => Some(image_utils::update_picture_autocrop(path)?),
             _ => None,
         };
 

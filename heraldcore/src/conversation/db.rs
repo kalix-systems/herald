@@ -126,6 +126,7 @@ pub(crate) fn expiration_period(
 }
 
 /// Gets picture for a conversation
+#[allow(unused)]
 pub(crate) fn picture(
     conn: &rusqlite::Connection,
     conversation_id: &ConversationId,
@@ -198,13 +199,8 @@ pub(crate) fn set_picture(
     conversation_id: &ConversationId,
     picture: Option<image_utils::ProfilePicture>,
 ) -> Result<Option<String>, HErr> {
-    let old_picture = self::picture(&conn, conversation_id)?;
-
     let path = match picture {
-        Some(picture) => Some(image_utils::update_picture(
-            picture,
-            old_picture.as_ref().map(String::as_str),
-        )?),
+        Some(picture) => Some(image_utils::update_picture(picture)?),
         None => None,
     };
 
@@ -222,19 +218,9 @@ pub(crate) fn set_picture_buf(
     conversation_id: &ConversationId,
     buf: Option<&[u8]>,
 ) -> Result<Option<String>, HErr> {
-    let old_picture = self::picture(&conn, conversation_id)?;
-
     let path = match buf {
-        Some(bytes) => Some(image_utils::update_picture_buf(
-            bytes,
-            old_picture.as_ref().map(String::as_str),
-        )?),
-        None => {
-            if let Some(old) = old_picture {
-                std::fs::remove_file(old).ok();
-            }
-            None
-        }
+        Some(bytes) => Some(image_utils::update_picture_buf(bytes)?),
+        None => None,
     };
 
     conn.execute(

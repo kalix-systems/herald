@@ -59,16 +59,9 @@ pub fn set_profile_picture(
     id: UserId,
     profile_picture: Option<image_utils::ProfilePicture>,
 ) -> Result<Option<String>, HErr> {
-    let old_path = self::profile_picture(conn, id)?;
-
     let profile_picture = match profile_picture {
-        Some(picture) => Some(image_utils::update_picture(picture, old_path)?),
-        None => {
-            if let Some(old) = old_path {
-                std::fs::remove_file(old).ok();
-            }
-            None
-        }
+        Some(picture) => Some(image_utils::update_picture(picture)?),
+        None => None,
     };
 
     let mut stmt = w!(conn.prepare(include_str!("sql/set_conversation_picture.sql")));
@@ -87,16 +80,9 @@ pub(crate) fn set_profile_picture_buf(
     id: UserId,
     buf: Option<&[u8]>,
 ) -> Result<Option<String>, HErr> {
-    let old_path = self::profile_picture(conn, id)?;
-
     let profile_picture = match buf {
-        Some(bytes) => Some(image_utils::update_picture_buf(bytes, old_path)?),
-        None => {
-            if let Some(old) = old_path {
-                std::fs::remove_file(old).ok();
-            }
-            None
-        }
+        Some(bytes) => Some(image_utils::update_picture_buf(bytes)?),
+        None => None,
     };
 
     let mut stmt = w!(conn.prepare(include_str!("sql/set_conversation_picture.sql")));

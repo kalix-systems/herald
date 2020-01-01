@@ -35,7 +35,7 @@ pub(super) fn handle_cmessage(
             conv_builder.title = title;
 
             conv_builder.picture = match picture {
-                Some(bytes) => Some(image_utils::update_picture_buf(&bytes, None::<&str>)?),
+                Some(bytes) => Some(image_utils::update_picture_buf(&bytes)?),
                 None => None,
             };
 
