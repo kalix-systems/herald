@@ -244,6 +244,18 @@ pub(crate) fn all_meta(conn: &rusqlite::Connection) -> Result<Vec<ConversationMe
     Ok(meta)
 }
 
+pub(crate) fn get_all_pairwise_conversations(
+    conn: &rusqlite::Connection
+) -> Result<Vec<ConversationId>, HErr> {
+    let mut stmt = w!(conn.prepare(include_str!("sql/all_pairwise_cids.sql")));
+
+    let res = stmt.query_map(NO_PARAMS, |row| {
+        row.get::<_, ConversationId>("conversation_id")
+    })?;
+
+    res.map(|cid| Ok(w!(cid))).collect()
+}
+
 pub(crate) fn get_pairwise_conversations(
     conn: &rusqlite::Connection,
     uids: &[UserId],
