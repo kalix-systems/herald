@@ -34,7 +34,7 @@ Rectangle {
             Layout.alignment: Qt.AlignRight
             iconSize: Qt.size(CmnCfg.units.dp(24), CmnCfg.units.dp(24))
             imageSource: "qrc:/reply-icon.svg"
-            onClicked: {
+            onTapped: {
                 ownedMessages.builder.opId = msgId
                 deactivate()
             }

@@ -56,11 +56,11 @@ ColumnLayout {
             }
             AnimIconButton {
                 color: CmnCfg.palette.black
-                onClicked: if (send) {
-                               ownedMessages.builder.body = cta.text
-                               ownedMessages.builder.finalize()
-                               cta.clear()
-                           }
+                onTapped: if (send) {
+                              ownedMessages.builder.body = cta.text
+                              ownedMessages.builder.finalize()
+                              cta.clear()
+                          }
                 imageSource: send ? "qrc:/send-icon.svg" : "qrc:/plus-icon.svg"
             }
         }

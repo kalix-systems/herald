@@ -14,7 +14,7 @@ RowLayout {
             id: backButton
             color: CmnCfg.palette.iconFill
             imageSource: "qrc:/back-arrow-icon.svg"
-            onClicked : {
+            onTapped: {
                 mainView.pop(null)
             }
         }
