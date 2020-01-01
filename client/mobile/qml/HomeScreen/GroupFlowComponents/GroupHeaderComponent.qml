@@ -44,7 +44,7 @@ Column {
             imageSource: "qrc:/camera-icon.svg"
             color: CmnCfg.palette.iconFill
 
-            tapCallback: function () {
+            onTapped : {
                 print("TODO implement group pics")
             }
         }

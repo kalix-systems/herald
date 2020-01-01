@@ -47,7 +47,7 @@ RowLayout {
             id: optionsButton
             color: CmnCfg.palette.iconFill
             imageSource: "qrc:/options-icon.svg"
-            tapCallback: function () {
+            onTapped: {
                 mainView.push(settingsMain)
             }
         }
