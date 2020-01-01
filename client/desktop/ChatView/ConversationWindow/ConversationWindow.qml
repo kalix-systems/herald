@@ -82,6 +82,7 @@ ListView {
     }
 
     delegate: Loader {
+        id: bubbleLoader
         property var modelData: model
         sourceComponent: model.auxData.length === 0 ? msgBubble : auxBubble
         width: parent.width
@@ -102,6 +103,19 @@ ListView {
                 BubbleDecoration {
                     parentBubble: parent
                 }
+                Component.onCompleted: {
+                    markReadLoader.active = true
+                }
+                Loader {
+                    id: markReadLoader
+                    active: false
+                    Connections {
+                        target: root
+                        onActiveChanged: if (root.active) {
+                                             ownedConversation.markRead(index)
+                                         }
+                    }
+                }
             }
         }
 
@@ -121,6 +135,19 @@ ListView {
                 bubbleIndex: index
                 BubbleDecoration {
                     parentBubble: parent
+                }
+                Component.onCompleted: {
+                    markReadLoader.active = true
+                }
+                Loader {
+                    id: markReadLoader
+                    active: false
+                    Connections {
+                        target: root
+                        onActiveChanged: if (root.active) {
+                                             ownedConversation.markRead(index)
+                                         }
+                    }
                 }
             }
         }
