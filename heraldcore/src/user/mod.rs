@@ -15,7 +15,7 @@ pub fn name(id: UserId) -> Result<Option<String>, HErr> {
 /// Change name of user by their `id`
 pub fn set_name(
     id: UserId,
-    name: &str,
+    name: Option<&str>,
 ) -> Result<(), HErr> {
     let db = Database::get()?;
     db::set_name(&db, id, name)

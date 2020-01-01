@@ -139,7 +139,7 @@ impl Interface for Users {
         let uid = none!(self.list.get(row_index), false).id;
         {
             let name = name.clone();
-            spawn!(user::set_name(uid, name.as_str()), false);
+            spawn!(user::set_name(uid, name.as_str().into()), false);
         }
 
         {

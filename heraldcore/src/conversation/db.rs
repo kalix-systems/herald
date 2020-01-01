@@ -229,7 +229,12 @@ pub(crate) fn set_picture_buf(
             bytes,
             old_picture.as_ref().map(String::as_str),
         )?),
-        None => None,
+        None => {
+            if let Some(old) = old_picture {
+                std::fs::remove_file(old).ok();
+            }
+            None
+        }
     };
 
     conn.execute(

@@ -9,7 +9,7 @@ pub(crate) fn set_name(
     name: String,
 ) -> Result<(), HErr> {
     let id = id(conn)?;
-    Ok(crate::user::db::set_name(conn, id, name.as_str())?)
+    Ok(crate::user::db::set_name(conn, id, name.as_str().into())?)
 }
 
 pub(crate) fn set_profile_picture(

@@ -158,6 +158,25 @@ fn handle_content(
                 remove,
             });
         }
+        ProfileChanged(change) => {
+            use cmessages::ProfileChanged::*;
+            match change {
+                Color(color) => {
+                    crate::user::set_color(uid, color)?;
+                }
+                DisplayName(name) => {
+                    crate::user::set_name(uid, name.as_ref().map(String::as_str))?;
+                }
+                Picture(buf) => {
+                    let conn = crate::db::Database::get()?;
+                    crate::user::db::set_profile_picture_buf(
+                        &conn,
+                        uid,
+                        buf.as_ref().map(Vec::as_slice),
+                    )?;
+                }
+            }
+        }
     };
 
     Ok(())

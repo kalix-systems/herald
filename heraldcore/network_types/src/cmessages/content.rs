@@ -12,6 +12,8 @@ pub enum Content {
     Receipt(Receipt),
     /// A message reaction
     Reaction(Reaction),
+    /// The sender's profile has changed
+    ProfileChanged(ProfileChanged),
 }
 
 #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
@@ -98,4 +100,12 @@ pub struct AddedToConvo {
     pub picture: Option<Vec<u8>>,
     /// The conversation's initial expiration period
     pub expiration_period: coretypes::conversation::ExpirationPeriod,
+}
+
+#[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
+/// Update to the current user's profile
+pub enum ProfileChanged {
+    Color(u32),
+    Picture(Option<Vec<u8>>),
+    DisplayName(Option<String>),
 }

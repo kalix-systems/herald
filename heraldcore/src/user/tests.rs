@@ -105,7 +105,7 @@ fn update_name() {
         .add_db(&mut conn)
         .expect(womp!());
 
-    db::set_name(&conn, id, "World").expect("Failed to update name");
+    db::set_name(&conn, id, "World".into()).expect("Failed to update name");
 
     assert_eq!(
         db::name(&conn, id)

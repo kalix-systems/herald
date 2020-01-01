@@ -17,8 +17,9 @@ pub(crate) fn name(
 pub(crate) fn set_name(
     conn: &rusqlite::Connection,
     id: UserId,
-    name: &str,
+    name: Option<&str>,
 ) -> Result<(), HErr> {
+    let name = name.unwrap_or_else(|| id.as_str());
     let mut stmt = w!(conn.prepare(include_str!("sql/update_name.sql")));
 
     w!(stmt.execute(params![name, id]));
@@ -77,6 +78,35 @@ pub fn set_profile_picture(
         include_str!("sql/update_profile_picture.sql"),
         params![profile_picture, id],
     ));
+    Ok(profile_picture)
+}
+
+/// Updates a user's profile picture.
+pub(crate) fn set_profile_picture_buf(
+    conn: &rusqlite::Connection,
+    id: UserId,
+    buf: Option<&[u8]>,
+) -> Result<Option<String>, HErr> {
+    let old_path = self::profile_picture(conn, id)?;
+
+    let profile_picture = match buf {
+        Some(bytes) => Some(image_utils::update_picture_buf(bytes, old_path)?),
+        None => {
+            if let Some(old) = old_path {
+                std::fs::remove_file(old).ok();
+            }
+            None
+        }
+    };
+
+    let mut stmt = w!(conn.prepare(include_str!("sql/set_conversation_picture.sql")));
+    w!(stmt.execute_named(named_params! {"@picture": profile_picture, "@user_id": id}));
+
+    w!(conn.execute(
+        include_str!("sql/update_profile_picture.sql"),
+        params![profile_picture, id],
+    ));
+
     Ok(profile_picture)
 }
 
