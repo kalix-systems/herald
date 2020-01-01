@@ -351,6 +351,11 @@ where
         self.rtx.send(ClientFrame::Quit)?;
         Ok(())
     }
+
+    pub fn into_inner(self) -> Arc<K> {
+        drop(self.quit());
+        self.inner
+    }
 }
 
 // TODO: figure out why this causes crashes

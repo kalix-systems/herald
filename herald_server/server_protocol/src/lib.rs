@@ -75,7 +75,10 @@ impl State {
     }
 
     pub async fn new_connection(&self) -> Result<Conn, Error> {
-        Ok(self.pool.get().await?)
+        self.pool
+            .get()
+            .await
+            .context("failed to get connection to postgres")
     }
 
     pub async fn handle_login<Tx, Rx>(
@@ -138,6 +141,11 @@ impl State {
 
         tx.write_u8(1).await?;
 
+        Ok(())
+    }
+
+    pub async fn reset(&self) -> Result<(), Error> {
+        self.new_connection().await?.reset_all().await?;
         Ok(())
     }
 }

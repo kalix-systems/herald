@@ -4,7 +4,7 @@
 
 use dashmap::DashMap;
 use futures::{
-    future::{self, BoxFuture, FutureExt},
+    future::{self, BoxFuture, FutureExt, TryFutureExt},
     stream::{self, StreamExt, TryStreamExt},
 };
 use herald_common::{
@@ -17,6 +17,7 @@ use server_protocol::*;
 use std::{
     collections::HashSet, convert::TryFrom, net::SocketAddr, ops::Deref, sync::Arc, time::Duration,
 };
+use stream_cancel::*;
 use tokio::{
     prelude::*,
     sync::{
@@ -28,9 +29,9 @@ use tokio::{
     time,
 };
 
-#[tokio::test(threaded_scheduler)]
-#[serial]
-async fn register() {
+async fn setup_server<O: Into<Option<usize>>>(
+    num_sessions: O
+) -> (Trigger, SocketAddr, Vec<u8>, Arc<State>) {
     let (server_config, server_cert) = tls::configure_server().expect("failed to configure server");
     let client_config =
         tls::configure_client(&[server_cert.as_ref()]).expect("failed to configure client");
@@ -38,206 +39,170 @@ async fn register() {
     let s_port = portpicker::pick_unused_port().expect("failed to pick port");
     let s_socket: SocketAddr = ([127u8, 0, 0, 1], s_port).into();
 
-    let run_server = async move {
-        let state = Arc::new(State::default());
-        dbg!();
-        state
-            .new_connection()
-            .await
-            .expect("failed to get postgres connection")
-            .reset_all()
-            .await
-            .expect("failed to reset db");
+    let state = Arc::new(State::default());
 
-        dbg!();
-        let mut futs = ws::serve_arc(state, s_socket, server_config)
-            .await
-            .map(Ok)
-            .try_buffer_unordered(2)
-            .boxed();
-        for i in 0u8..2 {
-            dbg!(i);
-            futs.next()
-                .await
-                .expect(&format!("never received connection {}", i))
-                .with_context(|| format!("server failed in connection {}", i))
-                .unwrap();
-        }
-    };
+    dbg!();
+    let (trigger, futs) = Valved::new(ws::serve_arc(state.clone(), s_socket, server_config).await);
 
-    let run_clients = async {
-        time::delay_for(Duration::from_secs(1)).await;
-        let uid_strs = vec!["u1", "u2"];
-        let uids = uid_strs
-            .into_iter()
-            .map(UserId::try_from)
-            .collect::<Result<Vec<_>, _>>()
-            .expect("failed to make userids");
+    tokio::spawn(futs.for_each_concurrent(num_sessions, |s| s.unwrap_or_else(|e| panic!("{}", e))));
 
-        let (cinits, crecvs) = uids
-            .iter()
-            .map(|u| {
-                let (tx, rx) = channel();
-                let cinit = ClientInit::new_reg(*u, move |p| {
-                    let tx = tx.clone();
-                    Box::pin(async move { tx.clone().send(p).is_ok() })
-                });
-                (cinit, rx)
-            })
-            .unzip::<_, _, Vec<_>, Vec<_>>();
-
-        let clients: Vec<ws::Client<HeraldProtocol, TestClient<_>>> = stream::iter(cinits)
-            .map(Ok)
-            .and_then(|cinit| {
-                dbg!();
-                ws::Client::connect(
-                    cinit,
-                    &client_config,
-                    webpki::DNSNameRef::try_from_ascii_str("localhost")
-                        .expect("failed to parse localhost as dns name"),
-                    &s_socket,
-                )
-            })
-            .map_ok(|(c, d)| {
-                tokio::spawn(d.map(drop));
-                c
-            })
-            .boxed()
-            .try_collect()
-            .await
-            .expect("failed to connect clients");
-
-        dbg!();
-        for client in clients {
-            client.quit().expect("client failed to quit");
-        }
-        dbg!();
-    };
-
-    future::join(run_server, run_clients).await;
+    (trigger, s_socket, server_cert, state)
 }
 
-#[tokio::test(threaded_scheduler)]
+type OnPush = Box<dyn Fn(Push) -> BoxFuture<'static, PushAck> + Send + Sync + 'static>;
+
+async fn register_client<F: Fn(Push) -> BoxFuture<'static, PushAck> + Send + Sync + 'static>(
+    uid: UserId,
+    on_push: F,
+    connector: &tokio_rustls::TlsConnector,
+    dns: &str,
+    socket: &SocketAddr,
+) -> Result<(Trigger, ws::Client<HeraldProtocol, TestClient<F>>), Error> {
+    let cinit = ClientInit::new_reg(uid, on_push);
+    let (client, driver) = ws::Client::connect(
+        cinit,
+        connector,
+        webpki::DNSNameRef::try_from_ascii_str(dns)?,
+        socket,
+    )
+    .await?;
+    let (trigger, tripwire) = Tripwire::new();
+    tokio::spawn(future::select(driver.boxed(), tripwire).map(drop));
+    Ok((trigger, client))
+}
+
+#[tokio::test]
 #[serial]
-async fn ping_pong() {
-    let (server_config, server_cert) = tls::configure_server().expect("failed to configure server");
-    let client_config =
-        tls::configure_client(&[server_cert.as_ref()]).expect("failed to configure client");
+async fn register() {
+    let (trigger, socket, cert, state) = setup_server(None).await;
+    dbg!();
+    state.reset().await.expect("failed to reset db");
+    dbg!();
 
-    let s_port = portpicker::pick_unused_port().expect("failed to pick port");
-    let s_socket: SocketAddr = ([127u8, 0, 0, 1], s_port).into();
+    let connector = tls::configure_client(&[&cert]).expect("failed to configure client-side TLS");
 
-    let run_server = async move {
-        let state = Arc::new(State::default());
-        dbg!();
-        state
-            .new_connection()
+    time::delay_for(Duration::from_secs(1)).await;
+    let uids = vec!["u1", "u2"]
+        .into_iter()
+        .map(UserId::try_from)
+        .collect::<Result<Vec<_>, _>>()
+        .expect("failed to make userids");
+
+    let items = stream::iter(uids.iter().map(|uid| {
+        let (tx, rx) = channel();
+        let on_push = move |p| {
+            let tx = tx.clone();
+            async move { tx.send(p).is_ok() }.boxed()
+        };
+        register_client(*uid, on_push, &connector, "localhost", &socket).map_ok(|(t, c)| (t, c, rx))
+    }))
+    .buffered(uids.len())
+    .try_collect::<Vec<_>>()
+    .await
+    .expect("failed to register clients");
+
+    let rxs = stream::iter(items)
+        .map(|(trigger, client, rx)| {
+            async move {
+                client.quit().expect("client failed to quit");
+                trigger.cancel();
+                rx
+            }
+        })
+        .buffered(uids.len())
+        .collect::<Vec<_>>()
+        .await;
+
+    for rx in rxs {
+        let pushes = rx.collect::<Vec<_>>().await;
+        assert_eq!(pushes, vec![]);
+    }
+
+    trigger.cancel();
+}
+
+#[tokio::test]
+#[serial]
+async fn broadcast() {
+    let (trigger, socket, cert, state) = setup_server(None).await;
+    dbg!();
+    state.reset().await.expect("failed to reset db");
+    dbg!();
+
+    let connector = tls::configure_client(&[&cert]).expect("failed to configure client-side TLS");
+
+    time::delay_for(Duration::from_secs(1)).await;
+    let uids = vec!["u1", "u2", "u3", "u4"]
+        .into_iter()
+        .map(UserId::try_from)
+        .collect::<Result<Vec<_>, _>>()
+        .expect("failed to make userids");
+
+    let items = stream::iter(uids.iter().map(|uid| {
+        let (tx, rx) = channel();
+        let on_push = move |p| {
+            let tx = tx.clone();
+            async move { tx.send(p).is_ok() }.boxed()
+        };
+        register_client(*uid, on_push, &connector, "localhost", &socket).map_ok(|(t, c)| (t, c, rx))
+    }))
+    .buffered(uids.len())
+    .try_collect::<Vec<_>>()
+    .await
+    .expect("failed to register clients");
+
+    let mut triggers = Vec::with_capacity(items.len());
+    let mut clients = Vec::with_capacity(items.len());
+    let mut rxs = Vec::with_capacity(items.len());
+
+    for (t, c, r) in items {
+        triggers.push(t);
+        clients.push(c);
+        rxs.push(r);
+    }
+
+    dbg!();
+    let recip = Recip::Many(Recips::Users(uids.clone()));
+
+    for client in &clients {
+        dbg!(client.uid.as_str());
+
+        let push = Request::Push(push::Req {
+            to: recip.clone(),
+            msg: Bytes::copy_from_slice(client.uid.as_str().as_bytes()),
+        });
+
+        let res = client
+            .req(push)
+            .expect(&format!(
+                "client {} failed to sink push",
+                client.deref().uid
+            ))
             .await
-            .expect("failed to get postgres connection")
-            .reset_all()
-            .await
-            .expect("failed to reset db");
+            .expect(&format!(
+                "client {} failed to receive response",
+                client.deref().uid
+            ));
+        dbg!(&res);
+    }
 
-        dbg!();
-        let mut futs = ws::serve_arc(state, s_socket, server_config)
-            .await
-            .map(Ok)
-            .try_buffer_unordered(4)
-            .boxed();
-        for i in 0u8..4 {
-            dbg!(i);
-            futs.next()
-                .await
-                .expect(&format!("never received connection {}", i))
-                .with_context(|| format!("server failed in connection {}", i))
-                .unwrap();
-        }
-    };
+    time::delay_for(Duration::from_millis(100)).await;
 
-    let run_clients = async {
-        time::delay_for(Duration::from_secs(1)).await;
-        let uid_strs = vec!["u1", "u2", "u3", "u4"];
-        let uids = uid_strs
-            .into_iter()
-            .map(UserId::try_from)
-            .collect::<Result<Vec<_>, _>>()
-            .expect("failed to make userids");
+    for (client, trigger) in clients.into_iter().zip(triggers) {
+        client.quit().expect("client failed to quit");
+        trigger.cancel();
+    }
 
-        let (cinits, crecvs) = uids
-            .iter()
-            .map(|u| {
-                let (tx, rx) = channel();
-                let cinit = ClientInit::new_reg(*u, move |p| {
-                    let tx = tx.clone();
-                    Box::pin(async move { tx.clone().send(p).is_ok() })
-                });
-                (cinit, rx)
-            })
-            .unzip::<_, _, Vec<_>, Vec<_>>();
+    let mut pushsets: Vec<Vec<_>> = Vec::with_capacity(uids.len());
+    for rx in rxs {
+        pushsets.push(rx.collect().await);
+    }
 
-        let clients: Vec<ws::Client<HeraldProtocol, TestClient<_>>> = stream::iter(cinits)
-            .map(Ok)
-            .and_then(|cinit| {
-                dbg!(cinit.uid.as_str());
-                ws::Client::connect(
-                    cinit,
-                    &client_config,
-                    webpki::DNSNameRef::try_from_ascii_str("localhost")
-                        .expect("failed to parse localhost as dns name"),
-                    &s_socket,
-                )
-            })
-            .map_ok(|(c, d)| {
-                dbg!();
-                tokio::spawn(d.map(drop));
-                dbg!();
-                c
-            })
-            .boxed()
-            .try_collect()
-            .await
-            .expect("failed to connect clients");
+    for (p1, p2) in pushsets.iter().zip(&pushsets[1..]) {
+        assert_eq!(p1, p2);
+    }
 
-        dbg!();
-        let recip = Recip::Many(Recips::Users(uids.clone()));
-
-        for client in &clients {
-            dbg!(client.uid.as_str());
-
-            let push = Request::Push(push::Req {
-                to: recip.clone(),
-                msg: Bytes::copy_from_slice(client.uid.as_str().as_bytes()),
-            });
-
-            let res = client
-                .req(push)
-                .expect(&format!(
-                    "client {} failed to sink push",
-                    client.deref().uid
-                ))
-                .await
-                .expect(&format!(
-                    "client {} failed to receive response",
-                    client.deref().uid
-                ));
-            dbg!(&res);
-        }
-
-        for client in clients {
-            client.quit().expect("client failed to quit");
-        }
-
-        let mut pushsets: Vec<Vec<_>> = Vec::with_capacity(uids.len());
-        for recv in crecvs {
-            pushsets.push(recv.collect().await);
-        }
-
-        for (p1, p2) in pushsets.iter().zip(&pushsets[1..]) {
-            assert_eq!(p1, p2);
-        }
-    };
-
-    future::join(run_server, run_clients).await;
+    trigger.cancel();
 }
 
 struct TestClient<F> {
