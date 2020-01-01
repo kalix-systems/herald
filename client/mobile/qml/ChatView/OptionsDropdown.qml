@@ -10,21 +10,18 @@ Rectangle {
     signal deactivate
     signal activate
     width: parent.width
-    height: 0
     visible: height != 0
     color: CmnCfg.palette.lightGrey
-    onActivate: {
-        height = 50
-    }
-    onDeactivate: {
-        height = 0
-    }
+    onActivate: height = 50
+    onDeactivate: height = 0
+
     Behavior on height {
         NumberAnimation {
             easing.type: Easing.InOutQuad
             duration: 100
         }
     }
+
     RowLayout {
         anchors.fill: parent
         clip: true
@@ -37,6 +34,10 @@ Rectangle {
             Layout.alignment: Qt.AlignRight
             iconSize: Qt.size(CmnCfg.units.dp(24), CmnCfg.units.dp(24))
             imageSource: "qrc:/reply-icon.svg"
+            onTapped: {
+                ownedMessages.builder.opId = msgId
+                deactivate()
+            }
         }
         CMN.AnimIconButton {
             Layout.alignment: Qt.AlignRight
@@ -54,7 +55,7 @@ Rectangle {
             Layout.alignment: Qt.AlignRight
             Layout.rightMargin: CmnCfg.largeMargin
             iconSize: Qt.size(CmnCfg.units.dp(24), CmnCfg.units.dp(24))
-            tapCallback: deactivate
+            onClicked: deactivate()
             imageSource: "qrc:/x-icon.svg"
         }
     }

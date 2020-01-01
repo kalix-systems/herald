@@ -129,9 +129,18 @@ Rectangle {
         bottomPadding: isTail ? CmnCfg.defaultMargin : CmnCfg.smallMargin
 
         Label {
+            id: actionText
             text: authorName + Utils.auxString(auxData.code, auxData.content)
             font.family: CmnCfg.chatFont.name
             font.italic: true
+        }
+
+        Loader {
+            id: imageClip
+            active: auxData.code === 3
+            sourceComponent: ReplyImageClip {
+                imageSource: "file:" + auxData.content
+            }
         }
         Loader {
             active: messageModelData.reactions.length > 0

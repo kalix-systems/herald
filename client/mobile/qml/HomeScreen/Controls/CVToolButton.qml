@@ -5,7 +5,7 @@ import LibHerald 1.0
 
 // TODO move this into common & rename, it's an abstract animated icon button thing
 ToolButton {
-    property var tapCallback: function () {
+    property var onClicked : {
         throw "undefined callback"
     }
     property string imageSource: ""

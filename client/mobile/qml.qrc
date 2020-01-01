@@ -11,7 +11,6 @@
         <file>qml/Common/Divider.qml</file>
         <file>qml/Common/EntityBlock.qml</file>
         <file>qml/Common/AnimIconButton.qml</file>
-        <file>qml/SearchView/SearchViewHeader.qml</file>
         <file>qml/SearchView/SearchViewMain.qml</file>
         <file>qml/LoginPage/Controls/LoginButton.qml</file>
         <file>qml/LoginPage/Controls/LoginField.qml</file>

@@ -9,10 +9,11 @@ import QtGraphicalEffects 1.0
 Rectangle {
     property real aspectRatio
     property url imageSource
-    property int count
+    property int count: 0
     property int clipSize: 64
     width: clipSize
     height: clipSize
+    color: "transparent"
 
     clip: true
 
