@@ -304,9 +304,9 @@ pub trait MessagesTrait {
         msg_id: &[u8],
     ) -> i64;
 
-    fn mark_read(
+    fn mark_read_by_id(
         &mut self,
-        index: u64,
+        id: &[u8],
     ) -> ();
 
     fn next_search_match(&mut self) -> i64;
@@ -773,12 +773,14 @@ pub unsafe extern "C" fn messages_index_by_id(
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn messages_mark_read(
+pub unsafe extern "C" fn messages_mark_read_by_id(
     ptr: *mut Messages,
-    index: u64,
+    id_str: *const c_char,
+    id_len: c_int,
 ) {
     let obj = &mut *ptr;
-    obj.mark_read(index)
+    let id = { qba_slice!(id_str, id_len) };
+    obj.mark_read_by_id(id)
 }
 
 #[no_mangle]

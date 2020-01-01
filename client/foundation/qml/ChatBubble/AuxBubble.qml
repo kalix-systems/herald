@@ -85,6 +85,7 @@ Rectangle {
     Highlight {
         id: bubbleHighlight
         z: bubbleRoot.z + 1
+        color: CmnCfg.palette.darkGrey
     }
 
     Rectangle {

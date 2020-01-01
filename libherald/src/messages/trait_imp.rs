@@ -367,11 +367,11 @@ impl Interface for Messages {
         self.user_receipts_(index).unwrap_or_default()
     }
 
-    fn mark_read(
+    fn mark_read_by_id(
         &mut self,
-        index: u64,
+        id: ffi::MsgIdRef,
     ) {
-        self.mark_read_(index)
+        self.mark_read_(id)
     }
 
     fn add_reaction(
