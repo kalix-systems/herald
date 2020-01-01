@@ -109,6 +109,9 @@ impl NotifHandler {
                     }
                 }
             }
+            UserChanged(uid, update) => {
+                push(UserUpdate::UserChanged(uid, update));
+            }
         }
     }
 

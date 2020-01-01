@@ -74,3 +74,10 @@ pub enum UserType {
     /// The user is remote
     Remote = 1,
 }
+
+#[derive(Clone, Debug)]
+pub enum UserChange {
+    Picture(Option<String>),
+    Color(u32),
+    DisplayName(Option<String>),
+}

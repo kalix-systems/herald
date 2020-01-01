@@ -159,21 +159,29 @@ fn handle_content(
             });
         }
         ProfileChanged(change) => {
-            use cmessages::ProfileChanged::*;
+            use cmessages::ProfileChanged as U;
+            use herald_user::UserChange::*;
+
             match change {
-                Color(color) => {
+                U::Color(color) => {
                     crate::user::set_color(uid, color)?;
+                    ev.notifications
+                        .push(Notification::UserChanged(uid, Color(color)));
                 }
-                DisplayName(name) => {
+                U::DisplayName(name) => {
                     crate::user::set_name(uid, name.as_ref().map(String::as_str))?;
+                    ev.notifications
+                        .push(Notification::UserChanged(uid, DisplayName(name)));
                 }
-                Picture(buf) => {
+                U::Picture(buf) => {
                     let conn = crate::db::Database::get()?;
-                    crate::user::db::set_profile_picture_buf(
+                    let path = crate::user::db::set_profile_picture_buf(
                         &conn,
                         uid,
                         buf.as_ref().map(Vec::as_slice),
                     )?;
+                    ev.notifications
+                        .push(Notification::UserChanged(uid, Picture(path)));
                 }
             }
         }
