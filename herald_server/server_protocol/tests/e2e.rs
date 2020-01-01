@@ -71,9 +71,32 @@ async fn register_client<F: Fn(Push) -> BoxFuture<'static, PushAck> + Send + Syn
     Ok((trigger, client))
 }
 
+async fn login_client<F: Fn(Push) -> BoxFuture<'static, PushAck> + Send + Sync + 'static>(
+    uid: UserId,
+    keys: sig::KeyPair,
+    on_push: F,
+    connector: &tokio_rustls::TlsConnector,
+    dns: &str,
+    socket: &SocketAddr,
+) -> Result<(Trigger, ws::Client<HeraldProtocol, TestClient<F>>), Error> {
+    let cinit = ClientInit::new_login(uid, keys, on_push);
+    let (client, driver) = ws::Client::connect(
+        cinit,
+        connector,
+        webpki::DNSNameRef::try_from_ascii_str(dns)?,
+        socket,
+    )
+    .await?;
+    let (trigger, tripwire) = Tripwire::new();
+    tokio::spawn(future::select(driver.boxed(), tripwire).map(drop));
+    Ok((trigger, client))
+}
+
 #[tokio::test]
 #[serial]
 async fn register() {
+    kcl::init();
+
     let (trigger, socket, cert, state) = setup_server(None).await;
     dbg!();
     state.reset().await.expect("failed to reset db");
@@ -124,6 +147,8 @@ async fn register() {
 #[tokio::test]
 #[serial]
 async fn broadcast() {
+    kcl::init();
+
     let (trigger, socket, cert, state) = setup_server(None).await;
     dbg!();
     state.reset().await.expect("failed to reset db");
@@ -205,6 +230,68 @@ async fn broadcast() {
     trigger.cancel();
 }
 
+#[tokio::test]
+#[serial]
+async fn login() {
+    kcl::init();
+
+    let (trigger, socket, cert, state) = setup_server(None).await;
+    dbg!();
+    state.reset().await.expect("failed to reset db");
+    dbg!();
+
+    let connector = tls::configure_client(&[&cert]).expect("failed to configure client-side TLS");
+
+    time::delay_for(Duration::from_secs(1)).await;
+
+    let uid = UserId::try_from("u").expect("failed to create userid");
+    let (t1, c1) = register_client(
+        uid,
+        |p| future::ready(true).boxed(),
+        &connector,
+        "localhost",
+        &socket,
+    )
+    .await
+    .expect("failed to register");
+
+    let new_keypair = sig::KeyPair::gen_new();
+    let update = sig::SigUpdate::Endorse(new_keypair.sign(uid));
+    let signed = c1.keys.sign(update);
+
+    let resp = c1
+        .req(Request::NewSig(signed))
+        .expect("failed to sink request")
+        .await
+        .expect("failed to receive response");
+
+    assert_eq!(
+        resp,
+        Response::NewSig(PKIResponse::Success),
+        "server failed to add key"
+    );
+
+    let (t2, c2) = login_client(
+        uid,
+        new_keypair,
+        |p| future::ready(true).boxed(),
+        &connector,
+        "localhost",
+        &socket,
+    )
+    .await
+    .expect("failed to login with new keys");
+
+    c1.quit().expect("failed to quit c1");
+    c2.quit().expect("failed to quit c2");
+    t1.cancel();
+    t2.cancel();
+    trigger.cancel();
+
+    // let signed = c1.keys.private_key().sign(new_keypair);
+    // c1.req(
+}
+
 struct TestClient<F> {
     on_push: F,
     uid: UserId,
@@ -226,6 +313,19 @@ impl<F: Fn(Push) -> BoxFuture<'static, PushAck> + Send + Sync + 'static> ClientI
         ClientInit {
             typ: ClientInitType::Register,
             keys: sig::KeyPair::gen_new(),
+            on_push,
+            uid,
+        }
+    }
+
+    fn new_login(
+        uid: UserId,
+        keys: sig::KeyPair,
+        on_push: F,
+    ) -> Self {
+        ClientInit {
+            typ: ClientInitType::Login,
+            keys,
             on_push,
             uid,
         }
