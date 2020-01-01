@@ -90,15 +90,12 @@ pub fn set_color(
 
     let update = settings::db::update_color(&db, color, conversation_id)?;
 
-    let msg = crate::message::db::outbound_group_settings(
+    let (mid, expiration) = crate::message::db::outbound_group_settings(
         &mut db,
         settings::SettingsUpdate::Color(color),
         conversation_id,
     )?;
-    let mid = msg.message_id;
-    let expiration = msg.time.expiration;
 
-    crate::push(crate::message::OutboundAux::StoreDone(Box::new(msg)));
     crate::network::send_group_settings_message(mid, *conversation_id, expiration, update)?;
 
     Ok(())
@@ -111,15 +108,12 @@ pub fn set_title(
 ) -> Result<(), HErr> {
     let mut db = Database::get()?;
     let update = settings::db::update_title(&db, title.clone(), conversation_id)?;
-    let msg = crate::message::db::outbound_group_settings(
+    let (mid, expiration) = crate::message::db::outbound_group_settings(
         &mut db,
         settings::SettingsUpdate::Title(title),
         conversation_id,
     )?;
-    let mid = msg.message_id;
-    let expiration = msg.time.expiration;
 
-    crate::push(crate::message::OutboundAux::StoreDone(Box::new(msg)));
     crate::network::send_group_settings_message(mid, *conversation_id, expiration, update)?;
     Ok(())
 }
@@ -133,16 +127,12 @@ pub fn set_picture(
 
     let (update, path) = settings::db::update_picture(&db, picture, conversation_id)?;
 
-    let msg = crate::message::db::outbound_group_settings(
+    let (mid, expiration) = crate::message::db::outbound_group_settings(
         &mut db,
         settings::SettingsUpdate::Picture(path.clone()),
         conversation_id,
     )?;
 
-    let mid = msg.message_id;
-    let expiration = msg.time.expiration;
-
-    crate::push(crate::message::OutboundAux::StoreDone(Box::new(msg)));
     crate::network::send_group_settings_message(mid, *conversation_id, expiration, update)?;
 
     Ok(path)
@@ -156,15 +146,12 @@ pub fn set_expiration_period(
     let mut db = Database::get()?;
 
     let update = settings::db::update_expiration(&db, expiration_period, conversation_id)?;
-    let msg = crate::message::db::outbound_group_settings(
+    let (mid, expiration) = crate::message::db::outbound_group_settings(
         &mut db,
         settings::SettingsUpdate::Expiration(expiration_period),
         conversation_id,
     )?;
-    let mid = msg.message_id;
-    let expiration = msg.time.expiration;
 
-    crate::push(crate::message::OutboundAux::StoreDone(Box::new(msg)));
     crate::network::send_group_settings_message(mid, *conversation_id, expiration, update)?;
     Ok(())
 }

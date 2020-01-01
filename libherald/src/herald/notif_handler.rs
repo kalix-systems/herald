@@ -106,7 +106,7 @@ impl NotifHandler {
             OutboundAux(update) => {
                 use heraldcore::message::OutboundAux::*;
                 match update {
-                    StoreDone(msg) => {
+                    Msg(msg) => {
                         err!(content_push(msg.conversation, MsgUpdate::BuilderMsg(msg)));
                     }
                     SendDone(cid, mid) => {

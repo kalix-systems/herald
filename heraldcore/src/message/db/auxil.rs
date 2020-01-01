@@ -77,7 +77,7 @@ pub(crate) fn outbound_group_settings(
     conn: &mut Conn,
     update: coretypes::conversation::settings::SettingsUpdate,
     cid: &ConversationId,
-) -> Result<Message, HErr> {
+) -> Result<(MsgId, Option<Time>), HErr> {
     let author = crate::config::db::id(&conn)?;
 
     let timestamp = Time::now();
@@ -95,6 +95,20 @@ pub(crate) fn outbound_group_settings(
 
     let send_status = MessageSendStatus::NoAck;
     let mid = MsgId::gen_new();
+
+    let msg = Message {
+        message_id: mid,
+        author,
+        conversation: *cid,
+        send_status: MessageSendStatus::Ack,
+        receipts: Default::default(),
+        reactions: Default::default(),
+        replies: Default::default(),
+        content: coretypes::messages::Item::Aux(update.clone()).into(),
+        time,
+    };
+
+    crate::push(OutboundAux::Msg(Box::new(msg)));
 
     let tx = w!(conn.transaction());
 
@@ -119,19 +133,5 @@ pub(crate) fn outbound_group_settings(
 
     w!(tx.commit());
 
-    let receipts = get_receipts(&conn, &mid).unwrap_or_default();
-    let replies = self::replies(&conn, &mid).unwrap_or_default();
-    let reactions = reactions(&conn, &mid).unwrap_or_default();
-
-    Ok(Message {
-        message_id: mid,
-        author,
-        conversation: *cid,
-        send_status: MessageSendStatus::Ack,
-        receipts,
-        reactions,
-        replies,
-        content: coretypes::messages::Item::Aux(update).into(),
-        time,
-    })
+    Ok((mid, expiration))
 }

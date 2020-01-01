@@ -19,8 +19,8 @@ pub use search::{ResultBody, Search, SearchResult};
 /// Outbound settings send updates
 #[derive(Clone, Debug)]
 pub enum OutboundAux {
-    /// Finished store
-    StoreDone(Box<Message>),
+    /// Render message
+    Msg(Box<Message>),
     /// Finished send
     SendDone(ConversationId, MsgId),
 }
