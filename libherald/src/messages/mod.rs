@@ -6,7 +6,6 @@ use crate::{
 };
 use herald_common::UserId;
 use heraldcore::{
-    conversation,
     message::{Elider, MessageReceiptStatus},
     types::*,
 };
@@ -74,10 +73,14 @@ impl Messages {
             }
             MsgUpdate::StoreDone(mid, meta) => {
                 let model = &mut self.model;
+                let emit = &mut self.emit;
 
-                none!(&self
-                    .container
-                    .handle_store_done(mid, meta, |ix| model.data_changed(ix, ix)));
+                none!(&self.container.handle_store_done(
+                    mid,
+                    meta,
+                    |ix| model.data_changed(ix, ix),
+                    || emit.last_has_attachments_changed()
+                ));
             }
             MsgUpdate::SendDone(mid) => {
                 let model = &mut self.model;
@@ -104,6 +107,7 @@ impl Messages {
 }
 
 /// Message related conversation updates
+#[derive(Debug)]
 pub(crate) enum MsgUpdate {
     /// A new message
     NewMsg(Box<heraldcore::message::Message>),

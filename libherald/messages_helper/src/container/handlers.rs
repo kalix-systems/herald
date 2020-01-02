@@ -35,21 +35,29 @@ impl Container {
         Some(())
     }
 
-    pub fn handle_store_done<F: FnMut(usize)>(
-        &self,
+    pub fn handle_store_done<D, L>(
+        &mut self,
         mid: MsgId,
         meta: herald_attachments::AttachmentMeta,
-        mut data_changed: F,
-    ) -> Option<()> {
-        update(&mid, move |data| {
-            if let Item::Plain(PlainItem {
-                ref mut attachments,
-                ..
-            }) = data.content
-            {
-                *attachments = meta;
-            }
-        })?;
+        mut data_changed: D,
+        mut last_has_attachments_changed: L,
+    ) -> Option<()>
+    where
+        D: FnMut(usize),
+        L: FnMut(),
+    {
+        {
+            let meta = &meta;
+            update(&mid, move |data| {
+                if let Item::Plain(PlainItem {
+                    ref mut attachments,
+                    ..
+                }) = data.content
+                {
+                    *attachments = meta.clone();
+                }
+            })?;
+        }
 
         let ix = self
             .list
@@ -59,6 +67,22 @@ impl Container {
             .rposition(|m| m.msg_id == mid)?;
 
         data_changed(ix);
+
+        if ix == 0 {
+            if let MsgData {
+                content:
+                    Item::Plain(PlainItem {
+                        ref mut attachments,
+                        ..
+                    }),
+                ..
+            } = self.last.as_mut()?
+            {
+                *attachments = meta;
+            }
+
+            last_has_attachments_changed();
+        }
 
         Some(())
     }
