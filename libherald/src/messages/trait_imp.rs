@@ -32,8 +32,13 @@ impl Interface for Messages {
     fn last_time(&self) -> Option<i64> {
         self.last_time_()
     }
+
     fn last_aux_code(&self) -> Option<u8> {
         self.last_aux_code_()
+    }
+
+    fn last_has_attachments(&self) -> Option<bool> {
+        self.last_has_attachments_()
     }
 
     fn index_by_id(

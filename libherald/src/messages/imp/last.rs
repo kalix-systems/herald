@@ -16,6 +16,10 @@ impl Messages {
             .aux_data_code_by_id(&self.container.list.front()?.msg_id)
     }
 
+    pub(crate) fn last_has_attachments_(&self) -> Option<bool> {
+        self.container.last_msg()?.has_attachments().into()
+    }
+
     pub(crate) fn last_body_(&self) -> Option<&str> {
         self.container.last_msg()?.text()
     }

@@ -154,6 +154,7 @@ struct ConversationContentPtrBundle {
   void (*messages_last_author_changed)(Messages *);
   void (*messages_last_aux_code_changed)(Messages *);
   void (*messages_last_body_changed)(Messages *);
+  void (*messages_last_has_attachments_changed)(Messages *);
   void (*messages_last_status_changed)(Messages *);
   void (*messages_last_time_changed)(Messages *);
   void (*messages_search_active_changed)(Messages *);
@@ -554,6 +555,7 @@ struct MessagesPtrBundle {
   void (*messages_last_author_changed)(Messages *);
   void (*messages_last_aux_code_changed)(Messages *);
   void (*messages_last_body_changed)(Messages *);
+  void (*messages_last_has_attachments_changed)(Messages *);
   void (*messages_last_status_changed)(Messages *);
   void (*messages_last_time_changed)(Messages *);
   void (*messages_search_active_changed)(Messages *);
@@ -1653,6 +1655,8 @@ private:
   Q_PROPERTY(
       QVariant lastAuxCode READ lastAuxCode NOTIFY lastAuxCodeChanged FINAL)
   Q_PROPERTY(QString lastBody READ lastBody NOTIFY lastBodyChanged FINAL)
+  Q_PROPERTY(QVariant lastHasAttachments READ lastHasAttachments NOTIFY
+                 lastHasAttachmentsChanged FINAL)
   Q_PROPERTY(QVariant lastStatus READ lastStatus NOTIFY lastStatusChanged FINAL)
   Q_PROPERTY(QVariant lastTime READ lastTime NOTIFY lastTimeChanged FINAL)
   Q_PROPERTY(bool searchActive READ searchActive WRITE setSearchActive NOTIFY
@@ -1676,6 +1680,7 @@ public:
   QString lastAuthor() const;
   QVariant lastAuxCode() const;
   QString lastBody() const;
+  QVariant lastHasAttachments() const;
   QVariant lastStatus() const;
   QVariant lastTime() const;
   bool searchActive() const;
@@ -1772,6 +1777,7 @@ Q_SIGNALS:
   void lastAuthorChanged();
   void lastAuxCodeChanged();
   void lastBodyChanged();
+  void lastHasAttachmentsChanged();
   void lastStatusChanged();
   void lastTimeChanged();
   void searchActiveChanged();

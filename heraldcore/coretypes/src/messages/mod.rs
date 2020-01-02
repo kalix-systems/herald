@@ -276,6 +276,14 @@ impl MsgData {
         }
     }
 
+    pub fn has_attachments(&self) -> bool {
+        self.content
+            .attachments()
+            .map(AttachmentMeta::is_empty)
+            .map(std::ops::Not::not)
+            .unwrap_or(false)
+    }
+
     pub fn save_all_attachments<P: AsRef<std::path::Path>>(
         &self,
         dest: P,
