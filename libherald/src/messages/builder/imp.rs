@@ -52,6 +52,7 @@ impl MessageBuilder {
         self.emit.op_doc_attachments_changed();
         self.emit.op_media_attachments_changed();
         self.emit.op_expiration_time_changed();
+        self.emit.op_aux_content_changed();
     }
 
     pub(in crate::messages) fn try_clear_reply(
@@ -74,6 +75,7 @@ pub(super) struct Reply {
     pub(super) author: UserId,
     pub(super) doc_attachments_json: Option<String>,
     pub(super) media_attachments_json: Option<String>,
+    pub(super) aux_content_json: Option<String>,
 }
 
 impl Reply {
@@ -86,6 +88,11 @@ impl Reply {
             None => (None, None),
         };
 
+        let aux_content_json = match &data.content {
+            Item::Aux(update) => json::JsonValue::from(update.clone()).dump().into(),
+            _ => None,
+        };
+
         Reply {
             time: data.time.insertion,
             expiration: data.time.expiration,
@@ -93,6 +100,7 @@ impl Reply {
             author: data.author,
             doc_attachments_json,
             media_attachments_json,
+            aux_content_json,
         }
     }
 
@@ -105,6 +113,13 @@ impl Reply {
 
     pub(super) fn doc(&self) -> &str {
         self.doc_attachments_json
+            .as_ref()
+            .map(String::as_str)
+            .unwrap_or("")
+    }
+
+    pub(super) fn aux(&self) -> &str {
+        self.aux_content_json
             .as_ref()
             .map(String::as_str)
             .unwrap_or("")

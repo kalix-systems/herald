@@ -131,6 +131,7 @@ struct ConversationContentPtrBundle {
   void (*media_attachments_begin_remove_rows)(MediaAttachments *, int, int);
   void (*media_attachments_end_remove_rows)(MediaAttachments *);
   void (*message_builder_op_author_changed)(MessageBuilder *);
+  void (*message_builder_op_aux_content_changed)(MessageBuilder *);
   void (*message_builder_op_body_changed)(MessageBuilder *);
   void (*message_builder_op_doc_attachments_changed)(MessageBuilder *);
   void (*message_builder_op_expiration_time_changed)(MessageBuilder *);
@@ -452,6 +453,7 @@ struct MessageBuilderPtrBundle {
   void (*media_attachments_begin_remove_rows)(MediaAttachments *, int, int);
   void (*media_attachments_end_remove_rows)(MediaAttachments *);
   void (*message_builder_op_author_changed)(MessageBuilder *);
+  void (*message_builder_op_aux_content_changed)(MessageBuilder *);
   void (*message_builder_op_body_changed)(MessageBuilder *);
   void (*message_builder_op_doc_attachments_changed)(MessageBuilder *);
   void (*message_builder_op_expiration_time_changed)(MessageBuilder *);
@@ -532,6 +534,7 @@ struct MessagesPtrBundle {
   void (*media_attachments_begin_remove_rows)(MediaAttachments *, int, int);
   void (*media_attachments_end_remove_rows)(MediaAttachments *);
   void (*message_builder_op_author_changed)(MessageBuilder *);
+  void (*message_builder_op_aux_content_changed)(MessageBuilder *);
   void (*message_builder_op_body_changed)(MessageBuilder *);
   void (*message_builder_op_doc_attachments_changed)(MessageBuilder *);
   void (*message_builder_op_expiration_time_changed)(MessageBuilder *);
@@ -1453,6 +1456,8 @@ private:
   Q_PROPERTY(MediaAttachments *mediaAttachments READ mediaAttachments NOTIFY
                  mediaAttachmentsChanged FINAL)
   Q_PROPERTY(QString opAuthor READ opAuthor NOTIFY opAuthorChanged FINAL)
+  Q_PROPERTY(
+      QString opAuxContent READ opAuxContent NOTIFY opAuxContentChanged FINAL)
   Q_PROPERTY(QString opBody READ opBody NOTIFY opBodyChanged FINAL)
   Q_PROPERTY(QString opDocAttachments READ opDocAttachments NOTIFY
                  opDocAttachmentsChanged FINAL)
@@ -1477,6 +1482,7 @@ public:
   const MediaAttachments *mediaAttachments() const;
   MediaAttachments *mediaAttachments();
   QString opAuthor() const;
+  QString opAuxContent() const;
   QString opBody() const;
   QString opDocAttachments() const;
   QVariant opExpirationTime() const;
@@ -1530,6 +1536,7 @@ Q_SIGNALS:
   void isReplyChanged();
   void mediaAttachmentsChanged();
   void opAuthorChanged();
+  void opAuxContentChanged();
   void opBodyChanged();
   void opDocAttachmentsChanged();
   void opExpirationTimeChanged();
