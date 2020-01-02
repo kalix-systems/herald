@@ -279,8 +279,7 @@ impl MsgData {
     pub fn has_attachments(&self) -> bool {
         self.content
             .attachments()
-            .map(AttachmentMeta::is_empty)
-            .map(std::ops::Not::not)
+            .map(|a| !a.is_empty())
             .unwrap_or(false)
     }
 

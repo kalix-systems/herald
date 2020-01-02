@@ -77,6 +77,7 @@ Item {
             Layout.alignment: Qt.AlignLeft | Qt.alignTop
             Layout.maximumHeight: labelGrid.height * 0.25
             color: labelColor
+            textFormat: Text.StyledText
         }
 
         Button {

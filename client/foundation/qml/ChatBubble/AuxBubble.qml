@@ -130,19 +130,23 @@ Rectangle {
         topPadding: isHead ? CmnCfg.smallMargin : CmnCfg.smallMargin
         leftPadding: CmnCfg.smallMargin
         bottomPadding: isTail ? CmnCfg.defaultMargin : CmnCfg.smallMargin
-        Label {
+        Text {
             text: friendlyTimestamp
             font.family: CmnCfg.chatFont.name
             font.italic: true
             font.pixelSize: 12
             color: CmnCfg.palette.darkGrey
+            elide: Text.ElideRight
+            width: bubbleRoot.maxWidth
         }
 
-        Label {
+        Text {
             id: actionText
             text: authorName + Utils.auxString(auxData.code, auxData.content)
             font.family: CmnCfg.chatFont.name
             font.italic: true
+            elide: Text.ElideRight
+            width: bubbleRoot.maxWidth
         }
 
         Loader {

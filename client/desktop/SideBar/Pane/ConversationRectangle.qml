@@ -16,10 +16,18 @@ Common.PlatonicRectangle {
         lastBody: {
             if (convContent.messages.isEmpty)
                 return ""
-            if (convContent.messages.lastAuxCode === undefined)
-                return lastAuthor + ": " + convContent.messages.lastBody
-            return lastAuthor + Utils.auxStringShort(
-                        convContent.messages.lastAuxCode)
+
+            if (convContent.messages.lastAuxCode !== undefined) {
+                return "<i>" + lastAuthor + Utils.auxStringShort(
+                            convContent.messages.lastAuxCode) + "</i>"
+            }
+
+            if ((convContent.messages.lastBody === "")
+                    && convContent.messages.lastHasAttachments) {
+                return lastAuthor + ": " + "<i>Media message</i>"
+            }
+
+            return lastAuthor + ": " + convContent.messages.lastBody
         }
 
         lastAuthor: outbound ? qsTr("You") : convContent.messages.lastAuthor
@@ -29,6 +37,5 @@ Common.PlatonicRectangle {
         secondaryLabelColor: convoRectangle.state
                              !== "" ? CmnCfg.palette.offBlack : CmnCfg.palette.medGrey
         labelFontSize: CmnCfg.entityLabelSize
-        bodyItalic: (convContent.messages.lastAuxCode !== undefined) ? true : false
     }
 }
