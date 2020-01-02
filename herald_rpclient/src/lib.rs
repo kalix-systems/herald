@@ -1,10 +1,11 @@
 use anyhow::*;
+use futures::{future::TryFutureExt, stream::StreamExt};
 use herald_common::{protocol::*, *};
 use krpc::*;
 use location::*;
 use once_cell::sync::Lazy;
 use rustls::*;
-use std::{future::*, marker::PhantomData, sync::Arc};
+use std::{future::*, marker::PhantomData, net::ToSocketAddrs, sync::Arc};
 use tokio::{prelude::*, sync::mpsc::*};
 use tokio_rustls::*;
 
@@ -16,43 +17,41 @@ static TLS_CONFIG: Lazy<TlsConnector> = Lazy::new(|| {
     Arc::new(config).into()
 });
 
-enum ClientInitType {
-    Register,
-    Login,
-}
-
-struct ClientInit {
-    typ: ClientInitType,
-    uid: UserId,
-    keys: sig::KeyPair,
-    ptx: UnboundedSender<Push>,
-}
-
-impl ClientInit {
-    fn new_reg(
-        uid: UserId,
+enum ClientInit {
+    Register {
+        names: Receiver<auth::register::ClientEvent>,
+        resps: Sender<auth::register::ServeEvent>,
+        keys: sig::KeyPair,
         ptx: UnboundedSender<Push>,
-    ) -> Self {
-        ClientInit {
-            typ: ClientInitType::Register,
-            keys: sig::KeyPair::gen_new(),
-            uid,
-            ptx,
-        }
-    }
-
-    fn new_login(
+    },
+    Login {
         uid: UserId,
         keys: sig::KeyPair,
         ptx: UnboundedSender<Push>,
-    ) -> Self {
-        ClientInit {
-            typ: ClientInitType::Login,
-            uid,
-            keys,
-            ptx,
+    },
+}
+
+async fn registration_loop<Tx: AsyncWrite + Send + Unpin, Rx: AsyncRead + Send + Unpin>(
+    mut names: Receiver<auth::register::ClientEvent>,
+    mut resps: Sender<auth::register::ServeEvent>,
+    tx: &mut Framed<Tx>,
+    rx: &mut Framed<Rx>,
+) -> Result<UserId, Error> {
+    use auth::register::*;
+
+    while let Some(cev) = names.next().await {
+        tx.write_ser(&cev).await?;
+        let sev = rx.read_de().await?;
+        resps.send(sev).await?;
+        match (cev, sev) {
+            (ClientEvent::Claim(s), ServeEvent::Success) => {
+                return Ok(*s.data());
+            }
+            _ => {}
         }
     }
+
+    Err(anyhow!("registration failed"))
 }
 
 struct Client {
@@ -106,7 +105,8 @@ impl Client {
     }
 
     async fn register<Tx: AsyncWrite + Send + Unpin, Rx: AsyncRead + Send + Unpin>(
-        uid: UserId,
+        names: Receiver<auth::register::ClientEvent>,
+        resps: Sender<auth::register::ServeEvent>,
         keys: sig::KeyPair,
         ptx: UnboundedSender<Push>,
         tx: &mut Framed<Tx>,
@@ -118,18 +118,7 @@ impl Client {
             .await
             .context("failed to write auth method")?;
 
-        tx.write_ser(&ClientEvent::Check(uid)).await?;
-        ensure!(
-            ServeEvent::Available == rx.read_de().await?,
-            "username taken"
-        );
-
-        let signed = keys.sign(uid);
-        tx.write_ser(&ClientEvent::Claim(signed)).await?;
-        ensure!(
-            ServeEvent::Success == rx.read_de().await?,
-            "registration failed"
-        );
+        let uid = registration_loop(names, resps, tx, rx).await?;
 
         Ok(Client { ptx, uid, keys })
     }
@@ -160,16 +149,14 @@ impl KrpcClient<HeraldProtocol> for Client {
         tx: &mut Framed<Tx>,
         rx: &mut Framed<Rx>,
     ) -> Result<Self, Error> {
-        let ClientInit {
-            typ,
-            uid,
-            keys,
-            ptx,
-        } = info;
-
-        let this = match typ {
-            ClientInitType::Register => Client::register(uid, keys, ptx, tx, rx).await?,
-            ClientInitType::Login => Client::login(uid, keys, ptx, tx, rx).await?,
+        let this = match info {
+            ClientInit::Login { uid, keys, ptx } => Client::login(uid, keys, ptx, tx, rx).await?,
+            ClientInit::Register {
+                names,
+                resps,
+                keys,
+                ptx,
+            } => Client::register(names, resps, keys, ptx, tx, rx).await?,
         };
 
         this.catchup(tx, rx).await?;
@@ -216,4 +203,64 @@ impl KrpcClient<HeraldProtocol> for Client {
     }
 
     fn on_close(&self) {}
+}
+
+pub struct HClient {
+    inner: ws::Client<HeraldProtocol, Client>,
+}
+
+impl HClient {
+    pub async fn login(
+        uid: UserId,
+        keys: sig::KeyPair,
+        server_dns: &str,
+        server_port: u16,
+    ) -> Result<(Self, UnboundedReceiver<Push>), Error> {
+        let (ptx, prx) = unbounded_channel();
+        let init = ClientInit::Login { uid, keys, ptx };
+        let (inner, driver) = ws::Client::connect(
+            init,
+            &TLS_CONFIG,
+            webpki::DNSNameRef::try_from_ascii_str(server_dns)?,
+            &(server_dns, server_port)
+                .to_socket_addrs()
+                .with_context(|| format!("host {} failed to resolve", server_dns))?
+                .next()
+                .ok_or_else(|| anyhow!("host {} resolved to no IPs", server_dns))?,
+        )
+        .await?;
+        tokio::spawn(driver.unwrap_or_else(|e| panic!()));
+        let out = HClient { inner };
+        todo!()
+    }
+
+    pub async fn register(
+        names: Receiver<auth::register::ClientEvent>,
+        resps: Sender<auth::register::ServeEvent>,
+        keys: sig::KeyPair,
+        server_dns: &str,
+        server_port: u16,
+    ) -> Result<(Self, UnboundedReceiver<Push>), Error> {
+        let (ptx, prx) = unbounded_channel();
+        let init = ClientInit::Register {
+            names,
+            resps,
+            keys,
+            ptx,
+        };
+        let (inner, driver) = ws::Client::connect(
+            init,
+            &TLS_CONFIG,
+            webpki::DNSNameRef::try_from_ascii_str(server_dns)?,
+            &(server_dns, server_port)
+                .to_socket_addrs()
+                .with_context(|| format!("host {} failed to resolve", server_dns))?
+                .next()
+                .ok_or_else(|| anyhow!("host {} resolved to no IPs", server_dns))?,
+        )
+        .await?;
+        tokio::spawn(driver.unwrap_or_else(|e| panic!()));
+        let out = HClient { inner };
+        todo!()
+    }
 }

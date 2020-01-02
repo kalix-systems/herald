@@ -711,6 +711,7 @@ name = "herald_client"
 version = "0.1.0"
 dependencies = [
  "anyhow 1.0.26 (registry+https://github.com/rust-lang/crates.io-index)",
+ "futures 0.3.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "herald_common 0.1.0",
  "krpc 0.1.0",
  "location 0.1.0",
