@@ -182,6 +182,9 @@ inline void messageBuilderIsReplyChanged(MessageBuilder *o) {
 inline void messageBuilderOpAuthorChanged(MessageBuilder *o) {
   Q_EMIT o->opAuthorChanged();
 }
+inline void messageBuilderOpAuxContentChanged(MessageBuilder *o) {
+  Q_EMIT o->opAuxContentChanged();
+}
 inline void messageBuilderOpBodyChanged(MessageBuilder *o) {
   Q_EMIT o->opBodyChanged();
 }
@@ -1704,6 +1707,8 @@ MediaAttachments::Private *
 message_builder_media_attachments_get(const MessageBuilder::Private *);
 void message_builder_op_author_get(const MessageBuilder::Private *, QString *,
                                    qstring_set);
+void message_builder_op_aux_content_get(const MessageBuilder::Private *,
+                                        QString *, qstring_set);
 void message_builder_op_body_get(const MessageBuilder::Private *, QString *,
                                  qstring_set);
 void message_builder_op_doc_attachments_get(const MessageBuilder::Private *,
@@ -3148,6 +3153,7 @@ ConversationContent::ConversationContent(QObject *parent)
           },
           [](MediaAttachments *o) { o->endRemoveRows(); },
           messageBuilderOpAuthorChanged,
+          messageBuilderOpAuxContentChanged,
           messageBuilderOpBodyChanged,
           messageBuilderOpDocAttachmentsChanged,
           messageBuilderOpExpirationTimeChanged,
@@ -4070,6 +4076,7 @@ MessageBuilder::MessageBuilder(QObject *parent)
           },
           [](MediaAttachments *o) { o->endRemoveRows(); },
           messageBuilderOpAuthorChanged,
+          messageBuilderOpAuxContentChanged,
           messageBuilderOpBodyChanged,
           messageBuilderOpDocAttachmentsChanged,
           messageBuilderOpExpirationTimeChanged,
@@ -4175,6 +4182,12 @@ MediaAttachments *MessageBuilder::mediaAttachments() {
 QString MessageBuilder::opAuthor() const {
   QString v;
   message_builder_op_author_get(m_d, &v, set_qstring);
+  return v;
+}
+
+QString MessageBuilder::opAuxContent() const {
+  QString v;
+  message_builder_op_aux_content_get(m_d, &v, set_qstring);
   return v;
 }
 
@@ -4391,6 +4404,7 @@ Messages::Messages(QObject *parent)
           },
           [](MediaAttachments *o) { o->endRemoveRows(); },
           messageBuilderOpAuthorChanged,
+          messageBuilderOpAuxContentChanged,
           messageBuilderOpBodyChanged,
           messageBuilderOpDocAttachmentsChanged,
           messageBuilderOpExpirationTimeChanged,
