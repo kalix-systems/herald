@@ -162,6 +162,7 @@ Rectangle {
                     ownedConversation.builder.addAttachment(fileUrls[i])
                 }
             }
+            chatText.forceActiveFocus()
         }
     }
 }
