@@ -16,7 +16,7 @@ sharded-slab = "0.0.7"
 
 [dependencies.tokio]
 version = "0.2.4"
-features = ["rt-core"]
+features = ["rt-core", "stream"]
 
 [dependencies.kson]
 path = "../kson"

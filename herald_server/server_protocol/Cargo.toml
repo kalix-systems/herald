@@ -18,7 +18,7 @@ stream-cancel = "0.5.0-alpha.5"
 
 [dependencies.tokio]
 version = "0.2.6"
-features = ["macros", "rt-threaded",  "sync", "time", "stream"]
+features = ["macros", "rt-core",  "sync", "time", "stream"]
 
 [dependencies.herald_common]
 path = "../../herald_common"
