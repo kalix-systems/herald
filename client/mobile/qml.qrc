@@ -14,7 +14,6 @@
         <file>qml/SearchView/SearchViewMain.qml</file>
         <file>qml/LoginPage/Controls/LoginButton.qml</file>
         <file>qml/LoginPage/Controls/LoginField.qml</file>
-        <file>qml/Common/Drawer.qml</file>
         <file>qml/SettingsMenu/SettingsMenuMain.qml</file>
         <file>qml/SettingsMenu/Controls/SettingsHeader.qml</file>
         <file>qml/SettingsMenu/Controls/SettingsSection.qml</file>
@@ -50,5 +49,8 @@
         <file>qml/SettingsMenu/SettingComponents/Profile.qml</file>
         <file>qml/SettingsMenu/SettingComponents/SettingsListItem.qml</file>
         <file>qml/SettingsMenu/SettingComponents/Storage.qml</file>
+        <file>qml/ChatView/InfoPage.qml</file>
+        <file>qml/Headers/MessageInfoHeader.qml</file>
+        <file>qml/Common/PlatonicRectangle.qml</file>
     </qresource>
 </RCC>

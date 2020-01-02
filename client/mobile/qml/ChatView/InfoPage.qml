@@ -1,32 +1,26 @@
-import QtQuick 2.13
-import QtQuick.Controls 2.13
+import QtQuick 2.14
+import QtQuick.Controls 2.14
 import LibHerald 1.0
-import QtQuick.Window 2.13
-import Qt.labs.platform 1.1
-import QtQuick.Dialogs 1.3
 import "qrc:/imports"
-import QtGraphicalEffects 1.0
-import "../../common" as Common
+import "../Common" as Common
 import "qrc:/imports/Entity" as Av
 import "qrc:/imports/js/utils.mjs" as Utils
 import "qrc:/imports/ChatBubble" as CB
 import "qrc:/imports" as Imports
 
-Popup {
+Page {
     id: moreInfoPopup
-    property var convoMembers: parent.convoMembers
-    property var messageData: parent.messageData
-    property var ownedMessages: parent.ownedMessages
-    property var receiptData
+    // List of conversation member passed in upon push
+    property var convoMembers
+    // message data passed in upon push
+    property var messageData
+    // messages model passed in upon push
+    property Messages ownedMessages: parent.ownedMessages
+    // list of receipt-user objects. set on completion
+    readonly property var receiptData: []
     property var outbound: messageData.author === Herald.config.configId
 
-    height: chatView.height
-    width: chatView.width
-    anchors.centerIn: parent
-    onClosed: messageInfoLoader.active = false
-    padding: 0
     background: Rectangle {
-        id: background
         color: CmnCfg.palette.white
     }
 
@@ -34,49 +28,8 @@ Popup {
         receiptData = JSON.parse(moreInfoPopup.messageData.userReceipts)
     }
 
-    Imports.IconButton {
-        anchors.right: parent.right
-        anchors.rightMargin: CmnCfg.defaultMargin
-        anchors.verticalCenter: header.verticalCenter
-        icon.source: "qrc:/x-icon.svg"
-        fill: CmnCfg.palette.white
-        onClicked: {
-            moreInfoPopup.close()
-            messageInfoLoader.active = false
-        }
-        z: header.z + 1
-    }
-
-    Rectangle {
-        id: header
-        anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.leftMargin: 1
-        anchors.right: parent.right
-        height: CmnCfg.toolbarHeight + 1
-        color: CmnCfg.palette.offBlack
-        Label {
-            id: headerLabel
-            anchors.left: parent.left
-            anchors.leftMargin: CmnCfg.smallMargin
-            text: "Message info"
-            font.pixelSize: CmnCfg.headerFontSize
-            color: CmnCfg.palette.white
-            anchors.verticalCenter: parent.verticalCenter
-            font.family: CmnCfg.labelFont.name
-        }
-    }
-    Rectangle {
-        anchors.right: header.left
-        color: CmnCfg.palette.lightGrey
-        width: 1
-        height: CmnCfg.palette.toolbarHeight
-    }
     Flickable {
-        width: chatView.width
-        anchors.top: header.bottom
-        anchors.bottom: parent.bottom
-        contentWidth: width
+        anchors.fill: parent
         contentHeight: wrapperCol.height
         clip: true
         ScrollBar.vertical: ScrollBar {}
@@ -111,7 +64,6 @@ Popup {
                 height: CmnCfg.convoHeight
                 width: parent.width
                 Common.PlatonicRectangle {
-
                     boxTitle: messageData.authorName
                     boxColor: messageData.authorColor
                     picture: Utils.safeStringOrDefault(
@@ -127,17 +79,15 @@ Popup {
                     MouseArea {
                         id: hoverHandler
                     }
-
-                    states: []
                 }
             }
 
             Label {
                 id: timeInfo
                 anchors.left: author.left
-                text: outbound ? "Sent at: " + Utils.userTime(
-                                     messageData.insertionTime) : "Sent at: " + Utils.userTime(
-                                     messageData.serverTime)
+                text: (outbound ? qsTr("Sent at: ") : qsTr(
+                                      "Received at: ")) + Utils.userTime(
+                          messageData.serverTime)
                 font.family: CmnCfg.chatFont.name
                 font.weight: Font.DemiBold
                 color: CmnCfg.palette.black
@@ -215,8 +165,6 @@ Popup {
                             anchors.verticalCenter: parent.verticalCenter
                             background: Item {}
                         }
-
-                        states: []
                     }
                 }
             }

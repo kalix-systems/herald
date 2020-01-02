@@ -31,7 +31,7 @@ Page {
                 id: backButton
                 color: CmnCfg.palette.iconFill
                 imageSource: "qrc:/back-arrow-icon.svg"
-                onTapped : {
+                onTapped: {
                     mainView.pop(null)
                 }
             }
@@ -44,7 +44,7 @@ Page {
                 pixelSize: CmnCfg.headerFontSize
                 family: CmnCfg.labelFont.name
             }
-            Layout.alignment: Layout.verticalCenter
+            Layout.alignment: Qt.AlignVCenter
             color: CmnCfg.palette.iconFill
         }
     }

@@ -1,5 +1,5 @@
 import QtQuick 2.12
-import Qt.labs.platform 1.1
+import QtQuick.Dialogs 1.0
 import QtGraphicalEffects 1.0
 import LibHerald 1.0
 // Includes CVFLoatingButton. ListItem, and Header
@@ -67,17 +67,21 @@ Rectangle {
         anchors.centerIn: parent
         source: "qrc:/camera-icon.svg"
         fill: CmnCfg.palette.black
-        onClicked: groupPicDialogue.open()
+        TapHandler {
+            onTapped: {
+                groupPicDialogue.open()
+            }
+        }
     }
 
-    FileDialog {
+    FileDialogWrapper {
         id: groupPicDialogue
-        folder: StandardPaths.writableLocation(StandardPaths.PicturesLocation)
+        folder: shortcuts.pictures
         nameFilters: ["Image File (*.jpg *.png *.jpeg)"]
-
-        onCurrentFileChanged: {
+        onSelectionAccepted: {
             groupImageLoader.active = true
-            groupImageLoader.imageSource = currentFile
+            groupImageLoader.imageSource = Herald.utils.stripUrlPrefix(
+                        groupPicDialogue.fileUrl)
         }
     }
 }

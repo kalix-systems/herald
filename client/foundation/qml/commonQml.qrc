@@ -63,5 +63,7 @@
         <file>ChatBubble/ComposeReplyComponent.qml</file>
         <file>ChatBubble/ReplyBubble/ReplyFileClip.qml</file>
         <file>ChatBubble/AuxBubble.qml</file>
+        <file>+android/FileDialogWrapper.qml</file>
+        <file>FileDialogWrapper.qml</file>
     </qresource>
 </RCC>

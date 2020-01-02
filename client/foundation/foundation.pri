@@ -83,19 +83,11 @@ CONFIG(iphoneos, iphoneos|iphonesimulator)  {
     SOURCES += $$PWD/objectiveutils.mm
 }
 
-#iphoneos {
-#   Q_ENABLE_BITCODE.name = ENABLE_BITCODE
-#   Q_ENABLE_BITCODE.value = NO
-#   QMAKE_MAC_XCODE_SETTINGS += Q_ENABLE_BITCODE
-
-
-
 macx {
   LIBS += -L $${PWD}/../../target/$${RUST_BUILD_TYPE} -lherald
   HEADERS += $$PWD/objectiveutils.h
   SOURCES += $$PWD/objectiveutils.mm
 }
-
 
 android {
      QT += androidextras
