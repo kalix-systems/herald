@@ -29,5 +29,6 @@ Common.PlatonicRectangle {
         secondaryLabelColor: convoRectangle.state
                              !== "" ? CmnCfg.palette.offBlack : CmnCfg.palette.medGrey
         labelFontSize: CmnCfg.entityLabelSize
+        bodyItalic: (convContent.messages.lastAuxCode !== undefined) ? true : false
     }
 }

@@ -28,6 +28,7 @@ Item {
     property color secondaryLabelColor: CmnCfg.palette.offBlack
     property int labelFontSize: CmnCfg.entityLabelSize
     property int subLabelFontSize: CmnCfg.entitySubLabelSize
+    property alias bodyItalic: bodyText.font.italic
 
     // labeling constants
     GridLayout {
