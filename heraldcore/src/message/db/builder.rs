@@ -58,8 +58,7 @@ impl OutboundMessageBuilder {
                 body: body.clone(),
                 op: op.into(),
                 attachments: vec![].into(),
-            })
-            .into(),
+            }),
             conversation: conversation_id,
             time,
             send_status,
@@ -245,8 +244,7 @@ impl OutboundMessageBuilder {
                 body,
                 attachments: attachment_meta,
                 op: op.into(),
-            })
-            .into(),
+            }),
             conversation: conversation_id,
             time,
             send_status,
@@ -380,8 +378,7 @@ impl InboundMessageBuilder {
                 body,
                 attachments,
                 op,
-            })
-            .into(),
+            }),
             conversation: conversation_id,
             send_status: MessageSendStatus::Ack,
             time,

@@ -70,7 +70,7 @@ pub(crate) fn inbound_aux<T: Into<AuxItem>>(
         receipts,
         reactions,
         replies,
-        content: Some(aux_item.into()),
+        content: aux_item.into(),
         time,
     }))
 }
@@ -108,7 +108,7 @@ pub(crate) fn outbound_aux<T: Into<AuxItem>>(
         receipts: Default::default(),
         reactions: Default::default(),
         replies: Default::default(),
-        content: Some(aux_item.clone().into()),
+        content: aux_item.clone().into(),
         time,
     };
 

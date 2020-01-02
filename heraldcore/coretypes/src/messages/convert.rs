@@ -147,18 +147,17 @@ impl Item {
         attachments: Option<AttachmentMeta>,
         op: ReplyId,
         aux: Option<T>,
-    ) -> Option<Item>
+    ) -> Item
     where
         T: Into<AuxItem>,
     {
         match (body, attachments, aux) {
-            (_, _, Some(aux)) => Item::Aux(aux.into()).into(),
+            (_, _, Some(aux)) => Item::Aux(aux.into()),
             (body, attachments, None) => Item::Plain(PlainItem {
                 body,
                 attachments: attachments.unwrap_or_default(),
                 op,
-            })
-            .into(),
+            }),
         }
     }
 }

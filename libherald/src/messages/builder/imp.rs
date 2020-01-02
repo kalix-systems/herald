@@ -89,7 +89,7 @@ impl Reply {
         Reply {
             time: data.time.insertion,
             expiration: data.time.expiration,
-            body: data.content.as_ref().and_then(Item::body).map(Clone::clone),
+            body: data.content.body().map(Clone::clone),
             author: data.author,
             doc_attachments_json,
             media_attachments_json,
