@@ -160,6 +160,7 @@ fn handle_content(
         }
         ProfileChanged(change) => {
             use cmessages::ProfileChanged as U;
+            use coretypes::conversation::settings::SettingsUpdate as S;
             use herald_user::UserChange::*;
 
             match change {
@@ -167,12 +168,28 @@ fn handle_content(
                     crate::user::set_color(uid, color)?;
                     ev.notifications
                         .push(Notification::UserChanged(uid, Color(color)));
+
+                    if let Some(cid) =
+                        crate::conversation::get_pairwise_conversations(&[uid])?.pop()
+                    {
+                        ev.notifications
+                            .push(Notification::Settings(cid, S::Color(color)));
+                    }
                 }
+
                 U::DisplayName(name) => {
                     crate::user::set_name(uid, name.as_ref().map(String::as_str))?;
                     ev.notifications
-                        .push(Notification::UserChanged(uid, DisplayName(name)));
+                        .push(Notification::UserChanged(uid, DisplayName(name.clone())));
+
+                    if let Some(cid) =
+                        crate::conversation::get_pairwise_conversations(&[uid])?.pop()
+                    {
+                        ev.notifications
+                            .push(Notification::Settings(cid, S::Title(name)));
+                    }
                 }
+
                 U::Picture(buf) => {
                     let conn = crate::db::Database::get()?;
                     let path = crate::user::db::set_profile_picture_buf(
@@ -181,7 +198,14 @@ fn handle_content(
                         buf.as_ref().map(Vec::as_slice),
                     )?;
                     ev.notifications
-                        .push(Notification::UserChanged(uid, Picture(path)));
+                        .push(Notification::UserChanged(uid, Picture(path.clone())));
+
+                    if let Some(cid) =
+                        crate::conversation::get_pairwise_conversations(&[uid])?.pop()
+                    {
+                        ev.notifications
+                            .push(Notification::Settings(cid, S::Picture(path.clone())));
+                    }
                 }
             }
         }
