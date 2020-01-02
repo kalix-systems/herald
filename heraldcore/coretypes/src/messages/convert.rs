@@ -160,12 +160,15 @@ impl Item {
 
 impl Reactions {
     pub fn from_vec(reactions: Vec<Reaction>) -> Option<Self> {
+        // early return
         if reactions.is_empty() {
             return None;
         }
 
+        // temporary collection
         let mut buckets = HashMap::<ReactContent, Vec<(Time, UserId)>>::new();
 
+        // insertion reactionary information for each reaction, indexed by reaction content
         for Reaction {
             reactionary,
             react_content,
@@ -178,21 +181,27 @@ impl Reactions {
                 .push((time, reactionary));
         }
 
+        // collect into a vector
         let mut content = buckets.into_iter().collect::<Vec<_>>();
 
+        // sort
         content.sort_unstable_by(|(_, a), (_, b)| {
-            a.iter()
+            let a_min = a
+                .iter()
                 .map(|(t, _)| t)
                 .min()
                 .copied()
-                .unwrap_or_else(|| Time::from(std::i64::MIN))
-                .cmp(
-                    &b.iter()
-                        .map(|(t, _)| t)
-                        .min()
-                        .copied()
-                        .unwrap_or_else(|| Time::from(std::i64::MIN)),
-                )
+                // this should be covered by the early return and the compiler should be able
+                // to optimize this out, but let's be safe
+                .unwrap_or_else(|| Time::from(std::i64::MIN));
+            let b_min = &b
+                .iter()
+                .map(|(t, _)| t)
+                .min()
+                .copied()
+                .unwrap_or_else(|| Time::from(std::i64::MIN));
+
+            a_min.cmp(b_min)
         });
 
         let content = content

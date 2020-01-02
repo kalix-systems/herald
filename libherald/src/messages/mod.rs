@@ -59,6 +59,7 @@ impl Messages {
                     .container
                     .handle_receipt(msg_id, status, recipient, |ix| model.data_changed(ix, ix)));
             }
+
             MsgUpdate::Reaction {
                 msg_id,
                 reactionary,

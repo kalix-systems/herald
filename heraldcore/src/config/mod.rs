@@ -5,6 +5,7 @@ use rusqlite::NO_PARAMS;
 use std::net::SocketAddr;
 
 /// Default name for the "Note to Self" conversation
+// TODO This should not exist
 pub const NTS_CONVERSATION_NAME: &str = "Note to Self";
 
 pub(crate) mod db;

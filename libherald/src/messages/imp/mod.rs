@@ -71,6 +71,22 @@ impl Messages {
         true
     }
 
+    pub(crate) fn clear_conversation_history_(&mut self) -> bool {
+        let id = none!(self.conversation_id, false);
+
+        spawn!(conversation::delete_conversation(&id), false);
+
+        self.clear_search();
+        self.model
+            .begin_remove_rows(0, self.container.len().saturating_sub(1));
+        self.container = Default::default();
+        self.model.end_remove_rows();
+
+        self.emit_last_changed();
+        self.emit.is_empty_changed();
+        true
+    }
+
     pub(crate) fn aux_data_(
         &self,
         index: usize,
