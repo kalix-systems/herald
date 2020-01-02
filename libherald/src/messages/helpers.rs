@@ -89,7 +89,7 @@ impl Messages {
 
         self.builder.try_clear_reply(&msg_id);
 
-        let len = self.container.len();
+        let old_len = self.container.len();
 
         self.model.begin_remove_rows(ix, ix);
         let data = self.container.remove(ix);
@@ -109,7 +109,7 @@ impl Messages {
             self.entry_changed(ix + 1);
         }
 
-        if len == 1 {
+        if old_len == 1 {
             self.emit.is_empty_changed();
         }
 

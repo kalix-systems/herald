@@ -3,7 +3,7 @@ use crate::messages::MsgUpdate;
 use crossbeam_channel::*;
 use heraldcore::{channel_send_err, errors::HErr};
 use once_cell::sync::OnceCell;
-use parking_lot::RwLock;
+use parking_lot::{Mutex, RwLock};
 use std::collections::HashMap;
 
 /// Concurrent hash map from `ConversationId`s to an event stream.
@@ -15,7 +15,7 @@ static RXS: OnceCell<RwLock<HashMap<ConversationId, Receiver<ContentUpdate>>>> =
 static TXS: OnceCell<RwLock<HashMap<ConversationId, Sender<ContentUpdate>>>> = OnceCell::new();
 /// Concurrent hash map of `MembersEmitter`. These are removed when the associated
 /// `Members` object is dropped.
-static EMITTERS: OnceCell<RwLock<HashMap<ConversationId, Emitter>>> = OnceCell::new();
+static EMITTERS: OnceCell<Mutex<HashMap<ConversationId, Emitter>>> = OnceCell::new();
 
 pub(super) fn txs() -> &'static RwLock<HashMap<ConversationId, Sender<ContentUpdate>>> {
     TXS.get_or_init(|| RwLock::new(HashMap::default()))
@@ -25,8 +25,8 @@ pub(super) fn rxs() -> &'static RwLock<HashMap<ConversationId, Receiver<ContentU
     RXS.get_or_init(|| RwLock::new(HashMap::default()))
 }
 
-pub(super) fn emitters() -> &'static RwLock<HashMap<ConversationId, Emitter>> {
-    EMITTERS.get_or_init(|| RwLock::new(HashMap::default()))
+pub(super) fn emitters() -> &'static Mutex<HashMap<ConversationId, Emitter>> {
+    EMITTERS.get_or_init(|| Mutex::new(HashMap::default()))
 }
 
 /// An update to a conversation's message model or members model
@@ -50,10 +50,15 @@ impl From<MsgUpdate> for ContentUpdate {
 }
 
 pub(crate) fn content_push<T: Into<ContentUpdate>>(
-    to: ConversationId,
+    cid_addr: ConversationId,
     update: T,
 ) -> Result<(), HErr> {
-    let maybe_tx = { txs().read().get(&to).cloned() };
+    let maybe_tx = {
+        let lock = txs().read();
+        let maybe = lock.get(&cid_addr).cloned();
+        drop(lock);
+        maybe
+    };
 
     let tx = match maybe_tx {
         Some(tx) => tx,
@@ -62,12 +67,14 @@ pub(crate) fn content_push<T: Into<ContentUpdate>>(
 
             {
                 let mut tx_lock = txs().write();
-                tx_lock.insert(to, (&tx).clone());
+                tx_lock.insert(cid_addr, (&tx).clone());
+                drop(tx_lock);
             }
 
             {
                 let mut rx_lock = rxs().write();
-                rx_lock.insert(to, rx);
+                rx_lock.insert(cid_addr, rx);
+                drop(rx_lock);
             }
 
             tx
@@ -76,7 +83,11 @@ pub(crate) fn content_push<T: Into<ContentUpdate>>(
 
     tx.send(update.into()).map_err(|_| channel_send_err!())?;
 
-    if let Some(emitter) = emitters().write().get_mut(&to) {
+    let mut emit_lock = emitters().lock();
+    let mut maybe_emitter = emit_lock.get_mut(&cid_addr).map(|e| e.clone());
+    drop(emit_lock);
+
+    if let Some(emitter) = maybe_emitter.as_mut() {
         emitter.new_data_ready();
     }
 
@@ -113,7 +124,7 @@ impl super::ConversationContent {
     pub(super) fn register_model(&mut self) -> Option<()> {
         let id = self.id?;
 
-        emitters().write().insert(id, self.emit.clone());
+        emitters().lock().insert(id, self.emit.clone());
 
         Some(())
     }
@@ -123,7 +134,7 @@ impl Drop for ConversationContent {
     fn drop(&mut self) {
         use shared::*;
         if let Some(cid) = self.id {
-            emitters().write().remove(&cid);
+            emitters().lock().remove(&cid);
             txs().write().remove(&cid);
             rxs().write().remove(&cid);
         }

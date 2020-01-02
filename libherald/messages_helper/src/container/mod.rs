@@ -164,7 +164,8 @@ impl Container {
         let update = cache::access(msg_id, |data| match data.content.as_ref()? {
             Item::Aux(update) => Some(update.clone()),
             _ => None,
-        })??;
+        })
+        .flatten()?;
 
         json::JsonValue::from(update).dump().into()
     }

@@ -205,6 +205,7 @@ impl SearchState {
         mut num_matches_changed: N,
         mut data_changed: D,
     ) -> Option<()> {
+        // early return for performance
         if self.active.not() || self.msg_matches(msg_id)?.not() {
             return Some(());
         }
@@ -224,7 +225,8 @@ impl SearchState {
         }
 
         if let Some(ix) = self.index {
-            if (0..=ix).contains(&pos) {
+            // check if it's before the current focus, and adjust the index if necessary
+            if pos <= ix {
                 let new_ix = ix.saturating_sub(1);
                 self.index.replace(new_ix);
 
@@ -232,10 +234,10 @@ impl SearchState {
 
                 let Match(msg) = self.matches.get(new_ix)?;
 
-                let container_ix = container.index_by_id(msg.msg_id)?;
-                container.list.get_mut(container_ix)?.match_status = MatchStatus::Focused;
+                let new_focus_ix = container.index_by_id(msg.msg_id)?;
+                container.list.get_mut(new_focus_ix)?.match_status = MatchStatus::Focused;
 
-                data_changed(container_ix);
+                data_changed(new_focus_ix);
             }
         }
 
@@ -265,8 +267,10 @@ impl SearchState {
             .unwrap_or(message.insertion_time)
             <= message.insertion_time
         {
+            // append to end if it's the most recent match
             self.matches.len()
         } else {
+            // otherwise insert in place
             match self.matches.binary_search(&Match(message)) {
                 Ok(_) => {
                     // early return if already matched
@@ -286,7 +290,7 @@ impl SearchState {
 
         if let Some(focus_ix) = focus_ix {
             // if the match was in the first part, adjust the focus
-            if (0..=focus_ix).contains(&match_pos) {
+            if match_pos <= focus_ix {
                 let new_focus_ix = (focus_ix + 1) % self.matches.len();
                 self.index.replace(new_focus_ix);
 
