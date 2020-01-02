@@ -17,17 +17,12 @@ pub use cache::{access, get, update};
 /// Container type for messages
 pub struct Container {
     pub list: Revec<MessageMeta>,
-    last: Option<MsgData>,
     op_body_elider: Elider,
 }
 
 impl Container {
-    pub fn new(
-        list: Vec<MessageMeta>,
-        last: Option<MsgData>,
-    ) -> Self {
+    pub fn new(list: Vec<MessageMeta>) -> Self {
         Self {
-            last,
             list: list.into(),
             op_body_elider: Elider {
                 line_count: 3,
@@ -57,10 +52,6 @@ impl Container {
         mid: &MsgId,
     ) -> Option<MsgData> {
         cache::get(mid)
-    }
-
-    pub fn last_msg(&self) -> Option<&MsgData> {
-        self.last.as_ref()
     }
 
     pub fn msg_data(
@@ -192,13 +183,6 @@ impl Container {
         let msg = self.list.remove(ix)?;
         let data = cache::remove(&msg.msg_id);
 
-        if ix == 0 {
-            self.last = self
-                .list
-                .front()
-                .and_then(|MessageMeta { ref msg_id, .. }| cache::get(msg_id));
-        }
-
         data
     }
 
@@ -225,13 +209,6 @@ impl Container {
 
         let ix = self.list.insert_ord(msg);
         cache::insert(mid, data);
-
-        if ix == 0 {
-            self.last = self
-                .list
-                .front()
-                .and_then(|MessageMeta { ref msg_id, .. }| cache::get(msg_id));
-        }
 
         ix
     }

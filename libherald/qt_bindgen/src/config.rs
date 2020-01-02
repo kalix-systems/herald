@@ -249,8 +249,8 @@ fn emoji_picker() -> Object {
 
 fn messages() -> Object {
     let props = props! {
-        lastAuthor: Prop::new().simple(QString).optional(),
-        lastBody: Prop::new().simple(QString).optional(),
+        lastAuthor: Prop::new().simple(QString).optional().get_by_value(),
+        lastBody: Prop::new().simple(QString).optional().get_by_value(),
         // Insertion time of last available message
         lastTime: Prop::new().simple(Qint64).optional(),
         lastStatus: Prop::new().simple(QUint32).optional(),
