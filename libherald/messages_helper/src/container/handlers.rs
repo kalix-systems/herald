@@ -42,10 +42,10 @@ impl Container {
         mut data_changed: F,
     ) -> Option<()> {
         update(&mid, move |data| {
-            if let Some(Item::Plain(PlainItem {
+            if let Item::Plain(PlainItem {
                 ref mut attachments,
                 ..
-            })) = data.content
+            }) = data.content
             {
                 *attachments = meta;
             }

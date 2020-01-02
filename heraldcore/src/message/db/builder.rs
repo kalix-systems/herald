@@ -58,8 +58,7 @@ impl OutboundMessageBuilder {
                 body: body.clone(),
                 op: op.into(),
                 attachments: vec![].into(),
-            })
-            .into(),
+            }),
             conversation: conversation_id,
             time,
             send_status,
@@ -105,9 +104,10 @@ impl OutboundMessageBuilder {
             return;
         }
 
-        e!(tx.execute(
-            include_str!("../../conversation/sql/update_last_active.sql"),
-            params![timestamp, conversation_id],
+        e!(crate::conversation::db::update_last_active(
+            &tx,
+            time.insertion,
+            &conversation_id
         ));
 
         if let Some(op) = op {
@@ -218,10 +218,11 @@ impl OutboundMessageBuilder {
             ],
         )?;
 
-        tx.execute(
-            include_str!("../../conversation/sql/update_last_active.sql"),
-            params![timestamp, conversation_id],
-        )?;
+        w!(crate::conversation::db::update_last_active(
+            &tx,
+            time.insertion,
+            &conversation_id
+        ));
 
         if let Some(op) = op {
             tx.execute_named(
@@ -245,8 +246,7 @@ impl OutboundMessageBuilder {
                 body,
                 attachments: attachment_meta,
                 op: op.into(),
-            })
-            .into(),
+            }),
             conversation: conversation_id,
             time,
             send_status,
@@ -328,9 +328,10 @@ impl InboundMessageBuilder {
             return Ok(None);
         }
 
-        w!(tx.execute(
-            include_str!("../../conversation/sql/update_last_active.sql"),
-            params![Time::now(), conversation_id],
+        w!(crate::conversation::db::update_last_active(
+            &tx,
+            time.insertion,
+            &conversation_id
         ));
 
         let op = if let Some(op) = op {
@@ -380,8 +381,7 @@ impl InboundMessageBuilder {
                 body,
                 attachments,
                 op,
-            })
-            .into(),
+            }),
             conversation: conversation_id,
             send_status: MessageSendStatus::Ack,
             time,

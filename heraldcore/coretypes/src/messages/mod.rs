@@ -30,7 +30,7 @@ pub struct Message {
     /// Recipient user id
     pub conversation: ConversationId,
     /// Content of message
-    pub content: Option<Item>,
+    pub content: Item,
     /// Message time information
     pub time: MessageTime,
     /// Send status
@@ -45,14 +45,11 @@ pub struct Message {
 
 impl Message {
     pub fn text(&self) -> Option<&str> {
-        self.content.as_ref()?.as_str()
+        self.content.as_str()
     }
 
     pub fn op(&self) -> &ReplyId {
-        self.content
-            .as_ref()
-            .map(Item::op)
-            .unwrap_or(&ReplyId::None)
+        self.content.op()
     }
 
     pub fn split(self) -> (MessageMeta, MsgData) {
@@ -258,7 +255,7 @@ impl Default for MessageReceiptStatus {
 #[derive(Clone, Debug)]
 pub struct MsgData {
     pub author: UserId,
-    pub content: Option<Item>,
+    pub content: Item,
     pub time: MessageTime,
     pub receipts: HashMap<UserId, MessageReceiptStatus>,
     pub send_status: MessageSendStatus,
@@ -272,18 +269,26 @@ impl MsgData {
         pattern: &search_pattern::SearchPattern,
     ) -> bool {
         match &self.content {
-            Some(Item::Plain(PlainItem {
+            Item::Plain(PlainItem {
                 body: Some(body), ..
-            })) => pattern.is_match(body.as_str()),
+            }) => pattern.is_match(body.as_str()),
             _ => false,
         }
+    }
+
+    pub fn has_attachments(&self) -> bool {
+        self.content
+            .attachments()
+            .map(AttachmentMeta::is_empty)
+            .map(std::ops::Not::not)
+            .unwrap_or(false)
     }
 
     pub fn save_all_attachments<P: AsRef<std::path::Path>>(
         &self,
         dest: P,
     ) -> Result<(), herald_attachments::Error> {
-        if let Some(Item::Plain(ref plain)) = self.content {
+        if let Item::Plain(ref plain) = self.content {
             let ext = format!(
                 "{author}_{time}",
                 author = self.author,
@@ -297,18 +302,15 @@ impl MsgData {
     }
 
     pub fn text(&self) -> Option<&str> {
-        self.content.as_ref()?.as_str()
+        self.content.as_str()
     }
 
     pub fn attachments(&self) -> Option<&AttachmentMeta> {
-        self.content.as_ref().and_then(Item::attachments)
+        self.content.attachments()
     }
 
     pub fn op(&self) -> &ReplyId {
-        self.content
-            .as_ref()
-            .map(Item::op)
-            .unwrap_or(&ReplyId::None)
+        self.content.op()
     }
 }
 

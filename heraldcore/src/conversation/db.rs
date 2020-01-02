@@ -281,6 +281,19 @@ pub(crate) fn set_expiration_period(
     Ok(())
 }
 
+pub(crate) fn update_last_active(
+    conn: &rusqlite::Connection,
+    time: Time,
+    cid: &ConversationId,
+) -> Result<(), rusqlite::Error> {
+    w!(conn.execute(
+        include_str!("sql/update_last_active.sql"),
+        params![time, Status::Active, cid],
+    ));
+
+    Ok(())
+}
+
 fn from_db(row: &rusqlite::Row) -> Result<ConversationMeta, rusqlite::Error> {
     Ok(ConversationMeta {
         conversation_id: row.get("conversation_id")?,

@@ -161,7 +161,7 @@ impl Container {
         &self,
         msg_id: &MsgId,
     ) -> Option<String> {
-        let update = cache::access(msg_id, |data| match data.content.as_ref()? {
+        let update = cache::access(msg_id, |data| match &data.content {
             Item::Aux(update) => Some(update.clone()),
             _ => None,
         })
@@ -174,7 +174,7 @@ impl Container {
         &self,
         msg_id: &MsgId,
     ) -> Option<u8> {
-        let update = cache::access(msg_id, |data| match data.content.as_ref()? {
+        let update = cache::access(msg_id, |data| match &data.content {
             Item::Aux(update) => Some(update.clone()),
 
             _ => None,
@@ -388,7 +388,7 @@ impl Container {
     ) -> Option<()> {
         for id in ids.into_iter() {
             let changed = update(&id, |data| match data.content {
-                Some(Item::Plain(PlainItem { ref mut op, .. })) => {
+                Item::Plain(PlainItem { ref mut op, .. }) => {
                     if *op != ReplyId::Dangling {
                         *op = ReplyId::Dangling;
                         true
@@ -414,13 +414,8 @@ impl Container {
         a_ix: usize,
         b_ix: usize,
     ) -> Option<bool> {
-        let flurry_info = |data: &MsgData| {
-            (
-                data.author,
-                data.time.insertion,
-                data.content.as_ref().map(Item::is_plain).unwrap_or(false),
-            )
-        };
+        let flurry_info =
+            |data: &MsgData| (data.author, data.time.insertion, data.content.is_plain());
 
         let (a_author, a_ts, a_is_plain) = self.access_by_index(a_ix, flurry_info)?;
         let (b_author, b_ts, b_is_plain) = self.access_by_index(b_ix, flurry_info)?;

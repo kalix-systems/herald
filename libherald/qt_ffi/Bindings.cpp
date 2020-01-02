@@ -216,6 +216,9 @@ inline void messagesLastAuxCodeChanged(Messages *o) {
 inline void messagesLastBodyChanged(Messages *o) {
   Q_EMIT o->lastBodyChanged();
 }
+inline void messagesLastHasAttachmentsChanged(Messages *o) {
+  Q_EMIT o->lastHasAttachmentsChanged();
+}
 inline void messagesLastStatusChanged(Messages *o) {
   Q_EMIT o->lastStatusChanged();
 }
@@ -2406,6 +2409,7 @@ void messages_last_author_get(const Messages::Private *, QString *,
                               qstring_set);
 option_quint8 messages_last_aux_code_get(const Messages::Private *);
 void messages_last_body_get(const Messages::Private *, QString *, qstring_set);
+option_bool messages_last_has_attachments_get(const Messages::Private *);
 option_quint32 messages_last_status_get(const Messages::Private *);
 option_qint64 messages_last_time_get(const Messages::Private *);
 bool messages_search_active_get(const Messages::Private *);
@@ -3181,6 +3185,7 @@ ConversationContent::ConversationContent(QObject *parent)
           messagesLastAuthorChanged,
           messagesLastAuxCodeChanged,
           messagesLastBodyChanged,
+          messagesLastHasAttachmentsChanged,
           messagesLastStatusChanged,
           messagesLastTimeChanged,
           messagesSearchActiveChanged,
@@ -4423,6 +4428,7 @@ Messages::Messages(QObject *parent)
           messagesLastAuthorChanged,
           messagesLastAuxCodeChanged,
           messagesLastBodyChanged,
+          messagesLastHasAttachmentsChanged,
           messagesLastStatusChanged,
           messagesLastTimeChanged,
           messagesSearchActiveChanged,
@@ -4518,6 +4524,15 @@ QString Messages::lastBody() const {
   QString v;
   messages_last_body_get(m_d, &v, set_qstring);
   return v;
+}
+
+QVariant Messages::lastHasAttachments() const {
+  QVariant v;
+  auto r = messages_last_has_attachments_get(m_d);
+  if (r.some) {
+    v.setValue(r.value);
+  }
+  return r;
 }
 
 QVariant Messages::lastStatus() const {

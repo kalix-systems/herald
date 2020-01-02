@@ -51,9 +51,10 @@ pub(crate) fn inbound_aux<T: Into<AuxItem>>(
         return Ok(None);
     }
 
-    w!(tx.execute(
-        include_str!("../../conversation/sql/update_last_active.sql"),
-        params![Time::now(), cid],
+    w!(crate::conversation::db::update_last_active(
+        &tx,
+        time.insertion,
+        &cid
     ));
 
     w!(tx.commit());
@@ -70,7 +71,7 @@ pub(crate) fn inbound_aux<T: Into<AuxItem>>(
         receipts,
         reactions,
         replies,
-        content: Some(aux_item.into()),
+        content: aux_item.into(),
         time,
     }))
 }
@@ -108,7 +109,7 @@ pub(crate) fn outbound_aux<T: Into<AuxItem>>(
         receipts: Default::default(),
         reactions: Default::default(),
         replies: Default::default(),
-        content: Some(aux_item.clone().into()),
+        content: aux_item.clone().into(),
         time,
     };
 
@@ -130,9 +131,10 @@ pub(crate) fn outbound_aux<T: Into<AuxItem>>(
         },
     ));
 
-    w!(tx.execute(
-        include_str!("../../conversation/sql/update_last_active.sql"),
-        params![Time::now(), cid],
+    w!(crate::conversation::db::update_last_active(
+        &tx,
+        time.insertion,
+        cid
     ));
 
     w!(tx.commit());

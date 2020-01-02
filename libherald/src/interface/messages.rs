@@ -8,6 +8,7 @@ pub struct MessagesEmitter {
     pub(super) last_author_changed: fn(*mut MessagesQObject),
     pub(super) last_aux_code_changed: fn(*mut MessagesQObject),
     pub(super) last_body_changed: fn(*mut MessagesQObject),
+    pub(super) last_has_attachments_changed: fn(*mut MessagesQObject),
     pub(super) last_status_changed: fn(*mut MessagesQObject),
     pub(super) last_time_changed: fn(*mut MessagesQObject),
     pub(super) search_active_changed: fn(*mut MessagesQObject),
@@ -32,6 +33,7 @@ impl MessagesEmitter {
             last_author_changed: self.last_author_changed,
             last_aux_code_changed: self.last_aux_code_changed,
             last_body_changed: self.last_body_changed,
+            last_has_attachments_changed: self.last_has_attachments_changed,
             last_status_changed: self.last_status_changed,
             last_time_changed: self.last_time_changed,
             search_active_changed: self.search_active_changed,
@@ -78,6 +80,14 @@ impl MessagesEmitter {
 
         if !ptr.is_null() {
             (self.last_body_changed)(ptr);
+        }
+    }
+
+    pub fn last_has_attachments_changed(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+
+        if !ptr.is_null() {
+            (self.last_has_attachments_changed)(ptr);
         }
     }
 
@@ -266,6 +276,8 @@ pub trait MessagesTrait {
     fn last_aux_code(&self) -> Option<u8>;
 
     fn last_body(&self) -> Option<&str>;
+
+    fn last_has_attachments(&self) -> Option<bool>;
 
     fn last_status(&self) -> Option<u32>;
 
@@ -610,6 +622,7 @@ pub unsafe fn messages_new_inner(ptr_bundle: *mut MessagesPtrBundle) -> Messages
         messages_last_author_changed,
         messages_last_aux_code_changed,
         messages_last_body_changed,
+        messages_last_has_attachments_changed,
         messages_last_status_changed,
         messages_last_time_changed,
         messages_search_active_changed,
@@ -709,6 +722,7 @@ pub unsafe fn messages_new_inner(ptr_bundle: *mut MessagesPtrBundle) -> Messages
         last_author_changed: messages_last_author_changed,
         last_aux_code_changed: messages_last_aux_code_changed,
         last_body_changed: messages_last_body_changed,
+        last_has_attachments_changed: messages_last_has_attachments_changed,
         last_status_changed: messages_last_status_changed,
         last_time_changed: messages_last_time_changed,
         search_active_changed: messages_search_active_changed,
@@ -921,6 +935,20 @@ pub unsafe extern "C" fn messages_last_body_get(
     if let Some(value) = value {
         let str_: *const c_char = value.as_ptr() as (*const c_char);
         set(prop, str_, to_c_int(value.len()));
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn messages_last_has_attachments_get(ptr: *const Messages) -> COption<bool> {
+    match (&*ptr).last_has_attachments() {
+        Some(value) => COption {
+            data: value,
+            some: true,
+        },
+        None => COption {
+            data: bool::default(),
+            some: false,
+        },
     }
 }
 
@@ -1485,6 +1513,7 @@ pub struct MessagesPtrBundle {
     messages_last_author_changed: fn(*mut MessagesQObject),
     messages_last_aux_code_changed: fn(*mut MessagesQObject),
     messages_last_body_changed: fn(*mut MessagesQObject),
+    messages_last_has_attachments_changed: fn(*mut MessagesQObject),
     messages_last_status_changed: fn(*mut MessagesQObject),
     messages_last_time_changed: fn(*mut MessagesQObject),
     messages_search_active_changed: fn(*mut MessagesQObject),
