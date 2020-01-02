@@ -1,6 +1,8 @@
 use super::*;
+use crate::conversation::settings::SettingsUpdate;
 use coremacros::from_fn;
 use herald_common::Time;
+use json::JsonValue;
 use std::convert::TryFrom;
 
 impl From<Option<MsgId>> for ReplyId {
@@ -249,3 +251,45 @@ from_fn!(
 
 from_fn!(Item, AuxItem, Item::Aux);
 from_fn!(Item, PlainItem, Item::Plain);
+
+impl From<AuxItem> for JsonValue {
+    fn from(item: AuxItem) -> Self {
+        use SettingsUpdate::*;
+        let code = item.code();
+
+        match item {
+            AuxItem::GroupSettings(settings) => match settings {
+                Expiration(period) => {
+                    json::object! {
+                        "code" => code,
+                        "content" => period as u8,
+                    }
+                }
+                Title(title) => {
+                    json::object! {
+                        "code" => code,
+                        "content" => title,
+                    }
+                }
+                Color(color) => {
+                    json::object! {
+                        "code" => code,
+                        "content" => color,
+                    }
+                }
+                Picture(path) => {
+                    json::object! {
+                        "code" => code,
+                        "content" => path,
+                    }
+                }
+            },
+            AuxItem::NewMembers(members) => {
+                json::object! {
+                    "code" => code,
+                    "content" => members.0.into_iter().map(|u| u.to_string()).collect::<Vec<_>>(),
+                }
+            }
+        }
+    }
+}

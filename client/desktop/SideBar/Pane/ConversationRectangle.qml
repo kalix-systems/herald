@@ -13,8 +13,15 @@ Common.PlatonicRectangle {
     isGroupPicture: !conversationData.pairwise
     labelComponent: Av.ConversationLabel {
         contactName: title
-        lastBody: !convContent.messages.isEmpty ? lastAuthor + ": "
-                                                  + convContent.messages.lastBody : ""
+        lastBody: {
+            if (convContent.messages.isEmpty)
+                return ""
+            if (convContent.messages.lastAuxCode === undefined)
+                return lastAuthor + ": " + convContent.messages.lastBody
+            return lastAuthor + Utils.auxStringShort(
+                        convContent.messages.lastAuxCode)
+        }
+
         lastAuthor: outbound ? qsTr("You") : convContent.messages.lastAuthor
         lastTimestamp: !convContent.messages.isEmpty ? Utils.friendlyTimestamp(
                                                            convContent.messages.lastTime) : ""
@@ -22,5 +29,6 @@ Common.PlatonicRectangle {
         secondaryLabelColor: convoRectangle.state
                              !== "" ? CmnCfg.palette.offBlack : CmnCfg.palette.medGrey
         labelFontSize: CmnCfg.entityLabelSize
+        bodyItalic: (convContent.messages.lastAuxCode !== undefined) ? true : false
     }
 }

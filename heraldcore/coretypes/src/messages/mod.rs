@@ -194,6 +194,22 @@ pub enum AuxItem {
     NewMembers(NewMembers),
 }
 
+impl AuxItem {
+    pub fn code(&self) -> u8 {
+        use crate::conversation::settings::SettingsUpdate::*;
+
+        match self {
+            AuxItem::GroupSettings(settings) => match settings {
+                Expiration(_) => 0,
+                Title(_) => 1,
+                Color(_) => 2,
+                Picture(_) => 3,
+            },
+            AuxItem::NewMembers(_) => 4,
+        }
+    }
+}
+
 #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
 /// Members that have just been added to a conversation.
 pub struct NewMembers(pub Vec<UserId>);

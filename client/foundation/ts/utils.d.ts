@@ -9,4 +9,5 @@ export declare function initialize(name: string): string;
 export declare function receiptCodeSwitch(receiptCode: MessageReceiptStatus): string;
 export declare function timerIcon(expireTime: number, insertTime: number): string;
 export declare function userTime(timestamp: number): string;
+export declare function auxStringShort(code: number): string;
 export declare function auxString(code: number, content: string): string;

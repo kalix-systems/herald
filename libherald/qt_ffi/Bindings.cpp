@@ -210,6 +210,9 @@ inline void messagesIsEmptyChanged(Messages *o) { Q_EMIT o->isEmptyChanged(); }
 inline void messagesLastAuthorChanged(Messages *o) {
   Q_EMIT o->lastAuthorChanged();
 }
+inline void messagesLastAuxCodeChanged(Messages *o) {
+  Q_EMIT o->lastAuxCodeChanged();
+}
 inline void messagesLastBodyChanged(Messages *o) {
   Q_EMIT o->lastBodyChanged();
 }
@@ -2401,6 +2404,7 @@ MessageBuilder::Private *messages_builder_get(const Messages::Private *);
 bool messages_is_empty_get(const Messages::Private *);
 void messages_last_author_get(const Messages::Private *, QString *,
                               qstring_set);
+option_quint8 messages_last_aux_code_get(const Messages::Private *);
 void messages_last_body_get(const Messages::Private *, QString *, qstring_set);
 option_quint32 messages_last_status_get(const Messages::Private *);
 option_qint64 messages_last_time_get(const Messages::Private *);
@@ -3175,6 +3179,7 @@ ConversationContent::ConversationContent(QObject *parent)
           [](MessageBuilder *o) { o->endRemoveRows(); },
           messagesIsEmptyChanged,
           messagesLastAuthorChanged,
+          messagesLastAuxCodeChanged,
           messagesLastBodyChanged,
           messagesLastStatusChanged,
           messagesLastTimeChanged,
@@ -4416,6 +4421,7 @@ Messages::Messages(QObject *parent)
           [](MessageBuilder *o) { o->endRemoveRows(); },
           messagesIsEmptyChanged,
           messagesLastAuthorChanged,
+          messagesLastAuxCodeChanged,
           messagesLastBodyChanged,
           messagesLastStatusChanged,
           messagesLastTimeChanged,
@@ -4497,6 +4503,15 @@ QString Messages::lastAuthor() const {
   QString v;
   messages_last_author_get(m_d, &v, set_qstring);
   return v;
+}
+
+QVariant Messages::lastAuxCode() const {
+  QVariant v;
+  auto r = messages_last_aux_code_get(m_d);
+  if (r.some) {
+    v.setValue(r.value);
+  }
+  return r;
 }
 
 QString Messages::lastBody() const {

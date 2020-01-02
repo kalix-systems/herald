@@ -170,6 +170,20 @@ impl Container {
         json::JsonValue::from(update).dump().into()
     }
 
+    pub fn aux_data_code_by_id(
+        &self,
+        msg_id: &MsgId,
+    ) -> Option<u8> {
+        let update = cache::access(msg_id, |data| match data.content.as_ref()? {
+            Item::Aux(update) => Some(update.clone()),
+
+            _ => None,
+        })
+        .flatten()?;
+
+        update.code().into()
+    }
+
     /// Removes the item from the container. *Does not modify disk storage*.
     pub fn remove(
         &mut self,
