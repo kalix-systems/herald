@@ -176,7 +176,7 @@ fn reply() {
 
     let reply = db::get_message(&conn, &mid2).expect(womp!());
 
-    assert_eq!(ReplyId::Known(mid1), *reply.content.unwrap().op());
+    assert_eq!(ReplyId::Known(mid1), *reply.content.op());
 }
 
 #[test]
@@ -276,7 +276,7 @@ fn reply_to_unknown_message() {
 
     let msg = db::get_message(&conn, &msg_id).expect(womp!());
 
-    assert!(msg.content.unwrap().op().is_dangling());
+    assert!(msg.content.op().is_dangling());
 }
 
 #[test]

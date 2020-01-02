@@ -104,9 +104,10 @@ impl OutboundMessageBuilder {
             return;
         }
 
-        e!(tx.execute(
-            include_str!("../../conversation/sql/update_last_active.sql"),
-            params![timestamp, conversation_id],
+        e!(crate::conversation::db::update_last_active(
+            &tx,
+            time.insertion,
+            &conversation_id
         ));
 
         if let Some(op) = op {
@@ -217,10 +218,11 @@ impl OutboundMessageBuilder {
             ],
         )?;
 
-        tx.execute(
-            include_str!("../../conversation/sql/update_last_active.sql"),
-            params![timestamp, conversation_id],
-        )?;
+        w!(crate::conversation::db::update_last_active(
+            &tx,
+            time.insertion,
+            &conversation_id
+        ));
 
         if let Some(op) = op {
             tx.execute_named(
@@ -326,9 +328,10 @@ impl InboundMessageBuilder {
             return Ok(None);
         }
 
-        w!(tx.execute(
-            include_str!("../../conversation/sql/update_last_active.sql"),
-            params![Time::now(), conversation_id],
+        w!(crate::conversation::db::update_last_active(
+            &tx,
+            time.insertion,
+            &conversation_id
         ));
 
         let op = if let Some(op) = op {
