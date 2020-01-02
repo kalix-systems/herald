@@ -83,18 +83,20 @@ fn reaction() {
 
     builder.store_db(&mut conn).expect(womp!()).expect(womp!());
 
-    assert!(db::reactions(&conn, &msg_id).expect(womp!()).is_none());
+    assert!(db::reactions::reactions(&conn, &msg_id)
+        .expect(womp!())
+        .is_none());
 
-    db::add_reaction(&conn, &msg_id, &receiver.id, "++").expect(womp!());
+    db::reactions::add_reaction(&conn, &msg_id, &receiver.id, "++").expect(womp!());
 
-    let reactions = db::reactions(&conn, &msg_id)
+    let reactions = db::reactions::reactions(&conn, &msg_id)
         .expect(womp!())
         .expect(womp!());
     assert_eq!(reactions.content.len(), 1);
 
-    db::remove_reaction(&conn, &msg_id, &receiver.id, "++").expect(womp!());
+    db::reactions::remove_reaction(&conn, &msg_id, &receiver.id, "++").expect(womp!());
 
-    let reactions = db::reactions(&conn, &msg_id).expect(womp!());
+    let reactions = db::reactions::reactions(&conn, &msg_id).expect(womp!());
     assert!(reactions.is_none());
 }
 
@@ -164,7 +166,7 @@ fn reply() {
 
     builder.store_db(&mut conn).expect(womp!());
 
-    let op_replies = db::replies(&conn, &mid1).expect(womp!());
+    let op_replies = db::replies::replies(&conn, &mid1).expect(womp!());
     let op = db::get_message(&conn, &mid1).expect(womp!());
     assert_eq!(op.replies.len(), 1);
     assert_eq!(op_replies.len(), 1);
@@ -174,7 +176,7 @@ fn reply() {
 
     let reply = db::get_message(&conn, &mid2).expect(womp!());
 
-    assert_eq!(ReplyId::Known(mid1), reply.op);
+    assert_eq!(ReplyId::Known(mid1), *reply.content.unwrap().op());
 }
 
 #[test]
@@ -230,7 +232,7 @@ fn message_receipt_status_updates() {
 
     builder.store_db(&mut conn).expect(womp!());
 
-    db::add_receipt(
+    db::receipts::add_receipt(
         &mut conn,
         msg_id,
         receiver.id,
@@ -238,14 +240,15 @@ fn message_receipt_status_updates() {
     )
     .expect(womp!());
 
-    let receipts = db::get_receipts(&conn, &msg_id).expect(womp!());
+    let receipts = db::receipts::get_receipts(&conn, &msg_id).expect(womp!());
 
     let receipt = receipts.get(&receiver.id).expect(womp!());
     assert_eq!(*receipt, MessageReceiptStatus::Received);
 
-    db::add_receipt(&mut conn, msg_id, receiver.id, MessageReceiptStatus::Read).expect(womp!());
+    db::receipts::add_receipt(&mut conn, msg_id, receiver.id, MessageReceiptStatus::Read)
+        .expect(womp!());
 
-    let receipts = db::get_receipts(&conn, &msg_id).expect(womp!());
+    let receipts = db::receipts::get_receipts(&conn, &msg_id).expect(womp!());
     let receipt = receipts.get(&receiver.id).expect(womp!());
     assert_eq!(*receipt, MessageReceiptStatus::Read);
 }
@@ -273,7 +276,7 @@ fn reply_to_unknown_message() {
 
     let msg = db::get_message(&conn, &msg_id).expect(womp!());
 
-    assert!(msg.op.is_dangling());
+    assert!(msg.content.unwrap().op().is_dangling());
 }
 
 #[test]
@@ -311,13 +314,13 @@ fn delete_op() {
 
     let msg = db::get_message(&conn, &mid1).expect(womp!());
 
-    assert!(msg.op.is_known());
+    assert!(msg.op().is_known());
 
     db::delete_message(&conn, &mid0).expect(womp!());
 
     let msg = db::get_message(&conn, &mid1).expect(womp!());
 
-    assert!(msg.op.is_dangling());
+    assert!(msg.op().is_dangling());
 }
 
 #[test]
@@ -338,17 +341,31 @@ fn add_delete_reaction() {
 
     builder.store_db(&mut conn).expect(womp!());
 
-    db::add_reaction(&conn, &mid, &author.id, ":)").expect(womp!("failed to add react"));
+    db::reactions::add_reaction(&conn, &mid, &author.id, ":)").expect(womp!("failed to add react"));
 
     //make sure adding the same react from the same userdoes not get registered
-    db::add_reaction(&conn, &mid, &author.id, ":)".try_into().expect(womp!()))
+    db::reactions::add_reaction(&conn, &mid, &author.id, ":)".try_into().expect(womp!()))
         .expect(womp!("failed to add react"));
-    let reacts = db::reactions(&conn, &mid).unwrap().expect(womp!());
+    let reacts = db::reactions::reactions(&conn, &mid)
+        .unwrap()
+        .expect(womp!());
     assert_eq!(reacts.content[0].content, ":)");
     assert_eq!(reacts.content.len(), 1);
     assert_eq!(reacts.content[0].reactionaries[0], author.id);
-    db::remove_reaction(&conn, &mid, &author.id, ":)").expect(womp!("failed to delete react"));
+    db::reactions::remove_reaction(&conn, &mid, &author.id, ":)")
+        .expect(womp!("failed to delete react"));
 
-    let reacts = db::reactions(&conn, &mid).expect(womp!());
+    let reacts = db::reactions::reactions(&conn, &mid).expect(womp!());
     assert!(reacts.is_none());
+}
+
+#[test]
+fn outbound_aux() {
+    let mut conn = Database::in_memory_with_config().expect(womp!());
+    let receiver = crate::user::db::test_user(&mut conn, "receiver");
+
+    let conv = receiver.pairwise_conversation;
+
+    let update = coretypes::conversation::settings::SettingsUpdate::Color(1);
+    db::outbound_group_settings(&mut conn, update, &conv).expect(womp!());
 }

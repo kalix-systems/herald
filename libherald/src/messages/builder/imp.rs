@@ -78,10 +78,13 @@ pub(super) struct Reply {
 
 impl Reply {
     pub(super) fn from_msg_data(data: &MsgData) -> Reply {
-        let doc_attachments_json =
-            messages_helper::doc_attachments_json(&data.attachments, Some(1));
-        let media_attachments_json =
-            messages_helper::media_attachments_json(&data.attachments, Some(5));
+        let (doc_attachments_json, media_attachments_json) = match data.attachments() {
+            Some(a) => (
+                messages_helper::doc_attachments_json(a, Some(1)),
+                messages_helper::media_attachments_json(a, Some(5)),
+            ),
+            None => (None, None),
+        };
 
         Reply {
             time: data.time.insertion,

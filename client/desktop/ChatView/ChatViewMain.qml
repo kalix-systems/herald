@@ -60,7 +60,6 @@ Page {
             onMessagePositionRequested: {
                 const msg_idx = chatPage.ownedConversation.indexById(
                                   requestedMsgId)
-
                 // early return on out of bounds
                 if ((msg_idx < 0) || (msg_idx >= convWindow.count))
                     return
@@ -112,7 +111,8 @@ Page {
             leftMargin: 0
             rightMargin: 0
         }
-
+        //to handle jumping behavior in bubbles caused when the page is small
+        onHeightChanged: convWindow.height = convWindow.contentHeight
         keysProxy: Item {
             Keys.onReturnPressed: TextJs.enterKeyHandler(
                                       event, chatTextArea.chatText,

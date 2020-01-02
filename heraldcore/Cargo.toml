@@ -26,6 +26,15 @@ path = "../channel_ratchet"
 [dependencies.coretypes]
 path = "./coretypes"
 
+[dependencies.herald_ids]
+path = "./herald_ids"
+
+[dependencies.herald_attachments]
+path = "./herald_attachments"
+
+[dependencies.herald_user]
+path = "./herald_user"
+
 [dependencies.coremacros]
 path = "./coremacros"
 
@@ -36,7 +45,7 @@ path = "./network_types"
 path = "../location"
 
 [dependencies.search_pattern]
-path = "./search_pattern"
+path = "../search_pattern"
 
 [dependencies.platform_dirs]
 path = "./platform_dirs"

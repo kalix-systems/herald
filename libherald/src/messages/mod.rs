@@ -7,7 +7,6 @@ use crate::{
 use herald_common::UserId;
 use heraldcore::{
     conversation,
-    errors::HErr,
     message::{Elider, MessageReceiptStatus},
     types::*,
 };
@@ -123,7 +122,7 @@ pub(crate) enum MsgUpdate {
     /// A rendered message from the `MessageBuilder`
     BuilderMsg(Box<heraldcore::message::Message>),
     /// An outbound message has been saved
-    StoreDone(MsgId, heraldcore::message::attachments::AttachmentMeta),
+    StoreDone(MsgId, herald_attachments::AttachmentMeta),
     /// There are expired messages that need to be pruned
     ExpiredMessages(Vec<MsgId>),
     /// The container contents, sent when the conversation id is first set.

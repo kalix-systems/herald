@@ -1,5 +1,5 @@
+use crate::updates::Notification;
 use crate::{
-    conversation::settings,
     errors::HErr::{self, *},
     message::MessageReceiptStatus,
     pending,
@@ -8,7 +8,6 @@ use crate::{
 };
 use chainkeys;
 use channel_ratchet::RatchetState;
-use coretypes::conversation::ConversationMeta;
 use herald_common::*;
 use std::{
     net::SocketAddr,
@@ -34,38 +33,6 @@ mod event;
 use event::*;
 
 mod helper;
-
-#[derive(Clone, Debug)]
-/// `Notification`s contain info about what updates were made to the database.
-pub enum Notification {
-    /// A new message has been received.
-    NewMsg(Box<message::Message>),
-    /// A message has been received.
-    MsgReceipt(message::MessageReceipt),
-    /// A message reaction has been received
-    Reaction {
-        /// Conversation id
-        cid: ConversationId,
-        /// Message being reacted to
-        msg_id: MsgId,
-        /// The user that reacted
-        reactionary: UserId,
-        /// The content of the react
-        content: message::ReactContent,
-        /// Is this reaction update an addition or a removal?
-        remove: bool,
-    },
-    /// A new user has been added
-    NewUser(Box<(coretypes::user::User, ConversationMeta)>),
-    /// A new conversation has been added
-    NewConversation(ConversationMeta),
-    /// Response to user request.
-    AddUserResponse(ConversationId, UserId, bool),
-    /// Response to request to join conversation.
-    AddConversationResponse(ConversationId, UserId, bool),
-    /// The conversation settings have been updated
-    Settings(ConversationId, settings::SettingsUpdate),
-}
 
 /// Deprecates key on server.
 pub fn dep_key(to_dep: sig::PublicKey) -> Result<PKIResponse, HErr> {
@@ -113,10 +80,10 @@ pub fn send_read_receipt(
 ) -> Result<(), HErr> {
     send_cmessage(
         cid,
-        &ConversationMessage::Receipt(cmessages::Receipt {
+        &ConversationMessage::Message(NetContent::Receipt(cmessages::Receipt {
             of: msg_id,
             stat: MessageReceiptStatus::Read,
-        }),
+        })),
     )
 }
 
@@ -137,7 +104,39 @@ pub(crate) fn send_normal_message(
     cid: ConversationId,
     msg: cmessages::Msg,
 ) -> Result<(), HErr> {
-    send_cmessage(cid, &ConversationMessage::Msg(msg))
+    send_cmessage(cid, &ConversationMessage::Message(NetContent::Msg(msg)))
+}
+
+pub(crate) fn send_group_settings_message(
+    mid: MsgId,
+    cid: ConversationId,
+    expiration: Option<Time>,
+    update: cmessages::GroupSettingsUpdate,
+) -> Result<(), HErr> {
+    send_normal_message(
+        cid,
+        cmessages::Msg {
+            mid,
+            expiration,
+            content: cmessages::MsgContent::GroupSettings(update),
+        },
+    )?;
+
+    crate::push(crate::message::OutboundAux::SendDone(cid, mid));
+    Ok(())
+}
+
+pub(crate) fn send_profile_update(update: cmessages::ProfileChanged) -> Result<(), HErr> {
+    let conn = crate::db::Database::get()?;
+    let cids = crate::conversation::db::get_all_pairwise_conversations(&conn)?;
+
+    let msg = ConversationMessage::Message(NetContent::ProfileChanged(update));
+
+    for cid in cids {
+        send_cmessage(cid, &msg)?;
+    }
+
+    Ok(())
 }
 
 /// Sends a reaction
@@ -148,10 +147,11 @@ pub fn send_reaction(
 ) -> Result<(), HErr> {
     send_cmessage(
         cid,
-        &ConversationMessage::Reaction(cmessages::Reaction::Add {
+        &ConversationMessage::Message(NetContent::Reaction(cmessages::Reaction {
             msg_id,
             react_content,
-        }),
+            remove: false,
+        })),
     )
 }
 
@@ -163,17 +163,12 @@ pub fn send_reaction_removal(
 ) -> Result<(), HErr> {
     send_cmessage(
         cid,
-        &ConversationMessage::Reaction(cmessages::Reaction::Remove {
+        &ConversationMessage::Message(NetContent::Reaction(cmessages::Reaction {
             msg_id,
             react_content,
-        }),
+            remove: true,
+        })),
     )
-}
-pub(crate) fn send_conversation_settings_update(
-    cid: ConversationId,
-    update: settings::SettingsUpdate,
-) -> Result<(), HErr> {
-    send_cmessage(cid, &ConversationMessage::Settings(update))
 }
 
 pub(crate) fn server_url(ext: &str) -> String {

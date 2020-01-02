@@ -51,6 +51,11 @@ pub trait UtilsTrait {
         fpath: String,
         target_path: String,
     ) -> bool;
+
+    fn strip_url_prefix(
+        &self,
+        path: String,
+    ) -> String;
 }
 
 #[no_mangle]
@@ -130,6 +135,22 @@ pub unsafe extern "C" fn utils_save_file(
     let mut target_path = String::new();
     set_string_from_utf16(&mut target_path, target_path_str, target_path_len);
     obj.save_file(fpath, target_path)
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn utils_strip_url_prefix(
+    ptr: *const Utils,
+    path_str: *const c_ushort,
+    path_len: c_int,
+    data: *mut QString,
+    set: fn(*mut QString, str_: *const c_char, len: c_int),
+) {
+    let obj = &*ptr;
+    let mut path = String::new();
+    set_string_from_utf16(&mut path, path_str, path_len);
+    let ret = obj.strip_url_prefix(path);
+    let str_: *const c_char = ret.as_ptr() as (*const c_char);
+    set(data, str_, ret.len() as i32);
 }
 
 #[derive(Clone, Copy)]

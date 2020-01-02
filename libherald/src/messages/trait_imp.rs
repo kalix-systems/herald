@@ -89,6 +89,13 @@ impl Interface for Messages {
         self.receipt_status_(index)
     }
 
+    fn aux_data(
+        &self,
+        index: usize,
+    ) -> String {
+        self.aux_data_(index)
+    }
+
     fn is_head(
         &self,
         index: usize,
@@ -177,6 +184,13 @@ impl Interface for Messages {
         index: usize,
     ) -> String {
         self.op_body_(index).unwrap_or_default()
+    }
+
+    fn op_aux_data(
+        &self,
+        index: usize,
+    ) -> String {
+        self.op_aux_data_(index).unwrap_or_default()
     }
 
     fn insertion_time(
@@ -353,11 +367,11 @@ impl Interface for Messages {
         self.user_receipts_(index).unwrap_or_default()
     }
 
-    fn mark_read(
+    fn mark_read_by_id(
         &mut self,
-        index: u64,
+        id: ffi::MsgIdRef,
     ) {
-        self.mark_read_(index)
+        self.mark_read_(id)
     }
 
     fn add_reaction(

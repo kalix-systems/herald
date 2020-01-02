@@ -9,6 +9,7 @@ Flickable {
 
     property alias messageSearchLoader: messageSearchLoader
     property alias sideBarBodyLoader: sideBarBodyLoader
+    property alias sideBarFlowLoader: sideBarFlowLoader
 
     anchors.fill: parent
     interactive: true
@@ -39,13 +40,22 @@ Flickable {
 
         Loader {
             id: sideBarBodyLoader
+            property bool archiveState: false
             sourceComponent: Component {
                 ConversationViewMain {
                     id: convosLvComponent
                     model: Herald.conversations
+                    state: sideBarBodyLoader.archiveState ? "archivestate" : ""
                 }
             }
             width: parent.width
+
+            Loader {
+                id: sideBarFlowLoader
+                anchors.fill: active ? parent : undefined
+                active: false
+                z: active ? parent.z + 1 : -1
+            }
         }
 
         Text {

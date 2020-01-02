@@ -1,4 +1,5 @@
 use crate::{db::Database, errors::HErr, types::*};
+use coremacros::from_fn;
 use herald_common::*;
 use rusqlite::params;
 use std::{collections::HashMap, path::PathBuf};
@@ -9,12 +10,26 @@ pub mod attachments;
 pub(crate) mod db;
 /// Runs message garbage collection tasks such as removing expired messages
 pub mod gc;
-use attachments::*;
 pub use coretypes::messages::*;
 mod builder;
 pub use builder::*;
 mod search;
 pub use search::{ResultBody, Search, SearchResult};
+
+/// Outbound settings send updates
+#[derive(Clone, Debug)]
+pub enum OutboundAux {
+    /// Render message
+    Msg(Box<Message>),
+    /// Finished send
+    SendDone(ConversationId, MsgId),
+}
+
+from_fn!(
+    crate::updates::Notification,
+    OutboundAux,
+    crate::updates::Notification::OutboundAux
+);
 
 /// Get message by message id
 pub fn get_message(msg_id: &MsgId) -> Result<Message, HErr> {
@@ -53,7 +68,7 @@ pub fn update_send_status(
 /// Get message read receipts by message id
 pub fn get_message_receipts(msg_id: &MsgId) -> Result<HashMap<UserId, MessageReceiptStatus>, HErr> {
     let db = Database::get()?;
-    Ok(db::get_receipts(&db, msg_id)?)
+    Ok(db::receipts::get_receipts(&db, msg_id)?)
 }
 
 /// Adds a message receipt
@@ -63,7 +78,7 @@ pub fn add_receipt(
     receipt_status: MessageReceiptStatus,
 ) -> Result<(), HErr> {
     let db = Database::get()?;
-    db::add_receipt(&db, msg_id, recip, receipt_status)
+    db::receipts::add_receipt(&db, msg_id, recip, receipt_status)
 }
 
 /// Adds a reaction to a message
@@ -73,7 +88,7 @@ pub fn add_reaction(
     react_content: &str,
 ) -> Result<(), HErr> {
     let db = Database::get()?;
-    db::add_reaction(&db, msg_id, reactionary, react_content).map_err(HErr::from)
+    db::reactions::add_reaction(&db, msg_id, reactionary, react_content).map_err(HErr::from)
 }
 
 /// Removes a reaction from a message
@@ -83,7 +98,7 @@ pub fn remove_reaction(
     react_content: &str,
 ) -> Result<(), HErr> {
     let db = Database::get()?;
-    db::remove_reaction(&db, msg_id, reactionary, react_content).map_err(HErr::from)
+    db::reactions::remove_reaction(&db, msg_id, reactionary, react_content).map_err(HErr::from)
 }
 
 /// Gets messages by `MessageSendStatus`

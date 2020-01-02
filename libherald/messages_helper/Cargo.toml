@@ -11,6 +11,10 @@ lru          = "0.4.1"
 once_cell    = "1.2.0"
 parking_lot  = "0.10.0"
 
+[dev-dependencies]
+serial_test_derive = "0.2.0"
+serial_test = "0.2.0"
+
 [dependencies.herald_common]
 path    = "../../herald_common"
 
@@ -20,14 +24,17 @@ path    = "../../heraldcore"
 [dependencies.coretypes]
 path    = "../../heraldcore/coretypes"
 
+[dependencies.herald_attachments]
+path    = "../../heraldcore/herald_attachments"
+
 [dependencies.search_pattern]
-path    = "../../heraldcore/search_pattern"
+path    = "../../search_pattern"
 
 [dependencies.message_cache]
-path = "../message_cache"
+path = "message_cache"
 
 [dependencies.revec]
-path = "../revec"
+path = "revec"
 
 [dev-dependencies.coremacros]
 path = "../../heraldcore/coremacros"

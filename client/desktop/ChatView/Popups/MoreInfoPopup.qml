@@ -10,6 +10,7 @@ import "../../common" as Common
 import "qrc:/imports/Entity" as Av
 import "qrc:/imports/js/utils.mjs" as Utils
 import "qrc:/imports/ChatBubble" as CB
+import "qrc:/imports" as Imports
 
 Popup {
     id: moreInfoPopup
@@ -23,7 +24,7 @@ Popup {
     width: chatView.width
     anchors.centerIn: parent
     onClosed: messageInfoLoader.active = false
-
+    padding: 0
     background: Rectangle {
         id: background
         color: CmnCfg.palette.white
@@ -33,10 +34,48 @@ Popup {
         receiptData = JSON.parse(moreInfoPopup.messageData.userReceipts)
     }
 
+    Imports.IconButton {
+        anchors.right: parent.right
+        anchors.rightMargin: CmnCfg.defaultMargin
+        anchors.verticalCenter: header.verticalCenter
+        icon.source: "qrc:/x-icon.svg"
+        fill: CmnCfg.palette.white
+        onClicked: {
+            moreInfoPopup.close()
+            messageInfoLoader.active = false
+        }
+        z: header.z + 1
+    }
+
+    Rectangle {
+        id: header
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.leftMargin: 1
+        anchors.right: parent.right
+        height: CmnCfg.toolbarHeight + 1
+        color: CmnCfg.palette.offBlack
+        Label {
+            id: headerLabel
+            anchors.left: parent.left
+            anchors.leftMargin: CmnCfg.smallMargin
+            text: "Message info"
+            font.pixelSize: CmnCfg.headerFontSize
+            color: CmnCfg.palette.white
+            anchors.verticalCenter: parent.verticalCenter
+            font.family: CmnCfg.labelFont.name
+        }
+    }
+    Rectangle {
+        anchors.right: header.left
+        color: CmnCfg.palette.lightGrey
+        width: 1
+        height: CmnCfg.palette.toolbarHeight
+    }
     Flickable {
         width: chatView.width
-        height: chatView.height
-        anchors.centerIn: parent
+        anchors.top: header.bottom
+        anchors.bottom: parent.bottom
         contentWidth: width
         contentHeight: wrapperCol.height
         clip: true
@@ -50,32 +89,6 @@ Popup {
             topPadding: CmnCfg.smallMargin
             bottomPadding: CmnCfg.smallMargin
 
-            Label {
-                id: header
-                anchors.horizontalCenter: parent.horizontalCenter
-                anchors.left: senderHeader.left
-                text: "Message info"
-                font.family: CmnCfg.chatFont.name
-                font.weight: Font.DemiBold
-                color: CmnCfg.palette.black
-                width: parent.width
-                font.pixelSize: CmnCfg.headerFontSize
-
-                IconButton {
-                    anchors.right: parent.right
-                    anchors.rightMargin: CmnCfg.smallMargin
-                    id: xIcon
-                    source: "qrc:/x-icon.svg"
-                    icon.height: 26
-                    icon.width: 26
-                    fill: CmnCfg.palette.black
-                    z: parent.z + 1
-                    onClicked: {
-                        messageInfoLoader.active = false
-                        moreInfoPopup.close()
-                    }
-                }
-            }
             CB.DefaultBubble {
                 id: bubbleInfo
                 convContainer: parent

@@ -1,4 +1,5 @@
 use crate::*;
+use coretypes::messages::{Item, PlainItem};
 use herald_common::{Time, UserId};
 use heraldcore::message::Elider;
 use message_cache as cache;
@@ -12,7 +13,7 @@ const FLURRY_FUZZ: i64 = 5 * 60_000;
 pub mod handlers;
 pub use cache::{access, get, update};
 
-#[derive(Default)]
+#[derive(Default, Debug)]
 /// Container type for messages
 pub struct Container {
     pub list: Revec<MessageMeta>,
@@ -104,7 +105,8 @@ impl Container {
         mid: &MsgId,
         limit: Option<usize>,
     ) -> Option<String> {
-        access(mid, |m| m.attachments.clone())
+        access(mid, |m| m.attachments().map(Clone::clone))
+            .flatten()
             .and_then(|attachments| crate::media_attachments_json(&attachments, limit))
     }
 
@@ -122,7 +124,8 @@ impl Container {
         mid: &MsgId,
         limit: Option<usize>,
     ) -> Option<String> {
-        access(mid, |m| m.attachments.clone())
+        access(mid, |m| m.attachments().map(Clone::clone))
+            .flatten()
             .and_then(|attachments| crate::doc_attachments_json(&attachments, limit))
     }
 
@@ -144,6 +147,26 @@ impl Container {
         let m = from_msg_id(msg_id)?;
 
         self.list.binary_search(&m).ok()
+    }
+
+    pub fn aux_data_json(
+        &self,
+        ix: usize,
+    ) -> Option<String> {
+        let mid = self.msg_id(ix)?;
+        self.aux_data_json_by_id(&mid)
+    }
+
+    pub fn aux_data_json_by_id(
+        &self,
+        msg_id: &MsgId,
+    ) -> Option<String> {
+        let update = cache::access(msg_id, |data| match data.content.as_ref()? {
+            Item::Aux(update) => Some(update.clone()),
+            _ => None,
+        })??;
+
+        json::JsonValue::from(update).dump().into()
     }
 
     /// Removes the item from the container. *Does not modify disk storage*.
@@ -179,7 +202,7 @@ impl Container {
     ) -> usize {
         let mid = msg.msg_id;
 
-        if let ReplyId::Known(op) = &data.op {
+        if let ReplyId::Known(op) = &data.op() {
             cache::update(op, |m| {
                 m.replies.insert(mid);
             });
@@ -209,14 +232,16 @@ impl Container {
         &self,
         index: usize,
     ) -> Option<ReplyType> {
-        Some(reply_type(&cache::access(self.msg_id(index)?, |m| m.op)?))
+        Some(reply_type(&cache::access(self.msg_id(index)?, |m| {
+            *m.op()
+        })?))
     }
 
     pub fn op_msg_id(
         &self,
         index: usize,
     ) -> Option<MsgId> {
-        match cache::access(self.msg_id(index)?, |m| m.op)? {
+        match cache::access(self.msg_id(index)?, |m| *m.op())? {
             ReplyId::Known(mid) => Some(mid),
             _ => None,
         }
@@ -272,6 +297,14 @@ impl Container {
     ) -> Option<String> {
         let mid = self.op_msg_id(index)?;
         self.get_media_attachments_data_json(&mid, Some(4))
+    }
+
+    pub fn op_aux_data_json(
+        &self,
+        index: usize,
+    ) -> Option<String> {
+        let mid = self.op_msg_id(index)?;
+        self.aux_data_json_by_id(&mid)
     }
 
     pub fn clear_search<F: FnMut(usize)>(
@@ -339,13 +372,16 @@ impl Container {
         mut data_changed: F,
     ) -> Option<()> {
         for id in ids.into_iter() {
-            let changed = update(&id, |data| {
-                if data.op != ReplyId::Dangling {
-                    data.op = ReplyId::Dangling;
-                    true
-                } else {
-                    false
+            let changed = update(&id, |data| match data.content {
+                Some(Item::Plain(PlainItem { ref mut op, .. })) => {
+                    if *op != ReplyId::Dangling {
+                        *op = ReplyId::Dangling;
+                        true
+                    } else {
+                        false
+                    }
                 }
+                _ => false,
             });
 
             if changed.unwrap_or(false) {
@@ -363,11 +399,24 @@ impl Container {
         a_ix: usize,
         b_ix: usize,
     ) -> Option<bool> {
-        let flurry_info = |data: &MsgData| (data.author, data.time.insertion);
+        let flurry_info = |data: &MsgData| {
+            (
+                data.author,
+                data.time.insertion,
+                data.content.as_ref().map(Item::is_plain).unwrap_or(false),
+            )
+        };
 
-        let (a_author, a_ts) = self.access_by_index(a_ix, flurry_info)?;
-        let (b_author, b_ts) = self.access_by_index(b_ix, flurry_info)?;
+        let (a_author, a_ts, a_is_plain) = self.access_by_index(a_ix, flurry_info)?;
+        let (b_author, b_ts, b_is_plain) = self.access_by_index(b_ix, flurry_info)?;
+
+        if !a_is_plain || !b_is_plain {
+            return Some(false);
+        }
 
         ((a_author == b_author) && a_ts.within(FLURRY_FUZZ, b_ts)).into()
     }
 }
+
+#[cfg(test)]
+mod tests;

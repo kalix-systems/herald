@@ -50,11 +50,8 @@ impl super::Conversations {
 
         spawn!(
             {
-                use heraldcore::conversation::settings::*;
-                let update = SettingsUpdate::Color(color);
-
-                err!(apply(&update, &cid));
-                err!(send_update(update, &cid));
+                use heraldcore::conversation::*;
+                err!(set_color(&cid, color));
             },
             false
         );
@@ -91,11 +88,8 @@ impl super::Conversations {
 
         spawn!(
             {
-                use conversation::settings::*;
-                let update = SettingsUpdate::Expiration(period);
-
-                err!(apply(&update, &cid));
-                err!(send_update(update, &cid));
+                use conversation::*;
+                err!(set_expiration_period(&cid, period));
             },
             false
         );
@@ -149,19 +143,17 @@ impl super::Conversations {
 
         let cid = none!(self.id(index));
 
-        let profile_picture = heraldcore::image_utils::ProfilePicture::from_json_string(
-            picture_json,
-        )
-        .and_then(|mut p| {
-            let stripped = crate::utils::strip_qrc(std::mem::take(&mut p.path))?;
-            p.path = stripped;
-            Some(p)
+        let profile_picture =
+            heraldcore::image_utils::ProfilePicture::from_json_string(picture_json);
+
+        spawn!({
+            use crate::conversations::shared::{ConvItemUpdate, ConvItemUpdateVariant};
+            let path = err!(conversation::set_picture(&cid, profile_picture));
+            crate::push(ConvItemUpdate {
+                cid,
+                variant: ConvItemUpdateVariant::PictureChanged(path),
+            });
         });
-
-        // FIXME exception safety
-        let path = err!(conversation::set_picture(&cid, profile_picture));
-
-        self.set_picture_inner(index, path);
     }
 
     pub(crate) fn title_(
@@ -181,11 +173,8 @@ impl super::Conversations {
             let title = title.clone();
             spawn!(
                 {
-                    use heraldcore::conversation::settings::*;
-                    let update = SettingsUpdate::Title(title);
-
-                    err!(apply(&update, &cid));
-                    err!(send_update(update, &cid));
+                    use heraldcore::conversation::*;
+                    err!(set_title(&cid, title));
                 },
                 false
             );

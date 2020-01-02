@@ -1,5 +1,6 @@
 use super::*;
-use crate::w;
+use coremacros::w;
+use herald_attachments::AttachmentMeta;
 use platform_dirs::attachments_dir;
 use rusqlite::{Connection as Conn, NO_PARAMS};
 

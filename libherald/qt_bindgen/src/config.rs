@@ -52,7 +52,8 @@ fn objects() -> BTreeMap<String, Rc<Object>> {
        message_builder(),
 
        media_attachments(),
-       document_attachments()
+       document_attachments(),
+       emoji_picker()
     }
 }
 
@@ -112,6 +113,8 @@ fn utils() -> Object {
         const saveFile(fpath: QString, target_path: QString) => Bool,
         // Returns image dimensions of the image at `path`, serialized as JSON
         const imageDimensions(path: QString) => QString,
+        // Strips QML URL prefix
+        const stripUrlPrefix(path: QString) => QString,
     };
 
     obj! {
@@ -216,6 +219,34 @@ fn members() -> Object {
     }
 }
 
+fn emoji_picker() -> Object {
+    let props = props! {
+        smileys_index: Prop::new().simple(QUint32),
+        nature_index: Prop::new().simple(QUint32),
+        body_index: Prop::new().simple(QUint32),
+        food_index: Prop::new().simple(QUint32),
+        locations_index: Prop::new().simple(QUint32),
+        activities_index: Prop::new().simple(QUint32),
+        symbols_index: Prop::new().simple(QUint32),
+        flags_index: Prop::new().simple(QUint32),
+        objects_index: Prop::new().simple(QUint32)
+    };
+
+    let funcs = functions! {
+        mut clearSearch() => Void,
+        mut setSearchString(search_string: QString) => Void,
+    };
+
+    let item_props = item_props! {
+     emoji: ItemProp::new(QString),
+     skintone_modifier: ItemProp::new(Bool)
+    };
+
+    obj! {
+        EmojiPicker: Obj::new().list().funcs(funcs).props(props).item_props(item_props)
+    }
+}
+
 fn messages() -> Object {
     let props = props! {
         lastAuthor: Prop::new().simple(QString).optional(),
@@ -258,6 +289,8 @@ fn messages() -> Object {
         authorName: ItemProp::new(QString).optional().get_by_value(),
         // Message reactions
         reactions: ItemProp::new(QString).get_by_value(),
+        // Auxiliary message data, serialized as JSON
+        auxData: ItemProp::new(QString).get_by_value(),
 
         // Media attachments metadata, serialized as JSON
         mediaAttachments: ItemProp::new(QString).get_by_value(),
@@ -289,6 +322,8 @@ fn messages() -> Object {
         opExpirationTime: ItemProp::new(Qint64).optional(),
         opColor: ItemProp::new(QUint32).optional(),
         opName: ItemProp::new(QString).optional().get_by_value(),
+        // Auxiliary message data, serialized as JSON
+        opAuxData: ItemProp::new(QString).get_by_value(),
 
         // Media attachments metadata, serialized as JSON
         opMediaAttachments: ItemProp::new(QString).get_by_value(),
@@ -298,7 +333,7 @@ fn messages() -> Object {
 
     let funcs = functions! {
         mut deleteMessage(row_index: QUint64) => Bool,
-        mut markRead(index: QUint64) => Void,
+        mut markReadById(id: QByteArray) => Void,
         mut clearConversationHistory() => Bool,
         mut clearSearch() => Void,
         mut nextSearchMatch() => Qint64,

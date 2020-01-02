@@ -1,5 +1,5 @@
 use crate::errors::*;
-use crate::w;
+use coremacros::w;
 use once_cell::sync::OnceCell;
 use platform_dirs::db_dir;
 use rusqlite::{Connection, NO_PARAMS};
@@ -50,6 +50,20 @@ pub fn init() -> Result<(), HErr> {
 
     w!(db.execute_batch(include_str!("../sql/create_all.sql")));
 
+    Ok(())
+}
+
+/// Resets all tables in database.
+pub fn reset_all() -> Result<(), HErr> {
+    let mut db = w!(Database::get());
+    let tx = w!(db.transaction());
+
+    // drop
+    w!(tx.execute_batch(include_str!("../sql/drop_all.sql")));
+
+    // create
+    w!(tx.execute_batch(include_str!("../sql/create_all.sql")));
+    w!(tx.commit());
     Ok(())
 }
 

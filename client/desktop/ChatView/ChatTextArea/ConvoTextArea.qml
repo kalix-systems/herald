@@ -8,6 +8,7 @@ import QtMultimedia 5.13
 import "qrc:/imports" as Imports
 import "js/ChatTextAreaUtils.mjs" as CTUtils
 import "../../common" as Common
+import "qrc:/imports/ChatBubble" as CB
 
 Rectangle {
     id: textWrapperRect
@@ -82,10 +83,10 @@ Rectangle {
                 property string opText: replyText
                 active: ownedConversation.builder.isReply
                 height: item ? item.height : 0
-                sourceComponent: ReplyComponent {
-                    startColor: CmnCfg.avatarColors[Herald.users.colorById(
-                                                        replyUid)]
+                sourceComponent: CB.ComposeReplyComponent {
+                    builderData: ownedConversation.builder
                 }
+
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.leftMargin: CmnCfg.smallMargin

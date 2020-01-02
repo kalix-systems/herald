@@ -221,3 +221,28 @@ export function userTime(timestamp) {
     var time = year + "-" + month + "-" + day + " " + hour + ":" + min + ":" + sec;
     return time;
 }
+export function auxString(code, content) {
+    var expTime = ["off", "thirty seconds", "one minute", "thirty minutes", "one hour", "twelve hours", "one day", "one week", "one month", "one year"];
+    switch (code) {
+        case 0: {
+            return " set the expiration time to " + expTime[Number(content)];
+            break;
+        }
+        case 1: {
+            return " set the group title to " + content;
+            break;
+        }
+        case 2: {
+            return " set the color";
+            break;
+        }
+        case 3: {
+            return " set the group picture";
+            break;
+        }
+        default: {
+            return "";
+            break;
+        }
+    }
+}

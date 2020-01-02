@@ -1,15 +1,24 @@
-use crate::{attachments::AttachmentMeta, ids::*};
+use herald_attachments::AttachmentMeta;
 use herald_common::*;
+use herald_ids::*;
 use std::{
     collections::{HashMap, HashSet},
     convert::TryInto,
 };
-use unicode_segmentation::UnicodeSegmentation;
 
 mod convert;
 mod display;
 mod rusqlite_imp;
 mod ser;
+
+mod elider;
+pub use elider::Elider;
+mod reaction;
+pub use reaction::*;
+mod match_status;
+pub use match_status::*;
+mod body;
+pub use body::*;
 
 /// Message
 #[derive(Clone, Debug)]
@@ -24,8 +33,6 @@ pub struct Message {
     pub content: Option<Item>,
     /// Message time information
     pub time: MessageTime,
-    /// Message id of the message being replied to
-    pub op: ReplyId,
     /// Send status
     pub send_status: MessageSendStatus,
     /// Receipts
@@ -34,13 +41,50 @@ pub struct Message {
     pub replies: HashSet<MsgId>,
     /// Reactions to this message
     pub reactions: Option<Reactions>,
-    /// Attachment metadata
-    pub attachments: AttachmentMeta,
 }
 
 impl Message {
     pub fn text(&self) -> Option<&str> {
-        self.content.as_ref().and_then(Item::as_str)
+        self.content.as_ref()?.as_str()
+    }
+
+    pub fn op(&self) -> &ReplyId {
+        self.content
+            .as_ref()
+            .map(Item::op)
+            .unwrap_or(&ReplyId::None)
+    }
+
+    pub fn split(self) -> (MessageMeta, MsgData) {
+        let Message {
+            message_id,
+            author,
+            content,
+            time,
+            receipts,
+            send_status,
+            reactions,
+            replies,
+            ..
+        } = self;
+
+        let data = MsgData {
+            author,
+            receipts,
+            content,
+            time,
+            send_status,
+            replies,
+            reactions,
+        };
+
+        let message = MessageMeta {
+            msg_id: message_id,
+            insertion_time: time.insertion,
+            match_status: MatchStatus::NotMatched,
+        };
+
+        (message, data)
     }
 }
 
@@ -55,85 +99,6 @@ pub struct MessageReceipt {
     pub recipient: UserId,
     /// The message receipt status
     pub status: MessageReceiptStatus,
-}
-
-/// An isolated message reaction
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct Reaction {
-    /// The reactionary
-    pub reactionary: UserId,
-    /// The text of the receipt
-    pub react_content: ReactContent,
-    /// The time the react arrived at the client
-    pub time: Time,
-}
-
-pub type ReactContent = String;
-
-/// A `ReactContent` with an ordered list of
-/// reactionaries
-#[derive(Clone, Debug, PartialEq, Eq, Ord, PartialOrd)]
-pub struct TaggedReact {
-    pub content: ReactContent,
-    pub reactionaries: Vec<UserId>,
-}
-
-/// A collection of message reactions
-#[derive(Clone, Debug, Default)]
-pub struct Reactions {
-    pub content: Vec<TaggedReact>,
-}
-
-impl Reactions {
-    pub fn add(
-        &mut self,
-        react: ReactContent,
-        reactionary: UserId,
-    ) -> bool {
-        match self
-            .content
-            .iter()
-            .position(|tagged| tagged.content == react)
-        {
-            Some(ix) => {
-                if let Some(tagged) = self.content.get_mut(ix) {
-                    if !tagged.reactionaries.contains(&reactionary) {
-                        tagged.reactionaries.push(reactionary);
-                        return true;
-                    }
-                }
-                false
-            }
-            None => {
-                self.content.push(TaggedReact {
-                    content: react,
-                    reactionaries: vec![reactionary],
-                });
-                true
-            }
-        }
-    }
-
-    pub fn remove(
-        &mut self,
-        react: ReactContent,
-        reactionary: UserId,
-    ) -> bool {
-        if let Some(ix) = self
-            .content
-            .iter()
-            .position(|tagged| tagged.content == react)
-        {
-            if let Some(tagged) = self.content.get_mut(ix) {
-                if let Some(position) = tagged.reactionaries.iter().position(|u| u == &reactionary)
-                {
-                    tagged.reactionaries.remove(position);
-                    return true;
-                }
-            }
-        };
-        false
-    }
 }
 
 #[derive(Clone, Copy, Debug, Ser, De, Eq, PartialEq, Hash)]
@@ -170,35 +135,57 @@ impl ReplyId {
 }
 
 /// An item in the message history
-#[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Item {
-    Plain(MessageBody),
-    Update(Update),
+    Plain(PlainItem),
+    Aux(crate::conversation::settings::SettingsUpdate),
+}
+
+/// An normal item in the message history
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct PlainItem {
+    pub body: Option<MessageBody>,
+    pub attachments: AttachmentMeta,
+    pub op: ReplyId,
 }
 
 impl Item {
+    pub fn is_plain(&self) -> bool {
+        match self {
+            Item::Plain(_) => true,
+            _ => false,
+        }
+    }
+
     pub fn as_str(&self) -> Option<&str> {
         match self {
-            Item::Plain(body) => Some(body.as_str()),
+            Item::Plain(PlainItem {
+                body: Some(body), ..
+            }) => Some(body.as_str()),
             _ => None,
         }
     }
 
     pub fn body(&self) -> Option<&MessageBody> {
         match self {
-            Item::Plain(body) => Some(&body),
+            Item::Plain(PlainItem { body, .. }) => body.as_ref(),
             _ => None,
         }
     }
-}
 
-/// An update that appears appears in the message history
-#[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
-pub enum Update {
-    Color(u32),
-    Title(String),
-    Picture(String),
-    Expiration(crate::conversation::ExpirationPeriod),
+    pub fn op(&self) -> &ReplyId {
+        match self {
+            Item::Plain(PlainItem { op, .. }) => op,
+            _ => &ReplyId::None,
+        }
+    }
+
+    pub fn attachments(&self) -> Option<&AttachmentMeta> {
+        match self {
+            Item::Plain(PlainItem { attachments, .. }) => Some(attachments),
+            _ => None,
+        }
+    }
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -211,61 +198,6 @@ pub struct MessageTime {
     /// The `Time` the message will expire, if applicable
     pub expiration: Option<Time>,
 }
-
-#[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
-/// A message body
-pub struct MessageBody(String);
-
-impl MessageBody {
-    /// Returns `MessageBody` as `&str`
-    pub fn as_str(&self) -> &str {
-        self.as_ref()
-    }
-
-    /// Returns `MessageBody` as `&[u8]`
-    pub fn as_slice(&self) -> &[u8] {
-        self.as_ref().as_bytes()
-    }
-
-    /// Returns inner `String`
-    pub fn inner(self) -> String {
-        self.0
-    }
-}
-
-#[derive(Debug)]
-/// Error returned when trying to creat an empty message body
-pub struct EmptyMessageBody;
-
-impl std::error::Error for EmptyMessageBody {}
-
-#[derive(Debug)]
-/// Error returned if an inbound message is missing data
-pub enum MissingInboundMessageField {
-    /// Message id was missing
-    MissingMessageId,
-    /// Body was missing
-    MissingBody,
-    /// Conversation id was missing
-    MissingConversationId,
-    /// Timestamp was missing
-    MissingTimestamp,
-    /// Author was missing
-    MissingAuthor,
-}
-
-impl std::error::Error for MissingInboundMessageField {}
-
-#[derive(Debug)]
-/// Error returned if an outbound message is missing data
-pub enum MissingOutboundMessageField {
-    /// Message body was missing
-    MissingBody,
-    /// Conversation id was missing
-    MissingConversationId,
-}
-
-impl std::error::Error for MissingOutboundMessageField {}
 
 #[derive(Hash, Debug, Clone, PartialEq, Eq, Copy)]
 #[repr(u8)]
@@ -302,26 +234,10 @@ pub struct MsgData {
     pub author: UserId,
     pub content: Option<Item>,
     pub time: MessageTime,
-    pub op: ReplyId,
     pub receipts: HashMap<UserId, MessageReceiptStatus>,
-    pub attachments: crate::attachments::AttachmentMeta,
     pub send_status: MessageSendStatus,
     pub replies: HashSet<MsgId>,
     pub reactions: Option<Reactions>,
-}
-
-#[repr(u8)]
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum MatchStatus {
-    NotMatched = 0,
-    Matched = 1,
-    Focused = 2,
-}
-
-impl MatchStatus {
-    pub fn is_match(self) -> bool {
-        self == MatchStatus::Matched || self == MatchStatus::Focused
-    }
 }
 
 impl MsgData {
@@ -329,8 +245,10 @@ impl MsgData {
         &self,
         pattern: &search_pattern::SearchPattern,
     ) -> bool {
-        match self.content.as_ref() {
-            Some(Item::Plain(body)) => pattern.is_match(body.as_str()),
+        match &self.content {
+            Some(Item::Plain(PlainItem {
+                body: Some(body), ..
+            })) => pattern.is_match(body.as_str()),
             _ => false,
         }
     }
@@ -338,18 +256,33 @@ impl MsgData {
     pub fn save_all_attachments<P: AsRef<std::path::Path>>(
         &self,
         dest: P,
-    ) -> Result<(), crate::attachments::Error> {
-        let ext = format!(
-            "{author}_{time}",
-            author = self.author,
-            time = self.time.insertion.as_i64()
-        );
+    ) -> Result<(), herald_attachments::Error> {
+        if let Some(Item::Plain(ref plain)) = self.content {
+            let ext = format!(
+                "{author}_{time}",
+                author = self.author,
+                time = self.time.insertion.as_i64()
+            );
 
-        self.attachments.save_all(dest.as_ref().join(ext))
+            plain.attachments.save_all(dest.as_ref().join(ext))?;
+        }
+
+        Ok(())
     }
 
     pub fn text(&self) -> Option<&str> {
-        self.content.as_ref().and_then(Item::as_str)
+        self.content.as_ref()?.as_str()
+    }
+
+    pub fn attachments(&self) -> Option<&AttachmentMeta> {
+        self.content.as_ref().and_then(Item::attachments)
+    }
+
+    pub fn op(&self) -> &ReplyId {
+        self.content
+            .as_ref()
+            .map(Item::op)
+            .unwrap_or(&ReplyId::None)
     }
 }
 
@@ -359,42 +292,6 @@ pub struct MessageMeta {
     pub msg_id: MsgId,
     pub insertion_time: Time,
     pub match_status: MatchStatus,
-}
-
-pub fn split_msg(msg: Message) -> (MessageMeta, MsgData) {
-    let Message {
-        message_id,
-        author,
-        content,
-        time,
-        op,
-        receipts,
-        attachments,
-        send_status,
-        reactions,
-        replies,
-        ..
-    } = msg;
-
-    let data = MsgData {
-        author,
-        receipts,
-        content,
-        op,
-        attachments,
-        time,
-        send_status,
-        replies,
-        reactions,
-    };
-
-    let message = MessageMeta {
-        msg_id: message_id,
-        insertion_time: time.insertion,
-        match_status: MatchStatus::NotMatched,
-    };
-
-    (message, data)
 }
 
 #[repr(u8)]
@@ -430,81 +327,5 @@ impl Ord for MessageMeta {
             Some(ord) => ord,
             None => self.msg_id.cmp(&rhs.msg_id),
         }
-    }
-}
-
-pub struct Elider {
-    pub line_count: usize,
-    pub char_count: usize,
-    pub char_per_line: usize,
-}
-
-impl Default for Elider {
-    fn default() -> Self {
-        let line_count = 30;
-        let char_per_line = 25;
-        let char_count = line_count * char_per_line;
-
-        Self {
-            line_count,
-            char_per_line,
-            char_count,
-        }
-    }
-}
-
-impl Elider {
-    pub fn set_line_count(
-        &mut self,
-        line_count: usize,
-    ) {
-        self.line_count = line_count
-    }
-
-    pub fn set_char_count(
-        &mut self,
-        char_count: usize,
-    ) {
-        self.char_count = char_count
-    }
-
-    pub fn set_char_per_line(
-        &mut self,
-        char_per_line: usize,
-    ) {
-        self.char_per_line = char_per_line;
-    }
-
-    pub fn elided_body(
-        &self,
-        body: String,
-    ) -> String {
-        let graphemes = UnicodeSegmentation::graphemes(body.as_str(), true);
-
-        let mut char_count = 0;
-        let mut line_count = 0;
-
-        for s in graphemes {
-            if char_count >= self.char_count || line_count >= self.line_count {
-                break;
-            }
-
-            char_count += 1;
-            line_count += s.lines().count().saturating_sub(1);
-        }
-
-        if char_count < self.char_count && line_count < self.line_count {
-            return body;
-        }
-
-        let chars_to_take = self.char_count.min(self.line_count * self.char_per_line);
-
-        let mut out: String = UnicodeSegmentation::graphemes(body.as_str(), true)
-            .take(chars_to_take)
-            .collect();
-
-        out.push_str("...");
-
-        out
     }
 }

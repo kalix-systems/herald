@@ -1,5 +1,5 @@
 use crate::{
-    conversations::shared::ConvUpdate, err, ffi, interface::*, none, push, spawn,
+    conversations::shared::GlobalConvUpdate, err, ffi, interface::*, none, push, spawn,
     users::shared::user_in_cache,
 };
 use herald_common::UserId;
@@ -120,7 +120,7 @@ impl ConversationBuilderTrait for ConversationBuilder {
             let conv = err!(inner.add());
 
             // send update to Conversations list
-            push(ConvUpdate::BuilderFinished(conv.meta.clone()));
+            push(GlobalConvUpdate::BuilderFinished(conv.meta.clone()));
 
             err!(start(conv));
         });
@@ -140,21 +140,15 @@ impl ConversationBuilderTrait for ConversationBuilder {
     }
 
     fn picture(&self) -> Option<&str> {
-        Some(self.inner.picture.as_ref()?.path.as_str())
+        Some(self.inner.tagged_picture.as_ref()?.path.as_str())
     }
 
     fn set_profile_picture(
         &mut self,
         picture_json: String,
     ) {
-        self.inner.picture = heraldcore::image_utils::ProfilePicture::from_json_string(
-            picture_json,
-        )
-        .and_then(|mut p| {
-            let stripped = crate::utils::strip_qrc(std::mem::take(&mut p.path))?;
-            p.path = stripped;
-            Some(p)
-        });
+        self.inner.tagged_picture =
+            heraldcore::image_utils::ProfilePicture::from_json_string(picture_json);
         self.emit.picture_changed();
     }
 

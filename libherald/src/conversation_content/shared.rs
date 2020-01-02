@@ -79,6 +79,7 @@ pub(crate) fn content_push<T: Into<ContentUpdate>>(
     if let Some(emitter) = emitters().write().get_mut(&to) {
         emitter.new_data_ready();
     }
+
     Ok(())
 }
 

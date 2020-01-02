@@ -1,10 +1,10 @@
 use chainkeys::ChainKeysError;
 use coremacros::from_fn;
-use coretypes::{
-    ids::InvalidRandomIdLength,
-    messages::{EmptyMessageBody, MissingInboundMessageField, MissingOutboundMessageField},
+use coretypes::messages::{
+    EmptyMessageBody, MissingInboundMessageField, MissingOutboundMessageField,
 };
 use herald_common::*;
+use herald_ids::*;
 use location::Location;
 use std::fmt;
 
@@ -47,7 +47,7 @@ pub enum HErr {
     /// Malformed path
     BadPath(std::ffi::OsString),
     /// Attachments error
-    Attachment(coretypes::attachments::Error),
+    Attachment(herald_attachments::Error),
     /// An empty message body,
     EmptyMessageBody(EmptyMessageBody),
     /// Bad socket address
@@ -117,7 +117,7 @@ herr!(KsonError, KsonError);
 herr!(websocket::result::WebSocketError, WebsocketError);
 herr!(search_pattern::SearchPatternError, RegexError);
 herr!(std::ffi::OsString, BadPath);
-herr!(coretypes::attachments::Error, Attachment);
+herr!(herald_attachments::Error, Attachment);
 herr!(std::net::AddrParseError, BadSocketAddr);
 
 impl From<image_utils::ImageError> for HErr {
@@ -154,16 +154,5 @@ macro_rules! NE {
     () => {{
         use ::herald_common::loc;
         $crate::errors::HErr::NoneError(loc!())
-    }};
-}
-
-#[macro_export]
-/// Convenience macro
-macro_rules! w {
-    ($maybe: expr) => {{
-        match $maybe {
-            Ok(val) => val,
-            Err(e) => return Err(e.into()),
-        }
     }};
 }

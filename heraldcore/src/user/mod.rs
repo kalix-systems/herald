@@ -1,9 +1,7 @@
 use crate::{db::Database, errors::HErr, image_utils, types::*};
-pub use coretypes::{
-    conversation::Conversation,
-    user::{User, UserStatus, UserType},
-};
+pub use coretypes::conversation::Conversation;
 use herald_common::*;
+use herald_user::{User, UserStatus, UserType};
 use rusqlite::{params, NO_PARAMS};
 
 pub(crate) mod db;
@@ -17,7 +15,7 @@ pub fn name(id: UserId) -> Result<Option<String>, HErr> {
 /// Change name of user by their `id`
 pub fn set_name(
     id: UserId,
-    name: &str,
+    name: Option<&str>,
 ) -> Result<(), HErr> {
     let db = Database::get()?;
     db::set_name(&db, id, name)

@@ -1,6 +1,6 @@
 use super::*;
 use crate::conversation::ExpirationPeriod;
-use crate::w;
+use coremacros::w;
 use rusqlite::named_params;
 use std::net::SocketAddr;
 
@@ -9,7 +9,13 @@ pub(crate) fn set_name(
     name: String,
 ) -> Result<(), HErr> {
     let id = id(conn)?;
-    Ok(crate::user::db::set_name(conn, id, name.as_str())?)
+
+    crate::user::db::set_name(conn, id, name.as_str().into())?;
+    crate::network::send_profile_update(network_types::cmessages::ProfileChanged::DisplayName(
+        name.into(),
+    ))?;
+
+    Ok(())
 }
 
 pub(crate) fn set_profile_picture(
@@ -17,11 +23,12 @@ pub(crate) fn set_profile_picture(
     profile_picture: Option<image_utils::ProfilePicture>,
 ) -> Result<Option<String>, HErr> {
     let id = id(conn)?;
-    Ok(crate::user::db::set_profile_picture(
-        conn,
-        id,
-        profile_picture,
-    )?)
+    let path = crate::user::db::set_profile_picture(conn, id, profile_picture)?;
+
+    let buf = path.as_ref().map(std::fs::read).transpose()?;
+
+    crate::network::send_profile_update(network_types::cmessages::ProfileChanged::Picture(buf))?;
+    Ok(path)
 }
 
 /// Update user's color
@@ -31,6 +38,7 @@ pub(crate) fn set_color(
 ) -> Result<(), HErr> {
     let id = id(conn)?;
     crate::user::db::set_color(conn, id, color)?;
+    crate::network::send_profile_update(network_types::cmessages::ProfileChanged::Color(color))?;
 
     Ok(())
 }

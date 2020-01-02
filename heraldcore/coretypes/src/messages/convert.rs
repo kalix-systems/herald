@@ -141,11 +141,18 @@ impl std::convert::TryFrom<i64> for MessageReceiptStatus {
 impl Item {
     pub fn from_parts(
         body: Option<MessageBody>,
-        update: Option<Update>,
+        attachments: Option<AttachmentMeta>,
+        op: ReplyId,
+        update: Option<crate::conversation::settings::SettingsUpdate>,
     ) -> Option<Item> {
         match (body, update) {
-            (Some(body), None) => Item::Plain(body).into(),
-            (None, Some(update)) => Item::Update(update).into(),
+            (Some(body), None) => Item::Plain(PlainItem {
+                body: Some(body),
+                attachments: attachments.unwrap_or_default(),
+                op,
+            })
+            .into(),
+            (None, Some(update)) => Item::Aux(update).into(),
             _ => None,
         }
     }

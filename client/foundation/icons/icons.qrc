@@ -15,8 +15,6 @@
         <file>gear-icon.svg</file>
         <file>hamburger-icon.svg</file>
         <file>help-icon.svg</file>
-        <file>land.png</file>
-        <file>mary.png</file>
         <file>options-icon.svg</file>
         <file>plus-icon.svg</file>
         <file>search-icon.svg</file>
@@ -59,5 +57,7 @@
         <file>up-chevron-icon.svg</file>
         <file>regex-search-icon.svg</file>
         <file>lenny-icon.svg</file>
+        <file>emoji-categories/recents.svg</file>
+        <file>herald.png</file>
     </qresource>
 </RCC>

@@ -13,6 +13,7 @@ Menu {
 
     MenuItem {
         text: qsTr("More Info") + "..."
+        visible: !parentBubble.aux
         onTriggered: {
             messageInfoLoader.convoMembers = conversationMembers
             messageInfoLoader.messageData = bubbleActual.messageModelData
@@ -23,6 +24,8 @@ Menu {
     }
     MenuItem {
         text: qsTr("Delete Message")
-        onTriggered: ownedConversation.deleteMessage(index)
+        onTriggered: {
+            ownedConversation.deleteMessage(index)
+        }
     }
 }

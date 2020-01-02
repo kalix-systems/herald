@@ -1,5 +1,6 @@
 use super::*;
 use crate::config::test_config;
+use herald_attachments::Attachment;
 use platform_dirs::attachments_dir;
 use serial_test_derive::serial;
 use std::{convert::TryInto, str::FromStr};
@@ -26,7 +27,7 @@ fn outbound_message_attachment() {
     builder
         .add_attachment((&path).clone())
         .conversation_id(config.nts_conversation);
-    let msg = builder.store_and_send_blocking().expect(womp!());
+    let msg = builder.store().expect(womp!());
 
     let meta = super::get(&msg.message_id)
         .expect(womp!())

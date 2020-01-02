@@ -8,7 +8,7 @@ Rectangle {
     property string modifier: ""
     property var caratCenter
     property var window
-    signal send(string emoji)
+    signal send(string emoji, bool takesMod)
     signal close
 
     height: 250
@@ -22,5 +22,30 @@ Rectangle {
             fill: parent
             centerIn: parent
         }
+    }
+    // Updates the recent emojis as if it
+    // were a stupid LRU cache
+    onSend: {
+        const emoji_data = {
+            "emoji": emoji,
+            "takesMod": takesMod
+        }
+
+        var any = false
+
+        for (var i = 0; i < CmnCfg.recentEmojis.length; i++) {
+            any = CmnCfg.recentEmojis[i].emoji === emoji
+            if (any)
+                break
+        }
+
+        if (!any) {
+            if (CmnCfg.recentEmojis.length === 20) {
+                CmnCfg.recentEmojis.splice(-1, 1)
+            }
+            CmnCfg.recentEmojis.unshift(emoji_data)
+        }
+
+        CmnCfg.settings.recentEmojisJson = JSON.stringify(CmnCfg.recentEmojis)
     }
 }

@@ -209,6 +209,7 @@ dependencies = [
  "coremacros 0.1.0",
  "coretypes 0.1.0",
  "herald_common 0.1.0",
+ "herald_ids 0.1.0",
  "kcl 0.1.0",
  "location 0.1.0",
  "once_cell 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -318,17 +319,15 @@ version = "0.1.0"
 name = "coretypes"
 version = "0.1.0"
 dependencies = [
+ "herald_attachments 0.1.0",
  "herald_common 0.1.0",
- "hex 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "image_utils 0.1.0",
+ "herald_ids 0.1.0",
  "json 0.12.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "kcl 0.1.0",
  "kson 0.1.0",
  "location 0.1.0",
- "platform_dirs 0.1.0",
  "rusqlite 0.21.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "search_pattern 0.1.0",
- "tar 0.4.26 (registry+https://github.com/rust-lang/crates.io-index)",
  "unicode-segmentation 1.6.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
@@ -441,6 +440,14 @@ dependencies = [
  "libc 0.2.66 (registry+https://github.com/rust-lang/crates.io-index)",
  "redox_users 0.3.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "winapi 0.3.8 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "emoji_utils"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+dependencies = [
+ "regex 1.3.1 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -666,7 +673,10 @@ version = "0.1.0"
 dependencies = [
  "coremacros 0.1.0",
  "crossbeam-channel 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "emoji_utils 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "herald_attachments 0.1.0",
  "herald_common 0.1.0",
+ "herald_user 0.1.0",
  "heraldcore 0.1.0",
  "im 14.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "json 0.12.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -682,6 +692,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "herald_attachments"
+version = "0.1.0"
+dependencies = [
+ "herald_common 0.1.0",
+ "hex 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "image_utils 0.1.0",
+ "json 0.12.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "kcl 0.1.0",
+ "kson 0.1.0",
+ "location 0.1.0",
+ "platform_dirs 0.1.0",
+ "tar 0.4.26 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
 name = "herald_common"
 version = "0.1.0"
 dependencies = [
@@ -692,6 +717,15 @@ dependencies = [
  "kson_channel 0.1.0",
  "rusqlite 0.21.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "tokio 0.2.6 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "herald_ids"
+version = "0.1.0"
+dependencies = [
+ "herald_common 0.1.0",
+ "kson 0.1.0",
+ "rusqlite 0.21.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -714,6 +748,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "herald_user"
+version = "0.1.0"
+dependencies = [
+ "herald_common 0.1.0",
+ "herald_ids 0.1.0",
+ "rusqlite 0.21.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "search_pattern 0.1.0",
+]
+
+[[package]]
 name = "heraldcore"
 version = "0.1.0"
 dependencies = [
@@ -722,7 +766,10 @@ dependencies = [
  "coremacros 0.1.0",
  "coretypes 0.1.0",
  "crossbeam-channel 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "herald_attachments 0.1.0",
  "herald_common 0.1.0",
+ "herald_ids 0.1.0",
+ "herald_user 0.1.0",
  "hex 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "image_utils 0.1.0",
  "kcl 0.1.0",
@@ -1167,6 +1214,7 @@ version = "0.1.0"
 dependencies = [
  "coremacros 0.1.0",
  "coretypes 0.1.0",
+ "herald_attachments 0.1.0",
  "herald_common 0.1.0",
  "heraldcore 0.1.0",
  "im 14.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -1177,6 +1225,8 @@ dependencies = [
  "parking_lot 0.10.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "revec 0.1.0",
  "search_pattern 0.1.0",
+ "serial_test 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "serial_test_derive 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -1242,7 +1292,9 @@ version = "0.1.0"
 dependencies = [
  "channel_ratchet 0.1.0",
  "coretypes 0.1.0",
+ "herald_attachments 0.1.0",
  "herald_common 0.1.0",
+ "herald_ids 0.1.0",
  "kson 0.1.0",
  "rusqlite 0.21.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
@@ -2823,6 +2875,7 @@ dependencies = [
 "checksum deflate 0.7.20 (registry+https://github.com/rust-lang/crates.io-index)" = "707b6a7b384888a70c8d2e8650b3e60170dfc6a67bb4aa67b6dfca57af4bedb4"
 "checksum digest 0.8.1 (registry+https://github.com/rust-lang/crates.io-index)" = "f3d0c8c8752312f9713efd397ff63acb9f85585afbf179282e720e7704954dd5"
 "checksum dirs 1.0.5 (registry+https://github.com/rust-lang/crates.io-index)" = "3fd78930633bd1c6e35c4b42b1df7b0cbc6bc191146e512bb3bedf243fcc3901"
+"checksum emoji_utils 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)" = "1166ad696e6965f537ea0a64c40a31d3f71867b597d527e81f395fbd91b4c4ed"
 "checksum err-derive 0.2.1 (registry+https://github.com/rust-lang/crates.io-index)" = "ead97ef6ef5530312e584d24b1ef31e96455bc2135945109fc737fe8b62ff4a5"
 "checksum failure 0.1.6 (registry+https://github.com/rust-lang/crates.io-index)" = "f8273f13c977665c5db7eb2b99ae520952fe5ac831ae4cd09d80c4c7042b5ed9"
 "checksum failure_derive 0.1.6 (registry+https://github.com/rust-lang/crates.io-index)" = "0bc225b78e0391e4b8683440bf2e63c2deeeb2ce5189eab46e2b68c6d3725d08"

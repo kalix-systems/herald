@@ -21,6 +21,7 @@ ListView {
     // this needs to be uninteractive so that they scroll together
     interactive: false
     height: contentHeight
+    property bool archiveView: false
 
     signal messagePositionRequested(var requestedMsgId)
 
@@ -64,7 +65,8 @@ ListView {
             }
         }
 
-        visible: conversationData.matched && conversationData.status !== 1
+        visible: !archiveView ? conversationData.matched
+                                && conversationData.status !== 1 : conversationData.status === 1
         height: visible ? CmnCfg.convoHeight : 0
         width: parent.width
 
@@ -77,7 +79,8 @@ ListView {
                 acceptedButtons: Qt.LeftButton | Qt.RightButton
                 onClicked: {
                     if (mouse.button == Qt.RightButton) {
-                        convOptionsMenu.open()
+                        !archiveView ? convOptionsMenu.open(
+                                           ) : unarchiveMenu.open()
                     } else {
                         chatView.sourceComponent = childChatView
                         conversationList.currentIndex = index
@@ -94,10 +97,23 @@ ListView {
 
             MenuItem {
                 text: "Archive"
-                //NOTE: unimplemented for now while backend changes are made, do not uncomment
-                //or try to use
-                // onTriggered: conversationData.status = 1
+                onTriggered: conversationData.status = 1
             }
+        }
+        Menu {
+            id: unarchiveMenu
+            MenuItem {
+                text: "Unarchive conversation"
+                onTriggered: conversationData.status = 0
+            }
+        }
+    }
+
+    states: State {
+        name: "archivestate"
+        PropertyChanges {
+            target: conversationList
+            archiveView: true
         }
     }
 }

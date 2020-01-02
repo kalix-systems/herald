@@ -11,11 +11,10 @@ import QtQuick.Controls 2.3
 MouseArea {
     id: chatBubbleHitbox
     property bool download: false
-
     propagateComposedEvents: true
     hoverEnabled: true
-    anchors.fill: bubbleActual
-    z: 100
+    anchors.fill: parent
+    z: CmnCfg.overlayZ + 1
     onClicked: mouse.accepted = false
     onPressed: mouse.accepted = false
     onReleased: mouse.accepted = false
@@ -27,9 +26,10 @@ MouseArea {
         id: buttonRect
         width: buttonRow.width
         height: buttonRow.height
-        // color: bubbleActual.authorColor
         z: CmnCfg.overlayZ
         color: "transparent"
+        visible: chatBubbleHitbox.containsMouse || parentBubble.hoverHighlight
+
         anchors {
             right: parent.right
             top: parent.top
@@ -43,14 +43,9 @@ MouseArea {
 
             Imports.IconButton {
                 id: replyButton
-                visible: chatBubbleHitbox.containsMouse
-                         || bubbleActual.hoverHighlight
-                anchors {
-                    margins: CmnCfg.defaultMargin
-                }
+                anchors.margins: CmnCfg.defaultMargin
                 source: "qrc:/reply-icon.svg"
                 z: CmnCfg.overlayZ
-
                 // changing the opId transfers focus to the compose field
                 onClicked: ownedConversation.builder.opId = msgId
             }
@@ -61,11 +56,7 @@ MouseArea {
 
             Imports.IconButton {
                 id: reactButton
-                visible: chatBubbleHitbox.containsMouse
-                         || bubbleActual.hoverHighlight
-                anchors {
-                    margins: visible ? CmnCfg.defaultMargin : 0
-                }
+                anchors.margins: visible ? CmnCfg.defaultMargin : 0
                 z: CmnCfg.overlayZ
                 icon.width: visible ? 24 : 0
                 source: "qrc:/lenny-icon.svg"
@@ -77,11 +68,8 @@ MouseArea {
 
             Imports.IconButton {
                 id: downloadButton
-                visible: (chatBubbleHitbox.containsMouse
-                          || bubbleActual.hoverHighlight) && download
-                anchors {
-                    margins: visible ? CmnCfg.defaultMargin : 0
-                }
+                visible: download
+                anchors.margins: visible ? CmnCfg.defaultMargin : 0
                 z: CmnCfg.overlayZ
                 icon.width: visible ? 22 : 0
                 source: "qrc:/download-icon.svg"
@@ -90,17 +78,10 @@ MouseArea {
 
             Imports.IconButton {
                 id: messageOptionsButton
-                visible: bubbleActual.hoverHighlight
-                         || chatBubbleHitbox.containsMouse
-
-                anchors {
-                    margins: CmnCfg.defaultMargin
-                }
+                anchors.margins: CmnCfg.defaultMargin
                 source: "qrc:/options-icon.svg"
                 z: CmnCfg.overlayZ
-                onClicked: {
-                    messageOptionsMenu.open()
-                }
+                onClicked: messageOptionsMenu.open()
             }
         }
     }

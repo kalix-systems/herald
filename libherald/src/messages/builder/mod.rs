@@ -1,12 +1,13 @@
 use crate::{
     attachments::{DocumentAttachments, MediaAttachments},
-    content_push, err, ffi,
+    err, ffi,
     interface::*,
-    none, push, spawn,
+    none, spawn,
 };
+use herald_attachments::is_media;
 use herald_common::{Time, UserId};
 use heraldcore::{
-    message::{attachments::is_media, *},
+    message::*,
     types::{ConversationId, MsgId},
 };
 use std::{convert::TryInto, path::PathBuf};
@@ -98,29 +99,9 @@ impl MessageBuilderTrait for MessageBuilder {
         self.emit.body_changed();
         self.emit_op_changed();
 
-        let cid = none!(builder.conversation);
+        none!(builder.conversation);
 
-        spawn!({
-            builder.store_and_send(move |m| {
-                use crate::messages::{MsgUpdate, *};
-                use heraldcore::message::StoreAndSend::*;
-
-                match m {
-                    Msg(msg) => {
-                        err!(content_push(cid, MsgUpdate::BuilderMsg(msg)));
-                    }
-                    Error { error, location } => {
-                        push((Err::<(), HErr>(error), location));
-                    }
-                    StoreDone(mid, meta) => {
-                        err!(content_push(cid, MsgUpdate::StoreDone(mid, meta)));
-                    }
-                    SendDone(mid) => {
-                        err!(content_push(cid, MsgUpdate::SendDone(mid)));
-                    }
-                }
-            })
-        });
+        spawn!({ builder.store_and_send() });
     }
 
     fn row_count(&self) -> usize {

@@ -15,18 +15,16 @@ pub(super) fn handle_cmessage(
     match msg {
         NewKey(nk) => crate::user_keys::add_keys(uid, &[nk.0])?,
         DepKey(dk) => crate::user_keys::deprecate_keys(&[dk.0])?,
-        AddedToConvo(ac) => {
-            use crate::{image_utils::image_path, types::cmessages::AddedToConvo};
-            use std::fs;
+        AddedToConvo { info, ratchet } => {
+            use crate::types::cmessages::AddedToConvo;
 
             let AddedToConvo {
                 members,
                 cid,
-                ratchet,
                 title,
                 picture,
                 expiration_period,
-            } = *ac;
+            } = *info;
 
             let mut conv_builder = crate::conversation::ConversationBuilder::new();
             conv_builder
@@ -37,13 +35,7 @@ pub(super) fn handle_cmessage(
             conv_builder.title = title;
 
             conv_builder.picture = match picture {
-                Some(bytes) => {
-                    let image_path = image_path();
-                    fs::write(&image_path, bytes)?;
-                    Some(image_utils::ProfilePicture::autocrop(
-                        image_path.into_os_string().into_string()?,
-                    ))
-                }
+                Some(bytes) => Some(image_utils::update_picture_buf(&bytes)?),
                 None => None,
             };
 
@@ -55,6 +47,21 @@ pub(super) fn handle_cmessage(
             ev.notifications
                 .push(Notification::NewConversation(conv.meta));
         }
+        Message(content) => handle_content(cid, uid, ts, &mut ev, content)?,
+    }
+
+    Ok(ev)
+}
+
+fn handle_content(
+    cid: ConversationId,
+    uid: UserId,
+    ts: Time,
+    ev: &mut Event,
+    content: NetContent,
+) -> Result<(), HErr> {
+    use NetContent::*;
+    match content {
         UserReqAck(cr) => ev
             .notifications
             .push(Notification::AddUserResponse(cid, uid, cr.0)),
@@ -65,30 +72,58 @@ pub(super) fn handle_cmessage(
             tx.commit()?;
         }
         Msg(msg) => {
-            let cmessages::Msg { mid, content, op } = msg;
-            let cmessages::Message {
-                body,
-                attachments,
+            let cmessages::Msg {
+                mid,
+                content,
                 expiration,
-            } = content;
+            } = msg;
 
-            let mut builder = crate::message::InboundMessageBuilder::default();
+            match content {
+                cmessages::MsgContent::Normal(cmessages::Message {
+                    body,
+                    attachments,
+                    op,
+                }) => {
+                    let mut builder = crate::message::InboundMessageBuilder::default();
 
-            builder
-                .id(mid)
-                .author(uid)
-                .conversation_id(cid)
-                .attachments(attachments)
-                .timestamp(ts);
+                    builder
+                        .id(mid)
+                        .author(uid)
+                        .conversation_id(cid)
+                        .attachments(attachments)
+                        .timestamp(ts);
 
-            builder.body = body;
-            builder.op = op;
-            builder.expiration = expiration;
+                    builder.body = body;
+                    builder.op = op;
+                    builder.expiration = expiration;
 
-            if let Some(msg) = builder.store()? {
-                ev.notifications.push(Notification::NewMsg(Box::new(msg)));
+                    if let Some(msg) = builder.store()? {
+                        ev.notifications.push(Notification::NewMsg(Box::new(msg)));
+                        ev.replies.push((cid, form_ack(mid)?));
+                    }
+                }
+                cmessages::MsgContent::GroupSettings(settings) => {
+                    let mut conn = crate::db::Database::get()?;
+
+                    let update =
+                        crate::conversation::settings::db::apply_inbound(&conn, settings, &cid)?;
+
+                    let msg = crate::message::db::inbound_group_settings(
+                        &mut conn,
+                        update.clone(),
+                        cid,
+                        mid,
+                        uid,
+                        ts,
+                        expiration,
+                    )?;
+
+                    if let Some(msg) = msg {
+                        ev.notifications.push(Notification::NewMsg(Box::new(msg)));
+                        ev.notifications.push(Notification::Settings(cid, update));
+                    }
+                }
             }
-            ev.replies.push((cid, form_ack(mid)?));
         }
         Receipt(receipt) => {
             let cmessages::Receipt {
@@ -105,40 +140,54 @@ pub(super) fn handle_cmessage(
                     status,
                 }));
         }
-        Reaction(cmessages::Reaction::Add {
+        Reaction(cmessages::Reaction {
             react_content,
             msg_id,
+            remove,
         }) => {
-            crate::message::add_reaction(&msg_id, &uid, &react_content)?;
+            if remove {
+                crate::message::remove_reaction(&msg_id, &uid, &react_content)?;
+            } else {
+                crate::message::add_reaction(&msg_id, &uid, &react_content)?;
+            }
             ev.notifications.push(Notification::Reaction {
                 cid,
                 msg_id,
                 reactionary: uid,
                 content: react_content,
-                remove: false,
+                remove,
             });
         }
-        Reaction(cmessages::Reaction::Remove {
-            react_content,
-            msg_id,
-        }) => {
-            crate::message::add_reaction(&msg_id, &uid, &react_content)?;
-            ev.notifications.push(Notification::Reaction {
-                cid,
-                msg_id,
-                reactionary: uid,
-                content: react_content,
-                remove: true,
-            });
-        }
-        Settings(update) => {
-            conversation::settings::apply(&update, &cid)?;
+        ProfileChanged(change) => {
+            use cmessages::ProfileChanged as U;
+            use herald_user::UserChange::*;
 
-            ev.notifications.push(Notification::Settings(cid, update));
+            match change {
+                U::Color(color) => {
+                    crate::user::set_color(uid, color)?;
+                    ev.notifications
+                        .push(Notification::UserChanged(uid, Color(color)));
+                }
+                U::DisplayName(name) => {
+                    crate::user::set_name(uid, name.as_ref().map(String::as_str))?;
+                    ev.notifications
+                        .push(Notification::UserChanged(uid, DisplayName(name)));
+                }
+                U::Picture(buf) => {
+                    let conn = crate::db::Database::get()?;
+                    let path = crate::user::db::set_profile_picture_buf(
+                        &conn,
+                        uid,
+                        buf.as_ref().map(Vec::as_slice),
+                    )?;
+                    ev.notifications
+                        .push(Notification::UserChanged(uid, Picture(path)));
+                }
+            }
         }
-    }
+    };
 
-    Ok(ev)
+    Ok(())
 }
 
 pub(super) fn handle_dmessage(
@@ -165,7 +214,7 @@ pub(super) fn handle_dmessage(
 
             ev.replies.push((
                 cid,
-                ConversationMessage::UserReqAck(cmessages::UserReqAck(true)),
+                ConversationMessage::Message(NetContent::UserReqAck(cmessages::UserReqAck(true))),
             ))
         }
     }
@@ -174,8 +223,10 @@ pub(super) fn handle_dmessage(
 }
 
 fn form_ack(mid: MsgId) -> Result<ConversationMessage, HErr> {
-    Ok(ConversationMessage::Receipt(cmessages::Receipt {
-        of: mid,
-        stat: MessageReceiptStatus::Received,
-    }))
+    Ok(ConversationMessage::Message(NetContent::Receipt(
+        cmessages::Receipt {
+            of: mid,
+            stat: MessageReceiptStatus::Received,
+        },
+    )))
 }

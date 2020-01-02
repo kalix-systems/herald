@@ -1,5 +1,6 @@
 use super::*;
-use location::Location;
+use coremacros::from_fn;
+use herald_attachments::{Attachment, AttachmentMeta};
 
 #[derive(Default)]
 /// Builder for storing outbound messages
@@ -14,24 +15,24 @@ pub struct OutboundMessageBuilder {
     pub attachments: Vec<PathBuf>,
 }
 
-/// Values `OutboundMessageBuilder`'s `store_and_send` function
-/// can pass into the callback.
-#[derive(Debug)]
+/// Values `OutboundMessageBuilder`'s `store_and_send` function produces
+/// while sending the message
+#[derive(Debug, Clone)]
 pub enum StoreAndSend {
     /// The message being stored and sent
-    Msg(Box<Message>),
-    /// An error accompanied by the line number it occured on
-    Error {
-        /// The error
-        error: HErr,
-        /// The location the error was thrown at
-        location: Location,
-    },
+    Msg(ConversationId, Box<Message>),
     /// A signal that the message has been stored successfully
-    StoreDone(MsgId, AttachmentMeta),
+    StoreDone(ConversationId, MsgId, AttachmentMeta),
     /// A signal that the message has been sent
-    SendDone(MsgId),
+    SendDone(ConversationId, MsgId),
 }
+
+// implement conversion
+from_fn!(
+    crate::updates::Notification,
+    StoreAndSend,
+    crate::updates::Notification::OutboundMsg
+);
 
 impl OutboundMessageBuilder {
     /// Set conversation id
@@ -71,19 +72,17 @@ impl OutboundMessageBuilder {
     }
 
     /// Stores and sends the message
-    pub fn store_and_send<F: FnMut(StoreAndSend) + Send + 'static>(
-        self,
-        callback: F,
-    ) -> Result<(), HErr> {
+    pub fn store_and_send(self) -> Result<(), HErr> {
         let mut db = Database::get()?;
-        self.store_and_send_db(&mut db, callback);
+        self.store_and_send_db(&mut db);
         Ok(())
     }
 
-    #[cfg(test)]
-    pub(crate) fn store_and_send_blocking(self) -> Result<Message, HErr> {
+    /// Stores the message without sending it. This function is meant for testing
+    /// and not intended to be used outside of this workspace.
+    pub fn store(self) -> Result<Message, HErr> {
         let mut db = Database::get()?;
-        self.store_and_send_blocking_db(&mut db)
+        self.store_db(&mut db)
     }
 }
 
@@ -104,7 +103,7 @@ pub(crate) struct InboundMessageBuilder {
     /// Message id of the message being replied to
     pub(crate) op: Option<MsgId>,
     /// Message attachments
-    pub(crate) attachments: Vec<attachments::Attachment>,
+    pub(crate) attachments: Vec<Attachment>,
 }
 
 impl InboundMessageBuilder {
@@ -160,7 +159,7 @@ impl InboundMessageBuilder {
 
     pub(crate) fn attachments(
         &mut self,
-        attachments: Vec<attachments::Attachment>,
+        attachments: Vec<Attachment>,
     ) -> &mut Self {
         self.attachments = attachments;
         self

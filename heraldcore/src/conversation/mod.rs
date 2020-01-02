@@ -36,14 +36,17 @@ pub fn start(conversation: Conversation) -> Result<(), HErr> {
 
     let pairwise = get_pairwise_conversations(&members)?;
 
-    let body = ConversationMessage::AddedToConvo(Box::new(cmessages::AddedToConvo {
-        members,
+    let body = ConversationMessage::AddedToConvo {
+        info: Box::new(cmessages::AddedToConvo {
+            members,
+            cid,
+            title,
+            expiration_period,
+            picture,
+        }),
+
         ratchet,
-        cid,
-        title,
-        expiration_period,
-        picture,
-    }));
+    };
 
     for pw_cid in pairwise {
         crate::network::send_cmessage(pw_cid, &body)?;
@@ -83,8 +86,74 @@ pub fn set_color(
     conversation_id: &ConversationId,
     color: u32,
 ) -> Result<(), HErr> {
-    let db = Database::get()?;
-    db::set_color(&db, conversation_id, color)
+    let mut db = Database::get()?;
+
+    let update = settings::db::update_color(&db, color, conversation_id)?;
+
+    let (mid, expiration) = crate::message::db::outbound_group_settings(
+        &mut db,
+        settings::SettingsUpdate::Color(color),
+        conversation_id,
+    )?;
+
+    crate::network::send_group_settings_message(mid, *conversation_id, expiration, update)?;
+
+    Ok(())
+}
+
+/// Sets title for a conversation
+pub fn set_title(
+    conversation_id: &ConversationId,
+    title: Option<String>,
+) -> Result<(), HErr> {
+    let mut db = Database::get()?;
+    let update = settings::db::update_title(&db, title.clone(), conversation_id)?;
+    let (mid, expiration) = crate::message::db::outbound_group_settings(
+        &mut db,
+        settings::SettingsUpdate::Title(title),
+        conversation_id,
+    )?;
+
+    crate::network::send_group_settings_message(mid, *conversation_id, expiration, update)?;
+    Ok(())
+}
+
+/// Sets picture for a conversation
+pub fn set_picture(
+    conversation_id: &ConversationId,
+    picture: Option<image_utils::ProfilePicture>,
+) -> Result<Option<String>, HErr> {
+    let mut db = Database::get()?;
+
+    let (update, path) = settings::db::update_picture(&db, picture, conversation_id)?;
+
+    let (mid, expiration) = crate::message::db::outbound_group_settings(
+        &mut db,
+        settings::SettingsUpdate::Picture(path.clone()),
+        conversation_id,
+    )?;
+
+    crate::network::send_group_settings_message(mid, *conversation_id, expiration, update)?;
+
+    Ok(path)
+}
+
+/// Sets expiration period for a conversation
+pub fn set_expiration_period(
+    conversation_id: &ConversationId,
+    expiration_period: ExpirationPeriod,
+) -> Result<(), HErr> {
+    let mut db = Database::get()?;
+
+    let update = settings::db::update_expiration(&db, expiration_period, conversation_id)?;
+    let (mid, expiration) = crate::message::db::outbound_group_settings(
+        &mut db,
+        settings::SettingsUpdate::Expiration(expiration_period),
+        conversation_id,
+    )?;
+
+    crate::network::send_group_settings_message(mid, *conversation_id, expiration, update)?;
+    Ok(())
 }
 
 /// Sets muted status of a conversation
@@ -103,33 +172,6 @@ pub fn set_status(
 ) -> Result<(), HErr> {
     let db = Database::get()?;
     db::set_status(&db, conversation_id, status)
-}
-
-/// Sets title for a conversation
-pub fn set_title(
-    conversation_id: &ConversationId,
-    title: Option<&str>,
-) -> Result<(), HErr> {
-    let db = Database::get()?;
-    db::set_title(&db, conversation_id, title)
-}
-
-/// Sets picture for a conversation
-pub fn set_picture(
-    conversation_id: &ConversationId,
-    picture: Option<image_utils::ProfilePicture>,
-) -> Result<Option<String>, HErr> {
-    let db = Database::get()?;
-    db::set_picture(&db, conversation_id, picture)
-}
-
-/// Sets expiration period for a conversation
-pub fn set_expiration_period(
-    conversation_id: &ConversationId,
-    expiration_period: ExpirationPeriod,
-) -> Result<(), HErr> {
-    let db = Database::get()?;
-    db::set_expiration_period(&db, conversation_id, expiration_period)
 }
 
 /// Get metadata of all conversations

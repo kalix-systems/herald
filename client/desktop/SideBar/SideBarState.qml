@@ -13,7 +13,8 @@ Item {
         State {
             name: "newContactState"
             PropertyChanges {
-                target: sideBarPane.sideBarBodyLoader
+                target: sideBarPane.sideBarFlowLoader
+                active: true
                 sourceComponent: newContactComponent
             }
             PropertyChanges {
@@ -27,7 +28,8 @@ Item {
         State {
             name: "newGroupState"
             PropertyChanges {
-                target: sideBarPane.sideBarBodyLoader
+                target: sideBarPane.sideBarFlowLoader
+                active: true
                 sourceComponent: newGroupComponent
             }
 
@@ -58,17 +60,12 @@ Item {
             name: "archivedState"
             PropertyChanges {
                 target: headerLoader
-            }
-
-            PropertyChanges {
-                target: headerLoader
                 sourceComponent: altContextHeader
                 headerText: qsTr("Archive")
             }
-
             PropertyChanges {
                 target: sideBarPane.sideBarBodyLoader
-                sourceComponent: archiveViewComponent
+                archiveState: true
             }
         }
     ]

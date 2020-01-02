@@ -31,7 +31,7 @@ Page {
                 id: backButton
                 color: CmnCfg.palette.iconFill
                 imageSource: "qrc:/back-arrow-icon.svg"
-                tapCallback: function () {
+                onTapped : {
                     mainView.pop(null)
                 }
             }
@@ -137,7 +137,8 @@ Page {
                             "height": Math.round(parsed.height),
                             "x": 0,
                             "y": 0,
-                            "path": imageSelector.imageSource
+                            "path": Herald.utils.stripUrlPrefix(
+                                        imageSelector.imageSource)
                         }
 
                         Herald.conversationBuilder.setProfilePicture(

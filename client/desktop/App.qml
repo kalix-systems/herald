@@ -57,6 +57,20 @@ Item {
         }
     }
 
+    Loader {
+        id: groupSettingsLoader
+        width: active ? chatView.width : 0
+        height: active ? chatView.height : 0
+        anchors.top: active ? parent.top : undefined
+        anchors.right: active ? parent.right : undefined
+        property var convoData
+        property var convoMembers
+        active: false
+        sourceComponent: CvPopups.GroupSettingsPopup {
+            id: groupSettings
+        }
+    }
+
     Popups.ColorPicker {
         id: avatarColorPicker
     }

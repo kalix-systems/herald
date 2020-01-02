@@ -1,5 +1,4 @@
 use super::*;
-use crate::content_push;
 
 pub(crate) struct LoadProps {
     pub(crate) config: Config,
@@ -23,32 +22,8 @@ impl LoadProps {
     }
 }
 
-fn gc_handler(update: gc::GCUpdate) {
-    use crate::messages::MsgUpdate;
-    use gc::GCUpdate::*;
-    use heraldcore::errors::HErr;
-    match update {
-        StaleConversations(convs) => {
-            for (cid, mids) in convs {
-                push_err!(
-                    content_push(cid, MsgUpdate::ExpiredMessages(mids)),
-                    "Couldn't expire messages"
-                );
-            }
-        }
-        GCError(e) => {
-            push_err!(Err::<(), HErr>(e), "Error deleting expired messages");
-        }
-    }
-}
-
 pub(super) fn start_gc() {
     // If this fails, it's because a thread couldn't be spawned.
     // This implies the OS is in a very bad place.
-    push_err!(
-        gc::init(move |update| {
-            gc_handler(update);
-        }),
-        "Couldn't start GC thread"
-    );
+    push_err!(gc::init(), "Couldn't start GC thread");
 }

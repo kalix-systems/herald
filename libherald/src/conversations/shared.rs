@@ -1,5 +1,6 @@
 use super::{types::Data, *};
-use heraldcore::{conversation::settings::SettingsUpdate, types::ConversationId};
+use heraldcore::conversation::settings::SettingsUpdate as CoreSettingsUpdate;
+use heraldcore::types::ConversationId;
 use once_cell::sync::OnceCell;
 use parking_lot::RwLock;
 use std::collections::HashMap;
@@ -7,16 +8,78 @@ use std::collections::HashMap;
 /// Conversation list updates
 #[derive(Debug)]
 pub enum ConvUpdate {
+    Global(GlobalConvUpdate),
+    Item(ConvItemUpdate),
+}
+
+/// An update to the conversations model as a whole
+#[derive(Debug)]
+pub enum GlobalConvUpdate {
     /// A new conversation has been added
     NewConversation(ConversationMeta),
     /// A conversation builder has been finalized
     BuilderFinished(ConversationMeta),
-    /// New activity
-    NewActivity(ConversationId),
-    /// Conversataion settings has been updated
-    Settings(ConversationId, SettingsUpdate),
     /// Initial data, sent when the conversations list is constructed
     Init(Vector<Conversation>),
+}
+
+/// An update to a particular conversation
+#[derive(Debug)]
+pub struct ConvItemUpdate {
+    pub(crate) cid: ConversationId,
+    pub(crate) variant: ConvItemUpdateVariant,
+}
+
+#[derive(Debug)]
+pub enum ConvItemUpdateVariant {
+    /// New activity
+    NewActivity,
+    /// Expiration period has been changed
+    ExpirationChanged(ExpirationPeriod),
+    /// Conversation picture has been changed
+    PictureChanged(Option<String>),
+    /// Conversation title has been changed
+    TitleChanged(Option<String>),
+    /// Conversation color has been changed
+    ColorChanged(u32),
+}
+
+impl From<(ConversationId, CoreSettingsUpdate)> for crate::Update {
+    fn from((cid, update): (ConversationId, CoreSettingsUpdate)) -> Self {
+        use ConvItemUpdateVariant::*;
+        let update = match update {
+            CoreSettingsUpdate::Color(color) => ConvItemUpdate {
+                cid,
+                variant: ColorChanged(color),
+            },
+            CoreSettingsUpdate::Expiration(period) => ConvItemUpdate {
+                cid,
+                variant: ExpirationChanged(period),
+            },
+            CoreSettingsUpdate::Title(title) => ConvItemUpdate {
+                cid,
+                variant: TitleChanged(title),
+            },
+            CoreSettingsUpdate::Picture(path) => ConvItemUpdate {
+                cid,
+                variant: PictureChanged(path),
+            },
+        };
+
+        update.into()
+    }
+}
+
+impl From<GlobalConvUpdate> for crate::Update {
+    fn from(update: GlobalConvUpdate) -> crate::Update {
+        crate::Update::Conv(ConvUpdate::Global(update))
+    }
+}
+
+impl From<ConvItemUpdate> for crate::Update {
+    fn from(update: ConvItemUpdate) -> crate::Update {
+        crate::Update::Conv(ConvUpdate::Item(update))
+    }
 }
 
 impl From<ConvUpdate> for crate::Update {

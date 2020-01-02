@@ -27,12 +27,11 @@ ListView {
         duration: 800
         easing.type: Easing.InCubic
     }
-    spacing: 0
 
+    spacing: 0
     // disable these, we're handling them differently
     keyNavigationEnabled: false
     keyNavigationWraps: false
-
     maximumFlickVelocity: 1500
     flickDeceleration: chatListView.height * 10
 
@@ -67,7 +66,6 @@ ListView {
         model.setElisionLineCount(38)
         model.setElisionCharCount(38 * 40)
         model.setElisionCharsPerLine(40)
-
         chatScrollBarInner.setPosition(1.0)
         cacheBuffer = chatListView.height * 5
         if (chatListView.count === 0) {
@@ -83,74 +81,60 @@ ListView {
         selectExisting: false
     }
 
-    delegate: CB.ChatBubble {
-        id: bubbleActual
-        convContainer: chatListView
-        defaultWidth: chatListView.width
+    delegate: Loader {
+        id: bubbleLoader
+        property var modelData: model
+        sourceComponent: model.auxData.length === 0 ? msgBubble : auxBubble
         width: parent.width
-        messageModelData: model
-        ListView.onAdd: chatScrollBarInner.setPosition(1.0)
-        bubbleIndex: index
+        height: active ? item.height : undefined
 
-        ChatBubbleHover {
-            id: bubbleHoverHandler
-            download: bubbleActual.imageAttach || bubbleActual.docAttach
-            onEntered: {
-                bubbleActual.hoverHighlight = true
-                bubbleActual.expireInfo.visible = false
-            }
-            onExited: {
-                if (reactPopup.active == true) {
-                    bubbleActual.hoverHighlight = true
-                }
+        property var highlightItem: active ? item.highlightItem : undefined
+        Component.onCompleted: if (root.active)
+                                   ownedConversation.markReadById(model.msgId)
 
-                bubbleActual.hoverHighlight = false
-                if (isHead)
-                    bubbleActual.expireInfo.visible = true
-            }
+        Connections {
+            target: root
+            // The additional check is because on deletion, root.active changes due to the popup and
+            // the connections lives a little longer than the parent loader, causing it to attempt to mark read
+            // an undefined msg id
+            onActiveChanged: if (root.active && model.msgId !== undefined) {
+                                 ownedConversation.markReadById(model.msgId)
+                             }
         }
 
-        Popup {
-            id: emojiMenu
-            width: reactPopup.width
-            height: reactPopup.height
-            x: chatListView.width - width
-            onClosed: {
-                reactPopup.active = false
-            }
-            onOpened: {
-                bubbleActual.hoverHighlight = true
-            }
+        Component {
+            id: auxBubble
+            CB.AuxBubble {
+                id: bubbleActual
+                auxData: JSON.parse(model.auxData)
+                messageModelData: model
+                width: parent.width
+                defaultWidth: chatListView.width
+                bubbleIndex: index
 
-            y: {
-                if (bubbleActual.y - chatListView.contentY > height) {
-                    return -height
-                }
-                return CmnCfg.largeMargin * 2
-            }
-
-            Popups.EmojiPopup {
-                id: reactPopup
-                anchors.centerIn: parent
-                isReactPopup: true
-                x: chatListView.width - width
-
-                z: convWindow.z + 1000
-                onActiveChanged: {
-                    if (!active)
-                        emojiMenu.close()
-                }
-
-                anchors {
-                    margins: CmnCfg.smallMargin
+                BubbleDecoration {
+                    parentBubble: parent
                 }
             }
         }
 
-        //TODO: this doesn't actually produce the desired behavior
-        Component.onCompleted: {
-            if (root.active) {
-                ownedConversation.markRead(index)
+        Component {
+            id: msgBubble
+            CB.ChatBubble {
+
+                id: bubbleActual
+                convContainer: chatListView
+                defaultWidth: chatListView.width
+                width: parent.width
+                messageModelData: model
+                ListView.onAdd: {
+                    chatScrollBarInner.setPosition(1.0)
+                    conversationItem.status = 0
+                }
+                bubbleIndex: index
+                BubbleDecoration {
+                    parentBubble: parent
+                }
             }
         }
     }

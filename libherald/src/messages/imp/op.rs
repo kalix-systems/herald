@@ -56,6 +56,13 @@ impl Messages {
         self.container.op_media_attachments_json(index)
     }
 
+    pub(crate) fn op_aux_data_(
+        &self,
+        index: usize,
+    ) -> Option<String> {
+        self.container.op_aux_data_json(index)
+    }
+
     pub(crate) fn op_insertion_time_(
         &self,
         index: usize,

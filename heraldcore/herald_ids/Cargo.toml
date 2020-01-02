@@ -1,0 +1,18 @@
+[package]
+name = "herald_ids"
+version = "0.1.0"
+authors = ["Baeo Maltinsky <baeo.maltinsky@gmail.com>"]
+edition = "2018"
+
+[dependencies.herald_common]
+path             = "../../herald_common"
+default_features = false
+features         = ["rusqlite_"]
+
+[dependencies.rusqlite]
+version          = "0.21"
+default_features = false
+features         = ["functions", "bundled"]
+
+[dependencies.kson]
+path = "../../kson"

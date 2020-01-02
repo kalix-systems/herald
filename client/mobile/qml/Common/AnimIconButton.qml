@@ -5,28 +5,29 @@ import LibHerald 1.0
 
 // TODO this should use IconButton in foundation
 ToolButton {
-
-    property var tapCallback: function anon() {
-        throw "undefined callback"
-    }
+    id: tb
     property string imageSource: ""
     property color color: CmnCfg.palette.iconMatte
-
-    property size iconSize: Qt.size(CmnCfg.iconSize,
-                                    CmnCfg.iconSize)
-    background: Rectangle {
-        id: splash
-        color: CmnCfg.palette.iconMatte
-        anchors.centerIn: parent
-        opacity: 0
-        height: width
-        radius: height
-    }
+    property size iconSize: Qt.size(CmnCfg.iconSize, CmnCfg.iconSize)
+    signal tapped
 
     TapHandler {
         onTapped: {
-            tapAnim.running = true
+            splash.x = eventPoint.position.x - splash.width / 2
+            splash.y = eventPoint.position.y - splash.height / 2
+            tapAnim.start()
+            parent.tapped()
         }
+    }
+
+    // buttons "onClicked" property does not work on mobile
+    // so I made a tapped signal, because there is not one by defaultx
+    background: Rectangle {
+        id: splash
+        color: CmnCfg.palette.iconMatte
+        opacity: 0
+        height: width
+        radius: height
     }
 
     padding: 0
@@ -52,9 +53,6 @@ ToolButton {
             to: 0
             duration: CmnCfg.units.shortDuration
             easing.type: Easing.InQuad
-        }
-        onFinished: {
-            tapCallback()
         }
     }
 }
