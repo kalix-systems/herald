@@ -367,5 +367,5 @@ fn outbound_aux() {
     let conv = receiver.pairwise_conversation;
 
     let update = coretypes::conversation::settings::SettingsUpdate::Color(1);
-    db::outbound_group_settings(&mut conn, update, &conv).expect(womp!());
+    db::outbound_aux(&mut conn, update, &conv).expect(womp!());
 }

@@ -138,7 +138,7 @@ impl ReplyId {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Item {
     Plain(PlainItem),
-    Aux(crate::conversation::settings::SettingsUpdate),
+    Aux(AuxItem),
 }
 
 /// An normal item in the message history
@@ -187,6 +187,16 @@ impl Item {
         }
     }
 }
+
+#[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
+pub enum AuxItem {
+    GroupSettings(crate::conversation::settings::SettingsUpdate),
+    NewMembers(NewMembers),
+}
+
+#[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
+/// Members that have just been added to a conversation.
+pub struct NewMembers(pub Vec<UserId>);
 
 #[derive(Clone, Copy, Debug)]
 /// Time data relating to messages

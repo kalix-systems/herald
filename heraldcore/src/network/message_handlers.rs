@@ -65,12 +65,6 @@ fn handle_content(
         UserReqAck(cr) => ev
             .notifications
             .push(Notification::AddUserResponse(cid, uid, cr.0)),
-        NewMembers(nm) => {
-            let mut db = crate::db::Database::get()?;
-            let tx = db.transaction()?;
-            crate::members::db::add_members_with_tx(&tx, cid, &nm.0)?;
-            tx.commit()?;
-        }
         Msg(msg) => {
             let cmessages::Msg {
                 mid,
@@ -108,7 +102,7 @@ fn handle_content(
                     let update =
                         crate::conversation::settings::db::apply_inbound(&conn, settings, &cid)?;
 
-                    let msg = crate::message::db::inbound_group_settings(
+                    let msg = crate::message::db::inbound_aux(
                         &mut conn,
                         update.clone(),
                         cid,
@@ -121,6 +115,20 @@ fn handle_content(
                     if let Some(msg) = msg {
                         ev.notifications.push(Notification::NewMsg(Box::new(msg)));
                         ev.notifications.push(Notification::Settings(cid, update));
+                    }
+                }
+                cmessages::MsgContent::NewMembers(nm) => {
+                    let mut conn = crate::db::Database::get()?;
+                    let tx = conn.transaction()?;
+                    crate::members::db::add_members_with_tx(&tx, cid, &nm.0)?;
+                    tx.commit()?;
+
+                    let msg = crate::message::db::inbound_aux(
+                        &mut conn, nm, cid, mid, uid, ts, expiration,
+                    )?;
+
+                    if let Some(msg) = msg {
+                        ev.notifications.push(Notification::NewMsg(Box::new(msg)));
                     }
                 }
             }
@@ -204,7 +212,7 @@ fn handle_content(
                         crate::conversation::get_pairwise_conversations(&[uid])?.pop()
                     {
                         ev.notifications
-                            .push(Notification::Settings(cid, S::Picture(path.clone())));
+                            .push(Notification::Settings(cid, S::Picture(path)));
                     }
                 }
             }

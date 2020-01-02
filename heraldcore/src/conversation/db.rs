@@ -1,5 +1,5 @@
 use super::*;
-use crate::message::{Item as MsgItem, MessageBody, MessageTime};
+use crate::message::{AuxItem, Item as MsgItem, MessageBody, MessageTime};
 use coremacros::w;
 use rusqlite::named_params;
 
@@ -44,8 +44,7 @@ pub(crate) fn conversation_messages(
             let op = (op, is_reply).into();
 
             let body: Option<MessageBody> = row.get("body")?;
-            let update: Option<coretypes::conversation::settings::SettingsUpdate> =
-                row.get("update_item")?;
+            let update: Option<AuxItem> = row.get("aux_item")?;
             let content = MsgItem::from_parts(body, Some(attachments), op, update);
 
             Ok(Message {

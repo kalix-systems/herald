@@ -1,4 +1,5 @@
 use super::*;
+use coremacros::from_fn;
 use herald_common::Time;
 use std::convert::TryFrom;
 
@@ -139,20 +140,23 @@ impl std::convert::TryFrom<i64> for MessageReceiptStatus {
 }
 
 impl Item {
-    pub fn from_parts(
+    pub fn from_parts<T>(
         body: Option<MessageBody>,
         attachments: Option<AttachmentMeta>,
         op: ReplyId,
-        update: Option<crate::conversation::settings::SettingsUpdate>,
-    ) -> Option<Item> {
-        match (body, update) {
+        aux: Option<T>,
+    ) -> Option<Item>
+    where
+        T: Into<AuxItem>,
+    {
+        match (body, aux) {
             (Some(body), None) => Item::Plain(PlainItem {
                 body: Some(body),
                 attachments: attachments.unwrap_or_default(),
                 op,
             })
             .into(),
-            (None, Some(update)) => Item::Aux(update).into(),
+            (None, Some(aux)) => Item::Aux(aux.into()).into(),
             _ => None,
         }
     }
@@ -235,3 +239,13 @@ impl From<Reactions> for json::JsonValue {
         content.into()
     }
 }
+
+from_fn!(AuxItem, NewMembers, AuxItem::NewMembers);
+from_fn!(
+    AuxItem,
+    crate::conversation::settings::SettingsUpdate,
+    AuxItem::GroupSettings
+);
+
+from_fn!(Item, AuxItem, Item::Aux);
+from_fn!(Item, PlainItem, Item::Plain);

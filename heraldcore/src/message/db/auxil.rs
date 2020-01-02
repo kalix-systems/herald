@@ -1,8 +1,8 @@
 use super::*;
 
-pub(crate) fn inbound_group_settings(
+pub(crate) fn inbound_aux<T: Into<AuxItem>>(
     conn: &mut Conn,
-    update: coretypes::conversation::settings::SettingsUpdate,
+    aux_item: T,
     cid: ConversationId,
     mid: MsgId,
     uid: UserId,
@@ -28,15 +28,17 @@ pub(crate) fn inbound_group_settings(
     // this can be inferred from the fact that this message was received
     let send_status = MessageSendStatus::Ack;
 
+    let aux_item: AuxItem = aux_item.into();
+
     let tx = w!(conn.transaction());
 
     let num_updated = w!(tx.execute_named(
-        include_str!("../sql/add_update.sql"),
+        include_str!("../sql/add_aux.sql"),
         named_params! {
             "@msg_id": mid,
             "@author": uid,
             "@conversation_id": cid,
-            "@update_item": update,
+            "@aux_item": aux_item,
             "@send_status": send_status,
             "@insertion_ts": time.insertion,
             "@server_ts": time.server,
@@ -68,14 +70,14 @@ pub(crate) fn inbound_group_settings(
         receipts,
         reactions,
         replies,
-        content: coretypes::messages::Item::Aux(update).into(),
+        content: Some(aux_item.into()),
         time,
     }))
 }
 
-pub(crate) fn outbound_group_settings(
+pub(crate) fn outbound_aux<T: Into<AuxItem>>(
     conn: &mut Conn,
-    update: coretypes::conversation::settings::SettingsUpdate,
+    aux: T,
     cid: &ConversationId,
 ) -> Result<(MsgId, Option<Time>), HErr> {
     let author = crate::config::db::id(&conn)?;
@@ -96,6 +98,8 @@ pub(crate) fn outbound_group_settings(
     let send_status = MessageSendStatus::NoAck;
     let mid = MsgId::gen_new();
 
+    let aux_item = aux.into();
+
     let msg = Message {
         message_id: mid,
         author,
@@ -104,7 +108,7 @@ pub(crate) fn outbound_group_settings(
         receipts: Default::default(),
         reactions: Default::default(),
         replies: Default::default(),
-        content: coretypes::messages::Item::Aux(update.clone()).into(),
+        content: Some(aux_item.clone().into()),
         time,
     };
 
@@ -113,12 +117,12 @@ pub(crate) fn outbound_group_settings(
     let tx = w!(conn.transaction());
 
     w!(tx.execute_named(
-        include_str!("../sql/add_update.sql"),
+        include_str!("../sql/add_aux.sql"),
         named_params! {
             "@msg_id": mid,
             "@author": author,
             "@conversation_id": cid,
-            "@update_item": update,
+            "@aux_item": aux_item,
             "@send_status": send_status,
             "@insertion_ts": time.insertion,
             "@server_ts": time.server,

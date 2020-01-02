@@ -1,7 +1,6 @@
 use super::*;
 use crate::{conversation::db::expiration_period, message::MessageTime};
 use coremacros::w;
-use coretypes::conversation::settings::SettingsUpdate as Update;
 use herald_attachments::Attachment;
 use rusqlite::{named_params, Connection as Conn};
 use std::collections::HashSet;
@@ -14,7 +13,7 @@ use reactions::*;
 pub(crate) mod replies;
 use replies::*;
 mod auxil;
-pub(crate) use auxil::{inbound_group_settings, outbound_group_settings};
+pub(crate) use auxil::{inbound_aux, outbound_aux};
 
 /// Get message by message id
 pub(crate) fn get_message(
@@ -45,7 +44,7 @@ pub(crate) fn get_message(
             let op = (op, is_reply).into();
 
             let body: Option<MessageBody> = row.get("body")?;
-            let update: Option<Update> = row.get("update_item")?;
+            let update: Option<AuxItem> = row.get("aux_item")?;
             let content = Item::from_parts(body, Some(attachments), op, update);
 
             Ok(Message {
@@ -107,7 +106,7 @@ pub(crate) fn message_data(
             let op = (op, is_reply).into();
 
             let body: Option<MessageBody> = row.get("body")?;
-            let update: Option<Update> = row.get("update_item")?;
+            let update: Option<AuxItem> = row.get("aux_item")?;
             let content = Item::from_parts(body, Some(attachments), op, update);
 
             Ok(MsgData {
@@ -152,7 +151,7 @@ pub(crate) fn get_message_opt(
             let op = (op, is_reply).into();
 
             let body: Option<MessageBody> = row.get("body")?;
-            let update: Option<Update> = row.get("update_item")?;
+            let update: Option<AuxItem> = row.get("aux_item")?;
             let content = Item::from_parts(body, Some(attachments), op, update);
 
             Ok(Message {
@@ -215,7 +214,7 @@ pub(crate) fn by_send_status(
             let op = (op, is_reply).into();
 
             let body: Option<MessageBody> = row.get("body")?;
-            let update: Option<Update> = row.get("update_item")?;
+            let update: Option<AuxItem> = row.get("aux_item")?;
             let content = Item::from_parts(body, Some(attachments), op, update);
 
             Ok(Message {

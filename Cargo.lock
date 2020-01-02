@@ -299,6 +299,7 @@ version = "0.1.0"
 name = "coretypes"
 version = "0.1.0"
 dependencies = [
+ "coremacros 0.1.0",
  "herald_attachments 0.1.0",
  "herald_common 0.1.0",
  "herald_ids 0.1.0",

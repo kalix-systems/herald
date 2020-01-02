@@ -1,9 +1,8 @@
 use super::*;
+use coretypes::messages::NewMembers;
 
 #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
 pub enum Content {
-    /// Members just added to a conversation
-    NewMembers(NewMembers),
     /// An acknowledgement of a contact request.
     UserReqAck(UserReqAck),
     /// A normal message.
@@ -15,10 +14,6 @@ pub enum Content {
     /// The sender's profile has changed
     ProfileChanged(ProfileChanged),
 }
-
-#[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
-/// Members that have just been added to a conversation.
-pub struct NewMembers(pub Vec<UserId>);
 
 #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
 /// An acknowledgement of a user request, with a bool to indicate whether the
@@ -41,6 +36,7 @@ pub struct Msg {
 pub enum MsgContent {
     Normal(Message),
     GroupSettings(GroupSettingsUpdate),
+    NewMembers(NewMembers),
 }
 
 #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
