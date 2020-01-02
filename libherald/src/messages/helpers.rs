@@ -11,6 +11,7 @@ impl Messages {
         self.emit.last_body_changed();
         self.emit.last_time_changed();
         self.emit.last_status_changed();
+        self.emit.last_aux_code_changed();
     }
 
     pub(super) fn entry_changed(

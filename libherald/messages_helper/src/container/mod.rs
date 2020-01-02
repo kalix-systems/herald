@@ -178,7 +178,9 @@ impl Container {
             Item::Aux(update) => Some(update.clone()),
 
             _ => None,
-        })??;
+        })
+        .flatten()?;
+
         update.code().into()
     }
 

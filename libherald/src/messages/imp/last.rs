@@ -12,7 +12,8 @@ impl Messages {
     }
 
     pub(crate) fn last_aux_code_(&self) -> Option<u8> {
-        self.container.last_aux_code()
+        self.container
+            .aux_data_code_by_id(&self.container.list.front()?.msg_id)
     }
 
     pub(crate) fn last_body_(&self) -> Option<&str> {
