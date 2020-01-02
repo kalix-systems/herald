@@ -149,7 +149,11 @@ pub fn home_server() -> Result<std::net::SocketAddr, HErr> {
 /// Updates user's display name
 pub fn set_name(name: String) -> Result<(), HErr> {
     let db = Database::get()?;
-    db::set_name(&db, name)
+    db::set_name(&db, name.as_str())?;
+    crate::network::send_profile_update(network_types::cmessages::ProfileChanged::DisplayName(
+        name.into(),
+    ))?;
+    Ok(())
 }
 
 /// Updates user's profile picture
@@ -157,7 +161,13 @@ pub fn set_profile_picture(
     profile_picture: Option<image_utils::ProfilePicture>
 ) -> Result<Option<String>, HErr> {
     let db = Database::get()?;
-    db::set_profile_picture(&db, profile_picture)
+    let path = db::set_profile_picture(&db, profile_picture)?;
+
+    let buf = path.as_ref().map(std::fs::read).transpose()?;
+
+    crate::network::send_profile_update(network_types::cmessages::ProfileChanged::Picture(buf))?;
+
+    Ok(path)
 }
 
 /// Update user's preferred expiration period
@@ -169,7 +179,9 @@ pub fn set_preferred_expiration(period: ExpirationPeriod) -> Result<(), HErr> {
 /// Update user's color
 pub fn set_color(color: u32) -> Result<(), HErr> {
     let db = Database::get()?;
-    db::set_color(&db, color)
+    db::set_color(&db, color)?;
+    crate::network::send_profile_update(network_types::cmessages::ProfileChanged::Color(color))?;
+    Ok(())
 }
 
 /// Update user's colorscheme

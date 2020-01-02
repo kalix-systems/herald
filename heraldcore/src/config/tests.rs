@@ -53,11 +53,11 @@ fn complicated_add_get_set_config() {
     assert_eq!(db_config.colorscheme, 1);
     assert_eq!(db_config.color, 2);
 
-    db::set_name(&conn, "test".to_owned()).expect(womp!());
+    db::set_name(&conn, "test").expect(womp!());
     let db_config = db::get(&conn).expect(womp!());
     assert_eq!(db_config.name, "test");
 
-    db::set_name(&conn, "hello".to_owned()).expect(womp!());
+    db::set_name(&conn, "hello").expect(womp!());
 
     let db_config = db::get(&conn).expect(womp!());
     assert_eq!(db_config.name, "hello");
