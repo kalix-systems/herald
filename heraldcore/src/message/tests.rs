@@ -205,8 +205,7 @@ fn message_send_status_updates() {
     );
 
     assert_eq!(
-        crate::conversation::conversation_messages(&conv_id)
-            .expect(womp!("failed to get conversation by author"))[0]
+        conversation_messages(&conv_id).expect(womp!("failed to get conversation by author"))[0]
             .send_status,
         MessageSendStatus::Ack
     );

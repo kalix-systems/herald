@@ -189,7 +189,7 @@ impl Messages {
         self.builder.set_conversation_id(id);
 
         spawn!({
-            let list: Vec<MessageMeta> = err!(conversation::conversation_message_meta(&id));
+            let list: Vec<MessageMeta> = err!(heraldcore::message::conversation_message_meta(&id));
 
             let last = match list.last().as_ref() {
                 Some(MessageMeta { ref msg_id, .. }) => {

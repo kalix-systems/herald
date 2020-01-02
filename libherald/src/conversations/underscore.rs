@@ -203,7 +203,10 @@ impl super::Conversations {
             return false;
         }
 
-        spawn!(err!(conversation::delete_conversation(&cid)), false);
+        spawn!(
+            err!(heraldcore::message::delete_conversation_messages(&cid)),
+            false
+        );
 
         self.model.begin_remove_rows(index, index);
         self.list.remove(index);

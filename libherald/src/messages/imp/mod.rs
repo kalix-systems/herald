@@ -5,7 +5,7 @@ use crate::{
     none, spawn,
 };
 use heraldcore::{
-    config, conversation,
+    config,
     message::{self, MessageReceiptStatus, MsgData},
 };
 use messages_helper::search::SearchState;
@@ -74,7 +74,7 @@ impl Messages {
     pub(crate) fn clear_conversation_history_(&mut self) -> bool {
         let id = none!(self.conversation_id, false);
 
-        spawn!(conversation::delete_conversation(&id), false);
+        spawn!(message::delete_conversation_messages(&id), false);
 
         self.clear_search();
         self.model

@@ -6,7 +6,6 @@ use crate::{
 };
 use herald_common::UserId;
 use heraldcore::{
-    conversation,
     message::{Elider, MessageReceiptStatus},
     types::*,
 };
