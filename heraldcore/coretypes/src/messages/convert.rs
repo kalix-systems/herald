@@ -152,20 +152,13 @@ impl Item {
         T: Into<AuxItem>,
     {
         match (body, attachments, aux) {
-            (None, None, Some(aux)) => Item::Aux(aux.into()).into(),
-            (Some(body), attachments, None) => Item::Plain(PlainItem {
-                body: Some(body),
+            (_, _, Some(aux)) => Item::Aux(aux.into()).into(),
+            (body, attachments, None) => Item::Plain(PlainItem {
+                body,
                 attachments: attachments.unwrap_or_default(),
                 op,
             })
             .into(),
-            (None, attachments, None) => Item::Plain(PlainItem {
-                body: None,
-                attachments: attachments.unwrap_or_default(),
-                op,
-            })
-            .into(),
-            _ => None,
         }
     }
 }
