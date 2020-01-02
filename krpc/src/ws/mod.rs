@@ -6,7 +6,7 @@ use futures::{
 use sharded_slab::*;
 use std::{cmp::min, ops::Deref, sync::Arc};
 use tokio::sync::{
-    mpsc::{unbounded_channel as channel, UnboundedSender as Sender},
+    mpsc::{unbounded_channel, UnboundedSender},
     oneshot,
 };
 use tokio_tungstenite::WebSocketStream;
@@ -66,7 +66,7 @@ where
     let (wtx, wrx) = ws.split();
 
     let awaiting_acks: Slab<_> = Slab::new();
-    let (sframe_tx, sframe_rx) = channel::<ServerFrame<P::Res, P::Push>>();
+    let (sframe_tx, sframe_rx) = unbounded_channel::<ServerFrame<P::Res, P::Push>>();
 
     let send_sframes = sframe_rx
         .map(|s| Ok(Message::Binary(s.to_vec())))
@@ -208,7 +208,7 @@ where
     P: Protocol,
     K: KrpcClient<P>,
 {
-    rtx: Sender<ClientFrame<P::Req, P::PushAck>>,
+    rtx: UnboundedSender<ClientFrame<P::Req, P::PushAck>>,
     awaiting: Arc<Slab<PendingReq<P::Req, P::Res>>>,
     inner: Arc<K>,
 }
@@ -256,7 +256,7 @@ where
         let ws = WebSocketStream::from_raw_socket(tls, Role::Client, Some(ws_config)).await;
         let (wtx, wrx) = ws.split();
 
-        let (cframe_tx, cframe_rx) = channel::<ClientFrame<P::Req, P::PushAck>>();
+        let (cframe_tx, cframe_rx) = unbounded_channel::<ClientFrame<P::Req, P::PushAck>>();
 
         let acli = Client {
             rtx: cframe_tx.clone(),
@@ -281,7 +281,7 @@ where
                 })
             })
             .and_then(|b| future::ready(<ServerFrame<P::Res, P::Push>>::from_bytes(b)))
-            .try_for_each_concurrent(max(P::MAX_CONCURRENT_PUSHES, P::MAX_CONCURRENT_REQS), {
+            .try_for_each_concurrent(P::MAX_CONCURRENT_PUSHES + P::MAX_CONCURRENT_REQS, {
                 let cframe_tx = cframe_tx.clone();
                 let client = acli.clone();
                 move |s| {
