@@ -152,6 +152,7 @@ struct ConversationContentPtrBundle {
   void (*message_builder_end_remove_rows)(MessageBuilder *);
   void (*messages_is_empty_changed)(Messages *);
   void (*messages_last_author_changed)(Messages *);
+  void (*messages_last_aux_code_changed)(Messages *);
   void (*messages_last_body_changed)(Messages *);
   void (*messages_last_status_changed)(Messages *);
   void (*messages_last_time_changed)(Messages *);
@@ -551,6 +552,7 @@ struct MessagesPtrBundle {
   void (*message_builder_end_remove_rows)(MessageBuilder *);
   void (*messages_is_empty_changed)(Messages *);
   void (*messages_last_author_changed)(Messages *);
+  void (*messages_last_aux_code_changed)(Messages *);
   void (*messages_last_body_changed)(Messages *);
   void (*messages_last_status_changed)(Messages *);
   void (*messages_last_time_changed)(Messages *);
@@ -1648,6 +1650,8 @@ private:
   Q_PROPERTY(MessageBuilder *builder READ builder NOTIFY builderChanged FINAL)
   Q_PROPERTY(bool isEmpty READ isEmpty NOTIFY isEmptyChanged FINAL)
   Q_PROPERTY(QString lastAuthor READ lastAuthor NOTIFY lastAuthorChanged FINAL)
+  Q_PROPERTY(
+      QVariant lastAuxCode READ lastAuxCode NOTIFY lastAuxCodeChanged FINAL)
   Q_PROPERTY(QString lastBody READ lastBody NOTIFY lastBodyChanged FINAL)
   Q_PROPERTY(QVariant lastStatus READ lastStatus NOTIFY lastStatusChanged FINAL)
   Q_PROPERTY(QVariant lastTime READ lastTime NOTIFY lastTimeChanged FINAL)
@@ -1670,6 +1674,7 @@ public:
   MessageBuilder *builder();
   bool isEmpty() const;
   QString lastAuthor() const;
+  QVariant lastAuxCode() const;
   QString lastBody() const;
   QVariant lastStatus() const;
   QVariant lastTime() const;
@@ -1765,6 +1770,7 @@ Q_SIGNALS:
   void builderChanged();
   void isEmptyChanged();
   void lastAuthorChanged();
+  void lastAuxCodeChanged();
   void lastBodyChanged();
   void lastStatusChanged();
   void lastTimeChanged();

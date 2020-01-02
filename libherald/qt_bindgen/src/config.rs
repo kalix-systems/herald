@@ -254,6 +254,7 @@ fn messages() -> Object {
         // Insertion time of last available message
         lastTime: Prop::new().simple(Qint64).optional(),
         lastStatus: Prop::new().simple(QUint32).optional(),
+        lastAuxCode: Prop::new().simple(QUint8).optional(),
         isEmpty: Prop::new().simple(Bool),
         searchPattern: filter_prop(),
         searchRegex: filter_regex_prop(),

@@ -32,6 +32,7 @@ impl Interface for Messages {
     fn last_time(&self) -> Option<i64> {
         self.last_time_()
     }
+    fn last_aux_code(&self) -> Option<u8> {}
 
     fn index_by_id(
         &self,

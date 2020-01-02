@@ -15,7 +15,7 @@ pub enum SettingsUpdate {
 }
 
 impl SettingsUpdate {
-    fn code(&self) -> u8 {
+    pub fn code(&self) -> u8 {
         use SettingsUpdate::*;
         match self {
             Expiration(_) => 0,

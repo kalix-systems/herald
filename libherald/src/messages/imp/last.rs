@@ -11,6 +11,10 @@ impl Messages {
         }
     }
 
+    pub(crate) fn last_aux_code_(&self) -> Option<u8> {
+        self.container.last_aux_code()
+    }
+
     pub(crate) fn last_body_(&self) -> Option<&str> {
         self.container.last_msg()?.text()
     }
