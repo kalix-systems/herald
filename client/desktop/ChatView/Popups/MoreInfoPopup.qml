@@ -7,7 +7,7 @@ import QtQuick.Dialogs 1.3
 import "qrc:/imports"
 import QtGraphicalEffects 1.0
 import "../../common" as Common
-import "qrc:/imports/Entity" as Av
+import "qrc:/imports/Entity" as Ent
 import "qrc:/imports/js/utils.mjs" as Utils
 import "qrc:/imports/ChatBubble" as CB
 import "qrc:/imports" as Imports
@@ -117,7 +117,7 @@ Popup {
                     picture: Utils.safeStringOrDefault(
                                  messageData.authorProfilePicture, "")
                     color: CmnCfg.palette.white
-                    labelComponent: Av.ContactLabel {
+                    labelComponent: Ent.ContactLabel {
                         displayName: messageData.authorName
                         username: messageData.author
                         labelColor: CmnCfg.palette.black
@@ -181,6 +181,8 @@ Popup {
                 delegate: Item {
                     height: visible ? CmnCfg.convoHeight : 0
                     width: 250
+                    // TODO special-case Note to Self conversations so they
+                    // don't have an empty recipient list
                     visible: memberData.userId !== messageData.author
                     property var memberData: model
                     Common.PlatonicRectangle {
@@ -190,7 +192,7 @@ Popup {
                                                            "")
                         property MouseArea hoverHandler
                         color: CmnCfg.palette.white
-                        labelComponent: Av.ContactLabel {
+                        labelComponent: Ent.ContactLabel {
                             displayName: memberData.name
                             username: memberData.userId
                             labelColor: CmnCfg.palette.black
