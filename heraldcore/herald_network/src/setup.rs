@@ -26,7 +26,7 @@ where
 }
 
 pub(super) async fn register_inner<PH, RH, CF>(
-    uid_rx: Receiver<register::ClientEvent>,
+    client_rx: Receiver<register::ClientEvent>,
     keys: sig::KeyPair,
     server_dns: String,
     server_port: u16,
@@ -42,14 +42,13 @@ where
     let (response_tx, mut response_rx) = channel(1);
 
     let (client, rx, err_rx) =
-        Client::register(uid_rx, response_tx, keys, &server_dns, server_port).await?;
+        Client::register(client_rx, response_tx, keys, &server_dns, server_port).await?;
 
     while let Some(response) = response_rx.recv().await {
         response_handler(response);
     }
 
     update_client(client);
-
     handle_events(push_handler, connection_failed, rx, err_rx).await;
 
     Ok::<(), Error>(())
@@ -65,7 +64,7 @@ async fn handle_events<PH, CF>(
     CF: FnOnce() + Send + 'static,
 {
     tokio::spawn(async move {
-        if let Err(_) = err_rx.await {
+        if err_rx.await.is_err() {
             connection_failed();
         }
     });
@@ -73,6 +72,8 @@ async fn handle_events<PH, CF>(
     while let Some(push) = rx.recv().await {
         push_handler(push);
     }
+
+    drop(CLIENT.get().map(|c| c.read().quit()));
 }
 
 fn update_client(client: Client) {
