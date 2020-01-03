@@ -42,33 +42,33 @@ Page {
                 font {
                     bold: true
                     family: CmnCfg.labelFont.name
-                    pixelSize: CmnCfg.units.dp(20)
+                    pixelSize: CmnCfg.units.dp(18)
                 }
             }
             Row {
-                spacing: CmnCfg.defaultMargin
+                spacing: CmnCfg.smallMargin
                 Av.Avatar {
                     color: CmnCfg.avatarColors[referredChatBubble.messageModelData.authorColor]
                     initials: referredChatBubble.authorName[0].toUpperCase()
                     pfpPath: Utils.safeStringOrDefault(
                                  referredChatBubble.messageModelData.authorProfilePicture)
-                    size: CmnCfg.units.dp(80)
                 }
-                ColumnLayout {
-                    height: parent.height
-                    spacing: 0
+                Column {
+                    spacing: CmnCfg.smallMargin
                     Text {
-                        padding: 0
                         text: referredChatBubble.messageModelData.authorName
-                        font: fromLabel.font
+                        font.bold: true
                     }
                     Text {
-                        padding: 0
                         text: "@" + referredChatBubble.messageModelData.author
-                        font: fromLabel.font
+                        font.bold: true
                     }
                 }
             }
+        }
+
+        Item {
+            Layout.fillHeight: true
         }
     }
 }
