@@ -240,9 +240,11 @@ impl HClient {
                 .ok_or_else(|| anyhow!("host {} resolved to no IPs", server_dns))?,
         )
         .await?;
+
+        //TODO: something more sensible here?
         tokio::spawn(driver.unwrap_or_else(|e| panic!()));
         let out = HClient { inner };
-        todo!()
+        Ok((out, prx))
     }
 
     pub async fn register(
@@ -270,9 +272,11 @@ impl HClient {
                 .ok_or_else(|| anyhow!("host {} resolved to no IPs", server_dns))?,
         )
         .await?;
+
+        //TODO: something more sensible here?
         tokio::spawn(driver.unwrap_or_else(|e| panic!()));
         let out = HClient { inner };
-        todo!()
+        Ok((out, prx))
     }
 
     pub fn req(
