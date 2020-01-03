@@ -17,17 +17,12 @@ pub use cache::{access, get, update};
 /// Container type for messages
 pub struct Container {
     pub list: Revec<MessageMeta>,
-    last: Option<MsgData>,
     op_body_elider: Elider,
 }
 
 impl Container {
-    pub fn new(
-        list: Vec<MessageMeta>,
-        last: Option<MsgData>,
-    ) -> Self {
+    pub fn new(list: Vec<MessageMeta>) -> Self {
         Self {
-            last,
             list: list.into(),
             op_body_elider: Elider {
                 line_count: 3,
@@ -57,10 +52,6 @@ impl Container {
         mid: &MsgId,
     ) -> Option<MsgData> {
         cache::get(mid)
-    }
-
-    pub fn last_msg(&self) -> Option<&MsgData> {
-        self.last.as_ref()
     }
 
     pub fn msg_data(
@@ -161,12 +152,27 @@ impl Container {
         &self,
         msg_id: &MsgId,
     ) -> Option<String> {
-        let update = cache::access(msg_id, |data| match data.content.as_ref()? {
+        let update = cache::access(msg_id, |data| match &data.content {
             Item::Aux(update) => Some(update.clone()),
             _ => None,
-        })??;
+        })
+        .flatten()?;
 
         json::JsonValue::from(update).dump().into()
+    }
+
+    pub fn aux_data_code_by_id(
+        &self,
+        msg_id: &MsgId,
+    ) -> Option<u8> {
+        let update = cache::access(msg_id, |data| match &data.content {
+            Item::Aux(update) => Some(update.clone()),
+
+            _ => None,
+        })
+        .flatten()?;
+
+        update.code().into()
     }
 
     /// Removes the item from the container. *Does not modify disk storage*.
@@ -175,16 +181,7 @@ impl Container {
         ix: usize,
     ) -> Option<MsgData> {
         let msg = self.list.remove(ix)?;
-        let data = cache::remove(&msg.msg_id);
-
-        if ix == 0 {
-            self.last = self
-                .list
-                .front()
-                .and_then(|MessageMeta { ref msg_id, .. }| cache::get(msg_id));
-        }
-
-        data
+        cache::remove(&msg.msg_id)
     }
 
     pub fn binary_search(
@@ -210,13 +207,6 @@ impl Container {
 
         let ix = self.list.insert_ord(msg);
         cache::insert(mid, data);
-
-        if ix == 0 {
-            self.last = self
-                .list
-                .front()
-                .and_then(|MessageMeta { ref msg_id, .. }| cache::get(msg_id));
-        }
 
         ix
     }
@@ -373,7 +363,7 @@ impl Container {
     ) -> Option<()> {
         for id in ids.into_iter() {
             let changed = update(&id, |data| match data.content {
-                Some(Item::Plain(PlainItem { ref mut op, .. })) => {
+                Item::Plain(PlainItem { ref mut op, .. }) => {
                     if *op != ReplyId::Dangling {
                         *op = ReplyId::Dangling;
                         true
@@ -399,13 +389,8 @@ impl Container {
         a_ix: usize,
         b_ix: usize,
     ) -> Option<bool> {
-        let flurry_info = |data: &MsgData| {
-            (
-                data.author,
-                data.time.insertion,
-                data.content.as_ref().map(Item::is_plain).unwrap_or(false),
-            )
-        };
+        let flurry_info =
+            |data: &MsgData| (data.author, data.time.insertion, data.content.is_plain());
 
         let (a_author, a_ts, a_is_plain) = self.access_by_index(a_ix, flurry_info)?;
         let (b_author, b_ts, b_is_plain) = self.access_by_index(b_ix, flurry_info)?;

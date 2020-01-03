@@ -249,11 +249,13 @@ fn emoji_picker() -> Object {
 
 fn messages() -> Object {
     let props = props! {
-        lastAuthor: Prop::new().simple(QString).optional(),
-        lastBody: Prop::new().simple(QString).optional(),
+        lastAuthor: Prop::new().simple(QString).optional().get_by_value(),
+        lastBody: Prop::new().simple(QString).optional().get_by_value(),
         // Insertion time of last available message
         lastTime: Prop::new().simple(Qint64).optional(),
         lastStatus: Prop::new().simple(QUint32).optional(),
+        lastAuxCode: Prop::new().simple(QUint8).optional(),
+        lastHasAttachments: Prop::new().simple(Bool).optional(),
         isEmpty: Prop::new().simple(Bool),
         searchPattern: filter_prop(),
         searchRegex: filter_regex_prop(),
@@ -373,6 +375,8 @@ fn message_builder() -> Object {
         opMediaAttachments: Prop::new().simple(QString),
         // Document attachments metadata, serialized as JSON
         opDocAttachments: Prop::new().simple(QString),
+        // Aux content metadata, serialized as JSON
+        opAuxContent: Prop::new().simple(QString),
         // Time the message will expire, if ever
         opExpirationTime: Prop::new().simple(Qint64).optional()
     );

@@ -113,5 +113,25 @@ pub fn delete_message(id: &MsgId) -> Result<(), HErr> {
     db::delete_message(&db, id)
 }
 
+/// Deletes all messages in a conversation.
+pub fn delete_conversation_messages(conversation_id: &ConversationId) -> Result<(), HErr> {
+    let db = Database::get()?;
+    db::delete_conversation(&db, conversation_id)
+}
+
+/// Get all messages in a conversation.
+pub fn conversation_messages(conversation_id: &ConversationId) -> Result<Vec<Message>, HErr> {
+    let db = Database::get()?;
+    db::conversation_messages(&db, conversation_id)
+}
+
+/// Get all message metadata in a conversation.
+pub fn conversation_message_meta(
+    conversation_id: &ConversationId
+) -> Result<Vec<crate::message::MessageMeta>, HErr> {
+    let db = Database::get()?;
+    db::conversation_message_meta(&db, conversation_id)
+}
+
 #[cfg(test)]
 mod tests;

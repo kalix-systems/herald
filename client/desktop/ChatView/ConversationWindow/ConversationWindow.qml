@@ -89,8 +89,10 @@ ListView {
         height: active ? item.height : undefined
 
         property var highlightItem: active ? item.highlightItem : undefined
-        Component.onCompleted: if (root.active)
-                                   ownedConversation.markReadById(model.msgId)
+        Component.onCompleted: {
+            if (root.active)
+                ownedConversation.markReadById(model.msgId)
+        }
 
         Connections {
             target: root

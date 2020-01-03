@@ -131,6 +131,7 @@ struct ConversationContentPtrBundle {
   void (*media_attachments_begin_remove_rows)(MediaAttachments *, int, int);
   void (*media_attachments_end_remove_rows)(MediaAttachments *);
   void (*message_builder_op_author_changed)(MessageBuilder *);
+  void (*message_builder_op_aux_content_changed)(MessageBuilder *);
   void (*message_builder_op_body_changed)(MessageBuilder *);
   void (*message_builder_op_doc_attachments_changed)(MessageBuilder *);
   void (*message_builder_op_expiration_time_changed)(MessageBuilder *);
@@ -152,7 +153,9 @@ struct ConversationContentPtrBundle {
   void (*message_builder_end_remove_rows)(MessageBuilder *);
   void (*messages_is_empty_changed)(Messages *);
   void (*messages_last_author_changed)(Messages *);
+  void (*messages_last_aux_code_changed)(Messages *);
   void (*messages_last_body_changed)(Messages *);
+  void (*messages_last_has_attachments_changed)(Messages *);
   void (*messages_last_status_changed)(Messages *);
   void (*messages_last_time_changed)(Messages *);
   void (*messages_search_active_changed)(Messages *);
@@ -450,6 +453,7 @@ struct MessageBuilderPtrBundle {
   void (*media_attachments_begin_remove_rows)(MediaAttachments *, int, int);
   void (*media_attachments_end_remove_rows)(MediaAttachments *);
   void (*message_builder_op_author_changed)(MessageBuilder *);
+  void (*message_builder_op_aux_content_changed)(MessageBuilder *);
   void (*message_builder_op_body_changed)(MessageBuilder *);
   void (*message_builder_op_doc_attachments_changed)(MessageBuilder *);
   void (*message_builder_op_expiration_time_changed)(MessageBuilder *);
@@ -530,6 +534,7 @@ struct MessagesPtrBundle {
   void (*media_attachments_begin_remove_rows)(MediaAttachments *, int, int);
   void (*media_attachments_end_remove_rows)(MediaAttachments *);
   void (*message_builder_op_author_changed)(MessageBuilder *);
+  void (*message_builder_op_aux_content_changed)(MessageBuilder *);
   void (*message_builder_op_body_changed)(MessageBuilder *);
   void (*message_builder_op_doc_attachments_changed)(MessageBuilder *);
   void (*message_builder_op_expiration_time_changed)(MessageBuilder *);
@@ -551,7 +556,9 @@ struct MessagesPtrBundle {
   void (*message_builder_end_remove_rows)(MessageBuilder *);
   void (*messages_is_empty_changed)(Messages *);
   void (*messages_last_author_changed)(Messages *);
+  void (*messages_last_aux_code_changed)(Messages *);
   void (*messages_last_body_changed)(Messages *);
+  void (*messages_last_has_attachments_changed)(Messages *);
   void (*messages_last_status_changed)(Messages *);
   void (*messages_last_time_changed)(Messages *);
   void (*messages_search_active_changed)(Messages *);
@@ -1449,6 +1456,8 @@ private:
   Q_PROPERTY(MediaAttachments *mediaAttachments READ mediaAttachments NOTIFY
                  mediaAttachmentsChanged FINAL)
   Q_PROPERTY(QString opAuthor READ opAuthor NOTIFY opAuthorChanged FINAL)
+  Q_PROPERTY(
+      QString opAuxContent READ opAuxContent NOTIFY opAuxContentChanged FINAL)
   Q_PROPERTY(QString opBody READ opBody NOTIFY opBodyChanged FINAL)
   Q_PROPERTY(QString opDocAttachments READ opDocAttachments NOTIFY
                  opDocAttachmentsChanged FINAL)
@@ -1473,6 +1482,7 @@ public:
   const MediaAttachments *mediaAttachments() const;
   MediaAttachments *mediaAttachments();
   QString opAuthor() const;
+  QString opAuxContent() const;
   QString opBody() const;
   QString opDocAttachments() const;
   QVariant opExpirationTime() const;
@@ -1526,6 +1536,7 @@ Q_SIGNALS:
   void isReplyChanged();
   void mediaAttachmentsChanged();
   void opAuthorChanged();
+  void opAuxContentChanged();
   void opBodyChanged();
   void opDocAttachmentsChanged();
   void opExpirationTimeChanged();
@@ -1648,7 +1659,11 @@ private:
   Q_PROPERTY(MessageBuilder *builder READ builder NOTIFY builderChanged FINAL)
   Q_PROPERTY(bool isEmpty READ isEmpty NOTIFY isEmptyChanged FINAL)
   Q_PROPERTY(QString lastAuthor READ lastAuthor NOTIFY lastAuthorChanged FINAL)
+  Q_PROPERTY(
+      QVariant lastAuxCode READ lastAuxCode NOTIFY lastAuxCodeChanged FINAL)
   Q_PROPERTY(QString lastBody READ lastBody NOTIFY lastBodyChanged FINAL)
+  Q_PROPERTY(QVariant lastHasAttachments READ lastHasAttachments NOTIFY
+                 lastHasAttachmentsChanged FINAL)
   Q_PROPERTY(QVariant lastStatus READ lastStatus NOTIFY lastStatusChanged FINAL)
   Q_PROPERTY(QVariant lastTime READ lastTime NOTIFY lastTimeChanged FINAL)
   Q_PROPERTY(bool searchActive READ searchActive WRITE setSearchActive NOTIFY
@@ -1670,7 +1685,9 @@ public:
   MessageBuilder *builder();
   bool isEmpty() const;
   QString lastAuthor() const;
+  QVariant lastAuxCode() const;
   QString lastBody() const;
+  QVariant lastHasAttachments() const;
   QVariant lastStatus() const;
   QVariant lastTime() const;
   bool searchActive() const;
@@ -1765,7 +1782,9 @@ Q_SIGNALS:
   void builderChanged();
   void isEmptyChanged();
   void lastAuthorChanged();
+  void lastAuxCodeChanged();
   void lastBodyChanged();
+  void lastHasAttachmentsChanged();
   void lastStatusChanged();
   void lastTimeChanged();
   void searchActiveChanged();

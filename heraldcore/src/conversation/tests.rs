@@ -72,7 +72,7 @@ fn add_and_get() {
         .body("2".try_into().expect(womp!()));
     builder2.store_db(&mut conn).expect(womp!());
 
-    let msgs = super::db::conversation_messages(&conn, &conversation)
+    let msgs = crate::message::db::conversation_messages(&conn, &conversation)
         .expect(womp!("Failed to get conversation"));
 
     assert_eq!(msgs.len(), 2);
@@ -97,7 +97,8 @@ fn conversation_message_meta() {
 
     let stored_meta = builder.store_db(&mut conn).expect(womp!()).expect(womp!());
 
-    let meta = db::conversation_message_meta(&conn, &conv).expect(womp!("unable to get message"));
+    let meta = crate::message::db::conversation_message_meta(&conn, &conv)
+        .expect(womp!("unable to get message"));
 
     assert_eq!(stored_meta.time.insertion, meta[0].insertion_time);
 }
@@ -274,9 +275,11 @@ fn delete_message() {
 
     crate::message::db::delete_message(&conn, &mid).expect(womp!());
 
-    assert!(super::db::conversation_messages(&conn, &conversation)
-        .expect(womp!())
-        .is_empty());
+    assert!(
+        crate::message::db::conversation_messages(&conn, &conversation)
+            .expect(womp!())
+            .is_empty()
+    );
 }
 
 #[test]
@@ -313,11 +316,13 @@ fn delete_conversation() {
         .body("2".try_into().expect(womp!()));
     builder2.store_db(&mut conn).expect(womp!());
 
-    super::db::delete_conversation(&conn, &conversation).expect(womp!());
+    crate::message::db::delete_conversation(&conn, &conversation).expect(womp!());
 
-    assert!(super::db::conversation_messages(&conn, &conversation)
-        .expect(womp!())
-        .is_empty());
+    assert!(
+        crate::message::db::conversation_messages(&conn, &conversation)
+            .expect(womp!())
+            .is_empty()
+    );
 }
 
 #[test]

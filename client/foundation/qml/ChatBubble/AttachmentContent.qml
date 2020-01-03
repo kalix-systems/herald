@@ -31,7 +31,6 @@ Column {
         if (medAttachments.length === 0) {
             return
         }
-
         wrapperCol.mediaParsed = JSON.parse(medAttachments)
 
         switch (wrapperCol.mediaParsed.num_more) {

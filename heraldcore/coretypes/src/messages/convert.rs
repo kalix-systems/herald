@@ -1,5 +1,8 @@
 use super::*;
+use crate::conversation::settings::SettingsUpdate;
+use coremacros::from_fn;
 use herald_common::Time;
+use json::JsonValue;
 use std::convert::TryFrom;
 
 impl From<Option<MsgId>> for ReplyId {
@@ -139,33 +142,37 @@ impl std::convert::TryFrom<i64> for MessageReceiptStatus {
 }
 
 impl Item {
-    pub fn from_parts(
+    pub fn from_parts<T>(
         body: Option<MessageBody>,
         attachments: Option<AttachmentMeta>,
         op: ReplyId,
-        update: Option<crate::conversation::settings::SettingsUpdate>,
-    ) -> Option<Item> {
-        match (body, update) {
-            (Some(body), None) => Item::Plain(PlainItem {
-                body: Some(body),
+        aux: Option<T>,
+    ) -> Item
+    where
+        T: Into<AuxItem>,
+    {
+        match (body, attachments, aux) {
+            (_, _, Some(aux)) => Item::Aux(aux.into()),
+            (body, attachments, None) => Item::Plain(PlainItem {
+                body,
                 attachments: attachments.unwrap_or_default(),
                 op,
-            })
-            .into(),
-            (None, Some(update)) => Item::Aux(update).into(),
-            _ => None,
+            }),
         }
     }
 }
 
 impl Reactions {
     pub fn from_vec(reactions: Vec<Reaction>) -> Option<Self> {
+        // early return
         if reactions.is_empty() {
             return None;
         }
 
+        // temporary collection
         let mut buckets = HashMap::<ReactContent, Vec<(Time, UserId)>>::new();
 
+        // insertion reactionary information for each reaction, indexed by reaction content
         for Reaction {
             reactionary,
             react_content,
@@ -178,21 +185,27 @@ impl Reactions {
                 .push((time, reactionary));
         }
 
+        // collect into a vector
         let mut content = buckets.into_iter().collect::<Vec<_>>();
 
+        // sort
         content.sort_unstable_by(|(_, a), (_, b)| {
-            a.iter()
+            let a_min = a
+                .iter()
                 .map(|(t, _)| t)
                 .min()
                 .copied()
-                .unwrap_or_else(|| Time::from(std::i64::MIN))
-                .cmp(
-                    &b.iter()
-                        .map(|(t, _)| t)
-                        .min()
-                        .copied()
-                        .unwrap_or_else(|| Time::from(std::i64::MIN)),
-                )
+                // this should be covered by the early return and the compiler should be able
+                // to optimize this out, but let's be safe
+                .unwrap_or_else(|| Time::from(std::i64::MIN));
+            let b_min = &b
+                .iter()
+                .map(|(t, _)| t)
+                .min()
+                .copied()
+                .unwrap_or_else(|| Time::from(std::i64::MIN));
+
+            a_min.cmp(b_min)
         });
 
         let content = content
@@ -224,5 +237,57 @@ impl From<TaggedReact> for json::JsonValue {
 impl From<Reactions> for json::JsonValue {
     fn from(Reactions { content }: Reactions) -> json::JsonValue {
         content.into()
+    }
+}
+
+from_fn!(AuxItem, NewMembers, AuxItem::NewMembers);
+from_fn!(
+    AuxItem,
+    crate::conversation::settings::SettingsUpdate,
+    AuxItem::GroupSettings
+);
+
+from_fn!(Item, AuxItem, Item::Aux);
+from_fn!(Item, PlainItem, Item::Plain);
+
+impl From<AuxItem> for JsonValue {
+    fn from(item: AuxItem) -> Self {
+        use SettingsUpdate::*;
+        let code = item.code();
+
+        match item {
+            AuxItem::GroupSettings(settings) => match settings {
+                Expiration(period) => {
+                    json::object! {
+                        "code" => code,
+                        "content" => period as u8,
+                    }
+                }
+                Title(title) => {
+                    json::object! {
+                        "code" => code,
+                        "content" => title,
+                    }
+                }
+                Color(color) => {
+                    json::object! {
+                        "code" => code,
+                        "content" => color,
+                    }
+                }
+                Picture(path) => {
+                    json::object! {
+                        "code" => code,
+                        "content" => path,
+                    }
+                }
+            },
+            AuxItem::NewMembers(members) => {
+                json::object! {
+                    "code" => code,
+                    "content" => members.0.into_iter().map(|u| u.to_string()).collect::<Vec<_>>(),
+                }
+            }
+        }
     }
 }

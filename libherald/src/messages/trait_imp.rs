@@ -17,7 +17,7 @@ impl Interface for Messages {
         self.is_empty_()
     }
 
-    fn last_author(&self) -> Option<ffi::UserIdRef> {
+    fn last_author(&self) -> Option<ffi::UserId> {
         self.last_author_()
     }
 
@@ -25,12 +25,20 @@ impl Interface for Messages {
         self.last_status_()
     }
 
-    fn last_body(&self) -> Option<&str> {
+    fn last_body(&self) -> Option<String> {
         self.last_body_()
     }
 
     fn last_time(&self) -> Option<i64> {
         self.last_time_()
+    }
+
+    fn last_aux_code(&self) -> Option<u8> {
+        self.last_aux_code_()
+    }
+
+    fn last_has_attachments(&self) -> Option<bool> {
+        self.last_has_attachments_()
     }
 
     fn index_by_id(
