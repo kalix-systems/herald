@@ -74,29 +74,28 @@ impl SearchState {
         Some(())
     }
 
-    pub fn set_pattern<F: FnMut()>(
+    pub fn set_pattern<E: MessageEmit>(
         &mut self,
         pattern: String,
-        mut pattern_changed: F,
+        emit: &mut E,
     ) -> Result<SearchChanged, SearchPatternError> {
         match self.set_pattern_inner(pattern)? {
             SearchChanged::NotChanged => Ok(SearchChanged::NotChanged),
             SearchChanged::Changed => {
-                pattern_changed();
+                emit.search_pattern_changed();
                 Ok(SearchChanged::Changed)
             }
         }
     }
 
-    pub fn set_matches<N: FnMut(), I: FnMut()>(
+    pub fn set_matches<E: MessageEmit>(
         &mut self,
         matches: Vec<Match>,
-        mut num_matches_changed: N,
-        mut index_changed: I,
+        emit: &mut E,
     ) {
         self.set_matches_inner(matches);
-        num_matches_changed();
-        index_changed();
+        emit.search_num_matches_changed();
+        emit.search_index_changed();
     }
 
     pub fn msg_matches(
@@ -107,15 +106,15 @@ impl SearchState {
         crate::container::access(msg_id, |m| m.matches(pattern))
     }
 
-    pub fn set_regex<F: FnMut()>(
+    pub fn set_regex<E: MessageEmit>(
         &mut self,
         use_regex: bool,
-        mut regex_changed: F,
+        emit: &mut E,
     ) -> Result<SearchChanged, SearchPatternError> {
         match self.set_regex_inner(use_regex)? {
             SearchChanged::NotChanged => Ok(SearchChanged::NotChanged),
             SearchChanged::Changed => {
-                regex_changed();
+                emit.search_regex_changed();
                 Ok(SearchChanged::Changed)
             }
         }
@@ -125,13 +124,16 @@ impl SearchState {
         self.matches.len()
     }
 
-    pub fn clear_search<F: FnMut()>(
+    pub fn clear_search<E: MessageEmit>(
         &mut self,
-        mut emit_cleared: F,
+        emit: &mut E,
     ) -> Result<(), SearchPatternError> {
         self.clear_search_inner()?;
 
-        emit_cleared();
+        emit.search_index_changed();
+        emit.search_pattern_changed();
+        emit.search_regex_changed();
+        emit.search_num_matches_changed();
 
         Ok(())
     }
@@ -197,13 +199,12 @@ impl SearchState {
         }
     }
 
-    pub fn try_remove_match<I: FnMut(), N: FnMut(), D: FnMut(usize)>(
+    pub fn try_remove_match<E: MessageEmit, M: MessageModel>(
         &mut self,
         msg_id: &MsgId,
         container: &mut Container,
-        mut index_changed: I,
-        mut num_matches_changed: N,
-        mut data_changed: D,
+        emit: &mut E,
+        model: &mut M,
     ) -> Option<()> {
         // early return for performance
         if self.active.not() || self.msg_matches(msg_id)?.not() {
@@ -216,11 +217,11 @@ impl SearchState {
             .position(|Match(MessageMeta { msg_id: mid, .. })| mid == msg_id)?;
 
         self.matches.remove(pos);
-        num_matches_changed();
+        emit.search_num_matches_changed();
 
         if self.matches.is_empty() {
             self.index = None;
-            index_changed();
+            emit.search_index_changed();
             return Some(());
         }
 
@@ -230,27 +231,27 @@ impl SearchState {
                 let new_ix = ix.saturating_sub(1);
                 self.index.replace(new_ix);
 
-                index_changed();
+                emit.search_index_changed();
 
                 let Match(msg) = self.matches.get(new_ix)?;
 
                 let new_focus_ix = container.index_by_id(msg.msg_id)?;
                 container.list.get_mut(new_focus_ix)?.match_status = MatchStatus::Focused;
 
-                data_changed(new_focus_ix);
+                model.entry_changed(new_focus_ix);
             }
         }
 
         Some(())
     }
 
-    pub fn try_insert_match<N: FnMut(), D: FnMut(usize)>(
+    pub fn try_insert_match<E: MessageEmit, M: MessageModel>(
         &mut self,
         msg_id: MsgId,
         model_ix: usize,
         container: &mut Container,
-        mut num_matches_changed: N,
-        mut data_changed: D,
+        emit: &mut E,
+        model: &mut M,
     ) -> Option<()> {
         // early return if search is inactive or message doesn't match
         if self.active.not() || self.msg_matches(&msg_id)?.not() {
@@ -282,11 +283,11 @@ impl SearchState {
 
         // insertion into matches
         self.matches.insert(match_pos, Match(message));
-        num_matches_changed();
+        emit.search_num_matches_changed();
 
         // update match status
         container.list.get_mut(model_ix)?.match_status = MatchStatus::Matched;
-        data_changed(model_ix);
+        model.entry_changed(model_ix);
 
         if let Some(focus_ix) = focus_ix {
             // if the match was in the first part, adjust the focus
@@ -297,7 +298,7 @@ impl SearchState {
                 let Match(MessageMeta { msg_id, .. }) = self.matches.get(new_focus_ix)?;
                 let model_focused_ix = container.index_by_id(*msg_id)?;
 
-                data_changed(model_focused_ix);
+                model.entry_changed(model_focused_ix);
             }
         }
 

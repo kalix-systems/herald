@@ -4,6 +4,18 @@ impl MessageEmit for crate::interface::MessagesEmitter {
     fn search_num_matches_changed(&mut self) {
         self.search_num_matches_changed();
     }
+
+    fn search_pattern_changed(&mut self) {
+        self.search_pattern_changed();
+    }
+
+    fn search_regex_changed(&mut self) {
+        self.search_regex_changed();
+    }
+
+    fn search_index_changed(&mut self) {
+        self.search_index_changed();
+    }
 }
 
 impl MessageModel for crate::interface::MessagesList {

@@ -299,7 +299,7 @@ impl Container {
 
     pub fn clear_search<M: MessageModel>(
         &mut self,
-        mut model: M,
+        model: &mut M,
     ) -> Option<()> {
         for (ix, msg) in self.list.iter_mut().enumerate() {
             if msg.match_status.is_match() {
@@ -312,11 +312,11 @@ impl Container {
     }
 
     // FIXME make this incremental, long conversations with a large number of matches freeze the UI
-    pub fn apply_search<M: MessageModel, N: FnMut()>(
+    pub fn apply_search<M: MessageModel, E: MessageEmit>(
         &mut self,
         search: &SearchState,
-        mut model: M,
-        mut num_matches_changed: N,
+        emit: &mut E,
+        model: &mut M,
     ) -> Option<Vec<Match>> {
         let pattern = search.pattern.as_ref()?;
 
@@ -350,7 +350,7 @@ impl Container {
             matches.push(Match(*msg))
         }
 
-        num_matches_changed();
+        emit.search_num_matches_changed();
 
         Some(matches)
     }
@@ -359,7 +359,7 @@ impl Container {
     pub fn set_dangling<M: MessageModel>(
         &self,
         ids: HashSet<MsgId>,
-        mut model: M,
+        model: &mut M,
     ) -> Option<()> {
         for id in ids.into_iter() {
             let changed = update(&id, |data| match data.content {

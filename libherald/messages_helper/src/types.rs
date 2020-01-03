@@ -17,6 +17,9 @@ pub trait MessageModel {
 
 pub trait MessageEmit {
     fn search_num_matches_changed(&mut self);
+    fn search_pattern_changed(&mut self);
+    fn search_regex_changed(&mut self);
+    fn search_index_changed(&mut self);
 }
 
 pub fn from_msg_id(msg_id: MsgId) -> Option<MessageMeta> {

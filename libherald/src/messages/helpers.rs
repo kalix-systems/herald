@@ -77,16 +77,10 @@ impl Messages {
     ) {
         {
             let emit = &mut self.emit;
-            let mut emit_num = emit.clone();
             let model = &mut self.model;
 
-            self.search.try_remove_match(
-                &msg_id,
-                &mut self.container,
-                || emit.search_index_changed(),
-                || emit_num.search_num_matches_changed(),
-                |ix| model.data_changed(ix, ix),
-            );
+            self.search
+                .try_remove_match(&msg_id, &mut self.container, emit, model);
         }
 
         self.builder.try_clear_reply(&msg_id);
@@ -99,8 +93,7 @@ impl Messages {
 
         if let Some(MsgData { replies, .. }) = data {
             let model = &mut self.model;
-            self.container
-                .set_dangling(replies, |ix| model.data_changed(ix, ix));
+            self.container.set_dangling(replies, model);
         }
 
         if ix > 0 {
@@ -137,13 +130,9 @@ impl Messages {
         {
             let emit = &mut self.emit;
             let model = &mut self.model;
-            self.search.try_insert_match(
-                msg_id,
-                ix,
-                &mut self.container,
-                || emit.search_num_matches_changed(),
-                |ix| model.data_changed(ix, ix),
-            );
+
+            self.search
+                .try_insert_match(msg_id, ix, &mut self.container, emit, model);
         }
 
         if ix == 0 {
