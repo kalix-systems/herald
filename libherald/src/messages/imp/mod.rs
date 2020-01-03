@@ -64,8 +64,13 @@ impl Messages {
         let ix = index as usize;
 
         let id = none!(self.container.get(ix), false).msg_id;
+        let builder = &mut self.builder;
+        let emit = &mut self.emit;
+        let container = &mut self.container;
+        let model = &mut self.model;
+        let search = &mut self.search;
 
-        self.remove_helper(id, ix);
+        container.remove_helper(id, ix, emit, model, search, || builder.try_clear_reply(&id));
         spawn!(message::delete_message(&id), false);
 
         true

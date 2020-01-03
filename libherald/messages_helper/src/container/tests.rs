@@ -3,6 +3,84 @@ use coremacros::*;
 use serial_test_derive::serial;
 use std::convert::TryInto;
 
+pub struct TestModel {
+    data_changed_state: Vec<(usize, usize)>,
+}
+
+impl TestModel {
+    fn new() -> TestModel {
+        TestModel {
+            data_changed_state: Vec::new(),
+        }
+    }
+}
+
+macro_rules! emit_imp {
+    ($($name: ident, $field: ident),*) => {
+       $(fn $name(&mut self) {
+           self.$field += 1;
+       })*
+    }
+}
+
+impl MessageModel for TestModel {
+    fn data_changed(
+        &mut self,
+        a: usize,
+        b: usize,
+    ) {
+        self.data_changed_state.push((a, b));
+    }
+
+    fn begin_remove_rows(
+        &mut self,
+        _a: usize,
+        _b: usize,
+    ) {
+    }
+
+    fn end_remove_rows(&mut self) {}
+
+    fn begin_insert_rows(
+        &mut self,
+        _a: usize,
+        _b: usize,
+    ) {
+    }
+
+    fn end_insert_rows(&mut self) {}
+}
+
+#[derive(Default)]
+pub struct TestEmit {
+    num_matches_state: u32,
+    pattern_changed_state: u32,
+    regex_changed_state: u32,
+    index_changed_state: u32,
+    last_has_attachments_state: u32,
+    is_empty_changed_state: u32,
+    last_changed_state: u32,
+}
+
+impl TestEmit {
+    fn new() -> TestEmit {
+        Default::default()
+    }
+}
+
+impl MessageEmit for TestEmit {
+    emit_imp! {
+    search_num_matches_changed, num_matches_state,
+    search_pattern_changed, pattern_changed_state,
+    search_regex_changed, regex_changed_state,
+    search_index_changed, index_changed_state,
+    last_has_attachments_changed, last_has_attachments_state,
+    is_empty_changed, is_empty_changed_state,
+    last_changed, last_changed_state
+
+    }
+}
+
 fn msg_constructor(body: &str) -> (MessageMeta, MsgData) {
     let convid = [0; 32].into();
     let mut builder = heraldcore::message::OutboundMessageBuilder::default();
@@ -82,16 +160,26 @@ fn test_container_search() {
 
     let mut searchstate = SearchState::new();
 
+    let emit = &mut TestEmit::new();
+    let model = &mut TestModel::new();
     searchstate
-        .set_pattern("te".to_string(), || ())
+        .set_pattern("te".to_string(), emit)
         .expect(womp!());
     searchstate.active = true;
 
+    assert_eq!(emit.pattern_changed_state, 1);
+
     let matches = container
-        .apply_search(&searchstate, |_| (), || ())
+        .apply_search(&searchstate, emit, model)
         .expect(womp!("Failed to apply search"));
 
-    searchstate.set_matches(matches, || (), || ());
+    assert_eq!(emit.num_matches_state, 1);
+
+    searchstate.set_matches(matches, emit);
+
+    assert_eq!(emit.num_matches_state, 2);
+
+    assert_eq!(emit.index_changed_state, 1);
 
     assert_eq!(searchstate.num_matches(), 2);
 
@@ -114,13 +202,16 @@ fn test_container_search() {
         container.get(1).expect(womp!())
     );
 
-    container.clear_search(|_| ());
+    container.clear_search(model);
 
     assert_eq!(msgmeta1.match_status, MatchStatus::NotMatched);
 
     assert_eq!(msgmeta2.match_status, MatchStatus::NotMatched);
 
     assert_eq!(msgmeta3.match_status, MatchStatus::NotMatched);
+
+    assert_eq!(model.data_changed_state[0], (1, 1));
+    assert_eq!(model.data_changed_state[1], (2, 2));
 }
 
 #[test]
@@ -147,17 +238,17 @@ fn test_handle_receipt() {
     let _ = container.insert_ord(msgmeta1, msgdata1);
     let _ = container.insert_ord(msgmeta2, msgdata2);
 
-    let mut vec = Vec::new();
+    let model = &mut TestModel::new();
 
     container.handle_receipt(
         msgmeta2.msg_id,
         coretypes::messages::MessageReceiptStatus::Read,
         "TEST".try_into().expect(womp!()),
-        |i: usize| vec.push(i),
+        model,
     );
 
-    assert_eq!(vec.len(), 1);
-    assert_eq!(vec[0], 0);
+    assert_eq!(model.data_changed_state.len(), 1);
+    assert_eq!(model.data_changed_state[0], (0, 0));
     assert_eq!(
         container
             .get_data(&msgmeta2.msg_id)

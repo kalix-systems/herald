@@ -184,6 +184,88 @@ impl Container {
         cache::remove(&msg.msg_id)
     }
 
+    pub fn insert_helper<
+        E: MessageEmit,
+        M: MessageModel,
+        P: FnOnce(heraldcore::types::ConversationId),
+    >(
+        &mut self,
+        msg: Message,
+        emit: &mut E,
+        model: &mut M,
+        search: &mut SearchState,
+        cid: heraldcore::types::ConversationId,
+        push: P,
+    ) {
+        let (message, data) = msg.split();
+
+        let msg_id = message.msg_id;
+
+        let ix = self.insert_ord(message, data);
+        model.begin_insert_rows(ix, ix);
+        model.end_insert_rows();
+
+        search.try_insert_match(msg_id, ix, self, emit, model);
+
+        if ix == 0 {
+            emit.last_changed();
+        } else {
+            model.entry_changed(ix - 1);
+        }
+
+        if self.len() == 1 {
+            emit.is_empty_changed();
+        }
+
+        if ix + 1 < self.len() {
+            model.entry_changed(ix + 1);
+        }
+
+        push(cid);
+    }
+
+    pub fn remove_helper<E: MessageEmit, M: MessageModel, B: FnMut()>(
+        &mut self,
+        msg_id: MsgId,
+        ix: usize,
+        emit: &mut E,
+        model: &mut M,
+        search: &mut SearchState,
+        mut builder: B,
+    ) {
+        {
+            search.try_remove_match(&msg_id, self, emit, model);
+        }
+
+        builder();
+
+        let old_len = self.len();
+
+        model.begin_remove_rows(ix, ix);
+        let data = self.remove(ix);
+        model.end_remove_rows();
+
+        if let Some(MsgData { replies, .. }) = data {
+            self.set_dangling(replies, model);
+        }
+
+        if ix > 0 {
+            model.entry_changed(ix - 1);
+        }
+
+        if ix + 1 < self.len() {
+            model.entry_changed(ix + 1);
+        }
+
+        if old_len == 1 {
+            emit.is_empty_changed();
+        }
+
+        if ix == 0 {
+            emit.last_changed();
+        }
+    }
+
     pub fn binary_search(
         &self,
         msg: &MessageMeta,
@@ -297,14 +379,14 @@ impl Container {
         self.aux_data_json_by_id(&mid)
     }
 
-    pub fn clear_search<F: FnMut(usize)>(
+    pub fn clear_search<M: MessageModel>(
         &mut self,
-        mut data_changed: F,
+        model: &mut M,
     ) -> Option<()> {
         for (ix, msg) in self.list.iter_mut().enumerate() {
             if msg.match_status.is_match() {
                 msg.match_status = MatchStatus::NotMatched;
-                data_changed(ix);
+                model.entry_changed(ix);
             }
         }
 
@@ -312,11 +394,11 @@ impl Container {
     }
 
     // FIXME make this incremental, long conversations with a large number of matches freeze the UI
-    pub fn apply_search<D: FnMut(usize), N: FnMut()>(
+    pub fn apply_search<M: MessageModel, E: MessageEmit>(
         &mut self,
         search: &SearchState,
-        mut data_changed: D,
-        mut num_matches_changed: N,
+        emit: &mut E,
+        model: &mut M,
     ) -> Option<Vec<Match>> {
         let pattern = search.pattern.as_ref()?;
 
@@ -340,7 +422,7 @@ impl Container {
             if (old_match_status != msg.match_status)
                 || (old_match_status.is_match() && msg.match_status.is_match())
             {
-                data_changed(ix);
+                model.entry_changed(ix);
             }
 
             if !matched {
@@ -350,16 +432,16 @@ impl Container {
             matches.push(Match(*msg))
         }
 
-        num_matches_changed();
+        emit.search_num_matches_changed();
 
         Some(matches)
     }
 
     /// Sets the reply type of a message to "dangling"
-    pub fn set_dangling<F: FnMut(usize)>(
+    pub fn set_dangling<M: MessageModel>(
         &self,
         ids: HashSet<MsgId>,
-        mut data_changed: F,
+        model: &mut M,
     ) -> Option<()> {
         for id in ids.into_iter() {
             let changed = update(&id, |data| match data.content {
@@ -376,7 +458,7 @@ impl Container {
 
             if changed.unwrap_or(false) {
                 if let Some(ix) = self.index_by_id(id) {
-                    data_changed(ix);
+                    model.entry_changed(ix);
                 }
             }
         }
