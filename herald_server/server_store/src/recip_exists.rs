@@ -56,6 +56,7 @@ impl Conn {
             .prepare_typed(sql!("user_exists"), types![TEXT])
             .await?;
 
+        // TODO: process concurrently?
         for uid in uids {
             let uid_str = uid.as_str();
             let row = self.query_one(&stmt, params![uid_str]).await?;
@@ -76,6 +77,7 @@ impl Conn {
             .prepare_typed(sql!("device_exists"), types![BYTEA])
             .await?;
 
+        // TODO: process concurrently?
         for key in keys {
             let key_slice = key.as_ref();
 
