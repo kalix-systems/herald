@@ -32,7 +32,8 @@ fn test_insertion_flurry_deletion() {
     let (msgmeta1, msgdata1) = msg_constructor("hello");
     std::thread::sleep(std::time::Duration::from_millis(2));
     let (msgmeta2, msgdata2) = msg_constructor("hello");
-    let mut container = Container::new(vec![], None);
+
+    let mut container = Container::new(vec![]);
 
     let _ = container.insert_ord(msgmeta1, msgdata1);
     let _ = container.insert_ord(msgmeta2, msgdata2);
@@ -72,7 +73,8 @@ fn test_container_search() {
     let (msgmeta2, msgdata2) = msg_constructor("retesting");
     std::thread::sleep(std::time::Duration::from_millis(2));
     let (msgmeta3, msgdata3) = msg_constructor("tost");
-    let mut container = Container::new(vec![], None);
+
+    let mut container = Container::new(vec![]);
 
     let _ = container.insert_ord(msgmeta1, msgdata1);
     let _ = container.insert_ord(msgmeta2, msgdata2);
@@ -139,7 +141,8 @@ fn test_handle_receipt() {
     let (msgmeta1, msgdata1) = msg_constructor("test");
     std::thread::sleep(std::time::Duration::from_millis(2));
     let (msgmeta2, msgdata2) = msg_constructor("123");
-    let mut container = Container::new(vec![], None);
+
+    let mut container = Container::new(vec![]);
 
     let _ = container.insert_ord(msgmeta1, msgdata1);
     let _ = container.insert_ord(msgmeta2, msgdata2);

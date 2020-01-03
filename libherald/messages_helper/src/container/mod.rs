@@ -181,9 +181,7 @@ impl Container {
         ix: usize,
     ) -> Option<MsgData> {
         let msg = self.list.remove(ix)?;
-        let data = cache::remove(&msg.msg_id);
-
-        data
+        cache::remove(&msg.msg_id)
     }
 
     pub fn binary_search(
