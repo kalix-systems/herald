@@ -13,7 +13,7 @@ pub struct Reaction {
 
 pub type ReactContent = String;
 
-/// A `ReactContent` with an ordered list of
+/// A `ReactContent` with a list of
 /// reactionaries
 #[derive(Clone, Debug, PartialEq, Eq, Ord, PartialOrd)]
 pub struct TaggedReact {
@@ -21,7 +21,8 @@ pub struct TaggedReact {
     pub reactionaries: Vec<UserId>,
 }
 
-/// A collection of message reactions
+/// A collection of message reactions ordered by the insertion time of the first instance of a
+/// given `ReactContent`
 #[derive(Clone, Debug, Default)]
 pub struct Reactions {
     pub content: Vec<TaggedReact>,

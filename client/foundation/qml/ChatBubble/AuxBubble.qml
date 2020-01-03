@@ -13,6 +13,7 @@ Rectangle {
     property bool expanded: false
     property var auxData
     property var messageModelData
+    property bool outbound: messageModelData.author === Herald.config.configId
 
     property alias highlightItem: bubbleHighlight
     readonly property color bubbleColor: CmnCfg.palette.lightGrey
@@ -28,7 +29,8 @@ Rectangle {
     readonly property string receiptImage: outbound ? Utils.receiptCodeSwitch(
                                                           messageModelData.receiptStatus) : ""
     readonly property color authorColor: CmnCfg.avatarColors[messageModelData.authorColor]
-    property string authorName: Herald.users.nameById(messageModelData.author)
+    property string authorName: outbound ? "You" : Herald.users.nameById(
+                                               messageModelData.author)
 
     property bool hoverHighlight: false
     property alias expireInfo: expireInfo
@@ -128,12 +130,23 @@ Rectangle {
         topPadding: isHead ? CmnCfg.smallMargin : CmnCfg.smallMargin
         leftPadding: CmnCfg.smallMargin
         bottomPadding: isTail ? CmnCfg.defaultMargin : CmnCfg.smallMargin
+        Text {
+            text: friendlyTimestamp
+            font.family: CmnCfg.chatFont.name
+            font.italic: true
+            font.pixelSize: 12
+            color: CmnCfg.palette.darkGrey
+            elide: Text.ElideRight
+            width: bubbleRoot.maxWidth
+        }
 
-        Label {
+        Text {
             id: actionText
             text: authorName + Utils.auxString(auxData.code, auxData.content)
             font.family: CmnCfg.chatFont.name
             font.italic: true
+            elide: Text.ElideRight
+            width: bubbleRoot.maxWidth
         }
 
         Loader {

@@ -11,6 +11,8 @@ impl Messages {
         self.emit.last_body_changed();
         self.emit.last_time_changed();
         self.emit.last_status_changed();
+        self.emit.last_aux_code_changed();
+        self.emit.last_has_attachments_changed();
     }
 
     pub(super) fn entry_changed(
@@ -89,7 +91,7 @@ impl Messages {
 
         self.builder.try_clear_reply(&msg_id);
 
-        let len = self.container.len();
+        let old_len = self.container.len();
 
         self.model.begin_remove_rows(ix, ix);
         let data = self.container.remove(ix);
@@ -109,7 +111,7 @@ impl Messages {
             self.entry_changed(ix + 1);
         }
 
-        if len == 1 {
+        if old_len == 1 {
             self.emit.is_empty_changed();
         }
 
@@ -146,14 +148,12 @@ impl Messages {
 
         if ix == 0 {
             self.emit_last_changed();
+        } else {
+            self.entry_changed(ix - 1);
         }
 
         if self.container.len() == 1 {
             self.emit.is_empty_changed();
-        }
-
-        if ix > 0 {
-            self.entry_changed(ix - 1);
         }
 
         if ix + 1 < self.container.len() {
@@ -189,19 +189,11 @@ impl Messages {
         self.builder.set_conversation_id(id);
 
         spawn!({
-            let list: Vec<MessageMeta> = err!(conversation::conversation_message_meta(&id));
-
-            let last = match list.last().as_ref() {
-                Some(MessageMeta { ref msg_id, .. }) => {
-                    let msg = err!(heraldcore::message::get_message(msg_id));
-                    Some(msg.split().1)
-                }
-                None => None,
-            };
+            let list: Vec<MessageMeta> = err!(heraldcore::message::conversation_message_meta(&id));
 
             err!(content_push(
                 id,
-                MsgUpdate::Container(Box::new(Container::new(list, last)))
+                MsgUpdate::Container(Box::new(Container::new(list)))
             ));
         });
     }

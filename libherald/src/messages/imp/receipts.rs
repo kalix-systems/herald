@@ -21,15 +21,6 @@ impl Messages {
         )
     }
 
-    pub(crate) fn last_status_(&self) -> Option<u32> {
-        self.container
-            .last_msg()?
-            .receipts
-            .values()
-            .max()
-            .map(|status| *status as u32)
-    }
-
     pub(crate) fn user_receipts_(
         &self,
         index: usize,

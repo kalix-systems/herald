@@ -83,8 +83,20 @@ Rectangle {
                 property string opText: replyText
                 active: ownedConversation.builder.isReply
                 height: item ? item.height : 0
-                sourceComponent: CB.ComposeReplyComponent {
-                    builderData: ownedConversation.builder
+                sourceComponent: ownedConversation.builder.opAuxContent.length
+                                 === 0 ? replyComp : auxComp
+
+                Component {
+                    id: replyComp
+                    CB.ComposeReplyComponent {
+                        builderData: ownedConversation.builder
+                    }
+                }
+                Component {
+                    id: auxComp
+                    CB.ComposeReplyAuxComponent {
+                        builderData: ownedConversation.builder
+                    }
                 }
 
                 anchors.left: parent.left
@@ -162,6 +174,7 @@ Rectangle {
                     ownedConversation.builder.addAttachment(fileUrls[i])
                 }
             }
+            chatText.forceActiveFocus()
         }
     }
 }

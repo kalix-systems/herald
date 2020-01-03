@@ -9,6 +9,7 @@ pub struct MessageBuilderEmitter {
     pub(super) has_media_attachment_changed: fn(*mut MessageBuilderQObject),
     pub(super) is_reply_changed: fn(*mut MessageBuilderQObject),
     pub(super) op_author_changed: fn(*mut MessageBuilderQObject),
+    pub(super) op_aux_content_changed: fn(*mut MessageBuilderQObject),
     pub(super) op_body_changed: fn(*mut MessageBuilderQObject),
     pub(super) op_doc_attachments_changed: fn(*mut MessageBuilderQObject),
     pub(super) op_expiration_time_changed: fn(*mut MessageBuilderQObject),
@@ -33,6 +34,7 @@ impl MessageBuilderEmitter {
             has_media_attachment_changed: self.has_media_attachment_changed,
             is_reply_changed: self.is_reply_changed,
             op_author_changed: self.op_author_changed,
+            op_aux_content_changed: self.op_aux_content_changed,
             op_body_changed: self.op_body_changed,
             op_doc_attachments_changed: self.op_doc_attachments_changed,
             op_expiration_time_changed: self.op_expiration_time_changed,
@@ -86,6 +88,14 @@ impl MessageBuilderEmitter {
 
         if !ptr.is_null() {
             (self.op_author_changed)(ptr);
+        }
+    }
+
+    pub fn op_aux_content_changed(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+
+        if !ptr.is_null() {
+            (self.op_aux_content_changed)(ptr);
         }
     }
 
@@ -279,6 +289,8 @@ pub trait MessageBuilderTrait {
 
     fn op_author(&self) -> Option<&str>;
 
+    fn op_aux_content(&self) -> &str;
+
     fn op_body(&self) -> Option<&str>;
 
     fn op_doc_attachments(&self) -> &str;
@@ -393,6 +405,7 @@ pub unsafe fn message_builder_new_inner(
         media_attachments_begin_remove_rows,
         media_attachments_end_remove_rows,
         message_builder_op_author_changed,
+        message_builder_op_aux_content_changed,
         message_builder_op_body_changed,
         message_builder_op_doc_attachments_changed,
         message_builder_op_expiration_time_changed,
@@ -457,6 +470,7 @@ pub unsafe fn message_builder_new_inner(
         has_media_attachment_changed: message_builder_has_media_attachment_changed,
         is_reply_changed: message_builder_is_reply_changed,
         op_author_changed: message_builder_op_author_changed,
+        op_aux_content_changed: message_builder_op_aux_content_changed,
         op_body_changed: message_builder_op_body_changed,
         op_doc_attachments_changed: message_builder_op_doc_attachments_changed,
         op_expiration_time_changed: message_builder_op_expiration_time_changed,
@@ -612,6 +626,18 @@ pub unsafe extern "C" fn message_builder_op_author_get(
         let str_: *const c_char = value.as_ptr() as (*const c_char);
         set(prop, str_, to_c_int(value.len()));
     }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn message_builder_op_aux_content_get(
+    ptr: *const MessageBuilder,
+    prop: *mut QString,
+    set: fn(*mut QString, *const c_char, c_int),
+) {
+    let obj = &*ptr;
+    let value = obj.op_aux_content();
+    let str_: *const c_char = value.as_ptr() as *const c_char;
+    set(prop, str_, to_c_int(value.len()));
 }
 
 #[no_mangle]
@@ -796,6 +822,7 @@ pub struct MessageBuilderPtrBundle {
     media_attachments_begin_remove_rows: fn(*mut MediaAttachmentsQObject, usize, usize),
     media_attachments_end_remove_rows: fn(*mut MediaAttachmentsQObject),
     message_builder_op_author_changed: fn(*mut MessageBuilderQObject),
+    message_builder_op_aux_content_changed: fn(*mut MessageBuilderQObject),
     message_builder_op_body_changed: fn(*mut MessageBuilderQObject),
     message_builder_op_doc_attachments_changed: fn(*mut MessageBuilderQObject),
     message_builder_op_expiration_time_changed: fn(*mut MessageBuilderQObject),

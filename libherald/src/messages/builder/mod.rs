@@ -140,6 +140,10 @@ impl MessageBuilderTrait for MessageBuilder {
         self.op.as_ref().map(Reply::media).unwrap_or("")
     }
 
+    fn op_aux_content(&self) -> &str {
+        self.op.as_ref().map(Reply::aux).unwrap_or("")
+    }
+
     fn add_attachment(
         &mut self,
         path: String,

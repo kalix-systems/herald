@@ -28,6 +28,7 @@ Item {
     property color secondaryLabelColor: CmnCfg.palette.offBlack
     property int labelFontSize: CmnCfg.entityLabelSize
     property int subLabelFontSize: CmnCfg.entitySubLabelSize
+    property alias bodyItalic: bodyText.font.italic
 
     // labeling constants
     GridLayout {
@@ -76,6 +77,7 @@ Item {
             Layout.alignment: Qt.AlignLeft | Qt.alignTop
             Layout.maximumHeight: labelGrid.height * 0.25
             color: labelColor
+            textFormat: Text.StyledText
         }
 
         Button {

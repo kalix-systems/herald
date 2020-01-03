@@ -176,7 +176,7 @@ fn reply() {
 
     let reply = db::get_message(&conn, &mid2).expect(womp!());
 
-    assert_eq!(ReplyId::Known(mid1), *reply.content.unwrap().op());
+    assert_eq!(ReplyId::Known(mid1), *reply.content.op());
 }
 
 #[test]
@@ -205,8 +205,7 @@ fn message_send_status_updates() {
     );
 
     assert_eq!(
-        crate::conversation::conversation_messages(&conv_id)
-            .expect(womp!("failed to get conversation by author"))[0]
+        conversation_messages(&conv_id).expect(womp!("failed to get conversation by author"))[0]
             .send_status,
         MessageSendStatus::Ack
     );
@@ -276,7 +275,7 @@ fn reply_to_unknown_message() {
 
     let msg = db::get_message(&conn, &msg_id).expect(womp!());
 
-    assert!(msg.content.unwrap().op().is_dangling());
+    assert!(msg.content.op().is_dangling());
 }
 
 #[test]
@@ -367,5 +366,5 @@ fn outbound_aux() {
     let conv = receiver.pairwise_conversation;
 
     let update = coretypes::conversation::settings::SettingsUpdate::Color(1);
-    db::outbound_group_settings(&mut conn, update, &conv).expect(womp!());
+    db::outbound_aux(&mut conn, update, &conv).expect(womp!());
 }

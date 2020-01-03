@@ -1,7 +1,6 @@
 use super::*;
 use crate::{conversation::db::expiration_period, message::MessageTime};
 use coremacros::w;
-use coretypes::conversation::settings::SettingsUpdate as Update;
 use herald_attachments::Attachment;
 use rusqlite::{named_params, Connection as Conn};
 use std::collections::HashSet;
@@ -14,7 +13,7 @@ use reactions::*;
 pub(crate) mod replies;
 use replies::*;
 mod auxil;
-pub(crate) use auxil::{inbound_group_settings, outbound_group_settings};
+pub(crate) use auxil::{inbound_aux, outbound_aux};
 
 /// Get message by message id
 pub(crate) fn get_message(
@@ -45,7 +44,7 @@ pub(crate) fn get_message(
             let op = (op, is_reply).into();
 
             let body: Option<MessageBody> = row.get("body")?;
-            let update: Option<Update> = row.get("update_item")?;
+            let update: Option<AuxItem> = row.get("aux_item")?;
             let content = Item::from_parts(body, Some(attachments), op, update);
 
             Ok(Message {
@@ -107,7 +106,7 @@ pub(crate) fn message_data(
             let op = (op, is_reply).into();
 
             let body: Option<MessageBody> = row.get("body")?;
-            let update: Option<Update> = row.get("update_item")?;
+            let update: Option<AuxItem> = row.get("aux_item")?;
             let content = Item::from_parts(body, Some(attachments), op, update);
 
             Ok(MsgData {
@@ -152,7 +151,7 @@ pub(crate) fn get_message_opt(
             let op = (op, is_reply).into();
 
             let body: Option<MessageBody> = row.get("body")?;
-            let update: Option<Update> = row.get("update_item")?;
+            let update: Option<AuxItem> = row.get("aux_item")?;
             let content = Item::from_parts(body, Some(attachments), op, update);
 
             Ok(Message {
@@ -215,7 +214,7 @@ pub(crate) fn by_send_status(
             let op = (op, is_reply).into();
 
             let body: Option<MessageBody> = row.get("body")?;
-            let update: Option<Update> = row.get("update_item")?;
+            let update: Option<AuxItem> = row.get("aux_item")?;
             let content = Item::from_parts(body, Some(attachments), op, update);
 
             Ok(Message {
@@ -249,6 +248,100 @@ pub(crate) fn delete_message(
     w!(stmt.execute_named(named_params! { "@msg_id": id }));
     super::attachments::db::gc(conn)?;
     Ok(())
+}
+
+/// Deletes all messages in a conversation.
+pub(crate) fn delete_conversation(
+    conn: &rusqlite::Connection,
+    conversation_id: &ConversationId,
+) -> Result<(), HErr> {
+    w!(conn.execute(
+        include_str!("../sql/delete_conversation.sql"),
+        &[conversation_id],
+    ));
+    Ok(())
+}
+
+/// Get all messages in a conversation.
+pub(crate) fn conversation_messages(
+    conn: &rusqlite::Connection,
+    conversation_id: &ConversationId,
+) -> Result<Vec<Message>, HErr> {
+    let mut stmt = w!(conn.prepare(include_str!("../sql/conversation_messages.sql")));
+    let res = w!(stmt.query_map_named(
+        named_params! {
+            "@conversation_id": conversation_id
+        },
+        |row| {
+            let message_id = row.get("msg_id")?;
+            let receipts = crate::message::db::receipts::get_receipts(conn, &message_id)?;
+            let replies = crate::message::db::replies::replies(conn, &message_id)?;
+            let attachments = crate::message::attachments::db::get(conn, &message_id)?;
+            let reactions = crate::message::db::reactions::reactions(conn, &message_id)?;
+
+            let time = MessageTime {
+                insertion: row.get("insertion_ts")?,
+                server: row.get("server_ts")?,
+                expiration: row.get("expiration_ts")?,
+            };
+
+            let is_reply: bool = row.get("is_reply")?;
+            let op: Option<MsgId> = row.get("op_msg_id")?;
+
+            let op = (op, is_reply).into();
+
+            let body: Option<MessageBody> = row.get("body")?;
+            let update: Option<AuxItem> = row.get("aux_item")?;
+            let content = Item::from_parts(body, Some(attachments), op, update);
+
+            Ok(Message {
+                message_id,
+                author: row.get("author")?,
+                conversation: *conversation_id,
+                content,
+                time,
+                send_status: row.get("send_status")?,
+                receipts,
+                replies,
+                reactions,
+            })
+        },
+    ));
+
+    let mut messages = Vec::new();
+    for msg in res {
+        messages.push(w!(msg));
+    }
+
+    Ok(messages)
+}
+
+/// Get all message metadata in a conversation.
+pub(crate) fn conversation_message_meta(
+    conn: &rusqlite::Connection,
+    conversation_id: &ConversationId,
+) -> Result<Vec<crate::message::MessageMeta>, HErr> {
+    let mut stmt = w!(conn.prepare(include_str!("../sql/conversation_message_meta.sql")));
+
+    let res = w!(stmt.query_map_named(
+        named_params! {
+            "@conversation_id": conversation_id
+        },
+        |row| {
+            Ok(crate::message::MessageMeta {
+                msg_id: row.get("msg_id")?,
+                insertion_time: row.get("insertion_ts")?,
+                match_status: crate::message::MatchStatus::NotMatched,
+            })
+        }
+    ));
+
+    let mut messages = Vec::new();
+    for msg in res {
+        messages.push(w!(msg));
+    }
+
+    Ok(messages)
 }
 
 /// Testing utility
