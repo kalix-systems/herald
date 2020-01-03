@@ -20,6 +20,7 @@ pub trait MessageEmit {
     fn search_pattern_changed(&mut self);
     fn search_regex_changed(&mut self);
     fn search_index_changed(&mut self);
+    fn last_has_attachments_changed(&mut self);
 }
 
 pub fn from_msg_id(msg_id: MsgId) -> Option<MessageMeta> {

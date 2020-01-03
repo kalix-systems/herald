@@ -16,6 +16,10 @@ impl MessageEmit for crate::interface::MessagesEmitter {
     fn search_index_changed(&mut self) {
         self.search_index_changed();
     }
+
+    fn last_has_attachments_changed(&mut self) {
+        self.last_has_attachments_changed();
+    }
 }
 
 impl MessageModel for crate::interface::MessagesList {

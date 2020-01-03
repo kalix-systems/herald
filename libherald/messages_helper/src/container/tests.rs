@@ -1,6 +1,5 @@
 use super::*;
 use coremacros::*;
-use parking_lot::Mutex;
 use serial_test_derive::serial;
 use std::convert::TryInto;
 
@@ -27,10 +26,10 @@ impl MessageModel for TestModel {
 }
 
 pub struct TestEmit {
-    num_matches_state: u64,
-    pattern_changed_state: u64,
-    regex_changed_state: u64,
-    index_changed_state: u64,
+    num_matches_state: u32,
+    pattern_changed_state: u32,
+    regex_changed_state: u32,
+    index_changed_state: u32,
 }
 
 impl TestEmit {
@@ -58,6 +57,7 @@ impl MessageEmit for TestEmit {
     fn search_regex_changed(&mut self) {
         self.regex_changed_state += 1;
     }
+    fn last_has_attachments_changed(&mut self) {}
 }
 
 fn msg_constructor(body: &str) -> (MessageMeta, MsgData) {
@@ -217,17 +217,17 @@ fn test_handle_receipt() {
     let _ = container.insert_ord(msgmeta1, msgdata1);
     let _ = container.insert_ord(msgmeta2, msgdata2);
 
-    let mut vec = Vec::new();
+    let model = &mut TestModel::new();
 
     container.handle_receipt(
         msgmeta2.msg_id,
         coretypes::messages::MessageReceiptStatus::Read,
         "TEST".try_into().expect(womp!()),
-        |i: usize| vec.push(i),
+        model,
     );
 
-    assert_eq!(vec.len(), 1);
-    assert_eq!(vec[0], 0);
+    assert_eq!(model.data_changed_state.len(), 1);
+    assert_eq!(model.data_changed_state[0], (0, 0));
     assert_eq!(
         container
             .get_data(&msgmeta2.msg_id)

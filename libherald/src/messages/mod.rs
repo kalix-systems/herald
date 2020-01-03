@@ -57,7 +57,7 @@ impl Messages {
 
                 none!(&self
                     .container
-                    .handle_receipt(msg_id, status, recipient, |ix| model.data_changed(ix, ix)));
+                    .handle_receipt(msg_id, status, recipient, model));
             }
 
             MsgUpdate::Reaction {
@@ -68,27 +68,18 @@ impl Messages {
             } => {
                 let model = &mut self.model;
                 self.container
-                    .handle_reaction(msg_id, reactionary, content, remove, |ix| {
-                        model.data_changed(ix, ix)
-                    });
+                    .handle_reaction(msg_id, reactionary, content, remove, model);
             }
             MsgUpdate::StoreDone(mid, meta) => {
                 let model = &mut self.model;
                 let emit = &mut self.emit;
 
-                none!(&self.container.handle_store_done(
-                    mid,
-                    meta,
-                    |ix| model.data_changed(ix, ix),
-                    || emit.last_has_attachments_changed()
-                ));
+                none!(&self.container.handle_store_done(mid, meta, emit, model));
             }
             MsgUpdate::SendDone(mid) => {
                 let model = &mut self.model;
 
-                none!(&self
-                    .container
-                    .handle_send_done(mid, |ix| { model.data_changed(ix, ix) }));
+                none!(&self.container.handle_send_done(mid, model));
             }
             MsgUpdate::ExpiredMessages(mids) => self.handle_expiration(mids),
             MsgUpdate::Container(container) => {
