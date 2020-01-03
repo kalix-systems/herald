@@ -13,6 +13,7 @@ members = [
   "heraldcore/coremacros",
   "heraldcore/coretypes",
   "heraldcore/herald_attachments",
+  "heraldcore/herald_network",
   "heraldcore/herald_ids",
   "heraldcore/herald_user",
   "heraldcore/image_utils",
