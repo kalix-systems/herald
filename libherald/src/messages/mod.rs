@@ -94,7 +94,10 @@ impl Messages {
 
                 none!(&self.container.handle_send_done(mid, model));
             }
-            MsgUpdate::ExpiredMessages(mids) => self.handle_expiration(mids),
+            MsgUpdate::ExpiredMessages(mids) => {
+                self.container
+                    .handle_expiration(mids, emit, model, search, &mut self.builder)
+            }
             MsgUpdate::Container(container) => {
                 if container.is_empty() {
                     return;

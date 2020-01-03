@@ -70,7 +70,7 @@ impl Messages {
         let model = &mut self.model;
         let search = &mut self.search;
 
-        container.remove_helper(id, ix, emit, model, search, || builder.try_clear_reply(&id));
+        container.remove_helper(id, ix, emit, model, search, builder);
         spawn!(message::delete_message(&id), false);
 
         true

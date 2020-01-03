@@ -41,6 +41,13 @@ pub trait MessageEmit {
     fn last_changed(&mut self);
 }
 
+pub trait MessageBuilderHelper {
+    fn try_clear_reply(
+        &mut self,
+        mid: &MsgId,
+    );
+}
+
 pub fn from_msg_id(msg_id: MsgId) -> Option<MessageMeta> {
     let insertion_time = crate::container::access(&msg_id, |m| m.time.insertion)?;
 

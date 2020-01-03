@@ -12,24 +12,6 @@ impl Messages {
         self.emit.last_has_attachments_changed();
     }
 
-    pub(super) fn handle_expiration(
-        &mut self,
-        mids: Vec<MsgId>,
-    ) {
-        for mid in mids {
-            if let Some(ix) = self.container.index_by_id(mid) {
-                let model = &mut self.model;
-                let emit = &mut self.emit;
-                let search = &mut self.search;
-                let container = &mut self.container;
-                let builder = &mut self.builder;
-                container.remove_helper(mid, ix, emit, model, search, || {
-                    builder.try_clear_reply(&mid)
-                });
-            }
-        }
-    }
-
     pub(crate) fn set_conversation_id(
         &mut self,
         id: ConversationId,

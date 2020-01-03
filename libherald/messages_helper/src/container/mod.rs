@@ -224,20 +224,20 @@ impl Container {
         push(cid);
     }
 
-    pub fn remove_helper<E: MessageEmit, M: MessageModel, B: FnMut()>(
+    pub fn remove_helper<E: MessageEmit, M: MessageModel, B: MessageBuilderHelper>(
         &mut self,
         msg_id: MsgId,
         ix: usize,
         emit: &mut E,
         model: &mut M,
         search: &mut SearchState,
-        mut builder: B,
+        builder: &mut B,
     ) {
         {
             search.try_remove_match(&msg_id, self, emit, model);
         }
 
-        builder();
+        builder.try_clear_reply(&msg_id);
 
         let old_len = self.len();
 
@@ -263,6 +263,21 @@ impl Container {
 
         if ix == 0 {
             emit.last_changed();
+        }
+    }
+
+    pub fn handle_expiration<E: MessageEmit, M: MessageModel, B: MessageBuilderHelper>(
+        &mut self,
+        mids: Vec<MsgId>,
+        emit: &mut E,
+        model: &mut M,
+        search: &mut SearchState,
+        builder: &mut B,
+    ) {
+        for mid in mids {
+            if let Some(ix) = self.index_by_id(mid) {
+                self.remove_helper(mid, ix, emit, model, search, builder);
+            }
         }
     }
 
