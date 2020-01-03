@@ -747,6 +747,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "herald_network"
+version = "0.1.0"
+dependencies = [
+ "anyhow 1.0.26 (registry+https://github.com/rust-lang/crates.io-index)",
+ "herald_client 0.1.0",
+ "herald_common 0.1.0",
+ "once_cell 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "parking_lot 0.10.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "tokio 0.2.6 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
 name = "herald_server"
 version = "0.1.0"
 dependencies = [

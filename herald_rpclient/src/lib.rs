@@ -243,6 +243,7 @@ impl HClient {
 
         //TODO: something more sensible here?
         tokio::spawn(driver.unwrap_or_else(|e| panic!()));
+
         let out = HClient { inner };
         Ok((out, prx))
     }
@@ -255,12 +256,14 @@ impl HClient {
         server_port: u16,
     ) -> Result<(Self, UnboundedReceiver<Push>), Error> {
         let (ptx, prx) = unbounded_channel();
+
         let init = ClientInit::Register {
             names,
             resps,
             keys,
             ptx,
         };
+
         let (inner, driver) = ws::Client::connect(
             init,
             &TLS_CONFIG,
