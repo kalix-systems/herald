@@ -9,6 +9,7 @@ import "../popups" as Popups
 import "qrc:/imports/Entity" as Av
 
 /// --- displays a list of contacts
+// TODO this seems to be dead code
 ListView {
     id: contactList
     clip: true
@@ -31,7 +32,7 @@ ListView {
             picture: Utils.safeStringOrDefault(contactData.profilePicture, "")
 
             labelComponent: Av.ConversationLabel {
-                contactName: contactData.name
+                convoTitle: contactData.name
                 labelFontSize: 14
                 lastBody: "@" + contactData.userId
             }

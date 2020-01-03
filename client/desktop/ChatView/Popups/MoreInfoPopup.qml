@@ -117,12 +117,10 @@ Popup {
                     picture: Utils.safeStringOrDefault(
                                  messageData.authorProfilePicture, "")
                     color: CmnCfg.palette.white
-                    labelComponent: Av.ConversationLabel {
-                        contactName: messageData.authorName
-                        lastBody: "@" + messageData.author
+                    labelComponent: Av.ContactLabel {
+                        displayName: messageData.authorName
+                        username: messageData.author
                         labelColor: CmnCfg.palette.black
-                        secondaryLabelColor: CmnCfg.palette.darkGrey
-                        labelFontSize: CmnCfg.entityLabelSize
                     }
                     MouseArea {
                         id: hoverHandler
@@ -192,12 +190,10 @@ Popup {
                                                            "")
                         property MouseArea hoverHandler
                         color: CmnCfg.palette.white
-                        labelComponent: Av.ConversationLabel {
-                            contactName: memberData.name
-                            lastBody: "@" + memberData.userId
+                        labelComponent: Av.ContactLabel {
+                            displayName: memberData.name
+                            username: memberData.userId
                             labelColor: CmnCfg.palette.black
-                            secondaryLabelColor: CmnCfg.palette.darkGrey
-                            labelFontSize: CmnCfg.entityLabelSize
                         }
 
                         Button {

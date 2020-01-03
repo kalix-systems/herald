@@ -49,7 +49,7 @@ Rectangle {
     }
 
     ConversationLabel {
-        contactName: entityName
+        convoTitle: entityName
         cc: convContent ? convContent : null
         labelFontSize: CmnCfg.labelFontSize
         // TODO setting lastBody below is necessary to keep EntityBlock working

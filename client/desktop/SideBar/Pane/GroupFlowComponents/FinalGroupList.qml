@@ -39,11 +39,10 @@ ListView {
                 id: hoverHandler
             }
 
-            labelComponent: Av.ConversationLabel {
-                contactName: memberName
+            labelComponent: Av.ContactLabel {
+                displayName: memberName
+                username: memberId
                 labelColor: CmnCfg.palette.white
-                labelFontSize: 14
-                lastBody: "@" + memberId
             }
 
             Imports.IconButton {

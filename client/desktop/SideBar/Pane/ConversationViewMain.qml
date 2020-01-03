@@ -79,9 +79,9 @@ ListView {
 
             labelComponent: Av.ConversationLabel {
                 cc: convContent
-                contactName: title
+                convoTitle: title
                 labelColor: convoRectangle.state !== "" ? CmnCfg.palette.black : CmnCfg.palette.lightGrey
-                secondaryLabelColor: convoRectangle.state
+                minorTextColor: convoRectangle.state
                                      !== "" ? CmnCfg.palette.offBlack : CmnCfg.palette.medGrey
             }
 
