@@ -16,7 +16,12 @@ Page {
     property var members: []
     readonly property string stateName: "info"
     // list of receipt-user objects. set on completion
-    readonly property var receiptData: []
+    property var receiptData: []
+
+    Component.onCompleted: {
+        receiptData = JSON.parse(
+                    referredChatBubble.messageModelData.userReceipts)
+    }
 
     background: Rectangle {
         color: CmnCfg.palette.white
@@ -70,6 +75,27 @@ Page {
                 }
             }
 
+            Label {
+                id: timeInfo
+                text: outbound ? qsTr("Sent at: ") + Utils.userTime(
+                                     referredChatBubble.messageModelData.insertionTime) : qsTr(
+                                     "Sent at: ") + Utils.userTime(
+                                     referredChatBubble.messageModelData.serverTime)
+                font.family: CmnCfg.chatFont.name
+                font.weight: Font.DemiBold
+                color: CmnCfg.palette.black
+            }
+
+            Label {
+                id: receiveInfo
+                text: qsTr("Received at: ") + Utils.userTime(
+                          referredChatBubble.messageModelData.insertionTime)
+                font.family: CmnCfg.chatFont.name
+                font.weight: Font.DemiBold
+                color: CmnCfg.palette.black
+                visible: !outbound
+            }
+
             Column {
                 Label {
                     text: "To : "
@@ -100,6 +126,19 @@ Page {
                             Text {
                                 text: "@" + author
                             }
+                        }
+
+                        Button {
+                            anchors.right: parent.right
+                            id: receipt
+                            icon.source: Utils.receiptCodeSwitch(
+                                             receiptData[index])
+                            icon.height: 16
+                            icon.width: 16
+                            icon.color: CmnCfg.palette.iconMatte
+                            padding: 0
+                            anchors.verticalCenter: parent.verticalCenter
+                            background: Item {}
                         }
                     }
                 }
