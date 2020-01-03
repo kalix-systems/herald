@@ -6,19 +6,24 @@ use parking_lot::RwLock;
 use std::thread::Builder as Thread;
 use tokio::runtime::Builder as Runtime;
 pub use tokio::sync::mpsc::Sender as RegistrationSender;
-use tokio::sync::mpsc::{channel, Receiver};
+use tokio::sync::{
+    mpsc::{channel, Receiver, UnboundedReceiver},
+    oneshot,
+};
 
 static CLIENT: OnceCell<RwLock<Client>> = OnceCell::new();
 
-pub fn login<F>(
+pub fn login<PH, CF>(
     uid: UserId,
     keys: sig::KeyPair,
     server_dns: String,
     server_port: u16,
-    push_handler: F,
+    push_handler: PH,
+    connection_failed: CF,
 ) -> Result<(), Error>
 where
-    F: FnMut(Push) + Send + 'static,
+    PH: FnMut(Push) + Send + Unpin + 'static,
+    CF: FnOnce() + Send + Unpin + 'static,
 {
     Thread::new().spawn(move || {
         let mut rt = Runtime::new().basic_scheduler().build()?;
@@ -29,6 +34,7 @@ where
             server_dns,
             server_port,
             push_handler,
+            connection_failed,
         ))?;
 
         Ok::<(), Error>(())
@@ -37,16 +43,18 @@ where
     Ok(())
 }
 
-pub fn register<PH, RH>(
+pub fn register<PH, RH, CF>(
     keys: sig::KeyPair,
     server_dns: String,
     server_port: u16,
     push_handler: PH,
     response_handler: RH,
+    connection_failed: CF,
 ) -> Result<RegistrationSender<register::ClientEvent>, Error>
 where
-    PH: FnMut(Push) + Send + 'static,
+    PH: FnMut(Push) + Send + Unpin + 'static,
     RH: FnMut(register::ServeEvent) + Send + 'static,
+    CF: FnOnce() + Send + Unpin + 'static,
 {
     let (client_tx, client_rx) = channel(1);
 
@@ -60,6 +68,7 @@ where
             server_port,
             push_handler,
             response_handler,
+            connection_failed,
         ))?;
 
         Ok::<(), Error>(())
@@ -68,42 +77,43 @@ where
     Ok(client_tx)
 }
 
-async fn login_inner<F>(
+async fn login_inner<PH, CF>(
     uid: UserId,
     keys: sig::KeyPair,
     server_dns: String,
     server_port: u16,
-    mut push_handler: F,
+    push_handler: PH,
+    connection_failed: CF,
 ) -> Result<(), Error>
 where
-    F: FnMut(Push) + Send + 'static,
+    PH: FnMut(Push) + Send + Unpin + 'static,
+    CF: FnOnce() + Send + Unpin + 'static,
 {
-    let (client, mut rx) = Client::login(uid, keys, &server_dns, server_port).await?;
+    let (client, rx, err_rx) = Client::login(uid, keys, &server_dns, server_port).await?;
 
     update_client(client);
-
-    while let Some(push) = rx.recv().await {
-        push_handler(push);
-    }
+    handle_events(push_handler, connection_failed, rx, err_rx).await;
 
     Ok::<(), Error>(())
 }
 
-async fn register_inner<PH, RH>(
+async fn register_inner<PH, RH, CF>(
     uid_rx: Receiver<register::ClientEvent>,
     keys: sig::KeyPair,
     server_dns: String,
     server_port: u16,
-    mut push_handler: PH,
+    push_handler: PH,
     mut response_handler: RH,
+    connection_failed: CF,
 ) -> Result<(), Error>
 where
-    PH: FnMut(Push) + Send + 'static,
+    PH: FnMut(Push) + Send + Unpin + 'static,
     RH: FnMut(register::ServeEvent) + Send + 'static,
+    CF: FnOnce() + Send + Unpin + 'static,
 {
     let (response_tx, mut response_rx) = channel(1);
 
-    let (client, mut rx) =
+    let (client, rx, err_rx) =
         Client::register(uid_rx, response_tx, keys, &server_dns, server_port).await?;
 
     while let Some(response) = response_rx.recv().await {
@@ -112,11 +122,29 @@ where
 
     update_client(client);
 
+    handle_events(push_handler, connection_failed, rx, err_rx).await;
+
+    Ok::<(), Error>(())
+}
+
+async fn handle_events<PH, CF>(
+    mut push_handler: PH,
+    connection_failed: CF,
+    mut rx: UnboundedReceiver<Push>,
+    err_rx: oneshot::Receiver<Error>,
+) where
+    PH: FnMut(Push) + Send + Unpin + 'static,
+    CF: FnOnce() + Send + Unpin + 'static,
+{
+    tokio::spawn(async move {
+        if let Err(_) = err_rx.await {
+            connection_failed();
+        }
+    });
+
     while let Some(push) = rx.recv().await {
         push_handler(push);
     }
-
-    Ok::<(), Error>(())
 }
 
 fn update_client(client: Client) {

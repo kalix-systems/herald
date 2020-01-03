@@ -2,14 +2,9 @@ use anyhow::*;
 use futures::{future::TryFutureExt, stream::StreamExt};
 use herald_common::{protocol::*, *};
 use krpc::*;
-use location::*;
 use once_cell::sync::Lazy;
-use rustls::*;
-use std::{future::*, marker::PhantomData, net::ToSocketAddrs, sync::Arc};
-use tokio::{
-    prelude::*,
-    sync::{mpsc::*, oneshot},
-};
+use std::{net::ToSocketAddrs, sync::Arc};
+use tokio::sync::{mpsc::*, oneshot};
 use tokio_rustls::*;
 
 static TLS_CONFIG: Lazy<TlsConnector> = Lazy::new(|| {
@@ -115,8 +110,6 @@ impl Client {
         tx: &mut Framed<Tx>,
         rx: &mut Framed<Rx>,
     ) -> Result<Self, Error> {
-        use auth::register::*;
-
         tx.write_u8(auth::REGISTER)
             .await
             .context("failed to write auth method")?;
@@ -226,7 +219,7 @@ impl HClient {
         keys: sig::KeyPair,
         server_dns: &str,
         server_port: u16,
-    ) -> Result<(Self, UnboundedReceiver<Push>), Error> {
+    ) -> Result<(Self, UnboundedReceiver<Push>, oneshot::Receiver<Error>), Error> {
         let (ptx, prx) = unbounded_channel();
         let init = ClientInit::Login { uid, keys, ptx };
         let (inner, driver) = ws::Client::connect(
@@ -241,11 +234,10 @@ impl HClient {
         )
         .await?;
 
-        //TODO: something more sensible here?
-        tokio::spawn(driver.unwrap_or_else(|e| panic!()));
-
+        let (etx, erx) = oneshot::channel();
+        tokio::spawn(driver.unwrap_or_else(|e| drop(etx.send(e))));
         let out = HClient { inner };
-        Ok((out, prx))
+        Ok((out, prx, erx))
     }
 
     pub async fn register(
@@ -254,16 +246,14 @@ impl HClient {
         keys: sig::KeyPair,
         server_dns: &str,
         server_port: u16,
-    ) -> Result<(Self, UnboundedReceiver<Push>), Error> {
+    ) -> Result<(Self, UnboundedReceiver<Push>, oneshot::Receiver<Error>), Error> {
         let (ptx, prx) = unbounded_channel();
-
         let init = ClientInit::Register {
             names,
             resps,
             keys,
             ptx,
         };
-
         let (inner, driver) = ws::Client::connect(
             init,
             &TLS_CONFIG,
@@ -276,10 +266,10 @@ impl HClient {
         )
         .await?;
 
-        //TODO: something more sensible here?
-        tokio::spawn(driver.unwrap_or_else(|e| panic!()));
+        let (etx, erx) = oneshot::channel();
+        tokio::spawn(driver.unwrap_or_else(|e| drop(etx.send(e))));
         let out = HClient { inner };
-        Ok((out, prx))
+        Ok((out, prx, erx))
     }
 
     pub fn req(
