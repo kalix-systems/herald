@@ -267,15 +267,31 @@ export function userTime(timestamp: number): string {
         return time
     }
 
+
+export function auxStringShort(code: number): string {
+
+    switch (code) {
+        case 0: return " set the expiration time"
+        case 1: return " set the group title"
+        case 2: return " set the color"
+        case 3: return " set the group picture"
+        default: return ""
+
+    }
+}
+
 export function auxString(code: number, content: string): string {
+
+    var expTime = ["off", "thirty seconds", "one minute", "thirty minutes", "one hour", "twelve hours", "one day", "one week", "one month", "one year"];
 switch (code) {
+
     case 0: {
-        return " set the expiration time"
+        return " set the expiration time to " + expTime[Number(content)]
         break;
     }
 
     case 1: {
-        return " set the title to " + content
+        return " set the group title to " + content
         break;
     }
 
@@ -284,7 +300,7 @@ switch (code) {
         break;
 }
  case 3: {
-      return " set the picture"
+      return " set the group picture"
       break;
  }
 

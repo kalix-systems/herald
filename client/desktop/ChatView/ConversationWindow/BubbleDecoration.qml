@@ -26,9 +26,8 @@ Item {
         }
         onExited: {
             if (reactPopup.active == true) {
-                parentBubble.hoverHighlight = true
+                return parentBubble.hoverHighlight = true
             }
-
             parentBubble.hoverHighlight = false
             if (isHead)
                 parentBubble.expireInfo.visible = true
@@ -41,13 +40,17 @@ Item {
         height: reactPopup.height
 
         x: chatListView.width - width
-        y: if (parentBubble.y - parentBubble.contentY > height) {
+        y: if (bubbleLoader.y - chatListView.contentY > height) {
                return -height
            } else {
                return CmnCfg.largeMargin * 2
            }
 
-        onClosed: reactPopup.active = false
+        onClosed: {
+            reactPopup.active = false
+            if (!bubbleHoverHandler.containsMouse)
+                parentBubble.hoverHighlight = false
+        }
         onOpened: parentBubble.hoverHighlight = true
 
         Popups.EmojiPopup {
@@ -61,20 +64,5 @@ Item {
                              }
             anchors.margins: CmnCfg.smallMargin
         }
-    }
-
-    Loader {
-        id: markReadLoader
-        active: false
-        Connections {
-            target: root
-            onActiveChanged: if (root.active) {
-                                 ownedConversation.markRead(index)
-                             }
-        }
-    }
-
-    Component.onCompleted: {
-        markReadLoader.active = true
     }
 }

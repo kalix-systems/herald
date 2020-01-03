@@ -5,7 +5,7 @@ use crate::{
     none, spawn,
 };
 use heraldcore::{
-    config, conversation,
+    config,
     message::{self, MessageReceiptStatus, MsgData},
 };
 use messages_helper::search::SearchState;
@@ -64,10 +64,31 @@ impl Messages {
         let ix = index as usize;
 
         let id = none!(self.container.get(ix), false).msg_id;
+        let builder = &mut self.builder;
+        let emit = &mut self.emit;
+        let container = &mut self.container;
+        let model = &mut self.model;
+        let search = &mut self.search;
 
-        self.remove_helper(id, ix);
+        container.remove_helper(id, ix, emit, model, search, builder);
         spawn!(message::delete_message(&id), false);
 
+        true
+    }
+
+    pub(crate) fn clear_conversation_history_(&mut self) -> bool {
+        let id = none!(self.conversation_id, false);
+
+        spawn!(message::delete_conversation_messages(&id), false);
+
+        self.clear_search();
+        self.model
+            .begin_remove_rows(0, self.container.len().saturating_sub(1));
+        self.container = Default::default();
+        self.model.end_remove_rows();
+
+        self.emit_last_changed();
+        self.emit.is_empty_changed();
         true
     }
 

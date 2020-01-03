@@ -35,7 +35,7 @@ pub(super) fn handle_cmessage(
             conv_builder.title = title;
 
             conv_builder.picture = match picture {
-                Some(bytes) => Some(image_utils::update_picture_buf(&bytes, None::<&str>)?),
+                Some(bytes) => Some(image_utils::update_picture_buf(&bytes)?),
                 None => None,
             };
 
@@ -65,12 +65,6 @@ fn handle_content(
         UserReqAck(cr) => ev
             .notifications
             .push(Notification::AddUserResponse(cid, uid, cr.0)),
-        NewMembers(nm) => {
-            let mut db = crate::db::Database::get()?;
-            let tx = db.transaction()?;
-            crate::members::db::add_members_with_tx(&tx, cid, &nm.0)?;
-            tx.commit()?;
-        }
         Msg(msg) => {
             let cmessages::Msg {
                 mid,
@@ -108,7 +102,7 @@ fn handle_content(
                     let update =
                         crate::conversation::settings::db::apply_inbound(&conn, settings, &cid)?;
 
-                    let msg = crate::message::db::inbound_group_settings(
+                    let msg = crate::message::db::inbound_aux(
                         &mut conn,
                         update.clone(),
                         cid,
@@ -121,6 +115,20 @@ fn handle_content(
                     if let Some(msg) = msg {
                         ev.notifications.push(Notification::NewMsg(Box::new(msg)));
                         ev.notifications.push(Notification::Settings(cid, update));
+                    }
+                }
+                cmessages::MsgContent::NewMembers(nm) => {
+                    let mut conn = crate::db::Database::get()?;
+                    let tx = conn.transaction()?;
+                    crate::members::db::add_members_with_tx(&tx, cid, &nm.0)?;
+                    tx.commit()?;
+
+                    let msg = crate::message::db::inbound_aux(
+                        &mut conn, nm, cid, mid, uid, ts, expiration,
+                    )?;
+
+                    if let Some(msg) = msg {
+                        ev.notifications.push(Notification::NewMsg(Box::new(msg)));
                     }
                 }
             }
@@ -157,6 +165,57 @@ fn handle_content(
                 content: react_content,
                 remove,
             });
+        }
+        ProfileChanged(change) => {
+            use cmessages::ProfileChanged as U;
+            use coretypes::conversation::settings::SettingsUpdate as S;
+            use herald_user::UserChange::*;
+
+            match change {
+                U::Color(color) => {
+                    crate::user::set_color(uid, color)?;
+                    ev.notifications
+                        .push(Notification::UserChanged(uid, Color(color)));
+
+                    if let Some(cid) =
+                        crate::conversation::get_pairwise_conversations(&[uid])?.pop()
+                    {
+                        ev.notifications
+                            .push(Notification::Settings(cid, S::Color(color)));
+                    }
+                }
+
+                U::DisplayName(name) => {
+                    crate::user::set_name(uid, name.as_ref().map(String::as_str))?;
+                    ev.notifications
+                        .push(Notification::UserChanged(uid, DisplayName(name.clone())));
+
+                    if let Some(cid) =
+                        crate::conversation::get_pairwise_conversations(&[uid])?.pop()
+                    {
+                        ev.notifications
+                            .push(Notification::Settings(cid, S::Title(name)));
+                    }
+                }
+
+                U::Picture(buf) => {
+                    let conn = crate::db::Database::get()?;
+                    let path = crate::user::db::set_profile_picture_buf(
+                        &conn,
+                        uid,
+                        buf.as_ref().map(Vec::as_slice),
+                    )?;
+                    ev.notifications
+                        .push(Notification::UserChanged(uid, Picture(path.clone())));
+
+                    if let Some(cid) =
+                        crate::conversation::get_pairwise_conversations(&[uid])?.pop()
+                    {
+                        ev.notifications
+                            .push(Notification::Settings(cid, S::Picture(path)));
+                    }
+                }
+            }
         }
     };
 

@@ -52,24 +52,16 @@ impl ProfilePicture {
 
 /// Given a path to an existing picture (`source`), generates a thumbnail with the provided tag
 /// information and moves the picture to herald's storage.
-pub fn update_picture<P>(
+pub fn update_picture(
     ProfilePicture {
         x,
         y,
         width,
         height,
         path,
-    }: ProfilePicture,
-    old_path: Option<P>,
-) -> Result<String, image::ImageError>
-where
-    P: AsRef<Path>,
-{
+    }: ProfilePicture
+) -> Result<String, image::ImageError> {
     std::fs::create_dir_all(pictures_dir())?;
-
-    if let Some(old_path) = old_path {
-        std::fs::remove_file(old_path)?;
-    }
 
     let image_path = image_path();
 
@@ -83,19 +75,11 @@ where
 
 /// Given a path to an existing picture (`source`), generates a thumbnail and moves the picture to
 /// herald's storage.
-pub fn update_picture_autocrop<P1, P2>(
-    path: P1,
-    old_path: Option<P2>,
-) -> Result<String, image::ImageError>
+pub fn update_picture_autocrop<P>(path: P) -> Result<String, image::ImageError>
 where
-    P1: AsRef<Path>,
-    P2: AsRef<Path>,
+    P: AsRef<Path>,
 {
     std::fs::create_dir_all(pictures_dir())?;
-
-    if let Some(old_path) = old_path {
-        std::fs::remove_file(old_path)?;
-    }
 
     let image_path = image_path();
 
@@ -108,18 +92,10 @@ where
 
 /// Given a raw image buffer, generates a thumbnail and moves the picture to
 /// herald's storage.
-pub fn update_picture_buf<P>(
-    buf: &[u8],
-    old_path: Option<P>,
-) -> Result<String, image::ImageError>
+pub fn update_picture_buf(buf: &[u8]) -> Result<String, image::ImageError>
 where
-    P: AsRef<Path>,
 {
     std::fs::create_dir_all(pictures_dir())?;
-
-    if let Some(old_path) = old_path {
-        std::fs::remove_file(old_path)?;
-    }
 
     let image_path = image_path();
 

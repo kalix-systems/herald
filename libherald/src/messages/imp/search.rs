@@ -42,24 +42,15 @@ impl Messages {
             self.emit.search_active_changed();
 
             let emit = &mut self.emit;
-            let mut emit_index = emit.clone();
 
             let model = &mut self.model;
 
             let matches = self
                 .container
-                .apply_search(
-                    &self.search,
-                    |ix| model.data_changed(ix, ix),
-                    || emit_index.search_num_matches_changed(),
-                )
+                .apply_search(&self.search, emit, model)
                 .unwrap_or_default();
 
-            self.search.set_matches(
-                matches,
-                || emit.search_num_matches_changed(),
-                || emit_index.search_index_changed(),
-            );
+            self.search.set_matches(matches, emit);
         }
     }
 
@@ -67,14 +58,9 @@ impl Messages {
     pub(crate) fn clear_search_(&mut self) {
         let model = &mut self.model;
         let emit = &mut self.emit;
-        self.container.clear_search(|ix| model.data_changed(ix, ix));
+        self.container.clear_search(model);
 
-        err!(self.search.clear_search(|| {
-            emit.search_index_changed();
-            emit.search_pattern_changed();
-            emit.search_regex_changed();
-            emit.search_num_matches_changed();
-        }));
+        err!(self.search.clear_search(emit));
     }
 
     pub(crate) fn set_search_pattern_(
@@ -90,27 +76,17 @@ impl Messages {
 
         let changed = err!(self
             .search
-            .set_pattern(pattern, || emit.search_pattern_changed())
+            .set_pattern(pattern, emit)
             .map(messages_helper::search::SearchChanged::changed));
 
         if changed && self.search.active {
             let model = &mut self.model;
             let matches = self
                 .container
-                .apply_search(
-                    &self.search,
-                    |ix| model.data_changed(ix, ix),
-                    || emit.search_num_matches_changed(),
-                )
+                .apply_search(&self.search, emit, model)
                 .unwrap_or_default();
 
-            let mut emit_index = emit.clone();
-
-            self.search.set_matches(
-                matches,
-                || emit_index.search_index_changed(),
-                || emit.search_num_matches_changed(),
-            );
+            self.search.set_matches(matches, emit);
         }
     }
 
@@ -121,29 +97,17 @@ impl Messages {
     ) {
         let emit = &mut self.emit;
 
-        let changed = err!(self
-            .search
-            .set_regex(use_regex, || emit.search_regex_changed()))
-        .changed();
+        let changed = err!(self.search.set_regex(use_regex, emit)).changed();
 
         if changed {
             let model = &mut self.model;
 
             let matches = self
                 .container
-                .apply_search(
-                    &self.search,
-                    |ix| model.data_changed(ix, ix),
-                    || emit.search_num_matches_changed(),
-                )
+                .apply_search(&self.search, emit, model)
                 .unwrap_or_default();
 
-            let mut emit_index = emit.clone();
-            self.search.set_matches(
-                matches,
-                || emit.search_num_matches_changed(),
-                || emit_index.search_index_changed(),
-            );
+            self.search.set_matches(matches, emit);
         }
     }
 
@@ -162,11 +126,17 @@ impl Messages {
     }
 
     pub(crate) fn next_search_match_(&mut self) -> i64 {
-        self.next_match_helper().map(|ix| ix as i64).unwrap_or(-1)
+        self.search
+            .next_match_helper(&mut self.container, &mut self.emit, &mut self.model)
+            .map(|ix| ix as i64)
+            .unwrap_or(-1)
     }
 
     pub(crate) fn prev_search_match_(&mut self) -> i64 {
-        self.prev_match_helper().map(|ix| ix as i64).unwrap_or(-1)
+        self.search
+            .prev_match_helper(&mut self.container, &mut self.emit, &mut self.model)
+            .map(|ix| ix as i64)
+            .unwrap_or(-1)
     }
 
     pub(crate) fn search_index_(&self) -> u64 {

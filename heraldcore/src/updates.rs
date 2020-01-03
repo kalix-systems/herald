@@ -43,6 +43,8 @@ pub enum Notification {
     OutboundMsg(crate::message::StoreAndSend),
     /// Incremental updates to outbound auxilliary message sending
     OutboundAux(crate::message::OutboundAux),
+    /// User profile information changed
+    UserChanged(UserId, herald_user::UserChange),
 }
 
 /// Registers handlers for notifications

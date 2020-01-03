@@ -1,4 +1,4 @@
-use crate::{db::Database, errors::HErr, message::Message, types::*};
+use crate::{db::Database, errors::HErr, types::*};
 pub use coretypes::conversation::*;
 use herald_common::*;
 use rusqlite::{params, NO_PARAMS};
@@ -55,26 +55,6 @@ pub fn start(conversation: Conversation) -> Result<(), HErr> {
     Ok(())
 }
 
-/// Deletes all messages in a conversation.
-pub fn delete_conversation(conversation_id: &ConversationId) -> Result<(), HErr> {
-    let db = Database::get()?;
-    db::delete_conversation(&db, conversation_id)
-}
-
-/// Get all messages in a conversation.
-pub fn conversation_messages(conversation_id: &ConversationId) -> Result<Vec<Message>, HErr> {
-    let db = Database::get()?;
-    db::conversation_messages(&db, conversation_id)
-}
-
-/// Get all message metadata in a conversation.
-pub fn conversation_message_meta(
-    conversation_id: &ConversationId
-) -> Result<Vec<crate::message::MessageMeta>, HErr> {
-    let db = Database::get()?;
-    db::conversation_message_meta(&db, conversation_id)
-}
-
 /// Get conversation metadata
 pub fn meta(conversation_id: &ConversationId) -> Result<ConversationMeta, HErr> {
     let db = Database::get()?;
@@ -90,7 +70,7 @@ pub fn set_color(
 
     let update = settings::db::update_color(&db, color, conversation_id)?;
 
-    let (mid, expiration) = crate::message::db::outbound_group_settings(
+    let (mid, expiration) = crate::message::db::outbound_aux(
         &mut db,
         settings::SettingsUpdate::Color(color),
         conversation_id,
@@ -108,7 +88,7 @@ pub fn set_title(
 ) -> Result<(), HErr> {
     let mut db = Database::get()?;
     let update = settings::db::update_title(&db, title.clone(), conversation_id)?;
-    let (mid, expiration) = crate::message::db::outbound_group_settings(
+    let (mid, expiration) = crate::message::db::outbound_aux(
         &mut db,
         settings::SettingsUpdate::Title(title),
         conversation_id,
@@ -127,7 +107,7 @@ pub fn set_picture(
 
     let (update, path) = settings::db::update_picture(&db, picture, conversation_id)?;
 
-    let (mid, expiration) = crate::message::db::outbound_group_settings(
+    let (mid, expiration) = crate::message::db::outbound_aux(
         &mut db,
         settings::SettingsUpdate::Picture(path.clone()),
         conversation_id,
@@ -146,7 +126,7 @@ pub fn set_expiration_period(
     let mut db = Database::get()?;
 
     let update = settings::db::update_expiration(&db, expiration_period, conversation_id)?;
-    let (mid, expiration) = crate::message::db::outbound_group_settings(
+    let (mid, expiration) = crate::message::db::outbound_aux(
         &mut db,
         settings::SettingsUpdate::Expiration(expiration_period),
         conversation_id,

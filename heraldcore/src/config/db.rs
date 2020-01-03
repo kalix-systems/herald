@@ -6,10 +6,13 @@ use std::net::SocketAddr;
 
 pub(crate) fn set_name(
     conn: &rusqlite::Connection,
-    name: String,
+    name: &str,
 ) -> Result<(), HErr> {
     let id = id(conn)?;
-    Ok(crate::user::db::set_name(conn, id, name.as_str())?)
+
+    crate::user::db::set_name(conn, id, name.into())?;
+
+    Ok(())
 }
 
 pub(crate) fn set_profile_picture(
@@ -17,11 +20,9 @@ pub(crate) fn set_profile_picture(
     profile_picture: Option<image_utils::ProfilePicture>,
 ) -> Result<Option<String>, HErr> {
     let id = id(conn)?;
-    Ok(crate::user::db::set_profile_picture(
-        conn,
-        id,
-        profile_picture,
-    )?)
+    let path = crate::user::db::set_profile_picture(conn, id, profile_picture)?;
+
+    Ok(path)
 }
 
 /// Update user's color

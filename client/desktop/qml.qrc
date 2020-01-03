@@ -67,7 +67,6 @@
         <file>SideBar/popups/ImageCropPopup.qml</file>
         <file>SideBar/popups/js/SettingsPopupSubmission.mjs</file>
         <file>ChatView/Popups/MoreInfoPopup.qml</file>
-        <file>SideBar/Pane/ConversationRectangle.qml</file>
         <file>ChatView/Popups/GroupSettingsPopup.qml</file>
         <file>EmojiKeyboard/SearchInteriorComponent.qml</file>
         <file>EmojiKeyboard/StandardInterior.qml</file>

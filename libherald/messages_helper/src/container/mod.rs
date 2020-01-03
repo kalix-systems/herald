@@ -11,23 +11,20 @@ use types::*;
 const FLURRY_FUZZ: i64 = 5 * 60_000;
 
 pub mod handlers;
+pub mod helpers;
+pub mod op;
 pub use cache::{access, get, update};
 
 #[derive(Default, Debug)]
 /// Container type for messages
 pub struct Container {
     pub list: Revec<MessageMeta>,
-    last: Option<MsgData>,
     op_body_elider: Elider,
 }
 
 impl Container {
-    pub fn new(
-        list: Vec<MessageMeta>,
-        last: Option<MsgData>,
-    ) -> Self {
+    pub fn new(list: Vec<MessageMeta>) -> Self {
         Self {
-            last,
             list: list.into(),
             op_body_elider: Elider {
                 line_count: 3,
@@ -59,16 +56,19 @@ impl Container {
         cache::get(mid)
     }
 
-    pub fn last_msg(&self) -> Option<&MsgData> {
-        self.last.as_ref()
-    }
-
     pub fn msg_data(
         &self,
         index: usize,
     ) -> Option<MsgData> {
         let msg = self.list.get(index);
         cache::get(&msg?.msg_id)
+    }
+
+    pub fn msg_id(
+        &self,
+        index: usize,
+    ) -> Option<&MsgId> {
+        Some(&self.list.get(index).as_ref()?.msg_id)
     }
 
     pub fn access_by_index<T, F: FnOnce(&MsgData) -> T>(
@@ -91,6 +91,27 @@ impl Container {
         update(&mid, f)
     }
 
+    pub fn index_by_id(
+        &self,
+        msg_id: MsgId,
+    ) -> Option<usize> {
+        let m = from_msg_id(msg_id)?;
+
+        self.list.binary_search(&m).ok()
+    }
+
+    pub fn last(&self) -> Option<&MessageMeta> {
+        self.list.last()
+    }
+
+    pub fn index_of(
+        &self,
+        msg: &MessageMeta,
+    ) -> Option<usize> {
+        self.list.binary_search(&msg).ok()
+    }
+
+    // media attachments functions
     pub fn media_attachments_data_json(
         &self,
         index: usize,
@@ -110,6 +131,7 @@ impl Container {
             .and_then(|attachments| crate::media_attachments_json(&attachments, limit))
     }
 
+    //doc attachments functions
     pub fn doc_attachments_data_json(
         &self,
         index: usize,
@@ -129,26 +151,7 @@ impl Container {
             .and_then(|attachments| crate::doc_attachments_json(&attachments, limit))
     }
 
-    pub fn last(&self) -> Option<&MessageMeta> {
-        self.list.last()
-    }
-
-    pub fn index_of(
-        &self,
-        msg: &MessageMeta,
-    ) -> Option<usize> {
-        self.list.binary_search(&msg).ok()
-    }
-
-    pub fn index_by_id(
-        &self,
-        msg_id: MsgId,
-    ) -> Option<usize> {
-        let m = from_msg_id(msg_id)?;
-
-        self.list.binary_search(&m).ok()
-    }
-
+    //aux data functions
     pub fn aux_data_json(
         &self,
         ix: usize,
@@ -161,12 +164,27 @@ impl Container {
         &self,
         msg_id: &MsgId,
     ) -> Option<String> {
-        let update = cache::access(msg_id, |data| match data.content.as_ref()? {
+        let update = cache::access(msg_id, |data| match &data.content {
             Item::Aux(update) => Some(update.clone()),
             _ => None,
-        })??;
+        })
+        .flatten()?;
 
         json::JsonValue::from(update).dump().into()
+    }
+
+    pub fn aux_data_code_by_id(
+        &self,
+        msg_id: &MsgId,
+    ) -> Option<u8> {
+        let update = cache::access(msg_id, |data| match &data.content {
+            Item::Aux(update) => Some(update.clone()),
+
+            _ => None,
+        })
+        .flatten()?;
+
+        update.code().into()
     }
 
     /// Removes the item from the container. *Does not modify disk storage*.
@@ -175,16 +193,7 @@ impl Container {
         ix: usize,
     ) -> Option<MsgData> {
         let msg = self.list.remove(ix)?;
-        let data = cache::remove(&msg.msg_id);
-
-        if ix == 0 {
-            self.last = self
-                .list
-                .front()
-                .and_then(|MessageMeta { ref msg_id, .. }| cache::get(msg_id));
-        }
-
-        data
+        cache::remove(&msg.msg_id)
     }
 
     pub fn binary_search(
@@ -211,122 +220,16 @@ impl Container {
         let ix = self.list.insert_ord(msg);
         cache::insert(mid, data);
 
-        if ix == 0 {
-            self.last = self
-                .list
-                .front()
-                .and_then(|MessageMeta { ref msg_id, .. }| cache::get(msg_id));
-        }
-
         ix
     }
 
-    pub fn msg_id(
-        &self,
-        index: usize,
-    ) -> Option<&MsgId> {
-        Some(&self.list.get(index).as_ref()?.msg_id)
-    }
-
-    pub fn op_reply_type(
-        &self,
-        index: usize,
-    ) -> Option<ReplyType> {
-        Some(reply_type(&cache::access(self.msg_id(index)?, |m| {
-            *m.op()
-        })?))
-    }
-
-    pub fn op_msg_id(
-        &self,
-        index: usize,
-    ) -> Option<MsgId> {
-        match cache::access(self.msg_id(index)?, |m| *m.op())? {
-            ReplyId::Known(mid) => Some(mid),
-            _ => None,
-        }
-    }
-
-    pub fn op_author(
-        &self,
-        index: usize,
-    ) -> Option<UserId> {
-        let mid = self.op_msg_id(index)?;
-        access(&mid, |m| m.author)
-    }
-
-    pub fn op_body(
-        &self,
-        index: usize,
-    ) -> Option<String> {
-        let mid = self.op_msg_id(index)?;
-
-        access(&mid, |m| m.text().map(ToString::to_string))
-            .flatten()
-            .map(|b| self.op_body_elider.elided_body(b))
-    }
-
-    pub fn op_insertion_time(
-        &self,
-        index: usize,
-    ) -> Option<Time> {
-        let mid = self.op_msg_id(index)?;
-        access(&mid, |m| m.time.insertion)
-    }
-
-    pub fn op_expiration_time(
-        &self,
-        index: usize,
-    ) -> Option<Time> {
-        let mid = self.op_msg_id(index)?;
-        access(&mid, |m| m.time.expiration)?
-    }
-
-    pub fn op_doc_attachments_json(
-        &self,
-        index: usize,
-    ) -> Option<String> {
-        let mid = self.op_msg_id(index)?;
-
-        self.get_doc_attachments_data_json(&mid, Some(1))
-    }
-
-    pub fn op_media_attachments_json(
-        &self,
-        index: usize,
-    ) -> Option<String> {
-        let mid = self.op_msg_id(index)?;
-        self.get_media_attachments_data_json(&mid, Some(4))
-    }
-
-    pub fn op_aux_data_json(
-        &self,
-        index: usize,
-    ) -> Option<String> {
-        let mid = self.op_msg_id(index)?;
-        self.aux_data_json_by_id(&mid)
-    }
-
-    pub fn clear_search<F: FnMut(usize)>(
-        &mut self,
-        mut data_changed: F,
-    ) -> Option<()> {
-        for (ix, msg) in self.list.iter_mut().enumerate() {
-            if msg.match_status.is_match() {
-                msg.match_status = MatchStatus::NotMatched;
-                data_changed(ix);
-            }
-        }
-
-        Some(())
-    }
-
+    //search functions
     // FIXME make this incremental, long conversations with a large number of matches freeze the UI
-    pub fn apply_search<D: FnMut(usize), N: FnMut()>(
+    pub fn apply_search<M: MessageModel, E: MessageEmit>(
         &mut self,
         search: &SearchState,
-        mut data_changed: D,
-        mut num_matches_changed: N,
+        emit: &mut E,
+        model: &mut M,
     ) -> Option<Vec<Match>> {
         let pattern = search.pattern.as_ref()?;
 
@@ -350,7 +253,7 @@ impl Container {
             if (old_match_status != msg.match_status)
                 || (old_match_status.is_match() && msg.match_status.is_match())
             {
-                data_changed(ix);
+                model.entry_changed(ix);
             }
 
             if !matched {
@@ -360,20 +263,34 @@ impl Container {
             matches.push(Match(*msg))
         }
 
-        num_matches_changed();
+        emit.search_num_matches_changed();
 
         Some(matches)
     }
 
+    pub fn clear_search<M: MessageModel>(
+        &mut self,
+        model: &mut M,
+    ) -> Option<()> {
+        for (ix, msg) in self.list.iter_mut().enumerate() {
+            if msg.match_status.is_match() {
+                msg.match_status = MatchStatus::NotMatched;
+                model.entry_changed(ix);
+            }
+        }
+
+        Some(())
+    }
+
     /// Sets the reply type of a message to "dangling"
-    pub fn set_dangling<F: FnMut(usize)>(
+    pub fn set_dangling<M: MessageModel>(
         &self,
         ids: HashSet<MsgId>,
-        mut data_changed: F,
+        model: &mut M,
     ) -> Option<()> {
         for id in ids.into_iter() {
             let changed = update(&id, |data| match data.content {
-                Some(Item::Plain(PlainItem { ref mut op, .. })) => {
+                Item::Plain(PlainItem { ref mut op, .. }) => {
                     if *op != ReplyId::Dangling {
                         *op = ReplyId::Dangling;
                         true
@@ -386,7 +303,7 @@ impl Container {
 
             if changed.unwrap_or(false) {
                 if let Some(ix) = self.index_by_id(id) {
-                    data_changed(ix);
+                    model.entry_changed(ix);
                 }
             }
         }
@@ -399,13 +316,8 @@ impl Container {
         a_ix: usize,
         b_ix: usize,
     ) -> Option<bool> {
-        let flurry_info = |data: &MsgData| {
-            (
-                data.author,
-                data.time.insertion,
-                data.content.as_ref().map(Item::is_plain).unwrap_or(false),
-            )
-        };
+        let flurry_info =
+            |data: &MsgData| (data.author, data.time.insertion, data.content.is_plain());
 
         let (a_author, a_ts, a_is_plain) = self.access_by_index(a_ix, flurry_info)?;
         let (b_author, b_ts, b_is_plain) = self.access_by_index(b_ix, flurry_info)?;

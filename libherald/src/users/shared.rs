@@ -76,6 +76,8 @@ pub enum UserUpdate {
     ReqResp(UserId, bool),
     /// Data has changed for this user
     DataChanged(UserId),
+    /// User profile information has been updated
+    UserChanged(UserId, herald_user::UserChange),
 }
 
 impl From<UserUpdate> for crate::Update {

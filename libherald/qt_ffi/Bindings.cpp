@@ -182,6 +182,9 @@ inline void messageBuilderIsReplyChanged(MessageBuilder *o) {
 inline void messageBuilderOpAuthorChanged(MessageBuilder *o) {
   Q_EMIT o->opAuthorChanged();
 }
+inline void messageBuilderOpAuxContentChanged(MessageBuilder *o) {
+  Q_EMIT o->opAuxContentChanged();
+}
 inline void messageBuilderOpBodyChanged(MessageBuilder *o) {
   Q_EMIT o->opBodyChanged();
 }
@@ -210,8 +213,14 @@ inline void messagesIsEmptyChanged(Messages *o) { Q_EMIT o->isEmptyChanged(); }
 inline void messagesLastAuthorChanged(Messages *o) {
   Q_EMIT o->lastAuthorChanged();
 }
+inline void messagesLastAuxCodeChanged(Messages *o) {
+  Q_EMIT o->lastAuxCodeChanged();
+}
 inline void messagesLastBodyChanged(Messages *o) {
   Q_EMIT o->lastBodyChanged();
+}
+inline void messagesLastHasAttachmentsChanged(Messages *o) {
+  Q_EMIT o->lastHasAttachmentsChanged();
 }
 inline void messagesLastStatusChanged(Messages *o) {
   Q_EMIT o->lastStatusChanged();
@@ -1698,6 +1707,8 @@ MediaAttachments::Private *
 message_builder_media_attachments_get(const MessageBuilder::Private *);
 void message_builder_op_author_get(const MessageBuilder::Private *, QString *,
                                    qstring_set);
+void message_builder_op_aux_content_get(const MessageBuilder::Private *,
+                                        QString *, qstring_set);
 void message_builder_op_body_get(const MessageBuilder::Private *, QString *,
                                  qstring_set);
 void message_builder_op_doc_attachments_get(const MessageBuilder::Private *,
@@ -2401,7 +2412,9 @@ MessageBuilder::Private *messages_builder_get(const Messages::Private *);
 bool messages_is_empty_get(const Messages::Private *);
 void messages_last_author_get(const Messages::Private *, QString *,
                               qstring_set);
+option_quint8 messages_last_aux_code_get(const Messages::Private *);
 void messages_last_body_get(const Messages::Private *, QString *, qstring_set);
+option_bool messages_last_has_attachments_get(const Messages::Private *);
 option_quint32 messages_last_status_get(const Messages::Private *);
 option_qint64 messages_last_time_get(const Messages::Private *);
 bool messages_search_active_get(const Messages::Private *);
@@ -2419,7 +2432,7 @@ bool messages_clear_conversation_history(Messages::Private *);
 void messages_clear_search(Messages::Private *);
 bool messages_delete_message(Messages::Private *, quint64);
 qint64 messages_index_by_id(const Messages::Private *, const char *, int);
-void messages_mark_read(Messages::Private *, quint64);
+void messages_mark_read_by_id(Messages::Private *, const char *, int);
 qint64 messages_next_search_match(Messages::Private *);
 qint64 messages_prev_search_match(Messages::Private *);
 void messages_remove_reaction(Messages::Private *, quint64, const ushort *,
@@ -3140,6 +3153,7 @@ ConversationContent::ConversationContent(QObject *parent)
           },
           [](MediaAttachments *o) { o->endRemoveRows(); },
           messageBuilderOpAuthorChanged,
+          messageBuilderOpAuxContentChanged,
           messageBuilderOpBodyChanged,
           messageBuilderOpDocAttachmentsChanged,
           messageBuilderOpExpirationTimeChanged,
@@ -3175,7 +3189,9 @@ ConversationContent::ConversationContent(QObject *parent)
           [](MessageBuilder *o) { o->endRemoveRows(); },
           messagesIsEmptyChanged,
           messagesLastAuthorChanged,
+          messagesLastAuxCodeChanged,
           messagesLastBodyChanged,
+          messagesLastHasAttachmentsChanged,
           messagesLastStatusChanged,
           messagesLastTimeChanged,
           messagesSearchActiveChanged,
@@ -4060,6 +4076,7 @@ MessageBuilder::MessageBuilder(QObject *parent)
           },
           [](MediaAttachments *o) { o->endRemoveRows(); },
           messageBuilderOpAuthorChanged,
+          messageBuilderOpAuxContentChanged,
           messageBuilderOpBodyChanged,
           messageBuilderOpDocAttachmentsChanged,
           messageBuilderOpExpirationTimeChanged,
@@ -4165,6 +4182,12 @@ MediaAttachments *MessageBuilder::mediaAttachments() {
 QString MessageBuilder::opAuthor() const {
   QString v;
   message_builder_op_author_get(m_d, &v, set_qstring);
+  return v;
+}
+
+QString MessageBuilder::opAuxContent() const {
+  QString v;
+  message_builder_op_aux_content_get(m_d, &v, set_qstring);
   return v;
 }
 
@@ -4381,6 +4404,7 @@ Messages::Messages(QObject *parent)
           },
           [](MediaAttachments *o) { o->endRemoveRows(); },
           messageBuilderOpAuthorChanged,
+          messageBuilderOpAuxContentChanged,
           messageBuilderOpBodyChanged,
           messageBuilderOpDocAttachmentsChanged,
           messageBuilderOpExpirationTimeChanged,
@@ -4416,7 +4440,9 @@ Messages::Messages(QObject *parent)
           [](MessageBuilder *o) { o->endRemoveRows(); },
           messagesIsEmptyChanged,
           messagesLastAuthorChanged,
+          messagesLastAuxCodeChanged,
           messagesLastBodyChanged,
+          messagesLastHasAttachmentsChanged,
           messagesLastStatusChanged,
           messagesLastTimeChanged,
           messagesSearchActiveChanged,
@@ -4499,10 +4525,28 @@ QString Messages::lastAuthor() const {
   return v;
 }
 
+QVariant Messages::lastAuxCode() const {
+  QVariant v;
+  auto r = messages_last_aux_code_get(m_d);
+  if (r.some) {
+    v.setValue(r.value);
+  }
+  return r;
+}
+
 QString Messages::lastBody() const {
   QString v;
   messages_last_body_get(m_d, &v, set_qstring);
   return v;
+}
+
+QVariant Messages::lastHasAttachments() const {
+  QVariant v;
+  auto r = messages_last_has_attachments_get(m_d);
+  if (r.some) {
+    v.setValue(r.value);
+  }
+  return r;
 }
 
 QVariant Messages::lastStatus() const {
@@ -4557,8 +4601,8 @@ bool Messages::deleteMessage(quint64 row_index) {
 qint64 Messages::indexById(const QByteArray &msg_id) const {
   return messages_index_by_id(m_d, msg_id.data(), msg_id.size());
 }
-void Messages::markRead(quint64 index) {
-  return messages_mark_read(m_d, index);
+void Messages::markReadById(const QByteArray &id) {
+  return messages_mark_read_by_id(m_d, id.data(), id.size());
 }
 qint64 Messages::nextSearchMatch() { return messages_next_search_match(m_d); }
 qint64 Messages::prevSearchMatch() { return messages_prev_search_match(m_d); }

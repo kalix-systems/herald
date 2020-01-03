@@ -37,7 +37,8 @@ Rectangle {
     }
 
     ReplyMouseArea {
-    id: mouseArea }
+        id: mouseArea
+    }
 
     Column {
         id: replyWrapperCol

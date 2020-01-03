@@ -17,7 +17,7 @@ impl Interface for Messages {
         self.is_empty_()
     }
 
-    fn last_author(&self) -> Option<ffi::UserIdRef> {
+    fn last_author(&self) -> Option<ffi::UserId> {
         self.last_author_()
     }
 
@@ -25,12 +25,20 @@ impl Interface for Messages {
         self.last_status_()
     }
 
-    fn last_body(&self) -> Option<&str> {
+    fn last_body(&self) -> Option<String> {
         self.last_body_()
     }
 
     fn last_time(&self) -> Option<i64> {
         self.last_time_()
+    }
+
+    fn last_aux_code(&self) -> Option<u8> {
+        self.last_aux_code_()
+    }
+
+    fn last_has_attachments(&self) -> Option<bool> {
+        self.last_has_attachments_()
     }
 
     fn index_by_id(
@@ -367,11 +375,11 @@ impl Interface for Messages {
         self.user_receipts_(index).unwrap_or_default()
     }
 
-    fn mark_read(
+    fn mark_read_by_id(
         &mut self,
-        index: u64,
+        id: ffi::MsgIdRef,
     ) {
-        self.mark_read_(index)
+        self.mark_read_(id)
     }
 
     fn add_reaction(

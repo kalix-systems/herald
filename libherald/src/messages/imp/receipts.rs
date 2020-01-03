@@ -21,15 +21,6 @@ impl Messages {
         )
     }
 
-    pub(crate) fn last_status_(&self) -> Option<u32> {
-        self.container
-            .last_msg()?
-            .receipts
-            .values()
-            .max()
-            .map(|status| *status as u32)
-    }
-
     pub(crate) fn user_receipts_(
         &self,
         index: usize,
@@ -47,15 +38,14 @@ impl Messages {
 
     pub(crate) fn mark_read_(
         &mut self,
-        index: u64,
+        id: ffi::MsgIdRef,
     ) {
-        let index = index as usize;
+        let msg_id = err!(id.try_into());
 
         let local_id = none!(self.local_id);
-        let msg_id = *none!(self.container.msg_id(index));
         let cid = none!(self.conversation_id);
 
-        let updated = none!(self.container.update_by_index(index, |data| {
+        let updated = none!(messages_helper::container::update(&msg_id, |data| {
             let status = data.receipts.entry(local_id).or_default();
 
             match *status {
@@ -71,6 +61,7 @@ impl Messages {
             return;
         }
 
+        let index = none!(self.container.index_by_id(msg_id));
         self.model.data_changed(index, index);
 
         spawn!({

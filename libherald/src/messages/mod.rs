@@ -6,13 +6,13 @@ use crate::{
 };
 use herald_common::UserId;
 use heraldcore::{
-    conversation,
     message::{Elider, MessageReceiptStatus},
     types::*,
 };
 use messages_helper::{container::Container, search::SearchState};
 use search_pattern::SearchPattern;
 
+mod helper_trait_imp;
 mod helpers;
 pub(crate) mod imp;
 mod trait_imp;
@@ -39,14 +39,27 @@ impl Messages {
         &mut self,
         update: MsgUpdate,
     ) {
+        let emit = &mut self.emit;
+        let model = &mut self.model;
+        let search = &mut self.search;
+        let cid = none!(self.conversation_id);
+        let push = |cid| {
+            use crate::conversations::shared::*;
+            crate::push(ConvItemUpdate {
+                cid,
+                variant: ConvItemUpdateVariant::NewActivity,
+            })
+        };
         match update {
             MsgUpdate::NewMsg(new) => {
                 new_msg_toast(new.as_ref());
 
-                err!(self.insert_helper(*new));
+                self.container
+                    .insert_helper(*new, emit, model, search, cid, push);
             }
             MsgUpdate::BuilderMsg(msg) => {
-                err!(self.insert_helper(*msg));
+                self.container
+                    .insert_helper(*msg, emit, model, search, cid, push);
             }
             MsgUpdate::Receipt {
                 msg_id,
@@ -57,8 +70,9 @@ impl Messages {
 
                 none!(&self
                     .container
-                    .handle_receipt(msg_id, status, recipient, |ix| model.data_changed(ix, ix)));
+                    .handle_receipt(msg_id, status, recipient, model));
             }
+
             MsgUpdate::Reaction {
                 msg_id,
                 reactionary,
@@ -67,25 +81,23 @@ impl Messages {
             } => {
                 let model = &mut self.model;
                 self.container
-                    .handle_reaction(msg_id, reactionary, content, remove, |ix| {
-                        model.data_changed(ix, ix)
-                    });
+                    .handle_reaction(msg_id, reactionary, content, remove, model);
             }
             MsgUpdate::StoreDone(mid, meta) => {
                 let model = &mut self.model;
+                let emit = &mut self.emit;
 
-                none!(&self
-                    .container
-                    .handle_store_done(mid, meta, |ix| model.data_changed(ix, ix)));
+                none!(&self.container.handle_store_done(mid, meta, emit, model));
             }
             MsgUpdate::SendDone(mid) => {
                 let model = &mut self.model;
 
-                none!(&self
-                    .container
-                    .handle_send_done(mid, |ix| { model.data_changed(ix, ix) }));
+                none!(&self.container.handle_send_done(mid, model));
             }
-            MsgUpdate::ExpiredMessages(mids) => self.handle_expiration(mids),
+            MsgUpdate::ExpiredMessages(mids) => {
+                self.container
+                    .handle_expiration(mids, emit, model, search, &mut self.builder)
+            }
             MsgUpdate::Container(container) => {
                 if container.is_empty() {
                     return;
@@ -103,6 +115,7 @@ impl Messages {
 }
 
 /// Message related conversation updates
+#[derive(Debug)]
 pub(crate) enum MsgUpdate {
     /// A new message
     NewMsg(Box<heraldcore::message::Message>),

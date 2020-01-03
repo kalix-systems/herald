@@ -50,13 +50,35 @@ impl Users {
                     println!("PLACEHOLDER: {} did not accept your user request", uid);
                 }
             }
-            UserUpdate::DataChanged(id) => {
-                let user = User { id, matched: false };
-                let pos = match self.list.binary_search(&user) {
-                    Ok(pos) => pos,
-                    Err(_) => return,
+            UserUpdate::DataChanged(uid) => {
+                let pos = match self.list.iter().rposition(|User { id, .. }| id == &uid) {
+                    Some(pos) => pos,
+                    None => return,
                 };
 
+                self.model.data_changed(pos, pos);
+            }
+            UserUpdate::UserChanged(uid, update) => {
+                use herald_user::UserChange as U;
+                let mut lock = shared::user_data().write();
+                match update {
+                    U::Color(color) => {
+                        lock.entry(uid).and_modify(|u| u.color = color);
+                    }
+                    U::Picture(picture) => {
+                        lock.entry(uid).and_modify(|u| u.profile_picture = picture);
+                    }
+                    U::DisplayName(name) => {
+                        lock.entry(uid)
+                            .and_modify(|u| u.name = name.unwrap_or_else(|| u.id.to_string()));
+                    }
+                }
+                drop(lock);
+
+                let pos = match self.list.iter().rposition(|User { id, .. }| id == &uid) {
+                    Some(pos) => pos,
+                    None => return,
+                };
                 self.model.data_changed(pos, pos);
             }
         }
@@ -67,11 +89,17 @@ impl crate::Loadable for Users {
     type Error = HErr;
 
     fn try_load(&mut self) -> Result<(), HErr> {
-        for user in user::all()? {
+        let users = user::all()?;
+
+        let mut lock = shared::user_data().write();
+        lock.reserve(users.len());
+        for user in users {
             let id = user.id;
-            shared::user_data().write().insert(id, user);
+            lock.insert(id, user);
             self.list.push(User { id, matched: true });
         }
+        drop(lock);
+
         self.loaded = true;
 
         Ok(())

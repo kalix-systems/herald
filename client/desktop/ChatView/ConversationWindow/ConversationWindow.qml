@@ -82,12 +82,27 @@ ListView {
     }
 
     delegate: Loader {
+        id: bubbleLoader
         property var modelData: model
         sourceComponent: model.auxData.length === 0 ? msgBubble : auxBubble
         width: parent.width
         height: active ? item.height : undefined
 
         property var highlightItem: active ? item.highlightItem : undefined
+        Component.onCompleted: {
+            if (root.active)
+                ownedConversation.markReadById(model.msgId)
+        }
+
+        Connections {
+            target: root
+            // The additional check is because on deletion, root.active changes due to the popup and
+            // the connections lives a little longer than the parent loader, causing it to attempt to mark read
+            // an undefined msg id
+            onActiveChanged: if (root.active && model.msgId !== undefined) {
+                                 ownedConversation.markReadById(model.msgId)
+                             }
+        }
 
         Component {
             id: auxBubble

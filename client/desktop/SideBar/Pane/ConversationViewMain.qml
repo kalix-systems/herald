@@ -70,7 +70,21 @@ ListView {
         height: visible ? CmnCfg.convoHeight : 0
         width: parent.width
 
-        ConversationRectangle {
+        Common.PlatonicRectangle {
+            id: convoRectangle
+            boxTitle: title
+            boxColor: conversationData.color
+            picture: Utils.safeStringOrDefault(conversationData.picture, "")
+            isGroupPicture: !conversationData.pairwise
+
+            labelComponent: Av.ConversationLabel {
+                cc: convContent
+                contactName: title
+                labelColor: convoRectangle.state !== "" ? CmnCfg.palette.black : CmnCfg.palette.lightGrey
+                secondaryLabelColor: convoRectangle.state
+                                     !== "" ? CmnCfg.palette.offBlack : CmnCfg.palette.medGrey
+            }
+
             MouseArea {
                 id: hoverHandler
                 hoverEnabled: true

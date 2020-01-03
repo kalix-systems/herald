@@ -12,6 +12,7 @@ use heraldcore::{
 };
 use std::{convert::TryInto, path::PathBuf};
 
+mod helper_trait_imp;
 mod imp;
 pub(super) use imp::*;
 
@@ -138,6 +139,10 @@ impl MessageBuilderTrait for MessageBuilder {
 
     fn op_media_attachments(&self) -> &str {
         self.op.as_ref().map(Reply::media).unwrap_or("")
+    }
+
+    fn op_aux_content(&self) -> &str {
+        self.op.as_ref().map(Reply::aux).unwrap_or("")
     }
 
     fn add_attachment(

@@ -113,16 +113,29 @@ pub(crate) fn send_group_settings_message(
     expiration: Option<Time>,
     update: cmessages::GroupSettingsUpdate,
 ) -> Result<(), HErr> {
-    crate::network::send_normal_message(
+    send_normal_message(
         cid,
-        network_types::cmessages::Msg {
+        cmessages::Msg {
             mid,
             expiration,
-            content: network_types::cmessages::MsgContent::GroupSettings(update),
+            content: cmessages::MsgContent::GroupSettings(update),
         },
     )?;
 
     crate::push(crate::message::OutboundAux::SendDone(cid, mid));
+    Ok(())
+}
+
+pub(crate) fn send_profile_update(update: cmessages::ProfileChanged) -> Result<(), HErr> {
+    let conn = crate::db::Database::get()?;
+    let cids = crate::conversation::db::get_all_pairwise_conversations(&conn)?;
+
+    let msg = ConversationMessage::Message(NetContent::ProfileChanged(update));
+
+    for cid in cids {
+        send_cmessage(cid, &msg)?;
+    }
+
     Ok(())
 }
 

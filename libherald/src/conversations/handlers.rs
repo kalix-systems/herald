@@ -45,6 +45,9 @@ impl Conversations {
                 self.model.data_changed(pos, pos);
             }
             NewActivity => {
+                self.set_status_inner(pos, heraldcore::conversation::Status::Active);
+                self.model.data_changed(pos, pos);
+
                 // NOTE: If this check isn't here,
                 // the program will segfault.
                 if pos == 0 {
