@@ -12,6 +12,8 @@ import "qrc:/imports" as Imports
 Page {
     id: moreInfoPopup
     property ChatBubble referredChatBubble
+    // members of the conversation content
+    property var members: []
     readonly property string stateName: "info"
     // list of receipt-user objects. set on completion
     readonly property var receiptData: []
@@ -19,25 +21,25 @@ Page {
     background: Rectangle {
         color: CmnCfg.palette.white
     }
+
     Flickable {
         anchors.fill: parent
+        anchors.bottomMargin: CmnCfg.largeMargin
         contentHeight: pageContent.height
-        ColumnLayout {
+
+        Column {
             id: pageContent
             width: parent.width
+            padding: CmnCfg.defaultMargin
+            spacing: CmnCfg.defaultMargin
+
             DefaultBubble {
-                Layout.fillWidth: true
                 defaultWidth: parent.width
                 convContainer: parent
                 messageModelData: referredChatBubble.messageModelData
-                height: referredChatBubble.height
-                Layout.alignment: Qt.AlignTop
             }
 
             Column {
-                Layout.alignment: Qt.AlignTop
-                Layout.fillWidth: true
-                Layout.leftMargin: CmnCfg.defaultMargin
                 Label {
                     id: fromLabel
                     text: "From : "
@@ -68,15 +70,7 @@ Page {
                 }
             }
 
-            Row {}
-
-            Row {}
-
             Column {
-                Layout.alignment: Qt.AlignTop
-                Layout.fillWidth: true
-                Layout.leftMargin: CmnCfg.defaultMargin
-                spacing: CmnCfg.defaultMargin
                 Label {
                     text: "To : "
                     font {
@@ -88,7 +82,7 @@ Page {
 
                 Repeater {
                     width: parent.width
-                    model: 8
+                    model: members
                     Row {
                         spacing: CmnCfg.smallMargin
                         Av.Avatar {
@@ -108,6 +102,26 @@ Page {
                             }
                         }
                     }
+                }
+            }
+
+            ToolButton {
+                anchors.horizontalCenter: parent.horizontalCenter
+                contentItem: Text {
+                    text: qsTr("DELETE MESSAGE")
+                    color: CmnCfg.palette.white
+                    font.pixelSize: 0
+                    font.family: CmnCfg.chatFont.name
+                }
+
+                background: Rectangle {
+                    color: CmnCfg.palette.alertColor
+                }
+                onClicked: {
+                    mainView.pop()
+                    ownedMessages.deleteMessage(
+                                ownedMessages.indexById(
+                                    referredChatBubble.messageModelData.msgId))
                 }
             }
         }

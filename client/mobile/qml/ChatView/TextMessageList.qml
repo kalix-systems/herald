@@ -52,6 +52,7 @@ ListView {
             property Component infoPage: Component {
                 InfoPage {
                     referredChatBubble: chatBubble
+                     members: convContent.members
                 }
             }
 
