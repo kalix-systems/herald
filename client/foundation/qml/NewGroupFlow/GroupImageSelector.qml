@@ -80,8 +80,7 @@ Rectangle {
         nameFilters: ["Image File (*.jpg *.png *.jpeg)"]
         onSelectionAccepted: {
             groupImageLoader.active = true
-            groupImageLoader.imageSource = Herald.utils.stripUrlPrefix(
-                        groupPicDialogue.fileUrl)
+            groupImageLoader.imageSource = fileUrl
         }
     }
 }
