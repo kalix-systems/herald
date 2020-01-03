@@ -13,8 +13,6 @@ ToolButton {
 
     TapHandler {
         onTapped: {
-            splash.x = eventPoint.position.x - splash.width / 2
-            splash.y = eventPoint.position.y - splash.height / 2
             tapAnim.start()
             parent.tapped()
         }
@@ -24,9 +22,11 @@ ToolButton {
     // so I made a tapped signal, because there is not one by defaultx
     background: Rectangle {
         id: splash
+        anchors.centerIn: parent
         color: CmnCfg.palette.iconMatte
         opacity: 0
-        height: width
+        height: tb.height / 2
+        width: height
         radius: height
     }
 
@@ -40,7 +40,7 @@ ToolButton {
         id: tapAnim
         NumberAnimation {
             target: splash
-            property: "width"
+            property: "height"
             from: parent.height
             to: parent.height * 1.5
             duration: CmnCfg.units.shortDuration

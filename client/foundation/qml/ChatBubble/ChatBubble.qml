@@ -159,7 +159,6 @@ Rectangle {
         BubbleLabel {
             visible: isHead
             timestamp: friendlyTimestamp
-
             id: authorLabel
         }
 

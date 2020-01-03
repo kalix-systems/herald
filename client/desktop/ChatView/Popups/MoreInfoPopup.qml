@@ -16,8 +16,8 @@ Popup {
     id: moreInfoPopup
     property var convoMembers: parent.convoMembers
     property var messageData: parent.messageData
-    property var receiptData
     property var ownedMessages: parent.ownedMessages
+    property var receiptData
     property var outbound: messageData.author === Herald.config.configId
 
     height: chatView.height
@@ -127,8 +127,6 @@ Popup {
                     MouseArea {
                         id: hoverHandler
                     }
-
-                    states: []
                 }
             }
 

@@ -20,6 +20,15 @@ void AndroidHelper::set_status_bar_color(QColor color) {
 
 void AndroidHelper::send_notification(QString content) {
     QAndroidJniObject javaNotification = QAndroidJniObject::fromString(content);
-    QAndroidJniObject::callStaticMethod<void>("org/qtproject/example/notification/NotificationBuilder", "notify", "(Ljava/lang/String;)V", javaNotification.object<jstring>());
+    QAndroidJniObject::callStaticMethod<void>("org/qtproject/notification/NotificationBuilder", "notify", "(Ljava/lang/String;)V", javaNotification.object<jstring>());
+}
+
+QFile* AndroidHelper::open_gallery() {
+ QAndroidJniObject::callStaticMethod<void>("org/qtproject/notification/NotificationBuilder", "open_gallery", "(V)String");
+ return new QFile();
+}
+
+QFile* AndroidHelper::open_file_browser() {
+ return new QFile();
 }
 #endif

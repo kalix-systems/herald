@@ -1,7 +1,7 @@
 import QtQuick 2.13
 import QtQuick.Controls 2.13
 import QtQuick.Layouts 1.12
-import QtQuick.Dialogs 1.3
+import Qt.labs.platform 1.1
 import QtQuick.Shapes 1.13
 import LibHerald 1.0
 import "../../Common" as CMN
@@ -129,14 +129,14 @@ ColumnLayout {
         }
     }
 
-    FileDialog {
+    Imports.FileDialogWrapper {
         id: cfgPfp
         property bool pfpValid: true
         folder: shortcuts.desktop
         nameFilters: ["(*.jpg *.png *.jpeg)"]
+
         onSelectionAccepted: {
             var parsed = JSON.parse(Herald.utils.imageDimensions(fileUrl))
-
             const picture = {
                 "width": Math.round(parsed.width),
                 "height": Math.round(parsed.height),
@@ -146,10 +146,6 @@ ColumnLayout {
             }
 
             Herald.config.setProfilePicture(JSON.stringify(picture))
-            //            imageCrop.imageWidth = parsed.width
-            //            imageCrop.imageHeight = parsed.height
-            //            imageCrop.imageSource = fileUrl
-            //            imageCrop.show()
         }
     }
 

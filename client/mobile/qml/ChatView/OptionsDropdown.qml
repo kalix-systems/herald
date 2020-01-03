@@ -42,14 +42,17 @@ Rectangle {
         CMN.AnimIconButton {
             Layout.alignment: Qt.AlignRight
             iconSize: Qt.size(CmnCfg.units.dp(24), CmnCfg.units.dp(24))
-
             imageSource: "qrc:/lenny-icon.svg"
         }
+
         CMN.AnimIconButton {
             Layout.alignment: Qt.AlignRight
             iconSize: Qt.size(CmnCfg.units.dp(24), CmnCfg.units.dp(24))
-
             imageSource: "qrc:/options-icon.svg"
+            onTapped: {
+                mainView.push(cb.infoPage)
+                deactivate()
+            }
         }
         CMN.AnimIconButton {
             Layout.alignment: Qt.AlignRight
