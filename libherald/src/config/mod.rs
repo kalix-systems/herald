@@ -49,11 +49,6 @@ impl ConfigTrait for Config {
         none!(self.inner.as_ref(), 0).color
     }
 
-    /// Returns of the colorscheme of the current user.
-    fn colorscheme(&self) -> u32 {
-        none!(self.inner.as_ref(), 0).colorscheme
-    }
-
     /// Returns of the preferred expiration period of the current user.
     fn preferred_expiration(&self) -> u8 {
         none!(self.inner.as_ref(), 0).preferred_expiration as u8
@@ -92,20 +87,6 @@ impl ConfigTrait for Config {
         inner.name = name;
 
         self.emit.name_changed();
-    }
-
-    /// Set the colorscheme of the current user.
-    fn set_colorscheme(
-        &mut self,
-        colorscheme: u32,
-    ) {
-        let inner = none!(self.inner.as_mut());
-
-        spawn!(core::set_colorscheme(colorscheme));
-
-        inner.colorscheme = colorscheme;
-
-        self.emit.colorscheme_changed();
     }
 
     /// Set  the preferred expiration period of the current user.
