@@ -19,56 +19,97 @@ Page {
     background: Rectangle {
         color: CmnCfg.palette.white
     }
-
-    ColumnLayout {
+    Flickable {
         anchors.fill: parent
-
-        DefaultBubble {
-            Layout.fillWidth: true
-            defaultWidth: parent.width
-            convContainer: parent
-            messageModelData: referredChatBubble.messageModelData
-            height: referredChatBubble.height
-            Layout.alignment: Qt.AlignTop
-        }
-
-        Column {
-            Layout.alignment: Qt.AlignTop
-            Layout.fillWidth: true
-            Layout.leftMargin: CmnCfg.defaultMargin
-            Label {
-                id: fromLabel
-                text: "From : "
-                font {
-                    bold: true
-                    family: CmnCfg.labelFont.name
-                    pixelSize: CmnCfg.units.dp(18)
-                }
+        contentHeight: pageContent.height
+        ColumnLayout {
+            id: pageContent
+            width: parent.width
+            DefaultBubble {
+                Layout.fillWidth: true
+                defaultWidth: parent.width
+                convContainer: parent
+                messageModelData: referredChatBubble.messageModelData
+                height: referredChatBubble.height
+                Layout.alignment: Qt.AlignTop
             }
-            Row {
-                spacing: CmnCfg.smallMargin
-                Av.Avatar {
-                    color: CmnCfg.avatarColors[referredChatBubble.messageModelData.authorColor]
-                    initials: referredChatBubble.authorName[0].toUpperCase()
-                    pfpPath: Utils.safeStringOrDefault(
-                                 referredChatBubble.messageModelData.authorProfilePicture)
+
+            Column {
+                Layout.alignment: Qt.AlignTop
+                Layout.fillWidth: true
+                Layout.leftMargin: CmnCfg.defaultMargin
+                Label {
+                    id: fromLabel
+                    text: "From : "
+                    font {
+                        bold: true
+                        family: CmnCfg.labelFont.name
+                        pixelSize: CmnCfg.units.dp(18)
+                    }
                 }
-                Column {
+                Row {
                     spacing: CmnCfg.smallMargin
-                    Text {
-                        text: referredChatBubble.messageModelData.authorName
-                        font.bold: true
+                    Av.Avatar {
+                        color: CmnCfg.avatarColors[referredChatBubble.messageModelData.authorColor]
+                        initials: referredChatBubble.authorName[0].toUpperCase()
+                        pfpPath: Utils.safeStringOrDefault(
+                                     referredChatBubble.messageModelData.authorProfilePicture)
                     }
-                    Text {
-                        text: "@" + referredChatBubble.messageModelData.author
-                        font.bold: true
+                    Column {
+                        spacing: CmnCfg.smallMargin
+                        Text {
+                            text: referredChatBubble.messageModelData.authorName
+                            font.bold: true
+                        }
+                        Text {
+                            text: "@" + referredChatBubble.messageModelData.author
+                        }
                     }
                 }
             }
-        }
 
-        Item {
-            Layout.fillHeight: true
+            Row {}
+
+            Row {}
+
+            Column {
+                Layout.alignment: Qt.AlignTop
+                Layout.fillWidth: true
+                Layout.leftMargin: CmnCfg.defaultMargin
+                spacing: CmnCfg.defaultMargin
+                Label {
+                    text: "To : "
+                    font {
+                        bold: true
+                        family: CmnCfg.labelFont.name
+                        pixelSize: CmnCfg.units.dp(18)
+                    }
+                }
+
+                Repeater {
+                    width: parent.width
+                    model: 8
+                    Row {
+                        spacing: CmnCfg.smallMargin
+                        Av.Avatar {
+                            color: CmnCfg.avatarColors[authorColor]
+                            initials: authorName[0].toUpperCase()
+                            pfpPath: Utils.safeStringOrDefault(
+                                         authorProfilePicture)
+                        }
+                        Column {
+                            spacing: CmnCfg.smallMargin
+                            Text {
+                                text: authorName
+                                font.bold: true
+                            }
+                            Text {
+                                text: "@" + author
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }
