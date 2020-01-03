@@ -80,6 +80,7 @@ Rectangle {
         height: 1
         color: CmnCfg.palette.medGrey
         visible: isHead
+        z: accent.z + 1
     }
 
     Rectangle {
@@ -89,6 +90,7 @@ Rectangle {
         height: 1
         color: CmnCfg.palette.medGrey
         visible: isTail
+        z: accent.z + 1
     }
 
     Highlight {
@@ -171,6 +173,10 @@ Rectangle {
                     return replyDanglingContent
                 }
 
+                if (messageModelData.opAuxData.length > 0) {
+                    return replyAux
+                }
+
                 const hasDoc = messageModelData.opDocAttachments.length > 0
                 const hasMedia = messageModelData.opMediaAttachments.length > 0
 
@@ -213,6 +219,12 @@ Rectangle {
             Component {
                 id: replyContent
                 ReplyText {}
+            }
+
+            // reply bubble if it is an aux message
+            Component {
+                id: replyAux
+                ReplyAux {}
             }
         }
 

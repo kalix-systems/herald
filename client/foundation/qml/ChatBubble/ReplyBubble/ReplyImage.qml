@@ -19,14 +19,15 @@ Rectangle {
     property color opColor: CmnCfg.avatarColors[messageModelData.opColor]
     property alias mouseEnabled: mouseArea.enabled
 
-
     Component.onCompleted: JS.parseMedia(messageModelData, imageClip)
 
     color: CmnCfg.palette.medGrey
     width: bubbleRoot.maxWidth
     height: wrapRow.height
 
-    ReplyMouseArea { id: mouseArea}
+    ReplyMouseArea {
+        id: mouseArea
+    }
 
     Rectangle {
         id: accent
@@ -61,6 +62,8 @@ Rectangle {
                 id: replyElidedBody
                 elideConstraint: imageSize
                 maximumWidth: bubbleRoot.maxWidth * 0.8 - imageSize
+                text: messageModelData.opBody
+                      !== "" ? messageModelData.opBody : "<i>Media message</i>"
             }
         }
 
