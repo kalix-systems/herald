@@ -252,6 +252,7 @@ Popup {
             Herald.conversations.setProfilePicture(
                         Herald.conversations.indexById(
                             convoData.conversationId), JSON.stringify(picture))
+            //commented out until image crop popup is fixed
             //            imageCrop.imageWidth = parsed.width
             //            imageCrop.imageHeight = parsed.height
             //            imageCrop.imageSource = fileUrl

@@ -135,12 +135,19 @@ ToolBar {
                     MenuItem {
                         text: conversationItem.pairwise ? "Conversation settings" : "Group settings"
                         //for now only group conversation settings, they are going to be separate components
-                        enabled: !conversationItem.pairwise
                         onTriggered: {
-                            groupSettingsLoader.convoData = conversationItem
-                            groupSettingsLoader.convoMembers = conversationMembers
-                            groupSettingsLoader.active = true
-                            groupSettingsLoader.item.open()
+                            if (!conversationItem.pairwise) {
+                                groupSettingsLoader.convoData = conversationItem
+                                groupSettingsLoader.convoMembers = conversationMembers
+                                groupSettingsLoader.active = true
+                                groupSettingsLoader.item.open()
+                            } else {
+
+                                convoSettingsLoader.convoData = conversationItem
+                                convoSettingsLoader.convoMembers = conversationMembers
+                                convoSettingsLoader.active = true
+                                convoSettingsLoader.item.open()
+                            }
                         }
                     }
                 }
