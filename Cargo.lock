@@ -747,6 +747,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "herald_network"
+version = "0.1.0"
+
+[[package]]
 name = "herald_server"
 version = "0.1.0"
 dependencies = [
