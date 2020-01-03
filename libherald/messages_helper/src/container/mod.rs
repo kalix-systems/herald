@@ -11,6 +11,7 @@ use types::*;
 const FLURRY_FUZZ: i64 = 5 * 60_000;
 
 pub mod handlers;
+pub mod op;
 pub use cache::{access, get, update};
 
 #[derive(Default, Debug)]
@@ -266,21 +267,6 @@ impl Container {
         }
     }
 
-    pub fn handle_expiration<E: MessageEmit, M: MessageModel, B: MessageBuilderHelper>(
-        &mut self,
-        mids: Vec<MsgId>,
-        emit: &mut E,
-        model: &mut M,
-        search: &mut SearchState,
-        builder: &mut B,
-    ) {
-        for mid in mids {
-            if let Some(ix) = self.index_by_id(mid) {
-                self.remove_helper(mid, ix, emit, model, search, builder);
-            }
-        }
-    }
-
     pub fn binary_search(
         &self,
         msg: &MessageMeta,
@@ -313,85 +299,6 @@ impl Container {
         index: usize,
     ) -> Option<&MsgId> {
         Some(&self.list.get(index).as_ref()?.msg_id)
-    }
-
-    pub fn op_reply_type(
-        &self,
-        index: usize,
-    ) -> Option<ReplyType> {
-        Some(reply_type(&cache::access(self.msg_id(index)?, |m| {
-            *m.op()
-        })?))
-    }
-
-    pub fn op_msg_id(
-        &self,
-        index: usize,
-    ) -> Option<MsgId> {
-        match cache::access(self.msg_id(index)?, |m| *m.op())? {
-            ReplyId::Known(mid) => Some(mid),
-            _ => None,
-        }
-    }
-
-    pub fn op_author(
-        &self,
-        index: usize,
-    ) -> Option<UserId> {
-        let mid = self.op_msg_id(index)?;
-        access(&mid, |m| m.author)
-    }
-
-    pub fn op_body(
-        &self,
-        index: usize,
-    ) -> Option<String> {
-        let mid = self.op_msg_id(index)?;
-
-        access(&mid, |m| m.text().map(ToString::to_string))
-            .flatten()
-            .map(|b| self.op_body_elider.elided_body(b))
-    }
-
-    pub fn op_insertion_time(
-        &self,
-        index: usize,
-    ) -> Option<Time> {
-        let mid = self.op_msg_id(index)?;
-        access(&mid, |m| m.time.insertion)
-    }
-
-    pub fn op_expiration_time(
-        &self,
-        index: usize,
-    ) -> Option<Time> {
-        let mid = self.op_msg_id(index)?;
-        access(&mid, |m| m.time.expiration)?
-    }
-
-    pub fn op_doc_attachments_json(
-        &self,
-        index: usize,
-    ) -> Option<String> {
-        let mid = self.op_msg_id(index)?;
-
-        self.get_doc_attachments_data_json(&mid, Some(1))
-    }
-
-    pub fn op_media_attachments_json(
-        &self,
-        index: usize,
-    ) -> Option<String> {
-        let mid = self.op_msg_id(index)?;
-        self.get_media_attachments_data_json(&mid, Some(4))
-    }
-
-    pub fn op_aux_data_json(
-        &self,
-        index: usize,
-    ) -> Option<String> {
-        let mid = self.op_msg_id(index)?;
-        self.aux_data_json_by_id(&mid)
     }
 
     pub fn clear_search<M: MessageModel>(

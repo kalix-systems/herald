@@ -129,4 +129,19 @@ impl Container {
 
         Some(())
     }
+
+    pub fn handle_expiration<E: MessageEmit, M: MessageModel, B: MessageBuilderHelper>(
+        &mut self,
+        mids: Vec<MsgId>,
+        emit: &mut E,
+        model: &mut M,
+        search: &mut SearchState,
+        builder: &mut B,
+    ) {
+        for mid in mids {
+            if let Some(ix) = self.index_by_id(mid) {
+                self.remove_helper(mid, ix, emit, model, search, builder);
+            }
+        }
+    }
 }
