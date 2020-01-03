@@ -271,11 +271,11 @@ pub trait MessagesTrait {
 
     fn is_empty(&self) -> bool;
 
-    fn last_author(&self) -> Option<&str>;
+    fn last_author(&self) -> Option<String>;
 
     fn last_aux_code(&self) -> Option<u8>;
 
-    fn last_body(&self) -> Option<&str>;
+    fn last_body(&self) -> Option<String>;
 
     fn last_has_attachments(&self) -> Option<bool>;
 

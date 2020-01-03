@@ -46,6 +46,10 @@ impl Container {
         D: FnMut(usize),
         L: FnMut(),
     {
+        if meta.is_empty() {
+            return Some(());
+        }
+
         {
             let meta = &meta;
             update(&mid, move |data| {
@@ -69,18 +73,6 @@ impl Container {
         data_changed(ix);
 
         if ix == 0 {
-            if let MsgData {
-                content:
-                    Item::Plain(PlainItem {
-                        ref mut attachments,
-                        ..
-                    }),
-                ..
-            } = self.last.as_mut()?
-            {
-                *attachments = meta;
-            }
-
             last_has_attachments_changed();
         }
 

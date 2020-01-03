@@ -191,17 +191,9 @@ impl Messages {
         spawn!({
             let list: Vec<MessageMeta> = err!(heraldcore::message::conversation_message_meta(&id));
 
-            let last = match list.last().as_ref() {
-                Some(MessageMeta { ref msg_id, .. }) => {
-                    let msg = err!(heraldcore::message::get_message(msg_id));
-                    Some(msg.split().1)
-                }
-                None => None,
-            };
-
             err!(content_push(
                 id,
-                MsgUpdate::Container(Box::new(Container::new(list, last)))
+                MsgUpdate::Container(Box::new(Container::new(list)))
             ));
         });
     }
