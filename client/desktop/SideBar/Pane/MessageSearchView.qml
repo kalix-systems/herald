@@ -48,80 +48,17 @@ ListView {
             }
 
             // TODO spacing is awkward
-            // TODO possible to handle this case in ConversationLabel?
-            labelComponent: GridLayout {
-                id: labelGrid
-                rows: bodyText.lineCount > 1 ? 3 : 2
-                columns: 2
-                width: parent.width
-                Label {
-                    id: uid
-                    font {
-                        bold: true
-                        family: CmnCfg.chatFont.name
-                        // TODO change when we make font defaults make sense
-                        pixelSize: 14
-                    }
-                    // TODO negative margin--handle better in Platonic Rectangle
-                    Layout.topMargin: labelGrid.rows > 2 ? -CmnCfg.smallMargin : 0
-                    Layout.alignment: Qt.AlignLeft | Qt.AlignTop
-                    Layout.preferredHeight: labelGrid.height * 0.25
-                    Layout.maximumWidth: parent.width
-                    elide: "ElideRight"
-                    text: messageData.conversationTitle
-                    color: messageRectangle.state
-                           !== "" ? CmnCfg.palette.black : CmnCfg.palette.lightGrey
-                }
+            labelComponent: Av.MessageSearchLabel {
+                conversationTitle: messageData.conversationTitle
+                timestamp: Utils.friendlyTimestamp(messageData.time)
+                labelColor: messageRectangle.state !== "" ? CmnCfg.palette.black : CmnCfg.palette.lightGrey
+                secondaryLabelColor: messageRectangle.state
+                                     !== "" ? CmnCfg.palette.offBlack : CmnCfg.palette.medGrey
+                labelFontSize: CmnCfg.entityLabelSize
 
-                Label {
-                    id: ts
-                    font {
-                        family: CmnCfg.chatFont.name
-                        //TODO: Magic number erasure, we need a secondary small label size
-                        pixelSize: 11
-                    }
-                    text: Utils.friendlyTimestamp(messageData.time)
-                    Layout.preferredHeight: labelGrid.height * 0.25
-                    Layout.alignment: Qt.AlignRight | Qt.AlignTop
-                    color: messageRectangle.state
-                           !== "" ? CmnCfg.palette.offBlack : CmnCfg.palette.medGrey
-                }
-
-                TextMetrics {
-                    id: prefix
-                    text: messageData.beforeFirstMatch
-                    elide: Text.ElideLeft
-                    elideWidth: labelGrid.width * 2
-                }
-
-                Label {
-                    id: bodyText
-                    font {
-                        family: CmnCfg.chatFont.name
-                        //TODO: Magic number erasure
-                        pixelSize: 13
-                    }
-                    // TODO negative margin--handle better in Platonic Rectangle
-                    Layout.topMargin: labelGrid.rows > 2 ? -CmnCfg.smallMargin : 0
-                    elide: "ElideRight"
-                    text: if (messageData.beforeFirstMatch.length === 0) {
-                              messageData.firstMatch + messageData.afterFirstMatch
-                          } else if (prefix.length === messageData.beforeFirstMatch.length) {
-                              prefix.elidedText + messageData.firstMatch
-                                      + messageData.afterFirstMatch
-                          } else {
-                              "..." + prefix.elidedText + messageData.firstMatch
-                                      + messageData.afterFirstMatch
-                          }
-
-                    Layout.fillWidth: true
-                    Layout.alignment: Qt.AlignLeft | Qt.alignTop
-                    Layout.maximumHeight: labelGrid.height
-                    color: messageRectangle.state
-                           !== "" ? CmnCfg.palette.black : CmnCfg.palette.lightGrey
-                    textFormat: Text.StyledText
-                    wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-                }
+                beforeMatch: messageData.beforeFirstMatch
+                match: messageData.firstMatch
+                afterMatch: messageData.afterFirstMatch
             }
         }
     }

@@ -7,8 +7,7 @@ declare class MessageSearch {}
 declare const enum AuxMessageCode {
   ExpirationChange = 0,
   TitleChange = 1,
-  ColorChange = 2,
-  PictureChange = 3
+  PictureChange = 2
 }
 
 declare const enum ExpirationPeriod {
@@ -131,8 +130,7 @@ declare class Message extends Item {}
 declare class Users {
   add(userid: UserId): ConversationID;
   setStatus(rowIndex: number, status: UserStatus): boolean;
-  setName(rowIndex: number, name: string): boolean;
-  setProfilePicture(rowIndex: number, profilePicture: string): boolean;
+  setColor(rowIndex: number, colorCode: number): boolean;
   pairwiseConversationId(rowIndex: number): ConversationID;
   indexFromConversationId(conversationID: ConversationID): number;
   toggleFilterRegexFilterRegex(): boolean;
@@ -160,7 +158,6 @@ declare class Config {
   pfpUrl?: string;
   // TODO replace this number with a const enum
   color: number;
-  colorscheme: ColorScheme;
 }
 
 declare class Conversations {

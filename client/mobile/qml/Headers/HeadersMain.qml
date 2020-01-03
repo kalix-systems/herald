@@ -38,6 +38,11 @@ ToolBar {
     }
 
     Component {
+        id: infoHeader
+        MessageInfoHeader {}
+    }
+
+    Component {
         id: newContactHeader
         NewContactHeader {}
     }
@@ -89,6 +94,13 @@ ToolBar {
             PropertyChanges {
                 target: rootLoader
                 sourceComponent: confHeader
+            }
+        },
+        State {
+            name: "info"
+            PropertyChanges {
+                target: rootLoader
+                sourceComponent: infoHeader
             }
         }
     ]

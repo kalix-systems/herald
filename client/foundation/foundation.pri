@@ -44,8 +44,15 @@ CONFIG(release, debug|profile|release) {
     }
 }
 
+iphoneos {
+   QMAKE_INFO_PLIST = $$PWD/ios_sources/Info.Plist
+   app_launch_images.files = $$PWD/ios_sources/HeraldScreen.xib
+    app_launch_images.files += $$PWD/icons/herald.png
+   QMAKE_BUNDLE_DATA += app_launch_images
+}
 
 CONFIG(iphonesimulator, iphoneos|iphonesimulator) {
+
         LIBS += $${PWD}/../../target/x86_64-apple-ios/$${RUST_BUILD_TYPE}/libherald.a \
             -l sqlite3
         ENABLE_BITCODE = NO
@@ -76,19 +83,11 @@ CONFIG(iphoneos, iphoneos|iphonesimulator)  {
     SOURCES += $$PWD/objectiveutils.mm
 }
 
-#iphoneos {
-#   Q_ENABLE_BITCODE.name = ENABLE_BITCODE
-#   Q_ENABLE_BITCODE.value = NO
-#   QMAKE_MAC_XCODE_SETTINGS += Q_ENABLE_BITCODE
-
-
-
 macx {
   LIBS += -L $${PWD}/../../target/$${RUST_BUILD_TYPE} -lherald
   HEADERS += $$PWD/objectiveutils.h
   SOURCES += $$PWD/objectiveutils.mm
 }
-
 
 android {
      QT += androidextras

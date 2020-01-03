@@ -133,7 +133,7 @@ fn conversations() -> Object {
        expirationPeriod: ItemProp::new(QUint8).write(),
        matched: matched_item_prop(),
        picture: picture_item_prop().get_by_value(),
-       color: color_item_prop().write(),
+       color: color_item_prop(),
        status: ItemProp::new(QUint8).write()
     };
 
@@ -157,7 +157,7 @@ fn users() -> Object {
 
     let item_props = item_props! {
        userId: ItemProp::new(QString),
-       name: ItemProp::new(QString).get_by_value().write(),
+       name: ItemProp::new(QString).get_by_value(),
        pairwiseConversationId: ItemProp::new(QByteArray).get_by_value(),
        status: ItemProp::new(QUint8).write(),
        matched: matched_item_prop(),
@@ -169,9 +169,6 @@ fn users() -> Object {
         mut add(id: QString) => QByteArray,
         mut toggleFilterRegex() => Bool,
         mut clearFilter() => Void,
-        // `profile_picture` is a path and bounding rectangle encoded as JSON.
-        // See `heraldcore/image_utils`.
-        mut setProfilePicture(index: QUint64, profile_picture: QString) => Void,
         const colorById(id: QString) => QUint32,
         const nameById(id: QString) => QString,
         const profilePictureById(id: QString) => QString,
@@ -256,7 +253,9 @@ fn messages() -> Object {
         lastStatus: Prop::new().simple(QUint32).optional(),
         lastAuxCode: Prop::new().simple(QUint8).optional(),
         lastHasAttachments: Prop::new().simple(Bool).optional(),
+
         isEmpty: Prop::new().simple(Bool),
+
         searchPattern: filter_prop(),
         searchRegex: filter_regex_prop(),
         searchActive: Prop::new().simple(Bool).write(),
@@ -283,12 +282,14 @@ fn messages() -> Object {
         serverTime: ItemProp::new(Qint64).optional(),
         // Time the message will expire, if ever
         expirationTime: ItemProp::new(Qint64).optional(),
+
         // User profile picture
         authorProfilePicture: ItemProp::new(QString).get_by_value(),
         // User color
         authorColor: ItemProp::new(QUint32).optional(),
         // User name
         authorName: ItemProp::new(QString).optional().get_by_value(),
+
         // Message reactions
         reactions: ItemProp::new(QString).get_by_value(),
         // Auxiliary message data, serialized as JSON
@@ -303,6 +304,7 @@ fn messages() -> Object {
 
         userReceipts: ItemProp::new(QString).get_by_value(),
         receiptStatus: ItemProp::new(QUint32).optional(),
+
         isHead: ItemProp::new(Bool).optional(),
         isTail: ItemProp::new(Bool).optional(),
 
@@ -400,7 +402,6 @@ fn config() -> Object {
         name: Prop::new().simple(QString).write(),
         profilePicture: Prop::new().simple(QString).optional(),
         color: Prop::new().simple(QUint32).write(),
-        colorscheme: Prop::new().simple(QUint32).write(),
         ntsConversationId: Prop::new().simple(QByteArray),
         preferredExpiration: Prop::new().simple(QUint8).write()
     };

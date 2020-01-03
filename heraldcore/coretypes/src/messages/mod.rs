@@ -199,10 +199,9 @@ impl AuxItem {
             AuxItem::GroupSettings(settings) => match settings {
                 Expiration(_) => 0,
                 Title(_) => 1,
-                Color(_) => 2,
-                Picture(_) => 3,
+                Picture(_) => 2,
             },
-            AuxItem::NewMembers(_) => 4,
+            AuxItem::NewMembers(_) => 3,
         }
     }
 }

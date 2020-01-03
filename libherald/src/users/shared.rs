@@ -74,8 +74,6 @@ pub enum UserUpdate {
     NewUser(herald_user::User),
     /// A user request has been responded to
     ReqResp(UserId, bool),
-    /// Data has changed for this user
-    DataChanged(UserId),
     /// User profile information has been updated
     UserChanged(UserId, herald_user::UserChange),
 }

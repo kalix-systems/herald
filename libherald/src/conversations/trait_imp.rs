@@ -25,14 +25,6 @@ impl ConversationsTrait for Conversations {
         self.color_(index)
     }
 
-    fn set_color(
-        &mut self,
-        index: usize,
-        color: u32,
-    ) -> bool {
-        self.set_color_(index, color)
-    }
-
     fn conversation_id(
         &self,
         index: usize,

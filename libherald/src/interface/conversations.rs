@@ -234,12 +234,6 @@ pub trait ConversationsTrait {
         index: usize,
     ) -> u32;
 
-    fn set_color(
-        &mut self,
-        index: usize,
-        _: u32,
-    ) -> bool;
-
     fn conversation_id(
         &self,
         index: usize,
@@ -503,15 +497,6 @@ pub unsafe extern "C" fn conversations_data_color(
 ) -> u32 {
     let obj = &*ptr;
     obj.color(to_usize(row).unwrap_or(0))
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn conversations_set_data_color(
-    ptr: *mut Conversations,
-    row: c_int,
-    value: u32,
-) -> bool {
-    (&mut *ptr).set_color(to_usize(row).unwrap_or(0), value)
 }
 
 #[no_mangle]

@@ -269,12 +269,6 @@ impl From<AuxItem> for JsonValue {
                         "content" => title,
                     }
                 }
-                Color(color) => {
-                    json::object! {
-                        "code" => code,
-                        "content" => color,
-                    }
-                }
                 Picture(path) => {
                     json::object! {
                         "code" => code,

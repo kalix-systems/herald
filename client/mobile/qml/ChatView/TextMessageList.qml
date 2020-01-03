@@ -49,6 +49,13 @@ ListView {
             defaultWidth: chatListView.width
             messageModelData: containerCol.messageModelData
             convContainer: parent
+            property Component infoPage: Component {
+                InfoPage {
+                    referredChatBubble: chatBubble
+                     members: convContent.members
+                }
+            }
+
             MessageMouseArea {
                 cb: parent
                 dropdown: dropdown
