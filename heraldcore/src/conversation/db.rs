@@ -44,19 +44,6 @@ pub(crate) fn picture(
     )))
 }
 
-/// Sets color for a conversation
-pub(crate) fn set_color(
-    conn: &rusqlite::Connection,
-    conversation_id: &ConversationId,
-    color: u32,
-) -> Result<(), HErr> {
-    w!(conn.execute(
-        include_str!("sql/update_color.sql"),
-        params![color, conversation_id],
-    ));
-    Ok(())
-}
-
 /// Sets muted status of a conversation
 pub(crate) fn set_muted(
     conn: &rusqlite::Connection,

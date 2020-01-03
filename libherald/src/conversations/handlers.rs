@@ -32,10 +32,6 @@ impl Conversations {
                 self.set_picture_inner(pos, path);
                 self.model.data_changed(pos, pos);
             }
-            ColorChanged(color) => {
-                self.set_color_inner(pos, color)?;
-                self.model.data_changed(pos, pos);
-            }
             TitleChanged(title) => {
                 self.set_title_inner(pos, title);
                 self.model.data_changed(pos, pos);

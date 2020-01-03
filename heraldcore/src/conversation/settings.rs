@@ -28,18 +28,6 @@ pub(crate) mod db {
         Ok(Title(title))
     }
 
-    pub(crate) fn update_color(
-        conn: &rusqlite::Connection,
-        color: u32,
-        cid: &ConversationId,
-    ) -> Result<cmessages::GroupSettingsUpdate, HErr> {
-        use crate::conversation::db::*;
-        use cmessages::GroupSettingsUpdate::*;
-
-        set_color(&conn, cid, color)?;
-        Ok(Color(color))
-    }
-
     pub(crate) fn update_picture(
         conn: &rusqlite::Connection,
         group_picture: Option<image_utils::ProfilePicture>,
@@ -69,10 +57,6 @@ pub(crate) mod db {
             Title(title) => {
                 set_title(&conn, cid, title.as_ref().map(String::as_str))?;
                 Ok(SettingsUpdate::Title(title))
-            }
-            Color(color) => {
-                set_color(&conn, cid, color)?;
-                Ok(SettingsUpdate::Color(color))
             }
             Picture(bytes) => {
                 let path = set_picture_buf(&conn, cid, bytes.as_ref().map(Vec::as_slice))?;

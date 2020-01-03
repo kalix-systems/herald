@@ -7,8 +7,7 @@ declare class MessageSearch {}
 declare const enum AuxMessageCode {
   ExpirationChange = 0,
   TitleChange = 1,
-  ColorChange = 2,
-  PictureChange = 3
+  PictureChange = 2
 }
 
 declare const enum ExpirationPeriod {
