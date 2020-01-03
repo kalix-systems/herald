@@ -97,9 +97,6 @@ inline QVariant cleanNullQVariant(const QVariant &v) {
 }
 
 inline void configColorChanged(Config *o) { Q_EMIT o->colorChanged(); }
-inline void configColorschemeChanged(Config *o) {
-  Q_EMIT o->colorschemeChanged();
-}
 inline void configConfigIdChanged(Config *o) { Q_EMIT o->configIdChanged(); }
 inline void configNameChanged(Config *o) { Q_EMIT o->nameChanged(); }
 inline void configNtsConversationIdChanged(Config *o) {
@@ -256,8 +253,6 @@ Config::Private *config_new(ConfigPtrBundle *);
 void config_free(Config::Private *);
 quint32 config_color_get(const Config::Private *);
 void config_color_set(Config::Private *, quint32);
-quint32 config_colorscheme_get(const Config::Private *);
-void config_colorscheme_set(Config::Private *, quint32);
 void config_config_id_get(const Config::Private *, QString *, qstring_set);
 void config_name_get(const Config::Private *, QString *, qstring_set);
 void config_name_set(Config::Private *, const ushort *str, int len);
@@ -570,7 +565,6 @@ conversation_content_messages_get(const ConversationContent::Private *);
 }
 extern "C" {
 quint32 conversations_data_color(const Conversations::Private *, int);
-bool conversations_set_data_color(Conversations::Private *, int, quint32);
 void conversations_data_conversation_id(const Conversations::Private *, int,
                                         QByteArray *, qbytearray_set);
 quint8 conversations_data_expiration_period(const Conversations::Private *,
@@ -654,17 +648,6 @@ Qt::ItemFlags Conversations::flags(const QModelIndex &i) const {
 
 quint32 Conversations::color(int row) const {
   return conversations_data_color(m_d, row);
-}
-
-bool Conversations::setColor(int row, quint32 value) {
-  bool set = false;
-  set = conversations_set_data_color(m_d, row, value);
-
-  if (set) {
-    QModelIndex index = createIndex(row, 0, row);
-    Q_EMIT dataChanged(index, index);
-  }
-  return set;
 }
 
 QByteArray Conversations::conversationId(int row) const {
@@ -829,11 +812,6 @@ bool Conversations::setHeaderData(int section, Qt::Orientation orientation,
 bool Conversations::setData(const QModelIndex &index, const QVariant &value,
                             int role) {
   if (index.column() == 0) {
-    if (role == Qt::UserRole + 0) {
-      if (value.canConvert(qMetaTypeId<quint32>())) {
-        return setColor(index.row(), value.value<quint32>());
-      }
-    }
     if (role == Qt::UserRole + 2) {
       if (value.canConvert(qMetaTypeId<quint8>())) {
         return setExpirationPeriod(index.row(), value.value<quint8>());
@@ -2449,7 +2427,6 @@ quint32 users_data_color(const Users::Private *, int);
 bool users_set_data_color(Users::Private *, int, quint32);
 bool users_data_matched(const Users::Private *, int);
 void users_data_name(const Users::Private *, int, QString *, qstring_set);
-bool users_set_data_name(Users::Private *, int, const ushort *s, int len);
 void users_data_pairwise_conversation_id(const Users::Private *, int,
                                          QByteArray *, qbytearray_set);
 void users_data_profile_picture(const Users::Private *, int, QString *,
@@ -2537,17 +2514,6 @@ QString Users::name(int row) const {
   QString s;
   users_data_name(m_d, row, &s, set_qstring);
   return s;
-}
-
-bool Users::setName(int row, const QString &value) {
-  bool set = false;
-  set = users_set_data_name(m_d, row, value.utf16(), value.length());
-
-  if (set) {
-    QModelIndex index = createIndex(row, 0, row);
-    Q_EMIT dataChanged(index, index);
-  }
-  return set;
 }
 
 QByteArray Users::pairwiseConversationId(int row) const {
@@ -2656,11 +2622,6 @@ bool Users::setData(const QModelIndex &index, const QVariant &value, int role) {
         return setColor(index.row(), value.value<quint32>());
       }
     }
-    if (role == Qt::UserRole + 2) {
-      if (value.canConvert(qMetaTypeId<QString>())) {
-        return setName(index.row(), value.value<QString>());
-      }
-    }
     if (role == Qt::UserRole + 5) {
       if (value.canConvert(qMetaTypeId<quint8>())) {
         return setStatus(index.row(), value.value<quint8>());
@@ -2685,7 +2646,6 @@ void users_name_by_id(const Users::Private *, const ushort *, int, QString *,
                       qstring_set);
 void users_profile_picture_by_id(const Users::Private *, const ushort *, int,
                                  QString *, qstring_set);
-void users_set_profile_picture(Users::Private *, quint64, const ushort *, int);
 bool users_toggle_filter_regex(Users::Private *);
 }
 extern "C" {
@@ -2912,8 +2872,7 @@ Config::Config(bool /*owned*/, QObject *parent)
 Config::Config(QObject *parent)
     : QObject(parent),
       m_d(config_new(new ConfigPtrBundle{
-          this, configColorChanged, configColorschemeChanged,
-          configConfigIdChanged, configNameChanged,
+          this, configColorChanged, configConfigIdChanged, configNameChanged,
           configNtsConversationIdChanged, configPreferredExpirationChanged,
           configProfilePictureChanged})),
       m_ownsPrivate(true) {}
@@ -2926,9 +2885,6 @@ Config::~Config() {
 
 quint32 Config::color() const { return config_color_get(m_d); }
 void Config::setColor(quint32 v) { config_color_set(m_d, v); }
-
-quint32 Config::colorscheme() const { return config_colorscheme_get(m_d); }
-void Config::setColorscheme(quint32 v) { config_colorscheme_set(m_d, v); }
 
 QString Config::configId() const {
   QString v;
@@ -3601,7 +3557,6 @@ Herald::Herald(QObject *parent)
           this,
           m_config,
           configColorChanged,
-          configColorschemeChanged,
           configConfigIdChanged,
           configNameChanged,
           configNtsConversationIdChanged,
@@ -4703,10 +4658,6 @@ QString Users::profilePictureById(const QString &id) const {
   QString s;
   users_profile_picture_by_id(m_d, id.utf16(), id.size(), &s, set_qstring);
   return s;
-}
-void Users::setProfilePicture(quint64 index, const QString &profile_picture) {
-  return users_set_profile_picture(m_d, index, profile_picture.utf16(),
-                                   profile_picture.size());
 }
 bool Users::toggleFilterRegex() { return users_toggle_filter_regex(m_d); }
 

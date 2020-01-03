@@ -35,8 +35,8 @@ Item {
     // the value of the latest read receipt according to the ReceiptStatus enum
     property int lastReceipt: 0
     // true if the last message was sent by the logged-in user
-    property bool outbound: cc && cc.messages.lastAuthor ===
-                            Herald.config.configId
+    property bool outbound: cc
+                            && cc.messages.lastAuthor === Herald.config.configId
     // user who sent the last message in the conversation
     property string lastAuthor: {
         if (cc && outbound)
@@ -46,16 +46,16 @@ Item {
         return ''
     }
     // the previous latest human readable timestamp, or the empty string
-    property string lastTimestamp: cc && !cc.messages.isEmpty ?
-                                       JS.friendlyTimestamp(
-                                           cc.messages.lastTime) : ""
+    property string lastTimestamp: cc
+                                   && !cc.messages.isEmpty ? JS.friendlyTimestamp(
+                                                                 cc.messages.lastTime) : ""
     // the previous message of the conversation, or the empty string
     property string lastBody: {
         if (cc && cc.messages.isEmpty)
             return ""
 
         if (cc && (cc.messages.lastAuxCode !== undefined)) {
-            return "<i>" + lastAuthor + Utils.auxStringShort(
+            return "<i>" + lastAuthor + JS.auxStringShort(
                         cc.messages.lastAuxCode) + "</i>"
         }
 
@@ -69,7 +69,6 @@ Item {
 
         return ''
     }
-
 
     GridLayout {
         id: labelGrid

@@ -50,14 +50,6 @@ impl Users {
                     println!("PLACEHOLDER: {} did not accept your user request", uid);
                 }
             }
-            UserUpdate::DataChanged(uid) => {
-                let pos = match self.list.iter().rposition(|User { id, .. }| id == &uid) {
-                    Some(pos) => pos,
-                    None => return,
-                };
-
-                self.model.data_changed(pos, pos);
-            }
             UserUpdate::UserChanged(uid, update) => {
                 use herald_user::UserChange as U;
                 let mut lock = shared::user_data().write();

@@ -42,7 +42,6 @@ using UtilsPtrBundle = struct UtilsPtrBundle;
 struct ConfigPtrBundle {
   Config *config;
   void (*config_color_changed)(Config *);
-  void (*config_colorscheme_changed)(Config *);
   void (*config_config_id_changed)(Config *);
   void (*config_name_changed)(Config *);
   void (*config_nts_conversation_id_changed)(Config *);
@@ -267,7 +266,6 @@ struct HeraldPtrBundle {
   Herald *herald;
   Config *config;
   void (*config_color_changed)(Config *);
-  void (*config_colorscheme_changed)(Config *);
   void (*config_config_id_changed)(Config *);
   void (*config_name_changed)(Config *);
   void (*config_nts_conversation_id_changed)(Config *);
@@ -644,8 +642,6 @@ private:
   Private *m_d;
   bool m_ownsPrivate;
   Q_PROPERTY(quint32 color READ color WRITE setColor NOTIFY colorChanged FINAL)
-  Q_PROPERTY(quint32 colorscheme READ colorscheme WRITE setColorscheme NOTIFY
-                 colorschemeChanged FINAL)
   Q_PROPERTY(QString configId READ configId NOTIFY configIdChanged FINAL)
   Q_PROPERTY(QString name READ name WRITE setName NOTIFY nameChanged FINAL)
   Q_PROPERTY(QByteArray ntsConversationId READ ntsConversationId NOTIFY
@@ -661,8 +657,6 @@ public:
   ~Config() override;
   quint32 color() const;
   void setColor(quint32 v);
-  quint32 colorscheme() const;
-  void setColorscheme(quint32 v);
   QString configId() const;
   QString name() const;
   void setName(const QString &v);
@@ -673,7 +667,6 @@ public:
   Q_INVOKABLE void setProfilePicture(const QString &profile_picture);
 Q_SIGNALS:
   void colorChanged();
-  void colorschemeChanged();
   void configIdChanged();
   void nameChanged();
   void ntsConversationIdChanged();
@@ -910,7 +903,6 @@ public:
   bool setData(const QModelIndex &index, const QVariant &value,
                int role = Qt::EditRole) override;
   Q_INVOKABLE quint32 color(int row) const;
-  Q_INVOKABLE bool setColor(int row, quint32 value);
   Q_INVOKABLE QByteArray conversationId(int row) const;
   Q_INVOKABLE quint8 expirationPeriod(int row) const;
   Q_INVOKABLE bool setExpirationPeriod(int row, quint8 value);
@@ -1835,8 +1827,6 @@ public:
   Q_INVOKABLE quint32 colorById(const QString &id) const;
   Q_INVOKABLE QString nameById(const QString &id) const;
   Q_INVOKABLE QString profilePictureById(const QString &id) const;
-  Q_INVOKABLE void setProfilePicture(quint64 index,
-                                     const QString &profile_picture);
   Q_INVOKABLE bool toggleFilterRegex();
   int columnCount(const QModelIndex &parent = QModelIndex()) const override;
   QVariant data(const QModelIndex &index,
@@ -1869,7 +1859,6 @@ public:
   Q_INVOKABLE bool setColor(int row, quint32 value);
   Q_INVOKABLE bool matched(int row) const;
   Q_INVOKABLE QString name(int row) const;
-  Q_INVOKABLE bool setName(int row, const QString &value);
   Q_INVOKABLE QByteArray pairwiseConversationId(int row) const;
   Q_INVOKABLE QString profilePicture(int row) const;
   Q_INVOKABLE quint8 status(int row) const;
