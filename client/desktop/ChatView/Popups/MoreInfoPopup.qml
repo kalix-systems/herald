@@ -127,8 +127,6 @@ Popup {
                     MouseArea {
                         id: hoverHandler
                     }
-
-                    states: []
                 }
             }
 

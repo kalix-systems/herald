@@ -1,7 +1,7 @@
 import QtQuick 2.13
 import LibHerald 1.0
 import QtQuick.Controls 2.13
-import "../common" as Common
+import "../Common" as Common
 import "qrc:/imports/js/utils.mjs" as Utils
 import "qrc:/imports/Entity"
 
@@ -48,23 +48,4 @@ Rectangle {
         }
         sourceComponent: bgBox.labelComponent
     }
-
-    states: [
-        State {
-            when: hoverHandler.containsMouse
-            name: "hovering"
-            PropertyChanges {
-                target: bgBox
-                color: CmnCfg.palette.lightGrey
-            }
-        },
-        State {
-            when: parent.focus
-            name: "selected"
-            PropertyChanges {
-                target: bgBox
-                color: CmnCfg.palette.lightGrey
-            }
-        }
-    ]
 }

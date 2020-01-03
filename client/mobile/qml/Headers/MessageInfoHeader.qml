@@ -22,13 +22,18 @@ RowLayout {
         }
     }
 
-    Row {
+    Item {
+        Layout.fillWidth: true
+    }
+
+    Label {
+        text: "More Info"
+        font: CmnCfg.headerFont
+        color: CmnCfg.palette.iconFill
         Layout.alignment: Qt.AlignCenter
-        Label {
-            text: "More Info"
-            font: CmnCfg.headerFont
-            anchors.verticalCenter: parent.verticalCenter
-            color: CmnCfg.palette.iconFill
-        }
+    }
+
+    Item {
+        Layout.fillWidth: true
     }
 }

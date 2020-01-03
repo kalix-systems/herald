@@ -1,190 +1,72 @@
 import QtQuick 2.14
 import QtQuick.Controls 2.14
+import QtQuick.Layouts 1.14
 import LibHerald 1.0
 import "qrc:/imports"
 import "../Common" as Common
 import "qrc:/imports/Entity" as Av
 import "qrc:/imports/js/utils.mjs" as Utils
-import "qrc:/imports/ChatBubble" as CB
+import "qrc:/imports/ChatBubble"
 import "qrc:/imports" as Imports
 
 Page {
     id: moreInfoPopup
-    // List of conversation member passed in upon push
-    property var convoMembers
-    // message data passed in upon push
-    property var messageData
-    // messages model passed in upon push
-    property Messages ownedMessages: parent.ownedMessages
+    property ChatBubble referredChatBubble
+    readonly property string stateName: "info"
     // list of receipt-user objects. set on completion
     readonly property var receiptData: []
-    property var outbound: messageData.author === Herald.config.configId
 
     background: Rectangle {
         color: CmnCfg.palette.white
     }
 
-    Component.onCompleted: {
-        receiptData = JSON.parse(moreInfoPopup.messageData.userReceipts)
-    }
-
-    Flickable {
+    ColumnLayout {
         anchors.fill: parent
-        contentHeight: wrapperCol.height
-        clip: true
-        ScrollBar.vertical: ScrollBar {}
-        boundsBehavior: Flickable.StopAtBounds
+
+        DefaultBubble {
+            Layout.fillWidth: true
+            defaultWidth: parent.width
+            convContainer: parent
+            messageModelData: referredChatBubble.messageModelData
+            height: referredChatBubble.height
+            Layout.alignment: Qt.AlignTop
+        }
+
         Column {
-            id: wrapperCol
-            width: parent.width - CmnCfg.smallMargin * 2
-            anchors.horizontalCenter: parent.horizontalCenter
-            spacing: CmnCfg.smallMargin
-            topPadding: CmnCfg.smallMargin
-            bottomPadding: CmnCfg.smallMargin
-
-            CB.DefaultBubble {
-                id: bubbleInfo
-                convContainer: parent
-                defaultWidth: parent.width
-                width: parent.width
-                messageModelData: moreInfoPopup.messageData
-            }
+            Layout.alignment: Qt.AlignTop
+            Layout.fillWidth: true
+            Layout.leftMargin: CmnCfg.defaultMargin
             Label {
-                id: senderHeader
-                anchors.left: bubbleInfo.left
-                text: "From:"
-                font.family: CmnCfg.chatFont.name
-                font.weight: Font.DemiBold
-                color: CmnCfg.palette.black
+                id: fromLabel
+                text: "From : "
+                font {
+                    bold: true
+                    family: CmnCfg.labelFont.name
+                    pixelSize: CmnCfg.units.dp(20)
+                }
             }
-
-            Item {
-                id: author
-                anchors.left: senderHeader.left
-                height: CmnCfg.convoHeight
-                width: parent.width
-                Common.PlatonicRectangle {
-                    boxTitle: messageData.authorName
-                    boxColor: messageData.authorColor
-                    picture: Utils.safeStringOrDefault(
-                                 messageData.authorProfilePicture, "")
-                    color: CmnCfg.palette.white
-                    labelComponent: Av.ConversationLabel {
-                        contactName: messageData.authorName
-                        lastBody: "@" + messageData.author
-                        labelColor: CmnCfg.palette.black
-                        secondaryLabelColor: CmnCfg.palette.darkGrey
-                        labelFontSize: CmnCfg.entityLabelSize
+            Row {
+                spacing: CmnCfg.defaultMargin
+                Av.Avatar {
+                    color: CmnCfg.avatarColors[referredChatBubble.messageModelData.authorColor]
+                    initials: referredChatBubble.authorName[0].toUpperCase()
+                    pfpPath: Utils.safeStringOrDefault(
+                                 referredChatBubble.messageModelData.authorProfilePicture)
+                    size: CmnCfg.units.dp(80)
+                }
+                ColumnLayout {
+                    height: parent.height
+                    spacing: 0
+                    Text {
+                        padding: 0
+                        text: referredChatBubble.messageModelData.authorName
+                        font: fromLabel.font
                     }
-                    MouseArea {
-                        id: hoverHandler
+                    Text {
+                        padding: 0
+                        text: "@" + referredChatBubble.messageModelData.author
+                        font: fromLabel.font
                     }
-                }
-            }
-
-            Label {
-                id: timeInfo
-                anchors.left: author.left
-                text: (outbound ? qsTr("Sent at: ") : qsTr(
-                                      "Received at: ")) + Utils.userTime(
-                          messageData.serverTime)
-                font.family: CmnCfg.chatFont.name
-                font.weight: Font.DemiBold
-                color: CmnCfg.palette.black
-            }
-
-            Label {
-                id: receiveInfo
-                anchors.left: author.left
-                text: "Received at: " + Utils.userTime(
-                          messageData.insertionTime)
-                font.family: CmnCfg.chatFont.name
-                font.weight: Font.DemiBold
-                color: CmnCfg.palette.black
-                visible: !outbound
-            }
-
-            Label {
-                id: expireInfo
-                anchors.left: timeInfo.left
-                visible: messageData.expirationTime !== undefined
-                text: messageData.expirationTime
-                      !== undefined ? "Expires at: " + Utils.userTime(
-                                          messageData.expirationTime) : ""
-                font.family: CmnCfg.chatFont.name
-                font.weight: Font.DemiBold
-                color: CmnCfg.palette.black
-            }
-
-            Label {
-                id: recHeader
-                anchors.left: timeInfo.left
-                text: "To:"
-                font.family: CmnCfg.chatFont.name
-                font.weight: Font.DemiBold
-                color: CmnCfg.palette.black
-            }
-
-            ListView {
-                height: contentHeight
-                width: parent.width
-                model: convoMembers
-                interactive: false
-                highlightFollowsCurrentItem: false
-                currentIndex: -1
-                delegate: Item {
-                    height: visible ? CmnCfg.convoHeight : 0
-                    width: 250
-                    visible: memberData.userId !== messageData.author
-                    property var memberData: model
-                    Common.PlatonicRectangle {
-                        boxTitle: memberData.name
-                        boxColor: memberData.color
-                        picture: Utils.safeStringOrDefault(memberData.picture,
-                                                           "")
-                        property MouseArea hoverHandler
-                        color: CmnCfg.palette.white
-                        labelComponent: Av.ConversationLabel {
-                            contactName: memberData.name
-                            lastBody: "@" + memberData.userId
-                            labelColor: CmnCfg.palette.black
-                            secondaryLabelColor: CmnCfg.palette.darkGrey
-                            labelFontSize: CmnCfg.entityLabelSize
-                        }
-
-                        Button {
-                            anchors.right: parent.right
-                            id: receipt
-                            icon.source: Utils.receiptCodeSwitch(
-                                             receiptData[memberData.userId])
-                            icon.height: 16
-                            icon.width: 16
-                            icon.color: CmnCfg.palette.iconMatte
-                            padding: 0
-
-                            anchors.verticalCenter: parent.verticalCenter
-                            background: Item {}
-                        }
-                    }
-                }
-            }
-            ToolButton {
-                anchors.horizontalCenter: parent.horizontalCenter
-                contentItem: Text {
-                    text: qsTr("DELETE MESSAGE")
-                    color: CmnCfg.palette.white
-                    font.pixelSize: CmnCfg.headerFontSize
-                    font.family: CmnCfg.chatFont.name
-                }
-
-                background: Rectangle {
-                    color: CmnCfg.palette.alertColor
-                }
-                onClicked: {
-                    moreInfoPopup.close()
-                    messageInfoLoader.active = false
-                    ownedMessages.deleteMessage(ownedMessages.indexById(
-                                                    messageData.msgId))
                 }
             }
         }

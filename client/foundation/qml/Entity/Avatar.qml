@@ -8,7 +8,6 @@ Item {
 
     property bool isGroup: false
     property string pfpPath
-
     property color color
     property real size: CmnCfg.avatarSize
     property color textColor: CmnCfg.palette.iconFill
@@ -18,7 +17,7 @@ Item {
     property int groupSize: size - 4
 
     height: size
-    width:  height
+    width: height
 
     Loader {
         id: iconLoader
