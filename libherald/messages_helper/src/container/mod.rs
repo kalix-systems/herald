@@ -297,14 +297,14 @@ impl Container {
         self.aux_data_json_by_id(&mid)
     }
 
-    pub fn clear_search<F: FnMut(usize)>(
+    pub fn clear_search<M: MessageModel>(
         &mut self,
-        mut data_changed: F,
+        mut model: M,
     ) -> Option<()> {
         for (ix, msg) in self.list.iter_mut().enumerate() {
             if msg.match_status.is_match() {
                 msg.match_status = MatchStatus::NotMatched;
-                data_changed(ix);
+                model.entry_changed(ix);
             }
         }
 
@@ -312,10 +312,10 @@ impl Container {
     }
 
     // FIXME make this incremental, long conversations with a large number of matches freeze the UI
-    pub fn apply_search<D: FnMut(usize), N: FnMut()>(
+    pub fn apply_search<M: MessageModel, N: FnMut()>(
         &mut self,
         search: &SearchState,
-        mut data_changed: D,
+        mut model: M,
         mut num_matches_changed: N,
     ) -> Option<Vec<Match>> {
         let pattern = search.pattern.as_ref()?;
@@ -340,7 +340,7 @@ impl Container {
             if (old_match_status != msg.match_status)
                 || (old_match_status.is_match() && msg.match_status.is_match())
             {
-                data_changed(ix);
+                model.entry_changed(ix);
             }
 
             if !matched {
@@ -356,10 +356,10 @@ impl Container {
     }
 
     /// Sets the reply type of a message to "dangling"
-    pub fn set_dangling<F: FnMut(usize)>(
+    pub fn set_dangling<M: MessageModel>(
         &self,
         ids: HashSet<MsgId>,
-        mut data_changed: F,
+        mut model: M,
     ) -> Option<()> {
         for id in ids.into_iter() {
             let changed = update(&id, |data| match data.content {
@@ -376,7 +376,7 @@ impl Container {
 
             if changed.unwrap_or(false) {
                 if let Some(ix) = self.index_by_id(id) {
-                    data_changed(ix);
+                    model.entry_changed(ix);
                 }
             }
         }

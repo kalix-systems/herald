@@ -12,6 +12,7 @@ use heraldcore::{
 use messages_helper::{container::Container, search::SearchState};
 use search_pattern::SearchPattern;
 
+mod helper_trait_imp;
 mod helpers;
 pub(crate) mod imp;
 mod trait_imp;
