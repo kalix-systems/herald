@@ -6,7 +6,10 @@ use location::*;
 use once_cell::sync::Lazy;
 use rustls::*;
 use std::{future::*, marker::PhantomData, net::ToSocketAddrs, sync::Arc};
-use tokio::{prelude::*, sync::mpsc::*};
+use tokio::{
+    prelude::*,
+    sync::{mpsc::*, oneshot},
+};
 use tokio_rustls::*;
 
 static TLS_CONFIG: Lazy<TlsConnector> = Lazy::new(|| {
@@ -270,5 +273,12 @@ impl HClient {
         tokio::spawn(driver.unwrap_or_else(|e| panic!()));
         let out = HClient { inner };
         todo!()
+    }
+
+    pub fn req(
+        &self,
+        req: Request,
+    ) -> Result<oneshot::Receiver<Response>, Error> {
+        self.inner.req(req)
     }
 }
