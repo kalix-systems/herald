@@ -80,6 +80,7 @@ Rectangle {
         height: 1
         color: CmnCfg.palette.medGrey
         visible: isHead
+        z: accent.z + 1
     }
 
     Rectangle {
@@ -89,6 +90,7 @@ Rectangle {
         height: 1
         color: CmnCfg.palette.medGrey
         visible: isTail
+        z: accent.z + 1
     }
 
     Highlight {
