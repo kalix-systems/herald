@@ -291,7 +291,6 @@ pub unsafe fn herald_new_inner(ptr_bundle: *mut HeraldPtrBundle) -> Herald {
         herald,
         config,
         config_color_changed,
-        config_colorscheme_changed,
         config_config_id_changed,
         config_name_changed,
         config_nts_conversation_id_changed,
@@ -393,7 +392,6 @@ pub unsafe fn herald_new_inner(ptr_bundle: *mut HeraldPtrBundle) -> Herald {
     let config_emit = ConfigEmitter {
         qobject: Arc::new(AtomicPtr::new(config)),
         color_changed: config_color_changed,
-        colorscheme_changed: config_colorscheme_changed,
         config_id_changed: config_config_id_changed,
         name_changed: config_name_changed,
         nts_conversation_id_changed: config_nts_conversation_id_changed,
@@ -718,7 +716,6 @@ pub struct HeraldPtrBundle {
     herald: *mut HeraldQObject,
     config: *mut ConfigQObject,
     config_color_changed: fn(*mut ConfigQObject),
-    config_colorscheme_changed: fn(*mut ConfigQObject),
     config_config_id_changed: fn(*mut ConfigQObject),
     config_name_changed: fn(*mut ConfigQObject),
     config_nts_conversation_id_changed: fn(*mut ConfigQObject),

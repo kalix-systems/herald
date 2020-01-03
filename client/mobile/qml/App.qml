@@ -35,6 +35,13 @@ Page {
     }
 
     Component {
+        id: messageInfoMain
+        ChatView.InfoPage {
+            readonly property string stateName: "info"
+        }
+    }
+
+    Component {
         id: settingsMain
         SettingsMenu.SettingsMenuMain {
             readonly property string stateName: "config"

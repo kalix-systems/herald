@@ -61,26 +61,6 @@ pub fn meta(conversation_id: &ConversationId) -> Result<ConversationMeta, HErr> 
     db::meta(&db, conversation_id)
 }
 
-/// Sets color for a conversation
-pub fn set_color(
-    conversation_id: &ConversationId,
-    color: u32,
-) -> Result<(), HErr> {
-    let mut db = Database::get()?;
-
-    let update = settings::db::update_color(&db, color, conversation_id)?;
-
-    let (mid, expiration) = crate::message::db::outbound_aux(
-        &mut db,
-        settings::SettingsUpdate::Color(color),
-        conversation_id,
-    )?;
-
-    crate::network::send_group_settings_message(mid, *conversation_id, expiration, update)?;
-
-    Ok(())
-}
-
 /// Sets title for a conversation
 pub fn set_title(
     conversation_id: &ConversationId,

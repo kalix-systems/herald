@@ -365,6 +365,6 @@ fn outbound_aux() {
 
     let conv = receiver.pairwise_conversation;
 
-    let update = coretypes::conversation::settings::SettingsUpdate::Color(1);
+    let update = coretypes::conversation::settings::SettingsUpdate::Title(Some("hi".into()));
     db::outbound_aux(&mut conn, update, &conv).expect(womp!());
 }

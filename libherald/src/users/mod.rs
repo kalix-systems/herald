@@ -130,26 +130,6 @@ impl Interface for Users {
         name(uid).unwrap_or_else(|| "".to_owned())
     }
 
-    /// Updates a user's name, returns a boolean to indicate success.
-    fn set_name(
-        &mut self,
-        row_index: usize,
-        name: String,
-    ) -> bool {
-        let uid = none!(self.list.get(row_index), false).id;
-        {
-            let name = name.clone();
-            spawn!(user::set_name(uid, name.as_str().into()), false);
-        }
-
-        {
-            let mut lock = user_data().write();
-            let mut inner = none!(lock.get_mut(&uid), false);
-            inner.name = name;
-        }
-        true
-    }
-
     /// Returns profile picture
     fn profile_picture(
         &self,
@@ -166,34 +146,6 @@ impl Interface for Users {
     ) -> String {
         let uid = &err!(id.as_str().try_into(), "".to_owned());
         profile_picture(uid).unwrap_or_else(|| "".to_owned())
-    }
-
-    /// Sets profile picture.
-    ///
-    /// Returns bool indicating success.
-    fn set_profile_picture(
-        &mut self,
-        index: u64,
-        picture_json: String,
-    ) {
-        let index = index as usize;
-
-        let uid = none!(self.list.get(index)).id;
-
-        spawn!({
-            let profile_picture =
-                heraldcore::image_utils::ProfilePicture::from_json_string(picture_json);
-
-            let path = err!(user::set_profile_picture(uid, profile_picture));
-
-            {
-                let mut lock = user_data().write();
-                let mut inner = none!(lock.get_mut(&uid));
-                inner.profile_picture = path;
-            }
-
-            crate::push(UserUpdate::DataChanged(uid));
-        });
     }
 
     /// Returns user's color

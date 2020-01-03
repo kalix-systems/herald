@@ -66,5 +66,8 @@
         <file>ChatBubble/ComposeReplyAuxComponent.qml</file>
         <file>ChatBubble/ReplyBubble/ReplyAux.qml</file>
         <file>Entity/MessageSearchLabel.qml</file>
+        <file>+android/FileDialogWrapper.qml</file>
+        <file>FileDialogWrapper.qml</file>
+        <file>Entity/ContactLabel.qml</file>
     </qresource>
 </RCC>

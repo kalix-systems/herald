@@ -15,22 +15,61 @@ import "qrc:/imports/js/utils.mjs" as JS
 // for contacts, not just conversations
 Item {
     // the group name or displayName of the conversation
-    property string contactName
-    // the previous message of the conversation, or the empty string
-    property string lastBody
-    // the previous latest human readable timestamp, or the empty string
-    property string lastTimestamp
-    // the value of the latest read receipt according to the ReceiptStatus enum
-    property int lastReceipt: 0
-    property string lastAuthor
+    property string convoTitle
 
     property color labelColor: CmnCfg.palette.black
-    property color secondaryLabelColor: CmnCfg.palette.offBlack
+    property color minorTextColor: CmnCfg.palette.offBlack
     property int labelFontSize: CmnCfg.entityLabelSize
     property int subLabelFontSize: CmnCfg.entitySubLabelSize
     property alias bodyItalic: bodyText.font.italic
 
-    // labeling constants
+    // This component expects one of the following groups of properties,
+    // either a ConversationContent property, or the subsequent group of
+    // properties calculated from it.
+
+    // OPTION 1: ConversationContent
+    // the ConversationContent bundle this label represents.
+    property ConversationContent cc
+
+    // OPTION 2: lastReceipt, outbound, lastAuthor, lastTimestamp, and lastBody
+    // the value of the latest read receipt according to the ReceiptStatus enum
+    property int lastReceipt: 0
+    // true if the last message was sent by the logged-in user
+    property bool outbound: cc
+                            && cc.messages.lastAuthor === Herald.config.configId
+    // user who sent the last message in the conversation
+    property string lastAuthor: {
+        if (cc && outbound)
+            return qsTr('You')
+        if (cc && !cc.messages.isEmpty)
+            return cc.messages.lastAuthor
+        return ''
+    }
+    // the previous latest human readable timestamp, or the empty string
+    property string lastTimestamp: cc
+                                   && !cc.messages.isEmpty ? JS.friendlyTimestamp(
+                                                                 cc.messages.lastTime) : ""
+    // the previous message of the conversation, or the empty string
+    property string lastBody: {
+        if (cc && cc.messages.isEmpty)
+            return ""
+
+        if (cc && (cc.messages.lastAuxCode !== undefined)) {
+            return "<i>" + lastAuthor + JS.auxStringShort(
+                        cc.messages.lastAuxCode) + "</i>"
+        }
+
+        if (cc && (cc.messages.lastBody === "")
+                && cc.messages.lastHasAttachments) {
+            return lastAuthor + ": " + "<i>Media message</i>"
+        }
+
+        if (cc)
+            return lastAuthor + ": " + cc.messages.lastBody
+
+        return ''
+    }
+
     GridLayout {
         id: labelGrid
         rows: 2
@@ -49,7 +88,7 @@ Item {
             Layout.preferredHeight: labelGrid.height * 0.25
             Layout.fillWidth: true
             elide: "ElideRight"
-            text: contactName
+            text: convoTitle
             color: labelColor
         }
 
@@ -62,7 +101,7 @@ Item {
             text: lastTimestamp
             Layout.preferredHeight: labelGrid.height * 0.25
             Layout.alignment: Qt.AlignRight | Qt.AlignTop
-            color: secondaryLabelColor
+            color: minorTextColor
         }
 
         Label {
@@ -83,9 +122,9 @@ Item {
         Button {
             id: receiptImage
             icon.source: JS.receiptCodeSwitch(lastReceipt)
-            icon.height: 24
-            icon.width: 24
-            icon.color: CmnCfg.palette.black
+            icon.height: 20
+            icon.width: 20
+            icon.color: CmnCfg.palette.iconFill
             padding: 0
             background: Item {}
         }

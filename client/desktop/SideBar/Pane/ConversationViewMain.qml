@@ -3,7 +3,7 @@ import LibHerald 1.0
 import QtQuick.Controls 2.13
 import QtQuick.Dialogs 1.3
 import "qrc:/common" as Common
-import "qrc:/imports/Entity" as Av
+import "qrc:/imports/Entity" as Ent
 import "qrc:/imports/js/utils.mjs" as Utils
 import "../../ChatView" as CV
 import ".././js/ContactView.mjs" as JS
@@ -70,7 +70,21 @@ ListView {
         height: visible ? CmnCfg.convoHeight : 0
         width: parent.width
 
-        ConversationRectangle {
+        Common.PlatonicRectangle {
+            id: convoRectangle
+            boxTitle: title
+            boxColor: conversationData.color
+            picture: Utils.safeStringOrDefault(conversationData.picture, "")
+            isGroupPicture: !conversationData.pairwise
+
+            labelComponent: Ent.ConversationLabel {
+                cc: convContent
+                convoTitle: title
+                labelColor: convoRectangle.state !== "" ? CmnCfg.palette.black : CmnCfg.palette.lightGrey
+                minorTextColor: convoRectangle.state
+                                     !== "" ? CmnCfg.palette.offBlack : CmnCfg.palette.medGrey
+            }
+
             MouseArea {
                 id: hoverHandler
                 hoverEnabled: true

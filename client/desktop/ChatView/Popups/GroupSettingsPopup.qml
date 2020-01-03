@@ -217,12 +217,9 @@ Popup {
                         picture: Utils.safeStringOrDefault(memberData.picture,
                                                            "")
                         color: CmnCfg.palette.white
-                        labelComponent: Entity.ConversationLabel {
-                            contactName: memberData.name
-                            lastBody: "@" + memberData.userId
-                            labelColor: CmnCfg.palette.black
-                            secondaryLabelColor: CmnCfg.palette.darkGrey
-                            labelFontSize: CmnCfg.entityLabelSize
+                        labelComponent: Entity.ContactLabel {
+                            displayName: memberData.name
+                            username: memberData.userId
                         }
                         states: []
                         MouseArea {

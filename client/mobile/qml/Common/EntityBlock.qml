@@ -49,6 +49,13 @@ Rectangle {
     }
 
     ConversationLabel {
+        convoTitle: entityName
+        cc: convContent ? convContent : null
+        labelFontSize: CmnCfg.labelFontSize
+        // TODO setting lastBody below is necessary to keep EntityBlock working
+        // to represent contacts; once that's not the case, get rid of this line
+        lastBody: subLabelText
+
         anchors {
             left: itemAvatar.right
             right: parent.right
@@ -59,11 +66,5 @@ Rectangle {
             bottomMargin: bottomTextMargin
 
         }
-
-        contactName: entityName
-        lastBody: subLabelText
-        lastTimestamp: timestamp
-        lastReceipt: entityItem.lastReceipt
-        labelFontSize: CmnCfg.labelFontSize
     }
 }
