@@ -210,6 +210,14 @@ pub struct HClient {
 }
 
 impl HClient {
+    pub fn uid(&self) -> UserId {
+        self.inner.uid
+    }
+
+    pub fn keys(&self) -> &sig::KeyPair {
+        &self.inner.keys
+    }
+
     pub async fn login(
         uid: UserId,
         keys: sig::KeyPair,
