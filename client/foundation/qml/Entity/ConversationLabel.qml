@@ -47,7 +47,7 @@ Item {
             }
             Layout.alignment: Qt.AlignLeft | Qt.AlignTop
             Layout.preferredHeight: labelGrid.height * 0.25
-            Layout.maximumWidth: parent.width
+            Layout.fillWidth: true
             elide: "ElideRight"
             text: contactName
             color: labelColor

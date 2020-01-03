@@ -65,5 +65,6 @@
         <file>ChatBubble/AuxBubble.qml</file>
         <file>ChatBubble/ComposeReplyAuxComponent.qml</file>
         <file>ChatBubble/ReplyBubble/ReplyAux.qml</file>
+        <file>Entity/MessageSearchLabel.qml</file>
     </qresource>
 </RCC>
