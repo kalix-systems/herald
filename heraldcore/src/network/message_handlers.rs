@@ -176,13 +176,6 @@ fn handle_content(
                     crate::user::set_color(uid, color)?;
                     ev.notifications
                         .push(Notification::UserChanged(uid, Color(color)));
-
-                    if let Some(cid) =
-                        crate::conversation::get_pairwise_conversations(&[uid])?.pop()
-                    {
-                        ev.notifications
-                            .push(Notification::Settings(cid, S::Color(color)));
-                    }
                 }
 
                 U::DisplayName(name) => {

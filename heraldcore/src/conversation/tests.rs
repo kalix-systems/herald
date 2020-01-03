@@ -187,15 +187,12 @@ fn set_get_meta() {
     bld.add_db(&mut conn)
         .expect(womp!("Failed to create conversation"));
 
-    super::db::set_color(&conn, &conv_id, 1).expect(womp!("Failed to set color"));
-
     super::db::set_title(&conn, &conv_id, Some("title")).expect(womp!("Failed to set title"));
 
     let conv_meta = super::db::meta(&conn, &conv_id).expect(womp!("Failed to get metadata"));
 
     assert_eq!(conv_meta.conversation_id, conv_id);
     assert_eq!(conv_meta.title.expect("failed to get title"), "title");
-    assert_eq!(conv_meta.color, 1);
 
     let conv_id2 = ConversationId::from([1; 32]);
 

@@ -7,8 +7,6 @@ pub enum SettingsUpdate {
     Expiration(ExpirationPeriod),
     /// The title of the conversation
     Title(Option<String>),
-    /// The color of the conversation
-    Color(u32),
     /// Group picture
     Picture(Option<String>),
 }
