@@ -22,8 +22,8 @@ pub fn login<PH, CF>(
     connection_failed: CF,
 ) -> Result<(), Error>
 where
-    PH: FnMut(Push) + Send + Unpin + 'static,
-    CF: FnOnce() + Send + Unpin + 'static,
+    PH: FnMut(Push) + Send + 'static,
+    CF: FnOnce() + Send + 'static,
 {
     Thread::new().spawn(move || {
         let mut rt = Runtime::new().basic_scheduler().build()?;
@@ -52,9 +52,9 @@ pub fn register<PH, RH, CF>(
     connection_failed: CF,
 ) -> Result<RegistrationSender<register::ClientEvent>, Error>
 where
-    PH: FnMut(Push) + Send + Unpin + 'static,
+    PH: FnMut(Push) + Send + 'static,
     RH: FnMut(register::ServeEvent) + Send + 'static,
-    CF: FnOnce() + Send + Unpin + 'static,
+    CF: FnOnce() + Send + 'static,
 {
     let (client_tx, client_rx) = channel(1);
 
@@ -86,8 +86,8 @@ async fn login_inner<PH, CF>(
     connection_failed: CF,
 ) -> Result<(), Error>
 where
-    PH: FnMut(Push) + Send + Unpin + 'static,
-    CF: FnOnce() + Send + Unpin + 'static,
+    PH: FnMut(Push) + Send + 'static,
+    CF: FnOnce() + Send + 'static,
 {
     let (client, rx, err_rx) = Client::login(uid, keys, &server_dns, server_port).await?;
 
@@ -107,9 +107,9 @@ async fn register_inner<PH, RH, CF>(
     connection_failed: CF,
 ) -> Result<(), Error>
 where
-    PH: FnMut(Push) + Send + Unpin + 'static,
+    PH: FnMut(Push) + Send + 'static,
     RH: FnMut(register::ServeEvent) + Send + 'static,
-    CF: FnOnce() + Send + Unpin + 'static,
+    CF: FnOnce() + Send + 'static,
 {
     let (response_tx, mut response_rx) = channel(1);
 
@@ -133,8 +133,8 @@ async fn handle_events<PH, CF>(
     mut rx: UnboundedReceiver<Push>,
     err_rx: oneshot::Receiver<Error>,
 ) where
-    PH: FnMut(Push) + Send + Unpin + 'static,
-    CF: FnOnce() + Send + Unpin + 'static,
+    PH: FnMut(Push) + Send + 'static,
+    CF: FnOnce() + Send + 'static,
 {
     tokio::spawn(async move {
         if let Err(_) = err_rx.await {
