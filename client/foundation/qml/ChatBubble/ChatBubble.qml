@@ -171,6 +171,10 @@ Rectangle {
                     return replyDanglingContent
                 }
 
+                if (messageModelData.opAuxData.length > 0) {
+                    return replyAux
+                }
+
                 const hasDoc = messageModelData.opDocAttachments.length > 0
                 const hasMedia = messageModelData.opMediaAttachments.length > 0
 
@@ -213,6 +217,12 @@ Rectangle {
             Component {
                 id: replyContent
                 ReplyText {}
+            }
+
+            // reply bubble if it is an aux message
+            Component {
+                id: replyAux
+                ReplyAux {}
             }
         }
 

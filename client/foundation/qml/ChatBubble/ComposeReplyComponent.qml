@@ -21,6 +21,9 @@ Rectangle {
     property string friendlyTimestamp: Utils.friendlyTimestamp(
                                            builderData.opTime)
     property var maxWidth: wrapper.width - CmnCfg.smallMargin
+    property var emptyImage: builderData.opBody === ""
+                             && (builderData.opMediaAttachments.length !== 0
+                                 && builderData.opDocAttachments.length === 0)
 
     Connections {
         target: appRoot.globalTimer
@@ -143,7 +146,7 @@ Rectangle {
                     elide: Text.ElideRight
                 }
 
-                text: opTextMetrics.elidedText
+                text: emptyImage ? "<i>Media message</i>" : opTextMetrics.elidedText
                 Layout.rightMargin: CmnCfg.smallMargin
                 Layout.alignment: Qt.AlignLeft
                 Layout.fillWidth: true
@@ -153,6 +156,7 @@ Rectangle {
                 selectByKeyboard: true
                 readOnly: true
                 color: CmnCfg.palette.black
+                textFormat: Text.RichText
             }
         }
 
