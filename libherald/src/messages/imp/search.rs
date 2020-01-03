@@ -126,11 +126,17 @@ impl Messages {
     }
 
     pub(crate) fn next_search_match_(&mut self) -> i64 {
-        self.next_match_helper().map(|ix| ix as i64).unwrap_or(-1)
+        self.search
+            .next_match_helper(&mut self.container, &mut self.emit, &mut self.model)
+            .map(|ix| ix as i64)
+            .unwrap_or(-1)
     }
 
     pub(crate) fn prev_search_match_(&mut self) -> i64 {
-        self.prev_match_helper().map(|ix| ix as i64).unwrap_or(-1)
+        self.search
+            .prev_match_helper(&mut self.container, &mut self.emit, &mut self.model)
+            .map(|ix| ix as i64)
+            .unwrap_or(-1)
     }
 
     pub(crate) fn search_index_(&self) -> u64 {

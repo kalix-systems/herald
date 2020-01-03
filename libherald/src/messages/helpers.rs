@@ -2,7 +2,6 @@ use super::*;
 use crate::push;
 use crate::{content_push, spawn};
 use heraldcore::{errors::HErr, message::Message as Msg, NE};
-use messages_helper::search::Match;
 pub use messages_helper::{container::*, types::*};
 
 impl Messages {
@@ -22,52 +21,6 @@ impl Messages {
         if ix < self.container.len() {
             self.model.data_changed(ix, ix);
         }
-    }
-
-    pub(super) fn prev_match_helper(&mut self) -> Option<usize> {
-        let old = (self.search.current(), self.search.index);
-
-        let new = (self.search.prev_match(), self.search.index);
-
-        self.match_helper(old, new)
-    }
-
-    pub(super) fn next_match_helper(&mut self) -> Option<usize> {
-        let old = (self.search.current(), self.search.index);
-
-        let new = (self.search.next_match(), self.search.index);
-
-        self.match_helper(old, new)
-    }
-
-    fn match_helper(
-        &mut self,
-        (old, old_index): (Option<Match>, Option<usize>),
-        (new, new_index): (Option<Match>, Option<usize>),
-    ) -> Option<usize> {
-        if old_index != new_index {
-            self.emit.search_index_changed();
-        }
-
-        if old == new {
-            let Match(msg) = new?;
-            return self.container.index_of(&msg);
-        }
-
-        if let Some(Match(old)) = old {
-            let ix = self.container.index_of(&old)?;
-            self.container.list.get_mut(ix)?.match_status = MatchStatus::Matched;
-            self.entry_changed(ix);
-        }
-
-        let Match(new) = new?;
-
-        let ix = self.container.index_of(&new)?;
-        self.container.list.get_mut(ix)?.match_status = MatchStatus::Focused;
-
-        self.entry_changed(ix);
-
-        Some(ix)
     }
 
     pub(super) fn remove_helper(

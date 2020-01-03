@@ -304,6 +304,66 @@ impl SearchState {
 
         Some(())
     }
+
+    pub fn prev_match_helper<E: MessageEmit, M: MessageModel>(
+        &mut self,
+        container: &mut Container,
+        emit: &mut E,
+        model: &mut M,
+    ) -> Option<usize> {
+        let old = (self.current(), self.index);
+
+        let new = (self.prev_match(), self.index);
+
+        self.match_helper(old, new, container, emit, model)
+    }
+
+    pub fn next_match_helper<E: MessageEmit, M: MessageModel>(
+        &mut self,
+        container: &mut Container,
+        emit: &mut E,
+        model: &mut M,
+    ) -> Option<usize> {
+        let old = (self.current(), self.index);
+
+        let new = (self.next_match(), self.index);
+
+        self.match_helper(old, new, container, emit, model)
+    }
+
+    fn match_helper<E: MessageEmit, M: MessageModel>(
+        &mut self,
+        (old, old_index): (Option<Match>, Option<usize>),
+        (new, new_index): (Option<Match>, Option<usize>),
+        container: &mut Container,
+        emit: &mut E,
+        model: &mut M,
+    ) -> Option<usize> {
+        if old_index != new_index {
+            emit.search_index_changed();
+        }
+
+        if old == new {
+            let Match(msg) = new?;
+            return container.index_of(&msg);
+        }
+
+        if let Some(Match(old)) = old {
+            let ix = container.index_of(&old)?;
+            container.list.get_mut(ix)?.match_status = MatchStatus::Matched;
+
+            model.entry_changed(ix);
+        }
+
+        let Match(new) = new?;
+
+        let ix = container.index_of(&new)?;
+        container.list.get_mut(ix)?.match_status = MatchStatus::Focused;
+
+        model.entry_changed(ix);
+
+        Some(ix)
+    }
 }
 
 #[cfg(test)]
