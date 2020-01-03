@@ -39,14 +39,27 @@ impl Messages {
         &mut self,
         update: MsgUpdate,
     ) {
+        let emit = &mut self.emit;
+        let model = &mut self.model;
+        let search = &mut self.search;
+        let cid = none!(self.conversation_id);
+        let push = |cid| {
+            use crate::conversations::shared::*;
+            crate::push(ConvItemUpdate {
+                cid,
+                variant: ConvItemUpdateVariant::NewActivity,
+            })
+        };
         match update {
             MsgUpdate::NewMsg(new) => {
                 new_msg_toast(new.as_ref());
 
-                err!(self.insert_helper(*new));
+                self.container
+                    .insert_helper(*new, emit, model, search, cid, push);
             }
             MsgUpdate::BuilderMsg(msg) => {
-                err!(self.insert_helper(*msg));
+                self.container
+                    .insert_helper(*msg, emit, model, search, cid, push);
             }
             MsgUpdate::Receipt {
                 msg_id,

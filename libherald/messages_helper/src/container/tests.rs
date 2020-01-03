@@ -15,6 +15,14 @@ impl TestModel {
     }
 }
 
+macro_rules! emit_imp {
+    ($($name: ident, $field: ident),*) => {
+       $(fn $name(&mut self) {
+           self.$field += 1;
+       })*
+    }
+}
+
 impl MessageModel for TestModel {
     fn data_changed(
         &mut self,
@@ -23,41 +31,54 @@ impl MessageModel for TestModel {
     ) {
         self.data_changed_state.push((a, b));
     }
+
+    fn begin_remove_rows(
+        &mut self,
+        _a: usize,
+        _b: usize,
+    ) {
+    }
+
+    fn end_remove_rows(&mut self) {}
+
+    fn begin_insert_rows(
+        &mut self,
+        _a: usize,
+        _b: usize,
+    ) {
+    }
+
+    fn end_insert_rows(&mut self) {}
 }
 
+#[derive(Default)]
 pub struct TestEmit {
     num_matches_state: u32,
     pattern_changed_state: u32,
     regex_changed_state: u32,
     index_changed_state: u32,
+    last_has_attachments_state: u32,
+    is_empty_changed_state: u32,
+    last_changed_state: u32,
 }
 
 impl TestEmit {
     fn new() -> TestEmit {
-        TestEmit {
-            num_matches_state: 0,
-            pattern_changed_state: 0,
-            regex_changed_state: 0,
-            index_changed_state: 0,
-        }
+        Default::default()
     }
 }
 
 impl MessageEmit for TestEmit {
-    fn search_index_changed(&mut self) {
-        self.index_changed_state += 1;
-    }
-    fn search_num_matches_changed(&mut self) {
-        self.num_matches_state += 1;
-    }
+    emit_imp! {
+    search_num_matches_changed, num_matches_state,
+    search_pattern_changed, pattern_changed_state,
+    search_regex_changed, regex_changed_state,
+    search_index_changed, index_changed_state,
+    last_has_attachments_changed, last_has_attachments_state,
+    is_empty_changed, is_empty_changed_state,
+    last_changed, last_changed_state
 
-    fn search_pattern_changed(&mut self) {
-        self.pattern_changed_state += 1;
     }
-    fn search_regex_changed(&mut self) {
-        self.regex_changed_state += 1;
-    }
-    fn last_has_attachments_changed(&mut self) {}
 }
 
 fn msg_constructor(body: &str) -> (MessageMeta, MsgData) {
