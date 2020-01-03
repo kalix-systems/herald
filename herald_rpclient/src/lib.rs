@@ -285,4 +285,8 @@ impl HClient {
     ) -> Result<oneshot::Receiver<Response>, Error> {
         self.inner.req(req)
     }
+
+    pub fn quit(&self) -> Result<(), Error> {
+        self.inner.quit()
+    }
 }
