@@ -64,6 +64,13 @@ impl Container {
         cache::get(&msg?.msg_id)
     }
 
+    pub fn msg_id(
+        &self,
+        index: usize,
+    ) -> Option<&MsgId> {
+        Some(&self.list.get(index).as_ref()?.msg_id)
+    }
+
     pub fn access_by_index<T, F: FnOnce(&MsgData) -> T>(
         &self,
         index: usize,
@@ -216,27 +223,7 @@ impl Container {
         ix
     }
 
-    pub fn msg_id(
-        &self,
-        index: usize,
-    ) -> Option<&MsgId> {
-        Some(&self.list.get(index).as_ref()?.msg_id)
-    }
-
-    pub fn clear_search<M: MessageModel>(
-        &mut self,
-        model: &mut M,
-    ) -> Option<()> {
-        for (ix, msg) in self.list.iter_mut().enumerate() {
-            if msg.match_status.is_match() {
-                msg.match_status = MatchStatus::NotMatched;
-                model.entry_changed(ix);
-            }
-        }
-
-        Some(())
-    }
-
+    //search functions
     // FIXME make this incremental, long conversations with a large number of matches freeze the UI
     pub fn apply_search<M: MessageModel, E: MessageEmit>(
         &mut self,
@@ -279,6 +266,20 @@ impl Container {
         emit.search_num_matches_changed();
 
         Some(matches)
+    }
+
+    pub fn clear_search<M: MessageModel>(
+        &mut self,
+        model: &mut M,
+    ) -> Option<()> {
+        for (ix, msg) in self.list.iter_mut().enumerate() {
+            if msg.match_status.is_match() {
+                msg.match_status = MatchStatus::NotMatched;
+                model.entry_changed(ix);
+            }
+        }
+
+        Some(())
     }
 
     /// Sets the reply type of a message to "dangling"

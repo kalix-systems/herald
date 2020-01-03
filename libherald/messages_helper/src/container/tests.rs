@@ -32,6 +32,13 @@ impl MessageModel for TestModel {
         self.data_changed_state.push((a, b));
     }
 
+    fn entry_changed(
+        &mut self,
+        ix: usize,
+    ) {
+        self.data_changed(ix, ix);
+    }
+
     fn begin_remove_rows(
         &mut self,
         _a: usize,
@@ -256,4 +263,54 @@ fn test_handle_receipt() {
             .receipts[&"TEST".try_into().expect(womp!())],
         coretypes::messages::MessageReceiptStatus::Read
     );
+}
+
+#[serial]
+#[test]
+fn test_handle_store_done() {
+    heraldcore::db::reset_all().expect(womp!());
+
+    let convid = [0; 32].into();
+
+    heraldcore::config::ConfigBuilder::new(
+        "TEST".try_into().expect(womp!()),
+        herald_common::sig::KeyPair::gen_new(),
+    )
+    .nts_conversation(convid)
+    .add()
+    .expect(womp!("Failed to add config"));
+
+    let (msgmeta1, msgdata1) = msg_constructor("test");
+    std::thread::sleep(std::time::Duration::from_millis(2));
+    let (msgmeta2, msgdata2) = msg_constructor("123");
+
+    let mut container = Container::new(vec![]);
+
+    let _ = container.insert_ord(msgmeta1, msgdata1);
+    let _ = container.insert_ord(msgmeta2, msgdata2);
+
+    let mut paths = Vec::new();
+    paths.push("path".into());
+
+    let attachmentmeta = herald_attachments::AttachmentMeta::new(paths);
+
+    let model = &mut TestModel::new();
+    let emit = &mut TestEmit::new();
+
+    container.handle_store_done(msgmeta2.msg_id, attachmentmeta.clone(), emit, model);
+
+    assert_eq!(
+        container
+            .get_data(&msgmeta2.msg_id)
+            .expect(womp!())
+            .attachments()
+            .expect(womp!()),
+        &attachmentmeta
+    );
+
+    assert_eq!(container.index_by_id(msgmeta2.msg_id).expect(womp!()), 0);
+
+    assert_eq!(model.data_changed_state[0], (0, 0));
+
+    assert_eq!(emit.last_has_attachments_state, 1);
 }
