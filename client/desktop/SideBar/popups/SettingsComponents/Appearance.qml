@@ -14,7 +14,7 @@ GridLayout {
     Imports.StandardLabel {
         text: qsTr("Theme")
         color: "black"
-        font.pixelSize: CmnCfg.chatTextSize
+        font: CmnCfg.defaultFont
         Layout.leftMargin: CmnCfg.defaultMargin
         Layout.fillWidth: true
     }

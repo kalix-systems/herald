@@ -20,13 +20,12 @@ ColumnLayout {
             text: qsTr("Username: ")
             color: "black"
             Layout.leftMargin: CmnCfg.defaultMargin
-            font.pixelSize: CmnCfg.chatTextSize
+            font: CmnCfg.defaultFont
         }
         Imports.StandardLabel {
             text: Herald.config.configId
             color: CmnCfg.palette.black
-            font.pixelSize: CmnCfg.chatTextSize
-            font.weight: Font.Medium
+            font: CmnCfg.defaultFont
         }
     }
 

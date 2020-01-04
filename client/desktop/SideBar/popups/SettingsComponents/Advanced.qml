@@ -13,7 +13,7 @@ ColumnLayout {
             text: qsTr("Language")
             color: CmnCfg.palette.black
             Layout.leftMargin: CmnCfg.defaultMargin
-            font.pixelSize: CmnCfg.chatTextSize
+            font: CmnCfg.defaultFont
         }
 
         Item {
@@ -38,7 +38,7 @@ ColumnLayout {
             text: qsTr("App Info")
             color: "black"
             Layout.leftMargin: CmnCfg.defaultMargin
-            font.pixelSize: CmnCfg.chatTextSize
+            font: CmnCfg.defaultFont
         }
 
         Item {
@@ -49,7 +49,7 @@ ColumnLayout {
             text: qsTr("Version ") + "0.0.1-alpha.1-rc.1"
             color: "black"
             Layout.leftMargin: CmnCfg.defaultMargin
-            font.pixelSize: CmnCfg.chatTextSize
+            font: CmnCfg.defaultFont
         }
     }
 
