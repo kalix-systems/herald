@@ -56,7 +56,7 @@ Item {
     // default font for basic UI text
     readonly property font defaultFont: Qt.font({
         family: chatFont.name,
-        pixelSize: units.dp(17)
+        pixelSize: units.dp(16)
     })
 
     readonly property font headerFont: Qt.font({

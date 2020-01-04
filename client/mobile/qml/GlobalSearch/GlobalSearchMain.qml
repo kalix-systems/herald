@@ -14,7 +14,6 @@ Page {
 
         Label {
             text: 'search view'
-            color: black
             anchors.top: parent.top
         }
     }

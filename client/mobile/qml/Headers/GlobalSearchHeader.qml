@@ -33,12 +33,16 @@ RowLayout {
             color: CmnCfg.palette.white
             borderColor: "Transparent"
             placeholderText: qsTr('Search your conversations')
+            font.pixelSize: CmnCfg.units.dp(18)
         }
 
         AnimIconButton {
             id: clearButton
-            anchors.right: parent.right
-            anchors.verticalCenter: parent.verticalCenter
+            anchors {
+                right: parent.right
+                bottom: parent.bottom
+                bottomMargin: CmnCfg.microMargin
+            }
             color: CmnCfg.palette.iconFill
             imageSource: "qrc:/x-icon.svg"
             onTapped: {

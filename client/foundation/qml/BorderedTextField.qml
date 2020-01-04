@@ -13,6 +13,7 @@ TextField {
     placeholderText: "Enter text"
     font: CmnCfg.defaultFont
     color: CmnCfg.palette.white
+    verticalAlignment: TextInput.AlignBottom
 
     background: Rectangle {
         id: border
