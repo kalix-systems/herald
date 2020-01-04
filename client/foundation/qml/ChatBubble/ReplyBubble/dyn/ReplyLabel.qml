@@ -32,10 +32,6 @@ Row {
         onRefreshTime: {
             replyTs.text = Utils.friendlyTimestamp(
                         messageModelData.opInsertionTime)
-            clock.icon.source = messageModelData.opExpirationTime
-                    !== undefined ? Utils.timerIcon(
-                                        messageModelData.opExpirationTime,
-                                        messageModelData.opInsertionTime) : ""
         }
     }
     Label {
@@ -47,18 +43,4 @@ Row {
         anchors.verticalCenter: replyLabel.verticalCenter
     }
 
-    Button {
-        id: clock
-        icon.source: messageModelData.opExpirationTime
-                     !== undefined ? Utils.timerIcon(
-                                         messageModelData.opExpirationTime,
-                                         messageModelData.opInsertionTime) : ""
-
-        icon.height: 16
-        icon.width: 16
-        icon.color: "grey"
-        padding: 0
-        background: Item {}
-        anchors.verticalCenter: replyTs.verticalCenter
-    }
 }

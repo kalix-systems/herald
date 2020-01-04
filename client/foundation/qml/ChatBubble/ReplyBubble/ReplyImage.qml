@@ -23,7 +23,7 @@ Rectangle {
 
     color: CmnCfg.palette.medGrey
     width: bubbleRoot.maxWidth
-    height: wrapRow.height
+    height: Math.max(wrapRow.height, imageClip.height)
 
     ReplyMouseArea {
         id: mouseArea
@@ -37,6 +37,11 @@ Rectangle {
         width: CmnCfg.accentBarWidth
         color: opColor
         anchors.left: parent.left
+    }
+
+    ReplyExpireInfo {
+        id: expireInfo
+        anchors.right: imageClip.left
     }
 
     Row {
@@ -60,16 +65,18 @@ Rectangle {
                 anchors.top: replyLabel.bottom
                 anchors.topMargin: CmnCfg.smallMargin
                 id: replyElidedBody
-                elideConstraint: imageSize
+                elideConstraint: imageSize + bubbleRoot.maxWidth * 0.2
                 maximumWidth: bubbleRoot.maxWidth * 0.8 - imageSize
                 text: messageModelData.opBody
                       !== "" ? messageModelData.opBody : "<i>Media message</i>"
             }
         }
+    }
 
-        ReplyImageClip {
-            id: imageClip
-            anchors.top: replyWrapperCol.top
-        }
+    ReplyImageClip {
+        id: imageClip
+        anchors.top: parent.top
+        anchors.right: parent.right
+        clipSize: wrapRow.height
     }
 }

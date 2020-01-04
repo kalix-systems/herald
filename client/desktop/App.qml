@@ -65,9 +65,19 @@ Item {
         anchors.right: active ? parent.right : undefined
         property var convoData
         property var convoMembers
+        property bool group
         active: false
-        sourceComponent: CvPopups.GroupSettingsPopup {
+        sourceComponent: group ? groupSettings : convoSettings
+
+        Component {
             id: groupSettings
+            CvPopups.GroupSettingsPopup {}
+        }
+
+        Component {
+
+            id: convoSettings
+            CvPopups.ConvoSettingsPopup {}
         }
     }
 

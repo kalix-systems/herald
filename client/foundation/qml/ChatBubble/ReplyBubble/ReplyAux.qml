@@ -25,6 +25,8 @@ Rectangle {
         id: mouseArea
     }
 
+    ReplyExpireInfo {}
+
     Column {
         id: replyWrapperCol
         spacing: CmnCfg.smallMargin
