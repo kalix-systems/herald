@@ -14,9 +14,9 @@ RadioButton {
         border.width: 2
         Rectangle {
             radius: 20
-            color: CmnCfg.palette.black
+            color: CmnCfg.palette.offBlack
             anchors.fill: parent
-            anchors.margins: control.checked ? 4 : 10
+            anchors.margins: control.checked ? 5 : 10
             Behavior on anchors.margins {
                 NumberAnimation {
                     duration: 200
@@ -29,6 +29,7 @@ RadioButton {
         text: control.text
         font: control.font
         anchors.verticalCenter: indic.verticalCenter
+        anchors.verticalCenterOffset: 2
         leftPadding: control.indicator.width + control.spacing
     }
 }

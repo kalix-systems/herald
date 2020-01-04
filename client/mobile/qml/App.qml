@@ -5,6 +5,7 @@ import "./Headers" as Headers
 import "./HomeScreen" as HomeScreen
 import "./NewContactView" as NewContactView
 import "./ChatView" as ChatView
+import "./GlobalSearch" as GlobalSearch
 import "./SettingsMenu" as SettingsMenu
 
 Page {
@@ -59,6 +60,13 @@ Page {
         id: newGroupViewMain
         HomeScreen.NewGroupView {
             readonly property string stateName: "newGroup"
+        }
+    }
+
+    Component {
+        id: globalSearchView
+        GlobalSearch.GlobalSearchMain {
+            readonly property string stateName: "globalSearch"
         }
     }
 

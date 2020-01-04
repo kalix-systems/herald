@@ -20,7 +20,6 @@ Rectangle {
     readonly property real imageSize: 80
     property alias mouseEnabled: mouseArea.enabled
 
-
     Component.onCompleted: {
         replyWrapper.fileCount = JS.parseDocs(replyFileClip.nameMetrics,
                                               messageModelData,
@@ -38,11 +37,17 @@ Rectangle {
         anchors.left: parent.left
     }
 
-    ReplyMouseArea { id: mouseArea}
+    ReplyMouseArea {
+        id: mouseArea
+    }
 
     height: wrapRow.height
     width: bubbleRoot.maxWidth
     color: CmnCfg.palette.medGrey
+
+    ReplyExpireInfo {
+        anchors.right: imageClip.left
+    }
 
     Row {
         id: wrapRow
@@ -74,10 +79,11 @@ Rectangle {
                 maximumWidth: bubbleRoot.maxWidth * 0.8 - imageSize
             }
         }
-
-        ReplyImageClip {
-            id: imageClip
-            anchors.top: replyWrapperCol.top
-        }
+    }
+    ReplyImageClip {
+        id: imageClip
+        anchors.top: parent.top
+        anchors.right: parent.right
+        clipSize: wrapRow.height
     }
 }

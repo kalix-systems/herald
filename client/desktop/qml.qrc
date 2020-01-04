@@ -71,5 +71,6 @@
         <file>EmojiKeyboard/SearchInteriorComponent.qml</file>
         <file>EmojiKeyboard/StandardInterior.qml</file>
         <file>ChatView/ConversationWindow/BubbleDecoration.qml</file>
+        <file>ChatView/Popups/ConvoSettingsPopup.qml</file>
     </qresource>
 </RCC>

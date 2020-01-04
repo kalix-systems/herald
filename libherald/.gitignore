@@ -2,3 +2,4 @@
 target/
 .vscode
 graph.png
+android_emulator_build.sh

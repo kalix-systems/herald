@@ -5,33 +5,36 @@ import LibHerald 1.0
 import "../../../common" as CMN
 import "qrc:/imports"
 
-ColumnLayout {
-    spacing: CmnCfg.defaultMargin
-    RowLayout {
+GridLayout {
+    rows: 2
+    columns: 2
+
+    StandardLabel {
+        text: qsTr('Save conversation data to this device')
+        font: CmnCfg.defaultFont
+        color: CmnCfg.palette.black
         Layout.fillWidth: true
         Layout.leftMargin: CmnCfg.defaultMargin
-        Layout.topMargin: CmnCfg.defaultMargin
-        Button {
-            Layout.alignment: Qt.AlignCenter
-            text: qsTr("Export Backup")
-        }
-
-        StandardLabel {
-            text: qsTr("Last Backup Was : ") + "Never"
-            color: "black"
-            Layout.leftMargin: CmnCfg.defaultMargin
-            font.pixelSize: CmnCfg.chatTextSize
-        }
     }
 
-    Button {
-        Layout.leftMargin: CmnCfg.defaultMargin
-        text: qsTr("Restore From Backup")
+    TextButton {
+        text: qsTr("BACK UP")
+        Layout.alignment: Qt.AlignCenter
+        Layout.rightMargin: CmnCfg.megaMargin
     }
 
-    Rectangle {
-        color: CmnCfg.palette.darkGrey
-        height: 1
+    StandardLabel {
+        text: qsTr("Last Backup Was : ") + "Never"
+        color: CmnCfg.palette.black
+        font: CmnCfg.defaultFont
         Layout.fillWidth: true
+        Layout.leftMargin: CmnCfg.defaultMargin
     }
+
+    TextButton {
+        text: qsTr("RESTORE")
+        Layout.alignment: Qt.AlignCenter
+        Layout.rightMargin: CmnCfg.megaMargin
+    }
+
 }

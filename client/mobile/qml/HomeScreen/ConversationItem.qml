@@ -1,7 +1,7 @@
 import QtQuick 2.13
 import QtQuick.Controls 2.13
 import LibHerald 1.0
-import "qrc:/imports/Entity"
+import "qrc:/imports/Entity" as Ent
 import "qrc:/imports/js/utils.mjs" as Utils
 import "../ChatView" as ChatView
 import "../Common" as Common
@@ -10,7 +10,7 @@ import "../Common" as Common
 Rectangle {
     id: contactItem
 
-    property string convoTitle
+    property string itemTitle
     // the index corresponding to the visual color of this GroupBox
     property int colorCode: 0
     // path to the conversation's avatar image
@@ -19,8 +19,7 @@ Rectangle {
     // asdf
     property ConversationContent convContent: null
 
-    height: entityBlock.height
-    color: CmnCfg.palette.white
+    height: CmnCfg.convoHeight
 
     // prevent animation spill over
     clip: true
@@ -31,20 +30,18 @@ Rectangle {
         right: parent.right
     }
 
-    Common.EntityBlock {
-        id: entityBlock
-        anchors.leftMargin: CmnCfg.smallMargin
-        anchors.rightMargin: CmnCfg.smallMargin
+    Common.PlatonicRectangle {
+        id: convoRectangle
+        boxTitle: itemTitle
+        boxColor: contactItem.colorCode
+        picture: imageSource
+        isGroupPicture: contactItem.isGroup
+        isMessageResult: false
 
-        entityName: convoTitle
-        subLabelText: convContent.messages.lastBody
-        timestamp: convContent.messages.isEmpty ? "" : Utils.friendlyTimestamp(
-                                                      convContent.messages.lastTime)
-        lastReceipt: convContent.messages.lastStatus
-                     === undefined ? 0 : convContent.messages.lastStatus
-        color: CmnCfg.avatarColors[contactItem.colorCode]
-        isGroup: contactItem.isGroup
-        pfpPath: imageSource
+        labelComponent: Ent.ConversationLabel {
+            convoTitle: itemTitle
+            cc: convContent ? convContent : null
+        }
     }
 
     // background item which gets manipulated
@@ -89,7 +86,7 @@ Rectangle {
         ChatView.ChatViewMain {
             property string stateName: "chat"
             ownedMessages: contactItem.convContent.messages
-            headerTitle: convoTitle
+            headerTitle: itemTitle
         }
     }
 

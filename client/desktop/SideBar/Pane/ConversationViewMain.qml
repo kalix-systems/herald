@@ -65,8 +65,15 @@ ListView {
             }
         }
 
-        visible: !archiveView ? conversationData.matched
-                                && conversationData.status !== 1 : conversationData.status === 1
+        visible: {
+            if (sideBarState.state === "globalSearch") {
+                return conversationData.matched
+            }
+            if (!archiveView) {
+                return conversationData.matched && conversationData.status !== 1
+            }
+            return conversationData.status === 1
+        }
         height: visible ? CmnCfg.convoHeight : 0
         width: parent.width
 
@@ -80,9 +87,10 @@ ListView {
             labelComponent: Ent.ConversationLabel {
                 cc: convContent
                 convoTitle: title
-                labelColor: convoRectangle.state !== "" ? CmnCfg.palette.black : CmnCfg.palette.lightGrey
+                labelColor: convoRectangle.state
+                            !== "" ? CmnCfg.palette.black : CmnCfg.palette.lightGrey
                 minorTextColor: convoRectangle.state
-                                     !== "" ? CmnCfg.palette.offBlack : CmnCfg.palette.medGrey
+                                !== "" ? CmnCfg.palette.offBlack : CmnCfg.palette.medGrey
             }
 
             MouseArea {
