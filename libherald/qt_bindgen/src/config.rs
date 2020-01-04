@@ -86,24 +86,30 @@ fn herald() -> Object {
         mut registerNewUser(user_id: QString, addr: QString, port: QString) => Void,
         mut login() => Bool,
         mut setAppLocalDataDir(path: QString) => Void,
+        mut pollUpdate() => Void,
+    };
+
+    let hooks = signals! {
+        tryPoll(),
+        | connect tryPoll pollUpdate
     };
 
     obj! {
-        Herald: Obj::new().props(properties).funcs(funcs).list()
+        Herald: Obj::new().props(properties).funcs(funcs).hooks(hooks)
     }
 }
 
 fn errors() -> Object {
-    let properties = props! {
-        tryPoll:  Prop::new().simple(Bool)
-    };
-
     let functions = functions! {
         mut nextError() => QString,
     };
 
+    let hooks = signals! {
+       newError(), |
+    };
+
     obj! {
-        Errors: Obj::new().props(properties).funcs(functions)
+        Errors: Obj::new().funcs(functions).hooks(hooks)
     }
 }
 

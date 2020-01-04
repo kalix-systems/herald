@@ -4,7 +4,6 @@ use std::collections::VecDeque;
 /// Errors
 pub struct Errors {
     emit: Emitter,
-    try_poll: bool,
     errors: VecDeque<String>,
 }
 
@@ -12,13 +11,8 @@ impl Interface for Errors {
     fn new(emit: Emitter) -> Self {
         Errors {
             emit,
-            try_poll: false,
             errors: VecDeque::new(),
         }
-    }
-
-    fn try_poll(&self) -> bool {
-        self.try_poll
     }
 
     fn next_error(&mut self) -> String {
@@ -35,8 +29,7 @@ impl Errors {
         &mut self,
         error: String,
     ) {
-        self.try_poll = !self.try_poll;
         self.errors.push_front(error);
-        self.emit.try_poll_changed();
+        self.emit.new_error();
     }
 }
