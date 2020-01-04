@@ -6,28 +6,28 @@ import LibHerald 1.0
 import "../../../common" as CMN
 import "qrc:/imports" as Imports
 
-ColumnLayout {
+GridLayout {
+    columns: 2
+    rows: 1
+    columnSpacing: 0
 
-    RowLayout {
+    Imports.StandardLabel {
+        text: qsTr("Theme")
+        color: "black"
+        font: CmnCfg.defaultFont
+        Layout.leftMargin: CmnCfg.defaultMargin
         Layout.fillWidth: true
-        Imports.StandardLabel {
-            text: qsTr("Theme")
-            color: "black"
-            Layout.leftMargin: CmnCfg.defaultMargin
-            font.pixelSize: CmnCfg.chatTextSize
-        }
+    }
 
-        Item {
-            Layout.fillWidth: true
-        }
+    Column {
+        spacing: CmnCfg.microMargin
+        Layout.rightMargin: CmnCfg.megaMargin
 
         ConfRadio {
-            Layout.alignment: Qt.AlignRight
             text: qsTr("Dark")
         }
 
         ConfRadio {
-            Layout.alignment: Qt.AlignRight
             text: qsTr("Light")
             checked: true
         }
@@ -37,5 +37,7 @@ ColumnLayout {
         color: CmnCfg.palette.darkGrey
         height: 1
         Layout.fillWidth: true
+        Layout.columnSpan: 2
     }
+
 }

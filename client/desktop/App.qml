@@ -42,6 +42,7 @@ Item {
         onTriggered: refreshTime()
     }
 
+
     Loader {
         id: messageInfoLoader
         width: active ? chatView.width : 0

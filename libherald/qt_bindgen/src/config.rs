@@ -2,6 +2,7 @@ use builders::func::*;
 use builders::item_prop::*;
 use builders::obj::*;
 use builders::prop::*;
+use builders::sig::*;
 use riqtshaw::{
     builders,
     configuration::{SimpleType::*, *},
@@ -186,8 +187,17 @@ fn conversation_content() -> Object {
         conversationId: conv_id_prop()
     };
 
+    let funcs = functions! {
+        mut pollUpdate() => Void,
+    };
+
+    let hooks = signals! {
+        tryPoll(),
+        | connect tryPoll pollUpdate
+    };
+
     obj! {
-        ConversationContent: Obj::new().props(props).list()
+        ConversationContent: Obj::new().props(props).funcs(funcs).hooks(hooks)
     }
 }
 

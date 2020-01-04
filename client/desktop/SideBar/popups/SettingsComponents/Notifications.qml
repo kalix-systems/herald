@@ -13,7 +13,7 @@ GridLayout {
         text: qsTr("Notifications Enabled")
         color: "black"
         Layout.leftMargin: CmnCfg.defaultMargin
-        font.pixelSize: CmnCfg.chatTextSize
+        font: CmnCfg.defaultFont
     }
 
     ConfSwitch {
@@ -31,7 +31,7 @@ GridLayout {
         text: qsTr("Silent")
         color: "black"
         Layout.leftMargin: CmnCfg.defaultMargin
-        font.pixelSize: CmnCfg.chatTextSize
+        font: CmnCfg.defaultFont
     }
 
     ConfSwitch {
@@ -49,7 +49,7 @@ GridLayout {
         text: qsTr("Show author in notification")
         color: "black"
         Layout.leftMargin: CmnCfg.defaultMargin
-        font.pixelSize: CmnCfg.chatTextSize
+        font: CmnCfg.defaultFont
     }
 
     ConfSwitch {
@@ -67,7 +67,7 @@ GridLayout {
         text: qsTr("Show message body in notification")
         color: CmnCfg.palette.black
         Layout.leftMargin: CmnCfg.defaultMargin
-        font.pixelSize: CmnCfg.chatTextSize
+        font: CmnCfg.defaultFont
     }
 
     ConfSwitch {

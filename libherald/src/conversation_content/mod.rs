@@ -1,10 +1,7 @@
 use crate::{
     err, ffi,
     imp::{Members, Messages},
-    interface::{
-        ConversationContentEmitter as Emitter, ConversationContentList as List,
-        ConversationContentTrait as Interface,
-    },
+    interface::{ConversationContentEmitter as Emitter, ConversationContentTrait as Interface},
     members::MemberUpdate,
     none,
 };
@@ -25,7 +22,6 @@ pub struct ConversationContent {
 impl Interface for ConversationContent {
     fn new(
         emit: Emitter,
-        _: List,
         members: Members,
         messages: Messages,
     ) -> Self {
@@ -61,11 +57,7 @@ impl Interface for ConversationContent {
         }
     }
 
-    fn can_fetch_more(&self) -> bool {
-        self.id.as_ref().map(shared::more_updates).unwrap_or(false)
-    }
-
-    fn fetch_more(&mut self) {
+    fn poll_update(&mut self) {
         none!(self.process_updates());
     }
 
@@ -83,9 +75,5 @@ impl Interface for ConversationContent {
 
     fn messages_mut(&mut self) -> &mut Messages {
         &mut self.messages
-    }
-
-    fn row_count(&self) -> usize {
-        0
     }
 }

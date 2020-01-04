@@ -70,5 +70,6 @@
         <file>FileDialogWrapper.qml</file>
         <file>Entity/ContactLabel.qml</file>
         <file>ChatBubble/ReplyBubble/dyn/ReplyExpireInfo.qml</file>
+        <file>TextButton.qml</file>
     </qresource>
 </RCC>

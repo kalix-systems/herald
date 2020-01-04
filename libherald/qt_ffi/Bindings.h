@@ -175,24 +175,7 @@ struct ConversationContentPtrBundle {
   void (*messages_end_move_rows)(Messages *);
   void (*messages_begin_remove_rows)(Messages *, int, int);
   void (*messages_end_remove_rows)(Messages *);
-
-  void (*conversation_content_new_data_ready)(const ConversationContent *);
-  void (*conversation_content_layout_about_to_be_changed)(
-      ConversationContent *);
-  void (*conversation_content_layout_changed)(ConversationContent *);
-  void (*conversation_content_data_changed)(ConversationContent *, quintptr,
-                                            quintptr);
-  void (*conversation_content_begin_reset_model)(ConversationContent *);
-  void (*conversation_content_end_reset_model)(ConversationContent *);
-  void (*conversation_content_begin_insert_rows)(ConversationContent *, int,
-                                                 int);
-  void (*conversation_content_end_insert_rows)(ConversationContent *);
-  void (*conversation_content_begin_move_rows)(ConversationContent *, int, int,
-                                               int);
-  void (*conversation_content_end_move_rows)(ConversationContent *);
-  void (*conversation_content_begin_remove_rows)(ConversationContent *, int,
-                                                 int);
-  void (*conversation_content_end_remove_rows)(ConversationContent *);
+  void (*conversation_content_tryPoll)(const ConversationContent *);
 };
 struct ConversationsPtrBundle {
   Conversations *conversations;
@@ -753,7 +736,7 @@ private:
 Q_SIGNALS:
   void pictureChanged();
 };
-class ConversationContent : public QAbstractItemModel {
+class ConversationContent : public QObject {
   Q_OBJECT
   friend class Config;
   friend class ConversationBuilder;
@@ -794,43 +777,12 @@ public:
   Members *members();
   const Messages *messages() const;
   Messages *messages();
-  int columnCount(const QModelIndex &parent = QModelIndex()) const override;
-  QVariant data(const QModelIndex &index,
-                int role = Qt::DisplayRole) const override;
-  QModelIndex index(int row, int column,
-                    const QModelIndex &parent = QModelIndex()) const override;
-  QModelIndex parent(const QModelIndex &index) const override;
-  bool hasChildren(const QModelIndex &parent = QModelIndex()) const override;
-  int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-  bool canFetchMore(const QModelIndex &parent) const override;
-  void fetchMore(const QModelIndex &parent) override;
-  Qt::ItemFlags flags(const QModelIndex &index) const override;
-  void sort(int column, Qt::SortOrder order = Qt::AscendingOrder) override;
-  int role(const char *name) const;
-  QHash<int, QByteArray> roleNames() const override;
-  QVariant headerData(int section, Qt::Orientation orientation,
-                      int role = Qt::DisplayRole) const override;
-  bool setHeaderData(int section, Qt::Orientation orientation,
-                     const QVariant &value, int role = Qt::EditRole) override;
-  Q_INVOKABLE bool
-  insertRows(int row, int count,
-             const QModelIndex &parent = QModelIndex()) override;
-  Q_INVOKABLE bool
-  removeRows(int row, int count,
-             const QModelIndex &parent = QModelIndex()) override;
-
-Q_SIGNALS:
-  // new data is ready to be made available to the model with fetchMore()
-  void newDataReady(const QModelIndex &parent) const;
-
-private:
-  QHash<QPair<int, Qt::ItemDataRole>, QVariant> m_headerData;
-  void initHeaderData();
-  void updatePersistentIndexes();
+  Q_INVOKABLE void pollUpdate();
 Q_SIGNALS:
   void conversationIdChanged();
   void membersChanged();
   void messagesChanged();
+  void tryPoll() const;
 };
 class Conversations : public QAbstractItemModel {
   Q_OBJECT

@@ -10,6 +10,7 @@ Rectangle {
     property var model: ["no", "model", "defined"]
     property string currentItem: model[0]
     property var onSelected: function () {}
+    property font labelFont: CmnCfg.defaultFont
 
     width: 100
     height: 40
@@ -38,35 +39,27 @@ Rectangle {
 
     MouseArea {
         anchors.fill: parent
+        cursorShape: Qt.PointingHandCursor
         onClicked: nativeMenu.open()
     }
 
     Row {
         anchors.fill: parent
-        spacing: CmnCfg.defaultMargin
+        spacing: CmnCfg.units.dp(2)
+
         Label {
             text: currentItem
             anchors.verticalCenter: parent.verticalCenter
-            font.family: CmnCfg.labelFont.name
-            font.pixelSize: CmnCfg.headerFontSize
+            font: self.labelFont
+            //font.family: CmnCfg.labelFont.name
+            //font.pixelSize: CmnCfg.headerFontSize
         }
 
-        //TODO: use an SVG image here
-        Canvas {
-            id: canvas
+        Image {
+            source: "qrc:/dropdown-arrow-icon.svg"
+            width: 20
+            height: 20
             anchors.verticalCenter: parent.verticalCenter
-            width: 12
-            height: 8
-            contextType: "2d"
-            Component.onCompleted: requestPaint()
-            onPaint: {
-                context.reset()
-                context.moveTo(0, 0)
-                context.lineTo(width, 0)
-                context.lineTo(width / 2, height)
-                context.closePath()
-                context.fill()
-            }
         }
     }
 }
