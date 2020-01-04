@@ -1,7 +1,7 @@
 import QtQuick 2.13
 import QtQuick.Controls 2.13
 import LibHerald 1.0
-import "qrc:/imports/Entity"
+import "qrc:/imports/Entity" as Ent
 import "qrc:/imports/js/utils.mjs" as Utils
 import "../ChatView" as ChatView
 
@@ -21,6 +21,7 @@ Rectangle {
     // value of latest read receipt according to the ReceiptStatus enum
     property int lastReceipt
     // the index corresponding to the visual color of this entity
+    // TODO not used
     property string color
 
     property real topTextMargin: CmnCfg.units.dp(8)
@@ -28,43 +29,60 @@ Rectangle {
     property bool isGroup: false
 
     color: CmnCfg.palette.white
-    height: itemAvatar.size + 2 * CmnCfg.smallMargin
+    height: CmnCfg.avatarSize
 
     anchors {
         left: parent.left
         right: parent.right
     }
 
-    Avatar {
-        id: itemAvatar
-        anchors {
-            left: parent.left
-            verticalCenter: parent.verticalCenter
-        }
-        color: entityItem.color
-        initials: Utils.initialize(entityName)
-        size: CmnCfg.units.dp(48)
-        isGroup: entityItem.isGroup
-        pfpPath: entityItem.pfpPath
-    }
+    PlatonicRectangle {
+        boxTitle: entityName
+        boxColor: 0 //color
+        picture: pfpPath
+        isGroupPicture: isGroup
+        isMessageResult: false
 
-    ConversationLabel {
-        convoTitle: entityName
-        cc: convContent ? convContent : null
-        labelFontSize: CmnCfg.labelFontSize
-        // TODO setting lastBody below is necessary to keep EntityBlock working
-        // to represent contacts; once that's not the case, get rid of this line
-        lastBody: subLabelText
-
-        anchors {
-            left: itemAvatar.right
-            right: parent.right
-            top: parent.top
-            bottom: parent.bottom
-            leftMargin: CmnCfg.defaultMargin
-            topMargin: topTextMargin
-            bottomMargin: bottomTextMargin
-
+        labelComponent: Ent.ConversationLabel {
+            convoTitle: entityName
+            cc: convContent ? convContent : null
+            labelFontSize: CmnCfg.labelFontSize
+            // TODO setting lastBody below is necessary to keep EntityBlock working
+            // to represent contacts; once that's not the case, get rid of this line
+            lastBody: subLabelText
         }
     }
+
+//    Ent.Avatar {
+//        id: itemAvatar
+//        anchors {
+//            left: parent.left
+//            verticalCenter: parent.verticalCenter
+//        }
+//        color: entityItem.color
+//        initials: Utils.initialize(entityName)
+//        size: CmnCfg.units.dp(48)
+//        isGroup: entityItem.isGroup
+//        pfpPath: entityItem.pfpPath
+//    }
+
+//    Ent.ConversationLabel {
+//        convoTitle: entityName
+//        cc: convContent ? convContent : null
+//        labelFontSize: CmnCfg.labelFontSize
+//        // TODO setting lastBody below is necessary to keep EntityBlock working
+//        // to represent contacts; once that's not the case, get rid of this line
+//        lastBody: subLabelText
+
+//        anchors {
+//            left: itemAvatar.right
+//            right: parent.right
+//            top: parent.top
+//            bottom: parent.bottom
+//            leftMargin: CmnCfg.defaultMargin
+//            topMargin: topTextMargin
+//            bottomMargin: bottomTextMargin
+
+//        }
+//    }
 }

@@ -76,6 +76,8 @@ Item {
     readonly property real identityAvatarDiameter: units.dp(30)
     /// standard avatar size
     readonly property real avatarSize: units.dp(56)
+    /// standard conversation/contact height
+    readonly property int convoHeight: 56
 
     /// width of chat bubble left accent bar
     readonly property int accentBarWidth: 4

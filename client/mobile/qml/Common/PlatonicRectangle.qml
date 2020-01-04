@@ -9,7 +9,6 @@ import "qrc:/imports/Entity"
 // conversations lists, search results, and contact selection autocompletion
 Rectangle {
     id: bgBox
-    color: CmnCfg.palette.offBlack
     anchors.fill: parent
     property alias conversationItemAvatar: itemAvatar
     property string boxTitle
@@ -18,8 +17,8 @@ Rectangle {
     property string picture
     property bool isGroupPicture: false
     property bool isMessageResult: false
-    property int topTextMargin: CmnCfg.smallMargin
-    property int bottomTextMargin: isMessageResult ? CmnCfg.smallMargin : CmnCfg.defaultMargin
+    property int topTextMargin: CmnCfg.defaultMargin
+    property int bottomTextMargin: isMessageResult ? CmnCfg.smallMargin : CmnCfg.largeMargin
 
     Avatar {
         id: itemAvatar
