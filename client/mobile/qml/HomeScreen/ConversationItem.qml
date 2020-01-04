@@ -19,7 +19,7 @@ Rectangle {
     // asdf
     property ConversationContent convContent: null
 
-    height: CmnCfg.convoHeight //entityBlock.height
+    height: CmnCfg.convoHeight
     color: CmnCfg.palette.white
 
     // prevent animation spill over

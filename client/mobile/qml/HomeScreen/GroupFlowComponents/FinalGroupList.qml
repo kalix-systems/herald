@@ -16,16 +16,19 @@ ListView {
     model: Herald.conversationBuilder
 
     delegate: Rectangle {
-        height: entityBlock.height
+        height: visible ? CmnCfg.convoHeight : 0
         width: parent.width
 
-        EntityBlock {
-            id: entityBlock
-            entityName: Herald.users.nameById(memberId)
-            subLabelText: '@' + memberId
-            color: CmnCfg.palette.avatarColors[Herald.users.colorById(
-                                                   memberId)]
-            // TODO pfpPath
+        PlatonicRectangle {
+            id: contactRect
+            boxColor: memberColor
+            boxTitle: memberName
+            picture: memberProfilePicture
+
+            labelComponent: ContactLabel {
+                displayName: Herald.users.nameById(memberId)
+                username: memberId
+            }
         }
 
         AnimIconButton {

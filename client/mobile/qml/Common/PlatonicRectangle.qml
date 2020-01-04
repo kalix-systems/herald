@@ -18,7 +18,7 @@ Rectangle {
     property bool isGroupPicture: false
     property bool isMessageResult: false
     property int topTextMargin: CmnCfg.defaultMargin
-    property int bottomTextMargin: isMessageResult ? CmnCfg.smallMargin : CmnCfg.largeMargin
+    property int bottomTextMargin: isMessageResult ? CmnCfg.smallMargin : CmnCfg.units.dp(20)
 
     Avatar {
         id: itemAvatar
@@ -28,7 +28,7 @@ Rectangle {
             leftMargin: CmnCfg.smallMargin
         }
         color: CmnCfg.avatarColors[boxColor]
-        initials: boxTitle[0].toUpperCase()
+        initials: Utils.initialize(boxTitle)
         pfpPath: Utils.safeStringOrDefault(picture)
         isGroup: isGroupPicture
     }
@@ -40,10 +40,10 @@ Rectangle {
             rightMargin: CmnCfg.defaultMargin
             topMargin: topTextMargin
             bottomMargin: bottomTextMargin
-            left: itemAvatar.right
-            right: parent.right
             top: parent.top
             bottom: parent.bottom
+            left: itemAvatar.right
+            right: parent.right
         }
         sourceComponent: bgBox.labelComponent
     }
