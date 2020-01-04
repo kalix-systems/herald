@@ -15,7 +15,7 @@ import QtQuick.Shapes 1.12
 Popup {
     id: convoSettingsPopup
     property var convoData: parent.convoData
-    property var contactMember: parent.convoMembers[0]
+    property var convoMembers: parent.convoMembers
 
     padding: 0
     height: chatView.height
@@ -36,7 +36,7 @@ Popup {
         fill: CmnCfg.palette.white
         onClicked: {
             convoSettingsPopup.close()
-            convoSettingsPopup.active = false
+            convoSettingsLoader.active = false
         }
         z: header.z + 1
     }
@@ -72,32 +72,44 @@ Popup {
         anchors.top: header.bottom
         anchors.bottom: parent.bottom
         contentWidth: width
-        contentHeight: wrapperCol.height
+        contentHeight: contactList.height
         clip: true
         ScrollBar.vertical: ScrollBar {}
         boundsBehavior: Flickable.StopAtBounds
-        Column {
-            id: wrapperCol
-            width: parent.width - CmnCfg.smallMargin * 2
-            anchors.horizontalCenter: parent.horizontalCenter
-            spacing: CmnCfg.smallMargin
-            padding: CmnCfg.smallMargin
-
-            Common.PlatonicRectangle {
-                boxTitle: contactMember.name
-                boxColor: contactMember.color
-                picture: Utils.safeStringOrDefault(memberData.picture, "")
-                color: CmnCfg.palette.white
-                labelComponent: Entity.ConversationLabel {
-                    contactName: contactMember.name
-                    lastBody: "@" + contactMember.userId
-                    labelColor: CmnCfg.palette.black
-                    secondaryLabelColor: CmnCfg.palette.darkGrey
-                    labelFontSize: CmnCfg.entityLabelSize
+        anchors.topMargin: CmnCfg.smallMargin
+        ListView {
+            id: contactList
+            height: 60
+            width: parent.width
+            model: convoMembers
+            delegate: Item {
+                width: parent.width
+                property var contactMember: model
+                height: visible ? 60 : 0
+                visible: contactMember.userId !== Herald.config.configId
+                Entity.Avatar {
+                    id: itemAvatar
+                    anchors {
+                        left: parent.left
+                        verticalCenter: parent.verticalCenter
+                        leftMargin: CmnCfg.smallMargin
+                    }
+                    color: CmnCfg.avatarColors[contactMember.color]
+                    initials: contactMember.name[0].toUpperCase()
+                    pfpPath: Utils.safeStringOrDefault(contactMember.picture)
+                    size: 60
                 }
-                states: []
-                MouseArea {
-                    id: hoverHandler
+
+                Entity.ContactLabel {
+                    anchors.left: itemAvatar.right
+                    anchors.leftMargin: CmnCfg.megaMargin
+                    anchors.fill: undefined
+                    anchors.verticalCenter: itemAvatar.verticalCenter
+                    displayNameSize: CmnCfg.headerFontSize
+                    width: 60
+                    displayName: contactMember.name
+                    username: contactMember.userId
+                    height: 40
                 }
             }
         }

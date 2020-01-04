@@ -65,25 +65,22 @@ Item {
         anchors.right: active ? parent.right : undefined
         property var convoData
         property var convoMembers
+        property bool group
         active: false
-        sourceComponent: CvPopups.GroupSettingsPopup {
+        sourceComponent: group ? groupSettings : convoSettings
+
+        Component {
             id: groupSettings
+            CvPopups.GroupSettingsPopup {}
+        }
+
+        Component {
+
+            id: convoSettings
+            CvPopups.ConvoSettingsPopup {}
         }
     }
 
-    Loader {
-        id: convoSettingsLoader
-        width: active ? chatView.width : 0
-        height: active ? chatView.height : 0
-        anchors.top: active ? parent.top : undefined
-        anchors.right: active ? parent.right : undefined
-        property var convoData
-        property var contactMember
-        active: false
-        sourceComponent: CvPopups.ConvoSettingsPopup {
-            id: convoSettings
-        }
-    }
     Popups.ColorPicker {
         id: avatarColorPicker
     }

@@ -137,17 +137,14 @@ ToolBar {
                         //for now only group conversation settings, they are going to be separate components
                         onTriggered: {
                             if (!conversationItem.pairwise) {
-                                groupSettingsLoader.convoData = conversationItem
-                                groupSettingsLoader.convoMembers = conversationMembers
-                                groupSettingsLoader.active = true
-                                groupSettingsLoader.item.open()
+                                groupSettingsLoader.group = true
                             } else {
-
-                                convoSettingsLoader.convoData = conversationItem
-                                convoSettingsLoader.convoMembers = conversationMembers
-                                convoSettingsLoader.active = true
-                                convoSettingsLoader.item.open()
+                                groupSettingsLoader.group = false
                             }
+                            groupSettingsLoader.convoData = conversationItem
+                            groupSettingsLoader.convoMembers = conversationMembers
+                            groupSettingsLoader.active = true
+                            groupSettingsLoader.item.open()
                         }
                     }
                 }
