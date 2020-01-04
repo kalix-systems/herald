@@ -150,6 +150,7 @@ Item {
 
         Loader {
             id: chatView
+            property var currentConvoId
             sourceComponent: splash
         }
 

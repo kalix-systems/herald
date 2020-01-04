@@ -105,6 +105,7 @@ ListView {
                                            ) : unarchiveMenu.open()
                     } else {
                         chatView.sourceComponent = childChatView
+                        chatView.currentConvoId = conversationData.conversationId
                         conversationList.currentIndex = index
                     }
                 }
@@ -119,7 +120,15 @@ ListView {
 
             MenuItem {
                 text: "Archive"
-                onTriggered: conversationData.status = 1
+                onTriggered: {
+                    conversationData.status = 1
+                    if (Herald.utils.compareByteArray(
+                                chatView.currentConvoId,
+                                conversationData.conversationId)) {
+                        chatView.sourceComponent = splash
+                        chatView.currentConvoId = undefined
+                    }
+                }
             }
         }
         Menu {
