@@ -12,6 +12,7 @@ use heraldcore::{
 };
 use std::{convert::TryInto, path::PathBuf};
 
+mod helper_trait_imp;
 mod imp;
 pub(super) use imp::*;
 

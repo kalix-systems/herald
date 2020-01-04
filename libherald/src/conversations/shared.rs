@@ -40,18 +40,12 @@ pub enum ConvItemUpdateVariant {
     PictureChanged(Option<String>),
     /// Conversation title has been changed
     TitleChanged(Option<String>),
-    /// Conversation color has been changed
-    ColorChanged(u32),
 }
 
 impl From<(ConversationId, CoreSettingsUpdate)> for crate::Update {
     fn from((cid, update): (ConversationId, CoreSettingsUpdate)) -> Self {
         use ConvItemUpdateVariant::*;
         let update = match update {
-            CoreSettingsUpdate::Color(color) => ConvItemUpdate {
-                cid,
-                variant: ColorChanged(color),
-            },
             CoreSettingsUpdate::Expiration(period) => ConvItemUpdate {
                 cid,
                 variant: ExpirationChanged(period),

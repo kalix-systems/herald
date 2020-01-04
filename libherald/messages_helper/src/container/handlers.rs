@@ -1,12 +1,12 @@
 use super::*;
 
 impl Container {
-    pub fn handle_receipt<F: FnMut(usize)>(
+    pub fn handle_receipt<M: MessageModel>(
         &self,
         mid: MsgId,
         status: MessageReceiptStatus,
         recipient: UserId,
-        mut data_changed: F,
+        model: &mut M,
     ) -> Option<()> {
         let res = update(&mid, |msg| {
             msg.receipts
@@ -30,22 +30,18 @@ impl Container {
             // it's probably fairly recent
             .rposition(|m| m.msg_id == mid)?;
 
-        data_changed(ix);
+        model.entry_changed(ix);
 
         Some(())
     }
 
-    pub fn handle_store_done<D, L>(
+    pub fn handle_store_done<E: MessageEmit, M: MessageModel>(
         &mut self,
         mid: MsgId,
         meta: herald_attachments::AttachmentMeta,
-        mut data_changed: D,
-        mut last_has_attachments_changed: L,
-    ) -> Option<()>
-    where
-        D: FnMut(usize),
-        L: FnMut(),
-    {
+        emit: &mut E,
+        model: &mut M,
+    ) -> Option<()> {
         if meta.is_empty() {
             return Some(());
         }
@@ -70,19 +66,19 @@ impl Container {
             // it's probably very recent
             .rposition(|m| m.msg_id == mid)?;
 
-        data_changed(ix);
+        model.entry_changed(ix);
 
         if ix == 0 {
-            last_has_attachments_changed();
+            emit.last_has_attachments_changed();
         }
 
         Some(())
     }
 
-    pub fn handle_send_done<F: FnMut(usize)>(
+    pub fn handle_send_done<M: MessageModel>(
         &self,
         mid: MsgId,
-        mut data_changed: F,
+        model: &mut M,
     ) -> Option<()> {
         update(&mid, move |data| {
             data.send_status = heraldcore::message::MessageSendStatus::Ack;
@@ -95,18 +91,18 @@ impl Container {
             // it's probably very recent
             .rposition(|m| m.msg_id == mid)?;
 
-        data_changed(ix);
+        model.entry_changed(ix);
 
         Some(())
     }
 
-    pub fn handle_reaction<F: FnMut(usize)>(
+    pub fn handle_reaction<M: MessageModel>(
         &self,
         mid: MsgId,
         reactionary: UserId,
         reaction: heraldcore::message::ReactContent,
         remove: bool,
-        mut data_changed: F,
+        model: &mut M,
     ) -> Option<()> {
         update(&mid, move |data| {
             if data.reactions.is_none() {
@@ -129,8 +125,23 @@ impl Container {
             // it's probably very recent
             .rposition(|m| m.msg_id == mid)?;
 
-        data_changed(ix);
+        model.entry_changed(ix);
 
         Some(())
+    }
+
+    pub fn handle_expiration<E: MessageEmit, M: MessageModel, B: MessageBuilderHelper>(
+        &mut self,
+        mids: Vec<MsgId>,
+        emit: &mut E,
+        model: &mut M,
+        search: &mut SearchState,
+        builder: &mut B,
+    ) {
+        for mid in mids {
+            if let Some(ix) = self.index_by_id(mid) {
+                self.remove_helper(mid, ix, emit, model, search, builder);
+            }
+        }
     }
 }

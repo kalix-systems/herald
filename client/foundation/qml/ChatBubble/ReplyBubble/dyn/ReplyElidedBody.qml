@@ -8,6 +8,7 @@ import LibHerald 1.0
 GridLayout {
     property real maximumWidth
     property real elideConstraint: 0
+    property alias text: opBodyTextMetrics.text
 
     Text {
         id: _innerTextEdit
@@ -19,7 +20,7 @@ GridLayout {
         Layout.alignment: Qt.AlignLeft
         font.family: CmnCfg.chatFont.name
         color: CmnCfg.palette.black
-        textFormat: TextEdit.AutoText
+        textFormat: Text.StyledText
 
         TextMetrics {
             id: opBodyTextMetrics

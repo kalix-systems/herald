@@ -92,16 +92,19 @@ export function friendlyTimestamp(msEpochTime: number): string {
   return months[monthNum] + " " + dateNum + " " + dt.getFullYear();
 }
 
-export function expireTimeShort(expireTime: number, insertTime: number): string {
+export function expireTimeShort(
+  expireTime: number,
+  insertTime: number
+): string {
   const secondsPerMinute = 60;
   const secondsPerHour = 3600;
   const secondsPerDay = 3600 * 24;
   const secondsPerWeek = 3600 * 24 * 7;
-  const secondsPerMonth = 3600 * 24 * 7 * 4
+  const secondsPerMonth = 3600 * 24 * 7 * 4;
   //using 7 * 4 * 12 instead of 365 because we want to not allow e.g. 13MO as a return
   const secondsPerYear = 3600 * 24 * 7 * 4 * 12;
 
-  const currentTime = Date.now()
+  const currentTime = Date.now();
 
   const diff = Math.round((expireTime - currentTime) / 1000);
 
@@ -118,19 +121,16 @@ export function expireTimeShort(expireTime: number, insertTime: number): string 
   }
 
   if (diff < secondsPerWeek) {
-    return Math.round(diff / secondsPerDay) + " D"
+    return Math.round(diff / secondsPerDay) + " D";
   }
 
   if (diff < secondsPerMonth) {
-
-    return Math.round(diff / secondsPerWeek) + " WK"
+    return Math.round(diff / secondsPerWeek) + " WK";
   }
   if (diff < secondsPerYear) {
-    return Math.round(diff / secondsPerMonth) + " MO"
+    return Math.round(diff / secondsPerMonth) + " MO";
   }
-  return Math.round(diff / secondsPerYear) + " Y"
-
-
+  return Math.round(diff / secondsPerYear) + " Y";
 }
 
 function isBoolean(maybeBool: unknown): boolean {
@@ -254,59 +254,65 @@ export function timerIcon(expireTime: number, insertTime: number): string {
 }
 
 export function userTime(timestamp: number): string {
-        var d = new Date(timestamp)
-        var year = d.getFullYear()
-        var month = ("0" + (d.getMonth() + 1)).slice(-2)
-        var day = ("0" + d.getDate()).slice(-2)
-        var hour = d.getHours()
-        var min = ("0" + d.getMinutes()).slice(-2)
-        var sec = ("0" + d.getSeconds()).slice(-2)
+  var d = new Date(timestamp);
+  var year = d.getFullYear();
+  var month = ("0" + (d.getMonth() + 1)).slice(-2);
+  var day = ("0" + d.getDate()).slice(-2);
+  var hour = d.getHours();
+  var min = ("0" + d.getMinutes()).slice(-2);
+  var sec = ("0" + d.getSeconds()).slice(-2);
 
-        var time = year + "-" + month + "-" + day + " " + hour + ":" + min + ":" + sec
+  var time =
+    year + "-" + month + "-" + day + " " + hour + ":" + min + ":" + sec;
 
-        return time
-    }
-
+  return time;
+}
 
 export function auxStringShort(code: number): string {
-
-    switch (code) {
-        case 0: return " set the expiration time"
-        case 1: return " set the group title"
-        case 2: return " set the color"
-        case 3: return " set the group picture"
-        default: return ""
-
-    }
+  switch (code) {
+    case AuxMessageCode.ExpirationChange:
+      return " set the expiration time";
+    case AuxMessageCode.TitleChange:
+      return " set the group title";
+    case AuxMessageCode.PictureChange:
+      return " set the group picture";
+    default:
+      return "";
+  }
 }
 
 export function auxString(code: number, content: string): string {
-
-    var expTime = ["off", "thirty seconds", "one minute", "thirty minutes", "one hour", "twelve hours", "one day", "one week", "one month", "one year"];
-switch (code) {
-
-    case 0: {
-        return " set the expiration time to " + expTime[Number(content)]
-        break;
-    }
-
-    case 1: {
-        return " set the group title to " + content
-        break;
-    }
-
-    case 2: {
-        return " set the color"
-        break;
-}
- case 3: {
-      return " set the group picture"
+  var expTime = [
+    "off",
+    "thirty seconds",
+    "one minute",
+    "thirty minutes",
+    "one hour",
+    "twelve hours",
+    "one day",
+    "one week",
+    "one month",
+    "one year"
+  ];
+  switch (code) {
+    case AuxMessageCode.ExpirationChange: {
+      return " set the expiration time to " + expTime[Number(content)];
       break;
- }
+    }
 
- default : {
-     return ""
-     break;
- }
-}
+    case AuxMessageCode.TitleChange: {
+      return " set the group title to " + content;
+      break;
+    }
+
+    case AuxMessageCode.PictureChange: {
+      return " set the group picture";
+      break;
+    }
+
+    default: {
+      return "";
+      break;
+    }
+  }
 }

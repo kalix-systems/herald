@@ -46,19 +46,9 @@ Rectangle {
         onClicked: builderData.clearReply()
     }
 
-    Rectangle {
-        id: accent
-        anchors.top: parent.top
-        anchors.bottom: parent.bottom
-
-        width: CmnCfg.accentBarWidth
-        color: CmnCfg.palette.darkGrey
-        anchors.left: parent.left
-    }
-
     Column {
         id: wrapperCol
-        anchors.left: accent.right
+        anchors.left: parent.left
         width: wrapper.width
 
         spacing: CmnCfg.smallMargin

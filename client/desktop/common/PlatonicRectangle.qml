@@ -10,20 +10,18 @@ import "qrc:/imports/Entity"
 // Shared rectangle for displaying contact and conversation items in sidebar
 // conversations lists, search results, and contact selection autocompletion
 Rectangle {
-    property alias conversationItemAvatar: itemAvatar
     id: bgBox
     color: CmnCfg.palette.offBlack
     anchors.fill: parent
+    property alias conversationItemAvatar: itemAvatar
     property string boxTitle
     property int boxColor
     property Component labelComponent
     property string picture
     property bool isGroupPicture: false
     property bool isMessageResult: false
-
     property int topTextMargin: CmnCfg.smallMargin
     property int bottomTextMargin: isMessageResult ? CmnCfg.smallMargin : CmnCfg.defaultMargin
-
 
     Avatar {
         id: itemAvatar

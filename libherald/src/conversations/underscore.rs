@@ -41,25 +41,6 @@ impl super::Conversations {
         none!(self.color_inner(index), 0)
     }
 
-    pub(crate) fn set_color_(
-        &mut self,
-        index: usize,
-        color: u32,
-    ) -> bool {
-        let cid = none!(self.id(index), false);
-
-        spawn!(
-            {
-                use heraldcore::conversation::*;
-                err!(set_color(&cid, color));
-            },
-            false
-        );
-
-        none!(self.set_color_inner(index, color), false);
-        true
-    }
-
     pub(crate) fn conversation_id_(
         &self,
         index: usize,

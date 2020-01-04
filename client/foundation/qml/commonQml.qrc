@@ -64,5 +64,9 @@
         <file>ChatBubble/ReplyBubble/ReplyFileClip.qml</file>
         <file>ChatBubble/AuxBubble.qml</file>
         <file>ChatBubble/ComposeReplyAuxComponent.qml</file>
+        <file>ChatBubble/ReplyBubble/ReplyAux.qml</file>
+        <file>Entity/MessageSearchLabel.qml</file>
+        <file>+android/FileDialogWrapper.qml</file>
+        <file>FileDialogWrapper.qml</file>
     </qresource>
 </RCC>

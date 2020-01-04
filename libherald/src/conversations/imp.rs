@@ -78,7 +78,6 @@ impl Conversations {
 
     set_imp! {
         set_muted_inner, muted, bool,
-        set_color_inner, color, u32,
         set_picture_inner, picture, Option<String>,
         set_expiration_inner, expiration_period, ExpirationPeriod,
         set_title_inner, title, Option<String>,

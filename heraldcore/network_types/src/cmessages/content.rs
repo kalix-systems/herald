@@ -45,8 +45,6 @@ pub enum GroupSettingsUpdate {
     Expiration(conversation::ExpirationPeriod),
     /// The title of the group
     Title(Option<String>),
-    /// The color of the group
-    Color(u32),
     /// The group picture, as a buffer
     Picture(Option<Vec<u8>>),
 }
