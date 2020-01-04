@@ -1884,6 +1884,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "ratchet_chat"
+version = "0.1.0"
+dependencies = [
+ "bytes 0.5.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "kcl 0.1.0",
+ "kson 0.1.0",
+]
+
+[[package]]
 name = "rcgen"
 version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"

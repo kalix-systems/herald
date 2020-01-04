@@ -21,9 +21,6 @@ new_type! {
 #[derive(Debug, Hash, Ser, De, Copy, Clone, Eq, PartialEq)]
 pub struct Tag(Mac, Nonce);
 
-#[must_use = "you should definitely check if the decryption was successful"]
-pub struct OpenSucceeded(pub bool);
-
 impl Key {
     pub fn new() -> Self {
         let mut buf = [0u8; KEY_LEN];
@@ -65,12 +62,13 @@ impl Key {
         Tag(Mac(mac_buf), Nonce(nonce_buf))
     }
 
+    #[must_use = "you should definitely check if the decryption was successful"]
     pub fn open(
         &self,
         ad: &[u8],
         tag: Tag,
         msg: &mut [u8],
-    ) -> OpenSucceeded {
+    ) -> bool {
         let Tag(mac, nonce) = tag;
 
         let res = unsafe {
@@ -87,6 +85,6 @@ impl Key {
             )
         };
 
-        OpenSucceeded(res == 0)
+        res == 0
     }
 }

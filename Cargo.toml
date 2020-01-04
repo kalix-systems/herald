@@ -30,6 +30,7 @@ members = [
   "libherald/messages_helper/revec",
   "libherald/qt_bindgen",
   "location",
+  "ratchet_chat",
   "search_pattern"
 ]
 
