@@ -41,6 +41,9 @@ RowLayout {
             id: searchButton
             color: CmnCfg.palette.iconFill
             imageSource: "qrc:/search-icon.svg"
+            onTapped: {
+                mainView.push(globalSearchView)
+            }
         }
 
         AnimIconButton {

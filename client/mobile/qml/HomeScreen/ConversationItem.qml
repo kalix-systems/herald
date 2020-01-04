@@ -20,7 +20,6 @@ Rectangle {
     property ConversationContent convContent: null
 
     height: CmnCfg.convoHeight
-    color: CmnCfg.palette.white
 
     // prevent animation spill over
     clip: true

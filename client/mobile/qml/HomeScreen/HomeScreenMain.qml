@@ -88,13 +88,6 @@ Page {
             name: "default"
         },
         State {
-            name: "search"
-            PropertyChanges {
-                target: listViewLoader
-            }
-        },
-
-        State {
             name: "fabButtonState"
             PropertyChanges {
                 target: disabledOverlay

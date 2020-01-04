@@ -33,7 +33,12 @@ ToolBar {
     }
 
     Component {
-        id: confHeader
+        id: globalSearchHeader
+        GlobalSearchHeader {}
+    }
+
+    Component {
+        id: settingsHeader
         SettingsHeader {}
     }
 
@@ -60,6 +65,7 @@ ToolBar {
                 sourceComponent: homeHeader
             }
         },
+
         State {
             name: "chat"
             PropertyChanges {
@@ -71,10 +77,20 @@ ToolBar {
                 title: mainView.currentItem.headerTitle
             }
         },
+
         State {
             name: "contacts"
             PropertyChanges {}
         },
+
+        State {
+            name: "globalSearch"
+            PropertyChanges {
+                target: rootLoader
+                sourceComponent: globalSearchHeader
+            }
+        },
+
         State {
             name: "newGroup"
             PropertyChanges {
@@ -82,6 +98,7 @@ ToolBar {
                 sourceComponent: newGroupHeader
             }
         },
+
         State {
             name: "newContact"
             PropertyChanges {
@@ -89,13 +106,15 @@ ToolBar {
                 sourceComponent: newContactHeader
             }
         },
+
         State {
             name: "config"
             PropertyChanges {
                 target: rootLoader
-                sourceComponent: confHeader
+                sourceComponent: settingsHeader
             }
         },
+
         State {
             name: "info"
             PropertyChanges {

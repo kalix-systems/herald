@@ -10,7 +10,7 @@
         <file>qml/Common/CommonConfig.qml</file>
         <file>qml/Common/Divider.qml</file>
         <file>qml/Common/AnimIconButton.qml</file>
-        <file>qml/SearchView/SearchViewMain.qml</file>
+        <file>qml/GlobalSearch/GlobalSearchMain.qml</file>
         <file>qml/LoginPage/Controls/LoginButton.qml</file>
         <file>qml/LoginPage/Controls/LoginField.qml</file>
         <file>qml/SettingsMenu/SettingsMenuMain.qml</file>
@@ -51,5 +51,6 @@
         <file>qml/ChatView/InfoPage.qml</file>
         <file>qml/Headers/MessageInfoHeader.qml</file>
         <file>qml/Common/PlatonicRectangle.qml</file>
+        <file>qml/Headers/GlobalSearchHeader.qml</file>
     </qresource>
 </RCC>
