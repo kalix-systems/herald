@@ -183,7 +183,8 @@ Popup {
                     width: 250
                     // TODO special-case Note to Self conversations so they
                     // don't have an empty recipient list
-                    visible: memberData.userId !== messageData.author
+                    visible: convoMembers.rowCount(
+                                 ) > 1 ? memberData.userId !== messageData.author : true
                     property var memberData: model
                     Common.PlatonicRectangle {
                         boxTitle: memberData.name
