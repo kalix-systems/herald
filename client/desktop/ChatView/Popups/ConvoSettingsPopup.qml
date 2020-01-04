@@ -36,7 +36,7 @@ Popup {
         fill: CmnCfg.palette.white
         onClicked: {
             convoSettingsPopup.close()
-            convoSettingsLoader.active = false
+            groupSettingsLoader.active = false
         }
         z: header.z + 1
     }
