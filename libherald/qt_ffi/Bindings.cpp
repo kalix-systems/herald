@@ -2959,7 +2959,9 @@ ConversationBuilder::ConversationBuilder(QObject *parent)
           [](ConversationBuilder *o, int first, int last) {
             o->beginRemoveRows(QModelIndex(), first, last);
           },
-          [](ConversationBuilder *o) { o->endRemoveRows(); }})),
+          [](ConversationBuilder *o) { o->endRemoveRows(); }
+
+      })),
       m_ownsPrivate(true) {
   connect(
       this, &ConversationBuilder::newDataReady, this,
@@ -3045,7 +3047,9 @@ ConversationContent::ConversationContent(QObject *parent)
           [](Members *o, int first, int last) {
             o->beginRemoveRows(QModelIndex(), first, last);
           },
-          [](Members *o) { o->endRemoveRows(); },
+          [](Members *o) { o->endRemoveRows(); }
+
+          ,
           m_messages,
           m_messages->m_builder,
           messageBuilderBodyChanged,
@@ -3076,7 +3080,9 @@ ConversationContent::ConversationContent(QObject *parent)
           [](DocumentAttachments *o, int first, int last) {
             o->beginRemoveRows(QModelIndex(), first, last);
           },
-          [](DocumentAttachments *o) { o->endRemoveRows(); },
+          [](DocumentAttachments *o) { o->endRemoveRows(); }
+
+          ,
           messageBuilderHasDocAttachmentChanged,
           messageBuilderHasMediaAttachmentChanged,
           messageBuilderIsReplyChanged,
@@ -3107,7 +3113,9 @@ ConversationContent::ConversationContent(QObject *parent)
           [](MediaAttachments *o, int first, int last) {
             o->beginRemoveRows(QModelIndex(), first, last);
           },
-          [](MediaAttachments *o) { o->endRemoveRows(); },
+          [](MediaAttachments *o) { o->endRemoveRows(); }
+
+          ,
           messageBuilderOpAuthorChanged,
           messageBuilderOpAuxContentChanged,
           messageBuilderOpBodyChanged,
@@ -3142,7 +3150,9 @@ ConversationContent::ConversationContent(QObject *parent)
           [](MessageBuilder *o, int first, int last) {
             o->beginRemoveRows(QModelIndex(), first, last);
           },
-          [](MessageBuilder *o) { o->endRemoveRows(); },
+          [](MessageBuilder *o) { o->endRemoveRows(); }
+
+          ,
           messagesIsEmptyChanged,
           messagesLastAuthorChanged,
           messagesLastAuxCodeChanged,
@@ -3179,7 +3189,9 @@ ConversationContent::ConversationContent(QObject *parent)
           [](Messages *o, int first, int last) {
             o->beginRemoveRows(QModelIndex(), first, last);
           },
-          [](Messages *o) { o->endRemoveRows(); },
+          [](Messages *o) { o->endRemoveRows(); }
+
+          ,
           [](const ConversationContent *o) {
             Q_EMIT o->newDataReady(QModelIndex());
           },
@@ -3206,7 +3218,9 @@ ConversationContent::ConversationContent(QObject *parent)
           [](ConversationContent *o, int first, int last) {
             o->beginRemoveRows(QModelIndex(), first, last);
           },
-          [](ConversationContent *o) { o->endRemoveRows(); }})),
+          [](ConversationContent *o) { o->endRemoveRows(); }
+
+      })),
       m_ownsPrivate(true) {
   m_members->m_d = conversation_content_members_get(m_d);
   m_messages->m_d = conversation_content_messages_get(m_d);
@@ -3312,7 +3326,9 @@ Conversations::Conversations(QObject *parent)
           [](Conversations *o, int first, int last) {
             o->beginRemoveRows(QModelIndex(), first, last);
           },
-          [](Conversations *o) { o->endRemoveRows(); }})),
+          [](Conversations *o) { o->endRemoveRows(); }
+
+      })),
       m_ownsPrivate(true) {
   connect(
       this, &Conversations::newDataReady, this,
@@ -3396,7 +3412,9 @@ DocumentAttachments::DocumentAttachments(QObject *parent)
           [](DocumentAttachments *o, int first, int last) {
             o->beginRemoveRows(QModelIndex(), first, last);
           },
-          [](DocumentAttachments *o) { o->endRemoveRows(); }})),
+          [](DocumentAttachments *o) { o->endRemoveRows(); }
+
+      })),
       m_ownsPrivate(true) {
   connect(
       this, &DocumentAttachments::newDataReady, this,
@@ -3454,7 +3472,9 @@ EmojiPicker::EmojiPicker(QObject *parent)
           [](EmojiPicker *o, int first, int last) {
             o->beginRemoveRows(QModelIndex(), first, last);
           },
-          [](EmojiPicker *o) { o->endRemoveRows(); }})),
+          [](EmojiPicker *o) { o->endRemoveRows(); }
+
+      })),
       m_ownsPrivate(true) {
   connect(
       this, &EmojiPicker::newDataReady, this,
@@ -3593,7 +3613,9 @@ Herald::Herald(QObject *parent)
           [](ConversationBuilder *o, int first, int last) {
             o->beginRemoveRows(QModelIndex(), first, last);
           },
-          [](ConversationBuilder *o) { o->endRemoveRows(); },
+          [](ConversationBuilder *o) { o->endRemoveRows(); }
+
+          ,
           m_conversations,
           conversationsFilterChanged,
           conversationsFilterRegexChanged,
@@ -3621,7 +3643,9 @@ Herald::Herald(QObject *parent)
           [](Conversations *o, int first, int last) {
             o->beginRemoveRows(QModelIndex(), first, last);
           },
-          [](Conversations *o) { o->endRemoveRows(); },
+          [](Conversations *o) { o->endRemoveRows(); }
+
+          ,
           m_errors,
           errorsTryPollChanged,
           m_messageSearch,
@@ -3651,7 +3675,9 @@ Herald::Herald(QObject *parent)
           [](MessageSearch *o, int first, int last) {
             o->beginRemoveRows(QModelIndex(), first, last);
           },
-          [](MessageSearch *o) { o->endRemoveRows(); },
+          [](MessageSearch *o) { o->endRemoveRows(); }
+
+          ,
           heraldRegistrationFailureCodeChanged,
           m_users,
           usersFilterChanged,
@@ -3680,7 +3706,9 @@ Herald::Herald(QObject *parent)
           [](Users *o, int first, int last) {
             o->beginRemoveRows(QModelIndex(), first, last);
           },
-          [](Users *o) { o->endRemoveRows(); },
+          [](Users *o) { o->endRemoveRows(); }
+
+          ,
           m_usersSearch,
           usersSearchFilterChanged,
           [](const UsersSearch *o) { Q_EMIT o->newDataReady(QModelIndex()); },
@@ -3707,7 +3735,9 @@ Herald::Herald(QObject *parent)
           [](UsersSearch *o, int first, int last) {
             o->beginRemoveRows(QModelIndex(), first, last);
           },
-          [](UsersSearch *o) { o->endRemoveRows(); },
+          [](UsersSearch *o) { o->endRemoveRows(); }
+
+          ,
           m_utils,
           [](const Herald *o) { Q_EMIT o->newDataReady(QModelIndex()); },
           [](Herald *o) { Q_EMIT o->layoutAboutToBeChanged(); },
@@ -3733,7 +3763,9 @@ Herald::Herald(QObject *parent)
           [](Herald *o, int first, int last) {
             o->beginRemoveRows(QModelIndex(), first, last);
           },
-          [](Herald *o) { o->endRemoveRows(); }})),
+          [](Herald *o) { o->endRemoveRows(); }
+
+      })),
       m_ownsPrivate(true) {
   m_config->m_d = herald_config_get(m_d);
   m_conversationBuilder->m_d = herald_conversation_builder_get(m_d);
@@ -3872,7 +3904,9 @@ MediaAttachments::MediaAttachments(QObject *parent)
           [](MediaAttachments *o, int first, int last) {
             o->beginRemoveRows(QModelIndex(), first, last);
           },
-          [](MediaAttachments *o) { o->endRemoveRows(); }})),
+          [](MediaAttachments *o) { o->endRemoveRows(); }
+
+      })),
       m_ownsPrivate(true) {
   connect(
       this, &MediaAttachments::newDataReady, this,
@@ -3921,7 +3955,9 @@ Members::Members(QObject *parent)
           [](Members *o, int first, int last) {
             o->beginRemoveRows(QModelIndex(), first, last);
           },
-          [](Members *o) { o->endRemoveRows(); }})),
+          [](Members *o) { o->endRemoveRows(); }
+
+      })),
       m_ownsPrivate(true) {
   connect(
       this, &Members::newDataReady, this,
@@ -3998,7 +4034,9 @@ MessageBuilder::MessageBuilder(QObject *parent)
           [](DocumentAttachments *o, int first, int last) {
             o->beginRemoveRows(QModelIndex(), first, last);
           },
-          [](DocumentAttachments *o) { o->endRemoveRows(); },
+          [](DocumentAttachments *o) { o->endRemoveRows(); }
+
+          ,
           messageBuilderHasDocAttachmentChanged,
           messageBuilderHasMediaAttachmentChanged,
           messageBuilderIsReplyChanged,
@@ -4029,7 +4067,9 @@ MessageBuilder::MessageBuilder(QObject *parent)
           [](MediaAttachments *o, int first, int last) {
             o->beginRemoveRows(QModelIndex(), first, last);
           },
-          [](MediaAttachments *o) { o->endRemoveRows(); },
+          [](MediaAttachments *o) { o->endRemoveRows(); }
+
+          ,
           messageBuilderOpAuthorChanged,
           messageBuilderOpAuxContentChanged,
           messageBuilderOpBodyChanged,
@@ -4064,7 +4104,9 @@ MessageBuilder::MessageBuilder(QObject *parent)
           [](MessageBuilder *o, int first, int last) {
             o->beginRemoveRows(QModelIndex(), first, last);
           },
-          [](MessageBuilder *o) { o->endRemoveRows(); }})),
+          [](MessageBuilder *o) { o->endRemoveRows(); }
+
+      })),
       m_ownsPrivate(true) {
   m_documentAttachments->m_d = message_builder_document_attachments_get(m_d);
   m_mediaAttachments->m_d = message_builder_media_attachments_get(m_d);
@@ -4240,7 +4282,9 @@ MessageSearch::MessageSearch(QObject *parent)
           [](MessageSearch *o, int first, int last) {
             o->beginRemoveRows(QModelIndex(), first, last);
           },
-          [](MessageSearch *o) { o->endRemoveRows(); }})),
+          [](MessageSearch *o) { o->endRemoveRows(); }
+
+      })),
       m_ownsPrivate(true) {
   connect(
       this, &MessageSearch::newDataReady, this,
@@ -4326,7 +4370,9 @@ Messages::Messages(QObject *parent)
           [](DocumentAttachments *o, int first, int last) {
             o->beginRemoveRows(QModelIndex(), first, last);
           },
-          [](DocumentAttachments *o) { o->endRemoveRows(); },
+          [](DocumentAttachments *o) { o->endRemoveRows(); }
+
+          ,
           messageBuilderHasDocAttachmentChanged,
           messageBuilderHasMediaAttachmentChanged,
           messageBuilderIsReplyChanged,
@@ -4357,7 +4403,9 @@ Messages::Messages(QObject *parent)
           [](MediaAttachments *o, int first, int last) {
             o->beginRemoveRows(QModelIndex(), first, last);
           },
-          [](MediaAttachments *o) { o->endRemoveRows(); },
+          [](MediaAttachments *o) { o->endRemoveRows(); }
+
+          ,
           messageBuilderOpAuthorChanged,
           messageBuilderOpAuxContentChanged,
           messageBuilderOpBodyChanged,
@@ -4392,7 +4440,9 @@ Messages::Messages(QObject *parent)
           [](MessageBuilder *o, int first, int last) {
             o->beginRemoveRows(QModelIndex(), first, last);
           },
-          [](MessageBuilder *o) { o->endRemoveRows(); },
+          [](MessageBuilder *o) { o->endRemoveRows(); }
+
+          ,
           messagesIsEmptyChanged,
           messagesLastAuthorChanged,
           messagesLastAuxCodeChanged,
@@ -4429,7 +4479,9 @@ Messages::Messages(QObject *parent)
           [](Messages *o, int first, int last) {
             o->beginRemoveRows(QModelIndex(), first, last);
           },
-          [](Messages *o) { o->endRemoveRows(); }})),
+          [](Messages *o) { o->endRemoveRows(); }
+
+      })),
       m_ownsPrivate(true) {
   m_builder->m_d = messages_builder_get(m_d);
   m_builder->m_documentAttachments->m_d =
@@ -4613,7 +4665,9 @@ Users::Users(QObject *parent)
           [](Users *o, int first, int last) {
             o->beginRemoveRows(QModelIndex(), first, last);
           },
-          [](Users *o) { o->endRemoveRows(); }})),
+          [](Users *o) { o->endRemoveRows(); }
+
+      })),
       m_ownsPrivate(true) {
   connect(
       this, &Users::newDataReady, this,
@@ -4694,7 +4748,9 @@ UsersSearch::UsersSearch(QObject *parent)
           [](UsersSearch *o, int first, int last) {
             o->beginRemoveRows(QModelIndex(), first, last);
           },
-          [](UsersSearch *o) { o->endRemoveRows(); }})),
+          [](UsersSearch *o) { o->endRemoveRows(); }
+
+      })),
       m_ownsPrivate(true) {
   connect(
       this, &UsersSearch::newDataReady, this,
