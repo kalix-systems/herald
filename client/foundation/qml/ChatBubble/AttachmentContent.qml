@@ -3,6 +3,7 @@ import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
 import LibHerald 1.0
 import QtGraphicalEffects 1.1
+import "ImageLayouts"
 
 Column {
     id: wrapperCol

@@ -23,9 +23,6 @@
         <file>ChatBubble/DocFileItem.qml</file>
         <file>ChatBubble/ElideHandler.qml</file>
         <file>ChatBubble/FileAttachmentContent.qml</file>
-        <file>ChatBubble/FourImageLayout.qml</file>
-        <file>ChatBubble/MultiImageLayout.qml</file>
-        <file>ChatBubble/OneImageLayout.qml</file>
         <file>ChatBubble/ReplyBubble/ReplyDangling.qml</file>
         <file>ChatBubble/ReplyBubble/ReplyDoc.qml</file>
         <file>ChatBubble/ReplyBubble/ReplyHybrid.qml</file>
@@ -40,8 +37,6 @@
         <file>ChatBubble/ReplyBubble/js/utils.js</file>
         <file>ChatBubble/StandardStamps.qml</file>
         <file>ChatBubble/StandardTextEdit.qml</file>
-        <file>ChatBubble/ThreeImageLayout.qml</file>
-        <file>ChatBubble/TwoImageLayout.qml</file>
         <file>NewGroupFlow/GroupImageSelector.qml</file>
         <file>StandardCombo.qml</file>
         <file>StandardLabel.qml</file>
@@ -82,5 +77,10 @@
         <file>Settings/SettingsComponents/Storage.qml</file>
         <file>Settings/SettingsPane.qml</file>
         <file>FileDialogWrapper.qml</file>
+        <file>ChatBubble/ImageLayouts/FourImageLayout.qml</file>
+        <file>ChatBubble/ImageLayouts/MultiImageLayout.qml</file>
+        <file>ChatBubble/ImageLayouts/OneImageLayout.qml</file>
+        <file>ChatBubble/ImageLayouts/ThreeImageLayout.qml</file>
+        <file>ChatBubble/ImageLayouts/TwoImageLayout.qml</file>
     </qresource>
 </RCC>
