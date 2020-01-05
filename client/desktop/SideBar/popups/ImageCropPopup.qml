@@ -13,23 +13,35 @@ Window {
     property real maxSize: 300
     property int maxWindowSize: 400
     property int minSize: Math.round(maxSize / 6)
+    color: CmnCfg.palette.black
 
-    color: "black"
-
-    Button {
-        anchors.top: parent.top
-        z: image.z + 1
-        text: "set"
-        onClicked: {
-            const picture = {
-                "width": Math.round(clipRect.width),
-                "height": Math.round(clipRect.height),
-                "x": Math.round(clipRect.x),
-                "y": Math.round(clipRect.y),
-                "path": Herald.utils.stripUrlPrefix(imageSource)
+    Row {
+        anchors {
+            bottom: parent.bottom
+            horizontalCenter: parent.horizontalCenter
+            margins: CmnCfg.defaultMargin
+        }
+        spacing: CmnCfg.defaultMargin
+        TextButton {
+            z: image.z + 1
+            text: "Set"
+            onClicked: {
+                const picture = {
+                    "width": Math.round(clipRect.width),
+                    "height": Math.round(clipRect.height),
+                    "x": Math.round(clipRect.x),
+                    "y": Math.round(clipRect.y),
+                    "path": Herald.utils.stripUrlPrefix(imageSource)
+                }
+                Herald.config.setProfilePicture(JSON.stringify(picture))
+                cropWindow.close()
             }
+        }
 
-            Herald.config.setProfilePicture(JSON.stringify(picture))
+        TextButton {
+            z: image.z + 1
+            text: "Cancel"
+            onClicked: cropWindow.close()
         }
     }
 
@@ -119,6 +131,7 @@ Window {
                     y = 0
                 }
             }
+
             MouseArea {
                 width: parent.width
                 height: parent.height
