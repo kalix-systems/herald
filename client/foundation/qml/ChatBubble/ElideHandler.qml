@@ -7,7 +7,8 @@ TextEdit {
     visible: elided
     text: !bubbleRoot.expanded ? qsTr("Read more") : qsTr("Collapse")
     font.bold: true
-    color: CmnCfg.palette.offBlack
+    font.family: CmnCfg.chatFont.name
+    color: CmnCfg.palette.black
     Layout.leftMargin: CmnCfg.smallMargin
     Layout.rightMargin: CmnCfg.smallMargin
     Layout.bottomMargin: CmnCfg.smallMargin

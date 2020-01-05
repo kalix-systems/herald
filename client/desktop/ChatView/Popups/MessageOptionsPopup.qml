@@ -25,7 +25,8 @@ Menu {
     MenuItem {
         text: qsTr("Delete Message")
         onTriggered: {
-            ownedConversation.deleteMessage(index)
+            deleteMsgPrompt.deleteId = msgId
+            deleteMsgPrompt.open()
         }
     }
 }

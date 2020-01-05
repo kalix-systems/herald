@@ -36,11 +36,12 @@ Item {
         id: globalTimer
         signal refreshTime
 
-        interval: 10000
+        interval: 1000
         running: true
         repeat: true
         onTriggered: refreshTime()
     }
+
 
     Loader {
         id: messageInfoLoader

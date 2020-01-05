@@ -76,6 +76,25 @@ impl Messages {
         true
     }
 
+    pub(crate) fn delete_message_by_id_(
+        &mut self,
+        id: ffi::MsgIdRef,
+    ) -> bool {
+        let id = err!(id.try_into(), false);
+        let ix = none!(self.container.index_by_id(id), false);
+
+        let builder = &mut self.builder;
+        let emit = &mut self.emit;
+        let container = &mut self.container;
+        let model = &mut self.model;
+        let search = &mut self.search;
+
+        container.remove_helper(id, ix, emit, model, search, builder);
+        spawn!(message::delete_message(&id), false);
+
+        true
+    }
+
     pub(crate) fn clear_conversation_history_(&mut self) -> bool {
         let id = none!(self.conversation_id, false);
 

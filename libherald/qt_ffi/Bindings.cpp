@@ -2194,6 +2194,7 @@ void messages_add_reaction(Messages::Private *, quint64, const ushort *, int);
 bool messages_clear_conversation_history(Messages::Private *);
 void messages_clear_search(Messages::Private *);
 bool messages_delete_message(Messages::Private *, quint64);
+bool messages_delete_message_by_id(Messages::Private *, const char *, int);
 qint64 messages_index_by_id(const Messages::Private *, const char *, int);
 void messages_mark_read_by_id(Messages::Private *, const char *, int);
 qint64 messages_next_search_match(Messages::Private *);
@@ -4332,6 +4333,9 @@ bool Messages::clearConversationHistory() {
 void Messages::clearSearch() { return messages_clear_search(m_d); }
 bool Messages::deleteMessage(quint64 row_index) {
   return messages_delete_message(m_d, row_index);
+}
+bool Messages::deleteMessageById(const QByteArray &id) {
+  return messages_delete_message_by_id(m_d, id.data(), id.size());
 }
 qint64 Messages::indexById(const QByteArray &msg_id) const {
   return messages_index_by_id(m_d, msg_id.data(), msg_id.size());

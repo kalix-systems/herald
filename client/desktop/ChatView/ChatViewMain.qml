@@ -10,7 +10,9 @@ import "js/KeyNavigation.mjs" as KeyNav
 import "../EmojiKeyboard" as EK
 import "../common" as Common
 import "Popups" as Popups
+import QtQuick.Dialogs 1.2
 
+//import Qt.labs.platform 1.1
 Page {
     id: chatPage
 
@@ -122,5 +124,22 @@ Page {
         }
         emojiButton.onClicked: emoKeysPopup.active = !!!emoKeysPopup.active
         atcButton.onClicked: chatTextArea.attachmentsDialogue.open()
+    }
+
+    MessageDialog {
+        id: deleteMsgPrompt
+        property var deleteId
+        text: qsTr("Delete message")
+        informativeText: qsTr("Do you want to delete this message from this device?")
+        standardButtons: MessageDialog.Ok | MessageDialog.Cancel
+
+        onAccepted: {
+            // prevent coercion of undefined into bytearray
+            if (deleteId === undefined) {
+                return
+            }
+            ownedConversation.deleteMessageById(deleteId)
+            deleteId = undefined
+        }
     }
 }
