@@ -19,5 +19,7 @@ ToolButton {
         hoverEnabled: true
         onPressed: mouse.accepted = false
         cursorShape: Qt.PointingHandCursor
+        preventStealing: true
+        z: parent.z + 1
     }
 }
