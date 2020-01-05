@@ -1,5 +1,5 @@
-import QtQuick 2.13
-import QtQuick.Controls 2.12
+import QtQuick 2.14
+import QtQuick.Controls 2.14
 import QtQuick.Layouts 1.12
 import QtQuick.Shapes 1.13
 import LibHerald 1.0
@@ -51,7 +51,7 @@ Item {
 
     MouseArea {
         anchors.fill: parent
-        z: parent.z - 1
+        z: parent.z - 2
         hoverEnabled: true
     }
 

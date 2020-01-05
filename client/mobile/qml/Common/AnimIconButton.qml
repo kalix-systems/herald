@@ -9,13 +9,13 @@ ToolButton {
     property string imageSource: ""
     property color color: CmnCfg.palette.iconMatte
     property size iconSize: Qt.size(CmnCfg.iconSize, CmnCfg.iconSize)
-    signal tapped
+
+    onPressed: {
+        tb.clicked()
+    }
 
     TapHandler {
-        onTapped: {
-            tapAnim.start()
-            parent.tapped()
-        }
+        onTapped: tapAnim.start()
     }
 
     // buttons "onClicked" property does not work on mobile

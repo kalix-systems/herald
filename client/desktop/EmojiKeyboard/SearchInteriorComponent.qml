@@ -8,7 +8,6 @@ GridView {
     anchors.fill: parent
     boundsBehavior: Flickable.StopAtBounds
     clip: true
-    ScrollBar.vertical: ScrollBar {}
     maximumFlickVelocity: 700
     flickDeceleration: emojiList.height * 10
     cellWidth: listView.width / 10
