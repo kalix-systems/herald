@@ -18,7 +18,7 @@ ApplicationWindow {
         id: errPopup
         Connections {
             target: Herald.errors
-            onTryPollChanged: {
+            onNewError: {
                 const errMsg = Herald.errors.nextError()
 
                 if (errMsg !== "") {

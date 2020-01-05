@@ -8,7 +8,7 @@ pub struct HeraldEmitter {
     pub(super) connection_pending_changed: fn(*mut HeraldQObject),
     pub(super) connection_up_changed: fn(*mut HeraldQObject),
     pub(super) registration_failure_code_changed: fn(*mut HeraldQObject),
-    pub(super) new_data_ready: fn(*mut HeraldQObject),
+    pub(super) try_poll: fn(*mut HeraldQObject),
 }
 
 impl HeraldEmitter {
@@ -25,7 +25,7 @@ impl HeraldEmitter {
             connection_pending_changed: self.connection_pending_changed,
             connection_up_changed: self.connection_up_changed,
             registration_failure_code_changed: self.registration_failure_code_changed,
-            new_data_ready: self.new_data_ready,
+            try_poll: self.try_poll,
         }
     }
 
@@ -67,111 +67,11 @@ impl HeraldEmitter {
         }
     }
 
-    pub fn new_data_ready(&mut self) {
+    pub fn try_poll(&mut self) {
         let ptr = self.qobject.load(Ordering::SeqCst);
+
         if !ptr.is_null() {
-            (self.new_data_ready)(ptr);
-        }
-    }
-}
-
-#[derive(Clone)]
-pub struct HeraldList {
-    pub(super) qobject: *mut HeraldQObject,
-    pub(super) layout_about_to_be_changed: fn(*mut HeraldQObject),
-    pub(super) layout_changed: fn(*mut HeraldQObject),
-    pub(super) begin_reset_model: fn(*mut HeraldQObject),
-    pub(super) end_reset_model: fn(*mut HeraldQObject),
-    pub(super) end_insert_rows: fn(*mut HeraldQObject),
-    pub(super) end_move_rows: fn(*mut HeraldQObject),
-    pub(super) end_remove_rows: fn(*mut HeraldQObject),
-    pub(super) begin_insert_rows: fn(*mut HeraldQObject, usize, usize),
-    pub(super) begin_remove_rows: fn(*mut HeraldQObject, usize, usize),
-    pub(super) data_changed: fn(*mut HeraldQObject, usize, usize),
-    pub(super) begin_move_rows: fn(*mut HeraldQObject, usize, usize, usize),
-}
-
-impl HeraldList {
-    pub fn layout_about_to_be_changed(&mut self) {
-        if !self.qobject.is_null() {
-            (self.layout_about_to_be_changed)(self.qobject);
-        }
-    }
-
-    pub fn layout_changed(&mut self) {
-        if !self.qobject.is_null() {
-            (self.layout_changed)(self.qobject)
-        }
-    }
-
-    pub fn begin_reset_model(&mut self) {
-        if !self.qobject.is_null() {
-            (self.begin_reset_model)(self.qobject);
-        }
-    }
-
-    pub fn end_reset_model(&mut self) {
-        if !self.qobject.is_null() {
-            (self.end_reset_model)(self.qobject);
-        }
-    }
-
-    pub fn end_insert_rows(&mut self) {
-        if !self.qobject.is_null() {
-            (self.end_insert_rows)(self.qobject);
-        }
-    }
-
-    pub fn end_move_rows(&mut self) {
-        if !self.qobject.is_null() {
-            (self.end_move_rows)(self.qobject);
-        }
-    }
-
-    pub fn end_remove_rows(&mut self) {
-        if !self.qobject.is_null() {
-            (self.end_remove_rows)(self.qobject);
-        }
-    }
-
-    pub fn begin_insert_rows(
-        &mut self,
-        first: usize,
-        last: usize,
-    ) {
-        if !self.qobject.is_null() {
-            (self.begin_insert_rows)(self.qobject, first, last);
-        }
-    }
-
-    pub fn begin_remove_rows(
-        &mut self,
-        first: usize,
-        last: usize,
-    ) {
-        if !self.qobject.is_null() {
-            (self.begin_remove_rows)(self.qobject, first, last);
-        }
-    }
-
-    pub fn data_changed(
-        &mut self,
-        first: usize,
-        last: usize,
-    ) {
-        if !self.qobject.is_null() {
-            (self.data_changed)(self.qobject, first, last);
-        }
-    }
-
-    pub fn begin_move_rows(
-        &mut self,
-        first: usize,
-        last: usize,
-        destination: usize,
-    ) {
-        if !self.qobject.is_null() {
-            (self.begin_move_rows)(self.qobject, first, last, destination);
+            (self.try_poll)(ptr);
         }
     }
 }
@@ -179,7 +79,6 @@ impl HeraldList {
 pub trait HeraldTrait {
     fn new(
         emit: HeraldEmitter,
-        model: HeraldList,
         config: Config,
         conversation_builder: ConversationBuilder,
         conversations: Conversations,
@@ -234,6 +133,8 @@ pub trait HeraldTrait {
 
     fn login(&mut self) -> bool;
 
+    fn poll_update(&mut self) -> ();
+
     fn register_new_user(
         &mut self,
         user_id: String,
@@ -245,37 +146,6 @@ pub trait HeraldTrait {
         &mut self,
         path: String,
     ) -> ();
-
-    fn row_count(&self) -> usize;
-
-    fn insert_rows(
-        &mut self,
-        _row: usize,
-        _count: usize,
-    ) -> bool {
-        false
-    }
-
-    fn remove_rows(
-        &mut self,
-        _row: usize,
-        _count: usize,
-    ) -> bool {
-        false
-    }
-
-    fn can_fetch_more(&self) -> bool {
-        false
-    }
-
-    fn fetch_more(&mut self) {}
-
-    fn sort(
-        &mut self,
-        _: u8,
-        _: SortOrder,
-    ) {
-    }
 }
 
 #[no_mangle]
@@ -329,7 +199,7 @@ pub unsafe fn herald_new_inner(ptr_bundle: *mut HeraldPtrBundle) -> Herald {
         conversations_begin_remove_rows,
         conversations_end_remove_rows,
         errors,
-        errors_try_poll_changed,
+        errors_new_error,
         message_search,
         message_search_regex_search_changed,
         message_search_search_pattern_changed,
@@ -376,18 +246,7 @@ pub unsafe fn herald_new_inner(ptr_bundle: *mut HeraldPtrBundle) -> Herald {
         users_search_begin_remove_rows,
         users_search_end_remove_rows,
         utils,
-        herald_new_data_ready,
-        herald_layout_about_to_be_changed,
-        herald_layout_changed,
-        herald_data_changed,
-        herald_begin_reset_model,
-        herald_end_reset_model,
-        herald_begin_insert_rows,
-        herald_end_insert_rows,
-        herald_begin_move_rows,
-        herald_end_move_rows,
-        herald_begin_remove_rows,
-        herald_end_remove_rows,
+        herald_try_poll,
     } = ptr_bundle;
     let config_emit = ConfigEmitter {
         qobject: Arc::new(AtomicPtr::new(config)),
@@ -442,7 +301,7 @@ pub unsafe fn herald_new_inner(ptr_bundle: *mut HeraldPtrBundle) -> Herald {
     let d_conversations = Conversations::new(conversations_emit, model);
     let errors_emit = ErrorsEmitter {
         qobject: Arc::new(AtomicPtr::new(errors)),
-        try_poll_changed: errors_try_poll_changed,
+        new_error: errors_new_error,
     };
     let d_errors = Errors::new(errors_emit);
     let message_search_emit = MessageSearchEmitter {
@@ -517,25 +376,10 @@ pub unsafe fn herald_new_inner(ptr_bundle: *mut HeraldPtrBundle) -> Herald {
         connection_pending_changed: herald_connection_pending_changed,
         connection_up_changed: herald_connection_up_changed,
         registration_failure_code_changed: herald_registration_failure_code_changed,
-        new_data_ready: herald_new_data_ready,
-    };
-    let model = HeraldList {
-        qobject: herald,
-        layout_about_to_be_changed: herald_layout_about_to_be_changed,
-        layout_changed: herald_layout_changed,
-        data_changed: herald_data_changed,
-        begin_reset_model: herald_begin_reset_model,
-        end_reset_model: herald_end_reset_model,
-        begin_insert_rows: herald_begin_insert_rows,
-        end_insert_rows: herald_end_insert_rows,
-        begin_move_rows: herald_begin_move_rows,
-        end_move_rows: herald_end_move_rows,
-        begin_remove_rows: herald_begin_remove_rows,
-        end_remove_rows: herald_end_remove_rows,
+        try_poll: herald_try_poll,
     };
     let d_herald = Herald::new(
         herald_emit,
-        model,
         d_config,
         d_conversation_builder,
         d_conversations,
@@ -557,6 +401,12 @@ pub unsafe extern "C" fn herald_free(ptr: *mut Herald) {
 pub unsafe extern "C" fn herald_login(ptr: *mut Herald) -> bool {
     let obj = &mut *ptr;
     obj.login()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn herald_poll_update(ptr: *mut Herald) {
+    let obj = &mut *ptr;
+    obj.poll_update()
 }
 
 #[no_mangle]
@@ -662,54 +512,6 @@ pub unsafe extern "C" fn herald_utils_get(ptr: *mut Herald) -> *mut Utils {
     (&mut *ptr).utils_mut()
 }
 
-#[no_mangle]
-pub unsafe extern "C" fn herald_row_count(ptr: *const Herald) -> c_int {
-    to_c_int((&*ptr).row_count())
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn herald_insert_rows(
-    ptr: *mut Herald,
-    row: c_int,
-    count: c_int,
-) -> bool {
-    match (to_usize(row), to_usize(count)) {
-        (Some(row), Some(count)) => (&mut *ptr).insert_rows(row, count),
-        _ => false,
-    }
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn herald_remove_rows(
-    ptr: *mut Herald,
-    row: c_int,
-    count: c_int,
-) -> bool {
-    match (to_usize(row), to_usize(count)) {
-        (Some(row), Some(count)) => (&mut *ptr).remove_rows(row, count),
-        _ => false,
-    }
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn herald_can_fetch_more(ptr: *const Herald) -> bool {
-    (&*ptr).can_fetch_more()
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn herald_fetch_more(ptr: *mut Herald) {
-    (&mut *ptr).fetch_more()
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn herald_sort(
-    ptr: *mut Herald,
-    column: u8,
-    order: SortOrder,
-) {
-    (&mut *ptr).sort(column, order)
-}
-
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct HeraldPtrBundle {
@@ -754,7 +556,7 @@ pub struct HeraldPtrBundle {
     conversations_begin_remove_rows: fn(*mut ConversationsQObject, usize, usize),
     conversations_end_remove_rows: fn(*mut ConversationsQObject),
     errors: *mut ErrorsQObject,
-    errors_try_poll_changed: fn(*mut ErrorsQObject),
+    errors_new_error: fn(*mut ErrorsQObject),
     message_search: *mut MessageSearchQObject,
     message_search_regex_search_changed: fn(*mut MessageSearchQObject),
     message_search_search_pattern_changed: fn(*mut MessageSearchQObject),
@@ -801,16 +603,5 @@ pub struct HeraldPtrBundle {
     users_search_begin_remove_rows: fn(*mut UsersSearchQObject, usize, usize),
     users_search_end_remove_rows: fn(*mut UsersSearchQObject),
     utils: *mut UtilsQObject,
-    herald_new_data_ready: fn(*mut HeraldQObject),
-    herald_layout_about_to_be_changed: fn(*mut HeraldQObject),
-    herald_layout_changed: fn(*mut HeraldQObject),
-    herald_data_changed: fn(*mut HeraldQObject, usize, usize),
-    herald_begin_reset_model: fn(*mut HeraldQObject),
-    herald_end_reset_model: fn(*mut HeraldQObject),
-    herald_begin_insert_rows: fn(*mut HeraldQObject, usize, usize),
-    herald_end_insert_rows: fn(*mut HeraldQObject),
-    herald_begin_move_rows: fn(*mut HeraldQObject, usize, usize, usize),
-    herald_end_move_rows: fn(*mut HeraldQObject),
-    herald_begin_remove_rows: fn(*mut HeraldQObject, usize, usize),
-    herald_end_remove_rows: fn(*mut HeraldQObject),
+    herald_try_poll: fn(*mut HeraldQObject),
 }

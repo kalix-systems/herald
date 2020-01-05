@@ -4,7 +4,7 @@ pub struct ErrorsQObject;
 
 pub struct ErrorsEmitter {
     pub(super) qobject: Arc<AtomicPtr<ErrorsQObject>>,
-    pub(super) try_poll_changed: fn(*mut ErrorsQObject),
+    pub(super) new_error: fn(*mut ErrorsQObject),
 }
 
 impl ErrorsEmitter {
@@ -17,7 +17,7 @@ impl ErrorsEmitter {
     pub fn clone(&mut self) -> ErrorsEmitter {
         ErrorsEmitter {
             qobject: self.qobject.clone(),
-            try_poll_changed: self.try_poll_changed,
+            new_error: self.new_error,
         }
     }
 
@@ -27,11 +27,11 @@ impl ErrorsEmitter {
             .store(n as *mut ErrorsQObject, Ordering::SeqCst);
     }
 
-    pub fn try_poll_changed(&mut self) {
+    pub fn new_error(&mut self) {
         let ptr = self.qobject.load(Ordering::SeqCst);
 
         if !ptr.is_null() {
-            (self.try_poll_changed)(ptr);
+            (self.new_error)(ptr);
         }
     }
 }
@@ -40,8 +40,6 @@ pub trait ErrorsTrait {
     fn new(emit: ErrorsEmitter) -> Self;
 
     fn emit(&mut self) -> &mut ErrorsEmitter;
-
-    fn try_poll(&self) -> bool;
 
     fn next_error(&mut self) -> String;
 }
@@ -57,11 +55,11 @@ pub unsafe fn errors_new_inner(ptr_bundle: *mut ErrorsPtrBundle) -> Errors {
 
     let ErrorsPtrBundle {
         errors,
-        errors_try_poll_changed,
+        errors_new_error,
     } = ptr_bundle;
     let errors_emit = ErrorsEmitter {
         qobject: Arc::new(AtomicPtr::new(errors)),
-        try_poll_changed: errors_try_poll_changed,
+        new_error: errors_new_error,
     };
     let d_errors = Errors::new(errors_emit);
     d_errors
@@ -84,14 +82,9 @@ pub unsafe extern "C" fn errors_next_error(
     set(data, str_, ret.len() as i32);
 }
 
-#[no_mangle]
-pub unsafe extern "C" fn errors_try_poll_get(ptr: *const Errors) -> bool {
-    (&*ptr).try_poll()
-}
-
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct ErrorsPtrBundle {
     errors: *mut ErrorsQObject,
-    errors_try_poll_changed: fn(*mut ErrorsQObject),
+    errors_new_error: fn(*mut ErrorsQObject),
 }

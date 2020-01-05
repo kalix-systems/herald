@@ -243,7 +243,7 @@ struct EmojiPickerPtrBundle {
 };
 struct ErrorsPtrBundle {
   Errors *errors;
-  void (*errors_try_poll_changed)(Errors *);
+  void (*errors_newError)(const Errors *);
 };
 struct HeraldPtrBundle {
   Herald *herald;
@@ -294,7 +294,7 @@ struct HeraldPtrBundle {
   void (*conversations_begin_remove_rows)(Conversations *, int, int);
   void (*conversations_end_remove_rows)(Conversations *);
   Errors *errors;
-  void (*errors_try_poll_changed)(Errors *);
+  void (*errors_newError)(const Errors *);
   MessageSearch *message_search;
   void (*message_search_regex_search_changed)(MessageSearch *);
   void (*message_search_search_pattern_changed)(MessageSearch *);
@@ -344,19 +344,7 @@ struct HeraldPtrBundle {
   void (*users_search_begin_remove_rows)(UsersSearch *, int, int);
   void (*users_search_end_remove_rows)(UsersSearch *);
   Utils *utils;
-
-  void (*herald_new_data_ready)(const Herald *);
-  void (*herald_layout_about_to_be_changed)(Herald *);
-  void (*herald_layout_changed)(Herald *);
-  void (*herald_data_changed)(Herald *, quintptr, quintptr);
-  void (*herald_begin_reset_model)(Herald *);
-  void (*herald_end_reset_model)(Herald *);
-  void (*herald_begin_insert_rows)(Herald *, int, int);
-  void (*herald_end_insert_rows)(Herald *);
-  void (*herald_begin_move_rows)(Herald *, int, int, int);
-  void (*herald_end_move_rows)(Herald *);
-  void (*herald_begin_remove_rows)(Herald *, int, int);
-  void (*herald_end_remove_rows)(Herald *);
+  void (*herald_tryPoll)(const Herald *);
 };
 struct MediaAttachmentsPtrBundle {
   MediaAttachments *media_attachments;
@@ -1074,18 +1062,16 @@ public:
 private:
   Private *m_d;
   bool m_ownsPrivate;
-  Q_PROPERTY(bool tryPoll READ tryPoll NOTIFY tryPollChanged FINAL)
   explicit Errors(bool owned, QObject *parent);
 
 public:
   explicit Errors(QObject *parent = nullptr);
   ~Errors() override;
-  bool tryPoll() const;
   Q_INVOKABLE QString nextError();
 Q_SIGNALS:
-  void tryPollChanged();
+  void newError() const;
 };
-class Herald : public QAbstractItemModel {
+class Herald : public QObject {
   Q_OBJECT
   friend class Config;
   friend class ConversationBuilder;
@@ -1162,42 +1148,10 @@ public:
   const Utils *utils() const;
   Utils *utils();
   Q_INVOKABLE bool login();
+  Q_INVOKABLE void pollUpdate();
   Q_INVOKABLE void registerNewUser(const QString &user_id, const QString &addr,
                                    const QString &port);
   Q_INVOKABLE void setAppLocalDataDir(const QString &path);
-  int columnCount(const QModelIndex &parent = QModelIndex()) const override;
-  QVariant data(const QModelIndex &index,
-                int role = Qt::DisplayRole) const override;
-  QModelIndex index(int row, int column,
-                    const QModelIndex &parent = QModelIndex()) const override;
-  QModelIndex parent(const QModelIndex &index) const override;
-  bool hasChildren(const QModelIndex &parent = QModelIndex()) const override;
-  int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-  bool canFetchMore(const QModelIndex &parent) const override;
-  void fetchMore(const QModelIndex &parent) override;
-  Qt::ItemFlags flags(const QModelIndex &index) const override;
-  void sort(int column, Qt::SortOrder order = Qt::AscendingOrder) override;
-  int role(const char *name) const;
-  QHash<int, QByteArray> roleNames() const override;
-  QVariant headerData(int section, Qt::Orientation orientation,
-                      int role = Qt::DisplayRole) const override;
-  bool setHeaderData(int section, Qt::Orientation orientation,
-                     const QVariant &value, int role = Qt::EditRole) override;
-  Q_INVOKABLE bool
-  insertRows(int row, int count,
-             const QModelIndex &parent = QModelIndex()) override;
-  Q_INVOKABLE bool
-  removeRows(int row, int count,
-             const QModelIndex &parent = QModelIndex()) override;
-
-Q_SIGNALS:
-  // new data is ready to be made available to the model with fetchMore()
-  void newDataReady(const QModelIndex &parent) const;
-
-private:
-  QHash<QPair<int, Qt::ItemDataRole>, QVariant> m_headerData;
-  void initHeaderData();
-  void updatePersistentIndexes();
 Q_SIGNALS:
   void configChanged();
   void configInitChanged();
@@ -1211,6 +1165,7 @@ Q_SIGNALS:
   void usersChanged();
   void usersSearchChanged();
   void utilsChanged();
+  void tryPoll() const;
 };
 class MediaAttachments : public QAbstractItemModel {
   Q_OBJECT

@@ -147,7 +147,6 @@ inline void emojiPickerSmileys_indexChanged(EmojiPicker *o) {
 inline void emojiPickerSymbols_indexChanged(EmojiPicker *o) {
   Q_EMIT o->symbols_indexChanged();
 }
-inline void errorsTryPollChanged(Errors *o) { Q_EMIT o->tryPollChanged(); }
 inline void heraldConfigInitChanged(Herald *o) {
   Q_EMIT o->configInitChanged();
 }
@@ -1025,114 +1024,8 @@ void emoji_picker_set_search_string(EmojiPicker::Private *, const ushort *,
 extern "C" {
 Errors::Private *errors_new(ErrorsPtrBundle *);
 void errors_free(Errors::Private *);
-bool errors_try_poll_get(const Errors::Private *);
 void errors_next_error(Errors::Private *, QString *, qstring_set);
 }
-extern "C" {
-void herald_sort(Herald::Private *, unsigned char column,
-                 Qt::SortOrder order = Qt::AscendingOrder);
-int herald_row_count(const Herald::Private *);
-bool herald_insert_rows(Herald::Private *, int, int);
-bool herald_remove_rows(Herald::Private *, int, int);
-bool herald_can_fetch_more(const Herald::Private *);
-void herald_fetch_more(Herald::Private *);
-}
-int Herald::columnCount(const QModelIndex &parent) const {
-  return (parent.isValid()) ? 0 : 1;
-}
-
-bool Herald::hasChildren(const QModelIndex &parent) const {
-  return rowCount(parent) > 0;
-}
-
-int Herald::rowCount(const QModelIndex &parent) const {
-  return (parent.isValid()) ? 0 : herald_row_count(m_d);
-}
-
-bool Herald::insertRows(int row, int count, const QModelIndex &) {
-  return herald_insert_rows(m_d, row, count);
-}
-
-bool Herald::removeRows(int row, int count, const QModelIndex &) {
-  return herald_remove_rows(m_d, row, count);
-}
-
-QModelIndex Herald::index(int row, int column,
-                          const QModelIndex &parent) const {
-  if (!parent.isValid() && row >= 0 && row < rowCount(parent) && column >= 0 &&
-      column < 1) {
-    return createIndex(row, column, static_cast<quintptr>(row));
-  }
-  return {};
-}
-
-QModelIndex Herald::parent(const QModelIndex &) const { return {}; }
-
-bool Herald::canFetchMore(const QModelIndex &parent) const {
-  return (parent.isValid()) ? false : herald_can_fetch_more(m_d);
-}
-
-void Herald::fetchMore(const QModelIndex &parent) {
-  if (!parent.isValid()) {
-    herald_fetch_more(m_d);
-  }
-}
-void Herald::updatePersistentIndexes() {}
-
-void Herald::sort(int column, Qt::SortOrder order) {
-  herald_sort(m_d, column, order);
-}
-
-Qt::ItemFlags Herald::flags(const QModelIndex &i) const {
-  auto flags = QAbstractItemModel::flags(i);
-  return flags;
-}
-
-QVariant Herald::data(const QModelIndex &index, int role) const {
-  Q_ASSERT(rowCount(index.parent()) > index.row());
-  switch (index.column()) {
-  case 0:
-    switch (role) {}
-    break;
-  }
-  return QVariant();
-}
-int Herald::role(const char *name) const {
-  auto names = roleNames();
-  auto i = names.constBegin();
-  while (i != names.constEnd()) {
-    if (i.value() == name) {
-      return i.key();
-    }
-    ++i;
-  }
-  return -1;
-}
-QHash<int, QByteArray> Herald::roleNames() const {
-  QHash<int, QByteArray> names = QAbstractItemModel::roleNames();
-  return names;
-}
-
-QVariant Herald::headerData(int section, Qt::Orientation orientation,
-                            int role) const {
-  if (orientation != Qt::Horizontal) {
-    return QVariant();
-  }
-  return m_headerData.value(
-      qMakePair(section, static_cast<Qt::ItemDataRole>(role)),
-      role == Qt::DisplayRole ? QString::number(section + 1) : QVariant());
-}
-
-bool Herald::setHeaderData(int section, Qt::Orientation orientation,
-                           const QVariant &value, int role) {
-  if (orientation != Qt::Horizontal) {
-    return false;
-  }
-  m_headerData.insert(qMakePair(section, static_cast<Qt::ItemDataRole>(role)),
-                      value);
-  return true;
-}
-
 extern "C" {
 Herald::Private *herald_new(HeraldPtrBundle *);
 void herald_free(Herald::Private *);
@@ -1150,6 +1043,7 @@ Users::Private *herald_users_get(const Herald::Private *);
 UsersSearch::Private *herald_users_search_get(const Herald::Private *);
 Utils::Private *herald_utils_get(const Herald::Private *);
 bool herald_login(Herald::Private *);
+void herald_poll_update(Herald::Private *);
 void herald_register_new_user(Herald::Private *, const ushort *, int,
                               const ushort *, int, const ushort *, int);
 void herald_set_app_local_data_dir(Herald::Private *, const ushort *, int);
@@ -3399,7 +3293,8 @@ Errors::Errors(bool /*owned*/, QObject *parent)
 
 Errors::Errors(QObject *parent)
     : QObject(parent),
-      m_d(errors_new(new ErrorsPtrBundle{this, errorsTryPollChanged})),
+      m_d(errors_new(new ErrorsPtrBundle{
+          this, [](const Errors *o) { Q_EMIT o->newError(); }})),
       m_ownsPrivate(true) {}
 
 Errors::~Errors() {
@@ -3407,8 +3302,6 @@ Errors::~Errors() {
     errors_free(m_d);
   }
 }
-
-bool Errors::tryPoll() const { return errors_try_poll_get(m_d); }
 QString Errors::nextError() {
   QString s;
   errors_next_error(m_d, &s, set_qstring);
@@ -3416,19 +3309,17 @@ QString Errors::nextError() {
 }
 
 Herald::Herald(bool /*owned*/, QObject *parent)
-    : QAbstractItemModel(parent), m_config(new Config(false, this)),
+    : QObject(parent), m_config(new Config(false, this)),
       m_conversationBuilder(new ConversationBuilder(false, this)),
       m_conversations(new Conversations(false, this)),
       m_errors(new Errors(false, this)),
       m_messageSearch(new MessageSearch(false, this)),
       m_users(new Users(false, this)),
       m_usersSearch(new UsersSearch(false, this)),
-      m_utils(new Utils(false, this)), m_d(nullptr), m_ownsPrivate(false) {
-  initHeaderData();
-}
+      m_utils(new Utils(false, this)), m_d(nullptr), m_ownsPrivate(false) {}
 
 Herald::Herald(QObject *parent)
-    : QAbstractItemModel(parent), m_config(new Config(false, this)),
+    : QObject(parent), m_config(new Config(false, this)),
       m_conversationBuilder(new ConversationBuilder(false, this)),
       m_conversations(new Conversations(false, this)),
       m_errors(new Errors(false, this)),
@@ -3510,7 +3401,7 @@ Herald::Herald(QObject *parent)
 
           ,
           m_errors,
-          errorsTryPollChanged,
+          [](const Errors *o) { Q_EMIT o->newError(); },
           m_messageSearch,
           messageSearchRegexSearchChanged,
           messageSearchSearchPatternChanged,
@@ -3602,33 +3493,7 @@ Herald::Herald(QObject *parent)
 
           ,
           m_utils,
-          [](const Herald *o) { Q_EMIT o->newDataReady(QModelIndex()); },
-          [](Herald *o) { Q_EMIT o->layoutAboutToBeChanged(); },
-          [](Herald *o) {
-            o->updatePersistentIndexes();
-            Q_EMIT o->layoutChanged();
-          },
-          [](Herald *o, quintptr first, quintptr last) {
-            o->dataChanged(o->createIndex(first, 0, first),
-                           o->createIndex(last, 0, last));
-          },
-          [](Herald *o) { o->beginResetModel(); },
-          [](Herald *o) { o->endResetModel(); },
-          [](Herald *o, int first, int last) {
-            o->beginInsertRows(QModelIndex(), first, last);
-          },
-          [](Herald *o) { o->endInsertRows(); },
-          [](Herald *o, int first, int last, int destination) {
-            o->beginMoveRows(QModelIndex(), first, last, QModelIndex(),
-                             destination);
-          },
-          [](Herald *o) { o->endMoveRows(); },
-          [](Herald *o, int first, int last) {
-            o->beginRemoveRows(QModelIndex(), first, last);
-          },
-          [](Herald *o) { o->endRemoveRows(); }
-
-      })),
+          [](const Herald *o) { Q_EMIT o->tryPoll(); }})),
       m_ownsPrivate(true) {
   m_config->m_d = herald_config_get(m_d);
   m_conversationBuilder->m_d = herald_conversation_builder_get(m_d);
@@ -3638,6 +3503,11 @@ Herald::Herald(QObject *parent)
   m_users->m_d = herald_users_get(m_d);
   m_usersSearch->m_d = herald_users_search_get(m_d);
   m_utils->m_d = herald_utils_get(m_d);
+
+  connect(
+      this, &Herald::tryPoll, this, [this]() { this->pollUpdate(); },
+      Qt::QueuedConnection);
+
   connect(
       this->m_conversationBuilder, &ConversationBuilder::newDataReady,
       this->m_conversationBuilder,
@@ -3663,11 +3533,6 @@ Herald::Herald(QObject *parent)
       this->m_usersSearch, &UsersSearch::newDataReady, this->m_usersSearch,
       [this](const QModelIndex &i) { this->m_usersSearch->fetchMore(i); },
       Qt::QueuedConnection);
-  connect(
-      this, &Herald::newDataReady, this,
-      [this](const QModelIndex &i) { this->fetchMore(i); },
-      Qt::QueuedConnection);
-  initHeaderData();
 }
 
 Herald::~Herald() {
@@ -3675,7 +3540,6 @@ Herald::~Herald() {
     herald_free(m_d);
   }
 }
-void Herald::initHeaderData() {}
 
 const Config *Herald::config() const { return m_config; }
 Config *Herald::config() { return m_config; }
@@ -3722,6 +3586,7 @@ UsersSearch *Herald::usersSearch() { return m_usersSearch; }
 const Utils *Herald::utils() const { return m_utils; }
 Utils *Herald::utils() { return m_utils; }
 bool Herald::login() { return herald_login(m_d); }
+void Herald::pollUpdate() { return herald_poll_update(m_d); }
 void Herald::registerNewUser(const QString &user_id, const QString &addr,
                              const QString &port) {
   return herald_register_new_user(m_d, user_id.utf16(), user_id.size(),

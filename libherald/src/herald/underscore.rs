@@ -87,14 +87,6 @@ impl Herald {
         );
     }
 
-    pub(crate) fn can_fetch_more_(&self) -> bool {
-        shared::more_updates()
-    }
-
-    pub(crate) fn fetch_more_(&mut self) {
-        self.process_updates()
-    }
-
     // TODO these need to come back
     pub(crate) fn connection_up_(&self) -> bool {
         false
