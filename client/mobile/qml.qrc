@@ -40,5 +40,6 @@
         <file>qml/Common/PlatonicRectangle.qml</file>
         <file>qml/Headers/GlobalSearchHeader.qml</file>
         <file>qml/Zombie/Appearance.qml</file>
+        <file>qml/Zombie/Profile.qml</file>
     </qresource>
 </RCC>
