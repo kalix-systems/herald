@@ -38,15 +38,16 @@ MouseArea {
 
         anchors {
             right: parent.right
+            rightMargin: (download && reply) ? CmnCfg.defaultMargin : 0
             top: parent.top
             topMargin: CmnCfg.smallMargin
         }
 
-        Row {
+        Grid {
             id: buttonRow
-            spacing: CmnCfg.defaultMargin
-            rightPadding: CmnCfg.smallMargin
-
+            rows: 2
+            columns: (download && reply) ? 2 : 4
+            spacing: CmnCfg.smallMargin
             Imports.IconButton {
                 id: replyButton
                 anchors.margins: CmnCfg.defaultMargin
