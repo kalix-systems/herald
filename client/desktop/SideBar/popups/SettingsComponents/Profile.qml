@@ -145,10 +145,10 @@ ColumnLayout {
             }
 
             Herald.config.setProfilePicture(JSON.stringify(picture))
-            imageCrop.imageWidth = parsed.width
-            imageCrop.imageHeight = parsed.height
-            imageCrop.imageSource = fileUrl
-            imageCrop.show()
+            //            imageCrop.imageWidth = parsed.width
+            //            imageCrop.imageHeight = parsed.height
+            //            imageCrop.imageSource = fileUrl
+            //            imageCrop.show()
         }
     }
 

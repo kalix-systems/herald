@@ -15,6 +15,7 @@ Window {
     property real aspectRatio: imageWidth / imageHeight
     property real maxSize: Math.min(imageWidth, imageHeight)
     property int maxWindowSize: 400
+    property int minSize: Math.round(maxSize / 6)
 
     Button {
         anchors.top: parent.top
@@ -26,9 +27,8 @@ Window {
                 "height": Math.round(clipRect.height),
                 "x": Math.round(clipRect.x),
                 "y": Math.round(clipRect.y),
-                "path": imageSource
+                "path": Herald.utils.stripUrlPrefix(imageSource)
             }
-            print(JSON.stringify(picture))
 
             Herald.config.setProfilePicture(JSON.stringify(picture))
         }
@@ -114,8 +114,8 @@ Window {
             onMouseXChanged: if (drag.active) {
                                  clipRect.width += Math.min(
                                              mouseX, maxSize - clipRect.width)
-                                 if (clipRect.width < 10) {
-                                     clipRect.width = 10
+                                 if (clipRect.width < minSize) {
+                                     clipRect.width = minSize
                                  }
 
                                  clipRect.height = clipRect.width
@@ -123,8 +123,8 @@ Window {
             onMouseYChanged: if (drag.active) {
                                  clipRect.height += Math.min(
                                              mouseY, maxSize - clipRect.width)
-                                 if (clipRect.height < 10) {
-                                     clipRect.height = 10
+                                 if (clipRect.height < minSize) {
+                                     clipRect.height = minSize
                                  }
                                  clipRect.width = clipRect.height
                              }
