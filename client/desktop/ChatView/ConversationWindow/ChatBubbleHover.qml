@@ -38,39 +38,33 @@ MouseArea {
 
         anchors {
             right: parent.right
-            rightMargin: (download && reply) ? CmnCfg.defaultMargin : 0
+            rightMargin: CmnCfg.microMargin
             top: parent.top
             topMargin: CmnCfg.smallMargin
         }
 
-        Grid {
+        Flow {
             id: buttonRow
-            rows: 2
-            columns: (download && reply) ? 2 : 4
+            width: if ((download && reply) & !isHead) {
+                       chatListView.width - bubbleActual.maxWidth - 80
+                   }
+            anchors.right: parent.right
+            layoutDirection: Qt.RightToLeft
+
+            //   rows: 2
+            //   columns: (download && reply) ? 2 : 4
+            //   columnSpacing: CmnCfg.smallMargin
+            //   rowSpacing: 0
+            topPadding: 0
+            bottomPadding: 0
             spacing: CmnCfg.smallMargin
+
             Imports.IconButton {
-                id: replyButton
+                id: messageOptionsButton
                 anchors.margins: CmnCfg.defaultMargin
-                source: "qrc:/reply-icon.svg"
+                source: "qrc:/options-icon.svg"
                 z: CmnCfg.overlayZ
-                // changing the opId transfers focus to the compose field
-                onClicked: ownedConversation.builder.opId = msgId
-            }
-
-            Popups.MessageOptionsPopup {
-                id: messageOptionsMenu
-            }
-
-            Imports.IconButton {
-                id: reactButton
-                anchors.margins: visible ? CmnCfg.defaultMargin : 0
-                z: CmnCfg.overlayZ
-                icon.width: visible ? 24 : 0
-                source: "qrc:/lenny-icon.svg"
-                onClicked: {
-                    reactPopup.active = true
-                    emojiMenu.open()
-                }
+                onClicked: messageOptionsMenu.open()
             }
 
             Imports.IconButton {
@@ -84,11 +78,27 @@ MouseArea {
             }
 
             Imports.IconButton {
-                id: messageOptionsButton
-                anchors.margins: CmnCfg.defaultMargin
-                source: "qrc:/options-icon.svg"
+                id: reactButton
+                anchors.margins: visible ? CmnCfg.defaultMargin : 0
                 z: CmnCfg.overlayZ
-                onClicked: messageOptionsMenu.open()
+                icon.width: visible ? 24 : 0
+                source: "qrc:/lenny-icon.svg"
+                onClicked: {
+                    reactPopup.active = true
+                    emojiMenu.open()
+                }
+            }
+            Imports.IconButton {
+                id: replyButton
+                anchors.margins: CmnCfg.defaultMargin
+                source: "qrc:/reply-icon.svg"
+                z: CmnCfg.overlayZ
+                // changing the opId transfers focus to the compose field
+                onClicked: ownedConversation.builder.opId = msgId
+            }
+
+            Popups.MessageOptionsPopup {
+                id: messageOptionsMenu
             }
         }
     }
