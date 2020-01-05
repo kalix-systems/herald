@@ -162,12 +162,6 @@ Rectangle {
             id: authorLabel
         }
 
-        Item {
-            width: chatListView.width
-            height: visible ? 20 : 0
-            visible: reply && !isHead
-        }
-
         //reply bubble loader
         Loader {
 

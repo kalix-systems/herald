@@ -82,7 +82,7 @@ MouseArea {
                 anchors.margins: visible ? CmnCfg.defaultMargin : 0
                 z: CmnCfg.overlayZ
                 icon.width: visible ? 24 : 0
-                source: "qrc:/lenny-icon.svg"
+                source: "qrc:/upside-down-emoji-icon.svg"
                 onClicked: {
                     reactPopup.active = true
                     emojiMenu.open()
