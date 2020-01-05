@@ -353,6 +353,7 @@ fn messages() -> Object {
 
     let funcs = functions! {
         mut deleteMessage(row_index: QUint64) => Bool,
+        mut deleteMessageById(id: QByteArray) => Bool,
         mut markReadById(id: QByteArray) => Void,
         mut clearConversationHistory() => Bool,
         mut clearSearch() => Void,
