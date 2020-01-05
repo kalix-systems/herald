@@ -115,8 +115,8 @@ Window {
                             hoverEnabled: true
                             anchors.fill: parent
                             cursorShape: Qt.PointingHandCursor
-                            onClicked: settingsPane.contentY =
-                                       settingsPane.mainColumn.children[index].y
+                            onClicked: settingsPane.contentY
+                                       = settingsPane.mainColumn.children[index].y
                         }
                     }
                 }
@@ -124,8 +124,23 @@ Window {
 
             Settings.SettingsPane {
                 id: settingsPane
-            }
+                cropCallbackArg: function (imageDimensions, fileUrl) {
+                    print("called in desktop")
+                    imageCrop.imageWidth = imageDimensions.width
+                    imageCrop.imageHeight = imageDimensions.height
+                    imageCrop.imageSource = fileUrl
+                    imageCrop.show()
 
+                    //                                      {
+                    //                            "width": Math.round(parsed.width),
+                    //                            "height": Math.round(parsed.height),
+                    //                            "x": 0,
+                    //                            "y": 0,
+                    //                            "path": Herald.utils.stripUrlPrefix(fileUrl)
+                    //                        }
+                    // Herald.config.setProfilePicture(JSON.stringify(picture))
+                }
+            }
         }
     }
 }

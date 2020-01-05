@@ -4,12 +4,11 @@ import QtQuick.Layouts 1.12
 import QtQuick.Dialogs 1.3
 import QtQuick.Shapes 1.13
 import LibHerald 1.0
-import '../../'
+import "../../"
 import "../../Entity" as Entity
 import "../../js/utils.mjs" as Utils
 
 ColumnLayout {
-
     RowLayout {
         Layout.fillWidth: true
         Layout.rightMargin: CmnCfg.defaultMargin
@@ -133,21 +132,10 @@ ColumnLayout {
         folder: shortcuts.desktop
         nameFilters: ["(*.jpg *.png *.jpeg)"]
         onSelectionAccepted: {
-            var parsed = JSON.parse(Herald.utils.imageDimensions(fileUrl))
 
-            const picture = {
-                "width": Math.round(parsed.width),
-                "height": Math.round(parsed.height),
-                "x": 0,
-                "y": 0,
-                "path": Herald.utils.stripUrlPrefix(fileUrl)
-            }
-
-            Herald.config.setProfilePicture(JSON.stringify(picture))
-            //            imageCrop.imageWidth = parsed.width
-            //            imageCrop.imageHeight = parsed.height
-            //            imageCrop.imageSource = fileUrl
-            //            imageCrop.show()
+            const imageDimensions = JSON.parse(
+                                      Herald.utils.imageDimensions(fileUrl))
+            cropCallbackArg(imageDimensions, fileUrl)
         }
     }
 

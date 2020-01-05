@@ -159,25 +159,26 @@ Item {
             height: parent.height
             width: 300
 
-            Rectangle {
+            //            Rectangle {
 
-                anchors.horizontalCenter: parent.right
-                width: 5
-                height: parent.height
-                color: "transparent"
-                //   color: "red"
-                MouseArea {
-                    drag.target: parent
-                    anchors.fill: parent
-                    drag.axis: Drag.XAxis
+            //                anchors.right: parent.right
+            //                width: 5
+            //                height: parent.height
+            //                // color: //"transparent"
+            //                color: "red"
+            //                MouseArea {
+            //                    drag.target: parent
+            //                    anchors.fill: parent
+            //                    drag.axis: Drag.XAxis
 
-                    cursorShape: Qt.SplitHCursor
-                    onMouseXChanged: {
-                        if (drag.active)
-                            rootSplitView.splitHandle(mouseX)
-                    }
-                }
-            }
+            //                    preventStealing: drag.active
+            //                    cursorShape: Qt.SplitHCursor
+            //                    onMouseXChanged: {
+            //                        if (drag.active)
+            //                            rootSplitView.splitHandle(mouseX)
+            //                    }
+            //                }
+            //            }
         }
 
         Loader {
@@ -191,23 +192,27 @@ Item {
             Rectangle {
 
                 anchors.horizontalCenter: parent.left
-                width: 5
+                anchors.rightMargin: 2
+                width: 9
                 height: parent.height
                 color: "transparent"
 
                 Rectangle {
                     anchors.right: parent.right
                     anchors.bottom: parent.bottom
-                    width: 3
+                    width: 2
                     height: parent.height - (CmnCfg.toolbarHeight + 2)
                     color: CmnCfg.palette.offBlack
                     z: parent.z + 1
                 }
                 MouseArea {
+                    id: mouse
                     drag.target: parent
                     anchors.fill: parent
                     drag.axis: Drag.XAxis
                     cursorShape: Qt.SplitHCursor
+                    preventStealing: drag.active
+                    drag.threshold: 0
 
                     onMouseXChanged: {
                         if (drag.active)

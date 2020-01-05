@@ -6,6 +6,26 @@ pub use image::ImageError;
 
 const IMAGE_SIZE: u32 = 300;
 
+pub struct Dims {
+    pub width: u32,
+    pub height: u32,
+}
+
+impl From<(u32, u32)> for Dims {
+    fn from((width, height): (u32, u32)) -> Self {
+        Self { width, height }
+    }
+}
+
+impl From<Dims> for json::JsonValue {
+    fn from(Dims { width, height }: Dims) -> Self {
+        json::object! {
+            "width" => width,
+            "height" => height
+        }
+    }
+}
+
 /// Specifies a path to an image along with the intended cropping behavior
 pub struct ProfilePicture {
     x: u32,
@@ -122,4 +142,30 @@ where
     P: AsRef<Path>,
 {
     Ok(image::image_dimensions(source)?)
+}
+
+/// Given image dimensions and a constant, scales the smaller dimension down
+/// and makes the larger dimension equal to the constant
+pub fn image_scaling<P>(
+    source: P,
+    scale: u32,
+) -> Result<Dims, image::ImageError>
+where
+    P: AsRef<Path>,
+{
+    let (width, height) = image_dimensions(source)?;
+    let (width, height, scale) = (width as f32, height as f32, scale as f32);
+
+    let aspect_ratio = width / height;
+
+    let (width, height) = if aspect_ratio > 1.0 {
+        (scale, scale * aspect_ratio)
+    } else {
+        (scale / aspect_ratio, scale)
+    };
+
+    Ok(Dims {
+        width: width as u32,
+        height: height as u32,
+    })
 }

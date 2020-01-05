@@ -5,13 +5,14 @@ import LibHerald 1.0
 import "qrc:/imports"
 import "./SettingsComponents" as SetsComps
 
-
 Flickable {
     property alias mainColumn: col
     Layout.fillWidth: true
     Layout.fillHeight: true
     contentHeight: col.height
     boundsBehavior: Flickable.StopAtBounds
+
+    property var cropCallbackArg
 
     Column {
         id: col
@@ -20,12 +21,12 @@ Flickable {
         anchors.right: parent.right
         anchors.left: parent.left
         SetsComps.SettingsListItem {
-            id: notifications
+            id: profile
             headerText: qsTr("Profile information")
             settingsContent: SetsComps.Profile {}
         }
         SetsComps.SettingsListItem {
-            id: profile
+            id: notifications
             headerText: qsTr("Notifications")
             settingsContent: SetsComps.Notifications {}
         }

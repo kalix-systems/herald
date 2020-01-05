@@ -13,9 +13,11 @@ Window {
     property real imageHeight
     property url imageSource
     property real aspectRatio: imageWidth / imageHeight
-    property real maxSize: Math.min(imageWidth, imageHeight)
+    property real maxSize: Math.min(300, 300 / aspectRatio, 300 * aspectRatio)
     property int maxWindowSize: 400
     property int minSize: Math.round(maxSize / 6)
+
+    color: "black"
 
     Button {
         anchors.top: parent.top
@@ -34,19 +36,25 @@ Window {
         }
     }
 
-    width: imageWidth + 100 //(aspectRatio > 1) ? maxWindowSize : maxWindowSize * aspectRatio
-    height: imageHeight + 100 //(aspectRatio > 1) ? maxWindowSize / aspectRatio : maxWindowSize
+    width: 400 //imageWidth + 100 //(aspectRatio > 1) ? maxWindowSize : maxWindowSize * aspectRatio
+    height: 400 //imageHeight + 100 //(aspectRatio > 1) ? maxWindowSize / aspectRatio : maxWindowSize
 
     Image {
         id: image
         anchors.centerIn: parent
         source: imageSource
+        sourceSize.height: aspectRatio > 1 ? 300 / aspectRatio : 300
+        sourceSize.width: aspectRatio > 1 ? 300 : 300 * aspectRatio
+        width: sourceSize.width
+        height: sourceSize.height
 
-        fillMode: Image.PreserveAspectFit
+        onSourceChanged: print(sourceSize.height, sourceSize.width,
+                               height, width)
 
+        // fillMode: Image.PreserveAspectFit
         Rectangle {
             id: clipRect
-            width: Math.min(imageWidth, imageHeight)
+            width: Math.min(image.width, image.height)
             height: width
             color: CmnCfg.palette.darkGrey
             opacity: 0.5
