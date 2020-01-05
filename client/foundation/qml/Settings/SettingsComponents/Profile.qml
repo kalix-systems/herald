@@ -62,6 +62,24 @@ ColumnLayout {
                     right: parent.right
                     bottom: parent.bottom
                 }
+
+                MouseArea {
+                    anchors {
+                        right: parent.right
+                        bottom: parent.bottom
+                    }
+                    height: cornerCarat.height * 0.2
+                    width: cornerCarat.width * 0.2
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: {
+                        print(Herald.config.profilePicture)
+                        const imageDimensions = JSON.parse(
+                                                  Herald.utils.imageDimensions(
+                                                      "file://" + Herald.config.profilePicture))
+                        print("opening the crop window not yet implemented")
+                    }
+                }
+
                 anchors.fill: parent
                 ShapePath {
                     fillColor: CmnCfg.palette.darkGrey
@@ -95,7 +113,6 @@ ColumnLayout {
             font.weight: Font.Medium
             color: CmnCfg.palette.black
             borderColor: CmnCfg.palette.white
-
             Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
             Layout.leftMargin: CmnCfg.megaMargin
             Layout.preferredWidth: displayName.contentWidth

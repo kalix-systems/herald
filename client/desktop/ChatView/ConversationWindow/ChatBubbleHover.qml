@@ -51,10 +51,6 @@ MouseArea {
             anchors.right: parent.right
             layoutDirection: Qt.RightToLeft
 
-            //   rows: 2
-            //   columns: (download && reply) ? 2 : 4
-            //   columnSpacing: CmnCfg.smallMargin
-            //   rowSpacing: 0
             topPadding: 0
             bottomPadding: 0
             spacing: CmnCfg.smallMargin
