@@ -45,9 +45,10 @@ MouseArea {
 
         Flow {
             id: buttonRow
-            width: if ((download && reply) & !isHead) {
+            width: //if ((download && reply) & !isHead) {
+                   if (!isHead && reply)
                        chatListView.width - bubbleActual.maxWidth - 80
-                   }
+            //    }
             anchors.right: parent.right
             layoutDirection: Qt.RightToLeft
 
