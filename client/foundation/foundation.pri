@@ -89,6 +89,12 @@ macx {
   SOURCES += $$PWD/objectiveutils.mm
 }
 
+
+windows {
+  LIBS += -L $${PWD}/../../target/$${RUST_BUILD_TYPE} -lherald
+  LIBS += -lws2_32
+  LIBS += -luserenv
+}
 android {
      QT += androidextras
      ANDROID_ABIS = armeabi-v7a
