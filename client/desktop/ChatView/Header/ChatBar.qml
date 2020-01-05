@@ -53,7 +53,7 @@ ToolBar {
 
         Label {
             id: uid
-            font: CmnCfg.headerBarFont
+            font: CmnCfg.headerFont
             Layout.alignment: Qt.AlignLeft
             Layout.fillWidth: true
             elide: Label.ElideRight

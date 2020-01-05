@@ -1,5 +1,5 @@
 import QtQuick 2.12
-import QtQuick.Dialogs 1.0
+import QtQuick.Dialogs 1.3
 import QtGraphicalEffects 1.0
 import LibHerald 1.0
 // Includes CVFLoatingButton. ListItem, and Header
@@ -69,7 +69,7 @@ Rectangle {
         fill: CmnCfg.palette.black
         TapHandler {
             onTapped: {
-                groupPicDialogue.open()
+                //groupPicDialogue.open()
             }
         }
     }

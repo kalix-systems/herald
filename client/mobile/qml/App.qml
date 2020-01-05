@@ -6,7 +6,7 @@ import "./HomeScreen" as HomeScreen
 import "./NewContactView" as NewContactView
 import "./ChatView" as ChatView
 import "./GlobalSearch" as GlobalSearch
-import "./SettingsMenu" as SettingsMenu
+import "qrc:/imports/Settings" as Settings
 
 Page {
     id: appRoot
@@ -44,7 +44,7 @@ Page {
 
     Component {
         id: settingsMain
-        SettingsMenu.SettingsMenuMain {
+        Settings.SettingsPane {
             readonly property string stateName: "config"
         }
     }

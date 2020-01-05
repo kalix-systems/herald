@@ -50,16 +50,6 @@
         <file>ChatView/Header/ChatBar.qml</file>
         <file>ChatView/ChatTextArea/js/ChatTextAreaUtils.mjs</file>
         <file>ChatView/Popups/ImageViewerPopup.qml</file>
-        <file>SideBar/popups/SettingsComponents/SettingsListItem.qml</file>
-        <file>SideBar/popups/SettingsComponents/Profile.qml</file>
-        <file>SideBar/popups/SettingsComponents/Notifications.qml</file>
-        <file>SideBar/popups/SettingsComponents/Appearance.qml</file>
-        <file>SideBar/popups/SettingsComponents/Privacy.qml</file>
-        <file>SideBar/popups/SettingsComponents/Advanced.qml</file>
-        <file>SideBar/popups/SettingsComponents/Storage.qml</file>
-        <file>SideBar/popups/SettingsComponents/Feedback.qml</file>
-        <file>SideBar/popups/SettingsComponents/ConfSwitch.qml</file>
-        <file>SideBar/popups/SettingsComponents/ConfRadio.qml</file>
         <file>ChatView/ChatTextArea/FileAttachmentsComponent.qml</file>
         <file>ChatView/ChatTextArea/FileClip.qml</file>
         <file>ChatView/Popups/GalleryView.qml</file>

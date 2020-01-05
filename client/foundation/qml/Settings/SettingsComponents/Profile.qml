@@ -4,10 +4,9 @@ import QtQuick.Layouts 1.12
 import QtQuick.Dialogs 1.3
 import QtQuick.Shapes 1.13
 import LibHerald 1.0
-import "../../../common" as CMN
-import "qrc:/imports" as Imports
-import "qrc:/imports/Entity" as Entity
-import "qrc:/imports/js/utils.mjs" as Utils
+import '../../'
+import "../../Entity" as Entity
+import "../../js/utils.mjs" as Utils
 
 ColumnLayout {
 
@@ -16,13 +15,13 @@ ColumnLayout {
         Layout.rightMargin: CmnCfg.defaultMargin
         Layout.bottomMargin: CmnCfg.defaultMargin
 
-        Imports.StandardLabel {
+        StandardLabel {
             text: qsTr("Username: ")
             color: "black"
             Layout.leftMargin: CmnCfg.defaultMargin
             font: CmnCfg.defaultFont
         }
-        Imports.StandardLabel {
+        StandardLabel {
             text: Herald.config.configId
             color: CmnCfg.palette.black
             font: CmnCfg.defaultFont
@@ -83,7 +82,7 @@ ColumnLayout {
             }
         }
 
-        Imports.BorderedTextField {
+        BorderedTextField {
             id: displayName
             text: Herald.config.name
             selectByMouse: true
@@ -100,7 +99,7 @@ ColumnLayout {
             Layout.preferredWidth: displayName.contentWidth
         }
 
-        Imports.IconButton {
+        IconButton {
             id: displayNameEditButton
             fill: CmnCfg.palette.black
             source: "qrc:/pencil-icon.svg"
