@@ -19,9 +19,10 @@ Popup {
     property var ownedMessages: parent.ownedMessages
     property var receiptData
     property var outbound: messageData.author === Herald.config.configId
+    modal: true
 
     height: chatView.height
-    width: chatView.width
+    width: parent.width
     anchors.centerIn: parent
     onClosed: messageInfoLoader.active = false
     padding: 0
@@ -51,7 +52,6 @@ Popup {
         id: header
         anchors.top: parent.top
         anchors.left: parent.left
-        anchors.leftMargin: 1
         anchors.right: parent.right
         height: CmnCfg.toolbarHeight + 1
         color: CmnCfg.palette.offBlack
@@ -66,14 +66,8 @@ Popup {
             font.family: CmnCfg.labelFont.name
         }
     }
-    Rectangle {
-        anchors.right: header.left
-        color: CmnCfg.palette.lightGrey
-        width: 1
-        height: CmnCfg.palette.toolbarHeight
-    }
     Flickable {
-        width: chatView.width
+        width: parent.width
         anchors.top: header.bottom
         anchors.bottom: parent.bottom
         contentWidth: width

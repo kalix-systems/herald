@@ -20,9 +20,10 @@ Popup {
 
     padding: 0
     height: chatView.height
-    width: chatView.width
+    width: parent.width
     anchors.centerIn: parent
     onClosed: groupSettingsLoader.active = false
+    modal: true
 
     background: Rectangle {
         id: background
@@ -46,7 +47,6 @@ Popup {
         id: header
         anchors.top: parent.top
         anchors.left: parent.left
-        anchors.leftMargin: 1
         anchors.right: parent.right
         height: CmnCfg.toolbarHeight + 1
         color: CmnCfg.palette.offBlack
@@ -61,15 +61,9 @@ Popup {
             font.family: CmnCfg.labelFont.name
         }
     }
-    Rectangle {
-        anchors.right: header.left
-        color: CmnCfg.palette.lightGrey
-        width: 1
-        height: CmnCfg.palette.toolbarHeight
-    }
 
     Flickable {
-        width: chatView.width
+        width: parent.width
         anchors.top: header.bottom
         anchors.bottom: parent.bottom
         contentWidth: width
