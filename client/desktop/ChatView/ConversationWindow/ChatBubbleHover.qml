@@ -27,65 +27,59 @@ MouseArea {
         width: buttonRow.width
         height: buttonRow.height
         z: CmnCfg.overlayZ
-        color: bubbleActual.aux ? "transparent" : "white"
+        color: "transparent" //CmnCfg.palette.offBlack // bubbleActual.aux ? "transparent" : "white"
         visible: chatBubbleHitbox.containsMouse || parentBubble.hoverHighlight
-
-        Rectangle {
-            anchors.fill: parent
-            color: bubbleActual.aux ? "transparent" : bubbleActual.highlightItem.color
-            opacity: 0.2
-        }
 
         anchors {
             right: parent.right
             rightMargin: CmnCfg.microMargin
             top: parent.top
-            topMargin: CmnCfg.smallMargin
+            topMargin: 6
         }
 
-        Grid {
+        Row {
             id: buttonRow
             anchors.right: parent.right
             property bool colMode: reply && !isHead
-            columns: {
-                if (colMode) {
-                    return 1
-                } else {
-                    return download ? 4 : 3
-                }
-            }
-            flow: {
-                if (colMode)
-                    Grid.TopToBottom
-                else
-                    Grid.LeftToRight
-            }
-
-            width: if (colMode) {
-                       return 22
-                   }
-
             topPadding: 0
             bottomPadding: 0
-            spacing: CmnCfg.smallMargin
+            spacing: CmnCfg.microMargin
+            anchors.top: parent.top
 
             Imports.IconButton {
                 id: replyButton
                 anchors.margins: CmnCfg.defaultMargin
+                fill: CmnCfg.palette.offBlack
                 source: "qrc:/reply-icon.svg"
                 z: CmnCfg.overlayZ
+                icon.width: 14
+                icon.height: 14
+                padding: CmnCfg.microMargin
                 // changing the opId transfers focus to the compose field
                 onClicked: ownedConversation.builder.opId = msgId
+                background: Rectangle {
+                    border.color: CmnCfg.palette.offBlack
+                    border.width: 1
+                    color: CmnCfg.palette.white
+                }
             }
             Imports.IconButton {
                 id: reactButton
                 anchors.margins: visible ? CmnCfg.defaultMargin : 0
                 z: CmnCfg.overlayZ
-                icon.width: visible ? 24 : 0
+                icon.width: visible ? 14 : 0
+                icon.height: 14
                 source: "qrc:/upside-down-emoji-icon.svg"
+                fill: CmnCfg.palette.offBlack
+                padding: CmnCfg.microMargin
                 onClicked: {
                     reactPopup.active = true
                     emojiMenu.open()
+                }
+                background: Rectangle {
+                    border.color: CmnCfg.palette.offBlack
+                    border.width: 1
+                    color: CmnCfg.palette.white
                 }
             }
             Imports.IconButton {
@@ -93,16 +87,33 @@ MouseArea {
                 visible: download
                 anchors.margins: visible ? CmnCfg.defaultMargin : 0
                 z: CmnCfg.overlayZ
-                icon.width: visible ? 22 : 0
+                fill: CmnCfg.palette.offBlack
+                icon.width: visible ? 14 : 0
+                icon.height: 14
+                padding: CmnCfg.microMargin
                 source: "qrc:/download-icon.svg"
                 onClicked: downloadFileChooser.open()
+                background: Rectangle {
+                    border.color: CmnCfg.palette.offBlack
+                    border.width: 1
+                    color: CmnCfg.palette.white
+                }
             }
             Imports.IconButton {
                 id: messageOptionsButton
                 anchors.margins: CmnCfg.defaultMargin
                 source: "qrc:/options-icon.svg"
                 z: CmnCfg.overlayZ
+                icon.width: 14
+                icon.height: 14
+                padding: CmnCfg.microMargin
                 onClicked: messageOptionsMenu.open()
+                fill: CmnCfg.palette.offBlack
+                background: Rectangle {
+                    border.color: CmnCfg.palette.offBlack
+                    border.width: 1
+                    color: CmnCfg.palette.white
+                }
             }
 
             Popups.MessageOptionsPopup {
