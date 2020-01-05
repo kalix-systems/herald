@@ -19,12 +19,11 @@ Row {
         clip: true
         color: "transparent"
         Image {
-            property var aspectRatio: firstImage.width / firstImage.height
+            property var dims: JSON.parse(Herald.utils.imageScaling(
+                                              firstImage.path, parent.height))
             source: "file:" + firstImage.path
-            sourceSize.height: aspectRatio > 1 ? 150 : 150 / aspectRatio
-            sourceSize.width: aspectRatio > 1 ? 150 * aspectRatio : 150
-            height: aspectRatio > 1 ? 150 : 150 / aspectRatio
-            width: aspectRatio > 1 ? 150 * aspectRatio : 150
+            sourceSize.height: dims.height
+            sourceSize.width: dims.width
             anchors.centerIn: parent
             mipmap: false
             asynchronous: true
@@ -43,12 +42,11 @@ Row {
             clip: true
             color: "transparent"
             Image {
-                property var aspectRatio: secondImage.width / secondImage.height
+                property var dims: JSON.parse(Herald.utils.imageScaling(
+                                                  secondImage.path, 150))
                 source: "file:" + secondImage.path
-                sourceSize.height: aspectRatio > 1 ? 150 : 150 / aspectRatio
-                sourceSize.width: aspectRatio > 1 ? 150 * aspectRatio : 150
-                height: aspectRatio > 1 ? 150 : 150 / aspectRatio
-                width: aspectRatio > 1 ? 150 * aspectRatio : 150
+                sourceSize.height: dims.height
+                sourceSize.width: dims.width
                 anchors.centerIn: parent
                 mipmap: false
                 asynchronous: true
@@ -69,12 +67,11 @@ Row {
                 clip: true
                 color: "transparent"
                 Image {
-                    property var aspectRatio: thirdImage.width / thirdImage.height
+                    property var dims: JSON.parse(Herald.utils.imageScaling(
+                                                      thirdImage.path, 75))
                     source: "file:" + thirdImage.path
-                    sourceSize.height: aspectRatio > 1 ? 150 : 150 / aspectRatio
-                    sourceSize.width: aspectRatio > 1 ? 150 * aspectRatio : 150
-                    height: aspectRatio > 1 ? 75 : 75 / aspectRatio
-                    width: aspectRatio > 1 ? 75 * aspectRatio : 75
+                    sourceSize.height: dims.height
+                    sourceSize.width: dims.width
                     anchors.centerIn: parent
                     mipmap: false
                     asynchronous: true
@@ -91,12 +88,12 @@ Row {
                 clip: true
                 color: "transparent"
                 Image {
-                    property var aspectRatio: fourthImage.width / fourthImage.height
+                    property var dims: JSON.parse(Herald.utils.imageScaling(
+                                                      fourthImage.path, 75))
+
                     source: "file:" + fourthImage.path
-                    sourceSize.height: aspectRatio > 1 ? 75 : 75 / aspectRatio
-                    sourceSize.width: aspectRatio > 1 ? 75 * aspectRatio : 75
-                    height: aspectRatio > 1 ? 75 : 75 / aspectRatio
-                    width: aspectRatio > 1 ? 75 * aspectRatio : 75
+                    sourceSize.height: dims.height
+                    sourceSize.width: dims.width
                     anchors.centerIn: parent
                     mipmap: false
                     asynchronous: true

@@ -174,16 +174,14 @@ fn image_scaling_dims(
 ) -> Dims {
     let (width, height, scale) = (width as f32, height as f32, scale as f32);
 
-    let aspect_ratio = width / height;
-
-    let (width, height) = if aspect_ratio > 1.0 {
-        (scale, scale * aspect_ratio)
+    let (width, height) = if width > height {
+        (scale * width / height, scale)
     } else {
-        (scale / aspect_ratio, scale)
+        (scale, scale * height / width)
     };
 
     Dims {
-        width: width as u32,
-        height: height as u32,
+        width: width.ceil().max(scale) as u32,
+        height: height.ceil().max(scale) as u32,
     }
 }

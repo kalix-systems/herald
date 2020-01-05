@@ -124,9 +124,7 @@ Window {
 
             Settings.SettingsPane {
                 id: settingsPane
-                cropCallbackArg: function (imageDimensions, fileUrl) {
-                    imageCrop.imageWidth = imageDimensions.width
-                    imageCrop.imageHeight = imageDimensions.height
+                cropCallbackArg: function (fileUrl) {
                     imageCrop.imageSource = fileUrl
                     imageCrop.show()
                 }

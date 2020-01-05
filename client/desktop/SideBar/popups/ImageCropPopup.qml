@@ -9,11 +9,8 @@ import "../../common" as Common
 
 Window {
     id: cropWindow
-    property real imageWidth
-    property real imageHeight
     property url imageSource
-    property real aspectRatio: imageWidth / imageHeight
-    property real maxSize: Math.min(300, 300 / aspectRatio, 300 * aspectRatio)
+    property real maxSize: 300
     property int maxWindowSize: 400
     property int minSize: Math.round(maxSize / 6)
     color: CmnCfg.palette.black
@@ -53,10 +50,18 @@ Window {
 
     Image {
         id: image
+        onSourceChanged: {
+            if (source !== undefined)
+                dims = JSON.parse(Herald.utils.imageScaling(
+                                      Herald.utils.stripUrlPrefix(
+                                          image.source), 300))
+        }
+        property var dims
         anchors.centerIn: parent
         source: imageSource
-        sourceSize.height: aspectRatio > 1 ? 300 / aspectRatio : 300
-        sourceSize.width: aspectRatio > 1 ? 300 : 300 * aspectRatio
+
+        sourceSize.height: dims === undefined ? 0 : dims.height
+        sourceSize.width: dims === undefined ? 0 : dims.width
         width: sourceSize.width
         height: sourceSize.height
 
@@ -140,9 +145,6 @@ Window {
 
                 onPressed: {
                     clipRect.anchors.centerIn = null
-                }
-                onReleased: {
-
                 }
             }
         }

@@ -23,12 +23,12 @@ Row {
         color: "transparent"
         Image {
             id: image1
-            property var aspectRatio: firstImage.width / firstImage.height
+
+            property var dims: JSON.parse(Herald.utils.imageScaling(
+                                              firstImage.path, parent.height))
             source: "file:" + firstImage.path
-            sourceSize.height: aspectRatio > 1 ? 150 : 150 / aspectRatio
-            sourceSize.width: aspectRatio > 1 ? 150 * aspectRatio : 150
-            height: aspectRatio > 1 ? 150 : 150 / aspectRatio
-            width: aspectRatio > 1 ? 150 * aspectRatio : 150
+            sourceSize.height: dims.height
+            sourceSize.width: dims.width
             anchors.centerIn: parent
             fillMode: Image.PreserveAspectFit
             mipmap: false
@@ -50,12 +50,12 @@ Row {
 
             Image {
                 id: image2
-                property var aspectRatio: secondImage.width / secondImage.height
+                property var dims: JSON.parse(Herald.utils.imageScaling(
+                                                  secondImage.path,
+                                                  wrapperRow.height))
                 source: "file:" + secondImage.path
-                sourceSize.height: aspectRatio > 1 ? 150 : 150 / aspectRatio
-                sourceSize.width: aspectRatio > 1 ? 150 * aspectRatio : 150
-                height: aspectRatio > 1 ? 150 : 150 / aspectRatio
-                width: aspectRatio > 1 ? 150 * aspectRatio : 150
+                sourceSize.height: dims.height
+                sourceSize.width: dims.width
                 anchors.centerIn: parent
                 fillMode: Image.PreserveAspectFit
                 mipmap: false
@@ -75,12 +75,12 @@ Row {
             color: "transparent"
             Image {
                 id: image3
-                property var aspectRatio: thirdImage.width / thirdImage.height
+                property var dims: JSON.parse(Herald.utils.imageScaling(
+                                                  thirdImage.path,
+                                                  wrapperRow.height))
                 source: "file:" + thirdImage.path
-                sourceSize.height: aspectRatio > 1 ? 150 : 150 / aspectRatio
-                sourceSize.width: aspectRatio > 1 ? 150 * aspectRatio : 150
-                height: aspectRatio > 1 ? 150 : 150 / aspectRatio
-                width: aspectRatio > 1 ? 150 * aspectRatio : 150
+                sourceSize.height: dims.height
+                sourceSize.width: dims.width
                 fillMode: Image.PreserveAspectFit
                 anchors.centerIn: parent
                 mipmap: false

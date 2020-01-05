@@ -24,17 +24,10 @@ impl From<MediaMeta> for json::JsonValue {
     fn from(meta: MediaMeta) -> json::JsonValue {
         use json::object;
 
-        let MediaMeta {
-            path,
-            width,
-            height,
-            name,
-        } = meta;
+        let MediaMeta { path, name } = meta;
 
         object! {
             "path" => path,
-            "width" => width,
-            "height" => height,
             "name" => name,
         }
     }

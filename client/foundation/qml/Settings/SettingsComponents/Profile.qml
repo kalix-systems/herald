@@ -72,11 +72,8 @@ ColumnLayout {
                     width: cornerCarat.width * 0.2
                     cursorShape: Qt.PointingHandCursor
                     onClicked: {
-                        print(Herald.config.profilePicture)
-                        const imageDimensions = JSON.parse(
-                                                  Herald.utils.imageDimensions(
-                                                      "file://" + Herald.config.profilePicture))
-                        print("opening the crop window not yet implemented")
+
+                        //  cropCallbackArg(Herald.config.profilePicture)
                     }
                 }
 
@@ -156,9 +153,7 @@ ColumnLayout {
         nameFilters: ["(*.jpg *.png *.jpeg)"]
         onSelectionAccepted: {
 
-            const imageDimensions = JSON.parse(
-                                      Herald.utils.imageDimensions(fileUrl))
-            cropCallbackArg(imageDimensions, fileUrl)
+            cropCallbackArg(fileUrl)
         }
     }
 

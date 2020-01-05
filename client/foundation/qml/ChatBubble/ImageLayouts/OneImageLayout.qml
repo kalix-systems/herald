@@ -8,15 +8,16 @@ Row {
 
     height: image.height
     property var firstImage
-    property var aspectRatio: firstImage.width / firstImage.height
     property var imageClickedCallBack: function () {
         throw "undefined callback"
     }
+    property var dims: JSON.parse(Herald.utils.imageScaling(firstImage.path,
+                                                            300))
 
     Image {
         id: image
-        sourceSize.width: aspectRatio < 1 ? 300 * aspectRatio : 300
-        sourceSize.height: aspectRatio < 1 ? 300 : 300 / aspectRatio
+        sourceSize.width: dims.width
+        sourceSize.height: dims.height
         source: "file:" + firstImage.path
         fillMode: Image.PreserveAspectCrop
         asynchronous: true
