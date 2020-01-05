@@ -48,16 +48,51 @@ Window {
         width: sourceSize.width
         height: sourceSize.height
 
-        onSourceChanged: print(sourceSize.height, sourceSize.width,
-                               height, width)
+        Rectangle {
+            id: top
+            anchors.top: image.top
+            anchors.bottom: clipRect.top
+            anchors.left: left.right
+            anchors.right: image.right
+            color: CmnCfg.palette.black
+            opacity: 0.5
+        }
 
-        // fillMode: Image.PreserveAspectFit
+        Rectangle {
+            id: right
+            anchors.left: clipRect.right
+            anchors.right: image.right
+            anchors.top: top.bottom
+            anchors.bottom: image.bottom
+            color: CmnCfg.palette.black
+            opacity: 0.5
+        }
+
+        Rectangle {
+            id: left
+            anchors.right: clipRect.left
+            anchors.left: image.left
+            anchors.bottom: bottom.top
+            anchors.top: image.top
+            color: CmnCfg.palette.black
+            opacity: 0.5
+        }
+
+        Rectangle {
+            id: bottom
+            anchors.bottom: image.bottom
+            anchors.top: clipRect.bottom
+            anchors.right: right.left
+            anchors.left: image.left
+            color: CmnCfg.palette.black
+            opacity: 0.5
+        }
+
         Rectangle {
             id: clipRect
             width: Math.min(image.width, image.height)
             height: width
-            color: CmnCfg.palette.darkGrey
-            opacity: 0.5
+            color: "transparent"
             anchors.centerIn: parent
 
             onWidthChanged: {
@@ -79,7 +114,6 @@ Window {
                     y = 0
                 }
             }
-
             MouseArea {
                 width: parent.width
                 height: parent.height
@@ -92,11 +126,10 @@ Window {
                 drag.maximumY: image.height - clipRect.height
 
                 onPressed: {
-                    clipRect.color = CmnCfg.palette.offBlack
                     clipRect.anchors.centerIn = null
                 }
                 onReleased: {
-                    clipRect.color = CmnCfg.palette.darkGrey
+
                 }
             }
         }
@@ -118,7 +151,7 @@ Window {
             drag.axis: Drag.XandYAxis
             drag.maximumX: image.width - clipRect.x
             drag.maximumY: image.height - clipRect.y
-
+            cursorShape: Qt.SizeFDiagCursor
             onMouseXChanged: if (drag.active) {
                                  clipRect.width += Math.min(
                                              mouseX, maxSize - clipRect.width)

@@ -3,7 +3,7 @@ import QtQuick 2.13
 import QtQuick.Controls 2.13
 import QtQuick.Layouts 1.12
 import QtQuick.Dialogs 1.3
-import Qt.labs.platform 1.1
+//import Qt.labs.platform 1.1
 import Qt.labs.settings 1.0
 import QtQuick.Shapes 1.13
 import LibHerald 1.0
