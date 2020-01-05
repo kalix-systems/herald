@@ -49,6 +49,12 @@ Item {
         }
     }
 
+    MouseArea {
+        anchors.fill: parent
+        z: parent.z - 1
+        hoverEnabled: true
+    }
+
     Item {
         id: header
         height: 30 //enough for search bar of default size w/ margins
@@ -177,6 +183,8 @@ Item {
             left: parent.left
             margins: CmnCfg.smallMargin
         }
+        // z is higher than mouse area capturing events behind parent to prevent chat bubble flicker
+        z: parent.z + 1
 
         Loader {
             id: listLoader
@@ -213,6 +221,8 @@ Item {
     Item {
         id: footer
 
+        // z is higher than mouse area capturing events behind parent to prevent chat bubble flicker
+        z: parent.z + 1
         anchors.bottom: parent.bottom
         width: parent.width
         height: 30
