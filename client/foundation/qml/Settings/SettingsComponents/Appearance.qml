@@ -3,15 +3,14 @@ import QtQuick.Controls 2.13
 import QtQuick.Layouts 1.12
 import QtQuick.Dialogs 1.3
 import LibHerald 1.0
-import "../../../common" as CMN
-import "qrc:/imports" as Imports
+import '../../'
 
 GridLayout {
     columns: 2
     rows: 1
     columnSpacing: 0
 
-    Imports.StandardLabel {
+    StandardLabel {
         text: qsTr("Theme")
         color: "black"
         font: CmnCfg.defaultFont

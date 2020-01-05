@@ -10,12 +10,12 @@ Column {
         right: parent.right
         left: parent.left
     }
+
     Label {
         text: headerText
-        font.family: CmnCfg.labelFont.name
-        font.weight: Font.DemiBold
-        font.pixelSize: CmnCfg.headerFontSize
+        font: CmnCfg.sectionHeaderFont
     }
+
     Loader {
         anchors {
             right: parent.right

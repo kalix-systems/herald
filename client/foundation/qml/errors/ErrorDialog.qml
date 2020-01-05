@@ -1,6 +1,6 @@
-import QtQuick 2.0
+import QtQuick 2.13
 import LibHerald 1.0
-import Qt.labs.platform 1.1
+import QtQuick.Dialogs 1.3
 
 MessageDialog {
     property string errorMsg

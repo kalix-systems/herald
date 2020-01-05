@@ -126,7 +126,7 @@ Item {
                     anchors.leftMargin: CmnCfg.megaMargin
                     anchors.verticalCenter: parent.verticalCenter
                     text: qsTr("Herald")
-                    font: CmnCfg.headerBarFont
+                    font: CmnCfg.headerFont
                     color: CmnCfg.palette.white
                 }
             }
