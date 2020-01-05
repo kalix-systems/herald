@@ -40,7 +40,6 @@ MouseArea {
         Row {
             id: buttonRow
             anchors.right: parent.right
-            property bool colMode: reply && !isHead
             topPadding: 0
             bottomPadding: 0
             spacing: CmnCfg.microMargin
