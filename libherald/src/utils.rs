@@ -185,6 +185,6 @@ mod tests {
     fn strip_qrc() {
         let path = "file:///what/a/path".into();
 
-        assert_eq!("/what/a/path", super::strip_qrc(path).unwrap());
+        assert_eq!("///what/a/path", super::strip_qrc(path).unwrap());
     }
 }
