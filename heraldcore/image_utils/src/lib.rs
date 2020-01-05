@@ -5,8 +5,6 @@ use std::path::Path;
 pub use image::image_dimensions;
 pub use image::ImageError;
 
-const IMAGE_SIZE: u32 = 300;
-
 pub struct Dims {
     pub width: u32,
     pub height: u32,
@@ -37,6 +35,8 @@ pub struct ProfilePicture {
 }
 
 impl ProfilePicture {
+    const SIZE: u32 = 300;
+
     pub fn from_json_string(j: String) -> Option<Self> {
         let val = json::parse(&j).ok()?;
 
@@ -84,11 +84,28 @@ pub fn update_picture(
 ) -> Result<String, image::ImageError> {
     std::fs::create_dir_all(pictures_dir())?;
 
+    let (src_width, src_height) = image_dimensions(&path)?;
+    let Dims {
+        width: scaled_width,
+        ..
+    } = image_scaling_dims(src_width, src_height, ProfilePicture::SIZE);
+
+    let t = |a| ((a as f32) * (src_width as f32) / (scaled_width as f32)) as u32;
+
+    let x = t(x);
+    let y = t(y);
+    let width = t(width);
+    let height = t(height);
+
     let image_path = image_path();
 
     image::open(path)?
         .crop(x, y, width, height)
-        .resize_exact(IMAGE_SIZE, IMAGE_SIZE, FilterType::Nearest)
+        .resize_exact(
+            ProfilePicture::SIZE,
+            ProfilePicture::SIZE,
+            FilterType::Nearest,
+        )
         .save_with_format(&image_path, ImageFormat::PNG)?;
 
     Ok(image_path)
@@ -105,7 +122,7 @@ where
     let image_path = image_path();
 
     image::open(path)?
-        .crop(0, 0, IMAGE_SIZE, IMAGE_SIZE)
+        .crop(0, 0, ProfilePicture::SIZE, ProfilePicture::SIZE)
         .save_with_format(&image_path, ImageFormat::PNG)?;
 
     Ok(image_path)
@@ -121,7 +138,7 @@ where
     let image_path = image_path();
 
     image::load_from_memory(buf)?
-        .crop(0, 0, IMAGE_SIZE, IMAGE_SIZE)
+        .crop(0, 0, ProfilePicture::SIZE, ProfilePicture::SIZE)
         .save_with_format(&image_path, ImageFormat::PNG)?;
 
     Ok(image_path)
@@ -147,6 +164,14 @@ where
     P: AsRef<Path>,
 {
     let (width, height) = image_dimensions(source)?;
+    Ok(image_scaling_dims(width, height, scale))
+}
+
+fn image_scaling_dims(
+    width: u32,
+    height: u32,
+    scale: u32,
+) -> Dims {
     let (width, height, scale) = (width as f32, height as f32, scale as f32);
 
     let aspect_ratio = width / height;
@@ -157,8 +182,8 @@ where
         (scale / aspect_ratio, scale)
     };
 
-    Ok(Dims {
+    Dims {
         width: width as u32,
         height: height as u32,
-    })
+    }
 }
