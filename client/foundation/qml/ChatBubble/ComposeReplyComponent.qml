@@ -58,7 +58,6 @@ Rectangle {
             imageClipLoader.item.count
                     = (media.num_more === 0) ? media.items.length - 1 : media.items.length
                                                - 1 + media.num_more
-            imageClipLoader.item.aspectRatio = media.items[0].width / media.items[0].height
         }
     }
 

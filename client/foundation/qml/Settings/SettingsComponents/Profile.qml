@@ -139,9 +139,7 @@ ColumnLayout {
         nameFilters: ["(*.jpg *.png *.jpeg)"]
         onSelectionAccepted: {
 
-            const imageDimensions = JSON.parse(
-                                      Herald.utils.imageDimensions(fileUrl))
-            cropCallbackArg(imageDimensions, fileUrl)
+            cropCallbackArg(fileUrl)
         }
     }
 

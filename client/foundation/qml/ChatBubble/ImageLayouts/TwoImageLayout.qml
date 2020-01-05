@@ -17,13 +17,12 @@ Row {
         width: height
         clip: true
         color: "transparent"
+        property var dims: JSON.parse(Herald.utils.imageScaling(
+                                          firstImage.path, 150))
         Image {
-            property var aspectRatio: firstImage.width / firstImage.height
             source: "file:" + firstImage.path
-            sourceSize.height: aspectRatio > 1 ? 150 : 150 / aspectRatio
-            sourceSize.width: aspectRatio > 1 ? 150 * aspectRatio : 150
-            height: aspectRatio > 1 ? 150 : 150 / aspectRatio
-            width: aspectRatio > 1 ? 150 * aspectRatio : 150
+            sourceSize.height: parent.dims.height
+            sourceSize.width: parent.dims.width
             anchors.centerIn: parent
             fillMode: Image.PreserveAspectFit
             asynchronous: true
@@ -39,13 +38,12 @@ Row {
         width: height
         clip: true
         color: "transparent"
+        property var dims: JSON.parse(Herald.utils.imageScaling(
+                                          secondImage.path, 150))
         Image {
-            property var aspectRatio: secondImage.width / secondImage.height
             source: "file:" + secondImage.path
-            sourceSize.height: aspectRatio > 1 ? 150 : 150 / aspectRatio
-            sourceSize.width: aspectRatio > 1 ? 150 * aspectRatio : 150
-            height: aspectRatio > 1 ? 150 : 150 / aspectRatio
-            width: aspectRatio > 1 ? 150 * aspectRatio : 150
+            sourceSize.height: parent.dims.height
+            sourceSize.width: parent.dims.width
             fillMode: Image.PreserveAspectFit
             anchors.centerIn: parent
             asynchronous: true

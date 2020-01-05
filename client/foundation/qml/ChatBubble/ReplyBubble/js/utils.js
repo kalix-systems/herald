@@ -25,5 +25,4 @@ function parseMedia(modelData, imageClip) {
     imageClip.imageSource = "file:" + media.items[0].path
     imageClip.count = (media.num_more === 0) ? media.items.length - 1 : media.num_more
                                                + media.items.length - 1
-    imageClip.aspectRatio = media.items[0].width / media.items[0].height
 }

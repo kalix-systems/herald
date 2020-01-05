@@ -1,15 +1,14 @@
 /// Strips `qrc` prefix from paths passed from QML.
 #[cfg(not(target_os = "ios"))]
-pub fn strip_qrc(mut path: String) -> Option<String> {
-    if path.len() < 7 {
-        None
-    } else {
-        Some(path.split_off(7))
-    }
+pub fn strip_qrc(path: String) -> Option<String> {
+    let mut chars = path.chars();
+    (&mut chars).skip_while(|&c| c != ':').next()?;
+
+    Some(chars.collect())
 }
 
-/// On Ios there are no QRC prefixes on directories
-/// from QT, this function is effectively a no-op
+/// On iOS there are no QRC prefixes on directories
+/// from Qt, this function is effectively a no-op
 #[cfg(target_os = "ios")]
 pub fn strip_qrc(path: String) -> Option<String> {
     Some(path)

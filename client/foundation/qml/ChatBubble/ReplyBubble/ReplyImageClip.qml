@@ -7,7 +7,6 @@ import QtQuick 2.13
 import QtGraphicalEffects 1.0
 
 Rectangle {
-    property real aspectRatio
     property url imageSource
     property int count: 0
     property int clipSize: 64
@@ -19,8 +18,15 @@ Rectangle {
 
     Image {
         id: replyImage
-        sourceSize.width: parent.aspectRatio < 1 ? clipSize : clipSize * parent.aspectRatio
-        sourceSize.height: parent.aspectRatio < 1 ? clipSize / parent.aspectRatio : clipSize
+        onSourceChanged: if (source !== undefined) {
+                             dims = JSON.parse(Herald.utils.imageScaling(
+                                                   Herald.utils.stripUrlPrefix(
+                                                       source), clipSize))
+                         }
+
+        property var dims
+        sourceSize.width: dims === undefined ? 0 : dims.width
+        sourceSize.height: dims === undefined ? 0 : dims.height
         anchors.centerIn: parent
         source: parent.imageSource
     }
