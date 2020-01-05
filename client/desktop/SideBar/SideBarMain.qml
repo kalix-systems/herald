@@ -13,10 +13,6 @@ Page {
     property real windowFraction: width / root.width
     readonly property real maxWindowFraction: 0.66
 
-    // maximum width, where root is ApplicationWindow
-    SplitView.maximumWidth: root.width * maxWindowFraction
-    SplitView.minimumWidth: 250
-    SplitView.preferredWidth: 300
     padding: 0 // All Interior Elements span the entire pane
 
     property alias sideBarState: sideBarState
