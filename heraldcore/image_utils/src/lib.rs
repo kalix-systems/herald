@@ -2,9 +2,28 @@ use image::{self, FilterType, ImageFormat};
 use platform_dirs::pictures_dir;
 use std::path::Path;
 
+pub use image::image_dimensions;
 pub use image::ImageError;
 
-const IMAGE_SIZE: u32 = 300;
+pub struct Dims {
+    pub width: u32,
+    pub height: u32,
+}
+
+impl From<(u32, u32)> for Dims {
+    fn from((width, height): (u32, u32)) -> Self {
+        Self { width, height }
+    }
+}
+
+impl From<Dims> for json::JsonValue {
+    fn from(Dims { width, height }: Dims) -> Self {
+        json::object! {
+            "width" => width,
+            "height" => height
+        }
+    }
+}
 
 /// Specifies a path to an image along with the intended cropping behavior
 pub struct ProfilePicture {
@@ -16,6 +35,8 @@ pub struct ProfilePicture {
 }
 
 impl ProfilePicture {
+    const SIZE: u32 = 300;
+
     pub fn from_json_string(j: String) -> Option<Self> {
         let val = json::parse(&j).ok()?;
 
@@ -63,11 +84,28 @@ pub fn update_picture(
 ) -> Result<String, image::ImageError> {
     std::fs::create_dir_all(pictures_dir())?;
 
+    let (src_width, src_height) = image_dimensions(&path)?;
+    let Dims {
+        width: scaled_width,
+        ..
+    } = image_scaling_dims(src_width, src_height, ProfilePicture::SIZE);
+
+    let t = |a| ((a as f32) * (src_width as f32) / (scaled_width as f32)) as u32;
+
+    let x = t(x);
+    let y = t(y);
+    let width = t(width);
+    let height = t(height);
+
     let image_path = image_path();
 
     image::open(path)?
         .crop(x, y, width, height)
-        .resize_exact(IMAGE_SIZE, IMAGE_SIZE, FilterType::Nearest)
+        .resize_exact(
+            ProfilePicture::SIZE,
+            ProfilePicture::SIZE,
+            FilterType::Nearest,
+        )
         .save_with_format(&image_path, ImageFormat::PNG)?;
 
     Ok(image_path)
@@ -84,7 +122,7 @@ where
     let image_path = image_path();
 
     image::open(path)?
-        .crop(0, 0, IMAGE_SIZE, IMAGE_SIZE)
+        .crop(0, 0, ProfilePicture::SIZE, ProfilePicture::SIZE)
         .save_with_format(&image_path, ImageFormat::PNG)?;
 
     Ok(image_path)
@@ -100,7 +138,7 @@ where
     let image_path = image_path();
 
     image::load_from_memory(buf)?
-        .crop(0, 0, IMAGE_SIZE, IMAGE_SIZE)
+        .crop(0, 0, ProfilePicture::SIZE, ProfilePicture::SIZE)
         .save_with_format(&image_path, ImageFormat::PNG)?;
 
     Ok(image_path)
@@ -116,10 +154,34 @@ pub fn image_path() -> String {
     image_path.into_os_string().to_string_lossy().to_string()
 }
 
-/// Returns image dimensions
-pub fn image_dimensions<P>(source: P) -> Result<(u32, u32), image::ImageError>
+/// Given image dimensions and a constant, scales the smaller dimension down
+/// and makes the larger dimension equal to the constant
+pub fn image_scaling<P>(
+    source: P,
+    scale: u32,
+) -> Result<Dims, image::ImageError>
 where
     P: AsRef<Path>,
 {
-    Ok(image::image_dimensions(source)?)
+    let (width, height) = image_dimensions(source)?;
+    Ok(image_scaling_dims(width, height, scale))
+}
+
+fn image_scaling_dims(
+    width: u32,
+    height: u32,
+    scale: u32,
+) -> Dims {
+    let (width, height, scale) = (width as f32, height as f32, scale as f32);
+
+    let (width, height) = if width > height {
+        (scale * width / height, scale)
+    } else {
+        (scale, scale * height / width)
+    };
+
+    Dims {
+        width: width.ceil().max(scale) as u32,
+        height: height.ceil().max(scale) as u32,
+    }
 }

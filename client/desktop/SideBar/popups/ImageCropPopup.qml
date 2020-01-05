@@ -9,13 +9,12 @@ import "../../common" as Common
 
 Window {
     id: cropWindow
-    property real imageWidth
-    property real imageHeight
     property url imageSource
-    property real aspectRatio: imageWidth / imageHeight
-    property real maxSize: Math.min(imageWidth, imageHeight)
+    property real maxSize: 300
     property int maxWindowSize: 400
     property int minSize: Math.round(maxSize / 6)
+
+    color: "black"
 
     Button {
         anchors.top: parent.top
@@ -34,22 +33,71 @@ Window {
         }
     }
 
-    width: imageWidth + 100 //(aspectRatio > 1) ? maxWindowSize : maxWindowSize * aspectRatio
-    height: imageHeight + 100 //(aspectRatio > 1) ? maxWindowSize / aspectRatio : maxWindowSize
+    width: 400
+    height: 400
 
     Image {
         id: image
+        onSourceChanged: {
+            if (source !== undefined)
+                dims = JSON.parse(Herald.utils.imageScaling(
+                                      Herald.utils.stripUrlPrefix(
+                                          image.source), 300))
+        }
+        property var dims
         anchors.centerIn: parent
         source: imageSource
 
-        fillMode: Image.PreserveAspectFit
+        sourceSize.height: dims === undefined ? 0 : dims.height
+        sourceSize.width: dims === undefined ? 0 : dims.width
+        width: sourceSize.width
+        height: sourceSize.height
+
+        Rectangle {
+            id: top
+            anchors.top: image.top
+            anchors.bottom: clipRect.top
+            anchors.left: left.right
+            anchors.right: image.right
+            color: CmnCfg.palette.black
+            opacity: 0.5
+        }
+
+        Rectangle {
+            id: right
+            anchors.left: clipRect.right
+            anchors.right: image.right
+            anchors.top: top.bottom
+            anchors.bottom: image.bottom
+            color: CmnCfg.palette.black
+            opacity: 0.5
+        }
+
+        Rectangle {
+            id: left
+            anchors.right: clipRect.left
+            anchors.left: image.left
+            anchors.bottom: bottom.top
+            anchors.top: image.top
+            color: CmnCfg.palette.black
+            opacity: 0.5
+        }
+
+        Rectangle {
+            id: bottom
+            anchors.bottom: image.bottom
+            anchors.top: clipRect.bottom
+            anchors.right: right.left
+            anchors.left: image.left
+            color: CmnCfg.palette.black
+            opacity: 0.5
+        }
 
         Rectangle {
             id: clipRect
-            width: Math.min(imageWidth, imageHeight)
+            width: Math.min(image.width, image.height)
             height: width
-            color: CmnCfg.palette.darkGrey
-            opacity: 0.5
+            color: "transparent"
             anchors.centerIn: parent
 
             onWidthChanged: {
@@ -71,7 +119,6 @@ Window {
                     y = 0
                 }
             }
-
             MouseArea {
                 width: parent.width
                 height: parent.height
@@ -84,11 +131,7 @@ Window {
                 drag.maximumY: image.height - clipRect.height
 
                 onPressed: {
-                    clipRect.color = CmnCfg.palette.offBlack
                     clipRect.anchors.centerIn = null
-                }
-                onReleased: {
-                    clipRect.color = CmnCfg.palette.darkGrey
                 }
             }
         }
@@ -110,7 +153,7 @@ Window {
             drag.axis: Drag.XandYAxis
             drag.maximumX: image.width - clipRect.x
             drag.maximumY: image.height - clipRect.y
-
+            cursorShape: Qt.SizeFDiagCursor
             onMouseXChanged: if (drag.active) {
                                  clipRect.width += Math.min(
                                              mouseX, maxSize - clipRect.width)

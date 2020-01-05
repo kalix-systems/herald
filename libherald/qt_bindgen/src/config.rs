@@ -122,6 +122,9 @@ fn utils() -> Object {
         const imageDimensions(path: QString) => QString,
         // Strips QML URL prefix
         const stripUrlPrefix(path: QString) => QString,
+        // Given image dimensions and a constant, scales the smaller dimension down
+        // and makes the larger dimension equal to the constant
+        const imageScaling(path: QString, scale: QUint32) => QString,
     };
 
     obj! {

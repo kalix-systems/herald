@@ -3,7 +3,8 @@ use crate::utils::strip_qrc;
 use crate::{err, none, spawn};
 use std::fs;
 use std::path::PathBuf;
-/// A collection of pure functions that are used in QML.
+
+/// A collection of helper functions that are used in QML.
 pub struct Utils {
     emit: UtilsEmitter,
 }
@@ -72,6 +73,19 @@ impl UtilsTrait for Utils {
         url: String,
     ) -> String {
         crate::utils::strip_qrc(url).unwrap_or_default()
+    }
+
+    fn image_scaling(
+        &self,
+        path: String,
+        constant: u32,
+    ) -> String {
+        let dims = err!(
+            heraldcore::image_utils::image_scaling(path, constant),
+            Default::default()
+        );
+
+        json::JsonValue::from(dims).dump()
     }
 
     fn emit(&mut self) -> &mut UtilsEmitter {

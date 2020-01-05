@@ -115,8 +115,8 @@ Window {
                             hoverEnabled: true
                             anchors.fill: parent
                             cursorShape: Qt.PointingHandCursor
-                            onClicked: settingsPane.contentY =
-                                       settingsPane.mainColumn.children[index].y
+                            onClicked: settingsPane.contentY
+                                       = settingsPane.mainColumn.children[index].y
                         }
                     }
                 }
@@ -124,8 +124,11 @@ Window {
 
             Settings.SettingsPane {
                 id: settingsPane
+                cropCallbackArg: function (fileUrl) {
+                    imageCrop.imageSource = fileUrl
+                    imageCrop.show()
+                }
             }
-
         }
     }
 }

@@ -148,15 +148,7 @@ impl AttachmentMeta {
                         .into_string()
                         .map_err(Error::NonUnicodePath)?;
 
-                    let (width, height) =
-                        image_utils::image_dimensions(&path).map_err(Error::Image)?;
-
-                    items.push(MediaMeta {
-                        width,
-                        height,
-                        name,
-                        path,
-                    });
+                    items.push(MediaMeta { name, path });
 
                     limit -= 1;
                 }
@@ -238,8 +230,6 @@ impl AttachmentMeta {
 pub struct MediaMeta {
     pub path: String,
     pub name: String,
-    pub width: u32,
-    pub height: u32,
 }
 
 pub struct Media {

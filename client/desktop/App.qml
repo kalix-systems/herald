@@ -42,7 +42,6 @@ Item {
         onTriggered: refreshTime()
     }
 
-
     Loader {
         id: messageInfoLoader
         width: active ? chatView.width * 0.75 : 0
@@ -140,41 +139,73 @@ Item {
         }
     }
 
-    SplitView {
+    Item {
         id: rootSplitView
         anchors.fill: parent
-        orientation: Qt.Horizontal
+        property var splitHandle: splitHandleDrag
+
+        function splitHandleDrag(mouseX) {
+            if ((sideBar.width + mouseX) >= root.width * 0.6)
+                return
+            if ((sideBar.width + mouseX) <= root.width * 0.25)
+                return
+
+            sideBar.width += mouseX
+        }
+
+        // filler mouse area to pin split view cursor when in resize mode
+        MouseArea {
+            anchors.fill: parent
+            enabled: mouse.drag.active
+            cursorShape: if (enabled)
+                             Qt.SplitHCursor
+            z: enabled ? sideBar.z + 1 : rootSplitView.z - 1
+        }
 
         SideBarMain {
             id: sideBar
+            anchors.left: parent.left
+            height: parent.height
+            width: 300
         }
 
         Loader {
+            anchors.left: sideBar.right
             id: chatView
             property var currentConvoId
             sourceComponent: splash
-        }
+            width: appRoot.width - sideBar.width
+            height: appRoot.height
 
-        // TODO: combine these two rectangles and figure out width
-        handle: Item {
-            id: handle
-            implicitWidth: 1
             Rectangle {
-                id: toolBarHandle
-                implicitWidth: 1
-                color: CmnCfg.palette.offBlack
-                height: CmnCfg.toolbarHeight + 1
-                anchors {
-                    top: parent.top
+
+                anchors.horizontalCenter: parent.left
+                //  anchors.rightMargin: 2
+                width: 9
+                height: parent.height
+                color: "transparent"
+
+                Rectangle {
+                    anchors.right: parent.right
+                    anchors.bottom: parent.bottom
+                    width: 5
+                    height: parent.height - (CmnCfg.toolbarHeight + 2)
+                    color: CmnCfg.palette.offBlack
+                    z: parent.z + 1
                 }
-            }
+                MouseArea {
+                    id: mouse
+                    drag.target: parent
+                    anchors.fill: parent
+                    drag.axis: Drag.XAxis
+                    cursorShape: Qt.SplitHCursor
+                    preventStealing: drag.active
+                    drag.threshold: 0
 
-            Rectangle {
-                implicitWidth: 1
-                color: CmnCfg.palette.offBlack
-                anchors {
-                    top: toolBarHandle.bottom
-                    bottom: parent.bottom
+                    onMouseXChanged: {
+                        if (drag.active)
+                            rootSplitView.splitHandle(mouseX)
+                    }
                 }
             }
         }

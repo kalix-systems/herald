@@ -3,16 +3,15 @@ import QtQuick 2.13
 import QtQuick.Controls 2.13
 import QtQuick.Layouts 1.12
 import QtQuick.Dialogs 1.3
-import Qt.labs.platform 1.1
+//import Qt.labs.platform 1.1
 import Qt.labs.settings 1.0
 import QtQuick.Shapes 1.13
 import LibHerald 1.0
-import '../../'
+import "../../"
 import "../../Entity" as Entity
 import "../../js/utils.mjs" as Utils
 
 ColumnLayout {
-
     RowLayout {
         Layout.fillWidth: true
         Layout.rightMargin: CmnCfg.defaultMargin
@@ -131,27 +130,16 @@ ColumnLayout {
     }
 
     // TODO FileDialog doesn't work on mobile, pass in something that does
+    // RESPONSE: this basically needs to be a loader, or we could stop fetishizing code reuse
+    // even when it breaks things everywhere
     FileDialog {
         id: cfgPfp
         property bool pfpValid: true
         folder: shortcuts.desktop
         nameFilters: ["(*.jpg *.png *.jpeg)"]
-        onAccepted: {
-            var parsed = JSON.parse(Herald.utils.imageDimensions(fileUrl))
+        onSelectionAccepted: {
 
-            const picture = {
-                "width": Math.round(parsed.width),
-                "height": Math.round(parsed.height),
-                "x": 0,
-                "y": 0,
-                "path": Herald.utils.stripUrlPrefix(fileUrl)
-            }
-
-            Herald.config.setProfilePicture(JSON.stringify(picture))
-            //            imageCrop.imageWidth = parsed.width
-            //            imageCrop.imageHeight = parsed.height
-            //            imageCrop.imageSource = fileUrl
-            //            imageCrop.show()
+            cropCallbackArg(fileUrl)
         }
     }
 

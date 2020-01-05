@@ -2645,6 +2645,8 @@ bool utils_compare_byte_array(const Utils::Private *, const char *, int,
                               const char *, int);
 void utils_image_dimensions(const Utils::Private *, const ushort *, int,
                             QString *, qstring_set);
+void utils_image_scaling(const Utils::Private *, const ushort *, int, quint32,
+                         QString *, qstring_set);
 bool utils_is_valid_rand_id(const Utils::Private *, const char *, int);
 bool utils_save_file(const Utils::Private *, const ushort *, int,
                      const ushort *, int);
@@ -4534,6 +4536,11 @@ bool Utils::compareByteArray(const QByteArray &bs1,
 QString Utils::imageDimensions(const QString &path) const {
   QString s;
   utils_image_dimensions(m_d, path.utf16(), path.size(), &s, set_qstring);
+  return s;
+}
+QString Utils::imageScaling(const QString &path, quint32 scale) const {
+  QString s;
+  utils_image_scaling(m_d, path.utf16(), path.size(), scale, &s, set_qstring);
   return s;
 }
 bool Utils::isValidRandId(const QByteArray &bs) const {

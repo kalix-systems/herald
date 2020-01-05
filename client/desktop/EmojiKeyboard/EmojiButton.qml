@@ -1,8 +1,7 @@
 import QtQuick 2.13
-import QtQuick.Controls 2.13
+import QtQuick.Controls 2.14
 import LibHerald 1.0
 
-//PAUL: demagic all numbers and colors
 Label {
     property bool takesModifier
     property string baseEmoji
@@ -19,36 +18,30 @@ Label {
         }
     }
     property color lowlight: CmnCfg.palette.darkGrey
-    height: selector.height
-    width: selector.width
+    height: selector.height + CmnCfg.smallMargin
+    width: selector.width + CmnCfg.smallMargin
 
     MouseArea {
         id: hoverHandler
         anchors.fill: bg
         hoverEnabled: true
         propagateComposedEvents: true
-
-        onClicked: {
-            maskShape.send(resultEmoji, takesModifier)
-        }
+        onClicked: maskShape.send(resultEmoji, takesModifier)
     }
 
     background: Rectangle {
         id: bg
-        opacity: parent.pressed || hoverHandler.containsMouse ? 1.0 : 0.0
-        width: parent.width * 1.8
-        height: parent.height * 1.8
+        visible: parent.pressed || hoverHandler.containsMouse
+        anchors.fill: parent
         anchors.centerIn: parent
         color: lowlight
     }
 
     Text {
         id: selector
-        opacity: 1.0
         anchors.centerIn: parent
         color: "white"
         font.pixelSize: 15
         text: resultEmoji
-        elide: Text.ElideLeft
     }
 }
