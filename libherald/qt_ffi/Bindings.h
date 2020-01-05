@@ -1898,6 +1898,7 @@ public:
   Q_INVOKABLE bool compareByteArray(const QByteArray &bs1,
                                     const QByteArray &bs2) const;
   Q_INVOKABLE QString imageDimensions(const QString &path) const;
+  Q_INVOKABLE QString imageScaling(const QString &path, quint32 scale) const;
   Q_INVOKABLE bool isValidRandId(const QByteArray &bs) const;
   Q_INVOKABLE bool saveFile(const QString &fpath,
                             const QString &target_path) const;

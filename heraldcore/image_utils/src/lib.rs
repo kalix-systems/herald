@@ -2,6 +2,7 @@ use image::{self, FilterType, ImageFormat};
 use platform_dirs::pictures_dir;
 use std::path::Path;
 
+pub use image::image_dimensions;
 pub use image::ImageError;
 
 const IMAGE_SIZE: u32 = 300;
@@ -134,14 +135,6 @@ pub fn image_path() -> String {
     image_path.set_extension("png");
 
     image_path.into_os_string().to_string_lossy().to_string()
-}
-
-/// Returns image dimensions
-pub fn image_dimensions<P>(source: P) -> Result<(u32, u32), image::ImageError>
-where
-    P: AsRef<Path>,
-{
-    Ok(image::image_dimensions(source)?)
 }
 
 /// Given image dimensions and a constant, scales the smaller dimension down
