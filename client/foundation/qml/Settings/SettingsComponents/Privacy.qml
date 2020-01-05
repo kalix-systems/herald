@@ -2,9 +2,8 @@ import QtQuick 2.13
 import QtQuick.Controls 2.13
 import QtQuick.Layouts 1.12
 import LibHerald 1.0
-import "../../../common" as CMN
-import "qrc:/imports"
 import Qt.labs.platform 1.0
+import '../../'
 
 ColumnLayout {
     RowLayout {

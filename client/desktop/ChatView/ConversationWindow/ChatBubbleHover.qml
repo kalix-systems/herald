@@ -27,12 +27,12 @@ MouseArea {
         width: buttonRow.width
         height: buttonRow.height
         z: CmnCfg.overlayZ
-        color: "white"
+        color: bubbleActual.aux ? "transparent" : "white"
         visible: chatBubbleHitbox.containsMouse || parentBubble.hoverHighlight
 
         Rectangle {
             anchors.fill: parent
-            color: bubbleActual.authorColor
+            color: bubbleActual.aux ? "transparent" : bubbleActual.highlightItem.color
             opacity: 0.2
         }
 

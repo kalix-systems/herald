@@ -2,22 +2,17 @@ import QtQuick 2.13
 import QtQuick.Controls 2.13
 import QtQuick.Layouts 1.12
 import LibHerald 1.0
-import "../../Common" as CMN
-import "qrc:/imports"
+import '../../'
 
 ColumnLayout {
     spacing: CmnCfg.defaultMargin
-
-    Item {
-        height: CmnCfg.defaultMargin
-        width: 1
-    }
 
     StandardLabel {
         text: qsTr("Open help center")
         color: "#0066cc"
         Layout.leftMargin: CmnCfg.defaultMargin
-        font.pixelSize: CmnCfg.chatTextSize
+        Layout.topMargin: CmnCfg.smallMargin
+        font: CmnCfg.defaultFont
     }
 
     Rectangle {
@@ -30,7 +25,7 @@ ColumnLayout {
         text: qsTr("Report an issue")
         color: "#0066cc"
         Layout.leftMargin: CmnCfg.defaultMargin
-        font.pixelSize: CmnCfg.chatTextSize
+        font: CmnCfg.defaultFont
     }
 
     Rectangle {

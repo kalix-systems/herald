@@ -67,9 +67,20 @@
         <file>ChatBubble/ReplyBubble/ReplyAux.qml</file>
         <file>Entity/MessageSearchLabel.qml</file>
         <file>+android/FileDialogWrapper.qml</file>
-        <file>FileDialogWrapper.qml</file>
         <file>Entity/ContactLabel.qml</file>
         <file>ChatBubble/ReplyBubble/dyn/ReplyExpireInfo.qml</file>
         <file>TextButton.qml</file>
+        <file>Settings/SettingsComponents/Advanced.qml</file>
+        <file>Settings/SettingsComponents/Appearance.qml</file>
+        <file>Settings/SettingsComponents/ConfRadio.qml</file>
+        <file>Settings/SettingsComponents/ConfSwitch.qml</file>
+        <file>Settings/SettingsComponents/Feedback.qml</file>
+        <file>Settings/SettingsComponents/Notifications.qml</file>
+        <file>Settings/SettingsComponents/Privacy.qml</file>
+        <file>Settings/SettingsComponents/Profile.qml</file>
+        <file>Settings/SettingsComponents/SettingsListItem.qml</file>
+        <file>Settings/SettingsComponents/Storage.qml</file>
+        <file>Settings/SettingsPane.qml</file>
+        <file>FileDialogWrapper.qml</file>
     </qresource>
 </RCC>

@@ -146,6 +146,13 @@ impl Interface for Messages {
         self.delete_message_(index)
     }
 
+    fn delete_message_by_id(
+        &mut self,
+        id: ffi::MsgIdRef,
+    ) -> bool {
+        self.delete_message_by_id_(id)
+    }
+
     fn clear_conversation_history(&mut self) -> bool {
         self.clear_conversation_history_()
     }

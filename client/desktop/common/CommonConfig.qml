@@ -49,10 +49,17 @@ Item {
         })
 
     // default font for text in top bar headers
-    readonly property font headerBarFont: Qt.font({
+    readonly property font headerFont: Qt.font({
             "family": labelFont.name,
             "weight": Font.DemiBold,
             "letterSpacing": 1,
+            "pixelSize": headerFontSize
+        })
+
+    // default font for text in headings outside the top bar
+    readonly property font sectionHeaderFont: Qt.font({
+            "family": labelFont.name,
+            "weight": Font.DemiBold,
             "pixelSize": headerFontSize
         })
 

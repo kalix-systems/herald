@@ -13,22 +13,6 @@ ApplicationWindow {
     width: 300
     height: 500
 
-    ErrorDialog {
-        id: errPopup
-
-        Connections {
-            target: Herald.errors
-            onNewError: {
-                const errMsg = Herald.errors.nextError()
-
-                if (errMsg !== "") {
-                    errPopup.errorMsg = errMsg
-                    errPopup.open()
-                }
-            }
-        }
-    }
-
     MobileHelper {
         id: mobHelper
         Component.onCompleted: {

@@ -323,6 +323,11 @@ pub trait MessagesTrait {
         row_index: u64,
     ) -> bool;
 
+    fn delete_message_by_id(
+        &mut self,
+        id: &[u8],
+    ) -> bool;
+
     fn index_by_id(
         &self,
         msg_id: &[u8],
@@ -789,6 +794,17 @@ pub unsafe extern "C" fn messages_delete_message(
 ) -> bool {
     let obj = &mut *ptr;
     obj.delete_message(row_index)
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn messages_delete_message_by_id(
+    ptr: *mut Messages,
+    id_str: *const c_char,
+    id_len: c_int,
+) -> bool {
+    let obj = &mut *ptr;
+    let id = { qba_slice!(id_str, id_len) };
+    obj.delete_message_by_id(id)
 }
 
 #[no_mangle]

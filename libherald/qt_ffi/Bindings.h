@@ -1601,6 +1601,7 @@ public:
   Q_INVOKABLE bool clearConversationHistory();
   Q_INVOKABLE void clearSearch();
   Q_INVOKABLE bool deleteMessage(quint64 row_index);
+  Q_INVOKABLE bool deleteMessageById(const QByteArray &id);
   Q_INVOKABLE qint64 indexById(const QByteArray &msg_id) const;
   Q_INVOKABLE void markReadById(const QByteArray &id);
   Q_INVOKABLE qint64 nextSearchMatch();

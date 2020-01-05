@@ -54,7 +54,7 @@ Popup {
             id: headerLabel
             anchors.left: parent.left
             anchors.leftMargin: CmnCfg.smallMargin
-            text: "Group settings"
+            text: qsTr("Group settings")
             font.pixelSize: CmnCfg.headerFontSize
             color: CmnCfg.palette.white
             anchors.verticalCenter: parent.verticalCenter

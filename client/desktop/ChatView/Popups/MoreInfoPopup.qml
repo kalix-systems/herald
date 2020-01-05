@@ -224,12 +224,31 @@ Popup {
                     color: CmnCfg.palette.alertColor
                 }
                 onClicked: {
-                    moreInfoPopup.close()
-                    messageInfoLoader.active = false
-                    ownedMessages.deleteMessage(ownedMessages.indexById(
-                                                    messageData.msgId))
+                    deleteMsgPrompt.deleteId = messageData.msgId
+                    deleteMsgPrompt.open()
                 }
             }
+        }
+    }
+
+    MessageDialog {
+        id: deleteMsgPrompt
+        property var deleteId
+        text: qsTr("Delete message")
+        informativeText: qsTr("Do you want to delete this message from this device?")
+        standardButtons: MessageDialog.Ok | MessageDialog.Cancel
+
+        onAccepted: {
+            // prevent coercion of undefined into bytearray
+            if (deleteId === undefined) {
+                return
+            }
+
+            moreInfoPopup.close()
+            messageInfoLoader.active = false
+
+            ownedMessages.deleteMessageById(deleteId)
+            deleteId = undefined
         }
     }
 }

@@ -36,11 +36,12 @@ Item {
         id: globalTimer
         signal refreshTime
 
-        interval: 10000
+        interval: 1000
         running: true
         repeat: true
         onTriggered: refreshTime()
     }
+
 
     Loader {
         id: messageInfoLoader
@@ -126,7 +127,7 @@ Item {
                     anchors.leftMargin: CmnCfg.megaMargin
                     anchors.verticalCenter: parent.verticalCenter
                     text: qsTr("Herald")
-                    font: CmnCfg.headerBarFont
+                    font: CmnCfg.headerFont
                     color: CmnCfg.palette.white
                 }
             }

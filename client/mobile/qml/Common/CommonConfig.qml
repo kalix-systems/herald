@@ -66,6 +66,11 @@ Item {
         'letterSpacing': 1
     })
 
+    readonly property font sectionHeaderFont: Qt.font({
+        "family": labelFont.name,
+        "weight": Font.DemiBold,
+        "pixelSize": labelFontSize
+    })
 
     // STANDARD COMPONENT SIZES
 

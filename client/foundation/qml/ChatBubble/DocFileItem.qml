@@ -12,18 +12,15 @@ ListView {
 
     interactive: false
     width: contentItem.childrenRect.width + CmnCfg.smallMargin * 2
-    height: 24 * Math.min(docParsed.length, 5)
+    height: 24 * (!expand ? Math.min(docParsed.length, 4) : docParsed.length)
     spacing: CmnCfg.microMargin
     clip: true
 
-    ScrollBar.vertical: ScrollBar {
-        id: scrollBar
-        policy: contentHeight > height ? ScrollBar.AlwaysOn : ScrollBar.AlwaysOff
-    }
     boundsBehavior: Flickable.StopAtBounds
 
     delegate: Row {
         spacing: CmnCfg.smallMargin / 2
+        visible: wrapperCol.expand ? true : index < 4
 
         IconButton {
             id: downloadIcon

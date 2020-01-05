@@ -2,8 +2,7 @@ import QtQuick 2.13
 import QtQuick.Controls 2.13
 import QtQuick.Layouts 1.12
 import LibHerald 1.0
-import "../../../common" as CMN
-import "qrc:/imports"
+import '../../'
 
 GridLayout {
     rows: 2
@@ -15,6 +14,7 @@ GridLayout {
         color: CmnCfg.palette.black
         Layout.fillWidth: true
         Layout.leftMargin: CmnCfg.defaultMargin
+        wrapMode: Text.WrapAtWordBoundaryOrAnywhere
     }
 
     TextButton {
@@ -29,6 +29,7 @@ GridLayout {
         font: CmnCfg.defaultFont
         Layout.fillWidth: true
         Layout.leftMargin: CmnCfg.defaultMargin
+        wrapMode: Text.WrapAtWordBoundaryOrAnywhere
     }
 
     TextButton {
