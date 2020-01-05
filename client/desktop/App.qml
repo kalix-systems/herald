@@ -153,32 +153,20 @@ Item {
             sideBar.width += mouseX
         }
 
+        // filler mouse area to pin split view cursor when in resize mode
+        MouseArea {
+            anchors.fill: parent
+            enabled: mouse.drag.active
+            cursorShape: if (enabled)
+                             Qt.SplitHCursor
+            z: enabled ? sideBar.z + 1 : rootSplitView.z - 1
+        }
+
         SideBarMain {
             id: sideBar
             anchors.left: parent.left
             height: parent.height
             width: 300
-
-            //            Rectangle {
-
-            //                anchors.right: parent.right
-            //                width: 5
-            //                height: parent.height
-            //                // color: //"transparent"
-            //                color: "red"
-            //                MouseArea {
-            //                    drag.target: parent
-            //                    anchors.fill: parent
-            //                    drag.axis: Drag.XAxis
-
-            //                    preventStealing: drag.active
-            //                    cursorShape: Qt.SplitHCursor
-            //                    onMouseXChanged: {
-            //                        if (drag.active)
-            //                            rootSplitView.splitHandle(mouseX)
-            //                    }
-            //                }
-            //            }
         }
 
         Loader {
@@ -192,7 +180,7 @@ Item {
             Rectangle {
 
                 anchors.horizontalCenter: parent.left
-                anchors.rightMargin: 2
+                //  anchors.rightMargin: 2
                 width: 9
                 height: parent.height
                 color: "transparent"
@@ -200,7 +188,7 @@ Item {
                 Rectangle {
                     anchors.right: parent.right
                     anchors.bottom: parent.bottom
-                    width: 2
+                    width: 5
                     height: parent.height - (CmnCfg.toolbarHeight + 2)
                     color: CmnCfg.palette.offBlack
                     z: parent.z + 1
