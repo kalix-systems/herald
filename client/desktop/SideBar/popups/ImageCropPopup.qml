@@ -34,8 +34,8 @@ Window {
         }
     }
 
-    width: imageWidth //(aspectRatio > 1) ? maxWindowSize : maxWindowSize * aspectRatio
-    height: imageHeight //(aspectRatio > 1) ? maxWindowSize / aspectRatio : maxWindowSize
+    width: imageWidth + 100 //(aspectRatio > 1) ? maxWindowSize : maxWindowSize * aspectRatio
+    height: imageHeight + 100 //(aspectRatio > 1) ? maxWindowSize / aspectRatio : maxWindowSize
 
     Image {
         id: image
@@ -51,6 +51,26 @@ Window {
             color: CmnCfg.palette.darkGrey
             opacity: 0.5
             anchors.centerIn: parent
+
+            onWidthChanged: {
+                clipRect.anchors.centerIn = null
+                if ((x + width) > image.width) {
+                    x = image.width - width
+                }
+                if (x < 0) {
+                    x = 0
+                }
+            }
+
+            onHeightChanged: {
+                clipRect.anchors.centerIn = null
+                if ((y + height) > image.height) {
+                    y = image.height - height
+                }
+                if (y < 0) {
+                    y = 0
+                }
+            }
 
             MouseArea {
                 width: parent.width
@@ -92,18 +112,21 @@ Window {
             drag.maximumY: image.height - clipRect.y
 
             onMouseXChanged: if (drag.active) {
-                                 print(mouseX)
                                  clipRect.width += Math.min(
                                              mouseX, maxSize - clipRect.width)
+                                 if (clipRect.width < 10) {
+                                     clipRect.width = 10
+                                 }
+
                                  clipRect.height = clipRect.width
-                                 //  clipRect.x += mouseX
                              }
             onMouseYChanged: if (drag.active) {
-                                 print(mouseY)
                                  clipRect.height += Math.min(
                                              mouseY, maxSize - clipRect.width)
+                                 if (clipRect.height < 10) {
+                                     clipRect.height = 10
+                                 }
                                  clipRect.width = clipRect.height
-                                 //  clipRect.y += mouseY
                              }
         }
     }
