@@ -43,37 +43,40 @@ MouseArea {
             topMargin: CmnCfg.smallMargin
         }
 
-        Flow {
+        Grid {
             id: buttonRow
-            width: //if ((download && reply) & !isHead) {
-                   if (!isHead && reply)
-                       chatListView.width - bubbleActual.maxWidth - 80
-            //    }
             anchors.right: parent.right
-            layoutDirection: Qt.RightToLeft
+            property bool colMode: reply && !isHead
+            columns: {
+                if (colMode) {
+                    return 1
+                } else {
+                    return download ? 4 : 3
+                }
+            }
+            flow: {
+                if (colMode)
+                    Grid.TopToBottom
+                else
+                    Grid.LeftToRight
+            }
+
+            width: if (colMode) {
+                       return 22
+                   }
 
             topPadding: 0
             bottomPadding: 0
             spacing: CmnCfg.smallMargin
 
             Imports.IconButton {
-                id: messageOptionsButton
+                id: replyButton
                 anchors.margins: CmnCfg.defaultMargin
-                source: "qrc:/options-icon.svg"
+                source: "qrc:/reply-icon.svg"
                 z: CmnCfg.overlayZ
-                onClicked: messageOptionsMenu.open()
+                // changing the opId transfers focus to the compose field
+                onClicked: ownedConversation.builder.opId = msgId
             }
-
-            Imports.IconButton {
-                id: downloadButton
-                visible: download
-                anchors.margins: visible ? CmnCfg.defaultMargin : 0
-                z: CmnCfg.overlayZ
-                icon.width: visible ? 22 : 0
-                source: "qrc:/download-icon.svg"
-                onClicked: downloadFileChooser.open()
-            }
-
             Imports.IconButton {
                 id: reactButton
                 anchors.margins: visible ? CmnCfg.defaultMargin : 0
@@ -86,12 +89,20 @@ MouseArea {
                 }
             }
             Imports.IconButton {
-                id: replyButton
-                anchors.margins: CmnCfg.defaultMargin
-                source: "qrc:/reply-icon.svg"
+                id: downloadButton
+                visible: download
+                anchors.margins: visible ? CmnCfg.defaultMargin : 0
                 z: CmnCfg.overlayZ
-                // changing the opId transfers focus to the compose field
-                onClicked: ownedConversation.builder.opId = msgId
+                icon.width: visible ? 22 : 0
+                source: "qrc:/download-icon.svg"
+                onClicked: downloadFileChooser.open()
+            }
+            Imports.IconButton {
+                id: messageOptionsButton
+                anchors.margins: CmnCfg.defaultMargin
+                source: "qrc:/options-icon.svg"
+                z: CmnCfg.overlayZ
+                onClicked: messageOptionsMenu.open()
             }
 
             Popups.MessageOptionsPopup {
