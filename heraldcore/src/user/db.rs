@@ -21,8 +21,11 @@ pub(crate) fn set_name(
 ) -> Result<(), HErr> {
     let name = name.unwrap_or_else(|| id.as_str());
     let mut stmt = w!(conn.prepare(include_str!("sql/update_name.sql")));
-
     w!(stmt.execute(params![name, id]));
+
+    let cid = crate::conversation::db::pairwise_conversation(conn, &id)?;
+    crate::conversation::db::set_title(conn, &cid, name.into())?;
+
     Ok(())
 }
 
