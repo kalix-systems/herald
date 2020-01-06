@@ -76,6 +76,18 @@ impl MessageBuilderTrait for MessageBuilder {
         Some(self.inner.body.as_ref()?.as_str())
     }
 
+    fn expiration_period(&self) -> Option<u8> {
+        Some(self.inner.expiration_period? as u8)
+    }
+
+    fn set_expiration_period(
+        &mut self,
+        period: Option<u8>,
+    ) {
+        self.inner.expiration_period = period.map(heraldcore::conversation::ExpirationPeriod::from);
+        self.emit.expiration_period_changed();
+    }
+
     /// Finalizes the builder, stores and sends the message, and resets the builder.
     fn finalize(&mut self) {
         self.model.begin_reset_model();
@@ -87,7 +99,7 @@ impl MessageBuilderTrait for MessageBuilder {
                 .into_iter()
                 .map(PathBuf::from),
         );
-        let builder = std::mem::replace(&mut self.inner, Default::default());
+        let builder = std::mem::take(&mut self.inner);
         self.inner.conversation = builder.conversation;
         self.model.end_reset_model();
 

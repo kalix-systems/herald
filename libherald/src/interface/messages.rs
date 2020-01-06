@@ -588,6 +588,7 @@ pub unsafe fn messages_new_inner(ptr_bundle: *mut MessagesPtrBundle) -> Messages
         document_attachments_end_move_rows,
         document_attachments_begin_remove_rows,
         document_attachments_end_remove_rows,
+        builder_expiration_period_changed,
         builder_has_doc_attachment_changed,
         builder_has_media_attachment_changed,
         builder_is_reply_changed,
@@ -690,6 +691,7 @@ pub unsafe fn messages_new_inner(ptr_bundle: *mut MessagesPtrBundle) -> Messages
     let builder_emit = MessageBuilderEmitter {
         qobject: Arc::new(AtomicPtr::new(builder)),
         body_changed: builder_body_changed,
+        expiration_period_changed: builder_expiration_period_changed,
         has_doc_attachment_changed: builder_has_doc_attachment_changed,
         has_media_attachment_changed: builder_has_media_attachment_changed,
         is_reply_changed: builder_is_reply_changed,
@@ -1492,6 +1494,7 @@ pub struct MessagesPtrBundle {
     document_attachments_end_move_rows: fn(*mut DocumentAttachmentsQObject),
     document_attachments_begin_remove_rows: fn(*mut DocumentAttachmentsQObject, usize, usize),
     document_attachments_end_remove_rows: fn(*mut DocumentAttachmentsQObject),
+    builder_expiration_period_changed: fn(*mut MessageBuilderQObject),
     builder_has_doc_attachment_changed: fn(*mut MessageBuilderQObject),
     builder_has_media_attachment_changed: fn(*mut MessageBuilderQObject),
     builder_is_reply_changed: fn(*mut MessageBuilderQObject),

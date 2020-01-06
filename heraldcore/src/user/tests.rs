@@ -100,7 +100,7 @@ fn update_name() {
 
     let id = "userid".try_into().expect(womp!());
 
-    let (user, conv) = UserBuilder::new(id)
+    UserBuilder::new(id)
         .name("Hello".into())
         .add_db(&mut conn)
         .expect(womp!());

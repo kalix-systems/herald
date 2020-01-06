@@ -79,14 +79,21 @@ ListView {
 
         Common.PlatonicRectangle {
             id: convoRectangle
-            boxTitle: title
-            boxColor: conversationData.color
-            picture: Utils.safeStringOrDefault(conversationData.picture, "")
+            property bool nts: {
+                Herald.utils.compareByteArray(Herald.config.ntsConversationId,
+                                              conversationData.conversationId)
+            }
+            boxTitle: !nts ? title : qsTr("Note to Self")
+            boxColor: !nts ? conversationData.color : Herald.config.color
+            picture: !nts ? Utils.safeStringOrDefault(
+                                conversationData.picture,
+                                "") : Utils.safeStringOrDefault(
+                                Herald.config.profilePicture, "")
             isGroupPicture: !conversationData.pairwise
 
             labelComponent: Ent.ConversationLabel {
                 cc: convContent
-                convoTitle: title
+                convoTitle: !convoRectangle.nts ? title : qsTr("Note to Self")
                 labelColor: convoRectangle.state
                             !== "" ? CmnCfg.palette.black : CmnCfg.palette.lightGrey
                 minorTextColor: convoRectangle.state
