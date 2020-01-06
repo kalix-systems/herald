@@ -19,7 +19,17 @@ RowLayout {
         Layout.alignment: Qt.AlignLeft
         color: CmnCfg.palette.iconFill
         imageSource: "qrc:/back-arrow-icon.svg"
-        onTapped: mainView.pop()
+        onTapped: {
+            // Search state is cleared on back button press, instead of on
+            // destruction of this component, to preserve search query text
+            // when this page is an entry in the app StackView (e.g. if a user
+            // clicks on a conversation item and then presses the back button
+            // to return to the search view)
+            Herald.users.clearFilter()
+            Herald.conversations.clearFilter()
+            Herald.messageSearch.clearSearch()
+            mainView.pop()
+        }
     }
 
     Item {
@@ -34,6 +44,9 @@ RowLayout {
             borderColor: "Transparent"
             placeholderText: qsTr('Search your conversations')
             font.pixelSize: CmnCfg.units.dp(18)
+            // Load previous search query in search field in case returns gets
+            // to this view via back button and expects state to be preserved
+            text: Herald.conversations.filter
 
             Component.onCompleted: forceActiveFocus()
 
@@ -50,12 +63,6 @@ RowLayout {
                     Herald.conversations.filter = text
                     Herald.messageSearch.searchPattern = text
                 }, searchField.text)
-            }
-
-            Component.onDestruction: {
-                Herald.users.clearFilter()
-                Herald.conversations.clearFilter()
-                Herald.messageSearch.clearSearch()
             }
         }
 
