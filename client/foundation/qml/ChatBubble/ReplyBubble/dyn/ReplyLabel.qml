@@ -19,7 +19,8 @@ Row {
 
         TextMetrics {
             id: opNameTM
-            text: messageModelData.opName
+            text: (messageModelData.opAuthor
+                   === Herald.config.configId) ? Herald.config.name : messageModelData.opName
             font.weight: Font.Bold
             font.family: CmnCfg.chatFont.name
             elideWidth: imageAttach ? 300 : bubbleRoot.maxWidth
@@ -42,5 +43,4 @@ Row {
         color: CmnCfg.palette.darkGrey
         anchors.verticalCenter: replyLabel.verticalCenter
     }
-
 }
