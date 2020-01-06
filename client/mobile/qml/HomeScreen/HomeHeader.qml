@@ -1,72 +1,54 @@
-import QtQuick.Controls 2.12
-import QtQuick.Layouts 1.12
-import QtQuick 2.12
+import QtQuick.Controls 2.14
+import QtQuick.Layouts 1.14
+import QtQuick 2.14
 import LibHerald 1.0
 import "../Common"
-import "../SettingsMenu"
 import "qrc:/imports/Entity"
 import "qrc:/imports/js/utils.mjs" as Utils
-import Qt.labs.platform 1.0
+import Qt.labs.platform 1.1
 
-ToolBar {
-    id: conversationViewHeader
+RowLayout {
+    anchors.fill: parent
 
-    clip: true
-    height: CmnCfg.toolbarHeight
-
-    background: Rectangle {
-        color: CmnCfg.palette.offBlack
-    }
-
-    RowLayout {
-        anchors.fill: parent
-        Row {
-            Layout.alignment: Qt.AlignLeft
-            Layout.leftMargin: CmnCfg.defaultMargin
-            spacing: CmnCfg.largeMargin
-
-            Avatar {
-                color: CmnCfg.palette.avatarColors[Herald.config.color]
-                initials: Herald.config.name[0].toUpperCase()
-                pfpPath: Utils.safeStringOrDefault(
-                             Herald.config.profilePicture, "")
-                size: CmnCfg.identityAvatarDiameter
-                Layout.alignment: Qt.AlignCenter
-                Layout.leftMargin: CmnCfg.units.dp(12)
-            }
-
-            Label {
-                id: stateLabel
-                text: qsTr("Conversations")
-                font {
-                    pixelSize: CmnCfg.headerTextSize
-                    family: CmnCfg.labelFont.name
-                    weight: Font.DemiBold
-                }
-                anchors.verticalCenter: parent.verticalCenter
-                color: CmnCfg.palette.iconFill
-            }
+    Row {
+        Layout.alignment: Qt.AlignLeft
+        Layout.leftMargin: CmnCfg.units.dp(12)
+        spacing: CmnCfg.units.dp(16)
+        Avatar {
+            color: CmnCfg.palette.avatarColors[Herald.config.color]
+            initials: Herald.config.name[0].toUpperCase()
+            pfpPath: Utils.safeStringOrDefault(Herald.config.profilePicture, "")
+            size: CmnCfg.units.dp(24)
+            anchors.verticalCenter: parent.verticalCenter
+            Layout.leftMargin: CmnCfg.units.dp(12)
         }
 
-        Row {
-            Layout.alignment: Qt.AlignRight
-            Layout.rightMargin: CmnCfg.units.dp(12)
-            spacing: CmnCfg.units.dp(12)
+        Label {
+            id: stateLabel
+            text: qsTr("Conversations")
+            font: CmnCfg.headerFont
+            anchors.verticalCenter: parent.verticalCenter
+            color: CmnCfg.palette.iconFill
+        }
+    }
 
-            AnimIconButton {
-                id: searchButton
-                color: CmnCfg.palette.iconFill
-                imageSource: "qrc:/search-icon.svg"
-            }
+    Row {
+        Layout.alignment: Qt.AlignRight
+        Layout.rightMargin: CmnCfg.units.dp(12)
+        spacing: CmnCfg.units.dp(12)
 
-            AnimIconButton {
-                id: optionsButton
-                color: CmnCfg.palette.iconFill
-                imageSource: "qrc:/options-icon.svg"
-                tapCallback: function () {
-                    mainView.push(settingsMain)
-                }
-            }
+        AnimIconButton {
+            id: searchButton
+            color: CmnCfg.palette.iconFill
+            imageSource: "qrc:/search-icon.svg"
+            onTapped: mainView.push(globalSearchView)
+        }
+
+        AnimIconButton {
+            id: optionsButton
+            color: CmnCfg.palette.iconFill
+            imageSource: "qrc:/options-icon.svg"
+            onTapped: mainView.push(settingsMain)
         }
     }
 }

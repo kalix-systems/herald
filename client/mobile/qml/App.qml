@@ -1,7 +1,6 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
 import LibHerald 1.0
-import "./Headers" as Headers
 import "./HomeScreen" as HomeScreen
 import "./NewContactView" as NewContactView
 import "./ChatView" as ChatView
@@ -23,7 +22,7 @@ Page {
         onTriggered: refreshTime()
     }
 
-    header: Headers.HeadersMain {
+    header: HeadersMain {
         id: rootHeader
     }
 
@@ -41,7 +40,7 @@ Page {
     Component {
         id: settingsMain
         Settings.SettingsPane {
-            readonly property Component headerComponent: Headers.SettingsHeader {}
+            readonly property Component headerComponent: SettingsHeader {}
         }
     }
 
