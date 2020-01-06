@@ -56,7 +56,9 @@ Page {
 
     Component {
         id: globalSearchView
-        GlobalSearch.GlobalSearchMain {}
+        GlobalSearch.GlobalSearchMain {
+            headerLoader: rootHeader.headerLoader
+        }
     }
 
     StackView {

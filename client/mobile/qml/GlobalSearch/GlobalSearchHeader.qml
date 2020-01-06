@@ -6,6 +6,8 @@ import "../Common"
 import "qrc:/imports/"
 
 RowLayout {
+    property alias searchText: searchField.text
+
     anchors {
         fill: parent
         rightMargin: CmnCfg.largeMargin
@@ -32,7 +34,29 @@ RowLayout {
             borderColor: "Transparent"
             placeholderText: qsTr('Search your conversations')
             font.pixelSize: CmnCfg.units.dp(18)
+
             Component.onCompleted: forceActiveFocus()
+
+            Keys.onPressed: {
+                // this makes sure that returns and tabs are not evaluated
+                if (event.key === Qt.Key_Return
+                        || event.key === Qt.Key_Tab) {
+                    event.accepted = true
+                }
+            }
+
+            onTextChanged: {
+                Qt.callLater(function (text) {
+                    Herald.conversations.filter = text
+                    Herald.messageSearch.searchPattern = text
+                }, searchField.text)
+            }
+
+            Component.onDestruction: {
+                Herald.users.clearFilter()
+                Herald.conversations.clearFilter()
+                Herald.messageSearch.clearSearch()
+            }
         }
 
         AnimIconButton {

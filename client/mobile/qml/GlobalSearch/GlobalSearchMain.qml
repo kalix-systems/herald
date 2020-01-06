@@ -7,14 +7,19 @@ import LibHerald 1.0
 Page {
     id: searchView
     readonly property Component headerComponent: GlobalSearchHeader {}
+    property Loader headerLoader
+
     background: Rectangle {
         color: CmnCfg.palette.white
         height: 40
         width: 100
 
-        Label {
-            text: 'search view'
-            anchors.top: parent.top
+        Button {
+            text: 'go'
+            onClicked: {
+                print(headerLoader.item.searchText)
+                print(Herald.conversations)
+            }
         }
     }
 }
