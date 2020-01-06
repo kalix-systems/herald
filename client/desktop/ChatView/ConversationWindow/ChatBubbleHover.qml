@@ -27,7 +27,7 @@ MouseArea {
         width: buttonRow.width
         height: buttonRow.height
         z: CmnCfg.overlayZ
-        color: "transparent" //CmnCfg.palette.offBlack // bubbleActual.aux ? "transparent" : "white"
+        color: "transparent"
         visible: chatBubbleHitbox.containsMouse || parentBubble.hoverHighlight
 
         anchors {
