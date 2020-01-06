@@ -6,6 +6,7 @@ import "../Common" as Common
 
 Page {
     id: chatPage
+    readonly property Component headerComponent: ChatHeader {}
     //swappable message model, set by the appstate
     property Messages ownedMessages
     property string headerTitle

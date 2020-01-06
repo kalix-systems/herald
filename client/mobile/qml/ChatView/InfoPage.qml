@@ -12,6 +12,8 @@ import "qrc:/imports" as Imports
 Page {
     id: moreInfoPopup
     property ChatBubble referredChatBubble
+    readonly property Component headerComponent: MessageInfoHeader {}
+
     // members of the conversation content
     property var members: []
     readonly property string stateName: "info"

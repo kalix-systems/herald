@@ -26,19 +26,21 @@
         <file>qml/HomeScreen/GroupFlowComponents/ContactsSearchComponent.qml</file>
         <file>qml/HomeScreen/GroupFlowComponents/FinalGroupList.qml</file>
         <file>qml/HomeScreen/GroupFlowComponents/GroupHeaderComponent.qml</file>
-        <file>qml/Headers/ChatHeader.qml</file>
-        <file>qml/Headers/SettingsHeader.qml</file>
-        <file>qml/Headers/HeadersMain.qml</file>
-        <file>qml/Headers/HomeHeader.qml</file>
-        <file>qml/Headers/Transitions.qml</file>
-        <file>qml/Headers/NewContactHeader.qml</file>
-        <file>qml/Headers/NewGroupHeader.qml</file>
         <file>qml/ChatView/OptionsDropdown.qml</file>
         <file>qml/ChatView/MessageMouseArea.qml</file>
         <file>qml/ChatView/InfoPage.qml</file>
-        <file>qml/Headers/MessageInfoHeader.qml</file>
         <file>qml/Common/PlatonicRectangle.qml</file>
-        <file>qml/Headers/GlobalSearchHeader.qml</file>
         <file>qml/Zombie/PhantomImports.qml</file>
+        <file>qml/ChatView/ChatHeader.qml</file>
+        <file>qml/GlobalSearch/GlobalSearchHeader.qml</file>
+        <file>qml/ChatView/MessageInfoHeader.qml</file>
+        <file>qml/NewContactView/NewContactHeader.qml</file>
+        <file>qml/HomeScreen/HomeHeader.qml</file>
+        <file>qml/HomeScreen/NewGroupFlow/ContactsSearchComponent.qml</file>
+        <file>qml/HomeScreen/NewGroupFlow/FinalGroupList.qml</file>
+        <file>qml/HomeScreen/NewGroupFlow/NewGroupHeader.qml</file>
+        <file>qml/HomeScreen/NewGroupFlow/NewGroupView.qml</file>
+        <file>qml/SettingsHeader.qml</file>
+        <file>qml/HeadersMain.qml</file>
     </qresource>
 </RCC>

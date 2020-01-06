@@ -11,70 +11,68 @@ import "qrc:/imports/Entity"
 import "qrc:/imports" as Imports
 import "qrc:/imports/js/utils.mjs" as Utils
 
-Column {
-    topPadding: CmnCfg.units.dp(24)
-    Component.onCompleted: Herald.usersSearch.refresh()
-    width: mainView.width - CmnCfg.megaMargin * 2
+Column {//    topPadding: CmnCfg.units.dp(24)
+    //    Component.onCompleted: Herald.usersSearch.refresh()
+    //    width: mainView.width - CmnCfg.megaMargin * 2
 
-    Imports.BorderedTextField {
-        id: groupSelectText
-        placeholderText: qsTr("Add members")
-        onTextChanged: {
-            Herald.usersSearch.filter = groupSelectText.text
-            contactPopup.popup.open()
-        }
-        anchors.left: parent.left
-        anchors.right: parent.right
-        color: CmnCfg.palette.black
-        borderColor: CmnCfg.palette.black
-    }
+    //    Imports.BorderedTextField {
+    //        id: groupSelectText
+    //        placeholderText: qsTr("Add members")
+    //        onTextChanged: {
+    //            Herald.usersSearch.filter = groupSelectText.text
+    //            contactPopup.popup.open()
+    //        }
+    //        anchors.left: parent.left
+    //        anchors.right: parent.right
+    //        color: CmnCfg.palette.black
+    //        borderColor: CmnCfg.palette.black
+    //    }
 
-    ComboBox {
-        id: contactPopup
-        model: Herald.usersSearch
-        width: parent.width
-        anchors.horizontalCenter: parent.horizontalCenter
-        height: 1
-        leftPadding: CmnCfg.defaultMargin
+    //    ComboBox {
+    //        id: contactPopup
+    //        model: Herald.usersSearch
+    //        width: parent.width
+    //        anchors.horizontalCenter: parent.horizontalCenter
+    //        height: 1
+    //        leftPadding: CmnCfg.defaultMargin
 
-        background: Rectangle {
-            visible: false
-        }
+    //        background: Rectangle {
+    //            visible: false
+    //        }
 
-        indicator: Rectangle {
-            visible: false
-        }
-        delegate: Rectangle {
-            property var contactData: model
-            height: visible ? entityBlock.height : 0 //CmnCfg.units.dp(48) : 0
-            width: parent.width
-            visible: matched && contactData.userId !== Herald.config.configId
-            anchors {
-                rightMargin: CmnCfg.units.dp(12)
-                leftMargin: CmnCfg.units.dp(12)
-            }
+    //        indicator: Rectangle {
+    //            visible: false
+    //        }
+    //        delegate: Rectangle {
+    //            property var contactData: model
+    //            height: visible ? entityBlock.height : 0 //CmnCfg.units.dp(48) : 0
+    //            width: parent.width
+    //            visible: matched && contactData.userId !== Herald.config.configId
+    //            anchors {
+    //                rightMargin: CmnCfg.units.dp(12)
+    //                leftMargin: CmnCfg.units.dp(12)
+    //            }
 
-            EntityBlock {
-                id: entityBlock
-                entityName: contactData.name
-                subLabelText: '@' + contactData.userId
-                color: CmnCfg.avatarColors[contactData.color]
-                // TODO pfpPath
+    //            EntityBlock {
+    //                id: entityBlock
+    //                entityName: contactData.name
+    //                subLabelText: '@' + contactData.userId
+    //                color: CmnCfg.avatarColors[contactData.color]
+    //                // TODO pfpPath
 
-                anchors.leftMargin: CmnCfg.smallMargin
-                anchors.rightMargin: CmnCfg.smallMargin
-            }
+    //                anchors.leftMargin: CmnCfg.smallMargin
+    //                anchors.rightMargin: CmnCfg.smallMargin
+    //            }
 
-            TapHandler {
-                onTapped: {
-                    Herald.conversationBuilder.addMember(contactData.userId)
-                    contactPopup.popup.close()
-                    Herald.usersSearch.clearFilter()
-                    groupSelectText.text = ""
-                }
-            }
-        }
-    }
-
-    FinalGroupList {}
+    //            TapHandler {
+    //                onTapped: {
+    //                    Herald.conversationBuilder.addMember(contactData.userId)
+    //                    contactPopup.popup.close()
+    //                    Herald.usersSearch.clearFilter()
+    //                    groupSelectText.text = ""
+    //                }
+    //            }
+    //        }
+    //    }
+    //FinalGroupList {}
 }

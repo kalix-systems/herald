@@ -6,6 +6,7 @@ import "../Common" as Common
 import "qrc:/imports" as Imports
 
 Page {
+    readonly property Component headerComponent: NewContactHeader {}
 
     ColumnLayout {
         anchors.fill: parent

@@ -1,7 +1,6 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
 import LibHerald 1.0
-import "./Headers" as Headers
 import "./HomeScreen" as HomeScreen
 import "./NewContactView" as NewContactView
 import "./ChatView" as ChatView
@@ -11,8 +10,8 @@ import "qrc:/imports/Settings" as Settings
 Page {
     id: appRoot
     anchors.fill: parent
-
     readonly property alias globalTimer: globalTimer
+
     Timer {
         id: globalTimer
         signal refreshTime
@@ -23,51 +22,41 @@ Page {
         onTriggered: refreshTime()
     }
 
-    header: Headers.HeadersMain {
+    header: HeadersMain {
         id: rootHeader
     }
 
     //TODO: Rename me
     Component {
         id: cvMain
-        HomeScreen.HomeScreenMain {
-            readonly property string stateName: "home"
-        }
+        HomeScreen.HomeScreenMain {}
     }
 
     Component {
         id: messageInfoMain
-        ChatView.InfoPage {
-            readonly property string stateName: "info"
-        }
+        ChatView.InfoPage {}
     }
 
     Component {
         id: settingsMain
         Settings.SettingsPane {
-            readonly property string stateName: "config"
+            readonly property Component headerComponent: SettingsHeader {}
         }
     }
 
     Component {
         id: newContactViewMain
-        NewContactView.NewContactViewMain {
-            readonly property string stateName: "newContact"
-        }
+        NewContactView.NewContactViewMain {}
     }
 
     Component {
         id: newGroupViewMain
-        HomeScreen.NewGroupView {
-            readonly property string stateName: "newGroup"
-        }
+        HomeScreen.NewGroupView {}
     }
 
     Component {
         id: globalSearchView
-        GlobalSearch.GlobalSearchMain {
-            readonly property string stateName: "globalSearch"
-        }
+        GlobalSearch.GlobalSearchMain {}
     }
 
     StackView {
@@ -75,7 +64,8 @@ Page {
         anchors.fill: parent
         initialItem: cvMain
         onCurrentItemChanged: {
-            rootHeader.state = currentItem.stateName
+            // upon pushing a page set the header to the proper component
+            rootHeader.headerComponent = currentItem.headerComponent
         }
     }
 

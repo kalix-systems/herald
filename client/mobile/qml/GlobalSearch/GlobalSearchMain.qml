@@ -6,7 +6,7 @@ import LibHerald 1.0
 // TODO this a dummy component, content is only to confirm it gets rendered
 Page {
     id: searchView
-    //header: GlobalSearchHeader {}
+    readonly property Component headerComponent: GlobalSearchHeader {}
     background: Rectangle {
         color: CmnCfg.palette.white
         height: 40

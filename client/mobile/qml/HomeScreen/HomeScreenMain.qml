@@ -12,7 +12,7 @@ import QtGraphicalEffects 1.0
 // contains a list of conversations by default
 Page {
     id: cvMainView
-
+    readonly property Component headerComponent: HomeHeader {}
     background: Rectangle {
         color: CmnCfg.palette.white
     }

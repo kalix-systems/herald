@@ -9,7 +9,7 @@ ApplicationWindow {
     id: root
     visible: true
     // for desktop prototyping
-    // removed on desktop
+    // removed implicitly in production
     width: 300
     height: 500
 
