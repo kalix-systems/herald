@@ -42,20 +42,23 @@ mod imp {
 mod imp {
     use heraldcore::message::Message;
     use notify_rust::*;
-    use std::sync::Once;
+    use once_cell::sync::OnceCell;
 
-    static IS_SET: Once = Once::new();
+    static IS_SET: OnceCell<bool> = OnceCell::new();
 
     fn setup() {
-        IS_SET.call_once(|| {
-            let bundle =
-                get_bundle_identifier(super::DESKTOP_APP_NAME).unwrap_or(super::DESKTOP_APP_NAME);
-            drop(set_application(&bundle));
-        });
+        IS_SET
+            .get_or_try_init(|| {
+                let bundle = get_bundle_identifier_or_default(super::DESKTOP_APP_NAME);
+                drop(set_application(&bundle));
+            })
+            .unwrap_or(false)
     }
 
     pub fn new_msg_toast(msg: &Message) {
-        setup();
+        if !setup() {
+            return;
+        }
 
         let mut notif = Notification::new();
 
