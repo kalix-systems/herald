@@ -24,6 +24,7 @@ impl OutboundMessageBuilder {
             body,
             op,
             attachments,
+            expiration_period: exp_period,
         } = self;
 
         use MissingOutboundMessageField::*;
@@ -36,7 +37,11 @@ impl OutboundMessageBuilder {
         let msg_id = MsgId::gen_new();
         let timestamp = Time::now();
         let author = e!(crate::config::db::id(&db));
-        let expiration_period = e!(expiration_period(&db, &conversation_id));
+
+        let expiration_period = match exp_period {
+            Some(p) => p,
+            None => e!(expiration_period(&db, &conversation_id)),
+        };
 
         let expiration = match expiration_period.into_millis() {
             Some(period) => Some(timestamp + period),
@@ -161,6 +166,7 @@ impl OutboundMessageBuilder {
             body,
             op,
             attachments,
+            expiration_period: exp_period,
         } = self;
 
         use MissingOutboundMessageField::*;
@@ -173,7 +179,11 @@ impl OutboundMessageBuilder {
         let msg_id = MsgId::gen_new();
         let timestamp = Time::now();
         let author = crate::config::db::id(&conn)?;
-        let expiration_period = expiration_period(&conn, &conversation_id)?;
+
+        let expiration_period = match exp_period {
+            Some(p) => p,
+            None => expiration_period(&conn, &conversation_id)?,
+        };
 
         let expiration = match expiration_period.into_millis() {
             Some(period) => Some(timestamp + period),

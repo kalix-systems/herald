@@ -383,6 +383,9 @@ fn message_builder() -> Object {
         isReply: Prop::new().simple(Bool),
         // Body of the message
         body: Prop::new().simple(QString).optional().write(),
+        // Set expiration period of the message.
+        expirationPeriod: Prop::new().simple(QUint8).write().optional(),
+
 
         hasMediaAttachment: Prop::new().simple(Bool),
         hasDocAttachment: Prop::new().simple(Bool),

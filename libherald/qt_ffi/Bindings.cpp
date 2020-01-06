@@ -166,6 +166,9 @@ inline void membersFilterRegexChanged(Members *o) {
 inline void messageBuilderBodyChanged(MessageBuilder *o) {
   Q_EMIT o->bodyChanged();
 }
+inline void messageBuilderExpirationPeriodChanged(MessageBuilder *o) {
+  Q_EMIT o->expirationPeriodChanged();
+}
 inline void messageBuilderHasDocAttachmentChanged(MessageBuilder *o) {
   Q_EMIT o->hasDocAttachmentChanged();
 }
@@ -1463,6 +1466,10 @@ void message_builder_body_set(MessageBuilder::Private *, const ushort *str,
 void message_builder_body_set_none(MessageBuilder::Private *);
 DocumentAttachments::Private *
 message_builder_document_attachments_get(const MessageBuilder::Private *);
+option_quint8
+message_builder_expiration_period_get(const MessageBuilder::Private *);
+void message_builder_expiration_period_set(MessageBuilder::Private *, quint8);
+void message_builder_expiration_period_set_none(MessageBuilder::Private *);
 bool message_builder_has_doc_attachment_get(const MessageBuilder::Private *);
 bool message_builder_has_media_attachment_get(const MessageBuilder::Private *);
 bool message_builder_is_reply_get(const MessageBuilder::Private *);
@@ -2871,6 +2878,7 @@ ConversationContent::ConversationContent(QObject *parent)
           [](DocumentAttachments *o) { o->endRemoveRows(); }
 
           ,
+          messageBuilderExpirationPeriodChanged,
           messageBuilderHasDocAttachmentChanged,
           messageBuilderHasMediaAttachmentChanged,
           messageBuilderIsReplyChanged,
@@ -3770,6 +3778,7 @@ MessageBuilder::MessageBuilder(QObject *parent)
           [](DocumentAttachments *o) { o->endRemoveRows(); }
 
           ,
+          messageBuilderExpirationPeriodChanged,
           messageBuilderHasDocAttachmentChanged,
           messageBuilderHasMediaAttachmentChanged,
           messageBuilderIsReplyChanged,
@@ -3888,6 +3897,22 @@ const DocumentAttachments *MessageBuilder::documentAttachments() const {
 }
 DocumentAttachments *MessageBuilder::documentAttachments() {
   return m_documentAttachments;
+}
+
+QVariant MessageBuilder::expirationPeriod() const {
+  QVariant v;
+  auto r = message_builder_expiration_period_get(m_d);
+  if (r.some) {
+    v.setValue(r.value);
+  }
+  return r;
+}
+void MessageBuilder::setExpirationPeriod(const QVariant &v) {
+  if (v.isNull() || !v.canConvert<quint8>()) {
+    message_builder_expiration_period_set_none(m_d);
+  } else {
+    message_builder_expiration_period_set(m_d, v.value<quint8>());
+  }
 }
 
 bool MessageBuilder::hasDocAttachment() const {
@@ -4106,6 +4131,7 @@ Messages::Messages(QObject *parent)
           [](DocumentAttachments *o) { o->endRemoveRows(); }
 
           ,
+          messageBuilderExpirationPeriodChanged,
           messageBuilderHasDocAttachmentChanged,
           messageBuilderHasMediaAttachmentChanged,
           messageBuilderIsReplyChanged,

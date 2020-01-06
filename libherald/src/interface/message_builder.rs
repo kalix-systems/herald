@@ -5,6 +5,7 @@ pub struct MessageBuilderQObject;
 pub struct MessageBuilderEmitter {
     pub(super) qobject: Arc<AtomicPtr<MessageBuilderQObject>>,
     pub(super) body_changed: fn(*mut MessageBuilderQObject),
+    pub(super) expiration_period_changed: fn(*mut MessageBuilderQObject),
     pub(super) has_doc_attachment_changed: fn(*mut MessageBuilderQObject),
     pub(super) has_media_attachment_changed: fn(*mut MessageBuilderQObject),
     pub(super) is_reply_changed: fn(*mut MessageBuilderQObject),
@@ -30,6 +31,7 @@ impl MessageBuilderEmitter {
         MessageBuilderEmitter {
             qobject: self.qobject.clone(),
             body_changed: self.body_changed,
+            expiration_period_changed: self.expiration_period_changed,
             has_doc_attachment_changed: self.has_doc_attachment_changed,
             has_media_attachment_changed: self.has_media_attachment_changed,
             is_reply_changed: self.is_reply_changed,
@@ -56,6 +58,14 @@ impl MessageBuilderEmitter {
 
         if !ptr.is_null() {
             (self.body_changed)(ptr);
+        }
+    }
+
+    pub fn expiration_period_changed(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+
+        if !ptr.is_null() {
+            (self.expiration_period_changed)(ptr);
         }
     }
 
@@ -277,6 +287,13 @@ pub trait MessageBuilderTrait {
 
     fn document_attachments_mut(&mut self) -> &mut DocumentAttachments;
 
+    fn expiration_period(&self) -> Option<u8>;
+
+    fn set_expiration_period(
+        &mut self,
+        value: Option<u8>,
+    );
+
     fn has_doc_attachment(&self) -> bool;
 
     fn has_media_attachment(&self) -> bool;
@@ -388,6 +405,7 @@ pub unsafe fn message_builder_new_inner(
         document_attachments_end_move_rows,
         document_attachments_begin_remove_rows,
         document_attachments_end_remove_rows,
+        message_builder_expiration_period_changed,
         message_builder_has_doc_attachment_changed,
         message_builder_has_media_attachment_changed,
         message_builder_is_reply_changed,
@@ -466,6 +484,7 @@ pub unsafe fn message_builder_new_inner(
     let message_builder_emit = MessageBuilderEmitter {
         qobject: Arc::new(AtomicPtr::new(message_builder)),
         body_changed: message_builder_body_changed,
+        expiration_period_changed: message_builder_expiration_period_changed,
         has_doc_attachment_changed: message_builder_has_doc_attachment_changed,
         has_media_attachment_changed: message_builder_has_media_attachment_changed,
         is_reply_changed: message_builder_is_reply_changed,
@@ -586,6 +605,36 @@ pub unsafe extern "C" fn message_builder_document_attachments_get(
     ptr: *mut MessageBuilder
 ) -> *mut DocumentAttachments {
     (&mut *ptr).document_attachments_mut()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn message_builder_expiration_period_get(
+    ptr: *const MessageBuilder
+) -> COption<u8> {
+    match (&*ptr).expiration_period() {
+        Some(value) => COption {
+            data: value,
+            some: true,
+        },
+        None => COption {
+            data: u8::default(),
+            some: false,
+        },
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn message_builder_expiration_period_set(
+    ptr: *mut MessageBuilder,
+    value: Option<u8>,
+) {
+    (&mut *ptr).set_expiration_period(value)
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn message_builder_expiration_period_set_none(ptr: *mut MessageBuilder) {
+    let obj = &mut *ptr;
+    obj.set_expiration_period(None);
 }
 
 #[no_mangle]
@@ -805,6 +854,7 @@ pub struct MessageBuilderPtrBundle {
     document_attachments_end_move_rows: fn(*mut DocumentAttachmentsQObject),
     document_attachments_begin_remove_rows: fn(*mut DocumentAttachmentsQObject, usize, usize),
     document_attachments_end_remove_rows: fn(*mut DocumentAttachmentsQObject),
+    message_builder_expiration_period_changed: fn(*mut MessageBuilderQObject),
     message_builder_has_doc_attachment_changed: fn(*mut MessageBuilderQObject),
     message_builder_has_media_attachment_changed: fn(*mut MessageBuilderQObject),
     message_builder_is_reply_changed: fn(*mut MessageBuilderQObject),

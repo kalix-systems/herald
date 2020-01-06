@@ -111,6 +111,7 @@ struct ConversationContentPtrBundle {
   void (*document_attachments_begin_remove_rows)(DocumentAttachments *, int,
                                                  int);
   void (*document_attachments_end_remove_rows)(DocumentAttachments *);
+  void (*message_builder_expiration_period_changed)(MessageBuilder *);
   void (*message_builder_has_doc_attachment_changed)(MessageBuilder *);
   void (*message_builder_has_media_attachment_changed)(MessageBuilder *);
   void (*message_builder_is_reply_changed)(MessageBuilder *);
@@ -403,6 +404,7 @@ struct MessageBuilderPtrBundle {
   void (*document_attachments_begin_remove_rows)(DocumentAttachments *, int,
                                                  int);
   void (*document_attachments_end_remove_rows)(DocumentAttachments *);
+  void (*message_builder_expiration_period_changed)(MessageBuilder *);
   void (*message_builder_has_doc_attachment_changed)(MessageBuilder *);
   void (*message_builder_has_media_attachment_changed)(MessageBuilder *);
   void (*message_builder_is_reply_changed)(MessageBuilder *);
@@ -484,6 +486,7 @@ struct MessagesPtrBundle {
   void (*document_attachments_begin_remove_rows)(DocumentAttachments *, int,
                                                  int);
   void (*document_attachments_end_remove_rows)(DocumentAttachments *);
+  void (*message_builder_expiration_period_changed)(MessageBuilder *);
   void (*message_builder_has_doc_attachment_changed)(MessageBuilder *);
   void (*message_builder_has_media_attachment_changed)(MessageBuilder *);
   void (*message_builder_is_reply_changed)(MessageBuilder *);
@@ -1347,6 +1350,8 @@ private:
   Q_PROPERTY(QString body READ body WRITE setBody NOTIFY bodyChanged FINAL)
   Q_PROPERTY(DocumentAttachments *documentAttachments READ documentAttachments
                  NOTIFY documentAttachmentsChanged FINAL)
+  Q_PROPERTY(QVariant expirationPeriod READ expirationPeriod WRITE
+                 setExpirationPeriod NOTIFY expirationPeriodChanged FINAL)
   Q_PROPERTY(bool hasDocAttachment READ hasDocAttachment NOTIFY
                  hasDocAttachmentChanged FINAL)
   Q_PROPERTY(bool hasMediaAttachment READ hasMediaAttachment NOTIFY
@@ -1375,6 +1380,8 @@ public:
   void setBody(const QString &v);
   const DocumentAttachments *documentAttachments() const;
   DocumentAttachments *documentAttachments();
+  QVariant expirationPeriod() const;
+  void setExpirationPeriod(const QVariant &v);
   bool hasDocAttachment() const;
   bool hasMediaAttachment() const;
   bool isReply() const;
@@ -1430,6 +1437,7 @@ private:
 Q_SIGNALS:
   void bodyChanged();
   void documentAttachmentsChanged();
+  void expirationPeriodChanged();
   void hasDocAttachmentChanged();
   void hasMediaAttachmentChanged();
   void isReplyChanged();

@@ -13,6 +13,8 @@ pub struct OutboundMessageBuilder {
     pub op: Option<MsgId>,
     /// Attachments
     pub attachments: Vec<PathBuf>,
+    /// Expiration period
+    pub expiration_period: Option<coretypes::conversation::ExpirationPeriod>,
 }
 
 /// Values `OutboundMessageBuilder`'s `store_and_send` function produces
