@@ -46,13 +46,13 @@ mod imp {
 
     static IS_SET: OnceCell<bool> = OnceCell::new();
 
-    fn setup() {
-        IS_SET
+    fn setup() -> bool {
+        *IS_SET
             .get_or_try_init(|| {
                 let bundle = get_bundle_identifier_or_default(super::DESKTOP_APP_NAME);
                 drop(set_application(&bundle));
             })
-            .unwrap_or(false)
+            .unwrap_or(&false)
     }
 
     pub fn new_msg_toast(msg: &Message) {
