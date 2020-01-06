@@ -42,7 +42,7 @@ Item {
         if (cc && outbound)
             return qsTr('You')
         if (cc && !cc.messages.isEmpty)
-            return cc.messages.lastAuthor
+            return Herald.users.nameById(cc.messages.lastAuthor)
         return ''
     }
     // the previous latest human readable timestamp, or the empty string
