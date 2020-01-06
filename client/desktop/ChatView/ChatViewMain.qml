@@ -139,6 +139,7 @@ Page {
         atcButton.onClicked: chatTextArea.attachmentsDialogue.open()
     }
 
+    // listens for typing indicators
     Connections {
         target: ownedConversation
         onNewTypingIndicator: print(
