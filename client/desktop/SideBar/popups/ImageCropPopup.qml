@@ -46,7 +46,7 @@ Window {
     }
 
     width: 400
-    height: 400
+    height: 500
 
     Image {
         id: image
@@ -111,6 +111,8 @@ Window {
             height: width
             color: "transparent"
             anchors.centerIn: parent
+            border.color: CmnCfg.palette.lightGrey
+            border.width: 1
 
             onWidthChanged: {
                 clipRect.anchors.centerIn = null
@@ -155,8 +157,10 @@ Window {
             anchors.verticalCenter: clipRect.bottom
             color: CmnCfg.palette.offBlack
             opacity: 1.0
-            height: 10
+            height: 8
             width: height
+            border.color: CmnCfg.palette.white
+            border.width: 1
         }
 
         MouseArea {
