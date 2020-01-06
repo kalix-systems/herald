@@ -128,12 +128,24 @@ pub(crate) fn send_group_settings_message(
 
 pub(crate) fn send_profile_update(update: cmessages::ProfileChanged) -> Result<(), HErr> {
     let conn = crate::db::Database::get()?;
-    let cids = crate::conversation::db::get_all_pairwise_conversations(&conn)?;
 
-    let msg = ConversationMessage::Message(NetContent::ProfileChanged(update));
+    use cmessages::ProfileChanged as P;
+    match update {
+        color @ P::Color(_) => {
+            let cid = crate::config::db::nts_conversation(&conn)?;
+            let msg = ConversationMessage::Message(NetContent::ProfileChanged(color));
 
-    for cid in cids {
-        send_cmessage(cid, &msg)?;
+            send_cmessage(cid, &msg)?;
+        }
+        other => {
+            let cids = crate::conversation::db::get_all_pairwise_conversations(&conn)?;
+
+            let msg = ConversationMessage::Message(NetContent::ProfileChanged(other));
+
+            for cid in cids {
+                send_cmessage(cid, &msg)?;
+            }
+        }
     }
 
     Ok(())
