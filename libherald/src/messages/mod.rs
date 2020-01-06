@@ -2,7 +2,6 @@ use crate::{
     err,
     interface::{MessagesEmitter as Emitter, MessagesList as List},
     none,
-    toasts::new_msg_toast,
 };
 use herald_common::UserId;
 use heraldcore::{
@@ -50,17 +49,18 @@ impl Messages {
                 variant: ConvItemUpdateVariant::NewActivity,
             })
         };
+
         match update {
             MsgUpdate::NewMsg(new) => {
-                new_msg_toast(new.as_ref());
-
                 self.container
                     .insert_helper(*new, emit, model, search, cid, push);
             }
+
             MsgUpdate::BuilderMsg(msg) => {
                 self.container
                     .insert_helper(*msg, emit, model, search, cid, push);
             }
+
             MsgUpdate::Receipt {
                 msg_id,
                 recipient,
@@ -83,21 +83,25 @@ impl Messages {
                 self.container
                     .handle_reaction(msg_id, reactionary, content, remove, model);
             }
+
             MsgUpdate::StoreDone(mid, meta) => {
                 let model = &mut self.model;
                 let emit = &mut self.emit;
 
                 none!(&self.container.handle_store_done(mid, meta, emit, model));
             }
+
             MsgUpdate::SendDone(mid) => {
                 let model = &mut self.model;
 
                 none!(&self.container.handle_send_done(mid, model));
             }
+
             MsgUpdate::ExpiredMessages(mids) => {
                 self.container
                     .handle_expiration(mids, emit, model, search, &mut self.builder)
             }
+
             MsgUpdate::Container(container) => {
                 if container.is_empty() {
                     return;
@@ -119,12 +123,14 @@ impl Messages {
 pub(crate) enum MsgUpdate {
     /// A new message
     NewMsg(Box<heraldcore::message::Message>),
+
     /// A message has been acknowledged
     Receipt {
         msg_id: MsgId,
         recipient: UserId,
         status: MessageReceiptStatus,
     },
+
     /// A reaction has been added or removed
     Reaction {
         msg_id: MsgId,
@@ -132,14 +138,19 @@ pub(crate) enum MsgUpdate {
         content: heraldcore::message::ReactContent,
         remove: bool,
     },
+
     /// A rendered message from the `MessageBuilder`
     BuilderMsg(Box<heraldcore::message::Message>),
+
     /// An outbound message has been saved
     StoreDone(MsgId, herald_attachments::AttachmentMeta),
+
     /// There are expired messages that need to be pruned
     ExpiredMessages(Vec<MsgId>),
+
     /// The container contents, sent when the conversation id is first set.
     Container(Box<Container>),
+
     /// An outbound message has arrived at the server
     SendDone(MsgId),
 }

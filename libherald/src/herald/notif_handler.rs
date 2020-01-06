@@ -18,6 +18,7 @@ impl NotifHandler {
 
         match notif {
             NewMsg(msg) => {
+                crate::toasts::new_msg_toast(msg.as_ref());
                 let cid = msg.conversation;
                 err!(content_push(cid, MsgUpdate::NewMsg(msg)));
             }

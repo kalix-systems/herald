@@ -10,7 +10,6 @@ mod imp {
     use heraldcore::message::Message;
 
     /// Displays a new message notification
-    // TODO: This should only be called if the user has notifications enabled.
     pub fn new_msg_toast(msg: &Message) {
         use notify_rust::*;
 
@@ -43,19 +42,30 @@ mod imp {
 mod imp {
     use heraldcore::message::Message;
     use notify_rust::*;
+    use std::sync::Once;
+
+    static IS_SET: Once = Once::new();
+
+    fn setup() {
+        IS_SET.call_once(|| {
+            let bundle =
+                get_bundle_identifier(super::DESKTOP_APP_NAME).unwrap_or(super::DESKTOP_APP_NAME);
+            drop(set_application(&bundle));
+        });
+    }
 
     pub fn new_msg_toast(msg: &Message) {
-        if set_application(super::DESKTOP_APP_NAME).is_ok() {
-            let mut notif = Notification::new();
+        setup();
 
-            notif.summary(&format!("New message from {}", msg.author));
+        let mut notif = Notification::new();
 
-            if let Some(body) = msg.text() {
-                notif.body(body);
-            }
+        notif.summary(&format!("New message from {}", msg.author));
 
-            drop(notif.show());
+        if let Some(body) = msg.text() {
+            notif.body(body);
         }
+
+        drop(notif.show());
     }
 }
 
