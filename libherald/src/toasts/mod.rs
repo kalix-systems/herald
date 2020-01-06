@@ -50,7 +50,8 @@ mod imp {
         *IS_SET
             .get_or_try_init(|| {
                 let bundle = get_bundle_identifier_or_default(super::DESKTOP_APP_NAME);
-                set_application(&bundle)
+                set_application(&bundle)?;
+                Ok(true)
             })
             .unwrap_or(&false)
     }
