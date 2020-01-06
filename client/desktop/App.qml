@@ -97,9 +97,8 @@ Item {
         id: convoMenu
     }
 
-    Popups.ImageCropPopup {
-        id: imageCrop
-    }
+    //    Popups.ImageCropPopup {//  id: imageCrop
+    //    }
     // TODO: move into seperate file
     Component {
         id: splash

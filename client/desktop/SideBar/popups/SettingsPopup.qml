@@ -21,6 +21,18 @@ Window {
         y = root.y + 100
     }
 
+    Loader {
+        id: cropLoader
+        property url imageSource
+        width: item ? item.width : undefined
+        height: item ? item.height : undefined
+        active: false
+        anchors.centerIn: parent
+        sourceComponent: ImageCropPopup {
+            id: imageCrop
+        }
+    }
+
     FileDialog {
         id: settingsProfPic
         property bool pfpValid: true
@@ -125,8 +137,11 @@ Window {
             Settings.SettingsPane {
                 id: settingsPane
                 cropCallbackArg: function (fileUrl) {
-                    imageCrop.imageSource = fileUrl
-                    imageCrop.show()
+                    cropLoader.imageSource = fileUrl
+                    cropLoader.active = true
+                    cropLoader.item.open()
+                    //                    imageCrop.imageSource = fileUrl
+                    //                    imageCrop.show()
                 }
             }
         }
