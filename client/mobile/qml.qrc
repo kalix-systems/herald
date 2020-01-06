@@ -27,9 +27,7 @@
         <file>qml/HomeScreen/GroupFlowComponents/FinalGroupList.qml</file>
         <file>qml/HomeScreen/GroupFlowComponents/GroupHeaderComponent.qml</file>
         <file>qml/Headers/SettingsHeader.qml</file>
-        <file>qml/Headers/HeadersMain.qml</file>
         <file>qml/Headers/HomeHeader.qml</file>
-        <file>qml/Headers/Transitions.qml</file>
         <file>qml/Headers/NewContactHeader.qml</file>
         <file>qml/Headers/NewGroupHeader.qml</file>
         <file>qml/ChatView/OptionsDropdown.qml</file>
