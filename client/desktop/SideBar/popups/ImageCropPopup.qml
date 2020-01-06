@@ -52,7 +52,7 @@ Window {
         id: image
         onSourceChanged: {
             if (source !== undefined)
-                dims = JSON.parse(Herald.utils.imageScaling(
+                dims = JSON.parse(Herald.utils.imageScaleReverse(
                                       Herald.utils.stripUrlPrefix(
                                           image.source), 300))
         }

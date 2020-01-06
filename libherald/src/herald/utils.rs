@@ -88,6 +88,18 @@ impl UtilsTrait for Utils {
         json::JsonValue::from(dims).dump()
     }
 
+    fn image_scale_reverse(
+        &self,
+        path: String,
+        constant: u32,
+    ) -> String {
+        let dims = err!(
+            heraldcore::image_utils::image_scaling_reverse(path, constant),
+            Default::default()
+        );
+        json::JsonValue::from(dims).dump()
+    }
+
     fn emit(&mut self) -> &mut UtilsEmitter {
         &mut self.emit
     }

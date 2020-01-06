@@ -41,6 +41,12 @@ pub trait UtilsTrait {
         path: String,
     ) -> String;
 
+    fn image_scale_reverse(
+        &self,
+        path: String,
+        scale: u32,
+    ) -> String;
+
     fn image_scaling(
         &self,
         path: String,
@@ -112,6 +118,23 @@ pub unsafe extern "C" fn utils_image_dimensions(
     let mut path = String::new();
     set_string_from_utf16(&mut path, path_str, path_len);
     let ret = obj.image_dimensions(path);
+    let str_: *const c_char = ret.as_ptr() as (*const c_char);
+    set(data, str_, ret.len() as i32);
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn utils_image_scale_reverse(
+    ptr: *const Utils,
+    path_str: *const c_ushort,
+    path_len: c_int,
+    scale: u32,
+    data: *mut QString,
+    set: fn(*mut QString, str_: *const c_char, len: c_int),
+) {
+    let obj = &*ptr;
+    let mut path = String::new();
+    set_string_from_utf16(&mut path, path_str, path_len);
+    let ret = obj.image_scale_reverse(path, scale);
     let str_: *const c_char = ret.as_ptr() as (*const c_char);
     set(data, str_, ret.len() as i32);
 }

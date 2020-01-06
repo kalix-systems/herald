@@ -125,6 +125,7 @@ fn utils() -> Object {
         // Given image dimensions and a constant, scales the smaller dimension down
         // and makes the larger dimension equal to the constant
         const imageScaling(path: QString, scale: QUint32) => QString,
+        const imageScaleReverse(path: QString, scale: QUint32) => QString,
     };
 
     obj! {

@@ -185,3 +185,25 @@ fn image_scaling_dims(
         height: height.ceil().max(scale) as u32,
     }
 }
+
+pub fn image_scaling_reverse<P>(
+    source: P,
+    scale: u32,
+) -> Result<Dims, image::ImageError>
+where
+    P: AsRef<Path>,
+{
+    let (width, height) = image_dimensions(source)?;
+    let (width, height, scale) = (width as f32, height as f32, scale as f32);
+
+    let (width, height) = if width > height {
+        (scale, scale * height / width)
+    } else {
+        (scale * width / height, scale)
+    };
+
+    Ok(Dims {
+        width: width.ceil().max(scale) as u32,
+        height: height.ceil().max(scale) as u32,
+    })
+}
