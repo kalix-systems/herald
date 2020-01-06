@@ -61,8 +61,7 @@ MouseArea {
                 background: Rectangle {
                     border.color: CmnCfg.palette.offBlack
                     border.width: 1
-                    color: CmnCfg.palette.white
-                    radius: width * 0.3
+                    color: replyButton.mouseArea.containsMouse ? CmnCfg.palette.lightGrey : CmnCfg.palette.white
                 }
             }
             Imports.IconButton {
@@ -81,8 +80,7 @@ MouseArea {
                 background: Rectangle {
                     border.color: CmnCfg.palette.offBlack
                     border.width: 1
-                    color: CmnCfg.palette.white
-                    radius: width * 0.3
+                    color: reactButton.mouseArea.containsMouse ? CmnCfg.palette.lightGrey : CmnCfg.palette.white
                 }
             }
             Imports.IconButton {
@@ -99,8 +97,7 @@ MouseArea {
                 background: Rectangle {
                     border.color: CmnCfg.palette.offBlack
                     border.width: 1
-                    color: CmnCfg.palette.white
-                    radius: width * 0.3
+                    color: downloadButton.mouseArea.containsMouse ? CmnCfg.palette.lightGrey : CmnCfg.palette.white
                 }
             }
             Imports.IconButton {
@@ -116,8 +113,7 @@ MouseArea {
                 background: Rectangle {
                     border.color: CmnCfg.palette.offBlack
                     border.width: 1
-                    color: CmnCfg.palette.white
-                    radius: width * 0.3
+                    color: messageOptionsButton.mouseArea.containsMouse ? CmnCfg.palette.lightGrey : CmnCfg.palette.white
                 }
             }
 
