@@ -14,10 +14,12 @@ Rectangle {
 
     //pass in messages.builder on desktop and mobile
     property var builderData
+    property bool outboundReply: Herald.config.configId === builderData.opAuthor
 
     property color authorColor: CmnCfg.palette.avatarColors[Herald.users.colorById(
                                                                 builderData.opAuthor)]
-    property string authorName: Herald.users.nameById(builderData.opAuthor)
+    property string authorName: outboundReply ? Herald.config.name : Herald.users.nameById(
+                                                    builderData.opAuthor)
     property string friendlyTimestamp: Utils.friendlyTimestamp(
                                            builderData.opTime)
     property var maxWidth: wrapper.width - CmnCfg.smallMargin
