@@ -32,6 +32,8 @@ Item {
             width: height
             radius: isGroup ? 0 : width
             color: wrapperItem.color
+            border.width: isGroup ? 1 : 0
+            border.color: CmnCfg.palette.white
             Text {
                 text: initials
                 font.bold: true
@@ -64,11 +66,10 @@ Item {
                 mipmap: true
                 Rectangle {
                     anchors.fill: parent
-                    radius: width
-                    visible: isGroup ? false : true
+                    radius: !isGroup ? width : 0
                     color: "transparent"
-                    border.color: wrapperItem.color
-                    border.width: visible ? 2 : 0
+                    border.color: !isGroup ? wrapperItem.color : CmnCfg.palette.white
+                    border.width: !isGroup ? 2 : 1
                 }
             }
         }
