@@ -3,6 +3,7 @@ import QtQuick.Layouts 1.12
 import QtQuick 2.12
 import LibHerald 1.0
 import "../Common"
+import "qrc:/imports/"
 
 RowLayout {
     anchors {
@@ -19,15 +20,12 @@ RowLayout {
         onTapped: mainView.pop()
     }
 
-    Row {
+    Label {
         Layout.alignment: Qt.AlignCenter
-
-        Label {
-            text: mainView.currentItem.headerTitle
-            font: CmnCfg.headerFont
-            anchors.verticalCenter: parent.verticalCenter
-            color: CmnCfg.palette.iconFill
-        }
+        text: mainView.currentItem.headerTitle
+        font: CmnCfg.headerFont
+        color: CmnCfg.palette.iconFill
+        visible: parent.state != "search"
     }
 
     AnimIconButton {
@@ -35,5 +33,50 @@ RowLayout {
         Layout.alignment: Qt.AlignRight
         color: CmnCfg.palette.iconFill
         imageSource: "qrc:/search-icon.svg"
+        visible: parent.state != "search"
+        onTapped: parent.state = "search"
     }
+
+    BorderedTextField {
+        id: sta
+        visible: parent.state === "search"
+        Layout.margins: CmnCfg.smallMargin
+        Layout.topMargin: 0
+        Layout.fillWidth: true
+        Layout.alignment: Qt.AlignCenter
+        onVisibleChanged: if (visible)
+                              forceActiveFocus()
+        onTextEdited: {
+            ownedMessages.searchPattern = text
+        }
+    }
+
+    AnimIconButton {
+        id: searchExitButton
+        Layout.alignment: Qt.AlignRight
+        color: CmnCfg.palette.iconFill
+        imageSource: "qrc:/x-icon.svg"
+        visible: parent.state === "search"
+        onTapped: parent.state = "default"
+    }
+
+    states: [
+        State {
+            name: "default"
+            StateChangeScript {
+                script: {
+                    ownedMessages.searchActive = false
+                    // clear search
+                }
+            }
+        },
+        State {
+            name: "search"
+            StateChangeScript {
+                script: {
+                    ownedMessages.searchActive = true
+                }
+            }
+        }
+    ]
 }
