@@ -139,11 +139,24 @@ Page {
         atcButton.onClicked: chatTextArea.attachmentsDialogue.open()
     }
 
-    // listens for typing indicators
-    Connections {
-        target: ownedConversation
-        onNewTypingIndicator: print(
-                                  ownedConversation.typingUserId + " is typing")
+    Item {
+        id: typingIndicatorPlaceholder
+        property int __secondsSinceLastReset: 0
+        property bool __aUserIsTyping: __secondsSinceLastReset < 6
+
+        // listens for typing indicators
+        Connections {
+            target: ownedConversation
+            onNewTypingIndicator: {
+                typingIndicatorPlaceholder.__secondsSinceLastReset = 0
+                print(ownedConversation.typingUserId + " is typing")
+            }
+        }
+
+        Connections {
+            target: appRoot.globalTimer
+            onRefreshTime: typingIndicatorPlaceholder.__secondsSinceLastReset += 1
+        }
     }
 
     MessageDialog {
