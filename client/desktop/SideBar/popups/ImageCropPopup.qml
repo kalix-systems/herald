@@ -64,6 +64,7 @@ Window {
         sourceSize.width: dims === undefined ? 0 : dims.width
         width: sourceSize.width
         height: sourceSize.height
+        onWidthChanged: print(dims.height, dims.width)
 
         Rectangle {
             id: top

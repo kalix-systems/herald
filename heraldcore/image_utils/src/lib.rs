@@ -88,7 +88,7 @@ pub fn update_picture(
     let Dims {
         width: scaled_width,
         ..
-    } = image_scaling_dims(src_width, src_height, ProfilePicture::SIZE);
+    } = image_scaling_dims_reverse(src_width, src_height, ProfilePicture::SIZE);
 
     let t = |a| ((a as f32) * (src_width as f32) / (scaled_width as f32)) as u32;
 
@@ -186,14 +186,11 @@ fn image_scaling_dims(
     }
 }
 
-pub fn image_scaling_reverse<P>(
-    source: P,
+fn image_scaling_dims_reverse(
+    width: u32,
+    height: u32,
     scale: u32,
-) -> Result<Dims, image::ImageError>
-where
-    P: AsRef<Path>,
-{
-    let (width, height) = image_dimensions(source)?;
+) -> Dims {
     let (width, height, scale) = (width as f32, height as f32, scale as f32);
 
     let (width, height) = if width > height {
@@ -202,8 +199,19 @@ where
         (scale * width / height, scale)
     };
 
-    Ok(Dims {
+    Dims {
         width: width.ceil().min(scale) as u32,
         height: height.ceil().min(scale) as u32,
-    })
+    }
+}
+
+pub fn image_scaling_reverse<P>(
+    source: P,
+    scale: u32,
+) -> Result<Dims, image::ImageError>
+where
+    P: AsRef<Path>,
+{
+    let (width, height) = image_dimensions(source)?;
+    Ok(image_scaling_dims_reverse(width, height, scale))
 }
