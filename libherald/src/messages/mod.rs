@@ -3,6 +3,7 @@ use crate::{
     interface::{MessagesEmitter as Emitter, MessagesList as List},
     none,
 };
+use crossbeam_channel::Sender;
 use herald_common::UserId;
 use heraldcore::{
     message::{Elider, MessageReceiptStatus},
@@ -31,6 +32,9 @@ pub struct Messages {
     search: SearchState,
     builder: MessageBuilder,
     elider: Elider,
+
+    typing_user: Option<UserId>,
+    typing_sender: Option<Sender<()>>,
 }
 
 impl Messages {
@@ -114,6 +118,12 @@ impl Messages {
                 self.emit.is_empty_changed();
                 self.emit_last_changed();
             }
+
+            MsgUpdate::TypingIndicator(uid) => {
+                self.typing_user.replace(uid);
+                self.emit.typing_user_id_changed();
+                self.emit.new_typing_indicator();
+            }
         }
     }
 }
@@ -138,6 +148,9 @@ pub(crate) enum MsgUpdate {
         content: heraldcore::message::ReactContent,
         remove: bool,
     },
+
+    /// A typing indicator has been received
+    TypingIndicator(UserId),
 
     /// A rendered message from the `MessageBuilder`
     BuilderMsg(Box<heraldcore::message::Message>),

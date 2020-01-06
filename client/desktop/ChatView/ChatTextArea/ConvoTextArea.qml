@@ -158,6 +158,11 @@ Rectangle {
                     target: ownedConversation.builder
                     onOpIdChanged: chatText.forceActiveFocus()
                 }
+
+                onTextChanged: {
+                    print("sending")
+                    ownedConversation.sendTypingIndicator()
+                }
             }
         }
     }

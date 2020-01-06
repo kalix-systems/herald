@@ -139,6 +139,12 @@ Page {
         atcButton.onClicked: chatTextArea.attachmentsDialogue.open()
     }
 
+    Connections {
+        target: ownedConversation
+        onNewTypingIndicator: print(
+                                  ownedConversation.typingUserId + " is typing")
+    }
+
     MessageDialog {
         id: deleteMsgPrompt
         property var deleteId

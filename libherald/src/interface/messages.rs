@@ -16,7 +16,9 @@ pub struct MessagesEmitter {
     pub(super) search_num_matches_changed: fn(*mut MessagesQObject),
     pub(super) search_pattern_changed: fn(*mut MessagesQObject),
     pub(super) search_regex_changed: fn(*mut MessagesQObject),
+    pub(super) typing_user_id_changed: fn(*mut MessagesQObject),
     pub(super) new_data_ready: fn(*mut MessagesQObject),
+    pub(super) new_typing_indicator: fn(*mut MessagesQObject),
 }
 
 impl MessagesEmitter {
@@ -41,6 +43,8 @@ impl MessagesEmitter {
             search_num_matches_changed: self.search_num_matches_changed,
             search_pattern_changed: self.search_pattern_changed,
             search_regex_changed: self.search_regex_changed,
+            typing_user_id_changed: self.typing_user_id_changed,
+            new_typing_indicator: self.new_typing_indicator,
             new_data_ready: self.new_data_ready,
         }
     }
@@ -144,6 +148,22 @@ impl MessagesEmitter {
 
         if !ptr.is_null() {
             (self.search_regex_changed)(ptr);
+        }
+    }
+
+    pub fn typing_user_id_changed(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+
+        if !ptr.is_null() {
+            (self.typing_user_id_changed)(ptr);
+        }
+    }
+
+    pub fn new_typing_indicator(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+
+        if !ptr.is_null() {
+            (self.new_typing_indicator)(ptr);
         }
     }
 
@@ -308,6 +328,8 @@ pub trait MessagesTrait {
         value: bool,
     );
 
+    fn typing_user_id(&self) -> Option<&str>;
+
     fn add_reaction(
         &mut self,
         index: u64,
@@ -353,6 +375,8 @@ pub trait MessagesTrait {
         index: u64,
         dest: String,
     ) -> bool;
+
+    fn send_typing_indicator(&mut self) -> ();
 
     fn set_elision_char_count(
         &mut self,
@@ -637,6 +661,7 @@ pub unsafe fn messages_new_inner(ptr_bundle: *mut MessagesPtrBundle) -> Messages
         messages_search_num_matches_changed,
         messages_search_pattern_changed,
         messages_search_regex_changed,
+        messages_typing_user_id_changed,
         messages_new_data_ready,
         messages_layout_about_to_be_changed,
         messages_layout_changed,
@@ -649,6 +674,7 @@ pub unsafe fn messages_new_inner(ptr_bundle: *mut MessagesPtrBundle) -> Messages
         messages_end_move_rows,
         messages_begin_remove_rows,
         messages_end_remove_rows,
+        messages_new_typing_indicator,
     } = ptr_bundle;
     let document_attachments_emit = DocumentAttachmentsEmitter {
         qobject: Arc::new(AtomicPtr::new(document_attachments)),
@@ -739,7 +765,9 @@ pub unsafe fn messages_new_inner(ptr_bundle: *mut MessagesPtrBundle) -> Messages
         search_num_matches_changed: messages_search_num_matches_changed,
         search_pattern_changed: messages_search_pattern_changed,
         search_regex_changed: messages_search_regex_changed,
+        typing_user_id_changed: messages_typing_user_id_changed,
         new_data_ready: messages_new_data_ready,
+        new_typing_indicator: messages_new_typing_indicator,
     };
     let model = MessagesList {
         qobject: messages,
@@ -867,6 +895,12 @@ pub unsafe extern "C" fn messages_save_all_attachments(
     let mut dest = String::new();
     set_string_from_utf16(&mut dest, dest_str, dest_len);
     obj.save_all_attachments(index, dest)
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn messages_send_typing_indicator(ptr: *mut Messages) {
+    let obj = &mut *ptr;
+    obj.send_typing_indicator()
 }
 
 #[no_mangle]
@@ -1058,6 +1092,20 @@ pub unsafe extern "C" fn messages_search_regex_set(
     value: bool,
 ) {
     (&mut *ptr).set_search_regex(value)
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn messages_typing_user_id_get(
+    ptr: *const Messages,
+    prop: *mut QString,
+    set: fn(*mut QString, *const c_char, c_int),
+) {
+    let obj = &*ptr;
+    let value = obj.typing_user_id();
+    if let Some(value) = value {
+        let str_: *const c_char = value.as_ptr() as (*const c_char);
+        set(prop, str_, to_c_int(value.len()));
+    }
 }
 
 #[no_mangle]
@@ -1543,6 +1591,7 @@ pub struct MessagesPtrBundle {
     messages_search_num_matches_changed: fn(*mut MessagesQObject),
     messages_search_pattern_changed: fn(*mut MessagesQObject),
     messages_search_regex_changed: fn(*mut MessagesQObject),
+    messages_typing_user_id_changed: fn(*mut MessagesQObject),
     messages_new_data_ready: fn(*mut MessagesQObject),
     messages_layout_about_to_be_changed: fn(*mut MessagesQObject),
     messages_layout_changed: fn(*mut MessagesQObject),
@@ -1555,4 +1604,5 @@ pub struct MessagesPtrBundle {
     messages_end_move_rows: fn(*mut MessagesQObject),
     messages_begin_remove_rows: fn(*mut MessagesQObject, usize, usize),
     messages_end_remove_rows: fn(*mut MessagesQObject),
+    messages_new_typing_indicator: fn(*mut MessagesQObject),
 }
