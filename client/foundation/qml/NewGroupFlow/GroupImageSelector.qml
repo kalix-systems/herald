@@ -69,7 +69,7 @@ Rectangle {
         fill: CmnCfg.palette.black
         TapHandler {
             onTapped: {
-                //groupPicDialogue.open()
+                groupPicDialogue.open()
             }
         }
     }

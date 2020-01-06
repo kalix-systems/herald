@@ -19,6 +19,7 @@ Rectangle {
     height: replyWrapperCol.height
     property alias mouseEnabled: mouseArea.enabled
 
+
     ReplyMouseArea {
         id: mouseArea
     }

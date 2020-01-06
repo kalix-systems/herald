@@ -164,6 +164,7 @@ Rectangle {
 
         //reply bubble loader
         Loader {
+
             sourceComponent: {
                 if (!reply)
                     return undefined
