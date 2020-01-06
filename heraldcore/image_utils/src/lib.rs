@@ -203,7 +203,7 @@ where
     };
 
     Ok(Dims {
-        width: width.ceil().max(scale) as u32,
-        height: height.ceil().max(scale) as u32,
+        width: width.ceil().min(scale) as u32,
+        height: height.ceil().min(scale) as u32,
     })
 }
