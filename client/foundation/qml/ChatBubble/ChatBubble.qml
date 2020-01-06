@@ -22,7 +22,7 @@ Rectangle {
 
     readonly property string body: messageModelData.body
     readonly property string authorId: messageModelData.author
-    readonly property string authorName: messageModelData.authorName
+    readonly property string authorName: outbound ? Herald.config.name : messageModelData.authorName
 
     readonly property string medAttachments: messageModelData.mediaAttachments
     readonly property string fullMedAttachments: messageModelData.fullMediaAttachments
@@ -48,7 +48,7 @@ Rectangle {
                                                           messageModelData.receiptStatus) : ""
     readonly property color authorColor: CmnCfg.avatarColors[messageModelData.authorColor]
 
-    readonly property string pfpUrl: messageModelData.authorProfilePicture
+    readonly property string pfpUrl: outbound ? Herald.config.profilePicture : messageModelData.authorProfilePicture
     property bool hoverHighlight: false
     property alias expireInfo: expireInfo
     property int bubbleIndex
