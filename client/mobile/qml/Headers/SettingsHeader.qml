@@ -16,9 +16,7 @@ RowLayout {
         Layout.alignment: Qt.AlignLeft
         color: CmnCfg.palette.iconFill
         imageSource: "qrc:/back-arrow-icon.svg"
-        onTapped : {
-            mainView.pop()
-        }
+        onTapped: mainView.pop()
     }
 
     Label {

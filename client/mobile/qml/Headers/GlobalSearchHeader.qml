@@ -17,9 +17,7 @@ RowLayout {
         Layout.alignment: Qt.AlignLeft
         color: CmnCfg.palette.iconFill
         imageSource: "qrc:/back-arrow-icon.svg"
-        onClicked : {
-            mainView.pop()
-        }
+        onTapped: mainView.pop()
     }
 
     Item {
@@ -45,10 +43,8 @@ RowLayout {
             }
             color: CmnCfg.palette.iconFill
             imageSource: "qrc:/x-icon.svg"
-            onTapped: {
-                searchField.text = ''
-                // TODO then focus search field again
-            }
+            onTapped: searchField.text = ''
+            // TODO then focus search field again
         }
 
         Rectangle {
@@ -62,4 +58,3 @@ RowLayout {
         }
     }
 }
-

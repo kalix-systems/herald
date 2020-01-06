@@ -43,10 +43,7 @@ Column {
             anchors.centerIn: parent
             imageSource: "qrc:/camera-icon.svg"
             color: CmnCfg.palette.iconFill
-
-            onTapped : {
-                print("TODO implement group pics")
-            }
+            onTapped: print("TODO implement group pics")
         }
     }
 
