@@ -11,6 +11,9 @@ Row {
     property var imageClickedCallBack: function () {
         throw "undefined callback"
     }
+
+    property var imageLongPressedCallBack: function () {}
+
     property var dims: JSON.parse(Herald.utils.imageScaling(firstImage.path,
                                                             300))
 
@@ -24,6 +27,7 @@ Row {
 
         MouseArea {
             onClicked: wrapperRow.imageClickedCallBack(image.source)
+            onPressAndHold: imageLongPressedCallBack()
             anchors.fill: parent
         }
     }
