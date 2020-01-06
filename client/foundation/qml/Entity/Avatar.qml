@@ -51,6 +51,8 @@ Item {
             width: height
             radius: isGroup ? 0 : width
             id: mask
+            clip: true
+
             Image {
                 source: JS.safeToQrcURI(pfpPath)
                 anchors.fill: mask
@@ -60,6 +62,14 @@ Item {
                 }
                 clip: true
                 mipmap: true
+                Rectangle {
+                    anchors.fill: parent
+                    radius: width
+                    visible: isGroup ? false : true
+                    color: "transparent"
+                    border.color: wrapperItem.color
+                    border.width: visible ? 2 : 0
+                }
             }
         }
     }
