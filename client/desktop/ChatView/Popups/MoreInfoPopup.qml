@@ -174,7 +174,7 @@ Popup {
                 currentIndex: -1
                 delegate: Item {
                     height: visible ? CmnCfg.convoHeight : 0
-                    width: 250
+                    width: 300
                     // TODO special-case Note to Self conversations so they
                     // don't have an empty recipient list
                     visible: convoMembers.rowCount(
@@ -183,8 +183,7 @@ Popup {
                     Common.PlatonicRectangle {
                         boxTitle: memberData.name
                         boxColor: memberData.color
-                        picture: Utils.safeStringOrDefault(memberData.picture,
-                                                           "")
+                        picture: memberData.profilePicture
                         property MouseArea hoverHandler
                         color: CmnCfg.palette.white
                         labelComponent: Ent.ContactLabel {
@@ -203,7 +202,8 @@ Popup {
                             icon.color: CmnCfg.palette.iconMatte
                             padding: 0
 
-                            anchors.verticalCenter: parent.verticalCenter
+                            anchors.bottom: parent.bottom
+                            anchors.bottomMargin: CmnCfg.smallMargin
                             background: Item {}
                         }
 
