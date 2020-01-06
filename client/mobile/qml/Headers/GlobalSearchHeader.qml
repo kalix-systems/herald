@@ -32,6 +32,7 @@ RowLayout {
             borderColor: "Transparent"
             placeholderText: qsTr('Search your conversations')
             font.pixelSize: CmnCfg.units.dp(18)
+            Component.onCompleted: forceActiveFocus()
         }
 
         AnimIconButton {

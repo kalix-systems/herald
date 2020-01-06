@@ -30,44 +30,34 @@ Page {
     //TODO: Rename me
     Component {
         id: cvMain
-        HomeScreen.HomeScreenMain {
-            readonly property string stateName: "home"
-        }
+        HomeScreen.HomeScreenMain {}
     }
 
     Component {
         id: messageInfoMain
-        ChatView.InfoPage {
-            readonly property string stateName: "info"
-        }
+        ChatView.InfoPage {}
     }
 
     Component {
         id: settingsMain
         Settings.SettingsPane {
-            readonly property string stateName: "config"
+            readonly property Component headerComponent: Headers.SettingsHeader {}
         }
     }
 
     Component {
         id: newContactViewMain
-        NewContactView.NewContactViewMain {
-            readonly property string stateName: "newContact"
-        }
+        NewContactView.NewContactViewMain {}
     }
 
     Component {
         id: newGroupViewMain
-        HomeScreen.NewGroupView {
-            readonly property string stateName: "newGroup"
-        }
+        HomeScreen.NewGroupView {}
     }
 
     Component {
         id: globalSearchView
-        GlobalSearch.GlobalSearchMain {
-            readonly property string stateName: "globalSearch"
-        }
+        GlobalSearch.GlobalSearchMain {}
     }
 
     StackView {

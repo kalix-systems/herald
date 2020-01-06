@@ -4,8 +4,10 @@ import QtQuick 2.12
 import LibHerald 1.0
 import "../Common" as Common
 import "qrc:/imports" as Imports
+import "../Headers" as Headers
 
 Page {
+    readonly property Component headerComponent: Headers.NewContactHeader {}
 
     ColumnLayout {
         anchors.fill: parent
