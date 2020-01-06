@@ -74,23 +74,37 @@ Page {
         }
     }
 
-    // This should be spawned by the EK
-    MouseArea {
-        id: exit
-        enabled: emoKeysPopup.active
-        anchors.fill: parent
-        onClicked: {
-            emoKeysPopup.active = false
-            anchors.fill = undefined
-        }
-    }
+    // wrapper Item to set margins for the popup instead of
+    // having to use explicit x and y positioning
+    Item {
 
-    Popups.EmojiPopup {
-        id: emoKeysPopup
         anchors {
-            margins: 12
-            bottom: chatTextArea.top
             left: parent.left
+            bottom: chatTextArea.top
+            margins: 12
+        }
+        height: emoKeysPopup.height
+        width: emoKeysPopup.width
+
+        Popup {
+            id: emojiPopupWrapper
+
+            onOpened: emoKeysPopup.active = true
+            onClosed: emoKeysPopup.active = false
+
+            z: chatPage.z + 2
+            height: emoKeysPopup.height
+            width: emoKeysPopup.width
+            onHeightChanged: print(width, height)
+
+            //            onClosed: emoKeysPopup.active = false
+            Popups.EmojiPopup {
+                id: emoKeysPopup
+                anchors.centerIn: parent
+                onActiveChanged: if (!active) {
+                                     emojiPopupWrapper.close()
+                                 }
+            }
         }
     }
 
@@ -122,7 +136,8 @@ Page {
                                       ownedConversation, chatTextArea)
             // TODO: Tab should cycle through a hierarchy of items as far as focus
         }
-        emojiButton.onClicked: emoKeysPopup.active = !!!emoKeysPopup.active
+        emojiButton.onClicked: emojiPopupWrapper.open(
+                                   ) //emoKeysPopup.active = !!!emoKeysPopup.active
         atcButton.onClicked: chatTextArea.attachmentsDialogue.open()
     }
 
