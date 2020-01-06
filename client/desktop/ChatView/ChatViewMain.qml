@@ -95,9 +95,7 @@ Page {
             z: chatPage.z + 2
             height: emoKeysPopup.height
             width: emoKeysPopup.width
-            onHeightChanged: print(width, height)
 
-            //            onClosed: emoKeysPopup.active = false
             Popups.EmojiPopup {
                 id: emoKeysPopup
                 anchors.centerIn: parent
