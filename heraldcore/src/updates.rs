@@ -27,6 +27,8 @@ pub enum Notification {
         /// Is this reaction update an addition or a removal?
         remove: bool,
     },
+    /// A typing indicator has been received
+    TypingIndicator(ConversationId, UserId),
     /// A new user has been added
     NewUser(Box<(herald_user::User, ConversationMeta)>),
     /// A new conversation has been added

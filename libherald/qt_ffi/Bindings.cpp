@@ -242,6 +242,9 @@ inline void messagesSearchPatternChanged(Messages *o) {
 inline void messagesSearchRegexChanged(Messages *o) {
   Q_EMIT o->searchRegexChanged();
 }
+inline void messagesTypingUserIdChanged(Messages *o) {
+  Q_EMIT o->typingUserIdChanged();
+}
 inline void usersFilterChanged(Users *o) { Q_EMIT o->filterChanged(); }
 inline void usersFilterRegexChanged(Users *o) {
   Q_EMIT o->filterRegexChanged();
@@ -2197,6 +2200,8 @@ void messages_search_pattern_set(Messages::Private *, const ushort *str,
                                  int len);
 bool messages_search_regex_get(const Messages::Private *);
 void messages_search_regex_set(Messages::Private *, bool);
+void messages_typing_user_id_get(const Messages::Private *, QString *,
+                                 qstring_set);
 void messages_add_reaction(Messages::Private *, quint64, const ushort *, int);
 bool messages_clear_conversation_history(Messages::Private *);
 void messages_clear_search(Messages::Private *);
@@ -2210,6 +2215,7 @@ void messages_remove_reaction(Messages::Private *, quint64, const ushort *,
                               int);
 bool messages_save_all_attachments(const Messages::Private *, quint64,
                                    const ushort *, int);
+void messages_send_typing_indicator(Messages::Private *);
 void messages_set_elision_char_count(Messages::Private *, quint16);
 void messages_set_elision_chars_per_line(Messages::Private *, quint8);
 void messages_set_elision_line_count(Messages::Private *, quint8);
@@ -2961,6 +2967,7 @@ ConversationContent::ConversationContent(QObject *parent)
           messagesSearchNumMatchesChanged,
           messagesSearchPatternChanged,
           messagesSearchRegexChanged,
+          messagesTypingUserIdChanged,
           [](const Messages *o) { Q_EMIT o->newDataReady(QModelIndex()); },
           [](Messages *o) { Q_EMIT o->layoutAboutToBeChanged(); },
           [](Messages *o) {
@@ -2988,6 +2995,7 @@ ConversationContent::ConversationContent(QObject *parent)
           [](Messages *o) { o->endRemoveRows(); }
 
           ,
+          [](const Messages *o) { Q_EMIT o->newTypingIndicator(); },
           [](const ConversationContent *o) { Q_EMIT o->tryPoll(); }})),
       m_ownsPrivate(true) {
   m_members->m_d = conversation_content_members_get(m_d);
@@ -4214,6 +4222,7 @@ Messages::Messages(QObject *parent)
           messagesSearchNumMatchesChanged,
           messagesSearchPatternChanged,
           messagesSearchRegexChanged,
+          messagesTypingUserIdChanged,
           [](const Messages *o) { Q_EMIT o->newDataReady(QModelIndex()); },
           [](Messages *o) { Q_EMIT o->layoutAboutToBeChanged(); },
           [](Messages *o) {
@@ -4240,7 +4249,8 @@ Messages::Messages(QObject *parent)
           },
           [](Messages *o) { o->endRemoveRows(); }
 
-      })),
+          ,
+          [](const Messages *o) { Q_EMIT o->newTypingIndicator(); }})),
       m_ownsPrivate(true) {
   m_builder->m_d = messages_builder_get(m_d);
   m_builder->m_documentAttachments->m_d =
@@ -4354,6 +4364,12 @@ void Messages::setSearchPattern(const QString &v) {
 
 bool Messages::searchRegex() const { return messages_search_regex_get(m_d); }
 void Messages::setSearchRegex(bool v) { messages_search_regex_set(m_d, v); }
+
+QString Messages::typingUserId() const {
+  QString v;
+  messages_typing_user_id_get(m_d, &v, set_qstring);
+  return v;
+}
 void Messages::addReaction(quint64 index, const QString &content) {
   return messages_add_reaction(m_d, index, content.utf16(), content.size());
 }
@@ -4380,6 +4396,9 @@ void Messages::removeReaction(quint64 index, const QString &content) {
 }
 bool Messages::saveAllAttachments(quint64 index, const QString &dest) const {
   return messages_save_all_attachments(m_d, index, dest.utf16(), dest.size());
+}
+void Messages::sendTypingIndicator() {
+  return messages_send_typing_indicator(m_d);
 }
 void Messages::setElisionCharCount(quint16 char_count) {
   return messages_set_elision_char_count(m_d, char_count);
