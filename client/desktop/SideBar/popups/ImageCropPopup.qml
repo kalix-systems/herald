@@ -7,14 +7,16 @@ import LibHerald 1.0
 import "qrc:/imports"
 import "../../common" as Common
 
-Window {
+Popup {
     id: cropWindow
-    property url imageSource
-    property real maxSize: 300
-    property int maxWindowSize: 400
-    property int minSize: Math.round(maxSize / 6)
-    color: CmnCfg.palette.black
+    property url imageSource: parent.imageSource
+    property real maxSize
 
+    property int minSize: Math.round(maxSize / 6)
+
+    //  color: CmnCfg.palette.black
+    modal: true
+    onClosed: cropLoader.active = false
     Row {
         anchors {
             bottom: parent.bottom
@@ -45,8 +47,12 @@ Window {
         }
     }
 
-    width: 400
-    height: 500
+    width: image.dims === undefined ? 0 : image.dims.width + 150
+
+    height: image.dims === undefined ? 0 : image.dims.height + 150
+    background: Rectangle {
+        color: CmnCfg.palette.black
+    }
 
     Image {
         id: image
@@ -55,6 +61,7 @@ Window {
                 dims = JSON.parse(Herald.utils.imageScaleReverse(
                                       Herald.utils.stripUrlPrefix(
                                           image.source), 300))
+            maxSize = Math.min(300, dims.height, dims.width)
         }
         property var dims
         anchors.centerIn: parent
@@ -107,7 +114,7 @@ Window {
 
         Rectangle {
             id: clipRect
-            width: Math.min(image.width, image.height)
+            width: maxSize
             height: width
             color: "transparent"
             anchors.centerIn: parent

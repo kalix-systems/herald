@@ -180,6 +180,7 @@ fn handle_content(
 
                 U::DisplayName(name) => {
                     crate::user::set_name(uid, name.as_ref().map(String::as_str))?;
+
                     ev.notifications
                         .push(Notification::UserChanged(uid, DisplayName(name.clone())));
 
@@ -202,7 +203,7 @@ fn handle_content(
                         .push(Notification::UserChanged(uid, Picture(path.clone())));
 
                     if let Some(cid) =
-                        crate::conversation::get_pairwise_conversations(&[uid])?.pop()
+                        crate::conversation::db::get_pairwise_conversations(&conn, &[uid])?.pop()
                     {
                         ev.notifications
                             .push(Notification::Settings(cid, S::Picture(path)));
