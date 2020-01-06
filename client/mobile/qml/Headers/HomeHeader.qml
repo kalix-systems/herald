@@ -41,18 +41,14 @@ RowLayout {
             id: searchButton
             color: CmnCfg.palette.iconFill
             imageSource: "qrc:/search-icon.svg"
-            onClicked: {
-                mainView.push(globalSearchView)
-            }
+            onTapped: mainView.push(globalSearchView)
         }
 
         AnimIconButton {
             id: optionsButton
             color: CmnCfg.palette.iconFill
             imageSource: "qrc:/options-icon.svg"
-            onClicked: {
-                mainView.push(settingsMain)
-            }
+            onTapped: mainView.push(settingsMain)
         }
     }
 }
