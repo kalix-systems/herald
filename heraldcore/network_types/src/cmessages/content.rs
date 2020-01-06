@@ -13,6 +13,8 @@ pub enum Content {
     Reaction(Reaction),
     /// The sender's profile has changed
     ProfileChanged(ProfileChanged),
+    /// Typing notification. Includes the time the notification was sent
+    Typing(Time),
 }
 
 #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]

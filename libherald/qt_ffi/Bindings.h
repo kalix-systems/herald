@@ -163,6 +163,7 @@ struct ConversationContentPtrBundle {
   void (*messages_search_num_matches_changed)(Messages *);
   void (*messages_search_pattern_changed)(Messages *);
   void (*messages_search_regex_changed)(Messages *);
+  void (*messages_typing_user_id_changed)(Messages *);
 
   void (*messages_new_data_ready)(const Messages *);
   void (*messages_layout_about_to_be_changed)(Messages *);
@@ -176,6 +177,7 @@ struct ConversationContentPtrBundle {
   void (*messages_end_move_rows)(Messages *);
   void (*messages_begin_remove_rows)(Messages *, int, int);
   void (*messages_end_remove_rows)(Messages *);
+  void (*messages_newTypingIndicator)(const Messages *);
   void (*conversation_content_tryPoll)(const ConversationContent *);
 };
 struct ConversationsPtrBundle {
@@ -538,6 +540,7 @@ struct MessagesPtrBundle {
   void (*messages_search_num_matches_changed)(Messages *);
   void (*messages_search_pattern_changed)(Messages *);
   void (*messages_search_regex_changed)(Messages *);
+  void (*messages_typing_user_id_changed)(Messages *);
 
   void (*messages_new_data_ready)(const Messages *);
   void (*messages_layout_about_to_be_changed)(Messages *);
@@ -551,6 +554,7 @@ struct MessagesPtrBundle {
   void (*messages_end_move_rows)(Messages *);
   void (*messages_begin_remove_rows)(Messages *, int, int);
   void (*messages_end_remove_rows)(Messages *);
+  void (*messages_newTypingIndicator)(const Messages *);
 };
 struct UsersPtrBundle {
   Users *users;
@@ -1583,6 +1587,8 @@ private:
                  NOTIFY searchPatternChanged FINAL)
   Q_PROPERTY(bool searchRegex READ searchRegex WRITE setSearchRegex NOTIFY
                  searchRegexChanged FINAL)
+  Q_PROPERTY(
+      QString typingUserId READ typingUserId NOTIFY typingUserIdChanged FINAL)
   explicit Messages(bool owned, QObject *parent);
 
 public:
@@ -1605,6 +1611,7 @@ public:
   void setSearchPattern(const QString &v);
   bool searchRegex() const;
   void setSearchRegex(bool v);
+  QString typingUserId() const;
   Q_INVOKABLE void addReaction(quint64 index, const QString &content);
   Q_INVOKABLE bool clearConversationHistory();
   Q_INVOKABLE void clearSearch();
@@ -1616,6 +1623,7 @@ public:
   Q_INVOKABLE qint64 prevSearchMatch();
   Q_INVOKABLE void removeReaction(quint64 index, const QString &content);
   Q_INVOKABLE bool saveAllAttachments(quint64 index, const QString &dest) const;
+  Q_INVOKABLE void sendTypingIndicator();
   Q_INVOKABLE void setElisionCharCount(quint16 char_count);
   Q_INVOKABLE void setElisionCharsPerLine(quint8 chars_per_line);
   Q_INVOKABLE void setElisionLineCount(quint8 line_count);
@@ -1700,6 +1708,8 @@ Q_SIGNALS:
   void searchNumMatchesChanged();
   void searchPatternChanged();
   void searchRegexChanged();
+  void typingUserIdChanged();
+  void newTypingIndicator() const;
 };
 class Users : public QAbstractItemModel {
   Q_OBJECT

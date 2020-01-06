@@ -38,6 +38,9 @@ impl Messages {
             search: SearchState::new(),
             builder,
             elider: Default::default(),
+
+            typing_user: Default::default(),
+            typing_sender: Default::default(),
         }
     }
 
@@ -120,6 +123,36 @@ impl Messages {
 
     pub(crate) fn is_empty_(&self) -> bool {
         self.container.is_empty()
+    }
+
+    pub(crate) fn send_typing_indicator_(&mut self) {
+        use crossbeam_channel::bounded;
+        let cid = none!(self.conversation_id);
+
+        let (typing_sender, rx) = match self.typing_sender.as_ref() {
+            Some(tx) => {
+                let _ = tx.try_send(());
+                return;
+            }
+            None => bounded(0),
+        };
+
+        // update the sender
+        self.typing_sender.replace(typing_sender);
+
+        spawn!({
+            err!(heraldcore::network::send_typing_indicator(cid));
+
+            loop {
+                match rx.recv() {
+                    Ok(_) => {
+                        err!(heraldcore::network::send_typing_indicator(cid));
+                        std::thread::sleep(std::time::Duration::from_secs(5));
+                    }
+                    Err(_) => return,
+                }
+            }
+        });
     }
 
     pub(crate) fn emit_(&mut self) -> &mut Emitter {

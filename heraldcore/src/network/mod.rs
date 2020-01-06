@@ -87,6 +87,14 @@ pub fn send_read_receipt(
     )
 }
 
+/// Sends a typing indicator
+pub fn send_typing_indicator(cid: ConversationId) -> Result<(), HErr> {
+    send_cmessage(
+        cid,
+        &ConversationMessage::Message(NetContent::Typing(Time::now())),
+    )
+}
+
 /// Sends a user request to `uid` with a proposed conversation id `cid`.
 pub fn send_user_req(
     uid: UserId,

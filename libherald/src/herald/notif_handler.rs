@@ -52,6 +52,9 @@ impl NotifHandler {
                     remove
                 }
             )),
+            TypingIndicator(cid, uid) => {
+                err!(content_push(cid, MsgUpdate::TypingIndicator(uid)));
+            }
             NewUser(update) => {
                 let (user, meta) = *update;
                 // add user

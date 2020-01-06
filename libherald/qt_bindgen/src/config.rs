@@ -274,6 +274,9 @@ fn messages() -> Object {
         lastAuxCode: Prop::new().simple(QUint8).optional(),
         lastHasAttachments: Prop::new().simple(Bool).optional(),
 
+        // User id of the last user to send a typing notification
+        typingUserId: Prop::new().simple(QString).optional(),
+
         isEmpty: Prop::new().simple(Bool),
 
         searchPattern: filter_prop(),
@@ -355,6 +358,10 @@ fn messages() -> Object {
         opDocAttachments: ItemProp::new(QString).get_by_value()
     };
 
+    let hooks = signals! {
+       newTypingIndicator(),|
+    };
+
     let funcs = functions! {
         mut deleteMessage(row_index: QUint64) => Bool,
         mut deleteMessageById(id: QByteArray) => Bool,
@@ -369,12 +376,13 @@ fn messages() -> Object {
         mut setElisionCharsPerLine(chars_per_line: QUint8) => Void,
         mut addReaction(index: QUint64, content: QString) => Void,
         mut removeReaction(index: QUint64, content: QString) => Void,
+        mut sendTypingIndicator() => Void,
         const indexById(msg_id: QByteArray) => Qint64,
         const saveAllAttachments(index: QUint64, dest: QString) => Bool,
     };
 
     obj! {
-        Messages: Obj::new().list().funcs(funcs).item_props(item_props).props(props)
+        Messages: Obj::new().list().funcs(funcs).item_props(item_props).props(props).hooks(hooks)
     }
 }
 
