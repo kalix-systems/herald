@@ -8,12 +8,11 @@ import "qrc:/imports/Entity" as Ent
 import "qrc:/imports/js/utils.mjs" as Utils
 import "qrc:/imports/ChatBubble"
 import "qrc:/imports" as Imports
-import "../Headers" as Headers
 
 Page {
     id: moreInfoPopup
     property ChatBubble referredChatBubble
-    readonly property Component headerComponent: Headers.MessageInfoHeader {}
+    readonly property Component headerComponent: MessageInfoHeader {}
 
     // members of the conversation content
     property var members: []
