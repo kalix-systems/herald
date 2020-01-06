@@ -11,8 +11,8 @@ import "qrc:/imports/Settings" as Settings
 Page {
     id: appRoot
     anchors.fill: parent
-
     readonly property alias globalTimer: globalTimer
+
     Timer {
         id: globalTimer
         signal refreshTime
@@ -75,7 +75,8 @@ Page {
         anchors.fill: parent
         initialItem: cvMain
         onCurrentItemChanged: {
-            rootHeader.state = currentItem.stateName
+            // upon pushing a page set the header to the proper component
+            rootHeader.headerComponent = currentItem.headerComponent
         }
     }
 

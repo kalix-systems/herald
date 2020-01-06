@@ -5,7 +5,6 @@ import LibHerald 1.0
 import "../Common"
 
 RowLayout {
-
     anchors {
         fill: parent
         rightMargin: CmnCfg.largeMargin
@@ -24,7 +23,7 @@ RowLayout {
         Layout.alignment: Qt.AlignCenter
 
         Label {
-            text: title
+            text: mainView.currentItem.headerTitle
             font: CmnCfg.headerFont
             anchors.verticalCenter: parent.verticalCenter
             color: CmnCfg.palette.iconFill

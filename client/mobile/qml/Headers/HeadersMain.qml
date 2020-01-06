@@ -9,6 +9,7 @@ ToolBar {
     property StackView mainStackView
     // global title used dynamically by multiple headers
     property string title
+    property Component headerComponent
 
     height: CmnCfg.toolbarHeight
 
@@ -20,6 +21,7 @@ ToolBar {
     Loader {
         id: rootLoader
         anchors.fill: parent
+        sourceComponent: headerComponent
     }
 
     Component {

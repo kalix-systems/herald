@@ -3,9 +3,11 @@ import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
 import LibHerald 1.0
 import "../Common" as Common
+import "../Headers" as Headers
 
 Page {
     id: chatPage
+    readonly property Component headerComponent: Headers.ChatHeader {}
     //swappable message model, set by the appstate
     property Messages ownedMessages
     property string headerTitle

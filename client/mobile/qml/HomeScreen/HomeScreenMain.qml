@@ -4,6 +4,7 @@ import QtQuick 2.12
 import LibHerald 1.0
 // Includes CVFLoatingButton. ListItem, and Header
 import "./Controls"
+import "../Headers" as Headers
 import "../Common" as Common
 import "qrc:/imports/js/utils.mjs" as Utils
 import QtGraphicalEffects 1.0
@@ -12,7 +13,7 @@ import QtGraphicalEffects 1.0
 // contains a list of conversations by default
 Page {
     id: cvMainView
-
+    readonly property Component headerComponent: Headers.HomeHeader {}
     background: Rectangle {
         color: CmnCfg.palette.white
     }
