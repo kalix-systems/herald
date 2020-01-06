@@ -7,6 +7,7 @@ ToolButton {
     property string source
     // TODO rename this fillColor
     property color fill: CmnCfg.palette.iconMatte
+    property alias mouseArea: mouse
     background: Item {}
     padding: 0
     icon.source: source
@@ -15,6 +16,7 @@ ToolButton {
     icon.height: 22
 
     MouseArea {
+        id: mouse
         anchors.fill: parent
         hoverEnabled: true
         onPressed: mouse.accepted = false

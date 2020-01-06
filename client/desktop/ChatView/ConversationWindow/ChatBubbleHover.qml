@@ -54,12 +54,15 @@ MouseArea {
                 icon.width: 14
                 icon.height: 14
                 padding: CmnCfg.microMargin
+
                 // changing the opId transfers focus to the compose field
                 onClicked: ownedConversation.builder.opId = msgId
+
                 background: Rectangle {
                     border.color: CmnCfg.palette.offBlack
                     border.width: 1
                     color: CmnCfg.palette.white
+                    radius: width * 0.3
                 }
             }
             Imports.IconButton {
@@ -79,6 +82,7 @@ MouseArea {
                     border.color: CmnCfg.palette.offBlack
                     border.width: 1
                     color: CmnCfg.palette.white
+                    radius: width * 0.3
                 }
             }
             Imports.IconButton {
@@ -96,6 +100,7 @@ MouseArea {
                     border.color: CmnCfg.palette.offBlack
                     border.width: 1
                     color: CmnCfg.palette.white
+                    radius: width * 0.3
                 }
             }
             Imports.IconButton {
@@ -112,6 +117,7 @@ MouseArea {
                     border.color: CmnCfg.palette.offBlack
                     border.width: 1
                     color: CmnCfg.palette.white
+                    radius: width * 0.3
                 }
             }
 
