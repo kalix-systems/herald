@@ -46,9 +46,15 @@ Page {
                 colorCode: model.color
                 imageSource: Utils.safeStringOrDefault(model.picture, "")
                 isGroup: !model.pairwise
-                convContent: ConversationContent {
-                    conversationId: model.conversationId
-                }
+                lastMsgDigest: model.lastMsgDigest
+                isEmpty: model.isEmpty
+                // TODO(cmck) avoid instantiating multiple ConversationContent
+                // items per conversation (HomeScreenMain already carestes one
+                // per conversation). Future refactor: create a single
+                // ConversationContent for a ChatView when it's pushed
+//                convoContent: ConversationContent {
+//                    conversationId: model.conversationId
+//                }
                 visible: model.matched
                 height: visible ? CmnCfg.convoHeight : 0
             }
