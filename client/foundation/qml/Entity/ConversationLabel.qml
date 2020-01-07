@@ -32,36 +32,43 @@ Item {
 
     // OPTION 1: lastMsgDigest
     // the bundle this label represents.
-    property var lastMessage: lastMsgDigest
-                     !== "" ? JSON.parse(
-                                  lastMsgDigest) : undefined
-
+    property var lastMessage: lastMsgDigest !== "" ? JSON.parse(
+                                                         lastMsgDigest) : undefined
     property bool isEmpty: true
+
+    readonly property bool __init: !isEmpty && lastMsgDigest !== ""
 
     // OPTION 2: lastReceipt, outbound, lastAuthor, lastTimestamp, and lastBody
     // the value of the latest read receipt according to the ReceiptStatus enum
     property int lastReceipt: 0
     // true if the last message was sent by the logged-in user
-    property bool outbound: isEmpty ? false :
-                                      lastMessage.author === Herald.config.configId
+    property bool outbound: !__init ? false : lastMessage.author === Herald.config.configId
     // user who sent the last message in the conversation
     property string lastAuthor: {
+        if (!__init) {
+            return ""
+        }
+
         if (outbound)
             return qsTr('You')
+
         if (!isEmpty)
             return Herald.users.nameById(lastMessage.author)
+
         return ''
     }
     // the previous latest human readable timestamp, or the empty string
-    property string lastTimestamp: !isEmpty ? JS.friendlyTimestamp(lastMessage.time) : ""
+    property string lastTimestamp: __init ? JS.friendlyTimestamp(
+                                                lastMessage.time) : ""
 
     // the previous message of the conversation, or the empty string
     property string lastBody: {
-        if (isEmpty)
+        if (!__init)
             return ""
 
         if (lastMessage.auxCode !== null) {
-            return "<i>" + lastAuthor + JS.auxStringShort(lastMessage.auxCode) + "</i>"
+            return "<i>" + lastAuthor + JS.auxStringShort(
+                        lastMessage.auxCode) + "</i>"
         }
 
         if (lastMessage.body === null && lastMessage.hasAttachments) {
