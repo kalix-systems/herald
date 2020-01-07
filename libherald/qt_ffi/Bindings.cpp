@@ -208,25 +208,6 @@ inline void messageSearchRegexSearchChanged(MessageSearch *o) {
 inline void messageSearchSearchPatternChanged(MessageSearch *o) {
   Q_EMIT o->searchPatternChanged();
 }
-inline void messagesIsEmptyChanged(Messages *o) { Q_EMIT o->isEmptyChanged(); }
-inline void messagesLastAuthorChanged(Messages *o) {
-  Q_EMIT o->lastAuthorChanged();
-}
-inline void messagesLastAuxCodeChanged(Messages *o) {
-  Q_EMIT o->lastAuxCodeChanged();
-}
-inline void messagesLastBodyChanged(Messages *o) {
-  Q_EMIT o->lastBodyChanged();
-}
-inline void messagesLastHasAttachmentsChanged(Messages *o) {
-  Q_EMIT o->lastHasAttachmentsChanged();
-}
-inline void messagesLastStatusChanged(Messages *o) {
-  Q_EMIT o->lastStatusChanged();
-}
-inline void messagesLastTimeChanged(Messages *o) {
-  Q_EMIT o->lastTimeChanged();
-}
 inline void messagesSearchActiveChanged(Messages *o) {
   Q_EMIT o->searchActiveChanged();
 }
@@ -467,6 +448,9 @@ quint8 conversations_data_expiration_period(const Conversations::Private *,
                                             int);
 bool conversations_set_data_expiration_period(Conversations::Private *, int,
                                               quint8);
+bool conversations_data_is_empty(const Conversations::Private *, int);
+void conversations_data_last_msg_digest(const Conversations::Private *, int,
+                                        QString *, qstring_set);
 bool conversations_data_matched(const Conversations::Private *, int);
 bool conversations_data_muted(const Conversations::Private *, int);
 bool conversations_set_data_muted(Conversations::Private *, int, bool);
@@ -567,6 +551,16 @@ bool Conversations::setExpirationPeriod(int row, quint8 value) {
   return set;
 }
 
+bool Conversations::isEmpty(int row) const {
+  return conversations_data_is_empty(m_d, row);
+}
+
+QString Conversations::lastMsgDigest(int row) const {
+  QString s;
+  conversations_data_last_msg_digest(m_d, row, &s, set_qstring);
+  return s;
+}
+
 bool Conversations::matched(int row) const {
   return conversations_data_matched(m_d, row);
 }
@@ -644,16 +638,20 @@ QVariant Conversations::data(const QModelIndex &index, int role) const {
     case Qt::UserRole + 2:
       return QVariant::fromValue(expirationPeriod(index.row()));
     case Qt::UserRole + 3:
-      return QVariant::fromValue(matched(index.row()));
+      return QVariant::fromValue(isEmpty(index.row()));
     case Qt::UserRole + 4:
-      return QVariant::fromValue(muted(index.row()));
+      return QVariant::fromValue(lastMsgDigest(index.row()));
     case Qt::UserRole + 5:
-      return QVariant::fromValue(pairwise(index.row()));
+      return QVariant::fromValue(matched(index.row()));
     case Qt::UserRole + 6:
-      return cleanNullQVariant(QVariant::fromValue(picture(index.row())));
+      return QVariant::fromValue(muted(index.row()));
     case Qt::UserRole + 7:
-      return QVariant::fromValue(status(index.row()));
+      return QVariant::fromValue(pairwise(index.row()));
     case Qt::UserRole + 8:
+      return cleanNullQVariant(QVariant::fromValue(picture(index.row())));
+    case Qt::UserRole + 9:
+      return QVariant::fromValue(status(index.row()));
+    case Qt::UserRole + 10:
       return cleanNullQVariant(QVariant::fromValue(title(index.row())));
     }
     break;
@@ -676,12 +674,14 @@ QHash<int, QByteArray> Conversations::roleNames() const {
   names.insert(Qt::UserRole + 0, "color");
   names.insert(Qt::UserRole + 1, "conversationId");
   names.insert(Qt::UserRole + 2, "expirationPeriod");
-  names.insert(Qt::UserRole + 3, "matched");
-  names.insert(Qt::UserRole + 4, "muted");
-  names.insert(Qt::UserRole + 5, "pairwise");
-  names.insert(Qt::UserRole + 6, "picture");
-  names.insert(Qt::UserRole + 7, "status");
-  names.insert(Qt::UserRole + 8, "title");
+  names.insert(Qt::UserRole + 3, "isEmpty");
+  names.insert(Qt::UserRole + 4, "lastMsgDigest");
+  names.insert(Qt::UserRole + 5, "matched");
+  names.insert(Qt::UserRole + 6, "muted");
+  names.insert(Qt::UserRole + 7, "pairwise");
+  names.insert(Qt::UserRole + 8, "picture");
+  names.insert(Qt::UserRole + 9, "status");
+  names.insert(Qt::UserRole + 10, "title");
   return names;
 }
 
@@ -713,17 +713,17 @@ bool Conversations::setData(const QModelIndex &index, const QVariant &value,
         return setExpirationPeriod(index.row(), value.value<quint8>());
       }
     }
-    if (role == Qt::UserRole + 4) {
+    if (role == Qt::UserRole + 6) {
       if (value.canConvert(qMetaTypeId<bool>())) {
         return setMuted(index.row(), value.value<bool>());
       }
     }
-    if (role == Qt::UserRole + 7) {
+    if (role == Qt::UserRole + 9) {
       if (value.canConvert(qMetaTypeId<quint8>())) {
         return setStatus(index.row(), value.value<quint8>());
       }
     }
-    if (role == Qt::UserRole + 8) {
+    if (role == Qt::UserRole + 10) {
       if (!value.isValid() || value.isNull() ||
           value.canConvert(qMetaTypeId<QString>())) {
         return setTitle(index.row(), value.value<QString>());
@@ -1471,8 +1471,6 @@ DocumentAttachments::Private *
 message_builder_document_attachments_get(const MessageBuilder::Private *);
 option_quint8
 message_builder_expiration_period_get(const MessageBuilder::Private *);
-void message_builder_expiration_period_set(MessageBuilder::Private *, quint8);
-void message_builder_expiration_period_set_none(MessageBuilder::Private *);
 bool message_builder_has_doc_attachment_get(const MessageBuilder::Private *);
 bool message_builder_has_media_attachment_get(const MessageBuilder::Private *);
 bool message_builder_is_reply_get(const MessageBuilder::Private *);
@@ -1502,6 +1500,7 @@ void message_builder_clear_reply(MessageBuilder::Private *);
 void message_builder_finalize(MessageBuilder::Private *);
 bool message_builder_remove_doc(MessageBuilder::Private *, quint64);
 bool message_builder_remove_media(MessageBuilder::Private *, quint64);
+void message_builder_set_expiration_period(MessageBuilder::Private *, quint8);
 }
 extern "C" {
 void message_search_data_after_first_match(const MessageSearch::Private *, int,
@@ -2182,14 +2181,6 @@ extern "C" {
 Messages::Private *messages_new(MessagesPtrBundle *);
 void messages_free(Messages::Private *);
 MessageBuilder::Private *messages_builder_get(const Messages::Private *);
-bool messages_is_empty_get(const Messages::Private *);
-void messages_last_author_get(const Messages::Private *, QString *,
-                              qstring_set);
-option_quint8 messages_last_aux_code_get(const Messages::Private *);
-void messages_last_body_get(const Messages::Private *, QString *, qstring_set);
-option_bool messages_last_has_attachments_get(const Messages::Private *);
-option_quint32 messages_last_status_get(const Messages::Private *);
-option_qint64 messages_last_time_get(const Messages::Private *);
 bool messages_search_active_get(const Messages::Private *);
 void messages_search_active_set(Messages::Private *, bool);
 quint64 messages_search_index_get(const Messages::Private *);
@@ -2955,13 +2946,6 @@ ConversationContent::ConversationContent(QObject *parent)
           [](MessageBuilder *o) { o->endRemoveRows(); }
 
           ,
-          messagesIsEmptyChanged,
-          messagesLastAuthorChanged,
-          messagesLastAuxCodeChanged,
-          messagesLastBodyChanged,
-          messagesLastHasAttachmentsChanged,
-          messagesLastStatusChanged,
-          messagesLastTimeChanged,
           messagesSearchActiveChanged,
           messagesSearchIndexChanged,
           messagesSearchNumMatchesChanged,
@@ -3915,13 +3899,6 @@ QVariant MessageBuilder::expirationPeriod() const {
   }
   return r;
 }
-void MessageBuilder::setExpirationPeriod(const QVariant &v) {
-  if (v.isNull() || !v.canConvert<quint8>()) {
-    message_builder_expiration_period_set_none(m_d);
-  } else {
-    message_builder_expiration_period_set(m_d, v.value<quint8>());
-  }
-}
 
 bool MessageBuilder::hasDocAttachment() const {
   return message_builder_has_doc_attachment_get(m_d);
@@ -4012,6 +3989,9 @@ bool MessageBuilder::removeDoc(quint64 row_index) {
 }
 bool MessageBuilder::removeMedia(quint64 row_index) {
   return message_builder_remove_media(m_d, row_index);
+}
+void MessageBuilder::setExpirationPeriod(quint8 period) {
+  return message_builder_set_expiration_period(m_d, period);
 }
 
 MessageSearch::MessageSearch(bool /*owned*/, QObject *parent)
@@ -4210,13 +4190,6 @@ Messages::Messages(QObject *parent)
           [](MessageBuilder *o) { o->endRemoveRows(); }
 
           ,
-          messagesIsEmptyChanged,
-          messagesLastAuthorChanged,
-          messagesLastAuxCodeChanged,
-          messagesLastBodyChanged,
-          messagesLastHasAttachmentsChanged,
-          messagesLastStatusChanged,
-          messagesLastTimeChanged,
           messagesSearchActiveChanged,
           messagesSearchIndexChanged,
           messagesSearchNumMatchesChanged,
@@ -4292,56 +4265,6 @@ void Messages::initHeaderData() {}
 
 const MessageBuilder *Messages::builder() const { return m_builder; }
 MessageBuilder *Messages::builder() { return m_builder; }
-
-bool Messages::isEmpty() const { return messages_is_empty_get(m_d); }
-
-QString Messages::lastAuthor() const {
-  QString v;
-  messages_last_author_get(m_d, &v, set_qstring);
-  return v;
-}
-
-QVariant Messages::lastAuxCode() const {
-  QVariant v;
-  auto r = messages_last_aux_code_get(m_d);
-  if (r.some) {
-    v.setValue(r.value);
-  }
-  return r;
-}
-
-QString Messages::lastBody() const {
-  QString v;
-  messages_last_body_get(m_d, &v, set_qstring);
-  return v;
-}
-
-QVariant Messages::lastHasAttachments() const {
-  QVariant v;
-  auto r = messages_last_has_attachments_get(m_d);
-  if (r.some) {
-    v.setValue(r.value);
-  }
-  return r;
-}
-
-QVariant Messages::lastStatus() const {
-  QVariant v;
-  auto r = messages_last_status_get(m_d);
-  if (r.some) {
-    v.setValue(r.value);
-  }
-  return r;
-}
-
-QVariant Messages::lastTime() const {
-  QVariant v;
-  auto r = messages_last_time_get(m_d);
-  if (r.some) {
-    v.setValue(r.value);
-  }
-  return r;
-}
 
 bool Messages::searchActive() const { return messages_search_active_get(m_d); }
 void Messages::setSearchActive(bool v) { messages_search_active_set(m_d, v); }

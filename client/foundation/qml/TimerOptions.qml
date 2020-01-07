@@ -11,7 +11,14 @@ Menu {
     // Item in `Conversations` model
     property var conversationItem
     property var builder
-    property int chosenPeriod: conversationItem.expirationPeriod
+    property int chosenPeriod: {
+        if (!messageModify) {
+
+            return conversationItem.expirationPeriod
+        }
+        builder.expirationPeriod
+                !== undefined ? builder.expirationPeriod : conversationItem.expirationPeriod
+    }
     property string chosenTimer: timerModel.get(chosenPeriod).path
     property bool messageModify: false
 
@@ -86,10 +93,12 @@ Menu {
                                          === index) : builder.expirationPeriod === index
             }
             onTriggered: {
+
                 if (!messageModify) {
                     return conversationItem.expirationPeriod = index
                 }
-                builder.expirationPeriod = index
+                builder.setExpirationPeriod(index)
+                chosenPeriod = index
             }
         }
 

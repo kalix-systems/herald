@@ -49,10 +49,11 @@ ListView {
             defaultWidth: chatListView.width
             messageModelData: containerCol.messageModelData
             convContainer: parent
+            convoExpiration: convoItem.expirationPeriod
             property Component infoPage: Component {
                 InfoPage {
                     referredChatBubble: chatBubble
-                     members: convContent.members
+                    members: convContent.members
                 }
             }
 

@@ -183,7 +183,8 @@ Popup {
                     Common.PlatonicRectangle {
                         boxTitle: memberData.name
                         boxColor: memberData.color
-                        picture: memberData.profilePicture
+                        picture: Utils.safeStringOrDefault(
+                                     memberData.profilePicture, "")
                         property MouseArea hoverHandler
                         color: CmnCfg.palette.white
                         labelComponent: Ent.ContactLabel {

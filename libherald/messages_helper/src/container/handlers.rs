@@ -41,6 +41,7 @@ impl Container {
         meta: herald_attachments::AttachmentMeta,
         emit: &mut E,
         model: &mut M,
+        conversation_id: ConversationId,
     ) -> Option<()> {
         if meta.is_empty() {
             return Some(());
@@ -69,7 +70,7 @@ impl Container {
         model.entry_changed(ix);
 
         if ix == 0 {
-            emit.last_has_attachments_changed();
+            emit.last_changed(conversation_id, self.list.front().map(|m| m.msg_id));
         }
 
         Some(())
@@ -137,10 +138,11 @@ impl Container {
         model: &mut M,
         search: &mut SearchState,
         builder: &mut B,
+        cid: ConversationId,
     ) {
         for mid in mids {
             if let Some(ix) = self.index_by_id(mid) {
-                self.remove_helper(mid, ix, emit, model, search, builder);
+                self.remove_helper(mid, ix, emit, model, search, builder, cid);
             }
         }
     }

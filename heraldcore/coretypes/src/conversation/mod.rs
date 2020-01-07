@@ -31,6 +31,8 @@ pub struct ConversationMeta {
     pub expiration_period: ExpirationPeriod,
     /// Conversation status
     pub status: Status,
+    /// Message id of the last message in the conversation
+    pub last_msg_id: Option<herald_ids::MsgId>,
 }
 
 impl ConversationMeta {

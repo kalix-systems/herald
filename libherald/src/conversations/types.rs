@@ -21,6 +21,7 @@ pub(super) fn split_meta(meta: ConversationMeta) -> (Conversation, Data) {
         last_active,
         expiration_period,
         status,
+        last_msg_id,
     } = meta;
 
     (
@@ -37,6 +38,7 @@ pub(super) fn split_meta(meta: ConversationMeta) -> (Conversation, Data) {
             last_active,
             expiration_period,
             status,
+            last_msg_id,
         },
     )
 }
@@ -58,4 +60,6 @@ pub(crate) struct Data {
     pub expiration_period: ExpirationPeriod,
     /// Conversation archive status
     pub status: heraldcore::conversation::Status,
+    /// Last message id
+    pub last_msg_id: Option<heraldcore::types::MsgId>,
 }

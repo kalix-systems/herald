@@ -7,10 +7,14 @@ pub(crate) fn meta(
     conn: &rusqlite::Connection,
     conversation_id: &ConversationId,
 ) -> Result<ConversationMeta, HErr> {
+    let mut last_mid = w!(conn.prepare_cached(include_str!(
+        "../message/sql/last_message_by_conversation.sql"
+    )));
+
     Ok(w!(conn.query_row(
         include_str!("sql/get_conversation_meta.sql"),
         params![conversation_id],
-        from_db,
+        |row| from_db(&mut last_mid, row)
     )))
 }
 
@@ -123,8 +127,13 @@ pub(crate) fn set_picture_buf(
 
 /// Get metadata of all conversations
 pub(crate) fn all_meta(conn: &rusqlite::Connection) -> Result<Vec<ConversationMeta>, HErr> {
-    let mut stmt = w!(conn.prepare(include_str!("sql/all_meta.sql")));
-    let res = stmt.query_map(NO_PARAMS, from_db)?;
+    let mut stmt = w!(conn.prepare_cached(include_str!("sql/all_meta.sql")));
+
+    let mut last_mid = w!(conn.prepare_cached(include_str!(
+        "../message/sql/last_message_by_conversation.sql"
+    )));
+
+    let res = stmt.query_map(NO_PARAMS, |row| from_db(&mut last_mid, row))?;
 
     let mut meta = Vec::new();
     for data in res {
@@ -198,9 +207,21 @@ pub(crate) fn update_last_active(
     Ok(())
 }
 
-fn from_db(row: &rusqlite::Row) -> Result<ConversationMeta, rusqlite::Error> {
+fn from_db(
+    last_msg_stmt: &mut rusqlite::Statement,
+    row: &rusqlite::Row,
+) -> Result<ConversationMeta, rusqlite::Error> {
+    let conversation_id = row.get("conversation_id")?;
+    let last_msg_id = last_msg_stmt
+        .query_map_named(
+            named_params! { "@conversation_id": conversation_id },
+            |row| row.get("msg_id"),
+        )?
+        .next()
+        .transpose()?;
+
     Ok(ConversationMeta {
-        conversation_id: row.get("conversation_id")?,
+        conversation_id,
         title: row.get("title")?,
         picture: row.get("picture")?,
         color: row.get("color")?,
@@ -209,5 +230,6 @@ fn from_db(row: &rusqlite::Row) -> Result<ConversationMeta, rusqlite::Error> {
         last_active: row.get("last_active_ts")?,
         expiration_period: row.get("expiration_period")?,
         status: row.get("status")?,
+        last_msg_id,
     })
 }

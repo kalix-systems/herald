@@ -74,6 +74,7 @@ ListView {
             }
             return conversationData.status === 1
         }
+
         height: visible ? CmnCfg.convoHeight : 0
         width: parent.width
 
@@ -92,7 +93,9 @@ ListView {
             isGroupPicture: !conversationData.pairwise
 
             labelComponent: Ent.ConversationLabel {
-                cc: convContent
+                id: conversationLabel
+                lastMsgDigest: conversationItem.conversationData.lastMsgDigest
+                isEmpty: conversationItem.conversationData.isEmpty
                 convoTitle: !convoRectangle.nts ? title : qsTr("Note to Self")
                 labelColor: convoRectangle.state
                             !== "" ? CmnCfg.palette.black : CmnCfg.palette.lightGrey

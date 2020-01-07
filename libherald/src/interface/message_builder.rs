@@ -289,11 +289,6 @@ pub trait MessageBuilderTrait {
 
     fn expiration_period(&self) -> Option<u8>;
 
-    fn set_expiration_period(
-        &mut self,
-        value: Option<u8>,
-    );
-
     fn has_doc_attachment(&self) -> bool;
 
     fn has_media_attachment(&self) -> bool;
@@ -343,6 +338,11 @@ pub trait MessageBuilderTrait {
         &mut self,
         row_index: u64,
     ) -> bool;
+
+    fn set_expiration_period(
+        &mut self,
+        period: u8,
+    ) -> ();
 
     fn row_count(&self) -> usize;
 
@@ -569,6 +569,15 @@ pub unsafe extern "C" fn message_builder_remove_media(
 }
 
 #[no_mangle]
+pub unsafe extern "C" fn message_builder_set_expiration_period(
+    ptr: *mut MessageBuilder,
+    period: u8,
+) {
+    let obj = &mut *ptr;
+    obj.set_expiration_period(period)
+}
+
+#[no_mangle]
 pub unsafe extern "C" fn message_builder_body_get(
     ptr: *const MessageBuilder,
     prop: *mut QString,
@@ -621,20 +630,6 @@ pub unsafe extern "C" fn message_builder_expiration_period_get(
             some: false,
         },
     }
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn message_builder_expiration_period_set(
-    ptr: *mut MessageBuilder,
-    value: Option<u8>,
-) {
-    (&mut *ptr).set_expiration_period(value)
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn message_builder_expiration_period_set_none(ptr: *mut MessageBuilder) {
-    let obj = &mut *ptr;
-    obj.set_expiration_period(None);
 }
 
 #[no_mangle]

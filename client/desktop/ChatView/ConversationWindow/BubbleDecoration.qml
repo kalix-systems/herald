@@ -30,6 +30,7 @@ Item {
             }
             parentBubble.hoverHighlight = false
             if (isHead)
+                // || !parentBubble.sameExpiration)
                 parentBubble.expireInfo.visible = true
         }
     }

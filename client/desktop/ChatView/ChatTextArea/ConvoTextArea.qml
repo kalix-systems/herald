@@ -32,6 +32,7 @@ Rectangle {
     property string replyName: ""
     property bool owned: replyUid === Herald.config.configId
     property string replyUid
+    property alias timer: timerMenu
 
     property var replyId
 
@@ -95,7 +96,9 @@ Rectangle {
             width: textWrapperRect.width
             spacing: CmnCfg.smallMargin
             anchors.horizontalCenter: parent.horizontalCenter
+            anchors.horizontalCenterOffset: 10
 
+            // anchors.horizontalCenter: parent.horizontalCenter
             Loader {
                 id: replyLoader
                 property string opName: replyName

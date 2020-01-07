@@ -4,12 +4,16 @@ pub use messages_helper::{container::*, types::*};
 
 impl Messages {
     pub(super) fn emit_last_changed(&mut self) {
-        self.emit.last_author_changed();
-        self.emit.last_body_changed();
-        self.emit.last_time_changed();
-        self.emit.last_status_changed();
-        self.emit.last_aux_code_changed();
-        self.emit.last_has_attachments_changed();
+        use crate::conversations::shared::{
+            update_last_msg_id, ConvItemUpdate, ConvItemUpdateVariant,
+        };
+        let cid = none!(self.conversation_id);
+
+        update_last_msg_id(&cid, self.container.list.front().map(|m| m.msg_id));
+        crate::push(ConvItemUpdate {
+            cid,
+            variant: ConvItemUpdateVariant::LastChanged,
+        });
     }
 
     pub(crate) fn set_conversation_id(

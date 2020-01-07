@@ -14,8 +14,8 @@ Row {
 
     property var imageLongPressedCallBack: function () {}
 
-    property var dims: JSON.parse(Herald.utils.imageScaling(firstImage.path,
-                                                            300))
+    property var dims: JSON.parse(Herald.utils.imageScaleReverse(
+                                      firstImage.path, 300))
 
     Image {
         id: image

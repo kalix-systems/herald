@@ -151,13 +151,6 @@ struct ConversationContentPtrBundle {
   void (*message_builder_end_move_rows)(MessageBuilder *);
   void (*message_builder_begin_remove_rows)(MessageBuilder *, int, int);
   void (*message_builder_end_remove_rows)(MessageBuilder *);
-  void (*messages_is_empty_changed)(Messages *);
-  void (*messages_last_author_changed)(Messages *);
-  void (*messages_last_aux_code_changed)(Messages *);
-  void (*messages_last_body_changed)(Messages *);
-  void (*messages_last_has_attachments_changed)(Messages *);
-  void (*messages_last_status_changed)(Messages *);
-  void (*messages_last_time_changed)(Messages *);
   void (*messages_search_active_changed)(Messages *);
   void (*messages_search_index_changed)(Messages *);
   void (*messages_search_num_matches_changed)(Messages *);
@@ -528,13 +521,6 @@ struct MessagesPtrBundle {
   void (*message_builder_end_move_rows)(MessageBuilder *);
   void (*message_builder_begin_remove_rows)(MessageBuilder *, int, int);
   void (*message_builder_end_remove_rows)(MessageBuilder *);
-  void (*messages_is_empty_changed)(Messages *);
-  void (*messages_last_author_changed)(Messages *);
-  void (*messages_last_aux_code_changed)(Messages *);
-  void (*messages_last_body_changed)(Messages *);
-  void (*messages_last_has_attachments_changed)(Messages *);
-  void (*messages_last_status_changed)(Messages *);
-  void (*messages_last_time_changed)(Messages *);
   void (*messages_search_active_changed)(Messages *);
   void (*messages_search_index_changed)(Messages *);
   void (*messages_search_num_matches_changed)(Messages *);
@@ -853,6 +839,8 @@ public:
   Q_INVOKABLE QByteArray conversationId(int row) const;
   Q_INVOKABLE quint8 expirationPeriod(int row) const;
   Q_INVOKABLE bool setExpirationPeriod(int row, quint8 value);
+  Q_INVOKABLE bool isEmpty(int row) const;
+  Q_INVOKABLE QString lastMsgDigest(int row) const;
   Q_INVOKABLE bool matched(int row) const;
   Q_INVOKABLE bool muted(int row) const;
   Q_INVOKABLE bool setMuted(int row, bool value);
@@ -1354,8 +1342,8 @@ private:
   Q_PROPERTY(QString body READ body WRITE setBody NOTIFY bodyChanged FINAL)
   Q_PROPERTY(DocumentAttachments *documentAttachments READ documentAttachments
                  NOTIFY documentAttachmentsChanged FINAL)
-  Q_PROPERTY(QVariant expirationPeriod READ expirationPeriod WRITE
-                 setExpirationPeriod NOTIFY expirationPeriodChanged FINAL)
+  Q_PROPERTY(QVariant expirationPeriod READ expirationPeriod NOTIFY
+                 expirationPeriodChanged FINAL)
   Q_PROPERTY(bool hasDocAttachment READ hasDocAttachment NOTIFY
                  hasDocAttachmentChanged FINAL)
   Q_PROPERTY(bool hasMediaAttachment READ hasMediaAttachment NOTIFY
@@ -1385,7 +1373,6 @@ public:
   const DocumentAttachments *documentAttachments() const;
   DocumentAttachments *documentAttachments();
   QVariant expirationPeriod() const;
-  void setExpirationPeriod(const QVariant &v);
   bool hasDocAttachment() const;
   bool hasMediaAttachment() const;
   bool isReply() const;
@@ -1405,6 +1392,7 @@ public:
   Q_INVOKABLE void finalize();
   Q_INVOKABLE bool removeDoc(quint64 row_index);
   Q_INVOKABLE bool removeMedia(quint64 row_index);
+  Q_INVOKABLE void setExpirationPeriod(quint8 period);
   int columnCount(const QModelIndex &parent = QModelIndex()) const override;
   QVariant data(const QModelIndex &index,
                 int role = Qt::DisplayRole) const override;
@@ -1568,15 +1556,6 @@ private:
   Private *m_d;
   bool m_ownsPrivate;
   Q_PROPERTY(MessageBuilder *builder READ builder NOTIFY builderChanged FINAL)
-  Q_PROPERTY(bool isEmpty READ isEmpty NOTIFY isEmptyChanged FINAL)
-  Q_PROPERTY(QString lastAuthor READ lastAuthor NOTIFY lastAuthorChanged FINAL)
-  Q_PROPERTY(
-      QVariant lastAuxCode READ lastAuxCode NOTIFY lastAuxCodeChanged FINAL)
-  Q_PROPERTY(QString lastBody READ lastBody NOTIFY lastBodyChanged FINAL)
-  Q_PROPERTY(QVariant lastHasAttachments READ lastHasAttachments NOTIFY
-                 lastHasAttachmentsChanged FINAL)
-  Q_PROPERTY(QVariant lastStatus READ lastStatus NOTIFY lastStatusChanged FINAL)
-  Q_PROPERTY(QVariant lastTime READ lastTime NOTIFY lastTimeChanged FINAL)
   Q_PROPERTY(bool searchActive READ searchActive WRITE setSearchActive NOTIFY
                  searchActiveChanged FINAL)
   Q_PROPERTY(
@@ -1596,13 +1575,6 @@ public:
   ~Messages() override;
   const MessageBuilder *builder() const;
   MessageBuilder *builder();
-  bool isEmpty() const;
-  QString lastAuthor() const;
-  QVariant lastAuxCode() const;
-  QString lastBody() const;
-  QVariant lastHasAttachments() const;
-  QVariant lastStatus() const;
-  QVariant lastTime() const;
   bool searchActive() const;
   void setSearchActive(bool v);
   quint64 searchIndex() const;
@@ -1696,13 +1668,6 @@ private:
   void updatePersistentIndexes();
 Q_SIGNALS:
   void builderChanged();
-  void isEmptyChanged();
-  void lastAuthorChanged();
-  void lastAuxCodeChanged();
-  void lastBodyChanged();
-  void lastHasAttachmentsChanged();
-  void lastStatusChanged();
-  void lastTimeChanged();
   void searchActiveChanged();
   void searchIndexChanged();
   void searchNumMatchesChanged();

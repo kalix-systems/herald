@@ -129,6 +129,7 @@ ListView {
                 defaultWidth: chatListView.width
                 width: parent.width
                 messageModelData: model
+                convoExpiration: conversationItem.expirationPeriod
                 ListView.onAdd: {
                     chatScrollBarInner.setPosition(1.0)
                     conversationItem.status = 0

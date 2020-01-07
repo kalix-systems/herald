@@ -82,8 +82,9 @@ impl MessageBuilderTrait for MessageBuilder {
 
     fn set_expiration_period(
         &mut self,
-        period: Option<u8>,
+        period: u8,
     ) {
+        let period: Option<u8> = period.into();
         self.inner.expiration_period = period.map(heraldcore::conversation::ExpirationPeriod::from);
         self.emit.expiration_period_changed();
     }

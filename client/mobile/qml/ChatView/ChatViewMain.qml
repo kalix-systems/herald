@@ -10,6 +10,7 @@ Page {
     //swappable message model, set by the appstate
     property Messages ownedMessages
     property string headerTitle
+    property var convoItem
 
     background: Rectangle {
         color: CmnCfg.palette.white

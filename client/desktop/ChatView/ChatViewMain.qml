@@ -47,7 +47,7 @@ Page {
         focus: true
         anchors {
             top: parent.top
-            bottom: chatTextArea.top
+            bottom: typingIndicator.top
             left: parent.left
             right: parent.right
         }
@@ -127,13 +127,22 @@ Page {
             rightMargin: 0
         }
         //to handle jumping behavior in bubbles caused when the page is small
-        onHeightChanged: convWindow.height = convWindow.contentHeight
+        onHeightChanged: {
+            if (convWindow.height > convWindow.contentHeight) {
+                convWindow.height = convWindow.contentHeight
+            }
+        }
         keysProxy: Item {
-            Keys.onReturnPressed: TextJs.enterKeyHandler(
-                                      event, chatTextArea.chatText,
-                                      ownedConversation.builder,
-                                      ownedConversation, chatTextArea)
-            // TODO: Tab should cycle through a hierarchy of items as far as focus
+            Keys.onReturnPressed: {
+                TextJs.enterKeyHandler(event, chatTextArea.chatText,
+                                       ownedConversation.builder,
+                                       ownedConversation, chatTextArea)
+
+                // TODO: Tab should cycle through a hierarchy of items as far as focus
+                chatTextArea.timer.chosenPeriod
+                        = (ownedConversation.builder.expirationPeriod
+                           !== undefined) ? ownedConversation.builder.expirationPeriod : conversationItem.expirationPeriod
+            }
         }
         emojiButton.onClicked: emojiPopupWrapper.open(
                                    ) //emoKeysPopup.active = !!!emoKeysPopup.active
@@ -164,8 +173,9 @@ Page {
             id: typingLoader
             property var typingUser
             active: false
+            asynchronous: true
 
-            height: active ? 52 : 0
+            height: active ? 40 : 0
             width: active ? parent.width : 0
             anchors.bottom: parent.bottom
             sourceComponent: CB.TypingBubble {
@@ -196,7 +206,6 @@ Page {
             }
         }
     }
-
     MessageDialog {
         id: clearHistoryPrompt
         text: qsTr("Clear conversation history")

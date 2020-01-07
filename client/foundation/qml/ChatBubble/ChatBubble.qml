@@ -54,6 +54,15 @@ Rectangle {
     property int bubbleIndex
     property bool moreInfo: false
     property bool aux: false
+    property var convoExpiration
+
+    property bool sameExpiration: {
+        if (messageModelData.expirationTime === undefined) {
+            return convoExpiration === 0
+        }
+        return Utils.sameExp(messageModelData.insertionTime,
+                             messageModelData.expirationTime, convoExpiration)
+    }
 
     height: contentRoot.height
     width: defaultWidth
@@ -66,16 +75,6 @@ Rectangle {
         height: 1
         color: CmnCfg.palette.medGrey
         visible: isHead
-        z: accent.z + 1
-    }
-
-    Rectangle {
-        anchors.bottom: parent.bottom
-        width: parent.width
-
-        height: 1
-        color: CmnCfg.palette.medGrey
-        visible: isTail
         z: accent.z + 1
     }
 
@@ -127,7 +126,7 @@ Rectangle {
 
     BubbleExpireInfo {
         id: expireInfo
-        visible: isHead
+        visible: isHead // || !sameExpiration
     }
 
     Column {
@@ -233,7 +232,6 @@ Rectangle {
                 asynchronous: true
                 // document component
                 Component {
-
                     id: doc
                     FileAttachmentContent {}
                 }

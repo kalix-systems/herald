@@ -16,7 +16,6 @@ mod attachments;
 mod author;
 mod body;
 mod flurry;
-mod last;
 mod op;
 mod reactions;
 mod receipts;
@@ -73,7 +72,8 @@ impl Messages {
         let model = &mut self.model;
         let search = &mut self.search;
 
-        container.remove_helper(id, ix, emit, model, search, builder);
+        let cid = none!(self.conversation_id, false);
+        container.remove_helper(id, ix, emit, model, search, builder, cid);
         spawn!(message::delete_message(&id), false);
 
         true
@@ -85,6 +85,7 @@ impl Messages {
     ) -> bool {
         let id = err!(id.try_into(), false);
         let ix = none!(self.container.index_by_id(id), false);
+        let cid = none!(self.conversation_id, false);
 
         let builder = &mut self.builder;
         let emit = &mut self.emit;
@@ -92,7 +93,7 @@ impl Messages {
         let model = &mut self.model;
         let search = &mut self.search;
 
-        container.remove_helper(id, ix, emit, model, search, builder);
+        container.remove_helper(id, ix, emit, model, search, builder, cid);
         spawn!(message::delete_message(&id), false);
 
         true
@@ -110,7 +111,6 @@ impl Messages {
         self.model.end_remove_rows();
 
         self.emit_last_changed();
-        self.emit.is_empty_changed();
         true
     }
 
@@ -119,10 +119,6 @@ impl Messages {
         index: usize,
     ) -> String {
         self.container.aux_data_json(index).unwrap_or_default()
-    }
-
-    pub(crate) fn is_empty_(&self) -> bool {
-        self.container.is_empty()
     }
 
     pub(crate) fn send_typing_indicator_(&mut self) {

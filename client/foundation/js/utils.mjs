@@ -210,6 +210,59 @@ export function timerIcon(expireTime, insertTime) {
     else
         return "qrc:/mini-timer-icons/empty.svg";
 }
+export function sameExp(insertTime, expireTime, conversationExpire) {
+    if (conversationExpire === 0) {
+        return false;
+    }
+    const msecondsPerMinute = 60 * 1000;
+    const msecondsPerHour = 3600 * 1000;
+    const msecondsPerDay = msecondsPerHour * 24;
+    const msecondsPerWeek = msecondsPerDay * 7;
+    const msecondsPerMonth = msecondsPerDay * 30;
+    const msecondsPerYear = msecondsPerDay * 365;
+    var potentialExpire = 0;
+    switch (conversationExpire) {
+        case 1 /* ThirtySeconds */: {
+            potentialExpire = insertTime + 30 * 1000;
+            break;
+        }
+        case 2 /* OneMinute */: {
+            potentialExpire = insertTime + msecondsPerMinute;
+            break;
+        }
+        case 3 /* ThirtyMinutes */: {
+            potentialExpire = insertTime + msecondsPerMinute * 30;
+            break;
+        }
+        case 4 /* OneHour */: {
+            potentialExpire = insertTime + msecondsPerHour;
+            break;
+        }
+        case 5 /* TwelveHours */: {
+            potentialExpire = insertTime + msecondsPerHour * 12;
+            break;
+        }
+        case 6 /* OneDay */: {
+            potentialExpire = insertTime + msecondsPerDay;
+            break;
+        }
+        case 7 /* OneWeek */: {
+            potentialExpire = insertTime + msecondsPerWeek;
+            break;
+        }
+        case 8 /* OneMonth */: {
+            potentialExpire = insertTime + msecondsPerMonth;
+            break;
+        }
+        case 9 /* OneYear */: {
+            potentialExpire = insertTime + msecondsPerYear;
+            break;
+        }
+        default:
+            break;
+    }
+    return potentialExpire === expireTime;
+}
 export function userTime(timestamp) {
     var d = new Date(timestamp);
     var year = d.getFullYear();
