@@ -192,13 +192,13 @@ impl Cipher {
         let Cipher { tag, ad, msg, .. } = self;
 
         let extra_keys = Vec::new();
-        let mut msg = BytesMut::from(msg);
+        let mut buf = msg.to_vec();
 
-        if key.open(&ad, tag, &mut msg).0 {
+        if key.open(&ad, tag, &mut buf) {
             DecryptionResult::Success {
                 extra_keys,
                 ad,
-                pt: msg,
+                pt: Bytes::from(buf),
             }
         } else {
             DecryptionResult::Failed { extra_keys }

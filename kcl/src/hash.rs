@@ -3,7 +3,7 @@ use crate::new_type;
 use arrayvec::ArrayVec;
 use libsodium_sys::*;
 
-pub const KEY_LEN: usize = crypto_generichash_blake2b_KEYBYTES as usize;
+pub const KEY_LEN: usize = crypto_generichash_blake2b_KEYBYTES_MAX as usize;
 pub const HASH_MIN_LEN: usize = crypto_generichash_blake2b_BYTES_MIN as usize;
 pub const HASH_MAX_LEN: usize = crypto_generichash_blake2b_BYTES_MAX as usize;
 pub const HASH_REC_LEN: usize = crypto_generichash_blake2b_BYTES as usize;

@@ -6,10 +6,13 @@ mod newtype_macros;
 pub mod aead;
 pub mod box_;
 pub mod hash;
+pub mod kx;
 pub mod random;
 pub mod sign;
 
+pub(crate) use libsodium_sys as ffi;
 pub use libsodium_sys;
+
 use std::sync::{
     atomic::{AtomicI32, Ordering},
     Once,

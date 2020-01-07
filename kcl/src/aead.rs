@@ -74,6 +74,7 @@ impl Key {
         let res = unsafe {
             crypto_aead_xchacha20poly1305_ietf_decrypt_detached(
                 msg.as_mut_ptr(),
+                // should always be null according to libsodium docs
                 std::ptr::null_mut(),
                 msg.as_ptr(),
                 msg.len() as _,
@@ -86,5 +87,67 @@ impl Key {
         };
 
         res == 0
+    }
+
+    pub fn seal_attached(
+        &self,
+        ad: &[u8],
+        pt: &[u8],
+    ) -> Vec<u8> {
+        let mut output = vec![0; NONCE_LEN + MAC_LEN + pt.len()];
+
+        let (nonce, rest) = output[..].split_at_mut(NONCE_LEN);
+        // generate a random nonce
+        random::gen_into(nonce);
+
+        let res = unsafe {
+            crypto_aead_xchacha20poly1305_ietf_encrypt(
+                rest.as_mut_ptr(),
+                rest.len() as _,
+                pt.as_ptr(),
+                pt.len() as _,
+                ad.as_ptr(),
+                ad.len() as _,
+                // should always be null according to libsodium docs
+                std::ptr::null(),
+                nonce.as_ptr(),
+                self.as_ref().as_ptr(),
+            )
+        };
+
+        assert_eq!(res, 0);
+
+        output
+    }
+
+    #[must_use]
+    pub fn open_attached(
+        &self,
+        ad: &[u8],
+        ct: &[u8],
+    ) -> Option<Vec<u8>> {
+        let mut output = vec![0; ct.len() - NONCE_LEN - MAC_LEN];
+        let (nonce, ct) = ct[..].split_at(NONCE_LEN);
+
+        let res = unsafe {
+            crypto_aead_xchacha20poly1305_ietf_decrypt(
+                output.as_mut_ptr(),
+                output.len() as _,
+                // should always be null according to libsodium docs
+                std::ptr::null_mut(),
+                ct.as_ptr(),
+                ct.len() as _,
+                ad.as_ptr(),
+                ad.len() as _,
+                nonce.as_ptr(),
+                self.as_ref().as_ptr(),
+            )
+        };
+
+        if res != 0 {
+            None
+        } else {
+            Some(output)
+        }
     }
 }

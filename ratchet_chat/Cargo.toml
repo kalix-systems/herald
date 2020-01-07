@@ -6,8 +6,8 @@ edition = "2018"
 
 [dependencies]
 bytes = "0.5.3"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+async-trait = "0.1.22"
+double-ratchet = "0.1.0"
 
 [dependencies.kcl]
 path = "../kcl"
