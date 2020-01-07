@@ -30,6 +30,7 @@ Item {
     // OPTION 1: ConversationContent
     // the ConversationContent bundle this label represents.
     property var cc
+
     property bool isEmpty: true
 
     // OPTION 2: lastReceipt, outbound, lastAuthor, lastTimestamp, and lastBody

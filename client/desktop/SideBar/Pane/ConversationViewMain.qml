@@ -75,19 +75,6 @@ ListView {
             return conversationData.status === 1
         }
 
-        onConversationDataChanged: {
-            if (conversationLabel === undefined) {
-                return
-            }
-
-            const digest = conversationData.lastMsgDigest
-            if (digest === "") {
-                conversationLabel.cc = undefined
-            }
-
-            conversationLabel.cc = JSON.parse(digest)
-        }
-
         height: visible ? CmnCfg.convoHeight : 0
         width: parent.width
 
@@ -118,6 +105,22 @@ ListView {
                             !== "" ? CmnCfg.palette.black : CmnCfg.palette.lightGrey
                 minorTextColor: convoRectangle.state
                                 !== "" ? CmnCfg.palette.offBlack : CmnCfg.palette.medGrey
+
+                Connections {
+                    target: conversationItem
+                    onConversationDataChanged: {
+                        if (conversationLabel === undefined) {
+                            return
+                        }
+
+                        const digest = conversationData.lastMsgDigest
+                        if (digest === "") {
+                            conversationLabel.cc = undefined
+                        }
+
+                        conversationLabel.cc = JSON.parse(digest)
+                    }
+                }
             }
 
             MouseArea {
