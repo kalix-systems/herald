@@ -273,11 +273,11 @@ fn messages() -> Object {
         lastStatus: Prop::new().simple(QUint32).optional(),
         lastAuxCode: Prop::new().simple(QUint8).optional(),
         lastHasAttachments: Prop::new().simple(Bool).optional(),
+        isEmpty: Prop::new().simple(Bool),
 
         // User id of the last user to send a typing notification
         typingUserId: Prop::new().simple(QString).optional(),
 
-        isEmpty: Prop::new().simple(Bool),
 
         searchPattern: filter_prop(),
         searchRegex: filter_regex_prop(),
