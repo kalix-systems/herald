@@ -13,6 +13,28 @@ Window {
     minimumWidth: 700
     minimumHeight: 450
 
+    Drawer {
+        width: 0.33 * settingsPopup.width
+        height: settingsPopup.height
+        edge: Qt.RightEdge
+        dragMargin: 0
+
+        IconButton {
+            fill: CmnCfg.palette.lightGrey
+            source: "qrc:/x-icon.svg"
+            anchors {
+                top: parent.top
+                right: parent.right
+                margins: CmnCfg.smallMargin
+            }
+            onClicked: parent.close()
+        }
+
+        Flickable {
+            anchors.fill: parent
+        }
+    }
+
     Page {
         anchors.fill: parent
         header: ToolBar {
@@ -39,7 +61,6 @@ Window {
 
                 IconButton {
                     id: searchButton
-                    property bool searchRegex: false
                     fill: CmnCfg.palette.lightGrey
                     source: "qrc:/search-icon.svg"
                 }
@@ -50,7 +71,6 @@ Window {
 
                 IconButton {
                     id: settignsButton
-                    property bool searchRegex: false
                     fill: CmnCfg.palette.lightGrey
                     source: "qrc:/options-icon.svg"
                 }
@@ -61,38 +81,40 @@ Window {
             id: rowLabel
             height: CmnCfg.toolbarHeight
             width: parent.width
+
             Item {
-                Layout.alignment: Qt.AlignLeft
-                Layout.preferredWidth: 32
-                height: 1
-            }
-            Text {
-                font.bold: true
-                Layout.alignment: Qt.AlignLeft
                 Layout.preferredWidth: CmnCfg.avatarSize
+            }
+
+            Text {
+                Layout.alignment: Qt.AlignLeft
+                Layout.preferredWidth: 85
                 text: "Name"
             }
             Text {
-                font.bold: true
                 Layout.alignment: Qt.AlignLeft
                 Layout.minimumWidth: CmnCfg.largeMargin
                 text: "Trusted"
             }
+
             Text {
-                font.bold: true
-                Layout.alignment: Qt.AlignHCenter
+                Layout.alignment: Qt.AlignLeft
+                Layout.minimumWidth: CmnCfg.largeMargin
+                text: "Groups"
+            }
+            Text {
+                Layout.alignment: Qt.AlignLeft
                 Layout.preferredWidth: 85
                 text: "Location"
             }
             Text {
-                font.bold: true
                 Layout.alignment: Qt.AlignRight
                 Layout.preferredWidth: 85
                 text: "Tags"
             }
         }
 
-        TableView {
+        ListView {
             id: tableView
             boundsBehavior: Flickable.StopAtBounds
             boundsMovement: Flickable.StopAtBounds
@@ -123,7 +145,7 @@ Window {
 
                     Avatar {
                         Layout.alignment: Qt.AlignLeft
-                        Layout.margins: CmnCfg.defaultMargin
+                        Layout.leftMargin: CmnCfg.defaultMargin
                         height: CmnCfg.avatarSize - CmnCfg.defaultMargin
                         pfpPath: profilePicture
                         color: CmnCfg.avatarColors[model.color]
@@ -167,11 +189,12 @@ Window {
 
                     Label {
                         Layout.alignment: Qt.AlignLeft
-                        Layout.preferredWidth: 140
+                        Layout.preferredWidth: 85
                         wrapMode: Label.WrapAtWordBoundaryOrAnywhere
                     }
 
                     Flow {
+                        Layout.alignment: Qt.AlignLeft
                         Layout.preferredWidth: 85
                         Repeater {
                             model: 0
