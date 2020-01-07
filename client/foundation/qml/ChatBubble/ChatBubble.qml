@@ -54,14 +54,14 @@ Rectangle {
     property int bubbleIndex
     property bool moreInfo: false
     property bool aux: false
+    property var convoExpiration
 
     property bool sameExpiration: {
         if (messageModelData.expirationTime === undefined) {
-            return conversationItem.expirationPeriod === 0
+            return convoExpiration === 0
         }
         return Utils.sameExp(messageModelData.insertionTime,
-                             messageModelData.expirationTime,
-                             conversationItem.expirationPeriod)
+                             messageModelData.expirationTime, convoExpiration)
     }
 
     height: contentRoot.height

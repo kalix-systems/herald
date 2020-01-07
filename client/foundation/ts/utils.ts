@@ -259,46 +259,55 @@ export function sameExp(insertTime: number, expireTime: number, conversationExpi
       return false;
   }
 
-  const secondsPerMinute = 60;
-  const secondsPerHour = 3600;
-  const secondsPerDay = 3600 * 24;
-  const secondsPerWeek = 3600 * 24 * 7;
-  const secondsPerMonth = 3600 * 24 * 30;
-  const secondsPerYear = 3600 * 24 * 30 * 12;
+  const msecondsPerMinute = 60 * 1000;
+  const msecondsPerHour = 3600 * 1000;
+  const msecondsPerDay = msecondsPerHour * 24;
+  const msecondsPerWeek = msecondsPerDay * 7;
+  const msecondsPerMonth = msecondsPerDay * 30;
+  const msecondsPerYear = msecondsPerDay * 365;
 
-  var insertTime = insertTime / 1000;
-  var expireTime = expireTime / 1000;
   var potentialExpire = 0;
 
   switch (conversationExpire) {
       case ExpirationPeriod.ThirtySeconds: {
-          potentialExpire = insertTime + secondsPerMinute / 2;
+          potentialExpire = insertTime + 30 * 1000;
+          break;
       }
       case ExpirationPeriod.OneMinute: {
-          potentialExpire = insertTime + secondsPerMinute;
+          potentialExpire = insertTime + msecondsPerMinute;
+          break;
 
       }
       case ExpirationPeriod.ThirtyMinutes: {
-         potentialExpire = insertTime + secondsPerMinute * 30;
+         potentialExpire = insertTime + msecondsPerMinute * 30;
+         break;
       }
       case ExpirationPeriod.OneHour: {
-          potentialExpire = insertTime + secondsPerHour;
+          potentialExpire = insertTime + msecondsPerHour;
+          break;
       }
       case ExpirationPeriod.TwelveHours: {
-          potentialExpire = insertTime + secondsPerHour * 12;
+          potentialExpire = insertTime + msecondsPerHour * 12;
+          break;
       }
       case ExpirationPeriod.OneDay: {
-          potentialExpire = insertTime + secondsPerDay;
+          potentialExpire = insertTime + msecondsPerDay;
+          break;
       }
       case ExpirationPeriod.OneWeek: {
-          potentialExpire = insertTime + secondsPerWeek;
+          potentialExpire = insertTime + msecondsPerWeek;
+          break;
       }
       case ExpirationPeriod.OneMonth: {
-          potentialExpire = insertTime + secondsPerMonth;
+          potentialExpire = insertTime + msecondsPerMonth;
+          break;
       }
       case ExpirationPeriod.OneYear: {
-          potentialExpire = insertTime + secondsPerYear;
+          potentialExpire = insertTime + msecondsPerYear;
+          break;
       }
+      default:
+          break;
 
   }
   return potentialExpire === expireTime;

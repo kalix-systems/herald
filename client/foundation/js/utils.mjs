@@ -214,43 +214,52 @@ export function sameExp(insertTime, expireTime, conversationExpire) {
     if (conversationExpire === 0) {
         return false;
     }
-    const secondsPerMinute = 60;
-    const secondsPerHour = 3600;
-    const secondsPerDay = 3600 * 24;
-    const secondsPerWeek = 3600 * 24 * 7;
-    const secondsPerMonth = 3600 * 24 * 30;
-    const secondsPerYear = 3600 * 24 * 30 * 12;
-    var insertTime = insertTime / 1000;
-    var expireTime = expireTime / 1000;
+    const msecondsPerMinute = 60 * 1000;
+    const msecondsPerHour = 3600 * 1000;
+    const msecondsPerDay = msecondsPerHour * 24;
+    const msecondsPerWeek = msecondsPerDay * 7;
+    const msecondsPerMonth = msecondsPerDay * 30;
+    const msecondsPerYear = msecondsPerDay * 365;
     var potentialExpire = 0;
     switch (conversationExpire) {
         case 1 /* ThirtySeconds */: {
-            potentialExpire = insertTime + secondsPerMinute / 2;
+            potentialExpire = insertTime + 30 * 1000;
+            break;
         }
         case 2 /* OneMinute */: {
-            potentialExpire = insertTime + secondsPerMinute;
+            potentialExpire = insertTime + msecondsPerMinute;
+            break;
         }
         case 3 /* ThirtyMinutes */: {
-            potentialExpire = insertTime + secondsPerMinute * 30;
+            potentialExpire = insertTime + msecondsPerMinute * 30;
+            break;
         }
         case 4 /* OneHour */: {
-            potentialExpire = insertTime + secondsPerHour;
+            potentialExpire = insertTime + msecondsPerHour;
+            break;
         }
         case 5 /* TwelveHours */: {
-            potentialExpire = insertTime + secondsPerHour * 12;
+            potentialExpire = insertTime + msecondsPerHour * 12;
+            break;
         }
         case 6 /* OneDay */: {
-            potentialExpire = insertTime + secondsPerDay;
+            potentialExpire = insertTime + msecondsPerDay;
+            break;
         }
         case 7 /* OneWeek */: {
-            potentialExpire = insertTime + secondsPerWeek;
+            potentialExpire = insertTime + msecondsPerWeek;
+            break;
         }
         case 8 /* OneMonth */: {
-            potentialExpire = insertTime + secondsPerMonth;
+            potentialExpire = insertTime + msecondsPerMonth;
+            break;
         }
         case 9 /* OneYear */: {
-            potentialExpire = insertTime + secondsPerYear;
+            potentialExpire = insertTime + msecondsPerYear;
+            break;
         }
+        default:
+            break;
     }
     return potentialExpire === expireTime;
 }

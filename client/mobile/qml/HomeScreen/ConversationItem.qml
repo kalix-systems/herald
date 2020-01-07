@@ -92,6 +92,7 @@ Rectangle {
             property string stateName: "chat"
             ownedMessages: convoContent.messages
             headerTitle: itemTitle
+            convoItem: conversationItem.conversationData
         }
     }
 
@@ -104,5 +105,4 @@ Rectangle {
             // callback implicity called at the end of the animation
         }
     }
-
 }

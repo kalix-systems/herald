@@ -30,6 +30,7 @@ Page {
             anchors.fill: parent
             model: Herald.conversations
             delegate: ConversationItem {
+                property var conversationData: model
                 itemTitle: title
                 colorCode: model.color
                 imageSource: Utils.safeStringOrDefault(model.picture, "")
@@ -40,7 +41,6 @@ Page {
                     conversationId: model.conversationId
                 }
             }
-
         }
     }
 
