@@ -164,8 +164,9 @@ Page {
             id: typingLoader
             property var typingUser
             active: false
+            asynchronous: true
 
-            height: active ? 52 : 0
+            height: active ? 40 : 0
             width: active ? parent.width : 0
             anchors.bottom: parent.bottom
             sourceComponent: CB.TypingBubble {
