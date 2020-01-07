@@ -4,13 +4,13 @@ import LibHerald 1.0
 import "./HomeScreen" as HomeScreen
 import "./NewContactView" as NewContactView
 import "./ChatView" as ChatView
-import "./GlobalSearch" as GlobalSearch
 import "qrc:/imports/Settings" as Settings
 
 Page {
     id: appRoot
     anchors.fill: parent
     readonly property alias globalTimer: globalTimer
+    property alias stackView: mainView
 
     Timer {
         id: globalTimer
@@ -56,7 +56,9 @@ Page {
 
     Component {
         id: globalSearchView
-        GlobalSearch.GlobalSearchMain {}
+        HomeScreen.GlobalSearchMain {
+            headerLoader: rootHeader.headerLoader
+        }
     }
 
     StackView {

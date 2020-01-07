@@ -82,6 +82,7 @@ ToolBar {
                 fill: CmnCfg.palette.lightGrey
                 topPadding: 1
                 onClicked: chatToolBar.state = "searchState"
+                tooltipText: "Search conversation"
                 MouseArea {
                     anchors.fill: parent
                     acceptedButtons: Qt.RightButton

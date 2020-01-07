@@ -100,7 +100,7 @@ Item {
             id: ts
             font {
                 family: CmnCfg.chatFont.name
-                pixelSize: 11
+                pixelSize: CmnCfg.minorTextSize
             }
             text: lastTimestamp
             Layout.preferredHeight: labelGrid.height * 0.25

@@ -140,10 +140,10 @@ Page {
         atcButton.onClicked: chatTextArea.attachmentsDialogue.open()
     }
 
+    //item that wraps type bubble; will eventually wrap a listview in the loader to show multiple typing indicators
     Item {
         id: typingIndicator
         anchors.bottom: chatTextArea.top
-        //    anchors.top: convWindow.bottom
         height: typingLoader.height
         width: parent.width
 

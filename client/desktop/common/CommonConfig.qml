@@ -31,6 +31,8 @@ Item {
     readonly property FontLoader chatFont: metaTheme.chatFont
     readonly property FontLoader labelFont: metaTheme.cairo
 
+    /// Font size for minor text (e.g. timestamps)
+    readonly property int minorTextSize: 11
     /// standard chat text size
     readonly property int chatTextSize: 12
     /// default font size for basic UI text

@@ -11,6 +11,7 @@
         <file>dashboard-icon.svg</file>
         <file>double-check-receipt-icon.svg</file>
         <file>emoji-icon.svg</file>
+        <file>emoticon-icon.svg</file>
         <file>forward-arrow-icon.svg</file>
         <file>gear-icon.svg</file>
         <file>hamburger-icon.svg</file>
@@ -59,6 +60,10 @@
         <file>regex-search-icon.svg</file>
         <file>lenny-icon.svg</file>
         <file>emoji-categories/recents.svg</file>
+        <file>directory-icon.svg</file>
+        <file>emoticon-icon-14.svg</file>
+        <file>options-icon-14.svg</file>
+        <file>reply-icon-14.svg</file>
         <file>herald.png</file>
     </qresource>
 </RCC>

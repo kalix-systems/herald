@@ -4,6 +4,7 @@ import QtQuick.Controls 2.12
 import LibHerald 1.0
 import "qrc:/imports/js/utils.mjs" as JS
 
+// Expects a PlatonicRectangle with id "messageRectangle" to be in scope
 Item {
     // the group name or displayName of the conversation
     property string conversationTitle
@@ -40,23 +41,20 @@ Item {
             Layout.alignment: Qt.AlignLeft | Qt.AlignTop
             Layout.fillWidth: true
             elide: "ElideRight"
-            text: messageData.conversationTitle
-            color: messageRectangle.state
-                   !== "" ? CmnCfg.palette.black : CmnCfg.palette.lightGrey
+            text: conversationTitle
+            color: labelColor
         }
 
         Label {
             id: ts
             font {
                 family: CmnCfg.chatFont.name
-                //TODO: Magic number erasure, we need a secondary small label size
-                pixelSize: 11
+                pixelSize: CmnCfg.minorTextSize
             }
             text: timestamp
             Layout.preferredHeight: ts.height
             Layout.alignment: Qt.AlignRight | Qt.AlignTop
-            color: messageRectangle.state
-                   !== "" ? CmnCfg.palette.offBlack : CmnCfg.palette.medGrey
+            color: secondaryLabelColor
         }
 
         TextMetrics {

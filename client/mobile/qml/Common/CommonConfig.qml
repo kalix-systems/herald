@@ -41,6 +41,8 @@ Item {
     readonly property real headerFontSize: units.dp(18)
     /// size of labels
     readonly property real labelFontSize: units.dp(18)
+    /// font size for minor text (e.g. timestamps)
+    readonly property int minorTextSize: units.dp(14)
     /// standard chat text size
     readonly property real chatTextSize: units.dp(16)
     /// size for contact/group name labels in lists
