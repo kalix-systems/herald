@@ -143,13 +143,21 @@ Page {
     Item {
         id: typingIndicator
         anchors.bottom: chatTextArea.top
+        //    anchors.top: convWindow.bottom
         height: typingLoader.height
         width: parent.width
 
         property int __secondsSinceLastReset: 0
         property bool __aUserIsTyping: __secondsSinceLastReset < 6
         onHeightChanged: {
-            convWindow.anchors.bottom = typingIndicator.top
+
+            if (height === 0) {
+                convWindow.anchors.bottom = chatTextArea.top
+                convWindow.height = convWindow.contentHeight
+            } else {
+                convWindow.anchors.bottom = typingIndicator.top
+                convWindow.height = convWindow.contentHeight
+            }
         }
 
         Loader {
@@ -157,7 +165,7 @@ Page {
             property var typingUser
             active: false
 
-            height: active ? 50 : 0
+            height: active ? 52 : 0
             width: active ? parent.width : 0
             anchors.bottom: parent.bottom
             sourceComponent: CB.TypingBubble {
