@@ -21,6 +21,7 @@ GridLayout {
         font.family: CmnCfg.chatFont.name
         color: CmnCfg.palette.black
         textFormat: Text.StyledText
+        font.pixelSize: CmnCfg.chatTextSize
 
         TextMetrics {
             id: opBodyTextMetrics
