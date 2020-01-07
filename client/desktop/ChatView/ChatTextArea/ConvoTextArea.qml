@@ -73,7 +73,7 @@ Rectangle {
         anchors.leftMargin: CmnCfg.defaultMargin
         anchors.bottom: parent.bottom
         bottomPadding: CmnCfg.smallMargin * 0.5
-        source: "qrc:/emoji-icon.svg"
+        source: "qrc:/emoticon-icon.svg"
     }
 
     // wrapper column so replies load

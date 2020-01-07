@@ -7,6 +7,7 @@ import LibHerald 1.0
 
 ApplicationWindow {
     id: root
+    property alias router: router
     visible: true
     // for desktop prototyping
     // removed implicitly in production
@@ -37,5 +38,10 @@ ApplicationWindow {
         active: Herald.configInit
         anchors.fill: parent
         sourceComponent: App {}
+
+        Router {
+            id: router
+            stack: appLoader.item.stackView
+        }
     }
 }

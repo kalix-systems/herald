@@ -16,7 +16,7 @@ Rectangle {
     // path to the conversation's avatar image
     property string imageSource: ''
     property bool isGroup: false
-    // asdf
+    // ConversationContent represented by this item
     property ConversationContent convContent: null
 
     height: CmnCfg.convoHeight

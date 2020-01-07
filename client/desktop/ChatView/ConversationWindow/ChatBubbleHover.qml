@@ -50,7 +50,7 @@ MouseArea {
                 tooltipText: "Reply to this message"
                 anchors.margins: CmnCfg.defaultMargin
                 fill: CmnCfg.palette.offBlack
-                source: "qrc:/reply-icon.svg"
+                source: "qrc:/reply-icon-14.svg"
                 z: CmnCfg.overlayZ
                 icon.width: 14
                 icon.height: 14
@@ -72,7 +72,7 @@ MouseArea {
                 z: CmnCfg.overlayZ
                 icon.width: visible ? 14 : 0
                 icon.height: 14
-                source: "qrc:/upside-down-emoji-icon.svg"
+                source: "qrc:/emoticon-icon-14.svg"
                 fill: CmnCfg.palette.offBlack
                 padding: CmnCfg.microMargin
                 onClicked: {
@@ -107,7 +107,7 @@ MouseArea {
                 id: messageOptionsButton
                 tooltipText: "More options"
                 anchors.margins: CmnCfg.defaultMargin
-                source: "qrc:/options-icon.svg"
+                source: "qrc:/options-icon-14.svg"
                 z: CmnCfg.overlayZ
                 icon.width: 14
                 icon.height: 14
