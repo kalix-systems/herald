@@ -133,7 +133,7 @@ Window {
                     Column {
                         Layout.alignment: Qt.AlignLeft
                         Layout.preferredWidth: 85
-                        spacing: CmnCfg.smallMargin
+                        spacing: CmnCfg.smallMargin / 2
                         Label {
                             font.bold: true
                             text: userId
@@ -168,7 +168,6 @@ Window {
                     Label {
                         Layout.alignment: Qt.AlignLeft
                         Layout.preferredWidth: 140
-                        text: "Location Location Location Location Location Location"
                         wrapMode: Label.WrapAtWordBoundaryOrAnywhere
                     }
 
