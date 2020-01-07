@@ -92,7 +92,7 @@ Window {
             }
         }
 
-        ListView {
+        TableView {
             id: tableView
             boundsBehavior: Flickable.StopAtBounds
             boundsMovement: Flickable.StopAtBounds
