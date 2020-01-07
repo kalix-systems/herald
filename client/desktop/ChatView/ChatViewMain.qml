@@ -11,6 +11,7 @@ import "../EmojiKeyboard" as EK
 import "../common" as Common
 import "Popups" as Popups
 import QtQuick.Dialogs 1.2
+import "qrc:/imports/ChatBubble" as CB
 
 //import Qt.labs.platform 1.1
 Page {
@@ -140,22 +141,52 @@ Page {
     }
 
     Item {
-        id: typingIndicatorPlaceholder
+        id: typingIndicator
+        anchors.bottom: chatTextArea.top
+        height: typingLoader.height
+        width: parent.width
+
         property int __secondsSinceLastReset: 0
         property bool __aUserIsTyping: __secondsSinceLastReset < 6
+        onHeightChanged: {
+            convWindow.anchors.bottom = typingIndicator.top
+        }
+
+        Loader {
+            id: typingLoader
+            property var typingUser
+            active: false
+
+            height: active ? 50 : 0
+            width: active ? parent.width : 0
+            anchors.bottom: parent.bottom
+            sourceComponent: CB.TypingBubble {
+                id: typeBubble
+
+                defaultWidth: convWindow.width
+            }
+        }
 
         // listens for typing indicators
         Connections {
             target: ownedConversation
             onNewTypingIndicator: {
-                typingIndicatorPlaceholder.__secondsSinceLastReset = 0
+                typingIndicator.__secondsSinceLastReset = 0
+                typingLoader.typingUser = ownedConversation.typingUserId
+                typingLoader.active = true
                 print(ownedConversation.typingUserId + " is typing")
             }
         }
 
         Connections {
             target: appRoot.globalTimer
-            onRefreshTime: typingIndicatorPlaceholder.__secondsSinceLastReset += 1
+            onRefreshTime: {
+                typingIndicator.__secondsSinceLastReset += 1
+                if (!typingIndicator.__aUserIsTyping) {
+                    typingLoader.active = false
+                    typingLoader.typingUser = undefined
+                }
+            }
         }
     }
 

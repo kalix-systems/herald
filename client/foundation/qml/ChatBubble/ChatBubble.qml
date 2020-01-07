@@ -2,9 +2,9 @@ import QtQuick 2.13
 import QtQuick.Layouts 1.12
 import QtQuick.Controls 2.13
 import LibHerald 1.0
+import "../Entity"
 import "./ReplyBubble"
 import "../js/utils.mjs" as Utils
-import "../Entity"
 
 Rectangle {
     id: bubbleRoot
@@ -55,20 +55,6 @@ Rectangle {
     property bool moreInfo: false
     property bool aux: false
 
-    Connections {
-        target: appRoot.globalTimer
-        onRefreshTime: {
-            friendlyTimestamp = Utils.friendlyTimestamp(
-                        messageModelData.insertionTime)
-            timerIcon = (expirationTime !== undefined) ? (Utils.timerIcon(
-                                                              expirationTime,
-                                                              insertionTime)) : ""
-            expireInfo.expireTime = (expirationTime
-                                     !== undefined) ? (Utils.expireTimeShort(
-                                                           expirationTime,
-                                                           insertionTime)) : ""
-        }
-    }
     height: contentRoot.height
     width: defaultWidth
 
