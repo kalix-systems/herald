@@ -5,6 +5,8 @@ import QtQuick.Layouts 1.13
 import QtQuick.Window 2.2
 import LibHerald 1.0
 import "qrc:/imports"
+import "qrc:/imports/Entity"
+import "qrc:/imports/js/utils.mjs" as Utils
 
 Window {
     id: settingsPopup
@@ -32,8 +34,6 @@ Window {
                     elide: Label.ElideRight
                     text: "Contacts"
                     color: CmnCfg.palette.white
-                    // top padding aligns headerText baseline with baseline of
-                    // initial in user avatar to right
                     topPadding: 1
                 }
 
@@ -61,13 +61,12 @@ Window {
             id: tableView
             boundsBehavior: Flickable.StopAtBounds
             boundsMovement: Flickable.StopAtBounds
-
             anchors.fill: parent
             model: Herald.users
             delegate: Rectangle {
                 color: CmnCfg.palette.white
                 width: settingsPopup.width
-                height: 10
+                height: row.height + 1
                 Rectangle {
                     anchors {
                         right: parent.right
@@ -81,6 +80,66 @@ Window {
                 RowLayout {
                     id: row
                     width: settingsPopup.width
+
+                    Avatar {
+                        Layout.maximumWidth: size
+                        Layout.margins: CmnCfg.defaultMargin
+                        height: CmnCfg.avatarSize - CmnCfg.defaultMargin
+                        pfpPath: profilePicture
+                        color: CmnCfg.avatarColors[model.color]
+                        initials: Utils.initialize(name)
+                    }
+
+                    Column {
+                        Layout.alignment: Qt.AlignLeft
+                        Layout.maximumWidth: 85
+                        Label {
+                            text: userId
+                        }
+                        Label {
+                            text: "@" + name
+                        }
+                    }
+
+                    IconButton {
+                        Layout.minimumWidth: CmnCfg.largeMargin
+                    }
+
+                    Flow {
+                        Layout.preferredWidth: 85
+                        Layout.preferredHeight: 45
+                        spacing: CmnCfg.microMargin
+                        topPadding: 3
+                        Repeater {
+                            model: [0, 1, 2, 3, 4, 5, 6, 7, 8].slice(0, 6)
+                            Rectangle {
+                                id: imagePorxy
+                                color: "green"
+                                width: 20
+                                height: 20
+                            }
+                        }
+                    }
+
+                    Label {
+                        Layout.preferredWidth: 140
+                        text: "Location Location Location Location Location Location"
+                        wrapMode: Label.WrapAtWordBoundaryOrAnywhere
+                    }
+
+                    Flow {
+                        Layout.preferredWidth: 85
+                        Repeater {
+                            model: 3
+                            Label {
+                                background: Rectangle {
+                                    width: index * 33
+                                    height: 10
+                                    color: "blue"
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
