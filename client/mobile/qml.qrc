@@ -9,14 +9,10 @@
         <file>qml/LoginPage/Registration.qml</file>
         <file>qml/Common/CommonConfig.qml</file>
         <file>qml/Common/Divider.qml</file>
-        <file>qml/Common/EntityBlock.qml</file>
         <file>qml/Common/AnimIconButton.qml</file>
-        <file>qml/SearchView/SearchViewMain.qml</file>
+        <file>qml/GlobalSearch/GlobalSearchMain.qml</file>
         <file>qml/LoginPage/Controls/LoginButton.qml</file>
         <file>qml/LoginPage/Controls/LoginField.qml</file>
-        <file>qml/SettingsMenu/SettingsMenuMain.qml</file>
-        <file>qml/SettingsMenu/Controls/SettingsHeader.qml</file>
-        <file>qml/SettingsMenu/Controls/SettingsSection.qml</file>
         <file>qml/NewContactView/NewContactViewMain.qml</file>
         <file>qml/App.qml</file>
         <file>qml/ChatView/TextMessageList.qml</file>
@@ -30,27 +26,21 @@
         <file>qml/HomeScreen/GroupFlowComponents/ContactsSearchComponent.qml</file>
         <file>qml/HomeScreen/GroupFlowComponents/FinalGroupList.qml</file>
         <file>qml/HomeScreen/GroupFlowComponents/GroupHeaderComponent.qml</file>
-        <file>qml/Headers/ChatHeader.qml</file>
-        <file>qml/Headers/SettingsHeader.qml</file>
-        <file>qml/Headers/HeadersMain.qml</file>
-        <file>qml/Headers/HomeHeader.qml</file>
-        <file>qml/Headers/Transitions.qml</file>
-        <file>qml/Headers/NewContactHeader.qml</file>
-        <file>qml/Headers/NewGroupHeader.qml</file>
         <file>qml/ChatView/OptionsDropdown.qml</file>
         <file>qml/ChatView/MessageMouseArea.qml</file>
-        <file>qml/SettingsMenu/SettingComponents/Advanced.qml</file>
-        <file>qml/SettingsMenu/SettingComponents/Appearance.qml</file>
-        <file>qml/SettingsMenu/SettingComponents/ConfRadio.qml</file>
-        <file>qml/SettingsMenu/SettingComponents/ConfSwitch.qml</file>
-        <file>qml/SettingsMenu/SettingComponents/Feedback.qml</file>
-        <file>qml/SettingsMenu/SettingComponents/Notifications.qml</file>
-        <file>qml/SettingsMenu/SettingComponents/Privacy.qml</file>
-        <file>qml/SettingsMenu/SettingComponents/Profile.qml</file>
-        <file>qml/SettingsMenu/SettingComponents/SettingsListItem.qml</file>
-        <file>qml/SettingsMenu/SettingComponents/Storage.qml</file>
         <file>qml/ChatView/InfoPage.qml</file>
-        <file>qml/Headers/MessageInfoHeader.qml</file>
         <file>qml/Common/PlatonicRectangle.qml</file>
+        <file>qml/Zombie/PhantomImports.qml</file>
+        <file>qml/ChatView/ChatHeader.qml</file>
+        <file>qml/GlobalSearch/GlobalSearchHeader.qml</file>
+        <file>qml/ChatView/MessageInfoHeader.qml</file>
+        <file>qml/NewContactView/NewContactHeader.qml</file>
+        <file>qml/HomeScreen/HomeHeader.qml</file>
+        <file>qml/HomeScreen/NewGroupFlow/ContactsSearchComponent.qml</file>
+        <file>qml/HomeScreen/NewGroupFlow/FinalGroupList.qml</file>
+        <file>qml/HomeScreen/NewGroupFlow/NewGroupHeader.qml</file>
+        <file>qml/HomeScreen/NewGroupFlow/NewGroupView.qml</file>
+        <file>qml/SettingsHeader.qml</file>
+        <file>qml/HeadersMain.qml</file>
     </qresource>
 </RCC>

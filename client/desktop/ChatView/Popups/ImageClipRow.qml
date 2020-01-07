@@ -24,12 +24,13 @@ ListView {
         width: 64
         clip: true
         color: "transparent"
-        property real aspectRatio: imageAttachments[index].width / imageAttachments[index].height
         property var imageSource: "file:" + imageAttachments[index].path
         Image {
             id: clip
-            sourceSize.width: parent.aspectRatio < 1 ? 64 : 64 * parent.aspectRatio
-            sourceSize.height: parent.aspectRatio < 1 ? 64 / parent.aspectRatio : 64
+            property var dims: JSON.parse(Herald.utils.imageScaling(
+                                              imageAttachments[index].path, 64))
+            sourceSize.width: dims.width
+            sourceSize.height: dims.height
             anchors.centerIn: parent
             source: parent.imageSource
             ColorOverlay {

@@ -9,25 +9,9 @@ ApplicationWindow {
     id: root
     visible: true
     // for desktop prototyping
-    // removed on desktop
+    // removed implicitly in production
     width: 300
     height: 500
-
-    ErrorDialog {
-        id: errPopup
-
-        Connections {
-            target: Herald.errors
-            onTryPollChanged: {
-                const errMsg = Herald.errors.nextError()
-
-                if (errMsg !== "") {
-                    errPopup.errorMsg = errMsg
-                    errPopup.open()
-                }
-            }
-        }
-    }
 
     MobileHelper {
         id: mobHelper

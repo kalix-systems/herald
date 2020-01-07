@@ -151,7 +151,7 @@ Rectangle {
 
         Loader {
             id: imageClip
-            active: auxData.code === 3
+            active: auxData.code === 2
             sourceComponent: ReplyImageClip {
                 imageSource: "file:" + auxData.content
             }

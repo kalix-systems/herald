@@ -7,7 +7,7 @@ import QtQuick.Dialogs 1.3
 import "qrc:/imports"
 import QtGraphicalEffects 1.0
 import "../../common" as Common
-import "qrc:/imports/Entity" as Av
+import "qrc:/imports/Entity" as Ent
 import "qrc:/imports/js/utils.mjs" as Utils
 import "qrc:/imports/ChatBubble" as CB
 import "qrc:/imports" as Imports
@@ -19,9 +19,10 @@ Popup {
     property var ownedMessages: parent.ownedMessages
     property var receiptData
     property var outbound: messageData.author === Herald.config.configId
+    modal: true
 
     height: chatView.height
-    width: chatView.width
+    width: parent.width
     anchors.centerIn: parent
     onClosed: messageInfoLoader.active = false
     padding: 0
@@ -51,7 +52,6 @@ Popup {
         id: header
         anchors.top: parent.top
         anchors.left: parent.left
-        anchors.leftMargin: 1
         anchors.right: parent.right
         height: CmnCfg.toolbarHeight + 1
         color: CmnCfg.palette.offBlack
@@ -66,14 +66,8 @@ Popup {
             font.family: CmnCfg.labelFont.name
         }
     }
-    Rectangle {
-        anchors.right: header.left
-        color: CmnCfg.palette.lightGrey
-        width: 1
-        height: CmnCfg.palette.toolbarHeight
-    }
     Flickable {
-        width: chatView.width
+        width: parent.width
         anchors.top: header.bottom
         anchors.bottom: parent.bottom
         contentWidth: width
@@ -117,12 +111,10 @@ Popup {
                     picture: Utils.safeStringOrDefault(
                                  messageData.authorProfilePicture, "")
                     color: CmnCfg.palette.white
-                    labelComponent: Av.ConversationLabel {
-                        contactName: messageData.authorName
-                        lastBody: "@" + messageData.author
+                    labelComponent: Ent.ContactLabel {
+                        displayName: messageData.authorName
+                        username: messageData.author
                         labelColor: CmnCfg.palette.black
-                        secondaryLabelColor: CmnCfg.palette.darkGrey
-                        labelFontSize: CmnCfg.entityLabelSize
                     }
                     MouseArea {
                         id: hoverHandler
@@ -182,22 +174,22 @@ Popup {
                 currentIndex: -1
                 delegate: Item {
                     height: visible ? CmnCfg.convoHeight : 0
-                    width: 250
-                    visible: memberData.userId !== messageData.author
+                    width: 300
+                    // TODO special-case Note to Self conversations so they
+                    // don't have an empty recipient list
+                    visible: convoMembers.rowCount(
+                                 ) > 1 ? memberData.userId !== messageData.author : true
                     property var memberData: model
                     Common.PlatonicRectangle {
                         boxTitle: memberData.name
                         boxColor: memberData.color
-                        picture: Utils.safeStringOrDefault(memberData.picture,
-                                                           "")
+                        picture: memberData.profilePicture
                         property MouseArea hoverHandler
                         color: CmnCfg.palette.white
-                        labelComponent: Av.ConversationLabel {
-                            contactName: memberData.name
-                            lastBody: "@" + memberData.userId
+                        labelComponent: Ent.ContactLabel {
+                            displayName: memberData.name
+                            username: memberData.userId
                             labelColor: CmnCfg.palette.black
-                            secondaryLabelColor: CmnCfg.palette.darkGrey
-                            labelFontSize: CmnCfg.entityLabelSize
                         }
 
                         Button {
@@ -210,7 +202,8 @@ Popup {
                             icon.color: CmnCfg.palette.iconMatte
                             padding: 0
 
-                            anchors.verticalCenter: parent.verticalCenter
+                            anchors.bottom: parent.bottom
+                            anchors.bottomMargin: CmnCfg.smallMargin
                             background: Item {}
                         }
 
@@ -231,12 +224,31 @@ Popup {
                     color: CmnCfg.palette.alertColor
                 }
                 onClicked: {
-                    moreInfoPopup.close()
-                    messageInfoLoader.active = false
-                    ownedMessages.deleteMessage(ownedMessages.indexById(
-                                                    messageData.msgId))
+                    deleteMsgPrompt.deleteId = messageData.msgId
+                    deleteMsgPrompt.open()
                 }
             }
+        }
+    }
+
+    MessageDialog {
+        id: deleteMsgPrompt
+        property var deleteId
+        text: qsTr("Delete message")
+        informativeText: qsTr("Do you want to delete this message from this device?")
+        standardButtons: MessageDialog.Ok | MessageDialog.Cancel
+
+        onAccepted: {
+            // prevent coercion of undefined into bytearray
+            if (deleteId === undefined) {
+                return
+            }
+
+            moreInfoPopup.close()
+            messageInfoLoader.active = false
+
+            ownedMessages.deleteMessageById(deleteId)
+            deleteId = undefined
         }
     }
 }

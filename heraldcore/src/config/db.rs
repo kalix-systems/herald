@@ -4,6 +4,13 @@ use coremacros::w;
 use rusqlite::named_params;
 use std::net::SocketAddr;
 
+/// Get's the "Note to Self" conversation
+pub(crate) fn nts_conversation(conn: &rusqlite::Connection) -> Result<ConversationId, HErr> {
+    let id = id(conn)?;
+
+    crate::conversation::db::pairwise_conversation(&conn, &id)
+}
+
 pub(crate) fn set_name(
     conn: &rusqlite::Connection,
     name: &str,

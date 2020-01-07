@@ -10,7 +10,10 @@ import "js/KeyNavigation.mjs" as KeyNav
 import "../EmojiKeyboard" as EK
 import "../common" as Common
 import "Popups" as Popups
+import QtQuick.Dialogs 1.2
+import "qrc:/imports/ChatBubble" as CB
 
+//import Qt.labs.platform 1.1
 Page {
     id: chatPage
 
@@ -72,23 +75,35 @@ Page {
         }
     }
 
-    // This should be spawned by the EK
-    MouseArea {
-        id: exit
-        enabled: emoKeysPopup.active
-        anchors.fill: parent
-        onClicked: {
-            emoKeysPopup.active = false
-            anchors.fill = undefined
-        }
-    }
+    // wrapper Item to set margins for the popup instead of
+    // having to use explicit x and y positioning
+    Item {
 
-    Popups.EmojiPopup {
-        id: emoKeysPopup
         anchors {
-            margins: 12
-            bottom: chatTextArea.top
             left: parent.left
+            bottom: chatTextArea.top
+            margins: 12
+        }
+        height: emoKeysPopup.height
+        width: emoKeysPopup.width
+
+        Popup {
+            id: emojiPopupWrapper
+
+            onOpened: emoKeysPopup.active = true
+            onClosed: emoKeysPopup.active = false
+
+            z: chatPage.z + 2
+            height: emoKeysPopup.height
+            width: emoKeysPopup.width
+
+            Popups.EmojiPopup {
+                id: emoKeysPopup
+                anchors.centerIn: parent
+                onActiveChanged: if (!active) {
+                                     emojiPopupWrapper.close()
+                                 }
+            }
         }
     }
 
@@ -120,7 +135,93 @@ Page {
                                       ownedConversation, chatTextArea)
             // TODO: Tab should cycle through a hierarchy of items as far as focus
         }
-        emojiButton.onClicked: emoKeysPopup.active = !!!emoKeysPopup.active
+        emojiButton.onClicked: emojiPopupWrapper.open(
+                                   ) //emoKeysPopup.active = !!!emoKeysPopup.active
         atcButton.onClicked: chatTextArea.attachmentsDialogue.open()
+    }
+
+    Item {
+        id: typingIndicator
+        anchors.bottom: chatTextArea.top
+        //    anchors.top: convWindow.bottom
+        height: typingLoader.height
+        width: parent.width
+
+        property int __secondsSinceLastReset: 0
+        property bool __aUserIsTyping: __secondsSinceLastReset < 5
+        onHeightChanged: {
+
+            if (height === 0) {
+                convWindow.anchors.bottom = chatTextArea.top
+                convWindow.height = convWindow.contentHeight
+            } else {
+                convWindow.anchors.bottom = typingIndicator.top
+                convWindow.height = convWindow.contentHeight
+            }
+        }
+
+        Loader {
+            id: typingLoader
+            property var typingUser
+            active: false
+
+            height: active ? 52 : 0
+            width: active ? parent.width : 0
+            anchors.bottom: parent.bottom
+            sourceComponent: CB.TypingBubble {
+                id: typeBubble
+
+                defaultWidth: convWindow.width
+            }
+        }
+
+        // listens for typing indicators
+        Connections {
+            target: ownedConversation
+            onNewTypingIndicator: {
+                typingIndicator.__secondsSinceLastReset = 0
+                typingLoader.typingUser = ownedConversation.typingUserId
+                typingLoader.active = true
+            }
+        }
+
+        Connections {
+            target: appRoot.globalTimer
+            onRefreshTime: {
+                typingIndicator.__secondsSinceLastReset += 1
+                if (!typingIndicator.__aUserIsTyping) {
+                    typingLoader.active = false
+                    typingLoader.typingUser = undefined
+                }
+            }
+        }
+    }
+
+    MessageDialog {
+        id: clearHistoryPrompt
+        text: qsTr("Clear conversation history")
+        informativeText: qsTr("Do you want to clear this conversation's history from this device?")
+        standardButtons: MessageDialog.Ok | MessageDialog.Cancel
+
+        onAccepted: {
+            ownedConversation.clearConversationHistory()
+        }
+    }
+
+    MessageDialog {
+        id: deleteMsgPrompt
+        property var deleteId
+        text: qsTr("Delete message")
+        informativeText: qsTr("Do you want to delete this message from this device?")
+        standardButtons: MessageDialog.Ok | MessageDialog.Cancel
+
+        onAccepted: {
+            // prevent coercion of undefined into bytearray
+            if (deleteId === undefined) {
+                return
+            }
+            ownedConversation.deleteMessageById(deleteId)
+            deleteId = undefined
+        }
     }
 }

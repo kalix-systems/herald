@@ -32,56 +32,93 @@ MouseArea {
 
         anchors {
             right: parent.right
+            rightMargin: CmnCfg.microMargin
             top: parent.top
-            topMargin: CmnCfg.smallMargin
+            topMargin: 6
         }
 
         Row {
             id: buttonRow
-            spacing: CmnCfg.defaultMargin
-            rightPadding: CmnCfg.smallMargin
+            anchors.right: parent.right
+            topPadding: 0
+            bottomPadding: 0
+            spacing: CmnCfg.microMargin
+            anchors.top: parent.top
 
             Imports.IconButton {
                 id: replyButton
                 anchors.margins: CmnCfg.defaultMargin
+                fill: CmnCfg.palette.offBlack
                 source: "qrc:/reply-icon.svg"
                 z: CmnCfg.overlayZ
+                icon.width: 14
+                icon.height: 14
+                padding: CmnCfg.microMargin
+
                 // changing the opId transfers focus to the compose field
                 onClicked: ownedConversation.builder.opId = msgId
-            }
 
-            Popups.MessageOptionsPopup {
-                id: messageOptionsMenu
+                background: Rectangle {
+                    border.color: CmnCfg.palette.offBlack
+                    border.width: 1
+                    color: replyButton.mouseArea.containsMouse ? CmnCfg.palette.lightGrey : CmnCfg.palette.white
+                }
             }
-
             Imports.IconButton {
                 id: reactButton
                 anchors.margins: visible ? CmnCfg.defaultMargin : 0
                 z: CmnCfg.overlayZ
-                icon.width: visible ? 24 : 0
-                source: "qrc:/lenny-icon.svg"
+                icon.width: visible ? 14 : 0
+                icon.height: 14
+                source: "qrc:/upside-down-emoji-icon.svg"
+                fill: CmnCfg.palette.offBlack
+                padding: CmnCfg.microMargin
                 onClicked: {
                     reactPopup.active = true
                     emojiMenu.open()
                 }
+                background: Rectangle {
+                    border.color: CmnCfg.palette.offBlack
+                    border.width: 1
+                    color: reactButton.mouseArea.containsMouse ? CmnCfg.palette.lightGrey : CmnCfg.palette.white
+                }
             }
-
             Imports.IconButton {
                 id: downloadButton
                 visible: download
                 anchors.margins: visible ? CmnCfg.defaultMargin : 0
                 z: CmnCfg.overlayZ
-                icon.width: visible ? 22 : 0
+                fill: CmnCfg.palette.offBlack
+                icon.width: visible ? 14 : 0
+                icon.height: 14
+                padding: CmnCfg.microMargin
                 source: "qrc:/download-icon.svg"
                 onClicked: downloadFileChooser.open()
+                background: Rectangle {
+                    border.color: CmnCfg.palette.offBlack
+                    border.width: 1
+                    color: downloadButton.mouseArea.containsMouse ? CmnCfg.palette.lightGrey : CmnCfg.palette.white
+                }
             }
-
             Imports.IconButton {
                 id: messageOptionsButton
                 anchors.margins: CmnCfg.defaultMargin
                 source: "qrc:/options-icon.svg"
                 z: CmnCfg.overlayZ
+                icon.width: 14
+                icon.height: 14
+                padding: CmnCfg.microMargin
                 onClicked: messageOptionsMenu.open()
+                fill: CmnCfg.palette.offBlack
+                background: Rectangle {
+                    border.color: CmnCfg.palette.offBlack
+                    border.width: 1
+                    color: messageOptionsButton.mouseArea.containsMouse ? CmnCfg.palette.lightGrey : CmnCfg.palette.white
+                }
+            }
+
+            Popups.MessageOptionsPopup {
+                id: messageOptionsMenu
             }
         }
     }

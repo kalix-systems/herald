@@ -58,7 +58,7 @@ Rectangle {
             Layout.alignment: Qt.AlignRight
             Layout.rightMargin: CmnCfg.largeMargin
             iconSize: Qt.size(CmnCfg.units.dp(24), CmnCfg.units.dp(24))
-            onClicked: deactivate()
+            onTapped: deactivate()
             imageSource: "qrc:/x-icon.svg"
         }
     }

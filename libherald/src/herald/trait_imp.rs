@@ -34,7 +34,6 @@ macro_rules! props {
 impl HeraldTrait for Herald {
     fn new(
         emit: HeraldEmitter,
-        _: HeraldList,
         config: Config,
         conversation_builder: ConversationBuilder,
         conversations: Conversations,
@@ -74,12 +73,8 @@ impl HeraldTrait for Herald {
         self.registration_failure_code.map(|c| c as u8)
     }
 
-    fn can_fetch_more(&self) -> bool {
-        self.can_fetch_more_()
-    }
-
-    fn fetch_more(&mut self) {
-        self.fetch_more_()
+    fn poll_update(&mut self) {
+        self.process_updates()
     }
 
     fn login(&mut self) -> bool {
@@ -110,10 +105,6 @@ impl HeraldTrait for Herald {
         message_search, message_search_mut, MessageSearch,
         users_search, users_search_mut, UsersSearch,
         utils, utils_mut, Utils
-    }
-
-    fn row_count(&self) -> usize {
-        0
     }
 
     fn set_app_local_data_dir(

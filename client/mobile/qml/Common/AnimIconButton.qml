@@ -14,7 +14,7 @@ ToolButton {
     TapHandler {
         onTapped: {
             tapAnim.start()
-            parent.tapped()
+            tb.tapped()
         }
     }
 

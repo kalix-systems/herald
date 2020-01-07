@@ -20,9 +20,10 @@ Popup {
 
     padding: 0
     height: chatView.height
-    width: chatView.width
+    width: parent.width
     anchors.centerIn: parent
     onClosed: groupSettingsLoader.active = false
+    modal: true
 
     background: Rectangle {
         id: background
@@ -46,7 +47,6 @@ Popup {
         id: header
         anchors.top: parent.top
         anchors.left: parent.left
-        anchors.leftMargin: 1
         anchors.right: parent.right
         height: CmnCfg.toolbarHeight + 1
         color: CmnCfg.palette.offBlack
@@ -54,22 +54,16 @@ Popup {
             id: headerLabel
             anchors.left: parent.left
             anchors.leftMargin: CmnCfg.smallMargin
-            text: "Group settings"
+            text: qsTr("Group settings")
             font.pixelSize: CmnCfg.headerFontSize
             color: CmnCfg.palette.white
             anchors.verticalCenter: parent.verticalCenter
             font.family: CmnCfg.labelFont.name
         }
     }
-    Rectangle {
-        anchors.right: header.left
-        color: CmnCfg.palette.lightGrey
-        width: 1
-        height: CmnCfg.palette.toolbarHeight
-    }
 
     Flickable {
-        width: chatView.width
+        width: parent.width
         anchors.top: header.bottom
         anchors.bottom: parent.bottom
         contentWidth: width
@@ -217,12 +211,9 @@ Popup {
                         picture: Utils.safeStringOrDefault(memberData.picture,
                                                            "")
                         color: CmnCfg.palette.white
-                        labelComponent: Entity.ConversationLabel {
-                            contactName: memberData.name
-                            lastBody: "@" + memberData.userId
-                            labelColor: CmnCfg.palette.black
-                            secondaryLabelColor: CmnCfg.palette.darkGrey
-                            labelFontSize: CmnCfg.entityLabelSize
+                        labelComponent: Entity.ContactLabel {
+                            displayName: memberData.name
+                            username: memberData.userId
                         }
                         states: []
                         MouseArea {
@@ -252,6 +243,7 @@ Popup {
             Herald.conversations.setProfilePicture(
                         Herald.conversations.indexById(
                             convoData.conversationId), JSON.stringify(picture))
+            //commented out until image crop popup is fixed
             //            imageCrop.imageWidth = parsed.width
             //            imageCrop.imageHeight = parsed.height
             //            imageCrop.imageSource = fileUrl

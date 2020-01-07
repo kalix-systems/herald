@@ -32,6 +32,8 @@ Item {
             width: height
             radius: isGroup ? 0 : width
             color: wrapperItem.color
+            border.width: isGroup ? 1 : 0
+            border.color: CmnCfg.palette.white
             Text {
                 text: initials
                 font.bold: true
@@ -51,6 +53,8 @@ Item {
             width: height
             radius: isGroup ? 0 : width
             id: mask
+            clip: true
+
             Image {
                 source: JS.safeToQrcURI(pfpPath)
                 anchors.fill: mask
@@ -60,6 +64,13 @@ Item {
                 }
                 clip: true
                 mipmap: true
+                Rectangle {
+                    anchors.fill: parent
+                    radius: !isGroup ? width : 0
+                    color: "transparent"
+                    border.color: !isGroup ? wrapperItem.color : CmnCfg.palette.white
+                    border.width: !isGroup ? 2 : 1
+                }
             }
         }
     }

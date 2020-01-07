@@ -12,11 +12,12 @@ import "qrc:/imports/Entity"
 import "qrc:/imports/NewGroupFlow"
 import "qrc:/imports/js/utils.mjs" as Utils
 import "GroupFlowComponents"
+import "NewGroupFlow"
 
 Page {
     id: newGroupView
     height: mainView.height
-
+    readonly property Component headerComponent: NewGroupHeader {}
     background: Rectangle {
         color: CmnCfg.palette.white
     }
@@ -31,9 +32,7 @@ Page {
                 id: backButton
                 color: CmnCfg.palette.iconFill
                 imageSource: "qrc:/back-arrow-icon.svg"
-                onTapped: {
-                    mainView.pop(null)
-                }
+                onTapped: mainView.pop(null)
             }
         }
 

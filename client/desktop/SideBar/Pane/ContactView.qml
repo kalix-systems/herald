@@ -6,9 +6,10 @@ import "../../common" as Common
 import "qrc:/imports/js/utils.mjs" as Utils
 import ".././js/ContactView.mjs" as JS
 import "../popups" as Popups
-import "qrc:/imports/Entity" as Av
+import "qrc:/imports/Entity" as Ent
 
 /// --- displays a list of contacts
+// TODO this seems to be dead code
 ListView {
     id: contactList
     clip: true
@@ -30,10 +31,9 @@ ListView {
             boxTitle: contactData.name
             picture: Utils.safeStringOrDefault(contactData.profilePicture, "")
 
-            labelComponent: Av.ConversationLabel {
-                contactName: contactData.name
-                labelFontSize: 14
-                lastBody: "@" + contactData.userId
+            labelComponent: Ent.ContactLabel {
+                displayName: contactData.name
+                username: contactData.userId
             }
 
             MouseArea {

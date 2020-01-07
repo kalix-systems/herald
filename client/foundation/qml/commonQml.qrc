@@ -23,9 +23,6 @@
         <file>ChatBubble/DocFileItem.qml</file>
         <file>ChatBubble/ElideHandler.qml</file>
         <file>ChatBubble/FileAttachmentContent.qml</file>
-        <file>ChatBubble/FourImageLayout.qml</file>
-        <file>ChatBubble/MultiImageLayout.qml</file>
-        <file>ChatBubble/OneImageLayout.qml</file>
         <file>ChatBubble/ReplyBubble/ReplyDangling.qml</file>
         <file>ChatBubble/ReplyBubble/ReplyDoc.qml</file>
         <file>ChatBubble/ReplyBubble/ReplyHybrid.qml</file>
@@ -40,16 +37,14 @@
         <file>ChatBubble/ReplyBubble/js/utils.js</file>
         <file>ChatBubble/StandardStamps.qml</file>
         <file>ChatBubble/StandardTextEdit.qml</file>
-        <file>ChatBubble/ThreeImageLayout.qml</file>
-        <file>ChatBubble/TwoImageLayout.qml</file>
         <file>NewGroupFlow/GroupImageSelector.qml</file>
         <file>StandardCombo.qml</file>
         <file>StandardLabel.qml</file>
         <file>TimerOptions.qml</file>
         <file>Units.qml</file>
         <file>errors/ErrorDialog.qml</file>
-        <file>js/Avatar.mjs</file>
-        <file>js/utils.mjs</file>
+        <file alias="/js/Avatar.mjs">../js/Avatar.mjs</file>
+        <file alias="/js/utils.mjs">../js/utils.mjs</file>
         <file>themes/Dark.qml</file>
         <file>themes/EarthTones.qml</file>
         <file>themes/Light.qml</file>
@@ -67,6 +62,26 @@
         <file>ChatBubble/ReplyBubble/ReplyAux.qml</file>
         <file>Entity/MessageSearchLabel.qml</file>
         <file>+android/FileDialogWrapper.qml</file>
+        <file>Entity/ContactLabel.qml</file>
+        <file>ChatBubble/ReplyBubble/dyn/ReplyExpireInfo.qml</file>
+        <file>TextButton.qml</file>
+        <file>Settings/SettingsComponents/Advanced.qml</file>
+        <file>Settings/SettingsComponents/Appearance.qml</file>
+        <file>Settings/SettingsComponents/ConfRadio.qml</file>
+        <file>Settings/SettingsComponents/ConfSwitch.qml</file>
+        <file>Settings/SettingsComponents/Feedback.qml</file>
+        <file>Settings/SettingsComponents/Notifications.qml</file>
+        <file>Settings/SettingsComponents/Privacy.qml</file>
+        <file>Settings/SettingsComponents/Profile.qml</file>
+        <file>Settings/SettingsComponents/SettingsListItem.qml</file>
+        <file>Settings/SettingsComponents/Storage.qml</file>
+        <file>Settings/SettingsPane.qml</file>
         <file>FileDialogWrapper.qml</file>
+        <file>ChatBubble/ImageLayouts/FourImageLayout.qml</file>
+        <file>ChatBubble/ImageLayouts/MultiImageLayout.qml</file>
+        <file>ChatBubble/ImageLayouts/OneImageLayout.qml</file>
+        <file>ChatBubble/ImageLayouts/ThreeImageLayout.qml</file>
+        <file>ChatBubble/ImageLayouts/TwoImageLayout.qml</file>
+        <file>ChatBubble/TypingBubble.qml</file>
     </qresource>
 </RCC>

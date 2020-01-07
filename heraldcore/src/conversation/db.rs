@@ -146,16 +146,29 @@ pub(crate) fn get_all_pairwise_conversations(
     res.map(|cid| Ok(w!(cid))).collect()
 }
 
+pub(crate) fn pairwise_conversation(
+    conn: &rusqlite::Connection,
+    uid: &UserId,
+) -> Result<ConversationId, HErr> {
+    let mut stmt = w!(conn.prepare(include_str!("sql/pairwise_cid.sql")));
+    Ok(w!(stmt.query_row(params![uid], |row| row.get(0))))
+}
+
 pub(crate) fn get_pairwise_conversations(
     conn: &rusqlite::Connection,
     uids: &[UserId],
 ) -> Result<Vec<ConversationId>, HErr> {
     let mut stmt = w!(conn.prepare(include_str!("sql/pairwise_cid.sql")));
 
-    uids.iter()
-        .map(|uid| stmt.query_row(params![uid], |row| Ok(w!(row.get(0)))))
-        .map(|res| Ok(w!(res)))
-        .collect()
+    let mut out = Vec::new();
+
+    for uid in uids {
+        if let Some(cid) = w!(stmt.query_map(params![uid], |row| row.get(0))).next() {
+            out.push(cid?);
+        }
+    }
+
+    Ok(out)
 }
 
 pub(crate) fn set_expiration_period(

@@ -21,6 +21,14 @@ Component {
             id: topRect
         }
 
+        // prevent selection of items behind the popup
+        MouseArea {
+            z: parent.z - 1
+            anchors.fill: parent
+            hoverEnabled: true
+            propagateComposedEvents: false
+        }
+
         Imports.BorderedTextField {
             id: titleText
             anchors {

@@ -58,11 +58,10 @@ Column {
                 picture: Utils.safeStringOrDefault(contactData.profilePicture,
                                                    "")
 
-                labelComponent: Entity.ConversationLabel {
-                    contactName: contactData.name
+                labelComponent: Entity.ContactLabel {
+                    displayName: contactData.name
                     labelColor: CmnCfg.palette.white
-                    labelFontSize: 14
-                    lastBody: "@" + contactData.userId
+                    username:contactData.userId
                 }
                 states: []
 

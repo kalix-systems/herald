@@ -41,6 +41,10 @@ impl Interface for Messages {
         self.last_has_attachments_()
     }
 
+    fn typing_user_id(&self) -> Option<ffi::UserIdRef> {
+        self.typing_user.as_ref()?.as_str().into()
+    }
+
     fn index_by_id(
         &self,
         msg_id: ffi::MsgIdRef,
@@ -144,6 +148,13 @@ impl Interface for Messages {
         index: u64,
     ) -> bool {
         self.delete_message_(index)
+    }
+
+    fn delete_message_by_id(
+        &mut self,
+        id: ffi::MsgIdRef,
+    ) -> bool {
+        self.delete_message_by_id_(id)
     }
 
     fn clear_conversation_history(&mut self) -> bool {
@@ -403,5 +414,9 @@ impl Interface for Messages {
         index: usize,
     ) -> String {
         self.reactions_(index).unwrap_or_default()
+    }
+
+    fn send_typing_indicator(&mut self) {
+        self.send_typing_indicator_()
     }
 }

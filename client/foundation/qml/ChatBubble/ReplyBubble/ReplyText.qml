@@ -20,7 +20,9 @@ Rectangle {
     property alias mouseEnabled: mouseArea.enabled
 
 
-    ReplyMouseArea {id: mouseArea}
+    ReplyMouseArea {
+        id: mouseArea
+    }
 
     Rectangle {
         id: accent
@@ -31,6 +33,8 @@ Rectangle {
         color: opColor
         anchors.left: parent.left
     }
+
+    ReplyExpireInfo {}
 
     Column {
         id: replyWrapperCol

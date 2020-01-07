@@ -158,6 +158,15 @@ Rectangle {
                     target: ownedConversation.builder
                     onOpIdChanged: chatText.forceActiveFocus()
                 }
+
+                // sends typing indicators
+                onTextChanged: {
+                    if (text !== "") {
+                        Qt.callLater(function () {
+                            ownedConversation.sendTypingIndicator()
+                        })
+                    }
+                }
             }
         }
     }

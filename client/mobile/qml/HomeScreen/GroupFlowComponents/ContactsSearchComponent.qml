@@ -14,6 +14,7 @@ import "qrc:/imports/js/utils.mjs" as Utils
 Column {
     topPadding: CmnCfg.units.dp(24)
     Component.onCompleted: Herald.usersSearch.refresh()
+    // TODO megaMargin here shouldnot apply to FinalGroupList component
     width: mainView.width - CmnCfg.megaMargin * 2
 
     Imports.BorderedTextField {
@@ -46,7 +47,7 @@ Column {
         }
         delegate: Rectangle {
             property var contactData: model
-            height: visible ? entityBlock.height : 0 //CmnCfg.units.dp(48) : 0
+            height: visible ? CmnCfg.convoHeight : 0
             width: parent.width
             visible: matched && contactData.userId !== Herald.config.configId
             anchors {
@@ -54,15 +55,16 @@ Column {
                 leftMargin: CmnCfg.units.dp(12)
             }
 
-            EntityBlock {
-                id: entityBlock
-                entityName: contactData.name
-                subLabelText: '@' + contactData.userId
-                color: CmnCfg.avatarColors[contactData.color]
-                // TODO pfpPath
+            PlatonicRectangle {
+                id: contactRect
+                boxTitle: contactData.name
+                boxColor: contactData.color
+                picture: contactData.profilePicture ? contactData.profilePicture : null
 
-                anchors.leftMargin: CmnCfg.smallMargin
-                anchors.rightMargin: CmnCfg.smallMargin
+                labelComponent: ContactLabel {
+                    displayName: contactData.name
+                    username: contactData.userId
+                }
             }
 
             TapHandler {

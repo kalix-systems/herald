@@ -16,15 +16,16 @@ ApplicationWindow {
 
     ErrorDialog {
         id: errPopup
-        Connections {
-            target: Herald.errors
-            onTryPollChanged: {
-                const errMsg = Herald.errors.nextError()
+    }
 
-                if (errMsg !== "") {
-                    errPopup.errorMsg = errMsg
-                    errPopup.open()
-                }
+    Connections {
+        target: Herald.errors
+        onNewError: {
+            const errMsg = Herald.errors.nextError()
+
+            if (errMsg !== "") {
+                errPopup.errorMsg = errMsg
+                errPopup.open()
             }
         }
     }

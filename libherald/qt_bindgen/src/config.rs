@@ -2,6 +2,7 @@ use builders::func::*;
 use builders::item_prop::*;
 use builders::obj::*;
 use builders::prop::*;
+use builders::sig::*;
 use riqtshaw::{
     builders,
     configuration::{SimpleType::*, *},
@@ -85,24 +86,30 @@ fn herald() -> Object {
         mut registerNewUser(user_id: QString, addr: QString, port: QString) => Void,
         mut login() => Bool,
         mut setAppLocalDataDir(path: QString) => Void,
+        mut pollUpdate() => Void,
+    };
+
+    let hooks = signals! {
+        tryPoll(),
+        | connect tryPoll pollUpdate
     };
 
     obj! {
-        Herald: Obj::new().props(properties).funcs(funcs).list()
+        Herald: Obj::new().props(properties).funcs(funcs).hooks(hooks)
     }
 }
 
 fn errors() -> Object {
-    let properties = props! {
-        tryPoll:  Prop::new().simple(Bool)
-    };
-
     let functions = functions! {
         mut nextError() => QString,
     };
 
+    let hooks = signals! {
+       newError(), |
+    };
+
     obj! {
-        Errors: Obj::new().props(properties).funcs(functions)
+        Errors: Obj::new().funcs(functions).hooks(hooks)
     }
 }
 
@@ -115,6 +122,10 @@ fn utils() -> Object {
         const imageDimensions(path: QString) => QString,
         // Strips QML URL prefix
         const stripUrlPrefix(path: QString) => QString,
+        // Given image dimensions and a constant, scales the smaller dimension down
+        // and makes the larger dimension equal to the constant
+        const imageScaling(path: QString, scale: QUint32) => QString,
+        const imageScaleReverse(path: QString, scale: QUint32) => QString,
     };
 
     obj! {
@@ -186,8 +197,17 @@ fn conversation_content() -> Object {
         conversationId: conv_id_prop()
     };
 
+    let funcs = functions! {
+        mut pollUpdate() => Void,
+    };
+
+    let hooks = signals! {
+        tryPoll(),
+        | connect tryPoll pollUpdate
+    };
+
     obj! {
-        ConversationContent: Obj::new().props(props).list()
+        ConversationContent: Obj::new().props(props).funcs(funcs).hooks(hooks)
     }
 }
 
@@ -253,6 +273,9 @@ fn messages() -> Object {
         lastStatus: Prop::new().simple(QUint32).optional(),
         lastAuxCode: Prop::new().simple(QUint8).optional(),
         lastHasAttachments: Prop::new().simple(Bool).optional(),
+
+        // User id of the last user to send a typing notification
+        typingUserId: Prop::new().simple(QString).optional(),
 
         isEmpty: Prop::new().simple(Bool),
 
@@ -321,11 +344,11 @@ fn messages() -> Object {
         // Message preview properties
         opMsgId: ItemProp::new(QByteArray).optional().get_by_value(),
         opAuthor: ItemProp::new(QString).optional().get_by_value(),
+        opName: ItemProp::new(QString).optional().get_by_value(),
         opBody: ItemProp::new(QString).get_by_value(),
         opInsertionTime: ItemProp::new(Qint64).optional(),
         opExpirationTime: ItemProp::new(Qint64).optional(),
         opColor: ItemProp::new(QUint32).optional(),
-        opName: ItemProp::new(QString).optional().get_by_value(),
         // Auxiliary message data, serialized as JSON
         opAuxData: ItemProp::new(QString).get_by_value(),
 
@@ -335,8 +358,13 @@ fn messages() -> Object {
         opDocAttachments: ItemProp::new(QString).get_by_value()
     };
 
+    let hooks = signals! {
+       newTypingIndicator(),|
+    };
+
     let funcs = functions! {
         mut deleteMessage(row_index: QUint64) => Bool,
+        mut deleteMessageById(id: QByteArray) => Bool,
         mut markReadById(id: QByteArray) => Void,
         mut clearConversationHistory() => Bool,
         mut clearSearch() => Void,
@@ -348,12 +376,13 @@ fn messages() -> Object {
         mut setElisionCharsPerLine(chars_per_line: QUint8) => Void,
         mut addReaction(index: QUint64, content: QString) => Void,
         mut removeReaction(index: QUint64, content: QString) => Void,
+        mut sendTypingIndicator() => Void,
         const indexById(msg_id: QByteArray) => Qint64,
         const saveAllAttachments(index: QUint64, dest: QString) => Bool,
     };
 
     obj! {
-        Messages: Obj::new().list().funcs(funcs).item_props(item_props).props(props)
+        Messages: Obj::new().list().funcs(funcs).item_props(item_props).props(props).hooks(hooks)
     }
 }
 
@@ -362,6 +391,9 @@ fn message_builder() -> Object {
         isReply: Prop::new().simple(Bool),
         // Body of the message
         body: Prop::new().simple(QString).optional().write(),
+        // Set expiration period of the message.
+        expirationPeriod: Prop::new().simple(QUint8).write().optional(),
+
 
         hasMediaAttachment: Prop::new().simple(Bool),
         hasDocAttachment: Prop::new().simple(Bool),

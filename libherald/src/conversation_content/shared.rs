@@ -88,17 +88,10 @@ pub(crate) fn content_push<T: Into<ContentUpdate>>(
     drop(emit_lock);
 
     if let Some(emitter) = maybe_emitter.as_mut() {
-        emitter.new_data_ready();
+        emitter.try_poll();
     }
 
     Ok(())
-}
-
-pub(super) fn more_updates(cid: &ConversationId) -> bool {
-    match rxs().read().get(cid) {
-        Some(rx) => !rx.is_empty(),
-        None => false,
-    }
 }
 
 impl super::ConversationContent {

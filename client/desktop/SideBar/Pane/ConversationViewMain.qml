@@ -3,7 +3,7 @@ import LibHerald 1.0
 import QtQuick.Controls 2.13
 import QtQuick.Dialogs 1.3
 import "qrc:/common" as Common
-import "qrc:/imports/Entity" as Av
+import "qrc:/imports/Entity" as Ent
 import "qrc:/imports/js/utils.mjs" as Utils
 import "../../ChatView" as CV
 import ".././js/ContactView.mjs" as JS
@@ -65,24 +65,39 @@ ListView {
             }
         }
 
-        visible: !archiveView ? conversationData.matched
-                                && conversationData.status !== 1 : conversationData.status === 1
+        visible: {
+            if (sideBarState.state === "globalSearch") {
+                return conversationData.matched
+            }
+            if (!archiveView) {
+                return conversationData.matched && conversationData.status !== 1
+            }
+            return conversationData.status === 1
+        }
         height: visible ? CmnCfg.convoHeight : 0
         width: parent.width
 
         Common.PlatonicRectangle {
             id: convoRectangle
-            boxTitle: title
-            boxColor: conversationData.color
-            picture: Utils.safeStringOrDefault(conversationData.picture, "")
+            property bool nts: {
+                Herald.utils.compareByteArray(Herald.config.ntsConversationId,
+                                              conversationData.conversationId)
+            }
+            boxTitle: !nts ? title : qsTr("Note to Self")
+            boxColor: !nts ? conversationData.color : Herald.config.color
+            picture: !nts ? Utils.safeStringOrDefault(
+                                conversationData.picture,
+                                "") : Utils.safeStringOrDefault(
+                                Herald.config.profilePicture, "")
             isGroupPicture: !conversationData.pairwise
 
-            labelComponent: Av.ConversationLabel {
+            labelComponent: Ent.ConversationLabel {
                 cc: convContent
-                contactName: title
-                labelColor: convoRectangle.state !== "" ? CmnCfg.palette.black : CmnCfg.palette.lightGrey
-                secondaryLabelColor: convoRectangle.state
-                                     !== "" ? CmnCfg.palette.offBlack : CmnCfg.palette.medGrey
+                convoTitle: !convoRectangle.nts ? title : qsTr("Note to Self")
+                labelColor: convoRectangle.state
+                            !== "" ? CmnCfg.palette.black : CmnCfg.palette.lightGrey
+                minorTextColor: convoRectangle.state
+                                !== "" ? CmnCfg.palette.offBlack : CmnCfg.palette.medGrey
             }
 
             MouseArea {
@@ -97,6 +112,7 @@ ListView {
                                            ) : unarchiveMenu.open()
                     } else {
                         chatView.sourceComponent = childChatView
+                        chatView.currentConvoId = conversationData.conversationId
                         conversationList.currentIndex = index
                     }
                 }
@@ -111,7 +127,15 @@ ListView {
 
             MenuItem {
                 text: "Archive"
-                onTriggered: conversationData.status = 1
+                onTriggered: {
+                    conversationData.status = 1
+                    if (Herald.utils.compareByteArray(
+                                chatView.currentConvoId,
+                                conversationData.conversationId)) {
+                        chatView.sourceComponent = splash
+                        chatView.currentConvoId = undefined
+                    }
+                }
             }
         }
         Menu {

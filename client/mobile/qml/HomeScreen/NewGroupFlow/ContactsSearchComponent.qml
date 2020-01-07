@@ -7,7 +7,7 @@ import "./../Controls"
 import "../../Common"
 import QtGraphicalEffects 1.0
 import Qt.labs.platform 1.0
-import "qrc:/imports/Entity"
+import "qrc:/imports/Entity" as Entity
 import "qrc:/imports" as Imports
 import "qrc:/imports/js/utils.mjs" as Utils
 
@@ -23,10 +23,11 @@ Column {
             Herald.usersSearch.filter = groupSelectText.text
             contactPopup.popup.open()
         }
-        anchors.left: parent.left
-        anchors.right: parent.right
         color: CmnCfg.palette.black
         borderColor: CmnCfg.palette.black
+
+        anchors.left: parent.left
+        anchors.right: parent.right
     }
 
     ComboBox {
@@ -44,25 +45,28 @@ Column {
         indicator: Rectangle {
             visible: false
         }
-        delegate: Rectangle {
+
+        delegate: Item {
             property var contactData: model
-            height: visible ? entityBlock.height : 0 //CmnCfg.units.dp(48) : 0
+            height: visible ? CmnCfg.convoHeight : 0
             width: parent.width
             visible: matched && contactData.userId !== Herald.config.configId
             anchors {
-                rightMargin: CmnCfg.units.dp(12)
-                leftMargin: CmnCfg.units.dp(12)
+                rightMargin: CmnCfg.units.defaultMargin
+                leftMargin: CmnCfg.units.defaultMargin
             }
 
-            EntityBlock {
-                id: entityBlock
-                entityName: contactData.name
-                subLabelText: '@' + contactData.userId
-                color: CmnCfg.avatarColors[contactData.color]
-                // TODO pfpPath
+            PlatonicRectangle {
+                boxColor: contactData.color
+                boxTitle: contactData.name
+                picture: Utils.safeStringOrDefault(
+                             contactData.profilePicture, "")
 
-                anchors.leftMargin: CmnCfg.smallMargin
-                anchors.rightMargin: CmnCfg.smallMargin
+                labelComponent: Entity.ContactLabel  {
+                    displayName: contactData.name
+                    username: contactData.userId
+
+                }
             }
 
             TapHandler {
@@ -75,6 +79,5 @@ Column {
             }
         }
     }
-
     FinalGroupList {}
 }

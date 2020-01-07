@@ -111,10 +111,8 @@ impl ConfigTrait for Config {
             let profile_picture =
                 heraldcore::image_utils::ProfilePicture::from_json_string(picture_json);
 
-            crate::push((
-                core::set_profile_picture(profile_picture).map(ConfUpdate::Picture),
-                loc!(),
-            ))
+            let path = err!(core::set_profile_picture(profile_picture).map(ConfUpdate::Picture));
+            crate::push(path);
         });
     }
 

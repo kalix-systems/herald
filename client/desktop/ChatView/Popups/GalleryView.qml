@@ -196,13 +196,12 @@ Popup {
     Action {
         id: zoomAction
         shortcut: StandardKey.ZoomIn
-        onTriggered: {
-            galleryPopup.imageScale += 0.3
-            flickable.resizeContent(galleryPopup.width * constrainedZoom,
-                                    galleryPopup.height * constrainedZoom,
-                                    Qt.point(image.width / 2 + image.x,
-                                             image.height / 2 + image.y))
-        }
+        onTriggered: zoomInFunction()
+    }
+
+    Shortcut {
+        sequence: "Ctrl+="
+        onActivated: zoomInFunction()
     }
 
     Action {
@@ -210,11 +209,20 @@ Popup {
         shortcut: StandardKey.ZoomOut
         onTriggered: {
             galleryPopup.imageScale -= 0.3
-            flickable.resizeContent(galleryPopup.width * constrainedZoom,
-                                    galleryPopup.height * constrainedZoom,
-                                    Qt.point(image.width / 2 + image.x,
-                                             image.height / 2 + image.y))
+            resizeContent()
         }
+    }
+
+    function zoomInFunction() {
+        galleryPopup.imageScale += 0.3
+        resizeContent()
+    }
+
+    function resizeContent() {
+        flickable.resizeContent(galleryPopup.width * constrainedZoom,
+                                galleryPopup.height * constrainedZoom,
+                                Qt.point(image.width / 2 + image.x,
+                                         image.height / 2 + image.y))
     }
 
     Flickable {
@@ -231,6 +239,7 @@ Popup {
         contentHeight: height
         contentWidth: width
         contentItem.anchors.centerIn: (contentHeight < flickable.height) ? flickable : undefined
+        boundsMovement: Flickable.StopAtBounds
 
         Image {
             id: image

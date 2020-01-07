@@ -6,7 +6,7 @@ import "../../common" as Common
 import "qrc:/imports/js/utils.mjs" as Utils
 import "./../js/ContactView.mjs" as JS
 import "../popups" as Popups
-import "qrc:/imports/Entity" as Av
+import "qrc:/imports/Entity" as Ent
 import "../../ChatView" as CV
 import QtQuick.Layouts 1.3
 
@@ -48,7 +48,7 @@ ListView {
             }
 
             // TODO spacing is awkward
-            labelComponent: Av.MessageSearchLabel {
+            labelComponent: Ent.MessageSearchLabel {
                 conversationTitle: messageData.conversationTitle
                 timestamp: Utils.friendlyTimestamp(messageData.time)
                 labelColor: messageRectangle.state !== "" ? CmnCfg.palette.black : CmnCfg.palette.lightGrey

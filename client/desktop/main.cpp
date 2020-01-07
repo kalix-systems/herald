@@ -3,6 +3,8 @@
 #include <QQmlApplicationEngine>
 #include <QStandardPaths>
 #include <QtQml/qqml.h>
+#include <QWindow>
+ #include <QDebug>
 
 int main(int argc, char* argv[])
 {
@@ -12,6 +14,9 @@ int main(int argc, char* argv[])
   QApplication::setOrganizationDomain("kalix.io");
   QApplication::setApplicationName("Herald");
   QApplication app(argc, argv);
+  QIcon icon = QIcon(":/herald.png");
+  QApplication::setWindowIcon(icon);
+
 
   qmlRegisterSingletonType<Herald>(
       "LibHerald", 1, 0, "Herald",

@@ -1,1 +1,10 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="none" d="M0 0h24v24H0V0z"/><path d="M10 9V5l-7 7 7 7v-4.1c5 0 8.5 1.6 11 5.1-1-5-4-10-11-11z"/></svg>
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 57.1 (83088) - https://sketch.com -->
+    <title>reply-icon</title>
+    <desc>Created with Sketch.</desc>
+    <g id="reply-icon" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <polygon id="Shape" points="0 0 24 0 24 24 0 24"></polygon>
+        <polygon id="↵" fill="#000000" fill-rule="nonzero" transform="translate(12.000000, 12.000000) scale(1, -1) translate(-12.000000, -12.000000) " points="4 12.9004334 8.30922693 8.80086679 8.30922693 12.1981928 18.5236908 12.1981928 18.5236908 7 20 7 20 13.602674 8.30922693 13.602674 8.30922693 17"></polygon>
+    </g>
+</svg>

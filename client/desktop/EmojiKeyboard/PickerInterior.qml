@@ -1,5 +1,5 @@
-import QtQuick 2.13
-import QtQuick.Controls 2.12
+import QtQuick 2.14
+import QtQuick.Controls 2.14
 import QtQuick.Layouts 1.12
 import QtQuick.Shapes 1.13
 import LibHerald 1.0
@@ -47,6 +47,12 @@ Item {
             sectionName: "Flags"
             imageSource: "qrc:/emoji-categories/flags.svg"
         }
+    }
+
+    MouseArea {
+        anchors.fill: parent
+        z: parent.z - 2
+        hoverEnabled: true
     }
 
     Item {
@@ -177,6 +183,8 @@ Item {
             left: parent.left
             margins: CmnCfg.smallMargin
         }
+        // z is higher than mouse area capturing events behind parent to prevent chat bubble flicker
+        z: parent.z + 1
 
         Loader {
             id: listLoader
@@ -213,6 +221,8 @@ Item {
     Item {
         id: footer
 
+        // z is higher than mouse area capturing events behind parent to prevent chat bubble flicker
+        z: parent.z + 1
         anchors.bottom: parent.bottom
         width: parent.width
         height: 30

@@ -15,10 +15,10 @@ import "qrc:/imports/js/utils.mjs" as JS
 // for contacts, not just conversations
 Item {
     // the group name or displayName of the conversation
-    property string contactName
+    property string convoTitle
 
     property color labelColor: CmnCfg.palette.black
-    property color secondaryLabelColor: CmnCfg.palette.offBlack
+    property color minorTextColor: CmnCfg.palette.offBlack
     property int labelFontSize: CmnCfg.entityLabelSize
     property int subLabelFontSize: CmnCfg.entitySubLabelSize
     property alias bodyItalic: bodyText.font.italic
@@ -42,7 +42,7 @@ Item {
         if (cc && outbound)
             return qsTr('You')
         if (cc && !cc.messages.isEmpty)
-            return cc.messages.lastAuthor
+            return Herald.users.nameById(cc.messages.lastAuthor)
         return ''
     }
     // the previous latest human readable timestamp, or the empty string
@@ -88,7 +88,7 @@ Item {
             Layout.preferredHeight: labelGrid.height * 0.25
             Layout.fillWidth: true
             elide: "ElideRight"
-            text: contactName
+            text: convoTitle
             color: labelColor
         }
 
@@ -101,7 +101,7 @@ Item {
             text: lastTimestamp
             Layout.preferredHeight: labelGrid.height * 0.25
             Layout.alignment: Qt.AlignRight | Qt.AlignTop
-            color: secondaryLabelColor
+            color: minorTextColor
         }
 
         Label {

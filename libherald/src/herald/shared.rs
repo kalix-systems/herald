@@ -60,7 +60,7 @@ fn bus() -> &'static Bus {
 fn emit_new_data() -> Option<()> {
     let mut emitter = emitter()?.lock();
 
-    emitter.new_data_ready();
+    emitter.try_poll();
     Some(())
 }
 
@@ -79,10 +79,6 @@ pub(super) fn set_emitter(emit: crate::interface::HeraldEmitter) {
 
 pub(super) fn updates() -> TryIter<'static, Update> {
     bus().rx.try_iter()
-}
-
-pub(super) fn more_updates() -> bool {
-    !bus().rx.is_empty()
 }
 
 impl super::Herald {

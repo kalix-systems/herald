@@ -2,9 +2,9 @@ import QtQuick 2.13
 import QtQuick.Layouts 1.12
 import QtQuick.Controls 2.13
 import LibHerald 1.0
+import "../Entity"
 import "./ReplyBubble"
 import "../js/utils.mjs" as Utils
-import "../Entity"
 
 Rectangle {
     id: bubbleRoot
@@ -22,7 +22,7 @@ Rectangle {
 
     readonly property string body: messageModelData.body
     readonly property string authorId: messageModelData.author
-    readonly property string authorName: messageModelData.authorName
+    readonly property string authorName: outbound ? Herald.config.name : messageModelData.authorName
 
     readonly property string medAttachments: messageModelData.mediaAttachments
     readonly property string fullMedAttachments: messageModelData.fullMediaAttachments
@@ -48,27 +48,13 @@ Rectangle {
                                                           messageModelData.receiptStatus) : ""
     readonly property color authorColor: CmnCfg.avatarColors[messageModelData.authorColor]
 
-    readonly property string pfpUrl: messageModelData.authorProfilePicture
+    readonly property string pfpUrl: outbound ? Herald.config.profilePicture : messageModelData.authorProfilePicture
     property bool hoverHighlight: false
     property alias expireInfo: expireInfo
     property int bubbleIndex
     property bool moreInfo: false
     property bool aux: false
 
-    Connections {
-        target: appRoot.globalTimer
-        onRefreshTime: {
-            friendlyTimestamp = Utils.friendlyTimestamp(
-                        messageModelData.insertionTime)
-            timerIcon = (expirationTime !== undefined) ? (Utils.timerIcon(
-                                                              expirationTime,
-                                                              insertionTime)) : ""
-            expireInfo.expireTime = (expirationTime
-                                     !== undefined) ? (Utils.expireTimeShort(
-                                                           expirationTime,
-                                                           insertionTime)) : ""
-        }
-    }
     height: contentRoot.height
     width: defaultWidth
 
@@ -164,6 +150,7 @@ Rectangle {
 
         //reply bubble loader
         Loader {
+
             sourceComponent: {
                 if (!reply)
                     return undefined

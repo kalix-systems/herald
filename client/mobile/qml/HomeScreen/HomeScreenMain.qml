@@ -12,7 +12,7 @@ import QtGraphicalEffects 1.0
 // contains a list of conversations by default
 Page {
     id: cvMainView
-
+    readonly property Component headerComponent: HomeHeader {}
     background: Rectangle {
         color: CmnCfg.palette.white
     }
@@ -30,7 +30,7 @@ Page {
             anchors.fill: parent
             model: Herald.conversations
             delegate: ConversationItem {
-                convoTitle: title
+                itemTitle: title
                 colorCode: model.color
                 imageSource: Utils.safeStringOrDefault(model.picture, "")
                 isGroup: !model.pairwise
@@ -87,13 +87,6 @@ Page {
         State {
             name: "default"
         },
-        State {
-            name: "search"
-            PropertyChanges {
-                target: listViewLoader
-            }
-        },
-
         State {
             name: "fabButtonState"
             PropertyChanges {

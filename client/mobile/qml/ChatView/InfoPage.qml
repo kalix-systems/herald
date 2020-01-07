@@ -4,7 +4,7 @@ import QtQuick.Layouts 1.14
 import LibHerald 1.0
 import "qrc:/imports"
 import "../Common" as Common
-import "qrc:/imports/Entity" as Av
+import "qrc:/imports/Entity" as Ent
 import "qrc:/imports/js/utils.mjs" as Utils
 import "qrc:/imports/ChatBubble"
 import "qrc:/imports" as Imports
@@ -12,6 +12,8 @@ import "qrc:/imports" as Imports
 Page {
     id: moreInfoPopup
     property ChatBubble referredChatBubble
+    readonly property Component headerComponent: MessageInfoHeader {}
+
     // members of the conversation content
     property var members: []
     readonly property string stateName: "info"
@@ -56,7 +58,7 @@ Page {
                 }
                 Row {
                     spacing: CmnCfg.smallMargin
-                    Av.Avatar {
+                    Ent.Avatar {
                         color: CmnCfg.avatarColors[referredChatBubble.messageModelData.authorColor]
                         initials: referredChatBubble.authorName[0].toUpperCase()
                         pfpPath: Utils.safeStringOrDefault(
@@ -111,7 +113,7 @@ Page {
                     model: members
                     Row {
                         spacing: CmnCfg.smallMargin
-                        Av.Avatar {
+                        Ent.Avatar {
                             color: CmnCfg.avatarColors[authorColor]
                             initials: authorName[0].toUpperCase()
                             pfpPath: Utils.safeStringOrDefault(

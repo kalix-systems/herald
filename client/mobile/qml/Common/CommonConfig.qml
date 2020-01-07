@@ -56,7 +56,7 @@ Item {
     // default font for basic UI text
     readonly property font defaultFont: Qt.font({
         family: chatFont.name,
-        pixelSize: units.dp(17)
+        pixelSize: units.dp(16)
     })
 
     readonly property font headerFont: Qt.font({
@@ -66,6 +66,11 @@ Item {
         'letterSpacing': 1
     })
 
+    readonly property font sectionHeaderFont: Qt.font({
+        "family": labelFont.name,
+        "weight": Font.DemiBold,
+        "pixelSize": labelFontSize
+    })
 
     // STANDARD COMPONENT SIZES
 
@@ -75,7 +80,9 @@ Item {
     /// logged-in user avatar size
     readonly property real identityAvatarDiameter: units.dp(30)
     /// standard avatar size
-    readonly property real avatarSize: units.dp(56)
+    readonly property real avatarSize: units.dp(48)
+    /// standard conversation/contact height
+    readonly property int convoHeight: avatarSize * 1.5
 
     /// width of chat bubble left accent bar
     readonly property int accentBarWidth: 4

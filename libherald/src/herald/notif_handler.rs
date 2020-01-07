@@ -18,6 +18,7 @@ impl NotifHandler {
 
         match notif {
             NewMsg(msg) => {
+                crate::toasts::new_msg_toast(msg.as_ref());
                 let cid = msg.conversation;
                 err!(content_push(cid, MsgUpdate::NewMsg(msg)));
             }
@@ -51,6 +52,9 @@ impl NotifHandler {
                     remove
                 }
             )),
+            TypingIndicator(cid, uid) => {
+                err!(content_push(cid, MsgUpdate::TypingIndicator(uid)));
+            }
             NewUser(update) => {
                 let (user, meta) = *update;
                 // add user
