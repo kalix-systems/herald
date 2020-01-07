@@ -140,64 +140,63 @@ Page {
         atcButton.onClicked: chatTextArea.attachmentsDialogue.open()
     }
 
-    //item that wraps type bubble; will eventually wrap a listview in the loader to show multiple typing indicators
-    Item {
-        id: typingIndicator
-        anchors.bottom: chatTextArea.top
-        height: typingLoader.height
-        width: parent.width
+    //    //item that wraps type bubble; will eventually wrap a listview in the loader to show multiple typing indicators
+    //    Item {
+    //        id: typingIndicator
+    //        anchors.bottom: chatTextArea.top
+    //        height: typingLoader.height
+    //        width: parent.width
 
-        property int __secondsSinceLastReset: 0
-        property bool __aUserIsTyping: __secondsSinceLastReset < 5
-        onHeightChanged: {
+    //        property int __secondsSinceLastReset: 0
+    //        property bool __aUserIsTyping: __secondsSinceLastReset < 5
+    //        onHeightChanged: {
 
-            if (height === 0) {
-                convWindow.anchors.bottom = chatTextArea.top
-                convWindow.height = convWindow.contentHeight
-            } else {
-                convWindow.anchors.bottom = typingIndicator.top
-                convWindow.height = convWindow.contentHeight
-            }
-        }
+    //            if (height === 0) {
+    //                convWindow.anchors.bottom = chatTextArea.top
+    //                convWindow.height = convWindow.contentHeight
+    //            } else {
+    //                convWindow.anchors.bottom = typingIndicator.top
+    //                convWindow.height = convWindow.contentHeight
+    //            }
+    //        }
 
-        Loader {
-            id: typingLoader
-            property var typingUser
-            active: false
-            asynchronous: true
+    //        Loader {
+    //            id: typingLoader
+    //            property var typingUser
+    //            active: false
+    //            asynchronous: true
 
-            height: active ? 40 : 0
-            width: active ? parent.width : 0
-            anchors.bottom: parent.bottom
-            sourceComponent: CB.TypingBubble {
-                id: typeBubble
+    //            height: active ? 40 : 0
+    //            width: active ? parent.width : 0
+    //            anchors.bottom: parent.bottom
+    //            sourceComponent: CB.TypingBubble {
+    //                id: typeBubble
 
-                defaultWidth: convWindow.width
-            }
-        }
+    //                defaultWidth: convWindow.width
+    //            }
+    //        }
 
-        // listens for typing indicators
-        Connections {
-            target: ownedConversation
-            onNewTypingIndicator: {
-                typingIndicator.__secondsSinceLastReset = 0
-                typingLoader.typingUser = ownedConversation.typingUserId
-                typingLoader.active = true
-            }
-        }
+    //        // listens for typing indicators
+    //        Connections {
+    //            target: ownedConversation
+    //            onNewTypingIndicator: {
+    //                typingIndicator.__secondsSinceLastReset = 0
+    //                typingLoader.typingUser = ownedConversation.typingUserId
+    //                typingLoader.active = true
+    //            }
+    //        }
 
-        Connections {
-            target: appRoot.globalTimer
-            onRefreshTime: {
-                typingIndicator.__secondsSinceLastReset += 1
-                if (!typingIndicator.__aUserIsTyping) {
-                    typingLoader.active = false
-                    typingLoader.typingUser = undefined
-                }
-            }
-        }
-    }
-
+    //        Connections {
+    //            target: appRoot.globalTimer
+    //            onRefreshTime: {
+    //                typingIndicator.__secondsSinceLastReset += 1
+    //                if (!typingIndicator.__aUserIsTyping) {
+    //                    typingLoader.active = false
+    //                    typingLoader.typingUser = undefined
+    //                }
+    //            }
+    //        }
+    //    }
     MessageDialog {
         id: clearHistoryPrompt
         text: qsTr("Clear conversation history")
