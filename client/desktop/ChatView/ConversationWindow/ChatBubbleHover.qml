@@ -47,6 +47,7 @@ MouseArea {
 
             Imports.IconButton {
                 id: replyButton
+                tooltipText: "Reply to this message"
                 anchors.margins: CmnCfg.defaultMargin
                 fill: CmnCfg.palette.offBlack
                 source: "qrc:/reply-icon.svg"
@@ -66,6 +67,7 @@ MouseArea {
             }
             Imports.IconButton {
                 id: reactButton
+                tooltipText: "Add a react"
                 anchors.margins: visible ? CmnCfg.defaultMargin : 0
                 z: CmnCfg.overlayZ
                 icon.width: visible ? 14 : 0
@@ -85,6 +87,7 @@ MouseArea {
             }
             Imports.IconButton {
                 id: downloadButton
+                tooltipText: "Download all attachments"
                 visible: download
                 anchors.margins: visible ? CmnCfg.defaultMargin : 0
                 z: CmnCfg.overlayZ

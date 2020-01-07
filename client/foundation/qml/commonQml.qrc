@@ -82,5 +82,6 @@
         <file>ChatBubble/ImageLayouts/OneImageLayout.qml</file>
         <file>ChatBubble/ImageLayouts/ThreeImageLayout.qml</file>
         <file>ChatBubble/ImageLayouts/TwoImageLayout.qml</file>
+        <file>ChatBubble/TypingBubble.qml</file>
     </qresource>
 </RCC>

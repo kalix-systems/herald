@@ -161,9 +161,11 @@ Rectangle {
 
                 // sends typing indicators
                 onTextChanged: {
-                    Qt.callLater(function () {
-                        ownedConversation.sendTypingIndicator()
-                    })
+                    if (text !== "") {
+                        Qt.callLater(function () {
+                            ownedConversation.sendTypingIndicator()
+                        })
+                    }
                 }
             }
         }
