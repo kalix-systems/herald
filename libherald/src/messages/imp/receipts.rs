@@ -46,6 +46,10 @@ impl Messages {
         let cid = none!(self.conversation_id);
 
         let updated = none!(messages_helper::container::update(&msg_id, |data| {
+            if local_id == data.author {
+                return false;
+            }
+
             let status = data.receipts.entry(local_id).or_default();
 
             match *status {
