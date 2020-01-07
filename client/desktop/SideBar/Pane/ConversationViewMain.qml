@@ -56,8 +56,6 @@ ListView {
             conversationId: conversationIdProxy
         }
 
-        property string lastMsgDigest: conversationData.lastMsgDigest
-
         property Component childChatView: Component {
             CV.ChatViewMain {
                 id: cvMain
@@ -96,10 +94,8 @@ ListView {
 
             labelComponent: Ent.ConversationLabel {
                 id: conversationLabel
-                lastMsgDigest: {
-                    conversationItem.conversationData.lastMsgDigest
-                }
-                isEmpty: conversationData.isEmpty
+                lastMsgDigest: conversationItem.conversationData.lastMsgDigest
+                isEmpty: conversationItem.conversationData.isEmpty
                 convoTitle: !convoRectangle.nts ? title : qsTr("Note to Self")
                 labelColor: convoRectangle.state
                             !== "" ? CmnCfg.palette.black : CmnCfg.palette.lightGrey
