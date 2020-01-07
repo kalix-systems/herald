@@ -17,7 +17,7 @@ Window {
         anchors.fill: parent
         header: ToolBar {
             id: toolBar
-            height: CmnCfg.toolbarHeight + 1
+            height: CmnCfg.toolbarHeight
             background: Rectangle {
                 color: CmnCfg.palette.offBlack
             }
@@ -57,11 +57,51 @@ Window {
             }
         }
 
+        RowLayout {
+            id: rowLabel
+            height: CmnCfg.toolbarHeight
+            width: parent.width
+            Item {
+                Layout.alignment: Qt.AlignLeft
+                Layout.preferredWidth: 32
+                height: 1
+            }
+            Text {
+                font.bold: true
+                Layout.alignment: Qt.AlignLeft
+                Layout.preferredWidth: CmnCfg.avatarSize
+                text: "Name"
+            }
+            Text {
+                font.bold: true
+                Layout.alignment: Qt.AlignLeft
+                Layout.minimumWidth: CmnCfg.largeMargin
+                text: "Trusted"
+            }
+            Text {
+                font.bold: true
+                Layout.alignment: Qt.AlignHCenter
+                Layout.preferredWidth: 85
+                text: "Location"
+            }
+            Text {
+                font.bold: true
+                Layout.alignment: Qt.AlignRight
+                Layout.preferredWidth: 85
+                text: "Tags"
+            }
+        }
+
         ListView {
             id: tableView
             boundsBehavior: Flickable.StopAtBounds
             boundsMovement: Flickable.StopAtBounds
-            anchors.fill: parent
+            anchors {
+                top: rowLabel.bottom
+                bottom: parent.bottom
+                right: parent.right
+                left: parent.left
+            }
             model: Herald.users
             delegate: Rectangle {
                 color: CmnCfg.palette.white
@@ -82,7 +122,7 @@ Window {
                     width: settingsPopup.width
 
                     Avatar {
-                        Layout.maximumWidth: size
+                        Layout.alignment: Qt.AlignLeft
                         Layout.margins: CmnCfg.defaultMargin
                         height: CmnCfg.avatarSize - CmnCfg.defaultMargin
                         pfpPath: profilePicture
@@ -92,8 +132,10 @@ Window {
 
                     Column {
                         Layout.alignment: Qt.AlignLeft
-                        Layout.maximumWidth: 85
+                        Layout.preferredWidth: 85
+                        spacing: CmnCfg.smallMargin
                         Label {
+                            font.bold: true
                             text: userId
                         }
                         Label {
@@ -102,16 +144,18 @@ Window {
                     }
 
                     IconButton {
+                        Layout.alignment: Qt.AlignLeft
                         Layout.minimumWidth: CmnCfg.largeMargin
                     }
 
                     Flow {
+                        Layout.alignment: Qt.AlignLeft
                         Layout.preferredWidth: 85
                         Layout.preferredHeight: 45
                         spacing: CmnCfg.microMargin
                         topPadding: 3
                         Repeater {
-                            model: [0, 1, 2, 3, 4, 5, 6, 7, 8].slice(0, 6)
+                            model: 0
                             Rectangle {
                                 id: imagePorxy
                                 color: "green"
@@ -122,6 +166,7 @@ Window {
                     }
 
                     Label {
+                        Layout.alignment: Qt.AlignLeft
                         Layout.preferredWidth: 140
                         text: "Location Location Location Location Location Location"
                         wrapMode: Label.WrapAtWordBoundaryOrAnywhere
@@ -130,13 +175,9 @@ Window {
                     Flow {
                         Layout.preferredWidth: 85
                         Repeater {
-                            model: 3
+                            model: 0
                             Label {
-                                background: Rectangle {
-                                    width: index * 33
-                                    height: 10
-                                    color: "blue"
-                                }
+                                background: Rectangle {}
                             }
                         }
                     }
