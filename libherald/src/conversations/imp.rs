@@ -67,8 +67,10 @@ impl Conversations {
         &self,
         index: usize,
     ) -> Option<bool> {
+        dbg!();
         let cid = &self.list.get(index).as_ref()?.id;
-        shared::last_msg_id(&cid).is_some().into()
+        dbg!();
+        dbg!(shared::last_msg_id(&cid).is_some().into())
     }
 
     pub(crate) fn last_msg_digest_(

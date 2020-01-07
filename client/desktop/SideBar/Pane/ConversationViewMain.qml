@@ -92,7 +92,8 @@ ListView {
             isGroupPicture: !conversationData.pairwise
 
             labelComponent: Ent.ConversationLabel {
-                cc: convContent
+                cc: JSON.parse(conversationData.lastMsgDigest)
+                isEmpty: conversationData.isEmpty
                 convoTitle: !convoRectangle.nts ? title : qsTr("Note to Self")
                 labelColor: convoRectangle.state
                             !== "" ? CmnCfg.palette.black : CmnCfg.palette.lightGrey

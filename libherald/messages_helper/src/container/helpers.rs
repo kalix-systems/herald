@@ -37,6 +37,7 @@ impl Container {
         push(cid);
     }
 
+    #[allow(clippy::too_many_arguments)]
     pub fn remove_helper<E: MessageEmit, M: MessageModel, B: MessageBuilderHelper>(
         &mut self,
         msg_id: MsgId,

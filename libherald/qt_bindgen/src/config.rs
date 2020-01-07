@@ -148,13 +148,6 @@ fn conversations() -> Object {
        status: ItemProp::new(QUint8).write(),
 
        lastMsgDigest: ItemProp::new(QString).get_by_value(),
-       //lastAuthor: ItemProp::new(QString).optional().get_by_value(),
-       //lastBody: ItemProp::new(QString).optional().get_by_value(),
-       //// Insertion time of last available message
-       //lastTime: ItemProp::new(Qint64).optional(),
-       //lastStatus: ItemProp::new(QUint32).optional(),
-       //lastAuxCode: ItemProp::new(QUint8).optional(),
-       //lastHasAttachments: ItemProp::new(Bool).optional(),
        isEmpty: ItemProp::new(Bool)
     };
 
