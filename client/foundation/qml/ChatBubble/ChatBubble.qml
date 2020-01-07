@@ -69,15 +69,15 @@ Rectangle {
         z: accent.z + 1
     }
 
-    Rectangle {
-        anchors.bottom: parent.bottom
-        width: parent.width
+//    Rectangle {
+//        anchors.bottom: parent.bottom
+//        width: parent.width
 
-        height: 1
-        color: CmnCfg.palette.medGrey
-        visible: isTail
-        z: accent.z + 1
-    }
+//        height: 1
+//        color: CmnCfg.palette.medGrey
+//        visible: isTail
+//        z: accent.z + 1
+//    }
 
     Highlight {
         id: bubbleHighlight
