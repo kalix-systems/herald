@@ -148,7 +148,7 @@ Page {
         width: parent.width
 
         property int __secondsSinceLastReset: 0
-        property bool __aUserIsTyping: __secondsSinceLastReset < 6
+        property bool __aUserIsTyping: __secondsSinceLastReset < 5
         onHeightChanged: {
 
             if (height === 0) {
@@ -182,7 +182,6 @@ Page {
                 typingIndicator.__secondsSinceLastReset = 0
                 typingLoader.typingUser = ownedConversation.typingUserId
                 typingLoader.active = true
-                print(ownedConversation.typingUserId + " is typing")
             }
         }
 
@@ -195,6 +194,17 @@ Page {
                     typingLoader.typingUser = undefined
                 }
             }
+        }
+    }
+
+    MessageDialog {
+        id: clearHistoryPrompt
+        text: qsTr("Clear conversation history")
+        informativeText: qsTr("Do you want to clear this conversation's history from this device?")
+        standardButtons: MessageDialog.Ok | MessageDialog.Cancel
+
+        onAccepted: {
+            ownedConversation.clearConversationHistory()
         }
     }
 

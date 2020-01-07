@@ -129,8 +129,7 @@ ToolBar {
 
                     MenuItem {
                         text: qsTr("Clear History")
-                        onTriggered: ownedConversation.clearConversationHistory(
-                                         )
+                        onTriggered: clearHistoryPrompt.open()
                     }
                     MenuItem {
                         text: conversationItem.pairwise ? "Conversation settings" : "Group settings"
