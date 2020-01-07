@@ -95,9 +95,9 @@ ListView {
             labelComponent: Ent.ConversationLabel {
                 id: conversationLabel
                 cc: {
-                    conversationData.lastMsgDigest
+                    conversationItem.conversationData.lastMsgDigest
                             !== "" ? JSON.parse(
-                                         conversationData.lastMsgDigest) : undefined
+                                         conversationItem.conversationData.lastMsgDigest) : undefined
                 }
                 isEmpty: conversationData.isEmpty
                 convoTitle: !convoRectangle.nts ? title : qsTr("Note to Self")
@@ -105,22 +105,6 @@ ListView {
                             !== "" ? CmnCfg.palette.black : CmnCfg.palette.lightGrey
                 minorTextColor: convoRectangle.state
                                 !== "" ? CmnCfg.palette.offBlack : CmnCfg.palette.medGrey
-
-                Connections {
-                    target: conversationItem
-                    onConversationDataChanged: {
-                        if (conversationLabel === undefined) {
-                            return
-                        }
-
-                        const digest = conversationData.lastMsgDigest
-                        if (digest === "") {
-                            conversationLabel.cc = undefined
-                        }
-
-                        conversationLabel.cc = JSON.parse(digest)
-                    }
-                }
             }
 
             MouseArea {

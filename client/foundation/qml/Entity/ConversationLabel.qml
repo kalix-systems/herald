@@ -37,12 +37,12 @@ Item {
     // the value of the latest read receipt according to the ReceiptStatus enum
     property int lastReceipt: 0
     // true if the last message was sent by the logged-in user
-    property bool outbound: cc && cc.author === Herald.config.configId
+    property bool outbound: cc.author === Herald.config.configId
     // user who sent the last message in the conversation
     property string lastAuthor: {
-        if (cc && outbound)
+        if (outbound)
             return qsTr('You')
-        if (cc && !isEmpty)
+        if (!isEmpty)
             return Herald.users.nameById(cc.author)
         return ''
     }
@@ -51,19 +51,20 @@ Item {
                                                         cc.time) : ""
     // the previous message of the conversation, or the empty string
     property string lastBody: {
-        if (cc && isEmpty)
+        if (isEmpty)
             return ""
 
-        if (cc && (cc.auxCode !== undefined)) {
+        if (cc.auxCode !== null) {
             return "<i>" + lastAuthor + JS.auxStringShort(cc.auxCode) + "</i>"
         }
 
-        if (cc && (cc.body === "") && cc.hasAttachments) {
+        if (cc.body === "" && cc.hasAttachments) {
             return lastAuthor + ": " + "<i>Media message</i>"
         }
 
-        if (cc)
+        if (cc.body !== null) {
             return lastAuthor + ": " + cc.body
+        }
 
         return ''
     }
