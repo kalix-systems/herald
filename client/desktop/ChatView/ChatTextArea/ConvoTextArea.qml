@@ -47,6 +47,25 @@ Rectangle {
         bottomPadding: CmnCfg.smallMargin * 0.5
         source: "qrc:/attach-icon.svg"
     }
+    Imports.IconButton {
+
+        id: timerButton
+        source: timerMenu.chosenTimer
+        fill: "transparent"
+        anchors.right: attachmentsButton.right
+        anchors.rightMargin: CmnCfg.defaultMargin * 2
+        anchors.bottom: parent.bottom
+        bottomPadding: CmnCfg.smallMargin * 0.5
+        topPadding: 1
+        onClicked: timerMenu.open()
+    }
+
+    Imports.TimerOptions {
+        id: timerMenu
+        conversationItem: chatPage.conversationItem
+        builder: ownedConversation.builder
+        messageModify: true
+    }
 
     Imports.IconButton {
         id: emojiButton
@@ -63,9 +82,9 @@ Rectangle {
 
         anchors {
             left: emojiButton.right
-            right: attachmentsButton.left
+            right: timerButton.left
             leftMargin: CmnCfg.smallMargin * 0.5
-            rightMargin: CmnCfg.smallMargin * 0.5
+            //  rightMargin: CmnCfg.smallMargin * 0.5
             bottomMargin: CmnCfg.smallMargin * 0.5
         }
 

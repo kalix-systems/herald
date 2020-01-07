@@ -105,6 +105,7 @@ MouseArea {
             }
             Imports.IconButton {
                 id: messageOptionsButton
+                tooltipText: "More options"
                 anchors.margins: CmnCfg.defaultMargin
                 source: "qrc:/options-icon.svg"
                 z: CmnCfg.overlayZ

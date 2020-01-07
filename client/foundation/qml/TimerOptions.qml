@@ -10,8 +10,10 @@ Menu {
 
     // Item in `Conversations` model
     property var conversationItem
+    property var builder
     property int chosenPeriod: conversationItem.expirationPeriod
     property string chosenTimer: timerModel.get(chosenPeriod).path
+    property bool messageModify: false
 
     // TODO real icon
     ListModel {
@@ -74,8 +76,21 @@ Menu {
         MenuItem {
             text: name
             checkable: true
-            checked: conversationItem.expirationPeriod === index
-            onTriggered: conversationItem.expirationPeriod = index
+            checked: {
+                if (!messageModify) {
+
+                    return conversationItem.expirationPeriod === index
+                }
+                builder.expirationPeriod
+                        === undefined ? (conversationItem.expirationPeriod
+                                         === index) : builder.expirationPeriod === index
+            }
+            onTriggered: {
+                if (!messageModify) {
+                    return conversationItem.expirationPeriod = index
+                }
+                builder.expirationPeriod = index
+            }
         }
 
         onObjectAdded: optMenu.insertItem(index, object)
