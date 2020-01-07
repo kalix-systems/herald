@@ -8,7 +8,7 @@ import "../Common" as Common
 
 // Layout & tap behavior for a conversation item in conversation list view
 Rectangle {
-    id: contactItem
+    id: conversationItem
 
     property string itemTitle
     // the index corresponding to the visual color of this GroupBox
@@ -16,8 +16,12 @@ Rectangle {
     // path to the conversation's avatar image
     property string imageSource: ''
     property bool isGroup: false
-    // ConversationContent represented by this item
-    property ConversationContent convContent: null
+    // TOOD(cmck) shouldn't need to pass this in
+    property ConversationContent convoContent
+    // true if the conversation contains no messages
+    property bool isEmpty
+    // most recent message content to display in this item
+    property var lastMsgDigest
 
     height: CmnCfg.convoHeight
 
@@ -33,14 +37,15 @@ Rectangle {
     Common.PlatonicRectangle {
         id: convoRectangle
         boxTitle: itemTitle
-        boxColor: contactItem.colorCode
+        boxColor: conversationItem.colorCode
         picture: imageSource
-        isGroupPicture: contactItem.isGroup
+        isGroupPicture: conversationItem.isGroup
         isMessageResult: false
 
         labelComponent: Ent.ConversationLabel {
             convoTitle: itemTitle
-            cc: convContent ? convContent : null
+            lastMsgDigest: conversationItem.lastMsgDigest
+            isEmpty: conversationItem.isEmpty
         }
     }
 
@@ -85,7 +90,7 @@ Rectangle {
         id: ownedChatView
         ChatView.ChatViewMain {
             property string stateName: "chat"
-            ownedMessages: contactItem.convContent.messages
+            ownedMessages: convoContent.messages
             headerTitle: itemTitle
         }
     }
@@ -99,4 +104,5 @@ Rectangle {
             // callback implicity called at the end of the animation
         }
     }
+
 }

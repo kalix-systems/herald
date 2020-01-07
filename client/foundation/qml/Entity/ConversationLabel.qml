@@ -32,9 +32,9 @@ Item {
 
     // OPTION 1: lastMsgDigest
     // the bundle this label represents.
-    property var cc: conversationData.lastMsgDigest
+    property var lastMessage: lastMsgDigest
                      !== "" ? JSON.parse(
-                                  conversationData.lastMsgDigest) : undefined
+                                  lastMsgDigest) : undefined
 
     property bool isEmpty: true
 
@@ -42,33 +42,34 @@ Item {
     // the value of the latest read receipt according to the ReceiptStatus enum
     property int lastReceipt: 0
     // true if the last message was sent by the logged-in user
-    property bool outbound: cc.author === Herald.config.configId
+    property bool outbound: isEmpty ? false :
+                                      lastMessage.author === Herald.config.configId
     // user who sent the last message in the conversation
     property string lastAuthor: {
         if (outbound)
             return qsTr('You')
         if (!isEmpty)
-            return Herald.users.nameById(cc.author)
+            return Herald.users.nameById(lastMessage.author)
         return ''
     }
     // the previous latest human readable timestamp, or the empty string
-    property string lastTimestamp: !isEmpty ? JS.friendlyTimestamp(cc.time) : ""
+    property string lastTimestamp: !isEmpty ? JS.friendlyTimestamp(lastMessage.time) : ""
 
     // the previous message of the conversation, or the empty string
     property string lastBody: {
         if (isEmpty)
             return ""
 
-        if (cc.auxCode !== null) {
-            return "<i>" + lastAuthor + JS.auxStringShort(cc.auxCode) + "</i>"
+        if (lastMessage.auxCode !== null) {
+            return "<i>" + lastAuthor + JS.auxStringShort(lastMessage.auxCode) + "</i>"
         }
 
-        if (cc.body === null && cc.hasAttachments) {
+        if (lastMessage.body === null && lastMessage.hasAttachments) {
             return lastAuthor + ": " + "<i>Media message</i>"
         }
 
-        if (cc.body !== null) {
-            return lastAuthor + ": " + cc.body
+        if (lastMessage.body !== null) {
+            return lastAuthor + ": " + lastMessage.body
         }
 
         return ''
