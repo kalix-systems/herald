@@ -70,7 +70,7 @@ impl Container {
         model.entry_changed(ix);
 
         if ix == 0 {
-            emit.last_changed(conversation_id);
+            emit.last_changed(conversation_id, self.last().map(|m| m.msg_id));
         }
 
         Some(())

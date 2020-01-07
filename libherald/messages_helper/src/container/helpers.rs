@@ -24,8 +24,8 @@ impl Container {
 
         search.try_insert_match(msg_id, ix, self, emit, model);
 
-        if ix == 0 || self.len() == 1 {
-            emit.last_changed(cid);
+        if ix == 0 {
+            emit.last_changed(cid, Some(msg_id));
         } else {
             model.entry_changed(ix - 1);
         }
@@ -73,7 +73,7 @@ impl Container {
         }
 
         if old_len == 1 || ix == 0 {
-            emit.last_changed(cid);
+            emit.last_changed(cid, self.last().map(|m| m.msg_id));
         }
     }
 }

@@ -1,4 +1,4 @@
-use heraldcore::types::ConversationId;
+use heraldcore::types::{ConversationId, MsgId};
 use messages_helper::types::{MessageEmit, MessageModel};
 
 macro_rules! imp {
@@ -20,8 +20,12 @@ impl MessageEmit for crate::interface::MessagesEmitter {
     fn last_changed(
         &mut self,
         cid: ConversationId,
+        mid: Option<MsgId>,
     ) {
-        use crate::conversations::shared::{ConvItemUpdate, ConvItemUpdateVariant};
+        use crate::conversations::shared::{
+            update_last_msg_id, ConvItemUpdate, ConvItemUpdateVariant,
+        };
+        update_last_msg_id(&cid, mid);
         crate::push(ConvItemUpdate {
             cid,
             variant: ConvItemUpdateVariant::LastChanged,

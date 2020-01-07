@@ -88,6 +88,7 @@ impl MessageEmit for TestEmit {
     fn last_changed(
         &mut self,
         _: ConversationId,
+        _: Option<MsgId>,
     ) {
         self.last_changed_state += 1;
     }

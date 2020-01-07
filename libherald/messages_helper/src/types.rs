@@ -42,6 +42,7 @@ pub trait MessageEmit {
     fn last_changed(
         &mut self,
         conversation_id: ConversationId,
+        mid: Option<MsgId>,
     );
 }
 

@@ -23,13 +23,18 @@ Item {
     property int subLabelFontSize: CmnCfg.entitySubLabelSize
     property alias bodyItalic: bodyText.font.italic
 
+    // json summary
+    property string lastMsgDigest
+
     // This component expects one of the following groups of properties,
-    // either a ConversationContent property, or the subsequent group of
+    // either a lastMsgDigest property (a JSON object), or the subsequent group of
     // properties calculated from it.
 
-    // OPTION 1: ConversationContent
-    // the ConversationContent bundle this label represents.
-    property var cc
+    // OPTION 1: lastMsgDigest
+    // the bundle this label represents.
+    property var cc: conversationData.lastMsgDigest
+                     !== "" ? JSON.parse(
+                                  conversationData.lastMsgDigest) : undefined
 
     property bool isEmpty: true
 
@@ -47,8 +52,8 @@ Item {
         return ''
     }
     // the previous latest human readable timestamp, or the empty string
-    property string lastTimestamp: cc && !isEmpty ? JS.friendlyTimestamp(
-                                                        cc.time) : ""
+    property string lastTimestamp: !isEmpty ? JS.friendlyTimestamp(cc.time) : ""
+
     // the previous message of the conversation, or the empty string
     property string lastBody: {
         if (isEmpty)

@@ -56,6 +56,8 @@ ListView {
             conversationId: conversationIdProxy
         }
 
+        property string lastMsgDigest: conversationData.lastMsgDigest
+
         property Component childChatView: Component {
             CV.ChatViewMain {
                 id: cvMain
@@ -94,10 +96,8 @@ ListView {
 
             labelComponent: Ent.ConversationLabel {
                 id: conversationLabel
-                cc: {
+                lastMsgDigest: {
                     conversationItem.conversationData.lastMsgDigest
-                            !== "" ? JSON.parse(
-                                         conversationItem.conversationData.lastMsgDigest) : undefined
                 }
                 isEmpty: conversationData.isEmpty
                 convoTitle: !convoRectangle.nts ? title : qsTr("Note to Self")
