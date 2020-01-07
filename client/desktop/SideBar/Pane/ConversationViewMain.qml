@@ -108,7 +108,6 @@ ListView {
             labelComponent: Ent.ConversationLabel {
                 id: conversationLabel
                 cc: {
-                    print(conversationData.lastMsgDigest)
                     conversationData.lastMsgDigest
                             !== "" ? JSON.parse(
                                          conversationData.lastMsgDigest) : undefined
