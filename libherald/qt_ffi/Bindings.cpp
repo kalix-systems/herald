@@ -1471,8 +1471,6 @@ DocumentAttachments::Private *
 message_builder_document_attachments_get(const MessageBuilder::Private *);
 option_quint8
 message_builder_expiration_period_get(const MessageBuilder::Private *);
-void message_builder_expiration_period_set(MessageBuilder::Private *, quint8);
-void message_builder_expiration_period_set_none(MessageBuilder::Private *);
 bool message_builder_has_doc_attachment_get(const MessageBuilder::Private *);
 bool message_builder_has_media_attachment_get(const MessageBuilder::Private *);
 bool message_builder_is_reply_get(const MessageBuilder::Private *);
@@ -1502,6 +1500,7 @@ void message_builder_clear_reply(MessageBuilder::Private *);
 void message_builder_finalize(MessageBuilder::Private *);
 bool message_builder_remove_doc(MessageBuilder::Private *, quint64);
 bool message_builder_remove_media(MessageBuilder::Private *, quint64);
+void message_builder_set_expiration_period(MessageBuilder::Private *, quint8);
 }
 extern "C" {
 void message_search_data_after_first_match(const MessageSearch::Private *, int,
@@ -3900,13 +3899,6 @@ QVariant MessageBuilder::expirationPeriod() const {
   }
   return r;
 }
-void MessageBuilder::setExpirationPeriod(const QVariant &v) {
-  if (v.isNull() || !v.canConvert<quint8>()) {
-    message_builder_expiration_period_set_none(m_d);
-  } else {
-    message_builder_expiration_period_set(m_d, v.value<quint8>());
-  }
-}
 
 bool MessageBuilder::hasDocAttachment() const {
   return message_builder_has_doc_attachment_get(m_d);
@@ -3997,6 +3989,9 @@ bool MessageBuilder::removeDoc(quint64 row_index) {
 }
 bool MessageBuilder::removeMedia(quint64 row_index) {
   return message_builder_remove_media(m_d, row_index);
+}
+void MessageBuilder::setExpirationPeriod(quint8 period) {
+  return message_builder_set_expiration_period(m_d, period);
 }
 
 MessageSearch::MessageSearch(bool /*owned*/, QObject *parent)

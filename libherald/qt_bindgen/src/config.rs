@@ -386,7 +386,7 @@ fn message_builder() -> Object {
         // Body of the message
         body: Prop::new().simple(QString).optional().write(),
         // Set expiration period of the message.
-        expirationPeriod: Prop::new().simple(QUint8).write().optional(),
+        expirationPeriod: Prop::new().simple(QUint8).optional(),
 
 
         hasMediaAttachment: Prop::new().simple(Bool),
@@ -415,6 +415,7 @@ fn message_builder() -> Object {
         mut addAttachment(path: QString) => Bool,
         mut removeDoc(row_index: QUint64) => Bool,
         mut removeMedia(row_index: QUint64) => Bool,
+        mut setExpirationPeriod(period: QUint8) => Void,
     };
 
     obj! {

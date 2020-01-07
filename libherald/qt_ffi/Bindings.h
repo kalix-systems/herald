@@ -1342,8 +1342,8 @@ private:
   Q_PROPERTY(QString body READ body WRITE setBody NOTIFY bodyChanged FINAL)
   Q_PROPERTY(DocumentAttachments *documentAttachments READ documentAttachments
                  NOTIFY documentAttachmentsChanged FINAL)
-  Q_PROPERTY(QVariant expirationPeriod READ expirationPeriod WRITE
-                 setExpirationPeriod NOTIFY expirationPeriodChanged FINAL)
+  Q_PROPERTY(QVariant expirationPeriod READ expirationPeriod NOTIFY
+                 expirationPeriodChanged FINAL)
   Q_PROPERTY(bool hasDocAttachment READ hasDocAttachment NOTIFY
                  hasDocAttachmentChanged FINAL)
   Q_PROPERTY(bool hasMediaAttachment READ hasMediaAttachment NOTIFY
@@ -1373,7 +1373,6 @@ public:
   const DocumentAttachments *documentAttachments() const;
   DocumentAttachments *documentAttachments();
   QVariant expirationPeriod() const;
-  void setExpirationPeriod(const QVariant &v);
   bool hasDocAttachment() const;
   bool hasMediaAttachment() const;
   bool isReply() const;
@@ -1393,6 +1392,7 @@ public:
   Q_INVOKABLE void finalize();
   Q_INVOKABLE bool removeDoc(quint64 row_index);
   Q_INVOKABLE bool removeMedia(quint64 row_index);
+  Q_INVOKABLE void setExpirationPeriod(quint8 period);
   int columnCount(const QModelIndex &parent = QModelIndex()) const override;
   QVariant data(const QModelIndex &index,
                 int role = Qt::DisplayRole) const override;
