@@ -29,7 +29,8 @@ Item {
                 return parentBubble.hoverHighlight = true
             }
             parentBubble.hoverHighlight = false
-            if (isHead || !parentBubble.sameExpiration)
+            if (isHead)
+                // || !parentBubble.sameExpiration)
                 parentBubble.expireInfo.visible = true
         }
     }

@@ -126,7 +126,7 @@ Rectangle {
 
     BubbleExpireInfo {
         id: expireInfo
-        visible: isHead || !sameExpiration
+        visible: isHead // || !sameExpiration
     }
 
     Column {
