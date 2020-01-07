@@ -253,6 +253,58 @@ export function timerIcon(expireTime: number, insertTime: number): string {
   else return "qrc:/mini-timer-icons/empty.svg";
 }
 
+export function sameExp(insertTime: number, expireTime: number, conversationExpire: number): boolean {
+
+  if (conversationExpire === 0) {
+      return false;
+  }
+
+  const secondsPerMinute = 60;
+  const secondsPerHour = 3600;
+  const secondsPerDay = 3600 * 24;
+  const secondsPerWeek = 3600 * 24 * 7;
+  const secondsPerMonth = 3600 * 24 * 30;
+  const secondsPerYear = 3600 * 24 * 30 * 12;
+
+  var insertTime = insertTime / 1000;
+  var expireTime = expireTime / 1000;
+  var potentialExpire = 0;
+
+  switch (conversationExpire) {
+      case ExpirationPeriod.ThirtySeconds: {
+          potentialExpire = insertTime + secondsPerMinute / 2;
+      }
+      case ExpirationPeriod.OneMinute: {
+          potentialExpire = insertTime + secondsPerMinute;
+
+      }
+      case ExpirationPeriod.ThirtyMinutes: {
+         potentialExpire = insertTime + secondsPerMinute * 30;
+      }
+      case ExpirationPeriod.OneHour: {
+          potentialExpire = insertTime + secondsPerHour;
+      }
+      case ExpirationPeriod.TwelveHours: {
+          potentialExpire = insertTime + secondsPerHour * 12;
+      }
+      case ExpirationPeriod.OneDay: {
+          potentialExpire = insertTime + secondsPerDay;
+      }
+      case ExpirationPeriod.OneWeek: {
+          potentialExpire = insertTime + secondsPerWeek;
+      }
+      case ExpirationPeriod.OneMonth: {
+          potentialExpire = insertTime + secondsPerMonth;
+      }
+      case ExpirationPeriod.OneYear: {
+          potentialExpire = insertTime + secondsPerYear;
+      }
+
+  }
+  return potentialExpire === expireTime;
+
+}
+
 export function userTime(timestamp: number): string {
   var d = new Date(timestamp);
   var year = d.getFullYear();

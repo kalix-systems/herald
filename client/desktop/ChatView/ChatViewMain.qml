@@ -133,11 +133,16 @@ Page {
             }
         }
         keysProxy: Item {
-            Keys.onReturnPressed: TextJs.enterKeyHandler(
-                                      event, chatTextArea.chatText,
-                                      ownedConversation.builder,
-                                      ownedConversation, chatTextArea)
-            // TODO: Tab should cycle through a hierarchy of items as far as focus
+            Keys.onReturnPressed: {
+                TextJs.enterKeyHandler(event, chatTextArea.chatText,
+                                       ownedConversation.builder,
+                                       ownedConversation, chatTextArea)
+
+                // TODO: Tab should cycle through a hierarchy of items as far as focus
+                chatTextArea.timer.chosenPeriod
+                        = (ownedConversation.builder.expirationPeriod
+                           !== undefined) ? ownedConversation.builder.expirationPeriod : conversationItem.expirationPeriod
+            }
         }
         emojiButton.onClicked: emojiPopupWrapper.open(
                                    ) //emoKeysPopup.active = !!!emoKeysPopup.active
@@ -154,10 +159,6 @@ Page {
         property int __secondsSinceLastReset: 0
         property bool __aUserIsTyping: __secondsSinceLastReset < 5
         onHeightChanged: {
-
-            if (convWindow.height < convWindow.contentHeight) {
-                return
-            }
 
             if (height === 0) {
                 convWindow.anchors.bottom = chatTextArea.top

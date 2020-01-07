@@ -98,6 +98,7 @@ Menu {
                     return conversationItem.expirationPeriod = index
                 }
                 builder.setExpirationPeriod(index)
+                chosenPeriod = index
             }
         }
 

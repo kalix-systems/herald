@@ -210,6 +210,50 @@ export function timerIcon(expireTime, insertTime) {
     else
         return "qrc:/mini-timer-icons/empty.svg";
 }
+export function sameExp(insertTime, expireTime, conversationExpire) {
+    if (conversationExpire === 0) {
+        return false;
+    }
+    const secondsPerMinute = 60;
+    const secondsPerHour = 3600;
+    const secondsPerDay = 3600 * 24;
+    const secondsPerWeek = 3600 * 24 * 7;
+    const secondsPerMonth = 3600 * 24 * 30;
+    const secondsPerYear = 3600 * 24 * 30 * 12;
+    var insertTime = insertTime / 1000;
+    var expireTime = expireTime / 1000;
+    var potentialExpire = 0;
+    switch (conversationExpire) {
+        case 1 /* ThirtySeconds */: {
+            potentialExpire = insertTime + secondsPerMinute / 2;
+        }
+        case 2 /* OneMinute */: {
+            potentialExpire = insertTime + secondsPerMinute;
+        }
+        case 3 /* ThirtyMinutes */: {
+            potentialExpire = insertTime + secondsPerMinute * 30;
+        }
+        case 4 /* OneHour */: {
+            potentialExpire = insertTime + secondsPerHour;
+        }
+        case 5 /* TwelveHours */: {
+            potentialExpire = insertTime + secondsPerHour * 12;
+        }
+        case 6 /* OneDay */: {
+            potentialExpire = insertTime + secondsPerDay;
+        }
+        case 7 /* OneWeek */: {
+            potentialExpire = insertTime + secondsPerWeek;
+        }
+        case 8 /* OneMonth */: {
+            potentialExpire = insertTime + secondsPerMonth;
+        }
+        case 9 /* OneYear */: {
+            potentialExpire = insertTime + secondsPerYear;
+        }
+    }
+    return potentialExpire === expireTime;
+}
 export function userTime(timestamp) {
     var d = new Date(timestamp);
     var year = d.getFullYear();

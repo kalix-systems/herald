@@ -32,6 +32,7 @@ Rectangle {
     property string replyName: ""
     property bool owned: replyUid === Herald.config.configId
     property string replyUid
+    property alias timer: timerMenu
 
     property var replyId
 
