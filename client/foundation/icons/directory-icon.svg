@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 57.1 (83088) - https://sketch.com -->
+    <title>directory-icon</title>
+    <desc>Created with Sketch.</desc>
+    <g id="directory-icon" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <polygon id="Path" points="0 0 24 0 24 24 0 24"></polygon>
+        <g id="Group" transform="translate(2.500000, 3.000000)" stroke="#000000">
+            <rect id="Rectangle" stroke-width="1.25" x="2.125" y="0.625" width="15.75" height="16.75"></rect>
+            <rect id="Rectangle" x="0.5" y="4.5" width="3" height="1"></rect>
+            <rect id="Rectangle" x="0.5" y="13" width="3" height="1"></rect>
+        </g>
+        <path d="M13,12 C13.966875,12 14.75,11.216875 14.75,10.25 C14.75,9.283125 13.966875,8.5 13,8.5 C12.033125,8.5 11.25,9.283125 11.25,10.25 C11.25,11.216875 12.033125,12 13,12 Z" id="Shape" fill="#000000" fill-rule="nonzero"></path>
+        <path d="M13,16 C15.209139,16 13.5,16 17,16 C17,14.3431458 15.209139,13 13,13 C10.790861,13 9,14.3431458 9,16 C12.5,16 10.790861,16 13,16 Z" id="Oval" fill="#000000"></path>
+    </g>
+</svg>

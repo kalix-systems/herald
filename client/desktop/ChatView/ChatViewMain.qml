@@ -11,6 +11,7 @@ import "../EmojiKeyboard" as EK
 import "../common" as Common
 import "Popups" as Popups
 import QtQuick.Dialogs 1.2
+import "qrc:/imports/ChatBubble" as CB
 
 //import Qt.labs.platform 1.1
 Page {
@@ -139,11 +140,72 @@ Page {
         atcButton.onClicked: chatTextArea.attachmentsDialogue.open()
     }
 
-    // listens for typing indicators
-    Connections {
-        target: ownedConversation
-        onNewTypingIndicator: print(
-                                  ownedConversation.typingUserId + " is typing")
+    //item that wraps type bubble; will eventually wrap a listview in the loader to show multiple typing indicators
+    Item {
+        id: typingIndicator
+        anchors.bottom: chatTextArea.top
+        height: typingLoader.height
+        width: parent.width
+
+        property int __secondsSinceLastReset: 0
+        property bool __aUserIsTyping: __secondsSinceLastReset < 5
+        onHeightChanged: {
+
+            if (height === 0) {
+                convWindow.anchors.bottom = chatTextArea.top
+                convWindow.height = convWindow.contentHeight
+            } else {
+                convWindow.anchors.bottom = typingIndicator.top
+                convWindow.height = convWindow.contentHeight
+            }
+        }
+
+        Loader {
+            id: typingLoader
+            property var typingUser
+            active: false
+
+            height: active ? 52 : 0
+            width: active ? parent.width : 0
+            anchors.bottom: parent.bottom
+            sourceComponent: CB.TypingBubble {
+                id: typeBubble
+
+                defaultWidth: convWindow.width
+            }
+        }
+
+        // listens for typing indicators
+        Connections {
+            target: ownedConversation
+            onNewTypingIndicator: {
+                typingIndicator.__secondsSinceLastReset = 0
+                typingLoader.typingUser = ownedConversation.typingUserId
+                typingLoader.active = true
+            }
+        }
+
+        Connections {
+            target: appRoot.globalTimer
+            onRefreshTime: {
+                typingIndicator.__secondsSinceLastReset += 1
+                if (!typingIndicator.__aUserIsTyping) {
+                    typingLoader.active = false
+                    typingLoader.typingUser = undefined
+                }
+            }
+        }
+    }
+
+    MessageDialog {
+        id: clearHistoryPrompt
+        text: qsTr("Clear conversation history")
+        informativeText: qsTr("Do you want to clear this conversation's history from this device?")
+        standardButtons: MessageDialog.Ok | MessageDialog.Cancel
+
+        onAccepted: {
+            ownedConversation.clearConversationHistory()
+        }
     }
 
     MessageDialog {

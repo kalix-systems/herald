@@ -6,6 +6,8 @@ import "."
 ToolBar {
     id: headerRoot
     property Component headerComponent
+    property alias headerLoader: rootLoader
+
     height: CmnCfg.toolbarHeight
     background: Rectangle {
         color: CmnCfg.palette.offBlack
