@@ -42,30 +42,27 @@ Item {
         if (cc && outbound)
             return qsTr('You')
         if (cc && !isEmpty)
-            return Herald.users.nameById(cc.messages.lastAuthor)
+            return Herald.users.nameById(cc.author)
         return ''
     }
     // the previous latest human readable timestamp, or the empty string
-    property string lastTimestamp: cc
-                                   && !isEmpty ? JS.friendlyTimestamp(
-                                                     cc.messages.lastTime) : ""
+    property string lastTimestamp: cc && !isEmpty ? JS.friendlyTimestamp(
+                                                        cc.time) : ""
     // the previous message of the conversation, or the empty string
     property string lastBody: {
         if (cc && isEmpty)
             return ""
 
-        if (cc && (cc.messages.lastAuxCode !== undefined)) {
-            return "<i>" + lastAuthor + JS.auxStringShort(
-                        cc.messages.lastAuxCode) + "</i>"
+        if (cc && (cc.auxCode !== undefined)) {
+            return "<i>" + lastAuthor + JS.auxStringShort(cc.auxCode) + "</i>"
         }
 
-        if (cc && (cc.messages.lastBody === "")
-                && cc.messages.lastHasAttachments) {
+        if (cc && (cc.body === "") && cc.hasAttachments) {
             return lastAuthor + ": " + "<i>Media message</i>"
         }
 
         if (cc)
-            return lastAuthor + ": " + cc.messages.lastBody
+            return lastAuthor + ": " + cc.body
 
         return ''
     }

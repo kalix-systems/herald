@@ -74,6 +74,20 @@ ListView {
             }
             return conversationData.status === 1
         }
+
+        onConversationDataChanged: {
+            if (conversationLabel === undefined) {
+                return
+            }
+
+            const digest = conversationData.lastMsgDigest
+            if (digest === "") {
+                conversationLabel.cc = undefined
+            }
+
+            conversationLabel.cc = JSON.parse(digest)
+        }
+
         height: visible ? CmnCfg.convoHeight : 0
         width: parent.width
 
@@ -92,7 +106,13 @@ ListView {
             isGroupPicture: !conversationData.pairwise
 
             labelComponent: Ent.ConversationLabel {
-                cc: JSON.parse(conversationData.lastMsgDigest)
+                id: conversationLabel
+                cc: {
+                    print(conversationData.lastMsgDigest)
+                    conversationData.lastMsgDigest
+                            !== "" ? JSON.parse(
+                                         conversationData.lastMsgDigest) : undefined
+                }
                 isEmpty: conversationData.isEmpty
                 convoTitle: !convoRectangle.nts ? title : qsTr("Note to Self")
                 labelColor: convoRectangle.state
