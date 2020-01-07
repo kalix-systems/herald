@@ -1,4 +1,7 @@
-pub use heraldcore::{message::*, types::MsgId};
+pub use heraldcore::{
+    message::*,
+    types::{ConversationId, MsgId},
+};
 
 pub trait MessageModel {
     fn entry_changed(
@@ -36,9 +39,10 @@ pub trait MessageEmit {
     fn search_pattern_changed(&mut self);
     fn search_regex_changed(&mut self);
     fn search_index_changed(&mut self);
-    fn last_has_attachments_changed(&mut self);
-    fn is_empty_changed(&mut self);
-    fn last_changed(&mut self);
+    fn last_changed(
+        &mut self,
+        conversation_id: ConversationId,
+    );
 }
 
 pub trait MessageBuilderHelper {

@@ -55,6 +55,10 @@ impl Conversations {
                 self.list.push_front(conv);
                 self.model.end_move_rows();
             }
+            LastChanged => {
+                // update last message
+                self.model.data_changed(pos, pos);
+            }
         }
 
         Some(())

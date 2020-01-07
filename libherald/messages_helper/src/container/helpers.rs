@@ -24,14 +24,10 @@ impl Container {
 
         search.try_insert_match(msg_id, ix, self, emit, model);
 
-        if ix == 0 {
-            emit.last_changed();
+        if ix == 0 || self.len() == 1 {
+            emit.last_changed(cid);
         } else {
             model.entry_changed(ix - 1);
-        }
-
-        if self.len() == 1 {
-            emit.is_empty_changed();
         }
 
         if ix + 1 < self.len() {
@@ -49,6 +45,7 @@ impl Container {
         model: &mut M,
         search: &mut SearchState,
         builder: &mut B,
+        cid: ConversationId,
     ) {
         {
             search.try_remove_match(&msg_id, self, emit, model);
@@ -74,12 +71,8 @@ impl Container {
             model.entry_changed(ix + 1);
         }
 
-        if old_len == 1 {
-            emit.is_empty_changed();
-        }
-
-        if ix == 0 {
-            emit.last_changed();
+        if old_len == 1 || ix == 0 {
+            emit.last_changed(cid);
         }
     }
 }

@@ -40,6 +40,8 @@ pub enum ConvItemUpdateVariant {
     PictureChanged(Option<String>),
     /// Conversation title has been changed
     TitleChanged(Option<String>),
+    /// The last message in the conversation has been changed
+    LastChanged,
 }
 
 impl From<(ConversationId, CoreSettingsUpdate)> for crate::Update {
@@ -107,6 +109,10 @@ pub(crate) fn pairwise(cid: &ConversationId) -> Option<bool> {
 
 pub(crate) fn conv_data() -> &'static RwLock<HashMap<ConversationId, Data>> {
     CONV_DATA.get_or_init(|| RwLock::new(HashMap::default()))
+}
+
+pub(crate) fn last_msg_id(cid: &ConversationId) -> Option<heraldcore::types::MsgId> {
+    conv_data().read().get(cid)?.last_msg_id
 }
 
 static CONV_DATA: OnceCell<RwLock<HashMap<ConversationId, Data>>> = OnceCell::new();

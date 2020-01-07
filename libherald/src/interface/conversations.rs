@@ -250,6 +250,16 @@ pub trait ConversationsTrait {
         _: u8,
     ) -> bool;
 
+    fn is_empty(
+        &self,
+        index: usize,
+    ) -> bool;
+
+    fn last_msg_digest(
+        &self,
+        index: usize,
+    ) -> String;
+
     fn matched(
         &self,
         index: usize,
@@ -528,6 +538,28 @@ pub unsafe extern "C" fn conversations_set_data_expiration_period(
     value: u8,
 ) -> bool {
     (&mut *ptr).set_expiration_period(to_usize(row).unwrap_or(0), value)
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn conversations_data_is_empty(
+    ptr: *const Conversations,
+    row: c_int,
+) -> bool {
+    let obj = &*ptr;
+    obj.is_empty(to_usize(row).unwrap_or(0))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn conversations_data_last_msg_digest(
+    ptr: *const Conversations,
+    row: c_int,
+    d: *mut QString,
+    set: fn(*mut QString, *const c_char, len: c_int),
+) {
+    let obj = &*ptr;
+    let data = obj.last_msg_digest(to_usize(row).unwrap_or(0));
+    let str_: *const c_char = data.as_ptr() as *const c_char;
+    set(d, str_, to_c_int(data.len()));
 }
 
 #[no_mangle]

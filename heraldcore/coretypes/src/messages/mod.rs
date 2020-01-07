@@ -183,6 +183,13 @@ impl Item {
             _ => None,
         }
     }
+
+    pub fn aux_code(&self) -> Option<u8> {
+        match &self {
+            Item::Aux(update) => Some(update.code()),
+            _ => None,
+        }
+    }
 }
 
 #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]

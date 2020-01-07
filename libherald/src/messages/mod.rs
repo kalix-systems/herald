@@ -91,8 +91,11 @@ impl Messages {
             MsgUpdate::StoreDone(mid, meta) => {
                 let model = &mut self.model;
                 let emit = &mut self.emit;
+                let cid = none!(self.conversation_id);
 
-                none!(&self.container.handle_store_done(mid, meta, emit, model));
+                none!(&self
+                    .container
+                    .handle_store_done(mid, meta, emit, model, cid));
             }
 
             MsgUpdate::SendDone(mid) => {
@@ -102,8 +105,9 @@ impl Messages {
             }
 
             MsgUpdate::ExpiredMessages(mids) => {
+                let cid = none!(self.conversation_id);
                 self.container
-                    .handle_expiration(mids, emit, model, search, &mut self.builder)
+                    .handle_expiration(mids, emit, model, search, &mut self.builder, cid)
             }
 
             MsgUpdate::Container(container) => {
@@ -115,7 +119,6 @@ impl Messages {
                     .begin_insert_rows(0, container.len().saturating_sub(1));
                 self.container = *container;
                 self.model.end_insert_rows();
-                self.emit.is_empty_changed();
                 self.emit_last_changed();
             }
 

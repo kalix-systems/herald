@@ -145,7 +145,17 @@ fn conversations() -> Object {
        matched: matched_item_prop(),
        picture: picture_item_prop().get_by_value(),
        color: color_item_prop(),
-       status: ItemProp::new(QUint8).write()
+       status: ItemProp::new(QUint8).write(),
+
+       lastMsgDigest: ItemProp::new(QString).get_by_value(),
+       //lastAuthor: ItemProp::new(QString).optional().get_by_value(),
+       //lastBody: ItemProp::new(QString).optional().get_by_value(),
+       //// Insertion time of last available message
+       //lastTime: ItemProp::new(Qint64).optional(),
+       //lastStatus: ItemProp::new(QUint32).optional(),
+       //lastAuxCode: ItemProp::new(QUint8).optional(),
+       //lastHasAttachments: ItemProp::new(Bool).optional(),
+       isEmpty: ItemProp::new(Bool)
     };
 
     let funcs = functions! {
@@ -266,15 +276,6 @@ fn emoji_picker() -> Object {
 
 fn messages() -> Object {
     let props = props! {
-        lastAuthor: Prop::new().simple(QString).optional().get_by_value(),
-        lastBody: Prop::new().simple(QString).optional().get_by_value(),
-        // Insertion time of last available message
-        lastTime: Prop::new().simple(Qint64).optional(),
-        lastStatus: Prop::new().simple(QUint32).optional(),
-        lastAuxCode: Prop::new().simple(QUint8).optional(),
-        lastHasAttachments: Prop::new().simple(Bool).optional(),
-        isEmpty: Prop::new().simple(Bool),
-
         // User id of the last user to send a typing notification
         typingUserId: Prop::new().simple(QString).optional(),
 
