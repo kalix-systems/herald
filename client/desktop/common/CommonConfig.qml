@@ -10,16 +10,18 @@ Item {
 
     property alias units: importUnits
     property alias settings: settings
-
+    property alias sysPalette: sysPalette
     Imports.Units {
         id: units
     }
     // TODO do we use this radius anywhere?
     /// edge rounding for all rectangles that use the radius property
     readonly property int radius: 10
-
     // MARGINS & SPACING
-
+    SystemPalette {
+        id: sysPalette
+        colorGroup: SystemPalette.Active
+    }
     /// standard margin size used to interior objects
     readonly property int microMargin: 4
     readonly property int smallMargin: 8
@@ -46,25 +48,24 @@ Item {
 
     // default font for basic UI text
     readonly property font defaultFont: Qt.font({
-            "family": chatFont.name,
-            "pixelSize": defaultFontSize
-        })
+                                                    "family": chatFont.name,
+                                                    "pixelSize": defaultFontSize
+                                                })
 
     // default font for text in top bar headers
     readonly property font headerFont: Qt.font({
-            "family": labelFont.name,
-            "weight": Font.DemiBold,
-            "letterSpacing": 1,
-            "pixelSize": headerFontSize
-        })
+                                                   "family": labelFont.name,
+                                                   "weight": Font.DemiBold,
+                                                   "letterSpacing": 1,
+                                                   "pixelSize": headerFontSize
+                                               })
 
     // default font for text in headings outside the top bar
     readonly property font sectionHeaderFont: Qt.font({
-            "family": labelFont.name,
-            "weight": Font.DemiBold,
-            "pixelSize": headerFontSize
-        })
-
+                                                          "family": labelFont.name,
+                                                          "weight": Font.DemiBold,
+                                                          "pixelSize": headerFontSize
+                                                      })
 
     // STANDARD COMPONENT SIZES
 
@@ -105,10 +106,6 @@ Item {
 
     Imports.Units {
         id: importUnits
-    }
-
-    SystemPalette {
-        id: sysPalette
     }
 
     Settings {
