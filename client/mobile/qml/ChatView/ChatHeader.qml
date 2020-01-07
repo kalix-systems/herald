@@ -38,7 +38,6 @@ RowLayout {
     }
 
     BorderedTextField {
-        id: sta
         visible: parent.state === "search"
         Layout.margins: CmnCfg.smallMargin
         Layout.topMargin: 0

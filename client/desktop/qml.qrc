@@ -62,5 +62,6 @@
         <file>EmojiKeyboard/StandardInterior.qml</file>
         <file>ChatView/ConversationWindow/BubbleDecoration.qml</file>
         <file>ChatView/Popups/ConvoSettingsPopup.qml</file>
+        <file>SideBar/popups/ContactsPopup.qml</file>
     </qresource>
 </RCC>

@@ -20,6 +20,9 @@ Item {
         Popups.SettingsPopup {
             id: preferencesPopup
         }
+        Popups.ContactsPopup {
+            id: contactsPopup
+        }
     }
 
     FileDialog {
