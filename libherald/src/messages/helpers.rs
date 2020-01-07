@@ -9,7 +9,7 @@ impl Messages {
         };
         let cid = none!(self.conversation_id);
 
-        update_last_msg_id(&cid, self.container.last().map(|m| m.msg_id));
+        update_last_msg_id(&cid, self.container.list.front().map(|m| m.msg_id));
         crate::push(ConvItemUpdate {
             cid,
             variant: ConvItemUpdateVariant::LastChanged,

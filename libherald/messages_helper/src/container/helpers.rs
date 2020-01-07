@@ -26,8 +26,6 @@ impl Container {
 
         if ix == 0 {
             emit.last_changed(cid, Some(msg_id));
-        } else {
-            model.entry_changed(ix - 1);
         }
 
         if ix + 1 < self.len() {
@@ -54,8 +52,6 @@ impl Container {
 
         builder.try_clear_reply(&msg_id);
 
-        let old_len = self.len();
-
         model.begin_remove_rows(ix, ix);
         let data = self.remove(ix);
         model.end_remove_rows();
@@ -72,8 +68,8 @@ impl Container {
             model.entry_changed(ix + 1);
         }
 
-        if old_len == 1 || ix == 0 {
-            emit.last_changed(cid, self.last().map(|m| m.msg_id));
+        if self.list.is_empty() {
+            emit.last_changed(cid, None);
         }
     }
 }
