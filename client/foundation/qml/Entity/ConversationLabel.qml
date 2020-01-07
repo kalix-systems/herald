@@ -63,7 +63,7 @@ Item {
             return "<i>" + lastAuthor + JS.auxStringShort(cc.auxCode) + "</i>"
         }
 
-        if (cc.body === "" && cc.hasAttachments) {
+        if (cc.body === null && cc.hasAttachments) {
             return lastAuthor + ": " + "<i>Media message</i>"
         }
 
