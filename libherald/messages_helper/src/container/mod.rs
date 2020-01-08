@@ -318,6 +318,14 @@ impl Container {
         b_ix: usize,
         conversation_expiration_period: coretypes::conversation::ExpirationPeriod,
     ) -> Option<bool> {
+        macro_rules! early {
+            ($pred:expr) => {
+                if $pred {
+                    return Some(false);
+                }
+            };
+        };
+
         let flurry_info = |data: &MsgData| {
             (
                 data.author,
@@ -330,28 +338,25 @@ impl Container {
         let (a_author, a_ts, a_exp, a_is_plain) = self.access_by_index(a_ix, flurry_info)?;
         let (b_author, b_ts, b_exp, b_is_plain) = self.access_by_index(b_ix, flurry_info)?;
 
-        if !(a_is_plain && b_is_plain) || (a_author != b_author) {
-            return Some(false);
-        }
+        early!(!(a_is_plain && b_is_plain) || (a_author != b_author));
 
-        let (a_exp, b_exp) = match (a_exp, b_exp) {
-            (Some(a_exp), Some(b_exp)) => (a_exp, b_exp),
+        match (a_exp, b_exp) {
+            (Some(a_exp), Some(b_exp)) => {
+                early!(a_exp <= a_ts || b_exp <= b_ts);
+
+                let diff = |exp: Time, ts: Time| *exp.as_i64() as f64 - *ts.as_i64() as f64;
+
+                let a_diff = diff(a_exp, a_ts);
+                let b_diff = diff(b_exp, b_ts);
+
+                let ratio = (a_diff / b_diff).max(b_diff / a_diff);
+
+                // eh, close enough
+                early!(ratio > 1.5);
+            }
+            (None, None) => {}
             _ => return Some(false),
         };
-
-        if a_exp <= a_ts || b_exp <= b_ts {
-            return Some(false);
-        }
-
-        let a_diff = (*a_exp.as_i64() as f64 - *a_ts.as_i64() as f64).abs();
-        let b_diff = (*b_exp.as_i64() as f64 - *b_ts.as_i64() as f64).abs();
-
-        let ratio = (a_diff / b_diff).max(b_diff / a_diff);
-
-        // eh, close enough
-        if ratio > 1.5 {
-            return Some(false);
-        }
 
         use coretypes::conversation::ExpirationPeriod::*;
         let fuzz = match conversation_expiration_period {
