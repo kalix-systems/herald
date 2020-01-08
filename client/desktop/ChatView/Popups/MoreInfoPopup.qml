@@ -30,6 +30,11 @@ Popup {
         id: background
         color: CmnCfg.palette.white
     }
+    onMessageDataChanged: {
+        if (messageData === null) {
+            moreInfoPopup.close()
+        }
+    }
 
     Component.onCompleted: {
         receiptData = JSON.parse(moreInfoPopup.messageData.userReceipts)

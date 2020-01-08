@@ -63,6 +63,22 @@ Rectangle {
         return Utils.sameExp(messageModelData.insertionTime,
                              messageModelData.expirationTime, convoExpiration)
     }
+    Connections {
+        target: appRoot.globalTimer
+        onRefreshTime: {
+            friendlyTimestamp = Utils.friendlyTimestamp(
+                        messageModelData.insertionTime)
+            timerIcon = (messageModelData.expirationTime
+                         !== undefined) ? (Utils.timerIcon(
+                                               messageModelData.expirationTime,
+                                               messageModelData.insertionTime)) : ""
+
+            expireInfo.expireTime = (messageModelData.expirationTime
+                                     !== undefined) ? (Utils.expireTimeShort(
+                                                           messageModelData.expirationTime,
+                                                           messageModelData.insertionTime)) : ""
+        }
+    }
 
     height: contentRoot.height
     width: defaultWidth
