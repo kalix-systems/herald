@@ -112,6 +112,7 @@ impl MessageBuilderTrait for MessageBuilder {
         self.emit.has_doc_attachment_changed();
         self.emit.body_changed();
         self.emit_op_changed();
+        self.emit.expiration_period_changed();
 
         none!(builder.conversation);
 
