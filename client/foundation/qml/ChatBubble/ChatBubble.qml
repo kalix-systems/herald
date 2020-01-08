@@ -66,8 +66,10 @@ Rectangle {
     Connections {
         target: appRoot.globalTimer
         onRefreshTime: {
-            friendlyTimestamp = Utils.friendlyTimestamp(
-                        messageModelData.insertionTime)
+            friendlyTimestamp
+                    = (outbound ? Utils.friendlyTimestamp(
+                                      messageModelData.insertionTime) : Utils.friendlyTimestamp(
+                                      messageModelData.serverTime))
             timerIcon = (messageModelData.expirationTime
                          !== undefined) ? (Utils.timerIcon(
                                                messageModelData.expirationTime,
