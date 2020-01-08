@@ -1,5 +1,5 @@
 use crate::{db::Database, errors::HErr, types::*};
-use coremacros::from_fn;
+use coremacros::{from_fn, w};
 use herald_common::*;
 use rusqlite::params;
 use std::{collections::HashMap, path::PathBuf};
@@ -78,7 +78,15 @@ pub fn add_receipt(
     receipt_status: MessageReceiptStatus,
 ) -> Result<(), HErr> {
     let db = Database::get()?;
-    db::receipts::add_receipt(&db, msg_id, recip, receipt_status)
+
+    w!(db::receipts::add_receipt(
+        &db,
+        msg_id,
+        recip,
+        receipt_status
+    ));
+
+    Ok(())
 }
 
 /// Adds a reaction to a message
