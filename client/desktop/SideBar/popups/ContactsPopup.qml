@@ -10,7 +10,7 @@ import "qrc:/imports/js/utils.mjs" as Utils
 
 Window {
     id: settingsPopup
-    minimumWidth: 700
+    minimumWidth: 350
     minimumHeight: 450
 
     Drawer {
@@ -88,7 +88,6 @@ Window {
 
             Text {
                 Layout.alignment: Qt.AlignLeft
-                Layout.preferredWidth: 85
                 text: "Name"
             }
             Text {
@@ -98,19 +97,8 @@ Window {
             }
 
             Text {
-                Layout.alignment: Qt.AlignLeft
                 Layout.minimumWidth: CmnCfg.largeMargin
                 text: "Groups"
-            }
-            Text {
-                Layout.alignment: Qt.AlignLeft
-                Layout.preferredWidth: 85
-                text: "Location"
-            }
-            Text {
-                Layout.alignment: Qt.AlignRight
-                Layout.preferredWidth: 85
-                text: "Tags"
             }
         }
 
@@ -147,14 +135,14 @@ Window {
                         Layout.alignment: Qt.AlignLeft
                         Layout.leftMargin: CmnCfg.defaultMargin
                         height: CmnCfg.avatarSize - CmnCfg.defaultMargin
-                        pfpPath: profilePicture
+                        pfpPath: Utils.safeStringOrDefault(
+                                     model.profilePicture, "")
                         color: CmnCfg.avatarColors[model.color]
                         initials: Utils.initialize(name)
                     }
 
                     Column {
                         Layout.alignment: Qt.AlignLeft
-                        Layout.preferredWidth: 85
                         spacing: CmnCfg.smallMargin / 2
                         Label {
                             font.bold: true
@@ -168,38 +156,32 @@ Window {
                     IconButton {
                         Layout.alignment: Qt.AlignLeft
                         Layout.minimumWidth: CmnCfg.largeMargin
+                        source: "qrc:/contacts-icon.svg"
                     }
 
                     Flow {
-                        Layout.alignment: Qt.AlignLeft
+                        Layout.alignment: Qt.AlignCenter
                         Layout.preferredWidth: 85
                         Layout.preferredHeight: 45
                         spacing: CmnCfg.microMargin
-                        topPadding: 3
                         Repeater {
-                            model: 0
-                            Rectangle {
+                            model: [0, 0, 1, 1, 1, 1]
+                            Image {
                                 id: imagePorxy
-                                color: "green"
+                                source: "qrc:/plus-icon.svg"
                                 width: 20
                                 height: 20
-                            }
-                        }
-                    }
-
-                    Label {
-                        Layout.alignment: Qt.AlignLeft
-                        Layout.preferredWidth: 85
-                        wrapMode: Label.WrapAtWordBoundaryOrAnywhere
-                    }
-
-                    Flow {
-                        Layout.alignment: Qt.AlignLeft
-                        Layout.preferredWidth: 85
-                        Repeater {
-                            model: 0
-                            Label {
-                                background: Rectangle {}
+                                Rectangle {
+                                    visible: model.length > 6 && index == 5
+                                    color: CmnCfg.palette.lightGrey
+                                    anchors.fill: parent
+                                    opacity: 0.5
+                                    Text {
+                                        color: CmnCfg.palette.white
+                                        anchors.centerIn: parent
+                                        text: "+" + model.length - 6
+                                    }
+                                }
                             }
                         }
                     }
