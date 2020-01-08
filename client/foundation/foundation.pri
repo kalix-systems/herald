@@ -1,4 +1,4 @@
-QT += quick svg xml
+QT += quick svg xml core
 VERSION = 0.0.1
 
 INCLUDEPATH += $$PWD/../../libherald/qt_ffi \
