@@ -76,7 +76,9 @@ macro_rules! w {
     ($maybe: expr) => {{
         match $maybe {
             Ok(val) => val,
-            Err(e) => return Err(e.into()),
+            Err(e) => {
+                return Err(e.into());
+            }
         }
     }};
 }
