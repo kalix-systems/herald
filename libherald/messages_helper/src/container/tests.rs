@@ -120,6 +120,8 @@ fn test_insertion_flurry_deletion() {
     .add()
     .expect(womp!("Failed to add config"));
 
+    let conv = heraldcore::conversation::meta(&convid).expect(womp!());
+
     let (msgmeta1, msgdata1) = msg_constructor("hello");
     std::thread::sleep(std::time::Duration::from_millis(2));
     let (msgmeta2, msgdata2) = msg_constructor("hello");
@@ -133,7 +135,12 @@ fn test_insertion_flurry_deletion() {
 
     assert_eq!(container.len(), 2);
 
-    assert_eq!(container.same_flurry(0, 1).expect(womp!()), true);
+    assert_eq!(
+        container
+            .same_flurry(0, 1, conv.expiration_period)
+            .expect(womp!()),
+        true
+    );
 
     let ix1 = container.index_of(&msgmeta1);
     assert!(ix1.is_some());

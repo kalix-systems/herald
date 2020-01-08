@@ -9,6 +9,7 @@ use std::collections::HashSet;
 use types::*;
 
 const FLURRY_FUZZ: i64 = 5 * 60_000;
+const SHORT_FUZZ: i64 = 10_000;
 
 pub mod handlers;
 pub mod helpers;
@@ -315,18 +316,50 @@ impl Container {
         &self,
         a_ix: usize,
         b_ix: usize,
+        conversation_expiration_period: coretypes::conversation::ExpirationPeriod,
     ) -> Option<bool> {
-        let flurry_info =
-            |data: &MsgData| (data.author, data.time.insertion, data.content.is_plain());
+        let flurry_info = |data: &MsgData| {
+            (
+                data.author,
+                data.time.insertion,
+                data.time.expiration,
+                data.content.is_plain(),
+            )
+        };
 
-        let (a_author, a_ts, a_is_plain) = self.access_by_index(a_ix, flurry_info)?;
-        let (b_author, b_ts, b_is_plain) = self.access_by_index(b_ix, flurry_info)?;
+        let (a_author, a_ts, a_exp, a_is_plain) = self.access_by_index(a_ix, flurry_info)?;
+        let (b_author, b_ts, b_exp, b_is_plain) = self.access_by_index(b_ix, flurry_info)?;
 
-        if !a_is_plain || !b_is_plain {
+        if !(a_is_plain && b_is_plain) || (a_author != b_author) {
             return Some(false);
         }
 
-        ((a_author == b_author) && a_ts.within(FLURRY_FUZZ, b_ts)).into()
+        let (a_exp, b_exp) = match (a_exp, b_exp) {
+            (Some(a_exp), Some(b_exp)) => (a_exp, b_exp),
+            _ => return Some(false),
+        };
+
+        if a_exp <= a_ts || b_exp <= b_ts {
+            return Some(false);
+        }
+
+        let a_diff = (*a_exp.as_i64() as f64 - *a_ts.as_i64() as f64).abs();
+        let b_diff = (*b_exp.as_i64() as f64 - *b_ts.as_i64() as f64).abs();
+
+        let ratio = (a_diff / b_diff).max(b_diff / a_diff);
+
+        // eh, close enough
+        if ratio > 1.5 {
+            return Some(false);
+        }
+
+        use coretypes::conversation::ExpirationPeriod::*;
+        let fuzz = match conversation_expiration_period {
+            ThirtySeconds | OneMinute => SHORT_FUZZ,
+            _ => FLURRY_FUZZ,
+        };
+
+        a_ts.within(fuzz, b_ts).into()
     }
 }
 
