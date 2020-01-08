@@ -36,7 +36,7 @@ Item {
                                                          lastMsgDigest) : undefined
     property bool isEmpty: true
 
-    readonly property bool __init: !isEmpty && lastMsgDigest !== ""
+    readonly property bool __init: !isEmpty && lastMessage !== undefined
 
     // OPTION 2: lastReceipt, outbound, lastAuthor, lastTimestamp, and lastBody
     // the value of the latest read receipt according to the ReceiptStatus enum
