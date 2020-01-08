@@ -159,6 +159,9 @@ Page {
         property int __secondsSinceLastReset: 0
         property bool __aUserIsTyping: __secondsSinceLastReset < 5
         onHeightChanged: {
+            if (convWindow.height < convWindow.contentHeight) {
+                return
+            }
 
             if (height === 0) {
                 convWindow.anchors.bottom = chatTextArea.top
