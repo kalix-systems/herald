@@ -45,7 +45,7 @@ impl Messages {
         let local_id = none!(self.local_id);
         let cid = none!(self.conversation_id);
 
-        let updated = none!(messages_helper::container::update(&msg_id, |data| {
+        let updated = messages_helper::container::update(&msg_id, |data| {
             if local_id == data.author {
                 return false;
             }
@@ -59,7 +59,8 @@ impl Messages {
                     true
                 }
             }
-        }));
+        })
+        .unwrap_or(false);
 
         if !updated {
             return;
