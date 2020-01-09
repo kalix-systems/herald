@@ -189,6 +189,11 @@ pub trait UsersTrait {
         id: String,
     ) -> u32;
 
+    fn index_by_id(
+        &self,
+        id: String,
+    ) -> i64;
+
     fn name_by_id(
         &self,
         id: String,
@@ -367,6 +372,18 @@ pub unsafe extern "C" fn users_color_by_id(
     let mut id = String::new();
     set_string_from_utf16(&mut id, id_str, id_len);
     obj.color_by_id(id)
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn users_index_by_id(
+    ptr: *const Users,
+    id_str: *const c_ushort,
+    id_len: c_int,
+) -> i64 {
+    let obj = &*ptr;
+    let mut id = String::new();
+    set_string_from_utf16(&mut id, id_str, id_len);
+    obj.index_by_id(id)
 }
 
 #[no_mangle]

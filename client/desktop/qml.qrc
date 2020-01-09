@@ -64,7 +64,6 @@
         <file>ChatView/Popups/ConvoSettingsPopup.qml</file>
         <file>SideBar/popups/ContactsPopup.qml</file>
         <file>SideBar/popups/ContactsPopup/ContactDrawer.qml</file>
-        <file>SideBar/popups/ContactsPopup/ContactsPopupMain.qml</file>
         <file>SideBar/popups/ContactsPopup/ContactsPopupHeader.qml</file>
         <file>common/TextContextMenu.qml</file>
     </qresource>

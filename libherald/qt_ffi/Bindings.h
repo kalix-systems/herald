@@ -1832,6 +1832,7 @@ public:
   Q_INVOKABLE QByteArray add(const QString &id);
   Q_INVOKABLE void clearFilter();
   Q_INVOKABLE quint32 colorById(const QString &id) const;
+  Q_INVOKABLE qint64 indexById(const QString &id) const;
   Q_INVOKABLE QString nameById(const QString &id) const;
   Q_INVOKABLE QString profilePictureById(const QString &id) const;
   Q_INVOKABLE bool toggleFilterRegex();

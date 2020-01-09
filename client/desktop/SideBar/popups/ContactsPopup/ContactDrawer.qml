@@ -9,6 +9,8 @@ import "qrc:/imports/Entity"
 import "../../../common" as Common
 import "qrc:/imports/js/utils.mjs" as Utils
 
+import "../" as Popups
+
 Drawer {
     id: drawer
     property var userData
@@ -59,6 +61,76 @@ Drawer {
                 }
 
                 Label {
+                    id: optionsHeader
+                    text: qsTr("Options")
+                    font.family: CmnCfg.chatFont.name
+                    color: CmnCfg.palette.darkGrey
+                }
+
+                Row {
+                    height: 30
+
+                    spacing: CmnCfg.defaultMargin
+                    Rectangle {
+                        height: 20
+                        width: height
+                        radius: width
+                        color: CmnCfg.palette.avatarColors[userData.color]
+                        MouseArea {
+                            id: mouseArea
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: {
+                                colorLoader.active = true
+                                colorLoader.item.open()
+                            }
+                            ToolTip {
+                                visible: mouseArea.containsMouse
+
+                                contentItem: Text {
+                                    text: qsTr("Set color")
+                                    font.family: CmnCfg.chatFont.name
+                                    font.pixelSize: 12
+                                }
+                                delay: 1000
+                                padding: 4
+                            }
+                        }
+                    }
+
+                    Loader {
+                        id: colorLoader
+                        y: mouse.mouseY
+                        active: false
+
+                        sourceComponent: Popups.ColorPicker {
+
+                            id: colorpicker
+                            y: mouse.mouseY
+                            onClosed: colorLoader.active = false
+                            colorCallback: function () {
+                                if (userData === undefined)
+                                    return
+                                var idx = Herald.users.indexById(
+                                            userData.userId)
+
+                                if ((idx < 0)
+                                        || (idx >= Herald.users.rowCount()))
+                                    return
+
+                                Herald.users.setColor(idx, colorIndex)
+                            }
+                        }
+                    }
+
+                    Label {
+                        text: qsTr("Color")
+                        font.family: CmnCfg.chatFont.name
+                    }
+                }
+
+                Label {
                     id: groupsHeader
                     text: qsTr("Common groups")
                     font.family: CmnCfg.chatFont.name
@@ -91,6 +163,20 @@ Drawer {
                             initials: Utils.initialize(
                                           Utils.safeStringOrDefault(
                                               groupData.conversationTitle))
+                            MouseArea {
+                                anchors.fill: parent
+                                cursorShape: Qt.PointingHandCursor
+                                hoverEnabled: true
+                                onClicked: {
+
+                                    drawer.close()
+                                    drawer.modal = false
+
+                                    groupClicked(groupData.conversationId)
+                                    contactsPopup.close()
+                                    contactsLoader.active = false
+                                }
+                            }
                         }
 
                         Label {

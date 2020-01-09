@@ -279,7 +279,7 @@ Popup {
                                         color: "white"
                                         font.family: CmnCfg.chatFont.name
                                         font.weight: Font.DemiBold
-                                        font.pixelSize: CmnCfg.defaultFontSize
+                                        font.pixelSize: CmnCfg.headerFontSize
                                     }
                                 }
                             }

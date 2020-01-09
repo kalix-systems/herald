@@ -130,6 +130,18 @@ impl Interface for Users {
         name(uid).unwrap_or_else(|| "".to_owned())
     }
 
+    fn index_by_id(
+        &self,
+        uid: ffi::UserId,
+    ) -> i64 {
+        let uid = &err!(uid.as_str().try_into(), -1);
+        self.list
+            .iter()
+            .position(|User { id, .. }| id == uid)
+            .map(|n| n as i64)
+            .unwrap_or(-1)
+    }
+
     /// Returns profile picture
     fn profile_picture(
         &self,

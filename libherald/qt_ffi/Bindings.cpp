@@ -2603,6 +2603,7 @@ void users_add(Users::Private *, const ushort *, int, QByteArray *,
                qbytearray_set);
 void users_clear_filter(Users::Private *);
 quint32 users_color_by_id(const Users::Private *, const ushort *, int);
+qint64 users_index_by_id(const Users::Private *, const ushort *, int);
 void users_name_by_id(const Users::Private *, const ushort *, int, QString *,
                       qstring_set);
 void users_profile_picture_by_id(const Users::Private *, const ushort *, int,
@@ -4651,6 +4652,9 @@ QByteArray Users::add(const QString &id) {
 void Users::clearFilter() { return users_clear_filter(m_d); }
 quint32 Users::colorById(const QString &id) const {
   return users_color_by_id(m_d, id.utf16(), id.size());
+}
+qint64 Users::indexById(const QString &id) const {
+  return users_index_by_id(m_d, id.utf16(), id.size());
 }
 QString Users::nameById(const QString &id) const {
   QString s;

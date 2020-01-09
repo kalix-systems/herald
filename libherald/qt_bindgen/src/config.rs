@@ -188,6 +188,7 @@ fn users() -> Object {
         const colorById(id: QString) => QUint32,
         const nameById(id: QString) => QString,
         const profilePictureById(id: QString) => QString,
+        const indexById(id: QString) => Qint64,
     };
 
     obj! {
