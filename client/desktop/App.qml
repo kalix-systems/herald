@@ -9,6 +9,7 @@ import "."
 import "ChatView/Popups" as CvPopups
 import Qt.labs.platform 1.1
 import QtQuick.Dialogs 1.3
+import "SideBar/popups" as SBPopups
 
 Item {
     id: appRoot
@@ -42,6 +43,14 @@ Item {
         onTriggered: refreshTime()
     }
 
+    Loader {
+        id: contactsLoader
+        anchors.fill: active ? parent : undefined
+        active: false
+        sourceComponent: SBPopups.ContactsPopup {
+            id: contactsPopup
+        }
+    }
     Loader {
         id: messageInfoLoader
         width: active ? chatView.width * 0.75 : 0

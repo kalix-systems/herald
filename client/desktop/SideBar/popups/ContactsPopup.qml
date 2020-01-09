@@ -17,6 +17,7 @@ Popup {
     onClosed: contactsLoader.active = false
     padding: 0
 
+    signal groupClicked(var groupId)
     Drawer {
         width: 0.33 * contactsPopup.width
         height: contactsPopup.height
@@ -94,6 +95,7 @@ Popup {
                 font.family: CmnCfg.chatFont.name
                 color: CmnCfg.palette.offBlack
                 font.pixelSize: CmnCfg.defaultFontSize
+                font.weight: Font.Medium
             }
 
             Text {
@@ -103,6 +105,7 @@ Popup {
                 font.family: CmnCfg.chatFont.name
                 color: CmnCfg.palette.offBlack
                 font.pixelSize: CmnCfg.defaultFontSize
+                font.weight: Font.Medium
             }
         }
 
@@ -187,7 +190,7 @@ Popup {
                                 property var groupData: model
                                 height: 30
                                 isGroup: true
-                                visible: index < 7
+                                visible: index < 6
 
                                 property int groupColor: groupData.conversationColor !== undefined ? groupData.conversationColor : 0
                                 pfpPath: Utils.safeStringOrDefault(
@@ -197,6 +200,14 @@ Popup {
                                 initials: Utils.initialize(
                                               Utils.safeStringOrDefault(
                                                   groupData.conversationTitle))
+
+                                MouseArea {
+                                    anchors.fill: parent
+                                    onClicked: {
+                                        groupClicked(groupData.conversationId)
+                                        contactsPopup.close()
+                                    }
+                                }
                             }
                         }
                     }
