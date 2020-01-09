@@ -16,40 +16,18 @@ Page {
         color: CmnCfg.palette.white
     }
 
-    ScrollView {
-        id: chatScrollView
+    ChatListView {
+        id: chatList
         clip: true
-        contentWidth: parent.width
-        height: chatPage.height - chatTextArea.height
-        topPadding: CmnCfg.smallMargin
-        bottomPadding: CmnCfg.smallMargin
-
-        anchors {
-            top: parent.top
-            right: parent.right
-            left: parent.left
-        }
-
-        ScrollBar.vertical: ScrollBar {
-            id: scrollControl
-        }
-
-        TextMessageList {
-            messageListModel: ownedMessages
-            width: parent.width
-            anchors.top: parent.top
-        }
-
-        Connections {
-            target: ownedMessages
-            onRowsInserted: {
-                scrollControl.position = 1.0
-            }
-        }
+        messageListModel: ownedMessages
+        width: parent.width
+        anchors.top: parent.top
+        anchors.bottom: divider.top
     }
 
     Common.Divider {
         width: parent.width
+        id: divider
         anchors.bottom: chatTextArea.top
     }
 
@@ -60,7 +38,7 @@ Page {
         anchors {
             right: parent.right
             left: parent.left
-            top: chatScrollView.bottom
+            bottom: parent.bottom
         }
     }
 }

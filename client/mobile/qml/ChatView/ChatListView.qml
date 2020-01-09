@@ -27,6 +27,15 @@ ListView {
         stepSize: 0.01
         minimumSize: 0.1
     }
+    boundsBehavior: ListView.StopAtBounds
+    boundsMovement: Flickable.StopAtBounds
+
+    Connections {
+        target: ownedMessages
+        onRowsInserted: {
+            chatScrollBarInner.position = 1.0
+        }
+    }
 
     model: messageListModel
     // TODO: Delegate should just be the ChatBubble

@@ -15,7 +15,7 @@
         <file>qml/LoginPage/Controls/LoginField.qml</file>
         <file>qml/NewContactView/NewContactViewMain.qml</file>
         <file>qml/App.qml</file>
-        <file>qml/ChatView/TextMessageList.qml</file>
+        <file>qml/ChatView/ChatListView.qml</file>
         <file>qml/ChatView/ChatTextArea.qml</file>
         <file>qml/HomeScreen/Controls/ComposeButton.qml</file>
         <file>qml/HomeScreen/Controls/CVToolButton.qml</file>
