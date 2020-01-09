@@ -70,11 +70,8 @@ impl Messages {
                 recipient,
                 status,
             } => {
-                let model = &mut self.model;
-
-                none!(&self
-                    .container
-                    .handle_receipt(msg_id, status, recipient, model));
+                self.container
+                    .handle_receipt(msg_id, status, recipient, model);
             }
 
             MsgUpdate::Reaction {
@@ -83,29 +80,20 @@ impl Messages {
                 content,
                 remove,
             } => {
-                let model = &mut self.model;
                 self.container
                     .handle_reaction(msg_id, reactionary, content, remove, model);
             }
 
             MsgUpdate::StoreDone(mid, meta) => {
-                let model = &mut self.model;
-                let emit = &mut self.emit;
-                let cid = none!(self.conversation_id);
-
-                none!(&self
-                    .container
-                    .handle_store_done(mid, meta, emit, model, cid));
+                self.container
+                    .handle_store_done(mid, meta, emit, model, cid);
             }
 
             MsgUpdate::SendDone(mid) => {
-                let model = &mut self.model;
-
-                none!(&self.container.handle_send_done(mid, model));
+                self.container.handle_send_done(mid, model);
             }
 
             MsgUpdate::ExpiredMessages(mids) => {
-                let cid = none!(self.conversation_id);
                 self.container
                     .handle_expiration(mids, emit, model, search, &mut self.builder, cid)
             }

@@ -325,7 +325,7 @@ pub(crate) fn conversation_message_meta(
 
     let res = w!(stmt.query_map_named(
         named_params! {
-            "@conversation_id": conversation_id
+            "@conversation_id": conversation_id, "@current_time": Time::now(),
         },
         |row| {
             Ok(crate::message::MessageMeta {
