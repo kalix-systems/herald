@@ -1,6 +1,6 @@
 TEMPLATE = app
 
-QT      += quick svg xml widgets
+QT      += quick svg xml widgets core
 VERSION = 0.0.1
 CONFIG  += c++11
 

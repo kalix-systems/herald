@@ -212,9 +212,11 @@ fn from_db(
     row: &rusqlite::Row,
 ) -> Result<ConversationMeta, rusqlite::Error> {
     let conversation_id = row.get("conversation_id")?;
+
+    let time = Time::now();
     let last_msg_id = last_msg_stmt
         .query_map_named(
-            named_params! { "@conversation_id": conversation_id },
+            named_params! { "@conversation_id": conversation_id, "@current_time": time },
             |row| row.get("msg_id"),
         )?
         .next()

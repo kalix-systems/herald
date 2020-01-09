@@ -68,8 +68,8 @@ impl Container {
             model.entry_changed(ix + 1);
         }
 
-        if self.list.is_empty() {
-            emit.last_changed(cid, None);
+        if self.list.is_empty() || ix == 0 {
+            emit.last_changed(cid, self.list.front().map(|m| m.msg_id));
         }
     }
 }

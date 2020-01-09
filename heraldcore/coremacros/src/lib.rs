@@ -76,7 +76,13 @@ macro_rules! w {
     ($maybe: expr) => {{
         match $maybe {
             Ok(val) => val,
-            Err(e) => return Err(e.into()),
+            Err(e) => {
+                #[cfg(debug_assertions)]
+                {
+                    eprintln!("{} {}:{}:{}", e, file!(), line!(), column!());
+                }
+                return Err(e.into());
+            }
         }
     }};
 }
