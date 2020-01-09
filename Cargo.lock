@@ -1304,6 +1304,7 @@ dependencies = [
 name = "message_cache"
 version = "0.1.0"
 dependencies = [
+ "herald_common 0.1.0",
  "heraldcore 0.1.0",
  "lru 0.4.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "once_cell 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)",

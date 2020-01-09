@@ -11,3 +11,6 @@ lru          = "0.4"
 
 [dependencies.heraldcore]
 path    = "../../../heraldcore"
+
+[dependencies.herald_common]
+path    = "../../../herald_common"
