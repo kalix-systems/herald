@@ -50,7 +50,10 @@ ToolBar {
             property bool searchRegex: false
             fill: CmnCfg.palette.lightGrey
             source: "qrc:/contacts-icon.svg"
-            onClicked: contactsPopup.show()
+            onClicked: {
+                contactsLoader.active = true
+                contactsLoader.item.open()
+            }
         }
 
         Imports.IconButton {

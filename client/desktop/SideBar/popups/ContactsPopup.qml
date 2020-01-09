@@ -8,27 +8,20 @@ import "qrc:/imports"
 import "qrc:/imports/Entity"
 import "qrc:/imports/js/utils.mjs" as Utils
 
-Window {
-    id: settingsPopup
-    minimumWidth: 350
-    minimumHeight: 450
+Popup {
+    id: contactsPopup
+
+    height: root.height
+    width: root.width
+    anchors.centerIn: parent
+    onClosed: contactsLoader.active = false
+    padding: 0
 
     Drawer {
-        width: 0.33 * settingsPopup.width
-        height: settingsPopup.height
+        width: 0.33 * contactsPopup.width
+        height: contactsPopup.height
         edge: Qt.RightEdge
         dragMargin: 0
-
-        IconButton {
-            fill: CmnCfg.palette.lightGrey
-            source: "qrc:/x-icon.svg"
-            anchors {
-                top: parent.top
-                right: parent.right
-                margins: CmnCfg.smallMargin
-            }
-            onClicked: parent.close()
-        }
 
         Flickable {
             anchors.fill: parent
@@ -39,66 +32,75 @@ Window {
         anchors.fill: parent
         header: ToolBar {
             id: toolBar
-            height: CmnCfg.toolbarHeight
+            height: CmnCfg.toolbarHeight + 1
+            width: parent.width
             background: Rectangle {
                 color: CmnCfg.palette.offBlack
             }
 
-            RowLayout {
-                anchors.fill: parent
+            Label {
+                font: CmnCfg.headerFont
+                anchors.left: parent.left
+                anchors.leftMargin: CmnCfg.megaMargin
+                anchors.verticalCenter: parent.verticalCenter
+                elide: Label.ElideRight
+                text: "Contacts"
+                color: CmnCfg.palette.white
+                topPadding: 1
+            }
+            Row {
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.right: parent.right
                 anchors.rightMargin: CmnCfg.defaultMargin
-                anchors.leftMargin: CmnCfg.defaultMargin
-
-                Label {
-                    font: CmnCfg.headerFont
-                    Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
-                    Layout.fillWidth: true
-                    elide: Label.ElideRight
-                    text: "Contacts"
-                    color: CmnCfg.palette.white
-                    topPadding: 1
+                spacing: CmnCfg.defaultMargin
+                layoutDirection: Qt.RightToLeft
+                IconButton {
+                    fill: CmnCfg.palette.lightGrey
+                    source: "qrc:/x-icon.svg"
+                    onClicked: contactsPopup.close()
                 }
 
+                IconButton {
+                    id: settingsButton
+                    fill: CmnCfg.palette.lightGrey
+                    source: "qrc:/options-icon.svg"
+                }
                 IconButton {
                     id: searchButton
                     fill: CmnCfg.palette.lightGrey
                     source: "qrc:/search-icon.svg"
                 }
-
-                Item {
-                    Layout.preferredWidth: CmnCfg.defaultMargin
-                }
-
-                IconButton {
-                    id: settignsButton
-                    fill: CmnCfg.palette.lightGrey
-                    source: "qrc:/options-icon.svg"
-                }
             }
         }
 
-        RowLayout {
+        Item {
             id: rowLabel
-            height: CmnCfg.toolbarHeight
+            height: CmnCfg.toolbarHeight - 10
             width: parent.width
 
             Item {
-                Layout.preferredWidth: CmnCfg.avatarSize
+                width: CmnCfg.avatarSize
+                anchors.left: parent.left
+                id: avatarFiller
+                anchors.leftMargin: CmnCfg.defaultMargin
             }
 
             Text {
-                Layout.alignment: Qt.AlignLeft
+                id: nameHeader
+                anchors.left: avatarFiller.right
+                anchors.leftMargin: CmnCfg.megaMargin
                 text: "Name"
-            }
-            Text {
-                Layout.alignment: Qt.AlignLeft
-                Layout.minimumWidth: CmnCfg.largeMargin
-                text: "Trusted"
+                anchors.verticalCenter: parent.verticalCenter
+                font.family: CmnCfg.chatFont.name
+                color: CmnCfg.palette.offBlack
             }
 
             Text {
-                Layout.minimumWidth: CmnCfg.largeMargin
                 text: "Groups"
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.horizontalCenter: parent.horizontalCenter
+                font.family: CmnCfg.chatFont.name
+                color: CmnCfg.palette.offBlack
             }
         }
 
@@ -114,9 +116,12 @@ Window {
             }
             model: Herald.users
             delegate: Rectangle {
+                property var userData: model
                 color: CmnCfg.palette.white
-                width: settingsPopup.width
-                height: row.height + 1
+                width: contactsPopup.width
+                height: visible ? row.height + 1 : 0
+
+                visible: userData.userId !== Herald.config.configId
                 Rectangle {
                     anchors {
                         right: parent.right
@@ -124,17 +129,20 @@ Window {
                         top: parent.top
                     }
                     height: 1
-                    color: CmnCfg.palette.black
+                    color: CmnCfg.palette.medGrey
                 }
 
-                RowLayout {
+                Item {
                     id: row
-                    width: settingsPopup.width
+                    width: contactsPopup.width
+                    height: 56
 
                     Avatar {
-                        Layout.alignment: Qt.AlignLeft
-                        Layout.leftMargin: CmnCfg.defaultMargin
-                        height: CmnCfg.avatarSize - CmnCfg.defaultMargin
+                        id: avatar
+                        anchors.left: parent.left
+                        anchors.leftMargin: CmnCfg.defaultMargin
+                        anchors.verticalCenter: parent.verticalCenter
+                        height: CmnCfg.avatarSize
                         pfpPath: Utils.safeStringOrDefault(
                                      model.profilePicture, "")
                         color: CmnCfg.avatarColors[model.color]
@@ -142,32 +150,30 @@ Window {
                     }
 
                     Column {
-                        Layout.alignment: Qt.AlignLeft
+                        anchors.left: avatar.right
+                        anchors.leftMargin: CmnCfg.megaMargin
+                        anchors.verticalCenter: avatar.verticalCenter
                         spacing: CmnCfg.smallMargin / 2
                         Label {
                             font.bold: true
+                            font.family: CmnCfg.chatFont.name
                             text: userId
+                            color: CmnCfg.palette.offBlack
                         }
                         Label {
                             text: "@" + name
+                            font.family: CmnCfg.chatFont.name
+                            color: CmnCfg.palette.offBlack
                         }
                     }
 
-                    IconButton {
-                        Layout.alignment: Qt.AlignLeft
-                        Layout.minimumWidth: CmnCfg.largeMargin
-                        source: "qrc:/contacts-icon.svg"
-                    }
-
                     Flow {
-                        Layout.alignment: Qt.AlignCenter
-                        Layout.preferredWidth: 85
-                        Layout.preferredHeight: 45
+                        anchors.horizontalCenter: parent.horizontalCenter
                         spacing: CmnCfg.microMargin
                         Repeater {
                             model: [0, 0, 1, 1, 1, 1]
                             Image {
-                                id: imagePorxy
+                                id: imageProxy
                                 source: "qrc:/plus-icon.svg"
                                 width: 20
                                 height: 20
@@ -196,7 +202,7 @@ Window {
                 top: tableView.bottom
             }
             height: 1
-            color: CmnCfg.palette.black
+            color: CmnCfg.palette.offBlack
         }
     }
 }

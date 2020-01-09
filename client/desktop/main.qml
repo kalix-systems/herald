@@ -4,6 +4,7 @@ import QtQuick.Controls 2.14
 import LibHerald 1.0
 import "qrc:/imports/errors"
 import "ChatView/Popups" as CvPopups
+import "SideBar/popups" as SBPopups
 
 ApplicationWindow {
     id: root
@@ -42,6 +43,14 @@ ApplicationWindow {
         active: false
         sourceComponent: CvPopups.GalleryView {
             id: galleryView
+        }
+    }
+    Loader {
+        id: contactsLoader
+        anchors.fill: active ? parent : undefined
+        active: false
+        sourceComponent: SBPopups.ContactsPopup {
+            id: contactsPopup
         }
     }
 
