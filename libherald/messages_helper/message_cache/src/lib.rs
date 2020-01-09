@@ -100,7 +100,7 @@ pub fn remove(mid: &MsgId) -> Option<MsgData> {
 }
 
 fn db_data(mid: &MsgId) -> Option<MsgData> {
-    let data = heraldcore::message::message_data(mid).ok()?;
+    let data = heraldcore::message::message_data(mid).ok().flatten()?;
 
     if data
         .time

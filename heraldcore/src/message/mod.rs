@@ -44,7 +44,7 @@ pub fn message_meta(msg_id: &MsgId) -> Result<MessageMeta, HErr> {
 }
 
 /// Get message data by message id
-pub fn message_data(msg_id: &MsgId) -> Result<MsgData, HErr> {
+pub fn message_data(msg_id: &MsgId) -> Result<Option<MsgData>, HErr> {
     let db = Database::get()?;
     db::message_data(&db, msg_id)
 }

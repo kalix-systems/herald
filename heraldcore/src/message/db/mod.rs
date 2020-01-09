@@ -84,22 +84,21 @@ pub(crate) fn message_meta(
 pub(crate) fn message_data(
     conn: &Conn,
     msg_id: &MsgId,
-) -> Result<MsgData, HErr> {
+) -> Result<Option<MsgData>, HErr> {
     let mut stmt = conn.prepare_cached(include_str!("../sql/message_data.sql"))?;
 
-    let receipts = get_receipts(conn, msg_id)?;
-    let replies = replies(conn, msg_id)?;
-    let reactions = reactions(conn, msg_id)?;
-    let attachments = crate::message::attachments::db::get(conn, &msg_id)?;
-
-    Ok(w!(stmt.query_row_named(
-        named_params! { "@msg_id": msg_id },
-        |row| {
+    let mut res = w!(
+        stmt.query_map_named(named_params! { "@msg_id": msg_id }, |row| {
             let time = MessageTime {
                 insertion: row.get("insertion_ts")?,
                 server: row.get("server_ts")?,
                 expiration: row.get("expiration_ts")?,
             };
+
+            let receipts = get_receipts(conn, msg_id)?;
+            let replies = replies(conn, msg_id)?;
+            let reactions = reactions(conn, msg_id)?;
+            let attachments = crate::message::attachments::db::get(conn, &msg_id)?;
 
             let is_reply: bool = row.get("is_reply")?;
             let op: Option<MsgId> = row.get("op_msg_id")?;
@@ -118,8 +117,10 @@ pub(crate) fn message_data(
                 replies,
                 reactions,
             })
-        }
-    )))
+        })
+    );
+
+    Ok(w!(res.next().transpose()))
 }
 
 /// Get message by message id
