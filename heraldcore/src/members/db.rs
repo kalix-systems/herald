@@ -63,14 +63,16 @@ pub(crate) fn members(
 pub(crate) fn shared_conversations(
     conn: &rusqlite::Connection,
     user_id: &UserId,
-) -> Result<Vec<ConversationId>, rusqlite::Error> {
+) -> Result<Vec<ConversationId>, HErr> {
+    use crate::conversation::db::pairwise_conversation;
+    let pairwise_cid = w!(pairwise_conversation(conn, user_id));
     let mut stmt = w!(conn.prepare_cached(include_str!("sql/shared_conversations.sql")));
 
     let mut shared = Vec::new();
-    let res = w!(
-        stmt.query_map_named(named_params! { "@user_id": user_id }, |row| row
-            .get("conversation_id"))
-    );
+    let res = w!(stmt.query_map_named(
+        named_params! { "@user_id": user_id, "@pairwise_cid": pairwise_cid, },
+        |row| row.get("conversation_id")
+    ));
 
     for cid in res {
         shared.push(cid?);

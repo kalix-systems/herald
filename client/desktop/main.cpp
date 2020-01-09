@@ -55,6 +55,7 @@ int main(int argc, char* argv[])
 
   qmlRegisterSingletonType(QUrl("qrc:///common/CommonConfig.qml"), "LibHerald",
                            1, 0, "CmnCfg");
+  qmlRegisterType<SharedConversations>("LibHerald", 1, 0, "SharedConversations");
 
   QQmlApplicationEngine engine;
 

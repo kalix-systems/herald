@@ -93,6 +93,7 @@ Popup {
                 anchors.verticalCenter: parent.verticalCenter
                 font.family: CmnCfg.chatFont.name
                 color: CmnCfg.palette.offBlack
+                font.pixelSize: CmnCfg.defaultFontSize
             }
 
             Text {
@@ -101,6 +102,7 @@ Popup {
                 anchors.horizontalCenter: parent.horizontalCenter
                 font.family: CmnCfg.chatFont.name
                 color: CmnCfg.palette.offBlack
+                font.pixelSize: CmnCfg.defaultFontSize
             }
         }
 
@@ -116,10 +118,15 @@ Popup {
             }
             model: Herald.users
             delegate: Rectangle {
+                id: userRow
                 property var userData: model
                 color: CmnCfg.palette.white
                 width: contactsPopup.width
                 height: visible ? row.height + 1 : 0
+
+                property var sharedConvos: SharedConversations {
+                    userId: userData.userId
+                }
 
                 visible: userData.userId !== Herald.config.configId
                 Rectangle {
@@ -135,8 +142,7 @@ Popup {
                 Item {
                     id: row
                     width: contactsPopup.width
-                    height: 56
-
+                    height: 70
                     Avatar {
                         id: avatar
                         anchors.left: parent.left
@@ -153,9 +159,10 @@ Popup {
                         anchors.left: avatar.right
                         anchors.leftMargin: CmnCfg.megaMargin
                         anchors.verticalCenter: avatar.verticalCenter
-                        spacing: CmnCfg.smallMargin / 2
+                        spacing: 2
                         Label {
-                            font.bold: true
+                            font.weight: Font.DemiBold
+                            font.pixelSize: CmnCfg.headerFontSize
                             font.family: CmnCfg.chatFont.name
                             text: userId
                             color: CmnCfg.palette.offBlack
@@ -164,30 +171,32 @@ Popup {
                             text: "@" + name
                             font.family: CmnCfg.chatFont.name
                             color: CmnCfg.palette.offBlack
+                            font.pixelSize: CmnCfg.defaultFontSize
                         }
                     }
 
                     Flow {
                         anchors.horizontalCenter: parent.horizontalCenter
+                        anchors.verticalCenter: parent.verticalCenter
                         spacing: CmnCfg.microMargin
+                        width: 100
+
                         Repeater {
-                            model: [0, 0, 1, 1, 1, 1]
-                            Image {
-                                id: imageProxy
-                                source: "qrc:/plus-icon.svg"
-                                width: 20
-                                height: 20
-                                Rectangle {
-                                    visible: model.length > 6 && index == 5
-                                    color: CmnCfg.palette.lightGrey
-                                    anchors.fill: parent
-                                    opacity: 0.5
-                                    Text {
-                                        color: CmnCfg.palette.white
-                                        anchors.centerIn: parent
-                                        text: "+" + model.length - 6
-                                    }
-                                }
+                            model: userRow.sharedConvos
+                            delegate: Avatar {
+                                property var groupData: model
+                                height: 30
+                                isGroup: true
+                                visible: index < 7
+
+                                property int groupColor: groupData.conversationColor !== undefined ? groupData.conversationColor : 0
+                                pfpPath: Utils.safeStringOrDefault(
+                                             groupData.conversationPicture, "")
+
+                                color: CmnCfg.avatarColors[groupColor]
+                                initials: Utils.initialize(
+                                              Utils.safeStringOrDefault(
+                                                  groupData.conversationTitle))
                             }
                         }
                     }
