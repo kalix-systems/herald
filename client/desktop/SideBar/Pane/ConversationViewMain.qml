@@ -65,6 +65,20 @@ ListView {
             }
         }
 
+        Connections {
+            target: contactsLoader.item
+            onGroupClicked: {
+
+                var groupIdx = Herald.conversations.indexById(groupId)
+                if ((groupIdx < 0) || (groupIdx >= conversationList.count))
+                    return
+                conversationItem.convContent.conversationId = groupId
+
+                chatView.sourceComponent = childChatView
+                chatView.currentConvoId = groupId
+                conversationList.currentIndex = groupIdx
+            }
+        }
         visible: {
             if (sideBarState.state === "globalSearch") {
                 return conversationData.matched
@@ -132,12 +146,14 @@ ListView {
                 text: "Archive"
                 onTriggered: {
                     conversationData.status = 1
-                    if (Herald.utils.compareByteArray(
-                                chatView.currentConvoId,
-                                conversationData.conversationId)) {
-                        chatView.sourceComponent = splash
-                        chatView.currentConvoId = undefined
-                    }
+                    //                    if (Herald.utils.compareByteArray(
+                    //                                chatView.currentConvoId,
+                    //                                conversationData.conversationId)) {
+
+                    //                        conversationList.currentIndex = -1
+                    //                        chatView.sourceComponent = splash
+                    //                        chatView.currentConvoId = undefined
+                    //                    }
                 }
             }
         }

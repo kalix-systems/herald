@@ -36,7 +36,8 @@ Item {
             border.color: CmnCfg.palette.white
             Text {
                 text: initials
-                font.bold: true
+                font.weight: Font.DemiBold
+                font.family: CmnCfg.chatFont.name
                 font.pixelSize: ((initials.length > 1 ? 1.0 : 0.67)
                                  * parent.width) / initials.length
                 anchors.centerIn: parent
