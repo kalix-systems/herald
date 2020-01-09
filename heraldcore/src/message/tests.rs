@@ -133,7 +133,7 @@ fn message_data() {
 
     let data = db::message_data(&conn, &msg_id).expect(womp!("unable to get message"));
 
-    assert_eq!(stored.time.insertion, data.time.insertion);
+    assert_eq!(Some(stored.time.insertion), data.map(|d| d.time.insertion));
 }
 
 #[test]
