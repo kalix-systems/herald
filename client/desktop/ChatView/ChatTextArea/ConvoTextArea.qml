@@ -1,7 +1,6 @@
 import QtQuick 2.4
 import QtQuick 2.13
 import QtQuick.Controls 2.13
-import QtQuick.Dialogs 1.3
 import LibHerald 1.0
 import QtQuick.Layouts 1.13
 import QtMultimedia 5.13
@@ -9,6 +8,7 @@ import "qrc:/imports" as Imports
 import "js/ChatTextAreaUtils.mjs" as CTUtils
 import "../../common" as Common
 import "qrc:/imports/ChatBubble" as CB
+import QtQuick.Dialogs 1.3
 
 Rectangle {
     id: textWrapperRect
@@ -169,11 +169,18 @@ Rectangle {
                 color: CmnCfg.palette.black
                 selectByMouse: true
                 wrapMode: TextArea.WrapAtWordBoundaryOrAnywhere
-                placeholderText: qsTr("Message") + " " + conversationItem.title
+                placeholderText: qsTr("Message") + " "
+                                 + (!Herald.utils.compareByteArray(
+                                        conversationItem.conversationId,
+                                        Herald.config.ntsConversationId) ? conversationItem.title : qsTr("Note to Self"))
 
                 Keys.forwardTo: keysProxy
                 Keys.onEscapePressed: focus = false
                 onEditingFinished: convWindow.focus = true
+
+                Common.TextContextMenu {
+                    parentText: chatText
+                }
 
                 // transfer focus to the compose field
                 Connections {
