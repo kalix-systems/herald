@@ -1,4 +1,5 @@
 use crate::{db::Database, errors::HErr, types::*};
+use coremacros::w;
 use herald_common::UserId;
 use rusqlite::params;
 
@@ -26,6 +27,13 @@ pub fn remove_member(
 pub fn members(conversation_id: &ConversationId) -> Result<Vec<UserId>, HErr> {
     let db = Database::get()?;
     db::members(&db, conversation_id)
+}
+
+/// Gets the conversations shared with a user
+pub fn shared_conversations(user_id: &UserId) -> Result<Vec<ConversationId>, HErr> {
+    let conn = Database::get()?;
+
+    Ok(w!(db::shared_conversations(&conn, user_id)))
 }
 
 #[cfg(test)]

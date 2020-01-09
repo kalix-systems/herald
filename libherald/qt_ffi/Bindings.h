@@ -19,6 +19,7 @@ class Members;
 class MessageBuilder;
 class MessageSearch;
 class Messages;
+class SharedConversations;
 class Users;
 class UsersSearch;
 class Utils;
@@ -36,6 +37,7 @@ using MembersPtrBundle = struct MembersPtrBundle;
 using MessageBuilderPtrBundle = struct MessageBuilderPtrBundle;
 using MessageSearchPtrBundle = struct MessageSearchPtrBundle;
 using MessagesPtrBundle = struct MessagesPtrBundle;
+using SharedConversationsPtrBundle = struct SharedConversationsPtrBundle;
 using UsersPtrBundle = struct UsersPtrBundle;
 using UsersSearchPtrBundle = struct UsersSearchPtrBundle;
 using UtilsPtrBundle = struct UtilsPtrBundle;
@@ -542,6 +544,29 @@ struct MessagesPtrBundle {
   void (*messages_end_remove_rows)(Messages *);
   void (*messages_newTypingIndicator)(const Messages *);
 };
+struct SharedConversationsPtrBundle {
+  SharedConversations *shared_conversations;
+  void (*shared_conversations_user_id_changed)(SharedConversations *);
+
+  void (*shared_conversations_new_data_ready)(const SharedConversations *);
+  void (*shared_conversations_layout_about_to_be_changed)(
+      SharedConversations *);
+  void (*shared_conversations_layout_changed)(SharedConversations *);
+  void (*shared_conversations_data_changed)(SharedConversations *, quintptr,
+                                            quintptr);
+  void (*shared_conversations_begin_reset_model)(SharedConversations *);
+  void (*shared_conversations_end_reset_model)(SharedConversations *);
+  void (*shared_conversations_begin_insert_rows)(SharedConversations *, int,
+                                                 int);
+  void (*shared_conversations_end_insert_rows)(SharedConversations *);
+  void (*shared_conversations_begin_move_rows)(SharedConversations *, int, int,
+                                               int);
+  void (*shared_conversations_end_move_rows)(SharedConversations *);
+  void (*shared_conversations_begin_remove_rows)(SharedConversations *, int,
+                                                 int);
+  void (*shared_conversations_end_remove_rows)(SharedConversations *);
+  void (*shared_conversations_tryLoad)(const SharedConversations *);
+};
 struct UsersPtrBundle {
   Users *users;
   void (*users_filter_changed)(Users *);
@@ -595,6 +620,7 @@ class Config : public QObject {
   friend class MessageBuilder;
   friend class MessageSearch;
   friend class Messages;
+  friend class SharedConversations;
   friend class Users;
   friend class UsersSearch;
   friend class Utils;
@@ -651,6 +677,7 @@ class ConversationBuilder : public QAbstractItemModel {
   friend class MessageBuilder;
   friend class MessageSearch;
   friend class Messages;
+  friend class SharedConversations;
   friend class Users;
   friend class UsersSearch;
   friend class Utils;
@@ -731,6 +758,7 @@ class ConversationContent : public QObject {
   friend class MessageBuilder;
   friend class MessageSearch;
   friend class Messages;
+  friend class SharedConversations;
   friend class Users;
   friend class UsersSearch;
   friend class Utils;
@@ -779,6 +807,7 @@ class Conversations : public QAbstractItemModel {
   friend class MessageBuilder;
   friend class MessageSearch;
   friend class Messages;
+  friend class SharedConversations;
   friend class Users;
   friend class UsersSearch;
   friend class Utils;
@@ -877,6 +906,7 @@ class DocumentAttachments : public QAbstractItemModel {
   friend class MessageBuilder;
   friend class MessageSearch;
   friend class Messages;
+  friend class SharedConversations;
   friend class Users;
   friend class UsersSearch;
   friend class Utils;
@@ -944,6 +974,7 @@ class EmojiPicker : public QAbstractItemModel {
   friend class MessageBuilder;
   friend class MessageSearch;
   friend class Messages;
+  friend class SharedConversations;
   friend class Users;
   friend class UsersSearch;
   friend class Utils;
@@ -1047,6 +1078,7 @@ class Errors : public QObject {
   friend class MessageBuilder;
   friend class MessageSearch;
   friend class Messages;
+  friend class SharedConversations;
   friend class Users;
   friend class UsersSearch;
   friend class Utils;
@@ -1080,6 +1112,7 @@ class Herald : public QObject {
   friend class MessageBuilder;
   friend class MessageSearch;
   friend class Messages;
+  friend class SharedConversations;
   friend class Users;
   friend class UsersSearch;
   friend class Utils;
@@ -1176,6 +1209,7 @@ class MediaAttachments : public QAbstractItemModel {
   friend class MessageBuilder;
   friend class MessageSearch;
   friend class Messages;
+  friend class SharedConversations;
   friend class Users;
   friend class UsersSearch;
   friend class Utils;
@@ -1242,6 +1276,7 @@ class Members : public QAbstractItemModel {
   friend class MessageBuilder;
   friend class MessageSearch;
   friend class Messages;
+  friend class SharedConversations;
   friend class Users;
   friend class UsersSearch;
   friend class Utils;
@@ -1327,6 +1362,7 @@ class MessageBuilder : public QAbstractItemModel {
   friend class Members;
   friend class MessageSearch;
   friend class Messages;
+  friend class SharedConversations;
   friend class Users;
   friend class UsersSearch;
   friend class Utils;
@@ -1457,6 +1493,7 @@ class MessageSearch : public QAbstractItemModel {
   friend class Members;
   friend class MessageBuilder;
   friend class Messages;
+  friend class SharedConversations;
   friend class Users;
   friend class UsersSearch;
   friend class Utils;
@@ -1544,6 +1581,7 @@ class Messages : public QAbstractItemModel {
   friend class Members;
   friend class MessageBuilder;
   friend class MessageSearch;
+  friend class SharedConversations;
   friend class Users;
   friend class UsersSearch;
   friend class Utils;
@@ -1676,6 +1714,83 @@ Q_SIGNALS:
   void typingUserIdChanged();
   void newTypingIndicator() const;
 };
+class SharedConversations : public QAbstractItemModel {
+  Q_OBJECT
+  friend class Config;
+  friend class ConversationBuilder;
+  friend class ConversationContent;
+  friend class Conversations;
+  friend class DocumentAttachments;
+  friend class EmojiPicker;
+  friend class Errors;
+  friend class Herald;
+  friend class MediaAttachments;
+  friend class Members;
+  friend class MessageBuilder;
+  friend class MessageSearch;
+  friend class Messages;
+  friend class Users;
+  friend class UsersSearch;
+  friend class Utils;
+
+public:
+  class Private;
+
+private:
+  Private *m_d;
+  bool m_ownsPrivate;
+  Q_PROPERTY(
+      QString userId READ userId WRITE setUserId NOTIFY userIdChanged FINAL)
+  explicit SharedConversations(bool owned, QObject *parent);
+
+public:
+  explicit SharedConversations(QObject *parent = nullptr);
+  ~SharedConversations() override;
+  QString userId() const;
+  void setUserId(const QString &v);
+  Q_INVOKABLE void load();
+  int columnCount(const QModelIndex &parent = QModelIndex()) const override;
+  QVariant data(const QModelIndex &index,
+                int role = Qt::DisplayRole) const override;
+  QModelIndex index(int row, int column,
+                    const QModelIndex &parent = QModelIndex()) const override;
+  QModelIndex parent(const QModelIndex &index) const override;
+  bool hasChildren(const QModelIndex &parent = QModelIndex()) const override;
+  int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+  bool canFetchMore(const QModelIndex &parent) const override;
+  void fetchMore(const QModelIndex &parent) override;
+  Qt::ItemFlags flags(const QModelIndex &index) const override;
+  void sort(int column, Qt::SortOrder order = Qt::AscendingOrder) override;
+  int role(const char *name) const;
+  QHash<int, QByteArray> roleNames() const override;
+  QVariant headerData(int section, Qt::Orientation orientation,
+                      int role = Qt::DisplayRole) const override;
+  bool setHeaderData(int section, Qt::Orientation orientation,
+                     const QVariant &value, int role = Qt::EditRole) override;
+  Q_INVOKABLE bool
+  insertRows(int row, int count,
+             const QModelIndex &parent = QModelIndex()) override;
+  Q_INVOKABLE bool
+  removeRows(int row, int count,
+             const QModelIndex &parent = QModelIndex()) override;
+
+  Q_INVOKABLE QVariant conversationColor(int row) const;
+  Q_INVOKABLE QByteArray conversationId(int row) const;
+  Q_INVOKABLE QString conversationPicture(int row) const;
+  Q_INVOKABLE QString conversationTitle(int row) const;
+
+Q_SIGNALS:
+  // new data is ready to be made available to the model with fetchMore()
+  void newDataReady(const QModelIndex &parent) const;
+
+private:
+  QHash<QPair<int, Qt::ItemDataRole>, QVariant> m_headerData;
+  void initHeaderData();
+  void updatePersistentIndexes();
+Q_SIGNALS:
+  void userIdChanged();
+  void tryLoad() const;
+};
 class Users : public QAbstractItemModel {
   Q_OBJECT
   friend class Config;
@@ -1691,6 +1806,7 @@ class Users : public QAbstractItemModel {
   friend class MessageBuilder;
   friend class MessageSearch;
   friend class Messages;
+  friend class SharedConversations;
   friend class UsersSearch;
   friend class Utils;
 
@@ -1783,6 +1899,7 @@ class UsersSearch : public QAbstractItemModel {
   friend class MessageBuilder;
   friend class MessageSearch;
   friend class Messages;
+  friend class SharedConversations;
   friend class Users;
   friend class Utils;
 
@@ -1864,6 +1981,7 @@ class Utils : public QObject {
   friend class MessageBuilder;
   friend class MessageSearch;
   friend class Messages;
+  friend class SharedConversations;
   friend class Users;
   friend class UsersSearch;
 
