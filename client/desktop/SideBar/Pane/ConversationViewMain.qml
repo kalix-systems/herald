@@ -69,14 +69,14 @@ ListView {
             target: contactsLoader.item
             onGroupClicked: {
 
-                var groupIdx = Herald.conversations.indexById(groupId)
+                const groupIdx = Herald.conversations.indexById(groupId)
                 if ((groupIdx < 0) || (groupIdx >= conversationList.count))
                     return
-                conversationItem.convContent.conversationId = groupId
 
-                chatView.sourceComponent = childChatView
-                chatView.currentConvoId = groupId
+                //conversationItem.convContent.conversationId = groupId
                 conversationList.currentIndex = groupIdx
+                chatView.sourceComponent = conversationList.currentItem.childChatView
+                chatView.currentConvoId = groupId
             }
         }
         visible: {

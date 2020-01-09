@@ -6,7 +6,9 @@ import QtQuick.Window 2.2
 import LibHerald 1.0
 import "qrc:/imports"
 import "qrc:/imports/Entity"
+import "../../common" as Common
 import "qrc:/imports/js/utils.mjs" as Utils
+import "ContactsPopup"
 
 Popup {
     id: contactsPopup
@@ -14,19 +16,16 @@ Popup {
     height: root.height
     width: root.width
     anchors.centerIn: parent
-    onClosed: contactsLoader.active = false
+    onClosed: {
+        drawer.close()
+        contactsLoader.active = false
+    }
     padding: 0
 
     signal groupClicked(var groupId)
-    Drawer {
-        width: 0.33 * contactsPopup.width
-        height: contactsPopup.height
-        edge: Qt.RightEdge
-        dragMargin: 0
 
-        Flickable {
-            anchors.fill: parent
-        }
+    ContactDrawer {
+        id: drawer
     }
 
     Page {
@@ -56,20 +55,26 @@ Popup {
                 spacing: CmnCfg.defaultMargin
                 layoutDirection: Qt.RightToLeft
                 IconButton {
+                    id: xButton
                     fill: CmnCfg.palette.lightGrey
                     source: "qrc:/x-icon.svg"
-                    onClicked: contactsPopup.close()
+                    enabled: !drawer.opened
+                    onClicked: {
+                        contactsPopup.close()
+                    }
                 }
 
                 IconButton {
                     id: settingsButton
                     fill: CmnCfg.palette.lightGrey
                     source: "qrc:/options-icon.svg"
+                    enabled: !drawer.opened
                 }
                 IconButton {
                     id: searchButton
                     fill: CmnCfg.palette.lightGrey
                     source: "qrc:/search-icon.svg"
+                    enabled: !drawer.opened
                 }
             }
         }
@@ -158,23 +163,34 @@ Popup {
                         initials: Utils.initialize(name)
                     }
 
-                    Column {
+                    MouseArea {
+                        height: labelCol.height
+                        width: labelCol.width
+                        cursorShape: Qt.PointingHandCursor
                         anchors.left: avatar.right
                         anchors.leftMargin: CmnCfg.megaMargin
                         anchors.verticalCenter: avatar.verticalCenter
-                        spacing: 2
-                        Label {
-                            font.weight: Font.DemiBold
-                            font.pixelSize: CmnCfg.headerFontSize
-                            font.family: CmnCfg.chatFont.name
-                            text: userId
-                            color: CmnCfg.palette.offBlack
+                        onClicked: {
+                            drawer.userData = userData
+                            drawer.open()
                         }
-                        Label {
-                            text: "@" + name
-                            font.family: CmnCfg.chatFont.name
-                            color: CmnCfg.palette.offBlack
-                            font.pixelSize: CmnCfg.defaultFontSize
+
+                        Column {
+                            id: labelCol
+                            spacing: 2
+                            Label {
+                                font.weight: Font.DemiBold
+                                font.pixelSize: CmnCfg.headerFontSize
+                                font.family: CmnCfg.chatFont.name
+                                text: userId
+                                color: CmnCfg.palette.offBlack
+                            }
+                            Label {
+                                text: "@" + name
+                                font.family: CmnCfg.chatFont.name
+                                color: CmnCfg.palette.offBlack
+                                font.pixelSize: CmnCfg.defaultFontSize
+                            }
                         }
                     }
 
@@ -203,9 +219,29 @@ Popup {
 
                                 MouseArea {
                                     anchors.fill: parent
+                                    cursorShape: Qt.PointingHandCursor
+                                    hoverEnabled: true
                                     onClicked: {
                                         groupClicked(groupData.conversationId)
                                         contactsPopup.close()
+                                        contactsLoader.active = false
+                                    }
+                                    ToolTip {
+                                        visible: parent.containsMouse
+                                        contentItem: Text {
+                                            text: Utils.safeStringOrDefault(
+                                                      groupData.conversationTitle,
+                                                      "")
+                                            font.family: CmnCfg.chatFont.name
+                                            font.pixelSize: 12
+                                            color: CmnCfg.palette.lightGrey
+                                            font.weight: Font.Medium
+                                        }
+                                        delay: 1000
+                                        padding: 4
+                                        background: Rectangle {
+                                            color: CmnCfg.palette.offBlack
+                                        }
                                     }
                                 }
                             }
