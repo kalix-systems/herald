@@ -80,6 +80,9 @@ Popup {
             }
         }
 
+        background: Rectangle {
+            color: CmnCfg.palette.lightGrey
+        }
         Item {
             id: rowLabel
             height: CmnCfg.toolbarHeight - 10
@@ -121,16 +124,13 @@ Popup {
             boundsMovement: Flickable.StopAtBounds
             anchors {
                 top: rowLabel.bottom
-                bottom: parent.bottom
                 right: parent.right
                 left: parent.left
             }
+            height: contentHeight
             model: Herald.users
+            ScrollBar.vertical: ScrollBar {}
 
-            //           UsersSearch {
-            //                id: usersSearch
-            //                reverse: true
-            //            }
             delegate: Rectangle {
                 id: userRow
                 property var userData: model
@@ -211,7 +211,7 @@ Popup {
                             delegate: Avatar {
                                 id: groupAv
                                 property var groupData: model
-                                height: 30
+                                size: 30
                                 isGroup: true
                                 visible: index < 6
 
@@ -293,7 +293,6 @@ Popup {
                 }
             }
         }
-
         Rectangle {
             anchors {
                 right: parent.right
@@ -301,7 +300,8 @@ Popup {
                 top: tableView.bottom
             }
             height: 1
-            color: CmnCfg.palette.offBlack
+            color: CmnCfg.palette.medGrey
+            z: parent.z + 1
         }
     }
 }
