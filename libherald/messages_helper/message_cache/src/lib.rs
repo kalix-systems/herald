@@ -106,7 +106,7 @@ fn db_data(mid: &MsgId) -> Option<MsgData> {
         .time
         .expiration
         .map(|exp| exp.as_i64() < herald_common::Time::now().as_i64())
-        .unwrap_or(true)
+        .unwrap_or(false)
     {
         return None;
     }
