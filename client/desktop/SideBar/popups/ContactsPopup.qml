@@ -9,6 +9,7 @@ import "qrc:/imports/Entity"
 import "../../common" as Common
 import "qrc:/imports/js/utils.mjs" as Utils
 import "ContactsPopup"
+import QtGraphicalEffects 1.0
 
 Popup {
     id: contactsPopup
@@ -203,6 +204,7 @@ Popup {
                         Repeater {
                             model: userRow.sharedConvos
                             delegate: Avatar {
+                                id: groupAv
                                 property var groupData: model
                                 height: 30
                                 isGroup: true
@@ -218,6 +220,7 @@ Popup {
                                                   groupData.conversationTitle))
 
                                 MouseArea {
+                                    enabled: !overlay.visible
                                     anchors.fill: parent
                                     cursorShape: Qt.PointingHandCursor
                                     hoverEnabled: true
@@ -242,6 +245,41 @@ Popup {
                                         background: Rectangle {
                                             color: CmnCfg.palette.offBlack
                                         }
+                                    }
+                                }
+                                Rectangle {
+                                    anchors.fill: parent
+                                    color: "transparent"
+
+                                    id: overlay
+                                    visible: (userRow.sharedConvos.rowCount(
+                                                  ) > 5 && index === 5)
+                                    ColorOverlay {
+                                        anchors.fill: parent
+                                        color: "black"
+                                        opacity: 0.5
+                                    }
+                                    MouseArea {
+                                        anchors.fill: parent
+                                        preventStealing: true
+                                        propagateComposedEvents: false
+                                        z: groupAv.z + 1
+                                        hoverEnabled: false
+                                        cursorShape: Qt.PointingHandCursor
+                                        onClicked: {
+                                            drawer.userData = userData
+                                            drawer.open()
+                                        }
+                                    }
+
+                                    Label {
+                                        anchors.centerIn: parent
+                                        text: "+" + (userRow.sharedConvos.rowCount(
+                                                         ) - 6)
+                                        color: "white"
+                                        font.family: CmnCfg.chatFont.name
+                                        font.weight: Font.DemiBold
+                                        font.pixelSize: CmnCfg.defaultFontSize
                                     }
                                 }
                             }
