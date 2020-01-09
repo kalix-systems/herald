@@ -90,9 +90,9 @@ Rectangle {
         id: ownedChatView
         ChatView.ChatViewMain {
             property string stateName: "chat"
-            ownedMessages: convoContent.messages
             headerTitle: itemTitle
             convoItem: conversationItem.conversationData
+            convContent: convoContent
         }
     }
 

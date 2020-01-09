@@ -61,8 +61,8 @@ ListView {
             convoExpiration: convoItem.expirationPeriod
             property Component infoPage: Component {
                 InfoPage {
-                    referredChatBubble: chatBubble
                     members: convContent.members
+                    messageData: chatBubble.messageModelData
                 }
             }
 

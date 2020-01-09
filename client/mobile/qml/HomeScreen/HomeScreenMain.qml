@@ -38,6 +38,7 @@ Page {
                 lastMsgDigest: model.lastMsgDigest
                 isEmpty: model.isEmpty
                 convoContent: ConversationContent {
+                    id: convContent
                     conversationId: model.conversationId
                 }
             }
