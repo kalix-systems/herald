@@ -126,6 +126,11 @@ Popup {
                 left: parent.left
             }
             model: Herald.users
+
+            //           UsersSearch {
+            //                id: usersSearch
+            //                reverse: true
+            //            }
             delegate: Rectangle {
                 id: userRow
                 property var userData: model

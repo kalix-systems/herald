@@ -68,11 +68,13 @@ Drawer {
                 }
 
                 Row {
-                    height: 30
+                    height: implicitHeight
 
-                    spacing: CmnCfg.defaultMargin
+                    spacing: 14 //CmnCfg.megaMargin
+                    padding: 0
                     Rectangle {
-                        height: 20
+                        id: colorDot
+                        height: 22
                         width: height
                         radius: width
                         color: CmnCfg.palette.avatarColors[userData.color]
@@ -127,6 +129,7 @@ Drawer {
                     Label {
                         text: qsTr("Color")
                         font.family: CmnCfg.chatFont.name
+                        anchors.verticalCenter: colorDot.verticalCenter
                     }
                 }
 
@@ -135,11 +138,13 @@ Drawer {
                     text: qsTr("Common groups")
                     font.family: CmnCfg.chatFont.name
                     color: CmnCfg.palette.darkGrey
+                    visible: groups.count > 0
                 }
 
                 ListView {
+                    id: groups
                     model: SharedConversations {
-
+                        id: sharedconvos
                         userId: drawer.userData.userId
                     }
                     width: parent.width
@@ -148,10 +153,10 @@ Drawer {
                     delegate: Item {
                         width: parent.width
                         property var groupData: model
-                        height: 44
+                        height: 42
                         Avatar {
                             id: groupPic
-                            height: 36
+                            height: 32
                             isGroup: true
 
                             property int groupColor: groupData.conversationColor
@@ -181,7 +186,7 @@ Drawer {
 
                         Label {
                             anchors.left: groupPic.right
-                            anchors.leftMargin: CmnCfg.defaultMargin
+                            anchors.leftMargin: CmnCfg.smallMargin
                             text: Utils.safeStringOrDefault(
                                       groupData.conversationTitle, "")
                             color: CmnCfg.palette.offBlack

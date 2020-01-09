@@ -48,30 +48,40 @@ Item {
 
     Component {
         id: imageAvatar
-        Rectangle {
-            color: CmnCfg.palette.offBlack
-            height: isGroup ? groupSize : size
-            width: height
-            radius: isGroup ? 0 : width
-            id: mask
-            clip: true
-
-            Image {
-                source: JS.safeToQrcURI(pfpPath)
-                anchors.fill: mask
-                layer.enabled: true
-                layer.effect: OpacityMask {
-                    maskSource: mask
-                }
+        Item {
+            width: border.width
+            height: border.height
+            Rectangle {
+                color: !isGroup ? wrapperItem.color : CmnCfg.palette.white
+                height: isGroup ? groupSize : size
+                width: height
+                radius: isGroup ? 0 : width
+                id: mask
                 clip: true
-                mipmap: true
-                Rectangle {
-                    anchors.fill: parent
-                    radius: !isGroup ? width : 0
-                    color: "transparent"
-                    border.color: !isGroup ? wrapperItem.color : CmnCfg.palette.white
-                    border.width: !isGroup ? 2 : 1
+                anchors.centerIn: parent
+
+                Image {
+                    id: image
+                    source: JS.safeToQrcURI(pfpPath)
+                    anchors.fill: mask
+                    layer.enabled: true
+                    layer.mipmap: true
+                    layer.effect: OpacityMask {
+                        maskSource: mask
+                    }
+                    layer.smooth: true
+                    mipmap: true
                 }
+            }
+
+            Rectangle {
+                id: border
+                anchors.centerIn: parent
+                width: isGroup ? mask.width + 2 : mask.width + 4
+                height: width
+                radius: !isGroup ? width : 0
+                color: !isGroup ? wrapperItem.color : CmnCfg.palette.white
+                z: parent.z - 1
             }
         }
     }
