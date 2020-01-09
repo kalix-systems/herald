@@ -18,7 +18,7 @@ ApplicationWindow {
         id: mobHelper
         Component.onCompleted: {
             set_status_bar_color(CmnCfg.palette.offBlack)
-            open_gallery()
+            //   open_gallery()
         }
     }
 

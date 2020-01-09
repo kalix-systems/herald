@@ -26,7 +26,8 @@ RowLayout {
         Label {
             id: stateLabel
             text: qsTr("Conversations")
-            font: CmnCfg.headerFont
+            font.family: CmnCfg.headerFont.family
+            font.pixelSize: CmnCfg.headerFontSize
             anchors.verticalCenter: parent.verticalCenter
             color: CmnCfg.palette.iconFill
         }

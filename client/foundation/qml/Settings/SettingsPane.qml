@@ -13,6 +13,7 @@ Flickable {
     boundsBehavior: Flickable.StopAtBounds
 
     property var cropCallbackArg
+    property Component fileDialogComponent
 
     Column {
         id: col
