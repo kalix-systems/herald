@@ -43,11 +43,11 @@ iinstructions instructions  instructions instructions")
         RowLayout {
             Layout.alignment: Qt.AlignCenter
             TextButton {
-                text: "Cancel"
+                text: qsTr("Cancel")
                 onClicked: settingsFlickable.state = ""
             }
             TextButton {
-                text: "Retry"
+                text: qsTr("Confirm")
             }
         }
     }
