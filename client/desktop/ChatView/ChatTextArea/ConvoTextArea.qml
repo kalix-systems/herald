@@ -43,7 +43,7 @@ Rectangle {
     Imports.IconButton {
         id: attachmentsButton
         anchors.right: parent.right
-        anchors.rightMargin: CmnCfg.defaultMargin
+        anchors.rightMargin: CmnCfg.smallMargin
         anchors.bottom: parent.bottom
         bottomPadding: CmnCfg.smallMargin * 0.5
         source: "qrc:/attach-icon.svg"
@@ -53,8 +53,8 @@ Rectangle {
         id: timerButton
         source: timerMenu.chosenTimer
         fill: "transparent"
-        anchors.right: attachmentsButton.right
-        anchors.rightMargin: CmnCfg.defaultMargin * 2
+        anchors.right: attachmentsButton.left
+        anchors.rightMargin: CmnCfg.smallMargin
         anchors.bottom: parent.bottom
         bottomPadding: CmnCfg.smallMargin * 0.5
         topPadding: 1
@@ -71,7 +71,7 @@ Rectangle {
     Imports.IconButton {
         id: emojiButton
         anchors.left: parent.left
-        anchors.leftMargin: CmnCfg.defaultMargin
+        anchors.leftMargin: CmnCfg.smallMargin
         anchors.bottom: parent.bottom
         bottomPadding: CmnCfg.smallMargin * 0.5
         source: "qrc:/emoticon-icon.svg"
@@ -164,6 +164,7 @@ Rectangle {
                 }
 
                 //TODO: use system palette.
+                leftPadding: CmnCfg.microMargin
                 bottomPadding: CmnCfg.smallMargin * 0.5
                 selectionColor: CmnCfg.palette.highlightColor
                 color: CmnCfg.palette.black

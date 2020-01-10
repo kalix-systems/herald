@@ -1,16 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg width="28px" height="27px" viewBox="0 0 28 27" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<svg width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
     <!-- Generator: Sketch 57.1 (83088) - https://sketch.com -->
     <title>add-contact-icon</title>
     <desc>Created with Sketch.</desc>
     <g id="add-contact-icon" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-        <g transform="translate(1.000000, 1.000000)" id="Shape">
-            <path d="M16,14 C18.21,14 20,12.21 20,10 C20,7.79 18.21,6 16,6 C13.79,6 12,7.79 12,10 C12,12.21 13.79,14 16,14 Z M16,16 C13.33,16 8,17.34 8,20 L8,22 L24,22 L24,20 C24,17.34 18.67,16 16,16 Z" fill="#000000" fill-rule="nonzero"></path>
-            <polygon points="0 0 24 0 24 24 0 24"></polygon>
+        <polygon id="Path" points="0 0 24 0 24 24 0 24"></polygon>
+        <g id="Group" transform="translate(6.500000, 5.000000)" fill="#000000">
+            <path d="M8,0 C9.93375,0 11.5,1.56625 11.5,3.5 C11.5,5.43375 9.93375,7 8,7 C6.06625,7 4.5,5.43375 4.5,3.5 C4.5,1.56625 6.06625,0 8,0 Z M8,1.5 C6.895,1.5 6,2.395 6,3.5 C6,4.605 6.895,5.5 8,5.5 C9.105,5.5 10,4.605 10,3.5 C10,2.395 9.105,1.5 8,1.5 Z" id="Shape" fill-rule="nonzero"></path>
+            <path d="M8,8.5 C12.418278,8.5 16,11.1862915 16,14.5 L16,14.5 L0,14.5 C0,11.1862915 3.581722,8.5 8,8.5 Z M8,10 C4.45154744,10 2.6564817,11.3458566 1.89992342,13.1 L14.0920909,13.1 L14.0920909,13.1 C13.3590333,11.3218552 11.5795723,10 8,10 Z" id="Combined-Shape"></path>
         </g>
-        <g id="+-icon" transform="translate(1.000000, 8.000000)">
-            <polygon id="Shape" fill="#000000" fill-rule="nonzero" points="9.16666667 5.5952381 5.5952381 5.5952381 5.5952381 9.16666667 4.4047619 9.16666667 4.4047619 5.5952381 0.833333333 5.5952381 0.833333333 4.4047619 4.4047619 4.4047619 4.4047619 0.833333333 5.5952381 0.833333333 5.5952381 4.4047619 9.16666667 4.4047619"></polygon>
-            <polygon id="Shape" points="0 0 10 0 10 10 0 10"></polygon>
-        </g>
+        <polygon id="Shape" fill="#000000" fill-rule="nonzero" points="9 12 6 12 6 15 4.5 15 4.5 12 1.5 12 1.5 10.5 4.5 10.5 4.5 7.5 6 7.5 6 10.5 9 10.5"></polygon>
     </g>
 </svg>

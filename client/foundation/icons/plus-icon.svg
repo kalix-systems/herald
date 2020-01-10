@@ -4,9 +4,7 @@
     <title>plus-icon</title>
     <desc>Created with Sketch.</desc>
     <g id="plus-icon" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-        <g id="+-icon">
-            <polygon id="Shape" fill="#000000" fill-rule="nonzero" points="19 13 13 13 13 19 11 19 11 13 5 13 5 11 11 11 11 5 13 5 13 11 19 11"></polygon>
-            <polygon id="Shape" points="0 0 24 0 24 24 0 24"></polygon>
-        </g>
+        <polygon id="Shape" points="0 0 24 0 24 24 0 24"></polygon>
+        <polygon id="Shape" fill="#000000" fill-rule="nonzero" points="19 13 13 13 13 19 11 19 11 13 5 13 5 11 11 11 11 5 13 5 13 11 19 11"></polygon>
     </g>
 </svg>

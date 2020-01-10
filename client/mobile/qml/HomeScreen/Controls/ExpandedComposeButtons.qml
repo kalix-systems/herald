@@ -101,7 +101,7 @@ Column {
         }
 
 
-        icon.source: "qrc:/pencil-icon-black.svg"
+        icon.source: "qrc:/pencil-icon.svg"
         icon.color: CmnCfg.palette.black
         icon.height: CmnCfg.iconSize
         icon.width: CmnCfg.iconSize
