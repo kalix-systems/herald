@@ -70,6 +70,7 @@ Item {
 
     /// standard avatar size
     readonly property int avatarSize: 44
+    readonly property int chatAvatarSize: 36
     /// standard conversation/contact height
     readonly property int convoHeight: 56
     /// standard toolbar height

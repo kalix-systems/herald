@@ -105,7 +105,7 @@ Rectangle {
         id: avatar
         color: authorColor
         initials: authorName[0].toUpperCase()
-        size: 36
+        size: CmnCfg.chatAvatarSize
         visible: isHead ? true : false
         anchors {
             left: parent.left

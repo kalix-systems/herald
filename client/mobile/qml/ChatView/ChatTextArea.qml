@@ -11,7 +11,7 @@ Column {
         cta.forceActiveFocus()
     }
 
-    property bool send: cta.text.length > 0
+    property bool send: (cta.preeditText.length !== 0 || cta.text.length !== 0)
     property string chatName: 'conversation'
     width: parent.width
     spacing: 0
@@ -64,7 +64,20 @@ Column {
             AnimIconButton {
                 color: CmnCfg.palette.black
                 onTapped: if (send) {
-                              ownedMessages.builder.body = cta.text
+                              const msgText = function () {
+                                  if ((cta.text.length !== 0)
+                                          && (cta.text.length !== 0)) {
+                                      return cta.text + " " + cta.preeditText
+                                  }
+
+                                  if (cta.text.length !== 0) {
+                                      return cta.text
+                                  }
+
+                                  return cta.preeditText
+                              }
+
+                              ownedMessages.builder.body = msgText()
                               ownedMessages.builder.finalize()
                               cta.clear()
                           }

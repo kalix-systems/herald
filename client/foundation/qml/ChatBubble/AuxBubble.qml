@@ -74,7 +74,7 @@ Rectangle {
     Avatar {
         id: avatar
         visible: false
-        size: 36
+        size: CmnCfg.chatAvatarSize
         anchors {
             left: parent.left
             top: parent.top
@@ -139,14 +139,17 @@ Rectangle {
             elide: Text.ElideRight
             width: bubbleRoot.maxWidth
         }
+        GridLayout {
 
-        Text {
-            id: actionText
-            text: authorName + Utils.auxString(auxData.code, auxData.content)
-            font.family: CmnCfg.chatFont.name
-            font.italic: true
-            elide: Text.ElideRight
-            width: bubbleRoot.maxWidth
+            Text {
+                id: actionText
+                text: authorName + Utils.auxString(auxData.code,
+                                                   auxData.content)
+                font.family: CmnCfg.chatFont.name
+                font.italic: true
+                Layout.maximumWidth: bubbleRoot.maxWidth
+                wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+            }
         }
 
         Loader {
