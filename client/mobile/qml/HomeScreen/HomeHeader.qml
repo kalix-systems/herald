@@ -18,9 +18,9 @@ RowLayout {
             color: CmnCfg.palette.avatarColors[Herald.config.color]
             initials: Herald.config.name[0].toUpperCase()
             pfpPath: Utils.safeStringOrDefault(Herald.config.profilePicture, "")
-            size: CmnCfg.units.dp(24)
+            size: CmnCfg.identityAvatarDiameter
             anchors.verticalCenter: parent.verticalCenter
-            Layout.leftMargin: CmnCfg.units.dp(12)
+            Layout.leftMargin: CmnCfg.defaultMargin
         }
 
         Label {

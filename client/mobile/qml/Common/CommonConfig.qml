@@ -13,8 +13,11 @@ Item {
 
     readonly property alias units: units
 
-    // MARGINS & SPACING
-
+    SystemPalette {
+        id: systemPalette
+        colorGroup: SystemPalette.Active
+    }
+    readonly property alias sysPalette: systemPalette
     /// standard tiny margin
     readonly property real microMargin: units.dp(4)
     /// standard small margin
@@ -77,7 +80,7 @@ Item {
     readonly property real toolbarHeight: units.dp(40)
 
     /// logged-in user avatar size
-    readonly property real identityAvatarDiameter: units.dp(28)
+    readonly property real identityAvatarDiameter: units.dp(24)
     /// standard avatar size
     readonly property real avatarSize: units.dp(42)
     /// standard conversation/contact height

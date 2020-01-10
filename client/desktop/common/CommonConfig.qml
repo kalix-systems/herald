@@ -17,7 +17,6 @@ Item {
     // TODO do we use this radius anywhere?
     /// edge rounding for all rectangles that use the radius property
     readonly property int radius: 10
-    // MARGINS & SPACING
     SystemPalette {
         id: sysPalette
         colorGroup: SystemPalette.Active

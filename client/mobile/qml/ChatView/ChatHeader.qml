@@ -16,11 +16,11 @@ ToolBar {
         id: backButton
         anchors.left: parent.left
         anchors.leftMargin: CmnCfg.smallMargin
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: CmnCfg.smallMargin
         color: CmnCfg.palette.iconFill
         imageSource: "qrc:/back-arrow-icon.svg"
         onTapped: mainView.pop()
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: CmnCfg.smallMargin
     }
 
     RowLayout {
@@ -60,6 +60,7 @@ ToolBar {
             onTextEdited: {
                 ownedMessages.searchPattern = text
             }
+            font.pixelSize: CmnCfg.chatTextSize
         }
 
         AnimIconButton {

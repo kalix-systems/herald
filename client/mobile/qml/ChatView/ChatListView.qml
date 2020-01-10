@@ -52,30 +52,52 @@ ListView {
         anchors.right: parent.right
         bottomPadding: 0
         topPadding: 0
-
-        CB.ChatBubble {
-            id: chatBubble
-            defaultWidth: chatListView.width
-            messageModelData: containerCol.messageModelData
-            convContainer: parent
-            convoExpiration: convoItem.expirationPeriod
-            property Component infoPage: Component {
-                InfoPage {
-                    members: convContent.members
-                    messageData: chatBubble.messageModelData
-                }
-            }
+        Loader {
+            id: bubbleLoader
+            property var modelData: model
+            sourceComponent: model.auxData.length === 0 ? msgBubble : auxBubble
+            width: parent.width
+            height: active ? item.height : undefined
+            property bool isAux: model.auxData.length !== 0
 
             MessageMouseArea {
-                cb: parent
-                dropdown: dropdown
+                cb: parent.item
+                dropdown: optionsDropdown
                 anchors.fill: parent
+            }
+            Component {
+                id: msgBubble
+                CB.ChatBubble {
+                    id: chatBubble
+                    defaultWidth: chatListView.width
+                    messageModelData: containerCol.messageModelData
+                    convContainer: parent
+                    convoExpiration: convoItem.expirationPeriod
+                    property Component infoPage: Component {
+                        InfoPage {
+                            members: convContent.members
+                            messageData: chatBubble.messageModelData
+                        }
+                    }
+                }
+            }
+            Component {
+                id: auxBubble
+                CB.AuxBubble {
+
+                    id: bubbleActual
+                    auxData: JSON.parse(model.auxData)
+                    messageModelData: model
+                    width: parent.width
+                    defaultWidth: chatListView.width
+                    bubbleIndex: index
+                }
             }
         }
 
         OptionsDropdown {
-            id: dropdown
-            cb: chatBubble
+            id: optionsDropdown
+            cb: bubbleLoader.item
         }
     }
 }

@@ -5,18 +5,21 @@ import LibHerald 1.0
 import "../Common"
 import "qrc:/imports/"
 
-RowLayout {
+ToolBar {
+
     property alias searchText: searchField.text
 
-    anchors {
-        fill: parent
-        rightMargin: CmnCfg.largeMargin
-        leftMargin: CmnCfg.largeMargin
+    width: parent.width
+    height: CmnCfg.toolbarHeight
+    background: Rectangle {
+        color: CmnCfg.palette.offBlack
     }
-
     AnimIconButton {
         id: backButton
-        Layout.alignment: Qt.AlignLeft
+        anchors.left: parent.left
+        anchors.leftMargin: CmnCfg.smallMargin
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: CmnCfg.smallMargin
         color: CmnCfg.palette.iconFill
         imageSource: "qrc:/back-arrow-icon.svg"
         onTapped: {
@@ -32,28 +35,35 @@ RowLayout {
         }
     }
 
-    Item {
-        Layout.fillWidth: true
-        Layout.leftMargin: CmnCfg.defaultMargin
-        Layout.alignment: Qt.AlignTop
-        height: parent.height - CmnCfg.microMargin
+    RowLayout {
+        id: searchRow
+        anchors.left: backButton.right
+        anchors.leftMargin: CmnCfg.smallMargin
+        anchors.rightMargin: CmnCfg.smallMargin
+        anchors.right: parent.right
+        anchors.verticalCenter: parent.verticalCenter
+        height: implicitHeight //searchField.height //parent.height - CmnCfg.microMargin
 
         BorderedTextField {
             id: searchField
             color: CmnCfg.palette.white
             borderColor: "Transparent"
             placeholderText: qsTr('Search your conversations')
-            font.pixelSize: CmnCfg.units.dp(18)
             // Load previous search query in search field in case returns gets
             // to this view via back button and expects state to be preserved
             text: Herald.conversations.filter
+            font.pixelSize: CmnCfg.chatTextSize
+            font.family: CmnCfg.defaultFont.family
 
+            Layout.margins: CmnCfg.smallMargin
+            Layout.topMargin: CmnCfg.microMargin
+            Layout.fillWidth: true
+            Layout.alignment: Qt.AlignCenter
             Component.onCompleted: forceActiveFocus()
 
             Keys.onPressed: {
                 // this makes sure that returns and tabs are not evaluated
-                if (event.key === Qt.Key_Return
-                        || event.key === Qt.Key_Tab) {
+                if (event.key === Qt.Key_Return || event.key === Qt.Key_Tab) {
                     event.accepted = true
                 }
             }
@@ -68,25 +78,23 @@ RowLayout {
 
         AnimIconButton {
             id: clearButton
-            anchors {
-                right: parent.right
-                bottom: parent.bottom
-                bottomMargin: CmnCfg.microMargin
-            }
+            Layout.alignment: Qt.AlignRight
             color: CmnCfg.palette.iconFill
             imageSource: "qrc:/x-icon.svg"
             onTapped: searchField.text = ''
             // TODO then focus search field again
         }
+    }
 
-        Rectangle {
-            height: 1
-            color: CmnCfg.palette.lightGrey
-            anchors {
-                bottom: parent.bottom
-                left: parent.left
-                right: parent.right
-            }
+    Rectangle {
+        height: 1
+        color: CmnCfg.palette.lightGrey
+        anchors {
+            bottomMargin: CmnCfg.smallMargin
+            bottom: parent.bottom
+            left: searchRow.left
+            leftMargin: CmnCfg.microMargin
+            right: searchRow.right
         }
     }
 }
