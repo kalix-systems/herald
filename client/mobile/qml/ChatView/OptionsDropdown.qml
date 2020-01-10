@@ -37,7 +37,7 @@ Rectangle {
         }
 
         CMN.AnimIconButton {
-            imageSource: "qrc:/options-icon.svg"
+            imageSource: "qrc:/info-icon.svg"
             anchors.verticalCenter: parent.verticalCenter
             visible: !bubbleLoader.isAux
             icon.color: CmnCfg.palette.white

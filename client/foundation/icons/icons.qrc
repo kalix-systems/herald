@@ -3,24 +3,15 @@
         <file>add-contact-icon.svg</file>
         <file>back-arrow-icon.svg</file>
         <file>camera-icon.svg</file>
-        <file>chats-icon.svg</file>
         <file>check-icon.svg</file>
         <file>contacts-icon.svg</file>
-        <file>convos-filter-icon.svg</file>
-        <file>convos-teams-filter-icon.svg</file>
         <file>dashboard-icon.svg</file>
-        <file>double-check-receipt-icon.svg</file>
-        <file>emoji-icon.svg</file>
         <file>emoticon-icon.svg</file>
         <file>forward-arrow-icon.svg</file>
-        <file>gear-icon.svg</file>
-        <file>hamburger-icon.svg</file>
-        <file>help-icon.svg</file>
         <file>options-icon.svg</file>
         <file>plus-icon.svg</file>
         <file>search-icon.svg</file>
         <file>send-icon.svg</file>
-        <file>single-check-receipt-icon.svg</file>
         <file>x-icon.svg</file>
         <file>reply-icon.svg</file>
         <file>pencil-icon.svg</file>
@@ -56,6 +47,7 @@
         <file>timer-option-icons/30s-dark.svg</file>
         <file>timer-option-icons/off.svg</file>
         <file>timer-option-icons/off-dark.svg</file>
+        <file>timer-option-icons/blank-dark.svg</file>
         <file>herald.icns</file>
         <file>attach-icon.svg</file>
         <file>file-icon.svg</file>
@@ -63,12 +55,9 @@
         <file>dropdown-arrow-icon.svg</file>
         <file>minus-icon.svg</file>
         <file>file-download-icon.svg</file>
-        <file>pencil-icon.svg</file>
         <file>down-chevron-icon.svg</file>
         <file>up-chevron-icon.svg</file>
-        <file>upside-down-emoji-icon.svg</file>
         <file>regex-search-icon.svg</file>
-        <file>lenny-icon.svg</file>
         <file>emoji-categories/recents.svg</file>
         <file>directory-icon.svg</file>
         <file>emoticon-icon-14.svg</file>
@@ -76,5 +65,10 @@
         <file>reply-icon-14.svg</file>
         <file>download-icon-14.svg</file>
         <file>herald.png</file>
+        <file>read-receipt-read-icon.svg</file>
+        <file>read-receipt-received-icon.svg</file>
+        <file>read-receipt-sending-icon.svg</file>
+        <file>read-receipt-sent-icon.svg</file>
+        <file>info-icon.svg</file>
     </qresource>
 </RCC>

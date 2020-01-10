@@ -179,6 +179,8 @@ export function initialize(name) {
     });
     return str;
 }
+
+// TODO add "sending" and "received but not read" states
 /*
  * returns the uri of an icon corresponding to the
  * receipt code
@@ -189,10 +191,10 @@ export function receiptCodeSwitch(receiptCode) {
             return "";
         }
         case 1 /* Received */: {
-            return "qrc:/single-check-receipt-icon.svg";
+            return "qrc:/read-receipt-sent-icon.svg";
         }
         case 2 /* Read */: {
-            return "qrc:/double-check-receipt-icon.svg";
+            return "qrc:/read-receipt-read-icon.svg";
         }
         default:
             return "";
