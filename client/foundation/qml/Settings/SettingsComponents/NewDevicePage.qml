@@ -9,19 +9,13 @@ Page {
     anchors.fill: parent
     ColumnLayout {
         anchors.fill: parent
-        anchors.margins: CmnCfg.largeMargin * 2
-
-        Label {
-            Layout.alignment: Qt.AlignCenter
-            text: qsTr("Title")
-        }
+        anchors.margins: CmnCfg.largeMargin * 4
 
         Text {
             Layout.alignment: Qt.AlignCenter
-            Layout.preferredWidth: parent.width * 0.66
-            text: qsTr("instructions instructions instructions instructions instructions instructions \
-instructions instructions instructions instructions instructions instructions \
-iinstructions instructions  instructions instructions")
+            Layout.preferredWidth: parent.width * 0.75
+            text: qsTr("On your other device, if you have not registered, select `link to existing acount` from the landing page. Enter the words below into the text area presented to you on the page and press submit.
+If you have registered a new account on your other device open `Settings` and navigate to `Add new Account` under devices,  press the button, enter the text show below into the text area, and press submit. ")
             wrapMode: Text.WrapAtWordBoundaryOrAnywhere
         }
 
@@ -36,19 +30,43 @@ iinstructions instructions  instructions instructions")
                 width: parent.width + CmnCfg.defaultMargin
                 anchors.centerIn: parent
             }
-
-            text: "boogaloo nine tryhard lemon sasquatch dogwater"
+            text: "" // some model should populate this with random text
         }
 
         RowLayout {
             Layout.alignment: Qt.AlignCenter
             TextButton {
+                id: canButton
                 text: qsTr("Cancel")
                 onClicked: settingsFlickable.state = ""
             }
             TextButton {
-                text: qsTr("Confirm")
+                id: conButton
+                text: qsTr("Connect")
+                onClicked: {
+                    parent.state = "waiting"
+                    // call server API
+                }
             }
+
+            BusyIndicator {
+                id: busy
+                visible: false
+            }
+
+            states: [
+                State {
+                    name: "waiting"
+                    PropertyChanges {
+                        target: conButton
+                        visible: false
+                    }
+                    PropertyChanges {
+                        target: busy
+                        visible: true
+                    }
+                }
+            ]
         }
     }
 }

@@ -9,7 +9,7 @@ ColumnLayout {
 
     TextButton {
         Layout.leftMargin: CmnCfg.defaultMargin
-        text: "Link New Device"
+        text: qsTr("Link New Device")
         onClicked: settingsFlickable.state = "newDeviceFlow"
     }
 
