@@ -14,6 +14,7 @@ Flickable {
     boundsBehavior: Flickable.StopAtBounds
 
     property var cropCallbackArg
+    property Component fileDialogComponent
 
     Loader {
         id: newDeviceLoader

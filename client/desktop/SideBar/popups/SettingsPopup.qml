@@ -135,7 +135,19 @@ Window {
             }
 
             Settings.SettingsPane {
+
                 id: settingsPane
+                //TODO: cropCallbackArg does not need to exist anymore
+                fileDialogComponent: FileDialog {
+                    id: cfgPfp
+                    property bool pfpValid: true
+                    folder: shortcuts.desktop
+                    nameFilters: ["(*.jpg *.png *.jpeg)"]
+                    onSelectionAccepted: {
+
+                        settingsPane.cropCallbackArg(fileUrl)
+                    }
+                }
                 cropCallbackArg: function (fileUrl) {
                     cropLoader.imageSource = fileUrl
                     cropLoader.active = true

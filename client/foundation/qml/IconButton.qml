@@ -30,14 +30,21 @@ ToolButton {
         id: tooltip
         y: -(height + CmnCfg.microMargin)
         visible: (mouseArea.containsMouse && tooltipText !== "")
-        font.family: CmnCfg.chatFont.name
         font.pixelSize: 11
+
+        contentItem: Text {
+            text: tooltip.text
+            font: tooltip.font
+            color: CmnCfg.sysPalette.text
+        }
+
         padding: CmnCfg.microMargin
         delay: 1500
         timeout: 4000
         background: Rectangle {
+            color: CmnCfg.sysPalette.window
             border.width: 1
-            border.color: CmnCfg.palette.offBlack
+            border.color: CmnCfg.sysPalette.midlight
         }
     }
 }

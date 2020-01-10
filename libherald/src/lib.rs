@@ -35,6 +35,8 @@ pub mod members;
 pub mod message_search;
 /// Messages object
 pub mod messages;
+/// Conversations shared with a given user
+pub mod shared_conversations;
 /// Desktop push notifications
 pub mod toasts;
 /// Users object

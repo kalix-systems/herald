@@ -14,7 +14,6 @@ Popup {
 
     property int minSize: Math.round(maxSize / 6)
 
-    //  color: CmnCfg.palette.black
     modal: true
     onClosed: cropLoader.active = false
     Row {

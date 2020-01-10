@@ -29,7 +29,9 @@ Page {
             Layout.alignment: Qt.AlignLeft
             Layout.leftMargin: CmnCfg.smallMargin
             Layout.topMargin: CmnCfg.microMargin
-            font: CmnCfg.sectionHeaderFont
+            font.family: CmnCfg.labelFont.name
+            font.weight: Font.DemiBold
+            font.pixelSize: CmnCfg.labelFontSize
             color: CmnCfg.palette.offBlack
         }
 
@@ -52,9 +54,9 @@ Page {
                 // items per conversation (HomeScreenMain already carestes one
                 // per conversation). Future refactor: create a single
                 // ConversationContent for a ChatView when it's pushed
-//                convoContent: ConversationContent {
-//                    conversationId: model.conversationId
-//                }
+                //                convoContent: ConversationContent {
+                //                    conversationId: model.conversationId
+                //                }
                 visible: model.matched
                 height: visible ? CmnCfg.convoHeight : 0
             }
@@ -65,7 +67,9 @@ Page {
             Layout.alignment: Qt.AlignLeft
             Layout.leftMargin: CmnCfg.smallMargin
             Layout.topMargin: CmnCfg.microMargin
-            font: CmnCfg.sectionHeaderFont
+            font.family: CmnCfg.labelFont.name
+            font.weight: Font.DemiBold
+            font.pixelSize: CmnCfg.labelFontSize
             color: CmnCfg.palette.offBlack
         }
 

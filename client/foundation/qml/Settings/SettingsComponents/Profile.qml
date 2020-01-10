@@ -2,7 +2,7 @@
 import QtQuick 2.13
 import QtQuick.Controls 2.13
 import QtQuick.Layouts 1.12
-import QtQuick.Dialogs 1.3
+//import QtQuick.Dialogs 1.3
 //import Qt.labs.platform 1.1
 import Qt.labs.settings 1.0
 import QtQuick.Shapes 1.13
@@ -50,7 +50,12 @@ ColumnLayout {
                 MouseArea {
                     anchors.fill: parent
                     cursorShape: Qt.PointingHandCursor
-                    onClicked: cfgPfp.open()
+                    onClicked: {
+                        if (!fileDialogLoader.active)
+                            return
+
+                        fileDialogLoader.item.open()
+                    }
                 }
             }
 
@@ -146,15 +151,21 @@ ColumnLayout {
     // TODO FileDialog doesn't work on mobile, pass in something that does
     // RESPONSE: this basically needs to be a loader, or we could stop fetishizing code reuse
     // even when it breaks things everywhere
-    FileDialog {
-        id: cfgPfp
-        property bool pfpValid: true
-        folder: shortcuts.desktop
-        nameFilters: ["(*.jpg *.png *.jpeg)"]
-        onSelectionAccepted: {
+    Loader {
+        id: fileDialogLoader
 
-            cropCallbackArg(fileUrl)
-        }
+        sourceComponent: fileDialogComponent
+        active: fileDialogComponent !== null
+        //  FileDialog {
+        //      id: cfgPfp
+        //      property bool pfpValid: true
+        //      folder: shortcuts.desktop
+        //      nameFilters: ["(*.jpg *.png *.jpeg)"]
+        //      onSelectionAccepted: {
+
+        //          cropCallbackArg(fileUrl)
+        //      }
+        //  }
     }
 
     Rectangle {

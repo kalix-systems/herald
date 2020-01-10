@@ -1,4 +1,5 @@
 use super::*;
+use coremacros::w;
 
 /// How old does a typing indicator need to be before being ignored?
 const TYPING_FUZZ: i64 = 10_000;
@@ -18,7 +19,7 @@ pub(super) fn handle_content(
 
         Msg(msg) => {
             // items that appear in linear message history
-            handle_msg(cid, uid, ts, msg, ev)?;
+            w!(handle_msg(cid, uid, ts, msg, ev));
         }
 
         Receipt(receipt) => {
@@ -27,7 +28,7 @@ pub(super) fn handle_content(
                 stat: status,
             } = receipt;
 
-            crate::message::add_receipt(msg_id, uid, status)?;
+            w!(crate::message::add_receipt(msg_id, uid, status));
             ev.notifications
                 .push(Notification::MsgReceipt(message::MessageReceipt {
                     msg_id,
@@ -43,9 +44,13 @@ pub(super) fn handle_content(
             remove,
         }) => {
             if remove {
-                crate::message::remove_reaction(&msg_id, &uid, &react_content)?;
+                w!(crate::message::remove_reaction(
+                    &msg_id,
+                    &uid,
+                    &react_content
+                ));
             } else {
-                crate::message::add_reaction(&msg_id, &uid, &react_content)?;
+                w!(crate::message::add_reaction(&msg_id, &uid, &react_content));
             }
             ev.notifications.push(Notification::Reaction {
                 cid,
@@ -58,7 +63,7 @@ pub(super) fn handle_content(
 
         ProfileChanged(change) => {
             // changes to a user's profile
-            profile_change(uid, change, ev)?;
+            w!(profile_change(uid, change, ev));
         }
 
         Typing(time_sent) => {
@@ -105,9 +110,9 @@ fn handle_msg(
             builder.op = op;
             builder.expiration = expiration;
 
-            if let Some(msg) = builder.store()? {
+            if let Some(msg) = w!(builder.store()) {
                 ev.notifications.push(Notification::NewMsg(Box::new(msg)));
-                ev.replies.push((cid, form_ack(mid)?));
+                ev.replies.push((cid, form_ack(mid)));
             }
         }
 

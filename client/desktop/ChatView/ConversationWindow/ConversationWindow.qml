@@ -113,7 +113,9 @@ ListView {
                 width: parent.width
                 defaultWidth: chatListView.width
                 bubbleIndex: index
-
+                ListView.onAdd: {
+                    chatScrollBarInner.setPosition(1.0)
+                }
                 BubbleDecoration {
                     parentBubble: parent
                 }
@@ -132,7 +134,6 @@ ListView {
                 convoExpiration: conversationItem.expirationPeriod
                 ListView.onAdd: {
                     chatScrollBarInner.setPosition(1.0)
-                    conversationItem.status = 0
                 }
                 bubbleIndex: index
                 BubbleDecoration {

@@ -18,15 +18,16 @@ RowLayout {
             color: CmnCfg.palette.avatarColors[Herald.config.color]
             initials: Herald.config.name[0].toUpperCase()
             pfpPath: Utils.safeStringOrDefault(Herald.config.profilePicture, "")
-            size: CmnCfg.units.dp(24)
+            size: CmnCfg.identityAvatarDiameter
             anchors.verticalCenter: parent.verticalCenter
-            Layout.leftMargin: CmnCfg.units.dp(12)
+            Layout.leftMargin: CmnCfg.defaultMargin
         }
 
         Label {
             id: stateLabel
             text: qsTr("Conversations")
-            font: CmnCfg.headerFont
+            font.family: CmnCfg.headerFont.family
+            font.pixelSize: CmnCfg.headerFontSize
             anchors.verticalCenter: parent.verticalCenter
             color: CmnCfg.palette.iconFill
         }

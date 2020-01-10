@@ -52,6 +52,8 @@ fn objects() -> BTreeMap<String, Rc<Object>> {
        messages(),
        message_builder(),
 
+       shared_conversations(),
+
        media_attachments(),
        document_attachments(),
        emoji_picker()
@@ -186,6 +188,7 @@ fn users() -> Object {
         const colorById(id: QString) => QUint32,
         const nameById(id: QString) => QString,
         const profilePictureById(id: QString) => QString,
+        const indexById(id: QString) => Qint64,
     };
 
     obj! {
@@ -551,6 +554,33 @@ fn message_search() -> Object {
 
     obj! {
         MessageSearch: Obj::new().list().funcs(funcs).props(props).item_props(item_props)
+    }
+}
+
+/// Shared conversations
+fn shared_conversations() -> Object {
+    let props = props! {
+       userId: Prop::new().simple(QString).optional().write()
+    };
+
+    let item_props = item_props! {
+        conversationId: ItemProp::new(QByteArray),
+        conversationPicture: ItemProp::new(QString).get_by_value().optional(),
+        conversationTitle: ItemProp::new(QString).get_by_value().optional(),
+        conversationColor: ItemProp::new(QUint32).get_by_value().optional()
+    };
+
+    let funcs = functions! {
+        mut load() => Void,
+    };
+
+    let hooks = signals! {
+        tryLoad(),
+        | connect tryLoad load
+    };
+
+    obj! {
+       SharedConversations: Obj::new().list().item_props(item_props).props(props).funcs(funcs).hooks(hooks)
     }
 }
 

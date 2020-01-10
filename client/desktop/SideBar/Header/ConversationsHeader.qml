@@ -35,6 +35,7 @@ ToolBar {
         }
 
         spacing: 12
+
         Imports.IconButton {
             id: searchButton
             property bool searchRegex: false
@@ -42,6 +43,17 @@ ToolBar {
             source: "qrc:/search-icon.svg"
             // TODO : add back in regex logic once ui is known
             onClicked: sideBarState.state = "globalSearch"
+        }
+
+        Imports.IconButton {
+            id: contactsButton
+            property bool searchRegex: false
+            fill: CmnCfg.palette.lightGrey
+            source: "qrc:/contacts-icon.svg"
+            onClicked: {
+                contactsLoader.active = true
+                contactsLoader.item.open()
+            }
         }
 
         Imports.IconButton {

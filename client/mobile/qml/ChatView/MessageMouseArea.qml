@@ -4,7 +4,7 @@ import LibHerald 1.0
 import "qrc:/imports/ChatBubble"
 
 MouseArea {
-    property ChatBubble cb
+    property var cb
     property OptionsDropdown dropdown
 
     pressAndHoldInterval: 350
