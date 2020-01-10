@@ -6,6 +6,7 @@ import "qrc:/imports"
 import "./SettingsComponents" as SetsComps
 
 Flickable {
+    id: settingsFlickable
     property alias mainColumn: col
     Layout.fillWidth: true
     Layout.fillHeight: true
@@ -13,6 +14,13 @@ Flickable {
     boundsBehavior: Flickable.StopAtBounds
 
     property var cropCallbackArg
+
+    Loader {
+        id: newDeviceLoader
+        anchors.fill: parent
+        active: false
+        sourceComponent: SetsComps.NewDevicePage {}
+    }
 
     Column {
         id: col
@@ -42,6 +50,12 @@ Flickable {
         }
 
         SetsComps.SettingsListItem {
+            id: otherDevices
+            headerText: qsTr("Devices")
+            settingsContent: SetsComps.MultipleDevice {}
+        }
+
+        SetsComps.SettingsListItem {
             id: storage
             headerText: qsTr("Data & Storage")
             settingsContent: SetsComps.Storage {}
@@ -59,4 +73,23 @@ Flickable {
             settingsContent: SetsComps.Feedback {}
         }
     }
+
+    states: [
+        State {
+            name: "newDeviceFlow"
+            PropertyChanges {
+                target: col
+                visible: false
+            }
+            PropertyChanges {
+                target: newDeviceLoader
+                active: true
+            }
+
+            PropertyChanges {
+                target: settingsFlickable
+                contentHeight: settingsFlickable.height
+            }
+        }
+    ]
 }
