@@ -5,7 +5,7 @@ import LibHerald 1.0
 
 // TODO: All these image layouts should be in an image layout subdirectory
 Row {
-    height: 150
+    height: CmnCfg.attachmentSize / 2
     spacing: CmnCfg.smallMargin
     property var firstImage
     property var secondImage
@@ -13,12 +13,13 @@ Row {
         throw "undefined callback"
     }
     Rectangle {
-        height: 150
+        height: CmnCfg.attachmentSize / 2
         width: height
         clip: true
         color: "transparent"
         property var dims: JSON.parse(Herald.utils.imageScaling(
-                                          firstImage.path, 150))
+                                          firstImage.path,
+                                          CmnCfg.attachmentSize / 2))
         Image {
             source: "file:" + firstImage.path
             sourceSize.height: parent.dims.height
@@ -34,12 +35,13 @@ Row {
     }
 
     Rectangle {
-        height: 150
+        height: CmnCfg.attachmentSize / 2
         width: height
         clip: true
         color: "transparent"
         property var dims: JSON.parse(Herald.utils.imageScaling(
-                                          secondImage.path, 150))
+                                          secondImage.path,
+                                          CmnCfg.attachmentSize / 2))
         Image {
             source: "file:" + secondImage.path
             sourceSize.height: parent.dims.height
