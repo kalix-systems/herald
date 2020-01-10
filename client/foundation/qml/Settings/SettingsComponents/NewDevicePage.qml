@@ -9,11 +9,14 @@ Page {
     anchors.fill: parent
     ColumnLayout {
         anchors.fill: parent
-        anchors.margins: CmnCfg.largeMargin * 4
+        anchors.topMargin: CmnCfg.largeMargin
+        anchors.bottomMargin: CmnCfg.largeMargin
+        spacing: 0
 
         Text {
             Layout.alignment: Qt.AlignCenter
-            Layout.preferredWidth: parent.width * 0.75
+            Layout.preferredWidth: parent.width * 0.90
+            font.pixelSize: CmnCfg.chatTextSize
             text: qsTr("On your other device, if you have not registered, select `link to existing acount` from the landing page. Enter the words below into the text area presented to you on the page and press submit.
 If you have registered a new account on your other device open `Settings` and navigate to `Add new Account` under devices,  press the button, enter the text show below into the text area, and press submit. ")
             wrapMode: Text.WrapAtWordBoundaryOrAnywhere
@@ -24,6 +27,8 @@ If you have registered a new account on your other device open `Settings` and na
             Layout.alignment: Qt.AlignCenter
             Layout.preferredWidth: parent.width * 0.66
             wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+            font.pixelSize: CmnCfg.labelSize
+            font.bold: true
             background: Rectangle {
                 border.color: CmnCfg.palette.offBlack
                 height: parent.height + CmnCfg.defaultMargin
