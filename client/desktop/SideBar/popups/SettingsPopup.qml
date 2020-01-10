@@ -83,6 +83,9 @@ Window {
                 name: qsTr("Privacy & Security")
             }
             ListElement {
+                name: qsTr("Devices")
+            }
+            ListElement {
                 name: qsTr("Data & Storage")
             }
 
@@ -127,15 +130,15 @@ Window {
                             hoverEnabled: true
                             anchors.fill: parent
                             cursorShape: Qt.PointingHandCursor
-                            onClicked: settingsPane.contentY
-                                       = settingsPane.mainColumn.children[index].y
+                            onClicked: if (settingsPane.state === "")
+                                           settingsPane.contentY
+                                                   = settingsPane.mainColumn.children[index].y
                         }
                     }
                 }
             }
 
             Settings.SettingsPane {
-
                 id: settingsPane
                 //TODO: cropCallbackArg does not need to exist anymore
                 fileDialogComponent: FileDialog {
@@ -152,8 +155,8 @@ Window {
                     cropLoader.imageSource = fileUrl
                     cropLoader.active = true
                     cropLoader.item.open()
-                    //                    imageCrop.imageSource = fileUrl
-                    //                    imageCrop.show()
+                    // imageCrop.imageSource = fileUrl
+                    // imageCrop.show()
                 }
             }
         }

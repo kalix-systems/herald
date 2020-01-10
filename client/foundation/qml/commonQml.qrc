@@ -83,5 +83,7 @@
         <file>ChatBubble/ImageLayouts/ThreeImageLayout.qml</file>
         <file>ChatBubble/ImageLayouts/TwoImageLayout.qml</file>
         <file>ChatBubble/TypingBubble.qml</file>
+        <file>Settings/SettingsComponents/MultipleDevice.qml</file>
+        <file>Settings/SettingsComponents/NewDevicePage.qml</file>
     </qresource>
 </RCC>

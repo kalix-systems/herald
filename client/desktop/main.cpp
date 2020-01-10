@@ -21,11 +21,10 @@ int main(int argc, char* argv[])
   qmlRegisterSingletonType<Herald>(
       "LibHerald", 1, 0, "Herald",
       [](QQmlEngine* engine, QJSEngine* scriptEngine) {
-        Q_UNUSED(engine);
-        Q_UNUSED(scriptEngine);
+        Q_UNUSED(engine)
+        Q_UNUSED(scriptEngine)
 
-        QStandardPaths::StandardLocation local =
-            QStandardPaths::AppDataLocation;
+       auto local = QStandardPaths::AppDataLocation;
 
         QString path = QStandardPaths::writableLocation(local);
 
