@@ -31,7 +31,6 @@ Column {
         height: cta.height
         TextArea {
             id: cta
-            //     Layout.fillWidth: true
             placeholderText: qsTr('Message ') + chatRowLayout.chatName
             wrapMode: TextArea.WrapAtWordBoundaryOrAnywhere
             color: CmnCfg.palette.black
@@ -77,7 +76,9 @@ Column {
                                   return cta.preeditText
                               }
 
-                              ownedMessages.builder.body = msgText()
+                              Qt.inputMethod.commit()
+                              ownedMessages.builder.body = cta.text //msgText()
+                              cta.focus = true
                               ownedMessages.builder.finalize()
                               cta.clear()
                           }

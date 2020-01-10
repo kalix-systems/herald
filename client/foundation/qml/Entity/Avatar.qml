@@ -48,28 +48,33 @@ Item {
     Component {
         id: imageAvatar
         Rectangle {
-            color: CmnCfg.palette.offBlack
             height: isGroup ? groupSize : size
             width: height
-            radius: isGroup ? 0 : width
-            id: mask
-            clip: true
+            color: "transparent"
 
-            Image {
-                source: JS.safeToQrcURI(pfpPath)
-                anchors.fill: mask
-                layer.enabled: true
-                layer.effect: OpacityMask {
-                    maskSource: mask
-                }
+            radius: !isGroup ? width : 0
+            border.color: !isGroup ? wrapperItem.color : CmnCfg.palette.white
+            border.width: !isGroup ? 2 : 1
+            Rectangle {
+                color: CmnCfg.palette.offBlack
+                height: isGroup ? groupSize : size
+                width: height
+                radius: isGroup ? 0 : width
+                id: mask
                 clip: true
-                mipmap: true
-                Rectangle {
-                    anchors.fill: parent
-                    radius: !isGroup ? width : 0
-                    color: "transparent"
-                    border.color: !isGroup ? wrapperItem.color : CmnCfg.palette.white
-                    border.width: !isGroup ? 2 : 1
+                anchors.fill: parent
+                anchors.margins: isGroup ? 1 : 2
+
+                Image {
+                    source: JS.safeToQrcURI(pfpPath)
+                    anchors.fill: mask
+                    layer.enabled: true
+                    layer.effect: OpacityMask {
+                        maskSource: mask
+                    }
+                    clip: true
+                    mipmap: true
+                    fillMode: Image.PreserveAspectFit
                 }
             }
         }

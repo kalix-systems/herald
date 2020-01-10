@@ -25,6 +25,7 @@ Row {
             sourceSize.height: dims.height
             sourceSize.width: dims.width
             anchors.centerIn: parent
+            fillMode: Image.PreserveAspectFit
             mipmap: false
             asynchronous: true
             MouseArea {
@@ -49,6 +50,7 @@ Row {
                 sourceSize.height: dims.height
                 sourceSize.width: dims.width
                 anchors.centerIn: parent
+                fillMode: Image.PreserveAspectFit
                 mipmap: false
                 asynchronous: true
                 MouseArea {
@@ -78,6 +80,7 @@ Row {
                     anchors.centerIn: parent
                     mipmap: false
                     asynchronous: true
+                    fillMode: Image.PreserveAspectFit
                     MouseArea {
                         onClicked: imageClickedCallBack(parent.source)
                         anchors.fill: parent
@@ -102,6 +105,7 @@ Row {
                     anchors.centerIn: parent
                     mipmap: false
                     asynchronous: true
+                    fillMode: Image.PreserveAspectFit
                     MouseArea {
                         onClicked: imageClickedCallBack(parent.source)
                         anchors.fill: parent

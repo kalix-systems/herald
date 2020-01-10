@@ -33,6 +33,7 @@ ListView {
             sourceSize.height: dims.height
             anchors.centerIn: parent
             source: parent.imageSource
+            fillMode: Image.PreserveAspectFit
             ColorOverlay {
                 id: overlay
                 anchors.fill: parent

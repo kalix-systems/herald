@@ -49,7 +49,7 @@ ToolBar {
             id: contactsButton
             property bool searchRegex: false
             fill: CmnCfg.palette.lightGrey
-            source: "qrc:/contacts-icon.svg"
+            source: "qrc:/directory-icon.svg"
             onClicked: {
                 contactsLoader.active = true
                 contactsLoader.item.open()
