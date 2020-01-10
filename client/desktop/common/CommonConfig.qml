@@ -97,6 +97,9 @@ Item {
     readonly property int bottomZ: 1
     readonly property int underlayZ: -1
 
+
+    readonly property int attachmentSize: 300
+
     /// list of recent emojis
     property var recentEmojis: []
     /// fitzpatrick emoji swatch codes

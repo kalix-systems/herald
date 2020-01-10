@@ -6,7 +6,7 @@ import QtGraphicalEffects 1.12
 
 Row {
     id: wrapperRow
-    height: 150
+    height: CmnCfg.attachmentSize / 2
     spacing: CmnCfg.smallMargin
     property var firstImage
     property var secondImage
@@ -17,7 +17,7 @@ Row {
 
     Rectangle {
         id: wrapperRect
-        height: 150
+        height: CmnCfg.attachmentSize / 2
         width: height
         clip: true
         color: "transparent"
@@ -41,11 +41,11 @@ Row {
     }
 
     Column {
-        width: 150
+        width: CmnCfg.attachmentSize / 2
 
         Rectangle {
-            height: 75 - CmnCfg.smallMargin / 2
-            width: 150
+            height: CmnCfg.attachmentSize / 4 - CmnCfg.smallMargin / 2
+            width: CmnCfg.attachmentSize / 2
             clip: true
 
             Image {
@@ -69,8 +69,8 @@ Row {
         spacing: CmnCfg.smallMargin
 
         Rectangle {
-            height: 75 - CmnCfg.smallMargin / 2
-            width: 150
+            height: CmnCfg.attachmentSize / 4 - CmnCfg.smallMargin / 2
+            width: CmnCfg.attachmentSize / 2
             clip: true
             color: "transparent"
             Image {
