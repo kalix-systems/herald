@@ -22,32 +22,31 @@ Page {
         color: CmnCfg.palette.white
     }
 
-    RowLayout {
-        anchors.fill: parent
-        Row {
-            Layout.alignment: Qt.AlignLeft
-            Layout.leftMargin: CmnCfg.units.dp(12)
-            spacing: CmnCfg.units.dp(16)
-            AnimIconButton {
-                id: backButton
-                color: CmnCfg.palette.iconFill
-                imageSource: "qrc:/back-arrow-icon.svg"
-                onTapped: mainView.pop(null)
-            }
-        }
+    //    RowLayout {
+    //        anchors.fill: parent
+    //        Row {
+    //            Layout.alignment: Qt.AlignLeft
+    //            Layout.leftMargin: CmnCfg.units.dp(12)
+    //            spacing: CmnCfg.units.dp(16)
+    //            AnimIconButton {
+    //                id: backButton
+    //                color: CmnCfg.palette.iconFill
+    //                imageSource: "qrc:/back-arrow-icon.svg"
+    //                onTapped: mainView.pop(null)
+    //            }
+    //        }
 
-        Label {
-            id: stateLabel
-            text: qsTr("New group")
-            font {
-                pixelSize: CmnCfg.headerFontSize
-                family: CmnCfg.labelFont.name
-            }
-            Layout.alignment: Qt.AlignVCenter
-            color: CmnCfg.palette.iconFill
-        }
-    }
-
+    //        Label {
+    //            id: stateLabel
+    //            text: qsTr("New group")
+    //            font {
+    //                pixelSize: CmnCfg.headerFontSize
+    //                family: CmnCfg.labelFont.name
+    //            }
+    //            Layout.alignment: Qt.AlignVCenter
+    //            color: CmnCfg.palette.iconFill
+    //        }
+    //    }
     ColumnLayout {
         anchors.left: parent.left
         anchors.right: parent.right
