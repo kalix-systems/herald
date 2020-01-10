@@ -41,5 +41,11 @@ Page {
             left: parent.left
             bottom: parent.bottom
         }
+
+        onHeightChanged: {
+            if (chatList.height > chatList.contentHeight) {
+                chatList.height = chatList.contentHeight
+            }
+        }
     }
 }

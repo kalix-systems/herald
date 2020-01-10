@@ -98,7 +98,6 @@ Rectangle {
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.horizontalCenterOffset: 10
 
-            // anchors.horizontalCenter: parent.horizontalCenter
             Loader {
                 id: replyLoader
                 property string opName: replyName

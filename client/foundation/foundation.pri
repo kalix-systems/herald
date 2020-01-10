@@ -1,4 +1,4 @@
-QT += quick svg xml core
+QT += quick svg xml gui
 VERSION = 0.0.1
 
 INCLUDEPATH += $$PWD/../../libherald/qt_ffi \
@@ -98,8 +98,10 @@ windows {
 android {
      QT += androidextras
      ANDROID_ABIS = armeabi-v7a
+    # ANDROID_ABIS = x86
 
      LIBS +=  $${PWD}/../../target/armv7-linux-androideabi/$${RUST_BUILD_TYPE}/libherald.a
+     # LIBS +=  $${PWD}/../../target/i686-linux-android/$${RUST_BUILD_TYPE}/libherald.a
      HEADERS +=  $$PWD/androidhelper.h
      SOURCES +=  $$PWD/androidhelper.cpp
 
