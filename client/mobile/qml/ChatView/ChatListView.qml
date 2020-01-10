@@ -14,8 +14,13 @@ ListView {
     // this is set to a higher value in `Component.onCompleted`
     // but is set to `0` here to improve initial load times
     cacheBuffer: 0
-    Component.onCompleted: cacheBuffer = chatListView.height * 5
+    Component.onCompleted: {
+        cacheBuffer = chatListView.height * 5
 
+        if (chatListView.contentHeight < chatListView.height) {
+            chatListView.height = chatListView.contentHeight
+        }
+    }
     // Note: we load the list view from the bottom up to make
     // scroll behavior more predictable
     verticalLayoutDirection: ListView.BottomToTop

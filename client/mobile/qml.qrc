@@ -39,7 +39,6 @@
         <file>qml/HomeScreen/NewGroupFlow/ContactsSearchComponent.qml</file>
         <file>qml/HomeScreen/NewGroupFlow/FinalGroupList.qml</file>
         <file>qml/HomeScreen/NewGroupFlow/NewGroupHeader.qml</file>
-        <file>qml/HomeScreen/NewGroupFlow/NewGroupView.qml</file>
         <file>qml/SettingsHeader.qml</file>
         <file>qml/HeadersMain.qml</file>
         <file>qml/Router.qml</file>
