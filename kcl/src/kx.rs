@@ -17,13 +17,13 @@ new_type! {
     secret SessionKey(SESSION_KEY_LEN)
 }
 
-#[derive(Ser, De, Clone)]
+#[derive(Ser, De, Clone, Debug)]
 pub struct Session {
     pub rx: SessionKey,
     pub tx: SessionKey,
 }
 
-#[derive(Ser, De, Clone)]
+#[derive(Ser, De, Clone, Debug)]
 pub struct KeyPair {
     pub public: PublicKey,
     pub secret: SecretKey,

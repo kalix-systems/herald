@@ -100,10 +100,11 @@ impl Key {
         // generate a random nonce
         random::gen_into(nonce);
 
+        let mut clen = 0u64;
         let res = unsafe {
             crypto_aead_xchacha20poly1305_ietf_encrypt(
                 rest.as_mut_ptr(),
-                rest.len() as _,
+                &mut clen as *mut _,
                 pt.as_ptr(),
                 pt.len() as _,
                 ad.as_ptr(),
@@ -116,6 +117,7 @@ impl Key {
         };
 
         assert_eq!(res, 0);
+        assert_eq!(clen as usize, MAC_LEN + pt.len());
 
         output
     }
@@ -126,13 +128,14 @@ impl Key {
         ad: &[u8],
         ct: &[u8],
     ) -> Option<Vec<u8>> {
-        let mut output = vec![0; ct.len() - NONCE_LEN - MAC_LEN];
+        let mut output = Vec::with_capacity(ct.len() - NONCE_LEN - MAC_LEN);
         let (nonce, ct) = ct[..].split_at(NONCE_LEN);
 
+        let mut plen = 0u64;
         let res = unsafe {
             crypto_aead_xchacha20poly1305_ietf_decrypt(
                 output.as_mut_ptr(),
-                output.len() as _,
+                &mut plen as *mut _,
                 // should always be null according to libsodium docs
                 std::ptr::null_mut(),
                 ct.as_ptr(),
@@ -147,6 +150,10 @@ impl Key {
         if res != 0 {
             None
         } else {
+            unsafe {
+                assert_eq!(plen as usize, output.capacity());
+                output.set_len(plen as usize);
+            }
             Some(output)
         }
     }
