@@ -16,7 +16,7 @@ Row {
         font.family: CmnCfg.chatFont.name
         padding: 0
         font.weight: Font.Bold
-        font.pixelSize: 13
+        font.pixelSize: CmnCfg.defaultFontSize
         color: authorColor
         TextMetrics {
             id: authorNameTM
@@ -30,10 +30,11 @@ Row {
 
     Label {
         id: time
-        font.pixelSize: 12
+        font.pixelSize: CmnCfg.chatTextSize
         text: timestamp
         color: CmnCfg.palette.darkGrey
         font.family: CmnCfg.chatFont.name
-        anchors.bottom: authorLabel.bottom
+        anchors.verticalCenter: authorLabel.verticalCenter
+        padding: 0
     }
 }
