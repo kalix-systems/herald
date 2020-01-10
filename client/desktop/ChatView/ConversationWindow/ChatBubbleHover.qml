@@ -95,7 +95,7 @@ MouseArea {
                 icon.width: visible ? 14 : 0
                 icon.height: 14
                 padding: CmnCfg.microMargin
-                source: "qrc:/download-icon.svg"
+                source: "qrc:/download-icon-14.svg"
                 onClicked: downloadFileChooser.open()
                 background: Rectangle {
                     border.color: CmnCfg.palette.offBlack

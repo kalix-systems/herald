@@ -65,7 +65,7 @@ Flow {
 
                 border.width: outboundReact ? 1 : 0
                 border.color: CmnCfg.palette.offBlack
-                color: outboundReact ? CmnCfg.palette.lightGrey : "transparent"
+                color: CmnCfg.palette.lightGrey
             }
         }
     }

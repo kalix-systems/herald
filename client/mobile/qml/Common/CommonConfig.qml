@@ -42,9 +42,10 @@ Item {
     /// size of labels
     readonly property real labelFontSize: units.dp(12)
     /// font size for minor text (e.g. timestamps)
-    readonly property int minorTextSize: units.dp(10)
+    readonly property int minorTextSize: units.dp(0)
     /// standard chat text size
-    readonly property real chatTextSize: units.dp(12)
+    readonly property real chatTextSize: units.dp(11)
+    readonly property real defaultFontSize: units.dp(12)
     /// size for contact/group name labels in lists
     readonly property int entityLabelSize: units.dp(14)
     /// size for contact/group name labels in lists
