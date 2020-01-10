@@ -100,7 +100,7 @@ Item {
     readonly property real miniFabDiameter: units.dp(40)
 
     // MISC
-
+    readonly property int attachmentSize: 150
     /// standard z values
     readonly property int overlayZ: 10
     readonly property int topZ: 9
