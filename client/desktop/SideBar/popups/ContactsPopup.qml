@@ -112,7 +112,11 @@ Popup {
                             fill: CmnCfg.palette.lightGrey
                             source: "qrc:/x-icon.svg"
                             scale: 0.8
-                            onClicked: searchButton.search = !searchButton.search
+                            onClicked: {
+                                searchButton.search = !searchButton.search
+                                field.text = ""
+                                Herald.users.filter = ""
+                            }
                         }
                         Rectangle {
                             id: divider
