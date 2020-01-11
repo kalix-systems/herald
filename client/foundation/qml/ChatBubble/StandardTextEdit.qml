@@ -16,12 +16,7 @@ GridLayout {
                   bubbleRoot.body
               }
 
-        onLinkActivated: if (link[0] === "@") {
-                             conversationList.messagePositionRequested(
-                                         link.split("#")[1])
-                         } else {
-                             Qt.openUrlExternally(link)
-                         }
+        onLinkActivated: Qt.openUrlExternally(link)
 
         wrapMode: Text.WrapAtWordBoundaryOrAnywhere
         Layout.alignment: Qt.AlignLeft
@@ -64,6 +59,7 @@ GridLayout {
         // them with hypertext
         // capture group 2: the name of the website
         // capture group 3: the tld
+        // capture group 7: the file extension or anchor
         function includes_link(text) {
             const regexp = /\b(https?:\/\/)?([\w-\.]+)\.([a-z]{1,4})?(\/[\w-\/]*(\?\w*(=\w+)*[&\w-=]*)*((#|\.)[\w-]+)*)?/gmi
             return regexp.test(text)
