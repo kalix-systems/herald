@@ -33,23 +33,29 @@ GridLayout {
         color: CmnCfg.palette.black
         textFormat: TextEdit.AutoText
         selectionColor: CmnCfg.palette.highlightColor
+
         MouseArea {
             anchors.fill: parent
             hoverEnabled: true
-            onEntered: bubbleActual.hoverHighlight = true
-            onExited: if (!bubbleActual.hitbox.containsMouse) {
-                          bubbleActual.hoverHighlight = false
-                      }
-            acceptedButtons: Qt.NoButton
-            propagateComposedEvents: true
             cursorShape: parent.hoveredLink ? Qt.PointingHandCursor : Qt.IBeamCursor
+            onEntered: {
+                if (bubbleRoot.moreInfo)
+                    return
+                bubbleRoot.hoverHighlight = true
+            }
+            onExited: {
+                if (bubbleRoot.moreInfo)
+                    return
+                if (!bubbleRoot.hitbox.containsMouse) {
+                    bubbleRoot.hoverHighlight = false
+                }
+            }
+            propagateComposedEvents: true
+            acceptedButtons: Qt.NoButton
         }
 
         Component.onCompleted: {
             if (includes_link(text))
-                text = generate_hyptertext(text)
-
-            if (includes_message_ref(text))
                 text = generate_hyptertext(text)
         }
 
@@ -61,20 +67,6 @@ GridLayout {
         function includes_link(text) {
             const regexp = /\b(https?:\/\/)?([\w-\.]+)\.([a-z]{1,4})?(\/[\w-\/]*(\?\w*(=\w+)*[&\w-=]*)*((#|\.)[\w-]+)*)?/gmi
             return regexp.test(text)
-        }
-
-        function includes_message_ref(text) {
-            const regexp = /\b(\@[a-z]{1,32})\#[a-z0-9]{9,32}/gmi
-            return regexp.test(text)
-        }
-
-        function generate_message_link(text) {
-            const regexp = /\b(\@[a-z]{1,32})\#[a-z0-9]{32}/gmi
-            return text.replace(regexp, function (match) {
-                const match_sect = match.split("#")
-                return "<a href=%1>%2</a>".arg(
-                            match, match_sect[0] + match_sect[1].slice(0, 9))
-            })
         }
 
         function generate_hyptertext(text) {

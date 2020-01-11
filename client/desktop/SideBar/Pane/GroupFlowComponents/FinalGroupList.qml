@@ -42,7 +42,7 @@ ListView {
             labelComponent: Ent.ContactLabel {
                 displayName: memberName
                 username: memberId
-                labelColor: CmnCfg.palette.white
+                labelColor: CmnCfg.palette.lightGrey
             }
 
             Imports.IconButton {

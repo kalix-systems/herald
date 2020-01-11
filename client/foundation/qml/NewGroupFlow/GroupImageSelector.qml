@@ -54,9 +54,7 @@ Rectangle {
             anchors.fill: parent
             hoverEnabled: true
             id: imageHover
-            onClicked: mouse.accepted = false
-            onReleased: mouse.accepted = false
-            onPressed: mouse.accepted = false
+            acceptedButtons: Qt.NoButton
             cursorShape: Qt.PointingHandCursor
         }
     }

@@ -17,21 +17,14 @@ Flow {
             id: emojiText
             property var emojiModel: emojiRepeater.model
             property bool outboundReact
-            property string reactions: ""
             visible: emojiModel[index]["reactionaries"].length !== 0
-            font.pixelSize: 12
+            font.pixelSize: CmnCfg.chatTextSize
             font.family: CmnCfg.chatFont.name
             Component.onCompleted: {
                 outboundReact = emojiModel[index]["reactionaries"].filter(
                             function (reactionary) {
                                 return reactionary === Herald.config.configId
                             }).length === 1
-
-                for (var reactionary in emojiModel[index]["reactionaries"]) {
-                    reactions += (Herald.users.nameById(
-                                      emojiModel[index]["reactionaries"][reactionary]) + ", ")
-                }
-                reactions = reactions.slice(0, reactions.length - 2)
             }
             MouseArea {
 
@@ -65,46 +58,52 @@ Flow {
                         border.width: 0
                     }
                     padding: 2
-                    contentItem: GridLayout {
-                        Label {
-                            text: emojiText.reactions !== undefined ? emojiText.reactions : ""
-                            Layout.maximumWidth: 100
-                            Layout.maximumHeight: 50
-                            wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-                            padding: 2
-                            font.pixelSize: CmnCfg.minorTextSize
-                            font.weight: Font.Medium
-                            color: CmnCfg.palette.white
-                            font.family: CmnCfg.chatFont.name
+                    contentItem: Column {
+                        Repeater {
+                            id: repeater
+                            model: emojiText.emojiModel[index]["reactionaries"]
+                            delegate: Label {
+                                property var reactData: repeater.model
+                                text: Herald.users.nameById(reactData[index])
+                                font.pixelSize: CmnCfg.minorTextSize
+                                font.weight: Font.Medium
+                                color: CmnCfg.palette.white
+                                font.family: CmnCfg.chatFont.name
+                                padding: 2
+                            }
                         }
                     }
                 }
             }
 
-            padding: outboundReact ? CmnCfg.microMargin / 2 : 0
             topPadding: CmnCfg.microMargin / 2
+            padding: 1
 
             contentItem: Row {
                 spacing: CmnCfg.microMargin
                 Label {
                     id: emoji
                     text: emojiModel[index]["content"]
+                    color: outboundReact ? CmnCfg.palette.white : CmnCfg.palette.black
+                    font.pixelSize: CmnCfg.chatTextSize
                 }
                 Label {
                     id: numLabel
                     text: emojiModel[index]["reactionaries"].length
                     font.family: CmnCfg.chatFont.name
-                    color: CmnCfg.palette.offBlack
-                    font.pixelSize: 11
+                    color: outboundReact ? CmnCfg.palette.white : CmnCfg.palette.offBlack
+
+                    font.pixelSize: CmnCfg.chatTextSize
+                    font.weight: Font.Medium
                     anchors.verticalCenter: emoji.verticalCenter
                 }
             }
 
             background: Rectangle {
 
-                border.width: outboundReact ? 1 : 0
-                border.color: CmnCfg.palette.offBlack
-                color: CmnCfg.palette.lightGrey
+                border.width: outboundReact ? 0 : 1
+                border.color: CmnCfg.palette.darkGrey
+                color: outboundReact ? CmnCfg.palette.darkGrey : CmnCfg.palette.lightGrey
             }
         }
     }

@@ -123,6 +123,8 @@ ListView {
                 z: CmnCfg.overlayZ
                 anchors.fill: parent
                 acceptedButtons: Qt.LeftButton | Qt.RightButton
+                cursorShape: conversationList.currentIndex
+                             === index ? Qt.ArrowCursor : Qt.PointingHandCursor
                 onClicked: {
                     if (mouse.button == Qt.RightButton) {
                         !archiveView ? convOptionsMenu.open(

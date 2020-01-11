@@ -12,8 +12,8 @@ Menu {
     signal infoPrompt
 
     MenuItem {
-        text: qsTr("More Info") + "..."
-        visible: !bubbleActual.aux
+        text: qsTr("More Info") + " ..."
+        //   visible: !bubbleActual.aux
         onTriggered: {
             messageInfoLoader.convoMembers = conversationMembers
             messageInfoLoader.messageData = bubbleActual.messageModelData

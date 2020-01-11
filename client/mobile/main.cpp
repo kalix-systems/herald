@@ -56,6 +56,7 @@ int main(int argc, char* argv[])
   qmlRegisterSingletonType(QUrl("qrc:/qml/Common/CommonConfig.qml"),
                            "LibHerald", 1, 0, "CmnCfg");
 
+
 #ifdef Q_OS_IOS
   qmlRegisterType<ObjectiveUtils>("LibHerald", 1, 0, "MobileHelper");
 #elif defined Q_OS_ANDROID

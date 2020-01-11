@@ -29,6 +29,7 @@ Column {
         width: parent.width - CmnCfg.megaMargin
         anchors.horizontalCenter: parent.horizontalCenter
         height: 1
+        currentIndex: -1
 
         //this and indicator are invisible, we don't want the combo box
         //controls to be visible
@@ -60,14 +61,17 @@ Column {
 
                 labelComponent: Entity.ContactLabel {
                     displayName: contactData.name
-                    labelColor: CmnCfg.palette.white
-                    username:contactData.userId
+                    labelColor: contactRectangle.state
+                                !== "" ? CmnCfg.palette.black : CmnCfg.palette.lightGrey
+                    username: contactData.userId
                 }
-                states: []
 
+                // states: []
                 MouseArea {
                     id: hoverHandler
                     anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
                     onClicked: {
                         Herald.conversationBuilder.addMember(contactData.userId)
                         contactPopup.popup.close()

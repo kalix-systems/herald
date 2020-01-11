@@ -31,6 +31,7 @@ Row {
                 onClicked: imageClickedCallBack(parent.source)
                 anchors.fill: parent
             onPressAndHold: imageLongPressedCallBack(firstImage.path)
+            cursorShape: Qt.PointingHandCursor
             }
         }
     }
@@ -54,6 +55,7 @@ Row {
                 onClicked: imageClickedCallBack(parent.source)
             onPressAndHold: imageLongPressedCallBack(secondImage.path)
                 anchors.fill: parent
+            cursorShape: Qt.PointingHandCursor
             }
         }
     }

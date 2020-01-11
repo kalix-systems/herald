@@ -14,7 +14,6 @@
         <file>SideBar/Header/AltContextHeader.qml</file>
         <file>SideBar/Header/SearchComponent.qml</file>
         <file>SideBar/Pane/ContactFlowComponents/NewContactComponent.qml</file>
-        <file>SideBar/Pane/ContactView.qml</file>
         <file>SideBar/Pane/ConversationViewMain.qml</file>
         <file>SideBar/Pane/GroupFlowComponents/ContactSearchComponent.qml</file>
         <file>SideBar/Pane/GroupFlowComponents/FinalGroupList.qml</file>
@@ -67,5 +66,6 @@
         <file>common/TextContextMenu.qml</file>
         <file>ChatView/ConversationWindow/BubbleHoverButtons.qml</file>
         <file>ChatView/ConversationWindow/BubbleEmojiPopup.qml</file>
+        <file>SideBar/popups/ContactsPopup/CommonGroupsFlow.qml</file>
     </qresource>
 </RCC>

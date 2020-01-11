@@ -23,18 +23,26 @@ Row {
             text: authorName
             font.weight: Font.Bold
             font.family: CmnCfg.chatFont.name
-            elideWidth: maxWidth
+            elideWidth: bubbleRoot.maxWidth - expireInfo.width - timeLabel.width
+                        - CmnCfg.smallMargin * 3
+
             elide: Text.ElideRight
         }
     }
 
     Label {
-        id: time
+        id: timeLabel
         font.pixelSize: CmnCfg.chatTextSize
-        text: timestamp
+        text: time.text
         color: CmnCfg.palette.darkGrey
         font.family: CmnCfg.chatFont.name
         anchors.verticalCenter: authorLabel.verticalCenter
+        TextMetrics {
+            id: time
+            font.family: CmnCfg.chatFont.name
+            elide: Text.ElideRight
+        }
+
         padding: 0
     }
 }
