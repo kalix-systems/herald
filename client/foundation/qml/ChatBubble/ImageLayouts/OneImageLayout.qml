@@ -27,6 +27,7 @@ Row {
             onClicked: wrapperRow.imageClickedCallBack(image.source)
             onPressAndHold: imageLongPressedCallBack(firstImage.path)
             anchors.fill: parent
+            cursorShape: Qt.PointingHandCursor
         }
     }
 }

@@ -52,6 +52,7 @@ Popup {
                 topPadding: 1
             }
             Row {
+                height: parent.height
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.right: parent.right
                 anchors.rightMargin: CmnCfg.defaultMargin
@@ -60,8 +61,8 @@ Popup {
                 IconButton {
                     id: xButton
                     fill: CmnCfg.palette.lightGrey
+                    anchors.verticalCenter: parent.verticalCenter
                     source: "qrc:/x-icon.svg"
-                    enabled: !drawer.opened
                     onClicked: {
                         contactsPopup.close()
                     }
@@ -71,13 +72,56 @@ Popup {
                     id: settingsButton
                     fill: CmnCfg.palette.lightGrey
                     source: "qrc:/options-icon.svg"
-                    enabled: !drawer.opened
+                    anchors.verticalCenter: parent.verticalCenter
                 }
-                IconButton {
-                    id: searchButton
-                    fill: CmnCfg.palette.lightGrey
-                    source: "qrc:/search-icon.svg"
-                    enabled: !drawer.opened
+                RowLayout {
+                    spacing: 0
+                    anchors.verticalCenter: parent.verticalCenter
+                    height: parent.height
+                    IconButton {
+                        id: searchButton
+                        property bool search: false
+                        fill: CmnCfg.palette.lightGrey
+                        source: "qrc:/search-icon.svg"
+                        onClicked: search = !search
+                    }
+
+                    BorderedTextField {
+                        id: field
+                        placeholderText: "Search names, groups"
+                        visible: searchButton.search
+                        Layout.maximumWidth: contactsPopup.width * 0.75
+                        Layout.bottomMargin: CmnCfg.smallMargin
+                        Layout.leftMargin: CmnCfg.smallMargin
+                        onTextChanged: {
+                            Qt.callLater(function (text) {
+                                Herald.users.filter = text
+                            }, field.text)
+                        }
+                    }
+                    Item {
+                        visible: searchButton.search
+                        height: field.height
+                        width: searchX.width
+                        Layout.bottomMargin: CmnCfg.smallMargin
+                        IconButton {
+                            id: searchX
+                            anchors.left: parent.left
+                            anchors.leftMargin: 2
+                            anchors.bottom: divider.top
+                            fill: CmnCfg.palette.lightGrey
+                            source: "qrc:/x-icon.svg"
+                            scale: 0.8
+                            onClicked: searchButton.search = !searchButton.search
+                        }
+                        Rectangle {
+                            id: divider
+                            anchors.bottom: parent.bottom
+                            width: searchX.width
+                            color: CmnCfg.palette.lightGrey
+                            height: 1
+                        }
+                    }
                 }
             }
         }
@@ -160,7 +204,7 @@ Popup {
                     userId: userData.userId
                 }
 
-                visible: userData.userId !== Herald.config.configId
+                visible: (userData.userId !== Herald.config.configId && matched)
 
                 //top header
                 Rectangle {

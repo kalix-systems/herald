@@ -32,6 +32,7 @@ Row {
                 onClicked: imageClickedCallBack(parent.source)
                 onPressAndHold: imageLongPressedCallBack(firstImage.path)
                 anchors.fill: parent
+            cursorShape: Qt.PointingHandCursor
             }
         }
     }
@@ -58,6 +59,7 @@ Row {
                     onClicked: imageClickedCallBack(parent.source)
                     onPressAndHold: imageLongPressedCallBack(secondImage.path)
                     anchors.fill: parent
+            cursorShape: Qt.PointingHandCursor
                 }
             }
         }
@@ -88,6 +90,7 @@ Row {
                         onPressAndHold: imageLongPressedCallBack(
                                             thirdImage.path)
                         anchors.fill: parent
+            cursorShape: Qt.PointingHandCursor
                     }
                 }
             }
@@ -115,6 +118,7 @@ Row {
                         onPressAndHold: imageLongPressedCallBack(
                                             fourthImage.path)
                         anchors.fill: parent
+            cursorShape: Qt.PointingHandCursor
                     }
                 }
             }
