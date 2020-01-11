@@ -16,6 +16,12 @@ GridLayout {
                   bubbleRoot.body
               }
 
+        onLinkActivated: if (link[0] === "@") {
+                             print("jump to the messages")
+                         } else {
+                             Qt.openUrlExternally(link)
+                         }
+
         wrapMode: Text.WrapAtWordBoundaryOrAnywhere
         Layout.alignment: Qt.AlignLeft
         selectByMouse: true
@@ -26,28 +32,47 @@ GridLayout {
         color: CmnCfg.palette.black
         textFormat: TextEdit.AutoText
         selectionColor: CmnCfg.palette.highlightColor
+        MouseArea {
+            anchors.fill: parent
+            hoverEnabled: true
+            onEntered: bubbleActual.hoverHighlight = true
+            onExited: if (!bubbleActual.hitbox.containsMouse) {
+                          bubbleActual.hoverHighlight = false
+                      }
 
-        onLinkActivated: if (false) {
+            onClicked: mouse.accepted = false
+            onPressAndHold: mouse.accepted = false
+            onPressed: mouse.accepted = false
+            onReleased: mouse.accepted = false
+            propagateComposedEvents: true
+            cursorShape: Qt.IBeamCursor
+        }
 
-                         } else if (false) {
+        Component.onCompleted: {
+            if (includes_link(text)) {
+                text = generate_hyptertext(text)
+            }
+        }
 
-                         }
-
+        // Note about this regex:
+        // it pulls every web URL out of the substring, it is used to replace
+        // them with hypertext
+        // capture group 2: the name of the website
+        // capture group 3: the tld
         function includes_link(text) {
-            var regexp = "@(https?|ftp):\/\/[^\s/$.?#].[^\s]*$@iS*"
+            const regexp = /\b(https?:\/\/)?([\w-\.]+)\.([a-zA-Z]{1,4})?(\/[\w-\/]*(\?\w*(=\w+)*[&\w-=]*)*((#|\.)[\w-]+)*)?/gmi
             return regexp.test(text)
         }
 
         function includes_message_ref(text) {}
 
         function generate_hyptertext(text) {
-            var regexp = "@(https?|ftp):\/\/[^\s/$.?#].[^\s]*$@iS*"
+            const regexp = /\b(https?:\/\/)?([\w-\.]+)\.([a-zA-Z]{1,4})?(\/[\w-\/]*(\?\w*(=\w+)*[&\w-=]*)*((#|\.)[\w-]+)*)?/gmi
             return text.replace(regexp, replacer)
         }
 
         function replacer(match) {
-            print(match)
-            return "grappo"
+            return "<a href=%1>%1</a>".arg(match)
         }
     }
 }

@@ -35,5 +35,13 @@ Row {
         icon.color: isShort ? CmnCfg.palette.alertColor : "grey"
         padding: 0
         background: Item {}
+        enabled: false
+        //        MouseArea {
+        //            anchors.fill: parent
+        //            onEntered: bubbleActual.hoverHighlight = true
+        //            onExited: if (!bubbleActual.hitbox.containsMouse) {
+        //                          bubbleActual.hoverHighlight = false
+        //                      }
+        //        }
     }
 }

@@ -94,9 +94,15 @@ Drawer {
                                     text: qsTr("Set color")
                                     font.family: CmnCfg.chatFont.name
                                     font.pixelSize: 12
+                                    color: CmnCfg.sysPalette.text
+                                }
+                                background: Rectangle {
+                                    color: CmnCfg.sysPalette.window
+                                    border.width: 1
+                                    border.color: CmnCfg.sysPalette.midlight
                                 }
                                 delay: 1000
-                                padding: 4
+                                padding: CmnCfg.microMargin
                             }
                         }
                     }

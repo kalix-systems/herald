@@ -2,6 +2,7 @@ import QtQuick 2.0
 import QtQuick.Controls 2.12
 import LibHerald 1.0
 import QtGraphicalEffects 1.13
+import QtQuick.Layouts 1.3
 
 Flow {
     spacing: CmnCfg.microMargin
@@ -16,6 +17,7 @@ Flow {
             id: emojiText
             property var emojiModel: emojiRepeater.model
             property bool outboundReact
+            property string reactions: ""
             visible: emojiModel[index]["reactionaries"].length !== 0
             font.pixelSize: 12
             font.family: CmnCfg.chatFont.name
@@ -24,8 +26,15 @@ Flow {
                             function (reactionary) {
                                 return reactionary === Herald.config.configId
                             }).length === 1
+
+                for (var reactionary in emojiModel[index]["reactionaries"]) {
+                    reactions += (Herald.users.nameById(
+                                      emojiModel[index]["reactionaries"][reactionary]) + ", ")
+                }
+                reactions = reactions.slice(0, reactions.length - 2)
             }
             MouseArea {
+
                 enabled: !bubbleRoot.moreInfo
                 anchors.fill: parent
                 hoverEnabled: true
@@ -40,6 +49,36 @@ Flow {
                                 emojiModel[index]["content"])
                 }
                 cursorShape: bubbleRoot.moreInfo ? Qt.ArrowCursor : Qt.PointingHandCursor
+                propagateComposedEvents: true
+                onEntered: bubbleActual.hoverHighlight = true
+                onExited: if (!bubbleActual.hitbox.containsMouse) {
+                              bubbleActual.hoverHighlight = false
+                          }
+
+                ToolTip {
+                    delay: 500
+
+                    visible: parent.containsMouse
+                    y: -height
+                    background: Rectangle {
+                        color: CmnCfg.palette.offBlack
+                        border.width: 0
+                    }
+                    padding: 2
+                    contentItem: GridLayout {
+                        Label {
+                            text: emojiText.reactions !== undefined ? emojiText.reactions : ""
+                            Layout.maximumWidth: 100
+                            Layout.maximumHeight: 50
+                            wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                            padding: 2
+                            font.pixelSize: CmnCfg.minorTextSize
+                            font.weight: Font.Medium
+                            color: CmnCfg.palette.white
+                            font.family: CmnCfg.chatFont.name
+                        }
+                    }
+                }
             }
 
             padding: outboundReact ? CmnCfg.microMargin / 2 : 0

@@ -30,6 +30,7 @@ Row {
             MouseArea {
                 onClicked: imageClickedCallBack(parent.source)
                 anchors.fill: parent
+            onPressAndHold: imageLongPressedCallBack(firstImage.path)
             }
         }
     }
@@ -51,6 +52,7 @@ Row {
             asynchronous: true
             MouseArea {
                 onClicked: imageClickedCallBack(parent.source)
+            onPressAndHold: imageLongPressedCallBack(secondImage.path)
                 anchors.fill: parent
             }
         }

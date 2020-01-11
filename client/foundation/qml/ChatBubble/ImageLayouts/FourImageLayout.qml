@@ -30,6 +30,7 @@ Row {
             asynchronous: true
             MouseArea {
                 onClicked: imageClickedCallBack(parent.source)
+                    onPressAndHold: imageLongPressedCallBack(firstImage.path)
                 anchors.fill: parent
             }
         }
@@ -55,6 +56,7 @@ Row {
                 asynchronous: true
                 MouseArea {
                     onClicked: imageClickedCallBack(parent.source)
+                    onPressAndHold: imageLongPressedCallBack(secondImage.path)
                     anchors.fill: parent
                 }
             }
@@ -83,6 +85,7 @@ Row {
                     fillMode: Image.PreserveAspectFit
                     MouseArea {
                         onClicked: imageClickedCallBack(parent.source)
+                    onPressAndHold: imageLongPressedCallBack(thirdImage.path)
                         anchors.fill: parent
                     }
                 }
@@ -108,6 +111,7 @@ Row {
                     fillMode: Image.PreserveAspectFit
                     MouseArea {
                         onClicked: imageClickedCallBack(parent.source)
+                    onPressAndHold: imageLongPressedCallBack(fourthImage.path)
                         anchors.fill: parent
                     }
                 }

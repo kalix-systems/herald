@@ -11,6 +11,7 @@ import Qt.labs.platform 1.1
 import QtQuick.Dialogs 1.3
 import QtGraphicalEffects 1.0
 import "../Popups" as Popups
+import "qrc:/imports" as Imports
 
 ListView {
     id: chatListView
@@ -87,6 +88,7 @@ ListView {
         sourceComponent: model.auxData.length === 0 ? msgBubble : auxBubble
         width: parent.width
         height: active ? item.height : undefined
+        z: parent.z + 1
 
         property var highlightItem: active ? item.highlightItem : undefined
         Component.onCompleted: {
@@ -106,38 +108,55 @@ ListView {
 
         Component {
             id: auxBubble
-            CB.AuxBubble {
-                id: bubbleActual
-                auxData: JSON.parse(model.auxData)
-                messageModelData: model
-                width: parent.width
-                defaultWidth: chatListView.width
-                bubbleIndex: index
-                ListView.onAdd: {
-                    chatScrollBarInner.setPosition(1.0)
-                }
-                BubbleDecoration {
-                    parentBubble: parent
+
+            ChatBubbleHover {
+                id: hover
+                childBubble: bubbleActual
+                CB.AuxBubble {
+                    id: bubbleActual
+                    auxData: JSON.parse(model.auxData)
+                    messageModelData: model
+                    width: parent.width
+                    defaultWidth: chatListView.width
+                    bubbleIndex: index
+                    hitbox: hover
+                    ListView.onAdd: {
+                        chatScrollBarInner.setPosition(1.0)
+                    }
+                    BubbleHoverButtons {
+                        id: buttons
+                    }
+                    BubbleEmojiPopup {
+                        id: emojiMenu
+                    }
                 }
             }
         }
 
         Component {
             id: msgBubble
-            CB.ChatBubble {
+            ChatBubbleHover {
+                id: hover
+                childBubble: bubbleActual
+                CB.ChatBubble {
 
-                id: bubbleActual
-                convContainer: chatListView
-                defaultWidth: chatListView.width
-                width: parent.width
-                messageModelData: model
-                convoExpiration: conversationItem.expirationPeriod
-                ListView.onAdd: {
-                    chatScrollBarInner.setPosition(1.0)
-                }
-                bubbleIndex: index
-                BubbleDecoration {
-                    parentBubble: parent
+                    id: bubbleActual
+                    convContainer: chatListView
+                    defaultWidth: chatListView.width
+                    width: parent.width
+                    messageModelData: model
+                    convoExpiration: conversationItem.expirationPeriod
+                    ListView.onAdd: {
+                        chatScrollBarInner.setPosition(1.0)
+                    }
+                    bubbleIndex: index
+                    hitbox: hover
+                    BubbleHoverButtons {
+                        id: buttons
+                    }
+                    BubbleEmojiPopup {
+                        id: emojiMenu
+                    }
                 }
             }
         }
