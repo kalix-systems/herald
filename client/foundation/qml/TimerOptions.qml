@@ -72,9 +72,10 @@ Menu {
             onTriggered: {
 
                 if (!messageModify) {
-                    chosenPeriod = index
 
-                    return conversationItem.expirationPeriod = index
+                    conversationItem.expirationPeriod = index
+                    chosenPeriod = index
+                    return
                 }
                 builder.setExpirationPeriod(index)
                 chosenPeriod = index

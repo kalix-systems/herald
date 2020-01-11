@@ -22,6 +22,7 @@ Page {
     //TODO: rename to something sane and not a shadow
     property var ownedConversation
     property var conversationMembers
+    property alias convoTimer: messageBar.timerMenu
 
     background: Rectangle {
         color: CmnCfg.palette.white

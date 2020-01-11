@@ -13,6 +13,7 @@ ToolBar {
     id: chatToolBar
     property var conversationItem
     property var ownedConversation: parent.ownedConversation
+    property alias timerMenu: timer
 
     height: CmnCfg.toolbarHeight
     z: CmnCfg.middleZ
@@ -112,7 +113,7 @@ ToolBar {
             }
 
             Imports.TimerOptions {
-                id: timerMenu
+                id: timer
                 conversationItem: chatToolBar.conversationItem
             }
 

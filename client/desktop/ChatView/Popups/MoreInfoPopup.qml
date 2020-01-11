@@ -90,12 +90,32 @@ Popup {
             topPadding: CmnCfg.smallMargin
             bottomPadding: CmnCfg.smallMargin
 
-            CB.DefaultBubble {
+            Loader {
                 id: bubbleInfo
-                convContainer: parent
-                defaultWidth: parent.width
+                sourceComponent: messageData.auxData.length === 0 ? bubbleMsg : bubbleAux
                 width: parent.width
-                messageModelData: moreInfoPopup.messageData
+                height: item.height
+
+                Component {
+                    id: bubbleMsg
+                    CB.DefaultBubble {
+                        convContainer: parent
+                        defaultWidth: parent.width
+                        width: parent.width
+                        messageModelData: moreInfoPopup.messageData
+                    }
+                }
+
+                Component {
+                    id: bubbleAux
+                    CB.AuxBubble {
+                        defaultWidth: parent.width
+                        width: parent.width
+                        messageModelData: moreInfoPopup.messageData
+                        auxData: JSON.parse(messageModelData.auxData)
+                        moreInfo: true
+                    }
+                }
             }
             Label {
                 id: senderHeader

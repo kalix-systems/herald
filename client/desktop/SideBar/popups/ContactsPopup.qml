@@ -42,6 +42,7 @@ Popup {
             }
 
             Label {
+                id: headerLabel
                 font: CmnCfg.headerFont
                 anchors.left: parent.left
                 anchors.leftMargin: CmnCfg.megaMargin
@@ -90,7 +91,8 @@ Popup {
                         id: field
                         placeholderText: "Search names, groups"
                         visible: searchButton.search
-                        Layout.maximumWidth: contactsPopup.width * 0.75
+                        Layout.maximumWidth: contactsPopup.width - 250
+                        selectByMouse: true
                         Layout.bottomMargin: CmnCfg.smallMargin
                         Layout.leftMargin: CmnCfg.smallMargin
                         onTextChanged: {
