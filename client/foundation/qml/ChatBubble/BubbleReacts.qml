@@ -26,6 +26,7 @@ Flow {
                             }).length === 1
             }
             MouseArea {
+
                 enabled: !bubbleRoot.moreInfo
                 anchors.fill: parent
                 hoverEnabled: true
@@ -40,6 +41,44 @@ Flow {
                                 emojiModel[index]["content"])
                 }
                 cursorShape: bubbleRoot.moreInfo ? Qt.ArrowCursor : Qt.PointingHandCursor
+                propagateComposedEvents: true
+                onEntered: bubbleActual.hoverHighlight = true
+                onExited: if (!bubbleActual.hitbox.containsMouse) {
+                              bubbleActual.hoverHighlight = false
+                          }
+
+                ToolTip {
+                    visible: parent.containsMouse
+                    y: -height
+                    background: Rectangle {
+                        color: CmnCfg.palette.lightGrey
+                        border.width: 0
+                    }
+                    padding: 0
+                    width: contentWidth
+                    height: contentHeight
+                    contentItem: Flow {
+                        id: flow
+                        anchors.centerIn: parent
+                        width: 100
+                        Repeater {
+                            id: reactionaryRepeater
+                            model: emojiModel[index]["reactionaries"]
+                            height: implicitHeight
+                            width: implicitWidth
+                            delegate: Label {
+                                id: person
+                                property var reactionaryData: reactionaryRepeater.model
+                                text: reactionaryData[index]
+                                      + (index !== (reactionaryRepeater.count - 1) ? ", " : "")
+                                font.family: CmnCfg.chatFont.name
+                                font.pixelSize: CmnCfg.minorTextSize
+                                padding: 2
+                                font.weight: Font.Medium
+                            }
+                        }
+                    }
+                }
             }
 
             padding: outboundReact ? CmnCfg.microMargin / 2 : 0

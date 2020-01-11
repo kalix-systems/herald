@@ -37,6 +37,7 @@ Rectangle {
     property int bubbleIndex
     property bool moreInfo: false
     property bool aux: true
+    property MouseArea hitbox
 
     Connections {
         target: appRoot.globalTimer
@@ -86,8 +87,8 @@ Rectangle {
 
     Highlight {
         id: bubbleHighlight
-        z: bubbleRoot.z + 1
         color: CmnCfg.palette.darkGrey
+        z: bubbleRoot.z + 1
     }
 
     Rectangle {

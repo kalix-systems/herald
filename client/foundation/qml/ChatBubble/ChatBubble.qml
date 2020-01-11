@@ -55,6 +55,7 @@ Rectangle {
     property bool moreInfo: false
     property bool aux: false
     property var convoExpiration
+    property MouseArea hitbox
 
     property bool sameExpiration: {
         if (messageModelData.expirationTime === undefined) {

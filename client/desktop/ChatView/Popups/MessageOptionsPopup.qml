@@ -13,7 +13,7 @@ Menu {
 
     MenuItem {
         text: qsTr("More Info") + "..."
-        visible: !parentBubble.aux
+        visible: !bubbleActual.aux
         onTriggered: {
             messageInfoLoader.convoMembers = conversationMembers
             messageInfoLoader.messageData = bubbleActual.messageModelData
