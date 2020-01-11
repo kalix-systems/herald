@@ -32,6 +32,7 @@ Row {
             asynchronous: true
             MouseArea {
                 onClicked: imageClickedCallBack(parent.source)
+                onPressAndHold: imageLongPressedCallBack(firstImage.path)
                 anchors.fill: parent
             }
         }
@@ -56,6 +57,7 @@ Row {
                 asynchronous: true
                 MouseArea {
                     onClicked: imageClickedCallBack(parent.source)
+                    onPressAndHold: imageLongPressedCallBack(secondImage.path)
                     anchors.fill: parent
                 }
             }
@@ -83,6 +85,8 @@ Row {
                     asynchronous: true
                     MouseArea {
                         onClicked: imageClickedCallBack(parent.source)
+                        onPressAndHold: imageLongPressedCallBack(
+                                            thirdImage.path)
                         anchors.fill: parent
                     }
                 }
