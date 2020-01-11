@@ -84,7 +84,7 @@ Popup {
                         property bool search: false
                         fill: CmnCfg.palette.lightGrey
                         source: "qrc:/search-icon.svg"
-                        onClicked: search = !search
+                        onClicked: search = true
                     }
 
                     BorderedTextField {

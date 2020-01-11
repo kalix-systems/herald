@@ -16,11 +16,7 @@ MouseArea {
     property var highlightItem: childBubble.highlightItem
     propagateComposedEvents: true
     hoverEnabled: true
-    onClicked: mouse.accepted = false
-    onPressed: mouse.accepted = false
-    onReleased: mouse.accepted = false
-    onDoubleClicked: mouse.accepted = false
-    onPressAndHold: mouse.accepted = false
+    acceptedButtons: Qt.NoButton
     property bool download: childBubble.aux ? false : (childBubble.imageAttach
                                                        || childBubble.docAttach)
     onEntered: {

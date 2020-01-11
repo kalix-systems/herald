@@ -42,12 +42,9 @@ GridLayout {
                     bubbleRoot.hoverHighlight = false
                 }
             }
-
-            onClicked: mouse.accepted = false
-            onPressAndHold: mouse.accepted = false
-            onPressed: mouse.accepted = false
-            onReleased: mouse.accepted = false
             propagateComposedEvents: true
+            acceptedButtons: Qt.NoButton
+
             cursorShape: Qt.IBeamCursor
         }
     }

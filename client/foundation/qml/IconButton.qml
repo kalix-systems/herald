@@ -20,7 +20,7 @@ ToolButton {
         id: mouse
         anchors.fill: parent
         hoverEnabled: true
-        onPressed: mouse.accepted = false
+        acceptedButtons: Qt.NoButton
         cursorShape: Qt.PointingHandCursor
         preventStealing: true
         z: parent.z + 1
