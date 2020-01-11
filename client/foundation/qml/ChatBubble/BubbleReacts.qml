@@ -19,7 +19,7 @@ Flow {
             property bool outboundReact
             property string reactions: ""
             visible: emojiModel[index]["reactionaries"].length !== 0
-            font.pixelSize: 12
+            font.pixelSize: CmnCfg.chatTextSize
             font.family: CmnCfg.chatFont.name
             Component.onCompleted: {
                 outboundReact = emojiModel[index]["reactionaries"].filter(
@@ -81,30 +81,34 @@ Flow {
                 }
             }
 
-            padding: outboundReact ? CmnCfg.microMargin / 2 : 0
             topPadding: CmnCfg.microMargin / 2
+            padding: 1
 
             contentItem: Row {
                 spacing: CmnCfg.microMargin
                 Label {
                     id: emoji
                     text: emojiModel[index]["content"]
+                    color: outboundReact ? CmnCfg.palette.white : CmnCfg.palette.black
+                    font.pixelSize: CmnCfg.chatTextSize
                 }
                 Label {
                     id: numLabel
                     text: emojiModel[index]["reactionaries"].length
                     font.family: CmnCfg.chatFont.name
-                    color: CmnCfg.palette.offBlack
-                    font.pixelSize: 11
+                    color: outboundReact ? CmnCfg.palette.white : CmnCfg.palette.offBlack
+
+                    font.pixelSize: CmnCfg.chatTextSize
+                    font.weight: Font.Medium
                     anchors.verticalCenter: emoji.verticalCenter
                 }
             }
 
             background: Rectangle {
 
-                border.width: outboundReact ? 1 : 0
-                border.color: CmnCfg.palette.offBlack
-                color: CmnCfg.palette.lightGrey
+                border.width: outboundReact ? 0 : 1
+                border.color: CmnCfg.palette.darkGrey
+                color: outboundReact ? CmnCfg.palette.darkGrey : CmnCfg.palette.lightGrey
             }
         }
     }

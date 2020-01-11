@@ -10,6 +10,7 @@ Row {
     anchors.top: parent.top
     anchors.topMargin: CmnCfg.smallMargin
     property alias expireTime: expireTime.text
+    visible: messageModelData.opExpirationTime !== undefined
 
     Connections {
         target: appRoot.globalTimer
