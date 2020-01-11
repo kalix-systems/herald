@@ -31,6 +31,8 @@ Popup {
 
     Page {
         anchors.fill: parent
+
+        //header
         header: ToolBar {
             id: toolBar
             height: CmnCfg.toolbarHeight + 1
@@ -127,8 +129,9 @@ Popup {
             }
         }
 
+        //contacts list view
         ListView {
-            id: tableView
+            id: listView
             boundsBehavior: Flickable.StopAtBounds
             boundsMovement: Flickable.StopAtBounds
             anchors {
@@ -141,13 +144,13 @@ Popup {
 
             clip: true
             maximumFlickVelocity: 1500
-            flickDeceleration: tableView.height * 10
+            flickDeceleration: listView.height * 10
             contentWidth: width
             model: Herald.users
             ScrollBar.vertical: ScrollBar {}
 
             delegate: Rectangle {
-                id: userRow
+                id: userRect
                 property var userData: model
                 color: CmnCfg.palette.white
                 width: contactsPopup.width
@@ -158,6 +161,8 @@ Popup {
                 }
 
                 visible: userData.userId !== Herald.config.configId
+
+                //top header
                 Rectangle {
                     anchors {
                         right: parent.right
@@ -168,6 +173,8 @@ Popup {
                     visible: index !== 0
                     color: CmnCfg.palette.medGrey
                 }
+
+                //bottom header
                 Rectangle {
                     anchors {
                         right: parent.right
@@ -177,13 +184,17 @@ Popup {
                     height: 1
                     color: CmnCfg.palette.medGrey
                     z: parent.z + 1
-                    visible: index === (tableView.count - 1)
+                    visible: index === (listView.count - 1)
                 }
 
+                //item wrapping avatar and label; not using platonic rectangle
+                //so they can have separate mouse areas
                 Item {
                     id: row
                     width: contactsPopup.width
                     height: 70
+
+                    //avatar
                     Avatar {
                         id: avatar
                         anchors.left: parent.left
@@ -216,6 +227,7 @@ Popup {
                             drawer.open()
                         }
 
+                        //contact label
                         Column {
                             id: labelCol
                             spacing: 2
@@ -235,96 +247,8 @@ Popup {
                         }
                     }
 
-                    Flow {
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        anchors.verticalCenter: parent.verticalCenter
-                        spacing: CmnCfg.microMargin
-                        width: 100
-
-                        Repeater {
-                            model: userRow.sharedConvos
-                            delegate: Avatar {
-                                id: groupAv
-                                property var groupData: model
-                                size: 30
-                                isGroup: true
-                                visible: index < 6
-
-                                property int groupColor: groupData.conversationColor !== undefined ? groupData.conversationColor : 0
-                                pfpPath: Utils.safeStringOrDefault(
-                                             groupData.conversationPicture, "")
-
-                                color: CmnCfg.avatarColors[groupColor]
-                                initials: Utils.initialize(
-                                              Utils.safeStringOrDefault(
-                                                  groupData.conversationTitle))
-
-                                MouseArea {
-                                    enabled: !overlay.visible
-                                    anchors.fill: parent
-                                    cursorShape: Qt.PointingHandCursor
-                                    hoverEnabled: true
-                                    onClicked: {
-                                        groupClicked(groupData.conversationId)
-                                        contactsPopup.close()
-                                        contactsLoader.active = false
-                                    }
-                                    ToolTip {
-                                        visible: parent.containsMouse
-                                        contentItem: Text {
-                                            text: Utils.safeStringOrDefault(
-                                                      groupData.conversationTitle,
-                                                      "")
-                                            font.family: CmnCfg.chatFont.name
-                                            font.pixelSize: 12
-                                            color: CmnCfg.palette.lightGrey
-                                            font.weight: Font.Medium
-                                        }
-                                        delay: 1000
-                                        padding: 4
-                                        background: Rectangle {
-                                            color: CmnCfg.palette.offBlack
-                                        }
-                                    }
-                                }
-                                Rectangle {
-                                    anchors.fill: parent
-                                    color: "transparent"
-
-                                    id: overlay
-                                    visible: (userRow.sharedConvos.rowCount(
-                                                  ) > 5 && index === 5)
-                                    ColorOverlay {
-                                        anchors.fill: parent
-                                        color: "black"
-                                        opacity: 0.5
-                                    }
-                                    MouseArea {
-                                        anchors.fill: parent
-                                        preventStealing: true
-                                        propagateComposedEvents: false
-                                        z: groupAv.z + 1
-                                        hoverEnabled: false
-                                        cursorShape: Qt.PointingHandCursor
-                                        onClicked: {
-                                            drawer.userData = userData
-                                            drawer.open()
-                                        }
-                                    }
-
-                                    Label {
-                                        anchors.centerIn: parent
-                                        text: "+" + (userRow.sharedConvos.rowCount(
-                                                         ) - 6)
-                                        color: "white"
-                                        font.family: CmnCfg.chatFont.name
-                                        font.weight: Font.DemiBold
-                                        font.pixelSize: CmnCfg.headerFontSize
-                                    }
-                                }
-                            }
-                        }
-                    }
+                    //common groups
+                    CommonGroupsFlow {}
                 }
             }
         }

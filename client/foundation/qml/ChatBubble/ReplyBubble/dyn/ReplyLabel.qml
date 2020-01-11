@@ -23,7 +23,7 @@ Row {
                    === Herald.config.configId) ? Herald.config.name : messageModelData.opName
             font.weight: Font.Bold
             font.family: CmnCfg.chatFont.name
-            elideWidth: imageAttach ? 300 : bubbleRoot.maxWidth
+            elideWidth: replyWrapper.width * 0.75
             elide: Text.ElideRight
         }
     }
