@@ -2,6 +2,7 @@ import QtQuick 2.0
 import QtQuick.Controls 2.12
 import LibHerald 1.0
 import QtGraphicalEffects 1.13
+import QtQuick.Layouts 1.3
 
 Flow {
     spacing: CmnCfg.microMargin
@@ -16,6 +17,7 @@ Flow {
             id: emojiText
             property var emojiModel: emojiRepeater.model
             property bool outboundReact
+            property string reactions: ""
             visible: emojiModel[index]["reactionaries"].length !== 0
             font.pixelSize: 12
             font.family: CmnCfg.chatFont.name
@@ -24,6 +26,12 @@ Flow {
                             function (reactionary) {
                                 return reactionary === Herald.config.configId
                             }).length === 1
+
+                for (var reactionary in emojiModel[index]["reactionaries"]) {
+                    reactions += (Herald.users.nameById(
+                                      emojiModel[index]["reactionaries"][reactionary]) + ", ")
+                }
+                reactions = reactions.slice(0, reactions.length - 2)
             }
             MouseArea {
 
@@ -48,34 +56,26 @@ Flow {
                           }
 
                 ToolTip {
+                    delay: 500
+
                     visible: parent.containsMouse
                     y: -height
                     background: Rectangle {
-                        color: CmnCfg.palette.lightGrey
+                        color: CmnCfg.palette.offBlack
                         border.width: 0
                     }
-                    padding: 0
-                    width: contentWidth
-                    height: contentHeight
-                    contentItem: Flow {
-                        id: flow
-                        anchors.centerIn: parent
-                        width: 100
-                        Repeater {
-                            id: reactionaryRepeater
-                            model: emojiModel[index]["reactionaries"]
-                            height: implicitHeight
-                            width: implicitWidth
-                            delegate: Label {
-                                id: person
-                                property var reactionaryData: reactionaryRepeater.model
-                                text: reactionaryData[index]
-                                      + (index !== (reactionaryRepeater.count - 1) ? ", " : "")
-                                font.family: CmnCfg.chatFont.name
-                                font.pixelSize: CmnCfg.minorTextSize
-                                padding: 2
-                                font.weight: Font.Medium
-                            }
+                    padding: 2
+                    contentItem: GridLayout {
+                        Label {
+                            text: emojiText.reactions !== undefined ? emojiText.reactions : ""
+                            Layout.maximumWidth: 100
+                            Layout.maximumHeight: 50
+                            wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                            padding: 2
+                            font.pixelSize: CmnCfg.minorTextSize
+                            font.weight: Font.Medium
+                            color: CmnCfg.palette.white
+                            font.family: CmnCfg.chatFont.name
                         }
                     }
                 }
