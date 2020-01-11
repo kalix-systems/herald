@@ -24,8 +24,19 @@ Drawer {
         anchors.fill: parent
         active: drawer.userData !== undefined
         sourceComponent: Flickable {
-            anchors.fill: parent
+            boundsBehavior: Flickable.StopAtBounds
+            boundsMovement: Flickable.StopAtBounds
+            anchors.top: parent.top
+            anchors.bottom: parent.bottom
+            width: parent.width
+            contentHeight: wrapperCol.height
+            clip: true
+            maximumFlickVelocity: 1500
+            flickDeceleration: height * 10
+            contentWidth: width
+            ScrollBar.vertical: ScrollBar {}
             Column {
+                id: wrapperCol
                 padding: CmnCfg.defaultMargin
                 width: parent.width
                 spacing: CmnCfg.defaultMargin

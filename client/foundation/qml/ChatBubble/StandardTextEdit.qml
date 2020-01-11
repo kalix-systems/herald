@@ -29,10 +29,18 @@ GridLayout {
         MouseArea {
             anchors.fill: parent
             hoverEnabled: true
-            onEntered: bubbleActual.hoverHighlight = true
-            onExited: if (!bubbleActual.hitbox.containsMouse) {
-                          bubbleActual.hoverHighlight = false
-                      }
+            onEntered: {
+                if (bubbleRoot.moreInfo)
+                    return
+                bubbleRoot.hoverHighlight = true
+            }
+            onExited: {
+                if (bubbleRoot.moreInfo)
+                    return
+                if (!bubbleRoot.hitbox.containsMouse) {
+                    bubbleRoot.hoverHighlight = false
+                }
+            }
 
             onClicked: mouse.accepted = false
             onPressAndHold: mouse.accepted = false

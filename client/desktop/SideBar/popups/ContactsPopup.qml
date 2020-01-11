@@ -116,6 +116,15 @@ Popup {
                 font.pixelSize: CmnCfg.defaultFontSize
                 font.weight: Font.Medium
             }
+            Rectangle {
+                anchors {
+                    right: parent.right
+                    left: parent.left
+                    bottom: parent.bottom
+                }
+                height: 1
+                color: CmnCfg.palette.medGrey
+            }
         }
 
         ListView {
@@ -126,8 +135,14 @@ Popup {
                 top: rowLabel.bottom
                 right: parent.right
                 left: parent.left
+                bottom: parent.bottom
             }
-            height: contentHeight
+            width: parent.width
+
+            clip: true
+            maximumFlickVelocity: 1500
+            flickDeceleration: tableView.height * 10
+            contentWidth: width
             model: Herald.users
             ScrollBar.vertical: ScrollBar {}
 
@@ -150,7 +165,19 @@ Popup {
                         top: parent.top
                     }
                     height: 1
+                    visible: index !== 0
                     color: CmnCfg.palette.medGrey
+                }
+                Rectangle {
+                    anchors {
+                        right: parent.right
+                        left: parent.left
+                        bottom: parent.bottom
+                    }
+                    height: 1
+                    color: CmnCfg.palette.medGrey
+                    z: parent.z + 1
+                    visible: index === (tableView.count - 1)
                 }
 
                 Item {
@@ -292,16 +319,6 @@ Popup {
                     }
                 }
             }
-        }
-        Rectangle {
-            anchors {
-                right: parent.right
-                left: parent.left
-                top: tableView.bottom
-            }
-            height: 1
-            color: CmnCfg.palette.medGrey
-            z: parent.z + 1
         }
     }
 }

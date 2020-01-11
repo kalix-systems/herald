@@ -80,6 +80,8 @@ Popup {
         clip: true
         ScrollBar.vertical: ScrollBar {}
         boundsBehavior: Flickable.StopAtBounds
+        maximumFlickVelocity: 1500
+        flickDeceleration: height * 10
         Column {
             id: wrapperCol
             width: parent.width - CmnCfg.smallMargin * 2
