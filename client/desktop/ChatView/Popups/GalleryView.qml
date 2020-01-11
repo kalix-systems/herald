@@ -139,7 +139,8 @@ Popup {
         icon.height: 30
         icon.width: 30
         anchors.verticalCenter: flickable.verticalCenter
-        anchors.right: parent.right
+        anchors.left: flickable.right
+        anchors.leftMargin: CmnCfg.smallMargin
         source: "qrc:/forward-arrow-icon.svg"
         enabled: currentIndex !== imageAttachments.length - 1
         fill: CmnCfg.palette.white
@@ -158,7 +159,8 @@ Popup {
         icon.height: 30
         icon.width: 30
         anchors.verticalCenter: flickable.verticalCenter
-        anchors.left: parent.left
+        anchors.right: flickable.left
+        anchors.rightMargin: CmnCfg.smallMargin
         source: "qrc:/back-arrow-icon.svg"
         enabled: currentIndex !== 0
         fill: CmnCfg.palette.white
@@ -227,10 +229,10 @@ Popup {
 
     Flickable {
         id: flickable
-        width: parent.width - 50
-        height: parent.height - 110
+        width: parent.width - 64
+        height: parent.height - 120
         anchors.top: parent.top
-        anchors.topMargin: 30
+        anchors.topMargin: 40
         anchors.horizontalCenter: parent.horizontalCenter
 
         clip: true

@@ -26,6 +26,7 @@ GridLayout {
         color: CmnCfg.palette.black
         textFormat: TextEdit.AutoText
         selectionColor: CmnCfg.palette.highlightColor
+
         MouseArea {
             anchors.fill: parent
             hoverEnabled: true

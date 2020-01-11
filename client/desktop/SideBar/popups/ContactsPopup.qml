@@ -194,6 +194,14 @@ Popup {
                                      model.profilePicture, "")
                         color: CmnCfg.avatarColors[model.color]
                         initials: Utils.initialize(name)
+                        MouseArea {
+                            cursorShape: Qt.PointingHandCursor
+                            anchors.fill: parent
+                            onClicked: {
+                                drawer.userData = userData
+                                drawer.open()
+                            }
+                        }
                     }
 
                     MouseArea {

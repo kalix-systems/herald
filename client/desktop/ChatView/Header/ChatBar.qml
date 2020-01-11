@@ -129,7 +129,7 @@ ToolBar {
                     }
 
                     MenuItem {
-                        text: qsTr("Clear History")
+                        text: qsTr("Clear history")
                         onTriggered: clearHistoryPrompt.open()
                     }
                     MenuItem {
