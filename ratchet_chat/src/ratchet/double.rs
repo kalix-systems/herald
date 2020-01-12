@@ -42,9 +42,8 @@
 //! [secure deletion]: https://signal.org/docs/specifications/doubleratchet/#secure-deletion
 //! [recovery from compromise]: https://signal.org/docs/specifications/doubleratchet/#recovery-from-compromise
 
+use super::*;
 use derive_getters::Getters;
-use kcl::*;
-use kson::prelude::*;
 use std::{collections::HashMap, error::Error};
 use thiserror::*;
 use typed_builder::TypedBuilder;
@@ -534,9 +533,7 @@ pub enum DecryptError<E: Error + Send + 'static> {
 /// discussion.
 ///
 /// [specification]: https://signal.org/docs/specifications/doubleratchet/#deletion-of-skipped-message-keys
-pub trait KeyStore {
-    type Error: std::error::Error + Send + 'static;
-
+pub trait KeyStore: StoreLike {
     fn get_key(
         &mut self,
         pk: kx::PublicKey,
@@ -574,13 +571,19 @@ pub trait KeyStore {
     ) -> Result<bool, Self::Error>;
 }
 
-impl<S1, S2> KeyStore for HashMap<kx::PublicKey, HashMap<Counter, aead::Key, S2>, S1>
+impl<S1, S2> StoreLike for HashMap<kx::PublicKey, HashMap<Counter, aead::Key, S2>, S1>
 where
     S1: std::hash::BuildHasher,
     S2: std::hash::BuildHasher + Default,
 {
     type Error = void::Void;
+}
 
+impl<S1, S2> KeyStore for HashMap<kx::PublicKey, HashMap<Counter, aead::Key, S2>, S1>
+where
+    S1: std::hash::BuildHasher,
+    S2: std::hash::BuildHasher + Default,
+{
     fn get_key(
         &mut self,
         pk: kx::PublicKey,
