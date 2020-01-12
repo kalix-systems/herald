@@ -16,8 +16,7 @@ Menu {
 
             return conversationItem.expirationPeriod
         }
-        builder.expirationPeriod
-                !== undefined ? builder.expirationPeriod : conversationItem.expirationPeriod
+        builder.expirationPeriod !== undefined ? builder.expirationPeriod : (timerModel.length - 1)
     }
     property string chosenTimer: timerModel[chosenPeriod].path
     property bool messageModify: false
@@ -25,7 +24,7 @@ Menu {
     // TODO real icon
     property var timerModel: [{
             "name": qsTr("Off"),
-            "path": messageModify ? "qrc:/timer-option-icons/blank-dark.svg" : "qrc:/timer-option-icons/off.svg"
+            "path": messageModify ? "qrc:/timer-option-icons/off-dark.svg" : "qrc:/timer-option-icons/off.svg"
         }, {
             "name": qsTr("30 seconds"),
             "path": messageModify ? "qrc:/timer-option-icons/30s-dark.svg" : "qrc:/timer-option-icons/30s.svg"
@@ -53,6 +52,9 @@ Menu {
         }, {
             "name": qsTr("1 year"),
             "path": messageModify ? "qrc:/timer-option-icons/1y-dark.svg" : "qrc:/timer-option-icons/1y.svg"
+        }, {
+            "name": qsTr("Default"),
+            "path": "qrc:/timer-option-icons/blank-dark.svg"
         }]
     Instantiator {
         model: timerModel
@@ -65,20 +67,16 @@ Menu {
 
                     return conversationItem.expirationPeriod === index
                 }
-                builder.expirationPeriod
-                        === undefined ? (conversationItem.expirationPeriod
-                                         === index) : builder.expirationPeriod === index
+                builder.expirationPeriod === undefined ? (index === (timerModel.length - 1)) : builder.expirationPeriod === index
             }
             onTriggered: {
 
                 if (!messageModify) {
 
                     conversationItem.expirationPeriod = index
-                    chosenPeriod = index
                     return
                 }
                 builder.setExpirationPeriod(index)
-                chosenPeriod = index
             }
         }
 
