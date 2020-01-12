@@ -203,7 +203,7 @@ pub struct PayloadResult {
     pub msg: Option<Bytes>,
     pub forward: bool,
 }
-/// Processes a payload using
+
 pub fn handle_payload<S: SigStore + ConversationStore>(
     store: &mut S,
     from: GlobalId,
