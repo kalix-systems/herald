@@ -241,7 +241,7 @@ pub mod sig {
         }
     }
 
-    #[derive(Ser, De, Debug, Clone, Copy, PartialEq, Eq)]
+    #[derive(Ser, De, Debug, Clone, Copy, PartialEq, Eq, Hash)]
     pub enum SigUpdate {
         Endorse(Signed<UserId>),
         Deprecate(sig::PublicKey),
