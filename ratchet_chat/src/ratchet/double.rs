@@ -63,6 +63,7 @@ pub type Counter = u32;
 #[derive(TypedBuilder, Getters, Debug)]
 pub struct DoubleRatchet {
     dhs: kx::KeyPair,
+    #[builder(default)]
     dhr: Option<kx::PublicKey>,
     rk: hash::Key,
     #[builder(default)]

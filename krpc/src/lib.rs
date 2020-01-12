@@ -1,12 +1,9 @@
 pub use anyhow::*;
 pub use async_trait::*;
-use futures::{
-    future::{self, FutureExt, TryFutureExt},
-    stream::{Stream, StreamExt},
-};
+use futures::stream::Stream;
 pub use kson::prelude::*;
 pub use kson_channel::*;
-use std::{cmp::max, fmt::Debug, net::SocketAddr};
+use std::fmt::Debug;
 pub use tokio::prelude::*;
 
 #[cfg(feature = "quic")]

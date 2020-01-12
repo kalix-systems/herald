@@ -1,10 +1,15 @@
 use super::*;
 use futures::{
-    future::{self, TryFuture},
+    future::{self, FutureExt, TryFuture, TryFutureExt},
     stream::{self, StreamExt, TryStreamExt},
 };
 use sharded_slab::*;
-use std::{cmp::min, ops::Deref, sync::Arc};
+use std::{
+    cmp::{max, min},
+    net::SocketAddr,
+    ops::Deref,
+    sync::Arc,
+};
 use tokio::sync::{
     mpsc::{unbounded_channel, UnboundedSender},
     oneshot,

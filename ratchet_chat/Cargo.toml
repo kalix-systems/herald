@@ -19,5 +19,8 @@ path = "../kcl"
 [dependencies.kson]
 path = "../kson"
 
+[dependencies.herald_common]
+path = "../herald_common"
+
 [dev-dependencies]
 serial_test = "0.3.2"
