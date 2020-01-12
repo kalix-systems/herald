@@ -16,8 +16,7 @@ GridLayout {
                   bubbleRoot.body
               }
 
-        onLinkActivated: Qt.openUrlExternally(link)
-
+        //  onLinkActivated: Qt.openUrlExternally(link)
         wrapMode: Text.WrapAtWordBoundaryOrAnywhere
         Layout.alignment: Qt.AlignLeft
         selectByMouse: true
@@ -32,7 +31,7 @@ GridLayout {
         MouseArea {
             anchors.fill: parent
             hoverEnabled: true
-            cursorShape: parent.hoveredLink ? Qt.PointingHandCursor : Qt.IBeamCursor
+            cursorShape: Qt.IBeamCursor
             onEntered: {
                 if (bubbleRoot.moreInfo)
                     return
@@ -49,27 +48,27 @@ GridLayout {
             acceptedButtons: Qt.NoButton
         }
 
-        Component.onCompleted: {
-            if (includes_link(text))
-                text = generate_hyptertext(text)
-        }
+        //        Component.onCompleted: {
+        //            if (includes_link(text))
+        //                text = generate_hyptertext(text)
+        //        }
 
-        // Note about this regex:
-        // it pulls every web URL out of the substring, it is used to replace
-        // them with hypertext
-        // capture group 2: the name of the website
-        // capture group 3: the tld
-        // capture group 7: the file extension or anchor
-        function includes_link(text) {
-            const regexp = /\b(https?:\/\/)?([\w-\.]+)\.([a-z]{1,4})?(\/[\w-\/]*(\?\w*(=\w+)*[&\w-=]*)*((#|\.)[\w-]+)*)?/gmi
-            return regexp.test(text)
-        }
+        //        // Note about this regex:
+        //        // it pulls every web URL out of the substring, it is used to replace
+        //        // them with hypertext
+        //        // capture group 2: the name of the website
+        //        // capture group 3: the tld
+        //        // capture group 7: the file extension or anchor
+        //        function includes_link(text) {
+        //            const regexp = /\b(https?:\/\/)?([\w-\.]+)\.([a-z]{1,4})?(\/[\w-\/]*(\?\w*(=\w+)*[&\w-=]*)*((#|\.)[\w-]+)*)?/gmi
+        //            return regexp.test(text)
+        //        }
 
-        function generate_hyptertext(text) {
-            const regexp = /\b(https?:\/\/)?([\w-\.]+)\.([a-z]{1,4})?(\/[\w-\/]*(\?\w*(=\w+)*[&\w-=]*)*((#|\.)[\w-]+)*)?/gmi
-            return text.replace(regexp, function (match) {
-                return "<a href=%1>%1</a>".arg(match)
-            })
-        }
+        //        function generate_hyptertext(text) {
+        //            const regexp = /\b(https?:\/\/)?([\w-\.]+)\.([a-z]{1,4})?(\/[\w-\/]*(\?\w*(=\w+)*[&\w-=]*)*((#|\.)[\w-]+)*)?/gmi
+        //            return text.replace(regexp, function (match) {
+        //                return "<a href=%1>%1</a>".arg(match)
+        //            })
+        //        }
     }
 }

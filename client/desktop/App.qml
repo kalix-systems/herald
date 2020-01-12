@@ -106,9 +106,6 @@ Item {
         id: convoMenu
     }
 
-    //    Popups.ImageCropPopup {//  id: imageCrop
-    //    }
-    // TODO: move into seperate file
     Component {
         id: splash
 
@@ -188,7 +185,6 @@ Item {
             Rectangle {
 
                 anchors.horizontalCenter: parent.left
-                //  anchors.rightMargin: 2
                 width: 9
                 height: parent.height
                 color: "transparent"
