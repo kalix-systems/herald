@@ -11,6 +11,7 @@ import "qrc:/imports/Entity" as Entity
 import "qrc:/imports/js/utils.mjs" as Utils
 import QtQuick.Layouts 1.3
 import QtQuick.Shapes 1.12
+import "../../SideBar/popups" as SBPopups
 
 Popup {
     id: convoSettingsPopup
@@ -76,34 +77,115 @@ Popup {
             height: 60
             width: parent.width
             model: convoMembers
-            delegate: Item {
+            delegate: Column {
                 width: parent.width
+                spacing: CmnCfg.smallMargin
+                leftPadding: CmnCfg.defaultMargin
                 property var contactMember: model
-                height: visible ? 60 : 0
+                height: visible ? contentHeight : 0
                 visible: contactMember.userId !== Herald.config.configId
-                Entity.Avatar {
-                    id: itemAvatar
-                    anchors {
-                        left: parent.left
-                        verticalCenter: parent.verticalCenter
-                        leftMargin: CmnCfg.smallMargin
+                Row {
+                    spacing: CmnCfg.megaMargin
+                    height: 72
+                    width: parent.width
+                    Entity.Avatar {
+                        id: itemAvatar
+                        color: CmnCfg.avatarColors[contactMember.color]
+                        initials: contactMember.name[0].toUpperCase()
+                        pfpPath: Utils.safeStringOrDefault(
+                                     contactMember.picture)
+                        size: 60
                     }
-                    color: CmnCfg.avatarColors[contactMember.color]
-                    initials: contactMember.name[0].toUpperCase()
-                    pfpPath: Utils.safeStringOrDefault(contactMember.picture)
-                    size: 60
+
+                    Entity.ContactLabel {
+                        anchors.fill: undefined
+                        anchors.verticalCenter: itemAvatar.verticalCenter
+                        displayNameSize: CmnCfg.headerFontSize
+                        width: 60
+                        displayName: contactMember.name
+                        username: contactMember.userId
+                        height: 40
+                    }
                 }
 
-                Entity.ContactLabel {
-                    anchors.left: itemAvatar.right
-                    anchors.leftMargin: CmnCfg.megaMargin
-                    anchors.fill: undefined
-                    anchors.verticalCenter: itemAvatar.verticalCenter
-                    displayNameSize: CmnCfg.headerFontSize
-                    width: 60
-                    displayName: contactMember.name
-                    username: contactMember.userId
-                    height: 40
+                Label {
+                    id: optionsHeader
+                    text: qsTr("Options")
+                    font.family: CmnCfg.chatFont.name
+                    color: CmnCfg.palette.darkGrey
+                }
+
+                Row {
+                    height: implicitHeight
+
+                    spacing: 14 //CmnCfg.megaMargin
+                    padding: 0
+                    Rectangle {
+                        id: colorDot
+                        height: 22
+                        width: height
+                        radius: width
+                        color: CmnCfg.palette.avatarColors[contactMember.color]
+                        MouseArea {
+                            id: mouseArea
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: {
+                                colorLoader.active = true
+                                colorLoader.item.open()
+                            }
+                            ToolTip {
+                                visible: mouseArea.containsMouse
+
+                                contentItem: Text {
+                                    text: qsTr("Set color")
+                                    font.family: CmnCfg.chatFont.name
+                                    font.pixelSize: 12
+                                    color: CmnCfg.sysPalette.text
+                                }
+                                background: Rectangle {
+                                    color: CmnCfg.sysPalette.window
+                                    border.width: 1
+                                    border.color: CmnCfg.sysPalette.midlight
+                                }
+                                delay: 1000
+                                padding: CmnCfg.microMargin
+                            }
+                        }
+                    }
+
+                    Loader {
+                        id: colorLoader
+                        y: mouse.mouseY
+                        active: false
+
+                        sourceComponent: SBPopups.ColorPicker {
+
+                            id: colorpicker
+                            y: mouse.mouseY
+                            onClosed: colorLoader.active = false
+                            colorCallback: function () {
+                                if (contactMember === undefined)
+                                    return
+                                var idx = Herald.users.indexById(
+                                            contactMember.userId)
+                                print(idx)
+
+                                if ((idx < 0)
+                                        || (idx >= Herald.users.rowCount()))
+                                    return
+
+                                Herald.users.setColor(idx, colorIndex)
+                            }
+                        }
+                    }
+
+                    Label {
+                        text: qsTr("Color")
+                        font.family: CmnCfg.chatFont.name
+                        anchors.verticalCenter: colorDot.verticalCenter
+                    }
                 }
             }
         }
