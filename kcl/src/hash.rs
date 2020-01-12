@@ -1,17 +1,15 @@
-use crate::new_type;
-
+use super::*;
 use arrayvec::ArrayVec;
-use libsodium_sys::*;
 
-pub const KEY_LEN: usize = crypto_generichash_blake2b_KEYBYTES_MAX as usize;
-pub const HASH_MIN_LEN: usize = crypto_generichash_blake2b_BYTES_MIN as usize;
-pub const HASH_MAX_LEN: usize = crypto_generichash_blake2b_BYTES_MAX as usize;
-pub const HASH_REC_LEN: usize = crypto_generichash_blake2b_BYTES as usize;
+pub const KEY_LEN: usize = ffi::crypto_generichash_blake2b_KEYBYTES_MAX as usize;
+pub const HASH_MIN_LEN: usize = ffi::crypto_generichash_blake2b_BYTES_MIN as usize;
+pub const HASH_MAX_LEN: usize = ffi::crypto_generichash_blake2b_BYTES_MAX as usize;
+pub const HASH_REC_LEN: usize = ffi::crypto_generichash_blake2b_BYTES as usize;
 
 pub fn simple_hash(msg: &[u8]) -> [u8; HASH_REC_LEN] {
     let mut buf = [0u8; HASH_REC_LEN];
     let res = unsafe {
-        crypto_generichash_blake2b(
+        ffi::crypto_generichash_blake2b(
             buf.as_mut_ptr(),
             HASH_REC_LEN,
             msg.as_ptr(),
@@ -31,7 +29,7 @@ pub fn simple_hash_into(
     assert!(HASH_MIN_LEN <= buf.len());
     assert!(buf.len() <= HASH_MAX_LEN);
     let res = unsafe {
-        crypto_generichash_blake2b(
+        ffi::crypto_generichash_blake2b(
             buf.as_mut_ptr(),
             HASH_REC_LEN,
             msg.as_ptr(),
@@ -50,7 +48,7 @@ new_type! {
 impl Key {
     pub fn new() -> Self {
         let mut buf = [0u8; KEY_LEN];
-        crate::random::gen_into(&mut buf);
+        random::gen_into(&mut buf);
         Key(buf)
     }
 
@@ -62,7 +60,7 @@ impl Key {
         assert!(HASH_MIN_LEN <= buf.len());
         assert!(buf.len() <= HASH_MAX_LEN);
         let result = unsafe {
-            crypto_generichash_blake2b(
+            ffi::crypto_generichash_blake2b(
                 buf.as_mut_ptr(),
                 buf.len(),
                 msg.as_ptr(),
@@ -126,7 +124,7 @@ pub struct Digest(pub ArrayVec<[u8; HASH_MAX_LEN]>);
 
 pub struct Hasher {
     out_len: usize,
-    state: crypto_generichash_blake2b_state,
+    state: ffi::crypto_generichash_blake2b_state,
 }
 
 impl Hasher {
@@ -144,7 +142,7 @@ impl Hasher {
             .unwrap_or((std::ptr::null(), 0));
 
         let result = unsafe {
-            crypto_generichash_blake2b_init(state.as_mut_ptr(), key_ptr, key_len, out_len)
+            ffi::crypto_generichash_blake2b_init(state.as_mut_ptr(), key_ptr, key_len, out_len)
         };
         assert_eq!(result, 0);
 
@@ -157,7 +155,11 @@ impl Hasher {
         data: &[u8],
     ) {
         let res = unsafe {
-            crypto_generichash_blake2b_update(&mut self.state, data.as_ptr(), data.len() as u64)
+            ffi::crypto_generichash_blake2b_update(
+                &mut self.state,
+                data.as_ptr(),
+                data.len() as u64,
+            )
         };
         assert_eq!(res, 0);
     }
@@ -165,8 +167,11 @@ impl Hasher {
     pub fn finalize(mut self) -> Digest {
         let mut buf = ArrayVec::new();
         unsafe {
-            let res =
-                crypto_generichash_blake2b_final(&mut self.state, buf.as_mut_ptr(), self.out_len);
+            let res = ffi::crypto_generichash_blake2b_final(
+                &mut self.state,
+                buf.as_mut_ptr(),
+                self.out_len,
+            );
             assert_eq!(res, 0);
             buf.set_len(self.out_len);
         };
@@ -180,7 +185,7 @@ impl Hasher {
         assert!(buf.len() == self.out_len);
         unsafe {
             let res =
-                crypto_generichash_blake2b_final(&mut self.state, buf.as_mut_ptr(), buf.len());
+                ffi::crypto_generichash_blake2b_final(&mut self.state, buf.as_mut_ptr(), buf.len());
             assert_eq!(res, 0);
         };
     }
@@ -188,10 +193,10 @@ impl Hasher {
 
 impl Drop for Hasher {
     fn drop(&mut self) {
-        let as_ptr = (&mut self.state) as *mut crypto_generichash_blake2b_state;
+        let as_ptr = (&mut self.state) as *mut ffi::crypto_generichash_blake2b_state;
         unsafe {
-            let len = crypto_generichash_blake2b_statebytes();
-            sodium_memzero(as_ptr as *mut std::ffi::c_void, len as usize);
+            let len = ffi::crypto_generichash_blake2b_statebytes();
+            ffi::sodium_memzero(as_ptr as *mut std::ffi::c_void, len as usize);
         }
     }
 }

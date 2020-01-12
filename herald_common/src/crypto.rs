@@ -181,64 +181,26 @@ impl SigMeta {
 
 pub mod sig {
     use super::*;
-    pub use sign::{PublicKey, Signature};
+    pub use sign::{KeyPair, PublicKey, Signature};
 
     pub const PUBLIC_KEY_BYTES: usize = sign::PUBLIC_KEY_LEN;
     pub const SIGNATURE_BYTES: usize = sign::SIGNATURE_LEN;
 
-    #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
-    pub struct KeyPair {
-        public: sign::PublicKey,
-        secret: sign::SecretKey,
-    }
-
-    impl KeyPair {
-        pub fn gen_new() -> Self {
-            let (public, secret) = sign::gen_keypair();
-            KeyPair { public, secret }
-        }
-
-        // TODO: make this copy public key instead of referencing it
-        pub fn public_key(&self) -> &sign::PublicKey {
-            &self.public
-        }
-
-        pub fn secret_key(&self) -> &sign::SecretKey {
-            &self.secret
-        }
-
-        pub fn sign<T: Ser>(
-            &self,
-            data: T,
-        ) -> Signed<T> {
-            let timestamp = Time::now();
-            let to_sign = compute_signing_data(&kson::to_vec(&data), timestamp);
-            let sig = self.secret.sign(&to_sign);
-            let signed = Signed {
-                data,
-                timestamp,
-                sig,
-                signed_by: self.public,
-            };
-            debug_assert!(signed.verify_sig() == SigValid::Yes);
-            signed
-        }
-
-        pub fn sign_detached(
-            &self,
-            data: &[u8],
-        ) -> SigMeta {
-            let timestamp = Time::now();
-            let to_sign = compute_signing_data(data, timestamp);
-            let sig = self.secret.sign(&to_sign);
-            let meta = SigMeta {
-                timestamp,
-                sig,
-                signed_by: self.public,
-            };
-            debug_assert!(meta.verify_sig(data) == SigValid::Yes);
-            meta
-        }
+    pub fn sign_ser<T: Ser>(
+        keys: &KeyPair,
+        data: T,
+    ) -> Signed<T> {
+        let timestamp = Time::now();
+        let to_sign = compute_signing_data(&kson::to_vec(&data), timestamp);
+        let sig = keys.secret().sign(&to_sign);
+        let signed = Signed {
+            data,
+            timestamp,
+            sig,
+            signed_by: *keys.public(),
+        };
+        debug_assert!(signed.verify_sig() == SigValid::Yes);
+        signed
     }
 
     #[derive(Ser, De, Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -296,10 +258,10 @@ pub mod sig {
 }
 
 #[derive(Ser, De, Debug, Clone, Copy, PartialEq, Eq)]
-pub struct Prekey(pub kcl::box_::PublicKey);
+pub struct Prekey(pub kcl::kx::PublicKey);
 
 impl Prekey {
     pub fn from_slice(bytes: &[u8]) -> Option<Self> {
-        kcl::box_::PublicKey::from_slice(bytes).map(Self)
+        kcl::kx::PublicKey::from_slice(bytes).map(Self)
     }
 }

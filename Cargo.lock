@@ -1013,8 +1013,10 @@ name = "kcl"
 version = "0.1.0"
 dependencies = [
  "arrayvec 0.5.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "derive-getters 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "kson 0.1.0",
  "libsodium-sys 0.2.5 (registry+https://github.com/rust-lang/crates.io-index)",
+ "typed-builder 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]

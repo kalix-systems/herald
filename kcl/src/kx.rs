@@ -1,17 +1,8 @@
 use super::*;
 use kson::prelude::*;
+pub use x25519::*;
 
-pub const PUBLIC_KEY_LEN: usize = ffi::crypto_kx_PUBLICKEYBYTES as usize;
-pub const SECRET_KEY_LEN: usize = ffi::crypto_kx_SECRETKEYBYTES as usize;
 pub const SESSION_KEY_LEN: usize = ffi::crypto_kx_SESSIONKEYBYTES as usize;
-
-new_type! {
-    secret SecretKey(SECRET_KEY_LEN)
-}
-
-new_type! {
-    public PublicKey(PUBLIC_KEY_LEN)
-}
 
 new_type! {
     secret SessionKey(SESSION_KEY_LEN)
@@ -23,23 +14,7 @@ pub struct Session {
     pub tx: SessionKey,
 }
 
-#[derive(Ser, De, Clone, Debug)]
-pub struct KeyPair {
-    pub public: PublicKey,
-    pub secret: SecretKey,
-}
-
 impl KeyPair {
-    pub fn gen_new() -> Self {
-        let mut pk_buf = [0u8; PUBLIC_KEY_LEN];
-        let mut sk_buf = [0u8; SECRET_KEY_LEN];
-        let res = unsafe { ffi::crypto_kx_keypair(pk_buf.as_mut_ptr(), sk_buf.as_mut_ptr()) };
-        assert_eq!(res, 0);
-        let public = PublicKey(pk_buf);
-        let secret = SecretKey(sk_buf);
-        KeyPair { public, secret }
-    }
-
     pub fn server_kx(
         &self,
         other: PublicKey,

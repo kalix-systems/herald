@@ -186,6 +186,15 @@ impl DoubleRatchet {
         Some((h, pt))
     }
 
+    pub fn ratchet_encrypt_inf(
+        &mut self,
+        pt: &[u8],
+        ad: &[u8],
+    ) -> (Header, Vec<u8>) {
+        self.ratchet_encrypt(pt, ad)
+            .expect("failed to ratchet encrypt")
+    }
+
     // Ratcheting forward the DH chain for sending is delayed until the first message in that chain
     // is going to be sent.
     //
@@ -196,23 +205,28 @@ impl DoubleRatchet {
     // Panics if encrypting is not yet initialized
     fn ratchet_send_chain(&mut self) -> Option<(Header, MessageKey)> {
         if self.cks.is_none() {
-            let dhr = self.dhr.as_ref()?;
-            self.dhs = KeyPair::gen_new();
-            let (rk, cks) = kdf_rk(&self.rk, &diffie_hellman(&self.dhs, dhr));
-            self.rk = rk;
-            self.cks = Some(cks);
-            self.pn = self.ns;
-            self.ns = 0;
+            self.ratchet_dh_chain()?;
         }
         let h = Header {
-            dh: self.dhs.public,
+            dh: *self.dhs.public(),
             n: self.ns,
             pn: self.pn,
         };
-        let (cks, mk) = kdf_ck(self.cks.as_ref().unwrap());
+        let (cks, mk) = kdf_ck(self.cks.as_ref()?);
         self.cks = Some(cks);
         self.ns += 1;
         Some((h, mk))
+    }
+
+    pub fn ratchet_dh_chain(&mut self) -> Option<()> {
+        let dhr = self.dhr.as_ref()?;
+        self.dhs = KeyPair::gen_new();
+        let (rk, cks) = kdf_rk(&self.rk, &diffie_hellman(&self.dhs, dhr));
+        self.rk = rk;
+        self.cks = Some(cks);
+        self.pn = self.ns;
+        self.ns = 0;
+        Some(())
     }
 
     /// Verify-decrypt the `ciphertext`, update `self` and return the plaintext.
@@ -405,7 +419,7 @@ pub type ChainKey = hash::Key;
 pub type MessageKey = aead::Key;
 
 /// Perform the Diffie-Hellman operation on the sender side.
-fn diffie_hellman(
+pub(crate) fn diffie_hellman(
     us: &KeyPair,
     them: &PublicKey,
 ) -> SharedSecret {
@@ -415,7 +429,7 @@ fn diffie_hellman(
 }
 
 /// Derive a new root-key/chain-key pair from the old root-key and a fresh shared secret.
-fn kdf_rk(
+pub(crate) fn kdf_rk(
     root_key: &RootKey,
     shared_secret: &SharedSecret,
 ) -> (RootKey, ChainKey) {
@@ -430,7 +444,7 @@ fn kdf_rk(
 }
 
 /// Derive a new chain-key/message-key pair from the old chain-key.
-fn kdf_ck(chain_key: &ChainKey) -> (ChainKey, MessageKey) {
+pub(crate) fn kdf_ck(chain_key: &ChainKey) -> (ChainKey, MessageKey) {
     let mut ck_buf = [0u8; hash::KEY_LEN];
     let mut mk_buf = [0u8; aead::KEY_LEN];
     let mut bufs: [&mut [u8]; 2] = [&mut ck_buf, &mut mk_buf];
@@ -652,10 +666,10 @@ mod tests {
 
         let a_pair = KeyPair::gen_new();
         let b_pair = KeyPair::gen_new();
-        let secret = diffie_hellman(&a_pair, &b_pair.public);
+        let secret = diffie_hellman(&a_pair, b_pair.public());
         let (secret, ck_init) = kdf_rk(&secret, &secret);
-        let alice = DR::new_alice(&secret, b_pair.public, Some(ck_init));
-        let bob = DR::new_bob(secret, b_pair, alice.dhs.public, None);
+        let alice = DR::new_alice(&secret, *b_pair.public(), Some(ck_init));
+        let bob = DR::new_bob(secret, b_pair, *alice.dhs.public(), None);
         (alice, bob)
     }
 
@@ -663,11 +677,11 @@ mod tests {
         kcl::init();
 
         let pair = KeyPair::gen_new();
-        let secret = diffie_hellman(&pair, &pair.public);
+        let secret = diffie_hellman(&pair, pair.public());
         let (secret, ck_init) = kdf_rk(&secret, &secret);
 
-        let alice = DR::new_alice(&secret, pair.public, Some(ck_init.clone()));
-        let bob = DR::new_bob(secret, pair.clone(), pair.public, Some(ck_init));
+        let alice = DR::new_alice(&secret, *pair.public(), Some(ck_init.clone()));
+        let bob = DR::new_bob(secret, pair.clone(), *pair.public(), Some(ck_init));
         (alice, bob)
     }
 

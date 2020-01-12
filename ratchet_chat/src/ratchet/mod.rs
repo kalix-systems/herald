@@ -16,6 +16,5 @@ impl RatchetKey {
     }
 }
 
-pub mod dh;
 pub mod double;
 pub mod sender;

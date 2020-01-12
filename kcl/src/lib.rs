@@ -5,10 +5,12 @@ mod newtype_macros;
 
 pub mod aead;
 pub mod box_;
+pub mod ed25519;
 pub mod hash;
 pub mod kx;
 pub mod random;
 pub mod sign;
+pub mod x25519;
 
 pub(crate) use libsodium_sys as ffi;
 pub use libsodium_sys;

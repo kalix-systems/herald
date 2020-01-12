@@ -1,10 +1,9 @@
-use crate::{new_type, random};
+use super::*;
 use kson::prelude::*;
-use libsodium_sys::*;
 
-pub const KEY_LEN: usize = crypto_aead_xchacha20poly1305_ietf_KEYBYTES as usize;
-pub const NONCE_LEN: usize = crypto_aead_xchacha20poly1305_ietf_NPUBBYTES as usize;
-pub const MAC_LEN: usize = crypto_aead_xchacha20poly1305_ietf_ABYTES as usize;
+pub const KEY_LEN: usize = ffi::crypto_aead_xchacha20poly1305_ietf_KEYBYTES as usize;
+pub const NONCE_LEN: usize = ffi::crypto_aead_xchacha20poly1305_ietf_NPUBBYTES as usize;
+pub const MAC_LEN: usize = ffi::crypto_aead_xchacha20poly1305_ietf_ABYTES as usize;
 
 new_type! {
     secret Key(KEY_LEN)
@@ -41,7 +40,7 @@ impl Key {
 
         let mut mac_len = 0u64;
         let res = unsafe {
-            crypto_aead_xchacha20poly1305_ietf_encrypt_detached(
+            ffi::crypto_aead_xchacha20poly1305_ietf_encrypt_detached(
                 msg.as_mut_ptr(),
                 mac_buf.as_mut_ptr(),
                 (&mut mac_len) as _,
@@ -72,7 +71,7 @@ impl Key {
         let Tag(mac, nonce) = tag;
 
         let res = unsafe {
-            crypto_aead_xchacha20poly1305_ietf_decrypt_detached(
+            ffi::crypto_aead_xchacha20poly1305_ietf_decrypt_detached(
                 msg.as_mut_ptr(),
                 // should always be null according to libsodium docs
                 std::ptr::null_mut(),
@@ -102,7 +101,7 @@ impl Key {
 
         let mut clen = 0u64;
         let res = unsafe {
-            crypto_aead_xchacha20poly1305_ietf_encrypt(
+            ffi::crypto_aead_xchacha20poly1305_ietf_encrypt(
                 rest.as_mut_ptr(),
                 &mut clen as *mut _,
                 pt.as_ptr(),
@@ -133,7 +132,7 @@ impl Key {
 
         let mut plen = 0u64;
         let res = unsafe {
-            crypto_aead_xchacha20poly1305_ietf_decrypt(
+            ffi::crypto_aead_xchacha20poly1305_ietf_decrypt(
                 output.as_mut_ptr(),
                 &mut plen as *mut _,
                 // should always be null according to libsodium docs
