@@ -1,6 +1,6 @@
 use super::{types::Data, *};
 use heraldcore::conversation::settings::SettingsUpdate as CoreSettingsUpdate;
-use heraldcore::types::ConversationId;
+use heraldcore::types::{ConversationId, MsgId};
 use once_cell::sync::OnceCell;
 use parking_lot::RwLock;
 use std::collections::HashMap;
@@ -40,6 +40,8 @@ pub enum ConvItemUpdateVariant {
     PictureChanged(Option<String>),
     /// Conversation title has been changed
     TitleChanged(Option<String>),
+    /// The last message in the conversation has been changed
+    LastChanged,
 }
 
 impl From<(ConversationId, CoreSettingsUpdate)> for crate::Update {
@@ -107,6 +109,18 @@ pub(crate) fn pairwise(cid: &ConversationId) -> Option<bool> {
 
 pub(crate) fn conv_data() -> &'static RwLock<HashMap<ConversationId, Data>> {
     CONV_DATA.get_or_init(|| RwLock::new(HashMap::default()))
+}
+
+pub(crate) fn last_msg_id(cid: &ConversationId) -> Option<MsgId> {
+    conv_data().read().get(cid)?.last_msg_id
+}
+
+pub(crate) fn update_last_msg_id(
+    cid: &ConversationId,
+    msg_id: Option<MsgId>,
+) -> Option<()> {
+    conv_data().write().get_mut(cid)?.last_msg_id = msg_id;
+    Some(())
 }
 
 static CONV_DATA: OnceCell<RwLock<HashMap<ConversationId, Data>>> = OnceCell::new();

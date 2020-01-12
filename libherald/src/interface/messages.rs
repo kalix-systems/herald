@@ -4,13 +4,6 @@ pub struct MessagesQObject;
 
 pub struct MessagesEmitter {
     pub(super) qobject: Arc<AtomicPtr<MessagesQObject>>,
-    pub(super) is_empty_changed: fn(*mut MessagesQObject),
-    pub(super) last_author_changed: fn(*mut MessagesQObject),
-    pub(super) last_aux_code_changed: fn(*mut MessagesQObject),
-    pub(super) last_body_changed: fn(*mut MessagesQObject),
-    pub(super) last_has_attachments_changed: fn(*mut MessagesQObject),
-    pub(super) last_status_changed: fn(*mut MessagesQObject),
-    pub(super) last_time_changed: fn(*mut MessagesQObject),
     pub(super) search_active_changed: fn(*mut MessagesQObject),
     pub(super) search_index_changed: fn(*mut MessagesQObject),
     pub(super) search_num_matches_changed: fn(*mut MessagesQObject),
@@ -31,13 +24,6 @@ impl MessagesEmitter {
     pub fn clone(&mut self) -> MessagesEmitter {
         MessagesEmitter {
             qobject: self.qobject.clone(),
-            is_empty_changed: self.is_empty_changed,
-            last_author_changed: self.last_author_changed,
-            last_aux_code_changed: self.last_aux_code_changed,
-            last_body_changed: self.last_body_changed,
-            last_has_attachments_changed: self.last_has_attachments_changed,
-            last_status_changed: self.last_status_changed,
-            last_time_changed: self.last_time_changed,
             search_active_changed: self.search_active_changed,
             search_index_changed: self.search_index_changed,
             search_num_matches_changed: self.search_num_matches_changed,
@@ -53,62 +39,6 @@ impl MessagesEmitter {
         let n: *const MessagesQObject = null();
         self.qobject
             .store(n as *mut MessagesQObject, Ordering::SeqCst);
-    }
-
-    pub fn is_empty_changed(&mut self) {
-        let ptr = self.qobject.load(Ordering::SeqCst);
-
-        if !ptr.is_null() {
-            (self.is_empty_changed)(ptr);
-        }
-    }
-
-    pub fn last_author_changed(&mut self) {
-        let ptr = self.qobject.load(Ordering::SeqCst);
-
-        if !ptr.is_null() {
-            (self.last_author_changed)(ptr);
-        }
-    }
-
-    pub fn last_aux_code_changed(&mut self) {
-        let ptr = self.qobject.load(Ordering::SeqCst);
-
-        if !ptr.is_null() {
-            (self.last_aux_code_changed)(ptr);
-        }
-    }
-
-    pub fn last_body_changed(&mut self) {
-        let ptr = self.qobject.load(Ordering::SeqCst);
-
-        if !ptr.is_null() {
-            (self.last_body_changed)(ptr);
-        }
-    }
-
-    pub fn last_has_attachments_changed(&mut self) {
-        let ptr = self.qobject.load(Ordering::SeqCst);
-
-        if !ptr.is_null() {
-            (self.last_has_attachments_changed)(ptr);
-        }
-    }
-
-    pub fn last_status_changed(&mut self) {
-        let ptr = self.qobject.load(Ordering::SeqCst);
-
-        if !ptr.is_null() {
-            (self.last_status_changed)(ptr);
-        }
-    }
-
-    pub fn last_time_changed(&mut self) {
-        let ptr = self.qobject.load(Ordering::SeqCst);
-
-        if !ptr.is_null() {
-            (self.last_time_changed)(ptr);
-        }
     }
 
     pub fn search_active_changed(&mut self) {
@@ -288,20 +218,6 @@ pub trait MessagesTrait {
     fn builder(&self) -> &MessageBuilder;
 
     fn builder_mut(&mut self) -> &mut MessageBuilder;
-
-    fn is_empty(&self) -> bool;
-
-    fn last_author(&self) -> Option<String>;
-
-    fn last_aux_code(&self) -> Option<u8>;
-
-    fn last_body(&self) -> Option<String>;
-
-    fn last_has_attachments(&self) -> Option<bool>;
-
-    fn last_status(&self) -> Option<u32>;
-
-    fn last_time(&self) -> Option<i64>;
 
     fn search_active(&self) -> bool;
 
@@ -649,13 +565,6 @@ pub unsafe fn messages_new_inner(ptr_bundle: *mut MessagesPtrBundle) -> Messages
         builder_end_move_rows,
         builder_begin_remove_rows,
         builder_end_remove_rows,
-        messages_is_empty_changed,
-        messages_last_author_changed,
-        messages_last_aux_code_changed,
-        messages_last_body_changed,
-        messages_last_has_attachments_changed,
-        messages_last_status_changed,
-        messages_last_time_changed,
         messages_search_active_changed,
         messages_search_index_changed,
         messages_search_num_matches_changed,
@@ -753,13 +662,6 @@ pub unsafe fn messages_new_inner(ptr_bundle: *mut MessagesPtrBundle) -> Messages
     );
     let messages_emit = MessagesEmitter {
         qobject: Arc::new(AtomicPtr::new(messages)),
-        is_empty_changed: messages_is_empty_changed,
-        last_author_changed: messages_last_author_changed,
-        last_aux_code_changed: messages_last_aux_code_changed,
-        last_body_changed: messages_last_body_changed,
-        last_has_attachments_changed: messages_last_has_attachments_changed,
-        last_status_changed: messages_last_status_changed,
-        last_time_changed: messages_last_time_changed,
         search_active_changed: messages_search_active_changed,
         search_index_changed: messages_search_index_changed,
         search_num_matches_changed: messages_search_num_matches_changed,
@@ -943,95 +845,6 @@ pub unsafe extern "C" fn messages_set_search_hint(
 #[no_mangle]
 pub unsafe extern "C" fn messages_builder_get(ptr: *mut Messages) -> *mut MessageBuilder {
     (&mut *ptr).builder_mut()
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn messages_is_empty_get(ptr: *const Messages) -> bool {
-    (&*ptr).is_empty()
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn messages_last_author_get(
-    ptr: *const Messages,
-    prop: *mut QString,
-    set: fn(*mut QString, *const c_char, c_int),
-) {
-    let obj = &*ptr;
-    let value = obj.last_author();
-    if let Some(value) = value {
-        let str_: *const c_char = value.as_ptr() as (*const c_char);
-        set(prop, str_, to_c_int(value.len()));
-    }
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn messages_last_aux_code_get(ptr: *const Messages) -> COption<u8> {
-    match (&*ptr).last_aux_code() {
-        Some(value) => COption {
-            data: value,
-            some: true,
-        },
-        None => COption {
-            data: u8::default(),
-            some: false,
-        },
-    }
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn messages_last_body_get(
-    ptr: *const Messages,
-    prop: *mut QString,
-    set: fn(*mut QString, *const c_char, c_int),
-) {
-    let obj = &*ptr;
-    let value = obj.last_body();
-    if let Some(value) = value {
-        let str_: *const c_char = value.as_ptr() as (*const c_char);
-        set(prop, str_, to_c_int(value.len()));
-    }
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn messages_last_has_attachments_get(ptr: *const Messages) -> COption<bool> {
-    match (&*ptr).last_has_attachments() {
-        Some(value) => COption {
-            data: value,
-            some: true,
-        },
-        None => COption {
-            data: bool::default(),
-            some: false,
-        },
-    }
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn messages_last_status_get(ptr: *const Messages) -> COption<u32> {
-    match (&*ptr).last_status() {
-        Some(value) => COption {
-            data: value,
-            some: true,
-        },
-        None => COption {
-            data: u32::default(),
-            some: false,
-        },
-    }
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn messages_last_time_get(ptr: *const Messages) -> COption<i64> {
-    match (&*ptr).last_time() {
-        Some(value) => COption {
-            data: value,
-            some: true,
-        },
-        None => COption {
-            data: i64::default(),
-            some: false,
-        },
-    }
 }
 
 #[no_mangle]
@@ -1579,13 +1392,6 @@ pub struct MessagesPtrBundle {
     builder_end_move_rows: fn(*mut MessageBuilderQObject),
     builder_begin_remove_rows: fn(*mut MessageBuilderQObject, usize, usize),
     builder_end_remove_rows: fn(*mut MessageBuilderQObject),
-    messages_is_empty_changed: fn(*mut MessagesQObject),
-    messages_last_author_changed: fn(*mut MessagesQObject),
-    messages_last_aux_code_changed: fn(*mut MessagesQObject),
-    messages_last_body_changed: fn(*mut MessagesQObject),
-    messages_last_has_attachments_changed: fn(*mut MessagesQObject),
-    messages_last_status_changed: fn(*mut MessagesQObject),
-    messages_last_time_changed: fn(*mut MessagesQObject),
     messages_search_active_changed: fn(*mut MessagesQObject),
     messages_search_index_changed: fn(*mut MessagesQObject),
     messages_search_num_matches_changed: fn(*mut MessagesQObject),

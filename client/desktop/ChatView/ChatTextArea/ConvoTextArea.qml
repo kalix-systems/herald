@@ -1,7 +1,6 @@
 import QtQuick 2.4
 import QtQuick 2.13
 import QtQuick.Controls 2.13
-import QtQuick.Dialogs 1.3
 import LibHerald 1.0
 import QtQuick.Layouts 1.13
 import QtMultimedia 5.13
@@ -9,6 +8,7 @@ import "qrc:/imports" as Imports
 import "js/ChatTextAreaUtils.mjs" as CTUtils
 import "../../common" as Common
 import "qrc:/imports/ChatBubble" as CB
+import QtQuick.Dialogs 1.3
 
 Rectangle {
     id: textWrapperRect
@@ -32,6 +32,7 @@ Rectangle {
     property string replyName: ""
     property bool owned: replyUid === Herald.config.configId
     property string replyUid
+    property alias timer: timerMenu
 
     property var replyId
 
@@ -42,19 +43,38 @@ Rectangle {
     Imports.IconButton {
         id: attachmentsButton
         anchors.right: parent.right
-        anchors.rightMargin: CmnCfg.defaultMargin
+        anchors.rightMargin: CmnCfg.smallMargin
         anchors.bottom: parent.bottom
         bottomPadding: CmnCfg.smallMargin * 0.5
         source: "qrc:/attach-icon.svg"
+    }
+    Imports.IconButton {
+
+        id: timerButton
+        source: timerMenu.chosenTimer
+        fill: "transparent"
+        anchors.right: attachmentsButton.left
+        anchors.rightMargin: CmnCfg.smallMargin
+        anchors.bottom: parent.bottom
+        bottomPadding: CmnCfg.smallMargin * 0.5
+        topPadding: 1
+        onClicked: timerMenu.open()
+    }
+
+    Imports.TimerOptions {
+        id: timerMenu
+        conversationItem: chatPage.conversationItem
+        builder: ownedConversation.builder
+        messageModify: true
     }
 
     Imports.IconButton {
         id: emojiButton
         anchors.left: parent.left
-        anchors.leftMargin: CmnCfg.defaultMargin
+        anchors.leftMargin: CmnCfg.smallMargin
         anchors.bottom: parent.bottom
         bottomPadding: CmnCfg.smallMargin * 0.5
-        source: "qrc:/emoji-icon.svg"
+        source: "qrc:/emoticon-icon.svg"
     }
 
     // wrapper column so replies load
@@ -63,9 +83,9 @@ Rectangle {
 
         anchors {
             left: emojiButton.right
-            right: attachmentsButton.left
+            right: timerButton.left
             leftMargin: CmnCfg.smallMargin * 0.5
-            rightMargin: CmnCfg.smallMargin * 0.5
+            //  rightMargin: CmnCfg.smallMargin * 0.5
             bottomMargin: CmnCfg.smallMargin * 0.5
         }
 
@@ -76,6 +96,7 @@ Rectangle {
             width: textWrapperRect.width
             spacing: CmnCfg.smallMargin
             anchors.horizontalCenter: parent.horizontalCenter
+            anchors.horizontalCenterOffset: 10
 
             Loader {
                 id: replyLoader
@@ -142,16 +163,24 @@ Rectangle {
                 }
 
                 //TODO: use system palette.
+                leftPadding: CmnCfg.microMargin
                 bottomPadding: CmnCfg.smallMargin * 0.5
                 selectionColor: CmnCfg.palette.highlightColor
                 color: CmnCfg.palette.black
                 selectByMouse: true
                 wrapMode: TextArea.WrapAtWordBoundaryOrAnywhere
-                placeholderText: qsTr("Message") + " " + conversationItem.title
+                placeholderText: qsTr("Message") + " "
+                                 + (!Herald.utils.compareByteArray(
+                                        conversationItem.conversationId,
+                                        Herald.config.ntsConversationId) ? conversationItem.title : qsTr("Note to Self"))
 
                 Keys.forwardTo: keysProxy
                 Keys.onEscapePressed: focus = false
                 onEditingFinished: convWindow.focus = true
+
+                Common.TextContextMenu {
+                    parentText: chatText
+                }
 
                 // transfer focus to the compose field
                 Connections {

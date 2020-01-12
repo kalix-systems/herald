@@ -83,6 +83,9 @@ Window {
                 name: qsTr("Privacy & Security")
             }
             ListElement {
+                name: qsTr("Devices")
+            }
+            ListElement {
                 name: qsTr("Data & Storage")
             }
 
@@ -127,8 +130,9 @@ Window {
                             hoverEnabled: true
                             anchors.fill: parent
                             cursorShape: Qt.PointingHandCursor
-                            onClicked: settingsPane.contentY
-                                       = settingsPane.mainColumn.children[index].y
+                            onClicked: if (settingsPane.state === "")
+                                           settingsPane.contentY
+                                                   = settingsPane.mainColumn.children[index].y
                         }
                     }
                 }
@@ -136,12 +140,23 @@ Window {
 
             Settings.SettingsPane {
                 id: settingsPane
+                //TODO: cropCallbackArg does not need to exist anymore
+                fileDialogComponent: FileDialog {
+                    id: cfgPfp
+                    property bool pfpValid: true
+                    folder: shortcuts.desktop
+                    nameFilters: ["(*.jpg *.png *.jpeg)"]
+                    onSelectionAccepted: {
+
+                        settingsPane.cropCallbackArg(fileUrl)
+                    }
+                }
                 cropCallbackArg: function (fileUrl) {
                     cropLoader.imageSource = fileUrl
                     cropLoader.active = true
                     cropLoader.item.open()
-                    //                    imageCrop.imageSource = fileUrl
-                    //                    imageCrop.show()
+                    // imageCrop.imageSource = fileUrl
+                    // imageCrop.show()
                 }
             }
         }

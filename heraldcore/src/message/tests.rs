@@ -13,6 +13,18 @@ fn test_outbound_text(
 }
 
 #[test]
+fn dangling_receipt() {
+    let mut conn = Database::in_memory_with_config().expect(womp!());
+
+    let receiver = crate::user::db::test_user(&mut conn, "receiver");
+
+    let mid = MsgId::gen_new();
+
+    db::receipts::add_receipt(&conn, mid, receiver.id, MessageReceiptStatus::Received)
+        .expect(womp!());
+}
+
+#[test]
 fn delete_get_message() {
     let mut conn = Database::in_memory_with_config().expect(womp!());
 
@@ -121,7 +133,7 @@ fn message_data() {
 
     let data = db::message_data(&conn, &msg_id).expect(womp!("unable to get message"));
 
-    assert_eq!(stored.time.insertion, data.time.insertion);
+    assert_eq!(Some(stored.time.insertion), data.map(|d| d.time.insertion));
 }
 
 #[test]

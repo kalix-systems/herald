@@ -54,6 +54,34 @@ Rectangle {
     property int bubbleIndex
     property bool moreInfo: false
     property bool aux: false
+    property var convoExpiration
+    property MouseArea hitbox
+
+    property bool sameExpiration: {
+        if (messageModelData.expirationTime === undefined) {
+            return convoExpiration === 0
+        }
+        return Utils.sameExp(messageModelData.insertionTime,
+                             messageModelData.expirationTime, convoExpiration)
+    }
+    Connections {
+        target: appRoot.globalTimer
+        onRefreshTime: {
+            friendlyTimestamp
+                    = (outbound ? Utils.friendlyTimestamp(
+                                      messageModelData.insertionTime) : Utils.friendlyTimestamp(
+                                      messageModelData.serverTime))
+            timerIcon = (messageModelData.expirationTime
+                         !== undefined) ? (Utils.timerIcon(
+                                               messageModelData.expirationTime,
+                                               messageModelData.insertionTime)) : ""
+
+            expireInfo.expireTime = (messageModelData.expirationTime
+                                     !== undefined) ? (Utils.expireTimeShort(
+                                                           messageModelData.expirationTime,
+                                                           messageModelData.insertionTime)) : ""
+        }
+    }
 
     height: contentRoot.height
     width: defaultWidth
@@ -69,16 +97,6 @@ Rectangle {
         z: accent.z + 1
     }
 
-    Rectangle {
-        anchors.bottom: parent.bottom
-        width: parent.width
-
-        height: 1
-        color: CmnCfg.palette.medGrey
-        visible: isTail
-        z: accent.z + 1
-    }
-
     Highlight {
         id: bubbleHighlight
         z: bubbleRoot.z + 1
@@ -88,7 +106,7 @@ Rectangle {
         id: avatar
         color: authorColor
         initials: authorName[0].toUpperCase()
-        size: 36
+        size: CmnCfg.chatAvatarSize
         visible: isHead ? true : false
         anchors {
             left: parent.left
@@ -127,7 +145,7 @@ Rectangle {
 
     BubbleExpireInfo {
         id: expireInfo
-        visible: isHead
+        visible: isHead // || !sameExpiration
     }
 
     Column {
@@ -233,7 +251,6 @@ Rectangle {
                 asynchronous: true
                 // document component
                 Component {
-
                     id: doc
                     FileAttachmentContent {}
                 }

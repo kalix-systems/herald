@@ -21,6 +21,8 @@ Flickable {
         width: CmnCfg.smallMargin
     }
 
+    maximumFlickVelocity: 1500
+    flickDeceleration: sideBarPaneRoot.height * 10
     //column to load content, components are inside instead of being declared separately because
     // otherwise loader cannot keep track of contentHeight of the listviews.
     Column {

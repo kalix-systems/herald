@@ -16,24 +16,33 @@ Row {
         font.family: CmnCfg.chatFont.name
         padding: 0
         font.weight: Font.Bold
-        font.pixelSize: 13
+        font.pixelSize: CmnCfg.defaultFontSize
         color: authorColor
         TextMetrics {
             id: authorNameTM
             text: authorName
             font.weight: Font.Bold
             font.family: CmnCfg.chatFont.name
-            elideWidth: maxWidth
+            elideWidth: bubbleRoot.maxWidth - expireInfo.width - timeLabel.width
+                        - CmnCfg.smallMargin * 3
+
             elide: Text.ElideRight
         }
     }
 
     Label {
-        id: time
-        font.pixelSize: 12
-        text: timestamp
+        id: timeLabel
+        font.pixelSize: CmnCfg.chatTextSize
+        text: time.text
         color: CmnCfg.palette.darkGrey
         font.family: CmnCfg.chatFont.name
-        anchors.bottom: authorLabel.bottom
+        anchors.verticalCenter: authorLabel.verticalCenter
+        TextMetrics {
+            id: time
+            font.family: CmnCfg.chatFont.name
+            elide: Text.ElideRight
+        }
+
+        padding: 0
     }
 }

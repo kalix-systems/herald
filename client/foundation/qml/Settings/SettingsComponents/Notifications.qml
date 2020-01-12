@@ -2,17 +2,20 @@ import QtQuick 2.13
 import QtQuick.Controls 2.13
 import QtQuick.Layouts 1.12
 import LibHerald 1.0
-import '../../'
+import "../../"
 
 GridLayout {
     columns: 2
     rows: 8
+    width: parent.width
 
     StandardLabel {
         text: qsTr("Notifications Enabled")
         color: "black"
         Layout.leftMargin: CmnCfg.defaultMargin
-        font: CmnCfg.defaultFont
+        wrapMode: Label.WrapAtWordBoundaryOrAnywhere
+        font.pixelSize: CmnCfg.entityLabelSize
+        font.family: CmnCfg.chatFont.name
     }
 
     ConfSwitch {
@@ -30,7 +33,9 @@ GridLayout {
         text: qsTr("Silent")
         color: "black"
         Layout.leftMargin: CmnCfg.defaultMargin
-        font: CmnCfg.defaultFont
+        wrapMode: Label.WrapAtWordBoundaryOrAnywhere
+        font.pixelSize: CmnCfg.entityLabelSize
+        font.family: CmnCfg.chatFont.name
     }
 
     ConfSwitch {
@@ -48,7 +53,9 @@ GridLayout {
         text: qsTr("Show author in notification")
         color: "black"
         Layout.leftMargin: CmnCfg.defaultMargin
-        font: CmnCfg.defaultFont
+        wrapMode: Label.WrapAtWordBoundaryOrAnywhere
+        font.pixelSize: CmnCfg.entityLabelSize
+        font.family: CmnCfg.chatFont.name
     }
 
     ConfSwitch {
@@ -65,8 +72,10 @@ GridLayout {
     StandardLabel {
         text: qsTr("Show message body in notification")
         color: CmnCfg.palette.black
+        Layout.minimumWidth: 0
         Layout.leftMargin: CmnCfg.defaultMargin
-        font: CmnCfg.defaultFont
+        font.pixelSize: CmnCfg.entityLabelSize
+        font.family: CmnCfg.labelFont.name
     }
 
     ConfSwitch {

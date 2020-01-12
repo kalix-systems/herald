@@ -6,7 +6,7 @@ import QtGraphicalEffects 1.12
 
 Row {
     id: wrapperRow
-    height: 150
+    height: CmnCfg.attachmentSize / 2
     spacing: CmnCfg.smallMargin
     property var firstImage
     property var secondImage
@@ -17,7 +17,7 @@ Row {
 
     Rectangle {
         id: wrapperRect
-        height: 150
+        height: CmnCfg.attachmentSize / 2
         width: height
         clip: true
         color: "transparent"
@@ -35,17 +35,19 @@ Row {
             asynchronous: true
             MouseArea {
                 onClicked: imageClickedCallBack(image1.source)
+                onPressAndHold: imageLongPressedCallBack(firstImage.path)
                 anchors.fill: parent
+            cursorShape: Qt.PointingHandCursor
             }
         }
     }
 
     Column {
-        width: 150
+        width: CmnCfg.attachmentSize / 2
 
         Rectangle {
-            height: 75 - CmnCfg.smallMargin / 2
-            width: 150
+            height: CmnCfg.attachmentSize / 4 - CmnCfg.smallMargin / 2
+            width: CmnCfg.attachmentSize / 2
             clip: true
 
             Image {
@@ -62,15 +64,17 @@ Row {
                 asynchronous: true
                 MouseArea {
                     onClicked: imageClickedCallBack(image2.source)
+                    onPressAndHold: imageLongPressedCallBack(secondImage.path)
                     anchors.fill: parent
+            cursorShape: Qt.PointingHandCursor
                 }
             }
         }
         spacing: CmnCfg.smallMargin
 
         Rectangle {
-            height: 75 - CmnCfg.smallMargin / 2
-            width: 150
+            height: CmnCfg.attachmentSize / 4 - CmnCfg.smallMargin / 2
+            width: CmnCfg.attachmentSize / 2
             clip: true
             color: "transparent"
             Image {
@@ -87,7 +91,9 @@ Row {
                 asynchronous: true
                 MouseArea {
                     onClicked: imageClickedCallBack(image3.source)
+                    onPressAndHold: imageLongPressedCallBack(thirdImage.path)
                     anchors.fill: parent
+            cursorShape: Qt.PointingHandCursor
                 }
             }
         }

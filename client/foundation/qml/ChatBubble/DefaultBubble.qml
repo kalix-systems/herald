@@ -12,46 +12,47 @@ Rectangle {
     id: bubbleRoot
 
     property real defaultWidth
-    property bool elided: body.length !== messageModelData.fullBody.length
+    property bool elided: isNull ? false : body.length !== messageModelData.fullBody.length
     property bool expanded: false
-    property bool outbound: messageModelData.author === Herald.config.configId
+    property bool outbound: isNull ? false : messageModelData.author === Herald.config.configId
     property Item convContainer
     property var messageModelData
+    property bool isNull: messageModelData === null
 
     property alias highlightItem: bubbleHighlight
     readonly property color bubbleColor: CmnCfg.palette.lightGrey
-    readonly property bool highlight: messageModelData.matchStatus === 2
+    readonly property bool highlight: isNull ? false : messageModelData.matchStatus === 2
 
-    readonly property string body: messageModelData.body
-    readonly property string authorId: messageModelData.author
-    readonly property string authorName: messageModelData.authorName
+    readonly property string body: isNull ? "" : messageModelData.body
+    readonly property string authorId: isNull ? "" : messageModelData.author
+    readonly property string authorName: isNull ? "" : messageModelData.authorName
 
-    readonly property string medAttachments: messageModelData.mediaAttachments
-    readonly property string fullMedAttachments: messageModelData.fullMediaAttachments
-    readonly property string documentAttachments: messageModelData.docAttachments
-    readonly property bool imageAttach: medAttachments.length !== 0
-    readonly property bool docAttach: documentAttachments.length !== 0
+    readonly property string medAttachments: isNull ? "" : messageModelData.mediaAttachments
+    readonly property string fullMedAttachments: isNull ? "" : messageModelData.fullMediaAttachments
+    readonly property string documentAttachments: isNull ? "" : messageModelData.docAttachments
+    readonly property bool imageAttach: isNull ? "" : medAttachments.length !== 0
+    readonly property bool docAttach: isNull ? "" : documentAttachments.length !== 0
 
-    readonly property var replyId: messageModelData.opMsgId
-    readonly property bool reply: messageModelData.replyType > 0
+    readonly property var replyId: isNull ? undefined : messageModelData.opMsgId
+    readonly property bool reply: isNull ? false : messageModelData.replyType > 0
 
-    readonly property bool isHead: messageModelData.isHead
-    readonly property bool isTail: messageModelData.isTail
-    readonly property bool hasReactions: messageModelData.reactions.length > 0
+    readonly property bool isHead: isNull ? false : messageModelData.isHead
+    readonly property bool isTail: isNull ? false : messageModelData.isTail
+    readonly property bool hasReactions: isNull ? false : messageModelData.reactions.length > 0
 
     readonly property real maxWidth: defaultWidth * 0.75
-    property string friendlyTimestamp: Utils.friendlyTimestamp(
-                                           messageModelData.insertionTime)
+    property string friendlyTimestamp: isNull ? "" : Utils.friendlyTimestamp(
+                                                    messageModelData.insertionTime)
 
-    property string timerIcon: messageModelData.expirationTime
-                               !== undefined ? Utils.timerIcon(
-                                                   messageModelData.expirationTime,
-                                                   messageModelData.insertionTime) : ""
-    readonly property string receiptImage: outbound ? Utils.receiptCodeSwitch(
-                                                          messageModelData.receiptStatus) : ""
-    readonly property color authorColor: CmnCfg.avatarColors[messageModelData.authorColor]
+    property string timerIcon: isNull ? "" : messageModelData.expirationTime
+                                        !== undefined ? Utils.timerIcon(
+                                                            messageModelData.expirationTime,
+                                                            messageModelData.insertionTime) : ""
+    readonly property string receiptImage: isNull ? "" : outbound ? Utils.receiptCodeSwitch(
+                                                                        messageModelData.receiptStatus) : ""
+    readonly property color authorColor: isNull ? "white" : CmnCfg.avatarColors[messageModelData.authorColor]
 
-    readonly property string pfpUrl: messageModelData.authorProfilePicture
+    readonly property string pfpUrl: isNull ? "" : messageModelData.authorProfilePicture
     property bool hoverHighlight: false
     property bool moreInfo: true
 
@@ -99,7 +100,7 @@ Rectangle {
     Avatar {
         id: avatar
         color: authorColor
-        initials: authorName[0].toUpperCase()
+        initials: isNull ? "" : authorName[0].toUpperCase()
         size: 36
 
         anchors {

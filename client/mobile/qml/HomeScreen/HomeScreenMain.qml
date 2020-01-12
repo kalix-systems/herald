@@ -30,11 +30,15 @@ Page {
             anchors.fill: parent
             model: Herald.conversations
             delegate: ConversationItem {
+                property var conversationData: model
                 itemTitle: title
                 colorCode: model.color
                 imageSource: Utils.safeStringOrDefault(model.picture, "")
                 isGroup: !model.pairwise
-                convContent: ConversationContent {
+                lastMsgDigest: model.lastMsgDigest
+                isEmpty: model.isEmpty
+                convoContent: ConversationContent {
+                    id: convContent
                     conversationId: model.conversationId
                 }
             }

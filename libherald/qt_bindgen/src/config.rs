@@ -52,6 +52,8 @@ fn objects() -> BTreeMap<String, Rc<Object>> {
        messages(),
        message_builder(),
 
+       shared_conversations(),
+
        media_attachments(),
        document_attachments(),
        emoji_picker()
@@ -145,7 +147,10 @@ fn conversations() -> Object {
        matched: matched_item_prop(),
        picture: picture_item_prop().get_by_value(),
        color: color_item_prop(),
-       status: ItemProp::new(QUint8).write()
+       status: ItemProp::new(QUint8).write(),
+
+       lastMsgDigest: ItemProp::new(QString).get_by_value(),
+       isEmpty: ItemProp::new(Bool)
     };
 
     let funcs = functions! {
@@ -183,6 +188,7 @@ fn users() -> Object {
         const colorById(id: QString) => QUint32,
         const nameById(id: QString) => QString,
         const profilePictureById(id: QString) => QString,
+        const indexById(id: QString) => Qint64,
     };
 
     obj! {
@@ -266,18 +272,9 @@ fn emoji_picker() -> Object {
 
 fn messages() -> Object {
     let props = props! {
-        lastAuthor: Prop::new().simple(QString).optional().get_by_value(),
-        lastBody: Prop::new().simple(QString).optional().get_by_value(),
-        // Insertion time of last available message
-        lastTime: Prop::new().simple(Qint64).optional(),
-        lastStatus: Prop::new().simple(QUint32).optional(),
-        lastAuxCode: Prop::new().simple(QUint8).optional(),
-        lastHasAttachments: Prop::new().simple(Bool).optional(),
-
         // User id of the last user to send a typing notification
         typingUserId: Prop::new().simple(QString).optional(),
 
-        isEmpty: Prop::new().simple(Bool),
 
         searchPattern: filter_prop(),
         searchRegex: filter_regex_prop(),
@@ -392,7 +389,7 @@ fn message_builder() -> Object {
         // Body of the message
         body: Prop::new().simple(QString).optional().write(),
         // Set expiration period of the message.
-        expirationPeriod: Prop::new().simple(QUint8).write().optional(),
+        expirationPeriod: Prop::new().simple(QUint8).optional(),
 
 
         hasMediaAttachment: Prop::new().simple(Bool),
@@ -421,6 +418,7 @@ fn message_builder() -> Object {
         mut addAttachment(path: QString) => Bool,
         mut removeDoc(row_index: QUint64) => Bool,
         mut removeMedia(row_index: QUint64) => Bool,
+        mut setExpirationPeriod(period: QUint8) => Void,
     };
 
     obj! {
@@ -556,6 +554,33 @@ fn message_search() -> Object {
 
     obj! {
         MessageSearch: Obj::new().list().funcs(funcs).props(props).item_props(item_props)
+    }
+}
+
+/// Shared conversations
+fn shared_conversations() -> Object {
+    let props = props! {
+       userId: Prop::new().simple(QString).optional().write()
+    };
+
+    let item_props = item_props! {
+        conversationId: ItemProp::new(QByteArray),
+        conversationPicture: ItemProp::new(QString).get_by_value().optional(),
+        conversationTitle: ItemProp::new(QString).get_by_value().optional(),
+        conversationColor: ItemProp::new(QUint32).get_by_value().optional()
+    };
+
+    let funcs = functions! {
+        mut load() => Void,
+    };
+
+    let hooks = signals! {
+        tryLoad(),
+        | connect tryLoad load
+    };
+
+    obj! {
+       SharedConversations: Obj::new().list().item_props(item_props).props(props).funcs(funcs).hooks(hooks)
     }
 }
 

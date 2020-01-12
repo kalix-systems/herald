@@ -1,5 +1,6 @@
 use super::*;
 use coremacros::w;
+use rusqlite::named_params;
 
 pub(crate) fn add_members_with_tx(
     tx: &rusqlite::Transaction,
@@ -16,7 +17,7 @@ pub(crate) fn add_members_with_tx(
 }
 
 /// Add a user with `member_id` to the conversation with `conversation_id`.
-pub fn add_member(
+pub(crate) fn add_member(
     conn: &rusqlite::Connection,
     conversation_id: &ConversationId,
     member_id: UserId,
@@ -29,7 +30,7 @@ pub fn add_member(
 }
 
 /// Remove a user with `member_id` to the conversation with `conversation_id`.
-pub fn remove_member(
+pub(crate) fn remove_member(
     conn: &rusqlite::Connection,
     conversation_id: &ConversationId,
     member_id: UserId,
@@ -43,7 +44,7 @@ pub fn remove_member(
 }
 
 /// Gets the members of a conversation.
-pub fn members(
+pub(crate) fn members(
     conn: &rusqlite::Connection,
     conversation_id: &ConversationId,
 ) -> Result<Vec<UserId>, HErr> {
@@ -56,4 +57,26 @@ pub fn members(
     }
 
     Ok(members)
+}
+
+/// Gets the conversations shared with a user
+pub(crate) fn shared_conversations(
+    conn: &rusqlite::Connection,
+    user_id: &UserId,
+) -> Result<Vec<ConversationId>, HErr> {
+    use crate::conversation::db::pairwise_conversation;
+    let pairwise_cid = w!(pairwise_conversation(conn, user_id));
+    let mut stmt = w!(conn.prepare_cached(include_str!("sql/shared_conversations.sql")));
+
+    let mut shared = Vec::new();
+    let res = w!(stmt.query_map_named(
+        named_params! { "@user_id": user_id, "@pairwise_cid": pairwise_cid, },
+        |row| row.get("conversation_id")
+    ));
+
+    for cid in res {
+        shared.push(cid?);
+    }
+
+    Ok(shared)
 }

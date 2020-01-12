@@ -83,10 +83,6 @@ declare class Herald {
 
 declare class Messages {
   conversationId?: ConversationID;
-  lastAuthor: string;
-  lastBody: string;
-  isEmpty: string;
-  lastTime: number;
   builder: MessageBuilder;
 
   deleteMessage(rowIndex: number): boolean;

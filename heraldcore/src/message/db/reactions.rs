@@ -31,12 +31,12 @@ pub(crate) fn add_reaction(
 ) -> Result<(), rusqlite::Error> {
     let mut stmt = w!(conn.prepare_cached(include_str!("../sql/add_reaction.sql")));
 
-    stmt.execute_named(named_params!(
+    drop(stmt.execute_named(named_params!(
         "@msg_id": msg_id,
         "@reactionary": reactionary,
         "@react_content": react_content,
         "@insertion_ts": Time::now()
-    ))?;
+    )));
 
     Ok(())
 }

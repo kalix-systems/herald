@@ -65,6 +65,20 @@ ListView {
             }
         }
 
+        Connections {
+            target: contactsLoader.item
+            onGroupClicked: {
+
+                const groupIdx = Herald.conversations.indexById(groupId)
+                if ((groupIdx < 0) || (groupIdx >= conversationList.count))
+                    return
+
+                //conversationItem.convContent.conversationId = groupId
+                conversationList.currentIndex = groupIdx
+                chatView.sourceComponent = conversationList.currentItem.childChatView
+                chatView.currentConvoId = groupId
+            }
+        }
         visible: {
             if (sideBarState.state === "globalSearch") {
                 return conversationData.matched
@@ -74,6 +88,7 @@ ListView {
             }
             return conversationData.status === 1
         }
+
         height: visible ? CmnCfg.convoHeight : 0
         width: parent.width
 
@@ -92,7 +107,9 @@ ListView {
             isGroupPicture: !conversationData.pairwise
 
             labelComponent: Ent.ConversationLabel {
-                cc: convContent
+                id: conversationLabel
+                lastMsgDigest: conversationItem.conversationData.lastMsgDigest
+                isEmpty: conversationItem.conversationData.isEmpty
                 convoTitle: !convoRectangle.nts ? title : qsTr("Note to Self")
                 labelColor: convoRectangle.state
                             !== "" ? CmnCfg.palette.black : CmnCfg.palette.lightGrey
@@ -106,6 +123,8 @@ ListView {
                 z: CmnCfg.overlayZ
                 anchors.fill: parent
                 acceptedButtons: Qt.LeftButton | Qt.RightButton
+                cursorShape: conversationList.currentIndex
+                             === index ? Qt.ArrowCursor : Qt.PointingHandCursor
                 onClicked: {
                     if (mouse.button == Qt.RightButton) {
                         !archiveView ? convOptionsMenu.open(
@@ -129,12 +148,14 @@ ListView {
                 text: "Archive"
                 onTriggered: {
                     conversationData.status = 1
-                    if (Herald.utils.compareByteArray(
-                                chatView.currentConvoId,
-                                conversationData.conversationId)) {
-                        chatView.sourceComponent = splash
-                        chatView.currentConvoId = undefined
-                    }
+                    //                    if (Herald.utils.compareByteArray(
+                    //                                chatView.currentConvoId,
+                    //                                conversationData.conversationId)) {
+
+                    //                        conversationList.currentIndex = -1
+                    //                        chatView.sourceComponent = splash
+                    //                        chatView.currentConvoId = undefined
+                    //                    }
                 }
             }
         }

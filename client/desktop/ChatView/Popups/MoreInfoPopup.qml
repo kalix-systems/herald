@@ -30,6 +30,11 @@ Popup {
         id: background
         color: CmnCfg.palette.white
     }
+    onMessageDataChanged: {
+        if (messageData === null) {
+            moreInfoPopup.close()
+        }
+    }
 
     Component.onCompleted: {
         receiptData = JSON.parse(moreInfoPopup.messageData.userReceipts)
@@ -75,6 +80,8 @@ Popup {
         clip: true
         ScrollBar.vertical: ScrollBar {}
         boundsBehavior: Flickable.StopAtBounds
+        maximumFlickVelocity: 1500
+        flickDeceleration: height * 10
         Column {
             id: wrapperCol
             width: parent.width - CmnCfg.smallMargin * 2
@@ -83,12 +90,32 @@ Popup {
             topPadding: CmnCfg.smallMargin
             bottomPadding: CmnCfg.smallMargin
 
-            CB.DefaultBubble {
+            Loader {
                 id: bubbleInfo
-                convContainer: parent
-                defaultWidth: parent.width
+                sourceComponent: messageData.auxData.length === 0 ? bubbleMsg : bubbleAux
                 width: parent.width
-                messageModelData: moreInfoPopup.messageData
+                height: item.height
+
+                Component {
+                    id: bubbleMsg
+                    CB.DefaultBubble {
+                        convContainer: parent
+                        defaultWidth: parent.width
+                        width: parent.width
+                        messageModelData: moreInfoPopup.messageData
+                    }
+                }
+
+                Component {
+                    id: bubbleAux
+                    CB.AuxBubble {
+                        defaultWidth: parent.width
+                        width: parent.width
+                        messageModelData: moreInfoPopup.messageData
+                        auxData: JSON.parse(messageModelData.auxData)
+                        moreInfo: true
+                    }
+                }
             }
             Label {
                 id: senderHeader
@@ -183,7 +210,8 @@ Popup {
                     Common.PlatonicRectangle {
                         boxTitle: memberData.name
                         boxColor: memberData.color
-                        picture: memberData.profilePicture
+                        picture: Utils.safeStringOrDefault(
+                                     memberData.profilePicture, "")
                         property MouseArea hoverHandler
                         color: CmnCfg.palette.white
                         labelComponent: Ent.ContactLabel {

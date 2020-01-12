@@ -6,12 +6,12 @@ import "qrc:/imports/ChatBubble"
 import "../Common" as CMN
 
 Rectangle {
-    property ChatBubble cb
+    property var cb
     signal deactivate
     signal activate
     width: parent.width
     visible: height != 0
-    color: CmnCfg.palette.lightGrey
+    color: CmnCfg.palette.offBlack
     onActivate: height = 50
     onDeactivate: height = 0
 
@@ -22,44 +22,44 @@ Rectangle {
         }
     }
 
-    RowLayout {
+    Row {
         anchors.fill: parent
+        anchors.rightMargin: CmnCfg.defaultMargin
         clip: true
+        layoutDirection: Qt.RightToLeft
+        spacing: CmnCfg.defaultMargin
 
-        Item {
-            Layout.preferredWidth: parent.width / 2
+        CMN.AnimIconButton {
+            icon.color: CmnCfg.palette.white
+            onTapped: deactivate()
+            imageSource: "qrc:/x-icon.svg"
+            anchors.verticalCenter: parent.verticalCenter
         }
 
         CMN.AnimIconButton {
-            Layout.alignment: Qt.AlignRight
-            iconSize: Qt.size(CmnCfg.units.dp(24), CmnCfg.units.dp(24))
-            imageSource: "qrc:/reply-icon.svg"
-            onTapped: {
-                ownedMessages.builder.opId = msgId
-                deactivate()
-            }
-        }
-        CMN.AnimIconButton {
-            Layout.alignment: Qt.AlignRight
-            iconSize: Qt.size(CmnCfg.units.dp(24), CmnCfg.units.dp(24))
-            imageSource: "qrc:/lenny-icon.svg"
-        }
-
-        CMN.AnimIconButton {
-            Layout.alignment: Qt.AlignRight
-            iconSize: Qt.size(CmnCfg.units.dp(24), CmnCfg.units.dp(24))
-            imageSource: "qrc:/options-icon.svg"
+            imageSource: "qrc:/info-icon.svg"
+            anchors.verticalCenter: parent.verticalCenter
+            visible: !bubbleLoader.isAux
+            icon.color: CmnCfg.palette.white
             onTapped: {
                 mainView.push(cb.infoPage)
                 deactivate()
             }
         }
+
         CMN.AnimIconButton {
-            Layout.alignment: Qt.AlignRight
-            Layout.rightMargin: CmnCfg.largeMargin
-            iconSize: Qt.size(CmnCfg.units.dp(24), CmnCfg.units.dp(24))
-            onTapped: deactivate()
-            imageSource: "qrc:/x-icon.svg"
+            imageSource: "qrc:/emoticon-icon.svg"
+            icon.color: CmnCfg.palette.white
+            anchors.verticalCenter: parent.verticalCenter
+        }
+        CMN.AnimIconButton {
+            icon.color: CmnCfg.palette.white
+            imageSource: "qrc:/reply-icon.svg"
+            anchors.verticalCenter: parent.verticalCenter
+            onTapped: {
+                ownedMessages.builder.opId = msgId
+                deactivate()
+            }
         }
     }
 }

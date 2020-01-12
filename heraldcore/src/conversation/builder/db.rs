@@ -68,6 +68,7 @@ impl ConversationBuilder {
                 expiration_period,
                 muted,
                 status,
+                last_msg_id: None,
             },
             members,
         })

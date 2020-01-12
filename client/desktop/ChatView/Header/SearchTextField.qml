@@ -27,8 +27,6 @@ ScrollView {
 
         verticalAlignment: TextEdit.AlignTop
 
-        //verticalAlignment: TextEdit.AlignVCenter
-        //Layout.alignment: Qt.AlignTop | Qt.AlignLeft
         Keys.onReturnPressed: {
             const backwards = (event.modifiers & Qt.ShiftModifier)
             //don't allow enter key to affect textfield

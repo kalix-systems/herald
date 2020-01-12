@@ -13,6 +13,7 @@ ToolBar {
     id: chatToolBar
     property var conversationItem
     property var ownedConversation: parent.ownedConversation
+    property alias timerMenu: timer
 
     height: CmnCfg.toolbarHeight
     z: CmnCfg.middleZ
@@ -82,6 +83,7 @@ ToolBar {
                 fill: CmnCfg.palette.lightGrey
                 topPadding: 1
                 onClicked: chatToolBar.state = "searchState"
+                tooltipText: "Search conversation"
                 MouseArea {
                     anchors.fill: parent
                     acceptedButtons: Qt.RightButton
@@ -111,7 +113,7 @@ ToolBar {
             }
 
             Imports.TimerOptions {
-                id: timerMenu
+                id: timer
                 conversationItem: chatToolBar.conversationItem
             }
 
@@ -128,7 +130,7 @@ ToolBar {
                     }
 
                     MenuItem {
-                        text: qsTr("Clear History")
+                        text: qsTr("Clear history")
                         onTriggered: clearHistoryPrompt.open()
                     }
                     MenuItem {

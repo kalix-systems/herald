@@ -23,49 +23,61 @@ Item {
     property int subLabelFontSize: CmnCfg.entitySubLabelSize
     property alias bodyItalic: bodyText.font.italic
 
+    // json summary
+    property string lastMsgDigest
+
     // This component expects one of the following groups of properties,
-    // either a ConversationContent property, or the subsequent group of
+    // either a lastMsgDigest property (a JSON object), or the subsequent group of
     // properties calculated from it.
 
-    // OPTION 1: ConversationContent
-    // the ConversationContent bundle this label represents.
-    property ConversationContent cc
+    // OPTION 1: lastMsgDigest
+    // the bundle this label represents.
+    property var lastMessage: lastMsgDigest !== "" ? JSON.parse(
+                                                         lastMsgDigest) : undefined
+    property bool isEmpty: true
+
+    readonly property bool __init: !isEmpty && lastMessage !== undefined
 
     // OPTION 2: lastReceipt, outbound, lastAuthor, lastTimestamp, and lastBody
     // the value of the latest read receipt according to the ReceiptStatus enum
     property int lastReceipt: 0
     // true if the last message was sent by the logged-in user
-    property bool outbound: cc
-                            && cc.messages.lastAuthor === Herald.config.configId
+    property bool outbound: !__init ? false : lastMessage.author === Herald.config.configId
     // user who sent the last message in the conversation
     property string lastAuthor: {
-        if (cc && outbound)
+        if (!__init) {
+            return ""
+        }
+
+        if (outbound)
             return qsTr('You')
-        if (cc && !cc.messages.isEmpty)
-            return Herald.users.nameById(cc.messages.lastAuthor)
+
+        if (!isEmpty)
+            return Herald.users.nameById(lastMessage.author)
+
         return ''
     }
     // the previous latest human readable timestamp, or the empty string
-    property string lastTimestamp: cc
-                                   && !cc.messages.isEmpty ? JS.friendlyTimestamp(
-                                                                 cc.messages.lastTime) : ""
+    property string lastTimestamp: __init ? JS.friendlyTimestamp(
+                                                lastMessage.time) : ""
+
     // the previous message of the conversation, or the empty string
     property string lastBody: {
-        if (cc && cc.messages.isEmpty)
+        if (!__init)
             return ""
 
-        if (cc && (cc.messages.lastAuxCode !== undefined)) {
+        if (lastMessage.auxCode !== null) {
             return "<i>" + lastAuthor + JS.auxStringShort(
-                        cc.messages.lastAuxCode) + "</i>"
+                        lastMessage.auxCode) + "</i>"
         }
 
-        if (cc && (cc.messages.lastBody === "")
-                && cc.messages.lastHasAttachments) {
+        if (lastMessage.body === null && lastMessage.hasAttachments) {
             return lastAuthor + ": " + "<i>Media message</i>"
         }
 
-        if (cc)
-            return lastAuthor + ": " + cc.messages.lastBody
+        if (lastMessage.body !== null) {
+            return lastAuthor + ": " + lastMessage.body
+        }
 
         return ''
     }
@@ -96,7 +108,7 @@ Item {
             id: ts
             font {
                 family: CmnCfg.chatFont.name
-                pixelSize: 11
+                pixelSize: CmnCfg.minorTextSize
             }
             text: lastTimestamp
             Layout.preferredHeight: labelGrid.height * 0.25

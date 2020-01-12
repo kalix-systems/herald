@@ -13,7 +13,7 @@ ListView {
     clip: true
     orientation: Qt.Horizontal
     anchors.top: flickable.bottom
-    anchors.topMargin: CmnCfg.smallMargin
+    anchors.topMargin: CmnCfg.largeMargin
     anchors.horizontalCenter: flickable.horizontalCenter
     model: imageAttachments
     ScrollBar.horizontal: ScrollBar {}
@@ -33,6 +33,7 @@ ListView {
             sourceSize.height: dims.height
             anchors.centerIn: parent
             source: parent.imageSource
+            fillMode: Image.PreserveAspectFit
             ColorOverlay {
                 id: overlay
                 anchors.fill: parent

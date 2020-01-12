@@ -5,32 +5,32 @@ import "qrc:/imports/ChatBubble" as CB
 import LibHerald 1.0
 import "../Common"
 
-ColumnLayout {
+Column {
     id: chatRowLayout
     readonly property var select: function () {
         cta.forceActiveFocus()
     }
 
-    property bool send: cta.text.length > 0
+    property bool send: (cta.preeditText.length !== 0 || cta.text.length !== 0)
     property string chatName: 'conversation'
     width: parent.width
     spacing: 0
     Loader {
         id: replyLoader
-        Layout.fillWidth: true
-        Layout.margins: CmnCfg.smallMargin
-        Layout.preferredHeight: item ? item.height : 0
+        width: parent.width
+        anchors.margins: CmnCfg.smallMargin
+        height: item ? item.height : 0
         active: ownedMessages.builder.isReply
         sourceComponent: CB.ComposeReplyComponent {
             builderData: ownedMessages.builder
         }
     }
 
-    RowLayout {
-        Layout.fillWidth: true
+    Item {
+        width: parent.width
+        height: cta.height
         TextArea {
             id: cta
-            Layout.fillWidth: true
             placeholderText: qsTr('Message ') + chatRowLayout.chatName
             wrapMode: TextArea.WrapAtWordBoundaryOrAnywhere
             color: CmnCfg.palette.black
@@ -44,11 +44,17 @@ ColumnLayout {
                                     && cta.text.length === 0) {
                                 Qt.inputMethod.hide()
                             }
+            anchors.left: parent.left
+            anchors.right: buttons.left
         }
         Grid {
             // TODO: Collapse options into plus when typing
             // TODO: this is a binding loop use TextMetrics
-            columns: cta.lineCount > 1 ? 1 : 2
+            columns: 2
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: CmnCfg.microMargin
+            id: buttons
             spacing: CmnCfg.defaultMargin
             AnimIconButton {
                 color: CmnCfg.palette.black
@@ -57,7 +63,22 @@ ColumnLayout {
             AnimIconButton {
                 color: CmnCfg.palette.black
                 onTapped: if (send) {
-                              ownedMessages.builder.body = cta.text
+                              const msgText = function () {
+                                  if ((cta.text.length !== 0)
+                                          && (cta.text.length !== 0)) {
+                                      return cta.text + " " + cta.preeditText
+                                  }
+
+                                  if (cta.text.length !== 0) {
+                                      return cta.text
+                                  }
+
+                                  return cta.preeditText
+                              }
+
+                              Qt.inputMethod.commit()
+                              ownedMessages.builder.body = cta.text //msgText()
+                              cta.focus = true
                               ownedMessages.builder.finalize()
                               cta.clear()
                           }

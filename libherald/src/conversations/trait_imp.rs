@@ -169,4 +169,18 @@ impl ConversationsTrait for Conversations {
     ) -> u8 {
         self.status_(index) as u8
     }
+
+    fn is_empty(
+        &self,
+        index: usize,
+    ) -> bool {
+        self.is_empty_(index).unwrap_or(true)
+    }
+
+    fn last_msg_digest(
+        &self,
+        index: usize,
+    ) -> String {
+        self.last_msg_digest_(index).unwrap_or_default()
+    }
 }

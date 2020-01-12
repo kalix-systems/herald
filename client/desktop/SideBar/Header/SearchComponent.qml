@@ -47,6 +47,10 @@ Component {
                     }
                 }
 
+                Common.TextContextMenu {
+                    parentText: parent
+                }
+
                 onTextChanged: {
                     if (contactsSearch) {
                         Qt.callLater(function (text) {
@@ -78,7 +82,6 @@ Component {
                     sideBarState.state = ""
                 }
             }
-
         }
     }
 }

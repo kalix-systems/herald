@@ -25,6 +25,10 @@ Column {
         galleryLoader.active = true
         galleryLoader.item.open()
     }
+    property var imageLongPressedCallBack: function (url) {
+        attachmentDownloader.filePath = url
+        attachmentDownloader.open()
+    }
 
     spacing: 0
 

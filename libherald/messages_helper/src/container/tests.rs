@@ -64,8 +64,6 @@ pub struct TestEmit {
     pattern_changed_state: u32,
     regex_changed_state: u32,
     index_changed_state: u32,
-    last_has_attachments_state: u32,
-    is_empty_changed_state: u32,
     last_changed_state: u32,
 }
 
@@ -76,15 +74,23 @@ impl TestEmit {
 }
 
 impl MessageEmit for TestEmit {
-    emit_imp! {
-    search_num_matches_changed, num_matches_state,
-    search_pattern_changed, pattern_changed_state,
-    search_regex_changed, regex_changed_state,
-    search_index_changed, index_changed_state,
-    last_has_attachments_changed, last_has_attachments_state,
-    is_empty_changed, is_empty_changed_state,
-    last_changed, last_changed_state
+    emit_imp!(
+        search_num_matches_changed,
+        num_matches_state,
+        search_pattern_changed,
+        pattern_changed_state,
+        search_regex_changed,
+        regex_changed_state,
+        search_index_changed,
+        index_changed_state
+    );
 
+    fn last_changed(
+        &mut self,
+        _: ConversationId,
+        _: Option<MsgId>,
+    ) {
+        self.last_changed_state += 1;
     }
 }
 
@@ -114,6 +120,8 @@ fn test_insertion_flurry_deletion() {
     .add()
     .expect(womp!("Failed to add config"));
 
+    let conv = heraldcore::conversation::meta(&convid).expect(womp!());
+
     let (msgmeta1, msgdata1) = msg_constructor("hello");
     std::thread::sleep(std::time::Duration::from_millis(2));
     let (msgmeta2, msgdata2) = msg_constructor("hello");
@@ -127,7 +135,12 @@ fn test_insertion_flurry_deletion() {
 
     assert_eq!(container.len(), 2);
 
-    assert_eq!(container.same_flurry(0, 1).expect(womp!()), true);
+    assert_eq!(
+        container
+            .same_flurry(0, 1, conv.expiration_period)
+            .expect(womp!()),
+        true
+    );
 
     let ix1 = container.index_of(&msgmeta1);
     assert!(ix1.is_some());
@@ -297,7 +310,7 @@ fn test_handle_store_done() {
     let model = &mut TestModel::new();
     let emit = &mut TestEmit::new();
 
-    container.handle_store_done(msgmeta2.msg_id, attachmentmeta.clone(), emit, model);
+    container.handle_store_done(msgmeta2.msg_id, attachmentmeta.clone(), emit, model, convid);
 
     assert_eq!(
         container
@@ -312,5 +325,5 @@ fn test_handle_store_done() {
 
     assert_eq!(model.data_changed_state[0], (0, 0));
 
-    assert_eq!(emit.last_has_attachments_state, 1);
+    assert_eq!(emit.last_changed_state, 1);
 }

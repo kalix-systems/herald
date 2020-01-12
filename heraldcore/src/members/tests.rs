@@ -28,6 +28,18 @@ fn add_remove_member() {
 }
 
 #[test]
+fn shared_conversations() {
+    let mut conn = Database::in_memory_with_config().expect(womp!());
+
+    let uid1 = "Hello".try_into().expect(womp!());
+    UserBuilder::new(uid1).add_db(&mut conn).expect(womp!());
+
+    let shared = db::shared_conversations(&conn, &uid1).expect(womp!());
+
+    assert_eq!(shared.len(), 0);
+}
+
+#[test]
 fn add_tx() {
     let mut conn = Database::in_memory_with_config().expect(womp!());
 

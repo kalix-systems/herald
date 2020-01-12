@@ -100,7 +100,16 @@ pub fn remove(mid: &MsgId) -> Option<MsgData> {
 }
 
 fn db_data(mid: &MsgId) -> Option<MsgData> {
-    let data = heraldcore::message::message_data(mid).ok()?;
+    let data = heraldcore::message::message_data(mid).ok().flatten()?;
+
+    if data
+        .time
+        .expiration
+        .map(|exp| exp.as_i64() < herald_common::Time::now().as_i64())
+        .unwrap_or(false)
+    {
+        return None;
+    }
 
     insert(*mid, data.clone());
 

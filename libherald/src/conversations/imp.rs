@@ -63,6 +63,53 @@ impl Conversations {
         Some(())
     }
 
+    pub(crate) fn is_empty_(
+        &self,
+        index: usize,
+    ) -> Option<bool> {
+        let cid = &self.list.get(index).as_ref()?.id;
+        shared::last_msg_id(&cid).is_none().into()
+    }
+
+    pub(crate) fn last_msg_digest_(
+        &self,
+        index: usize,
+    ) -> Option<String> {
+        use heraldcore::message::MsgData;
+        let cid = &self.list.get(index).as_ref()?.id;
+        let mid = shared::last_msg_id(&cid)?;
+
+        let MsgData {
+            author,
+            receipts,
+            send_status,
+            time,
+            content,
+            ..
+        } = messages_helper::container::get(&mid)?;
+
+        let body = content.as_str();
+        let time = time.insertion;
+        let aux_code = content.aux_code();
+        let has_attachments = content
+            .attachments()
+            .map(|a| !a.is_empty())
+            .unwrap_or(false);
+        let status = receipts.values().max().map(|status| *status as u32);
+
+        let object = json::object! {
+            "author" => author.as_str(),
+            "body" => body,
+            "time" => *time.as_i64(),
+            "auxCode" => aux_code,
+            "status" => status,
+            "sendStatus" => send_status as u8,
+            "hasAttachments" => has_attachments
+        };
+
+        Some(object.dump())
+    }
+
     imp! {
         color_inner, color, u32,
         pairwise_inner, pairwise, bool,

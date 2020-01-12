@@ -25,13 +25,7 @@ impl Container {
         search.try_insert_match(msg_id, ix, self, emit, model);
 
         if ix == 0 {
-            emit.last_changed();
-        } else {
-            model.entry_changed(ix - 1);
-        }
-
-        if self.len() == 1 {
-            emit.is_empty_changed();
+            emit.last_changed(cid, Some(msg_id));
         }
 
         if ix + 1 < self.len() {
@@ -41,6 +35,7 @@ impl Container {
         push(cid);
     }
 
+    #[allow(clippy::too_many_arguments)]
     pub fn remove_helper<E: MessageEmit, M: MessageModel, B: MessageBuilderHelper>(
         &mut self,
         msg_id: MsgId,
@@ -49,14 +44,13 @@ impl Container {
         model: &mut M,
         search: &mut SearchState,
         builder: &mut B,
+        cid: ConversationId,
     ) {
         {
             search.try_remove_match(&msg_id, self, emit, model);
         }
 
         builder.try_clear_reply(&msg_id);
-
-        let old_len = self.len();
 
         model.begin_remove_rows(ix, ix);
         let data = self.remove(ix);
@@ -74,12 +68,8 @@ impl Container {
             model.entry_changed(ix + 1);
         }
 
-        if old_len == 1 {
-            emit.is_empty_changed();
-        }
-
-        if ix == 0 {
-            emit.last_changed();
+        if self.list.is_empty() || ix == 0 {
+            emit.last_changed(cid, self.list.front().map(|m| m.msg_id));
         }
     }
 }

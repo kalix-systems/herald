@@ -14,9 +14,18 @@ impl Messages {
             return Some(true);
         }
 
+        let cid = &self.conversation_id.as_ref()?;
+        let exp_period = {
+            crate::conversations::shared::conv_data()
+                .read()
+                .get(cid)
+                .as_ref()?
+                .expiration_period
+        };
+
         // other cases
         self.container
-            .same_flurry(index, index - 1)
+            .same_flurry(index, index - 1, exp_period)
             .map(std::ops::Not::not)
     }
 
@@ -28,6 +37,15 @@ impl Messages {
             return None;
         }
 
+        let cid = &self.conversation_id?;
+        let exp_period = {
+            crate::conversations::shared::conv_data()
+                .read()
+                .get(cid)
+                .as_ref()?
+                .expiration_period
+        };
+
         // Case where message is first message in conversation
         if index + 1 == self.container.len() {
             return Some(true);
@@ -35,7 +53,7 @@ impl Messages {
 
         // other cases
         self.container
-            .same_flurry(index, index + 1)
+            .same_flurry(index, index + 1, exp_period)
             .map(std::ops::Not::not)
     }
 }

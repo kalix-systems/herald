@@ -26,5 +26,26 @@ GridLayout {
         color: CmnCfg.palette.black
         textFormat: TextEdit.AutoText
         selectionColor: CmnCfg.palette.highlightColor
+
+        MouseArea {
+            anchors.fill: parent
+            hoverEnabled: true
+            onEntered: {
+                if (bubbleRoot.moreInfo)
+                    return
+                bubbleRoot.hoverHighlight = true
+            }
+            onExited: {
+                if (bubbleRoot.moreInfo)
+                    return
+                if (!bubbleRoot.hitbox.containsMouse) {
+                    bubbleRoot.hoverHighlight = false
+                }
+            }
+            propagateComposedEvents: true
+            acceptedButtons: Qt.NoButton
+
+            cursorShape: Qt.IBeamCursor
+        }
     }
 }

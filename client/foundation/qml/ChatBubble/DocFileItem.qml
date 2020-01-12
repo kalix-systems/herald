@@ -31,6 +31,10 @@ ListView {
                 attachmentDownloader.filePath = path
                 attachmentDownloader.open()
             }
+            mouseArea.onEntered: bubbleActual.hoverHighlight = true
+            mouseArea.onExited: if (!bubbleActual.hitbox.containsMouse) {
+                                    bubbleActual.hoverHighlight = false
+                                }
         }
 
         Text {

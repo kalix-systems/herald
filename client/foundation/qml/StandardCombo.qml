@@ -12,7 +12,7 @@ Rectangle {
     property var onSelected: function () {}
     property font labelFont: CmnCfg.defaultFont
 
-    width: 100
+    width: container.width
     height: 40
 
     Menu {
@@ -44,7 +44,8 @@ Rectangle {
     }
 
     Row {
-        anchors.fill: parent
+        id: container
+        height: parent.height
         spacing: CmnCfg.units.dp(2)
 
         Label {

@@ -11,18 +11,17 @@ import "qrc:/imports" as Imports
 
 Page {
     id: moreInfoPopup
-    property ChatBubble referredChatBubble
     readonly property Component headerComponent: MessageInfoHeader {}
 
+    property var messageData
     // members of the conversation content
-    property var members: []
+    property var members
     readonly property string stateName: "info"
     // list of receipt-user objects. set on completion
     property var receiptData: []
 
     Component.onCompleted: {
-        receiptData = JSON.parse(
-                    referredChatBubble.messageModelData.userReceipts)
+        receiptData = JSON.parse(messageData.userReceipts)
     }
 
     background: Rectangle {
@@ -33,6 +32,7 @@ Page {
         anchors.fill: parent
         anchors.bottomMargin: CmnCfg.largeMargin
         contentHeight: pageContent.height
+        boundsBehavior: Flickable.StopAtBounds
 
         Column {
             id: pageContent
@@ -43,35 +43,39 @@ Page {
             DefaultBubble {
                 defaultWidth: parent.width
                 convContainer: parent
-                messageModelData: referredChatBubble.messageModelData
+                messageModelData: messageData
+                width: parent.width
+                anchors.horizontalCenter: parent.horizontalCenter
             }
 
             Column {
                 Label {
                     id: fromLabel
-                    text: "From : "
+                    text: qsTr("From: ")
+
                     font {
                         bold: true
                         family: CmnCfg.labelFont.name
                         pixelSize: CmnCfg.units.dp(18)
                     }
                 }
-                Row {
-                    spacing: CmnCfg.smallMargin
-                    Ent.Avatar {
-                        color: CmnCfg.avatarColors[referredChatBubble.messageModelData.authorColor]
-                        initials: referredChatBubble.authorName[0].toUpperCase()
-                        pfpPath: Utils.safeStringOrDefault(
-                                     referredChatBubble.messageModelData.authorProfilePicture)
-                    }
-                    Column {
-                        spacing: CmnCfg.smallMargin
-                        Text {
-                            text: referredChatBubble.messageModelData.authorName
-                            font.bold: true
-                        }
-                        Text {
-                            text: "@" + referredChatBubble.messageModelData.author
+
+                Item {
+                    id: author
+                    anchors.left: fromLabel.left
+                    height: CmnCfg.convoHeight
+                    width: parent.width
+                    Common.PlatonicRectangle {
+
+                        boxTitle: messageData.authorName
+                        boxColor: messageData.authorColor
+                        picture: Utils.safeStringOrDefault(
+                                     messageData.authorProfilePicture, "")
+                        color: CmnCfg.palette.white
+                        labelComponent: Ent.ContactLabel {
+                            displayName: messageData.authorName
+                            username: messageData.author
+                            labelColor: CmnCfg.palette.black
                         }
                     }
                 }
@@ -80,9 +84,9 @@ Page {
             Label {
                 id: timeInfo
                 text: outbound ? qsTr("Sent at: ") + Utils.userTime(
-                                     referredChatBubble.messageModelData.insertionTime) : qsTr(
+                                     messageData.insertionTime) : qsTr(
                                      "Sent at: ") + Utils.userTime(
-                                     referredChatBubble.messageModelData.serverTime)
+                                     messageData.serverTime)
                 font.family: CmnCfg.chatFont.name
                 font.weight: Font.DemiBold
                 color: CmnCfg.palette.black
@@ -91,7 +95,7 @@ Page {
             Label {
                 id: receiveInfo
                 text: qsTr("Received at: ") + Utils.userTime(
-                          referredChatBubble.messageModelData.insertionTime)
+                          messageData.insertionTime)
                 font.family: CmnCfg.chatFont.name
                 font.weight: Font.DemiBold
                 color: CmnCfg.palette.black
@@ -100,7 +104,7 @@ Page {
 
             Column {
                 Label {
-                    text: "To : "
+                    text: qsTr("To: ")
                     font {
                         bold: true
                         family: CmnCfg.labelFont.name
@@ -108,39 +112,43 @@ Page {
                     }
                 }
 
-                Repeater {
+                ListView {
                     width: parent.width
                     model: members
-                    Row {
-                        spacing: CmnCfg.smallMargin
-                        Ent.Avatar {
-                            color: CmnCfg.avatarColors[authorColor]
-                            initials: authorName[0].toUpperCase()
-                            pfpPath: Utils.safeStringOrDefault(
-                                         authorProfilePicture)
-                        }
-                        Column {
-                            spacing: CmnCfg.smallMargin
-                            Text {
-                                text: authorName
-                                font.bold: true
-                            }
-                            Text {
-                                text: "@" + author
-                            }
-                        }
+                    height: contentHeight
+                    interactive: false
 
-                        Button {
-                            anchors.right: parent.right
-                            id: receipt
-                            icon.source: Utils.receiptCodeSwitch(
-                                             receiptData[index])
-                            icon.height: 16
-                            icon.width: 16
-                            icon.color: CmnCfg.palette.iconMatte
-                            padding: 0
-                            anchors.verticalCenter: parent.verticalCenter
-                            background: Item {}
+                    delegate: Item {
+                        property var memberData: model
+                        width: moreInfoPopup.width * 0.75
+                        height: visible ? CmnCfg.convoHeight : 0
+                        visible: members.rowCount(
+                                     ) > 1 ? memberData.userId !== messageData.author : true
+                        Common.PlatonicRectangle {
+                            boxTitle: memberData.name
+                            boxColor: memberData.color
+                            picture: Utils.safeStringOrDefault(
+                                         memberData.profilePicture, "")
+                            property MouseArea hoverHandler
+                            color: CmnCfg.palette.white
+                            labelComponent: Ent.ContactLabel {
+                                displayName: memberData.name
+                                username: memberData.userId
+                                labelColor: CmnCfg.palette.black
+                            }
+
+                            Button {
+                                id: receipt
+                                anchors.right: parent.right
+                                icon.source: Utils.receiptCodeSwitch(
+                                                 receiptData[memberData.userId])
+                                icon.height: 16
+                                icon.width: 16
+                                icon.color: CmnCfg.palette.black
+                                padding: 0
+                                anchors.verticalCenter: parent.verticalCenter
+                                background: Item {}
+                            }
                         }
                     }
                 }

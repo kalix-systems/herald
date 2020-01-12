@@ -37,6 +37,7 @@ Rectangle {
     property int bubbleIndex
     property bool moreInfo: false
     property bool aux: true
+    property MouseArea hitbox
 
     Connections {
         target: appRoot.globalTimer
@@ -74,7 +75,7 @@ Rectangle {
     Avatar {
         id: avatar
         visible: false
-        size: 36
+        size: CmnCfg.chatAvatarSize
         anchors {
             left: parent.left
             top: parent.top
@@ -86,8 +87,8 @@ Rectangle {
 
     Highlight {
         id: bubbleHighlight
-        z: bubbleRoot.z + 1
         color: CmnCfg.palette.darkGrey
+        z: bubbleRoot.z + 1
     }
 
     Rectangle {
@@ -139,14 +140,17 @@ Rectangle {
             elide: Text.ElideRight
             width: bubbleRoot.maxWidth
         }
+        GridLayout {
 
-        Text {
-            id: actionText
-            text: authorName + Utils.auxString(auxData.code, auxData.content)
-            font.family: CmnCfg.chatFont.name
-            font.italic: true
-            elide: Text.ElideRight
-            width: bubbleRoot.maxWidth
+            Text {
+                id: actionText
+                text: authorName + Utils.auxString(auxData.code,
+                                                   auxData.content)
+                font.family: CmnCfg.chatFont.name
+                font.italic: true
+                Layout.maximumWidth: bubbleRoot.maxWidth
+                wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+            }
         }
 
         Loader {

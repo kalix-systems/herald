@@ -253,6 +253,67 @@ export function timerIcon(expireTime: number, insertTime: number): string {
   else return "qrc:/mini-timer-icons/empty.svg";
 }
 
+export function sameExp(insertTime: number, expireTime: number, conversationExpire: number): boolean {
+
+  if (conversationExpire === 0) {
+      return false;
+  }
+
+  const msecondsPerMinute = 60 * 1000;
+  const msecondsPerHour = 3600 * 1000;
+  const msecondsPerDay = msecondsPerHour * 24;
+  const msecondsPerWeek = msecondsPerDay * 7;
+  const msecondsPerMonth = msecondsPerDay * 30;
+  const msecondsPerYear = msecondsPerDay * 365;
+
+  var potentialExpire = 0;
+
+  switch (conversationExpire) {
+      case ExpirationPeriod.ThirtySeconds: {
+          potentialExpire = insertTime + 30 * 1000;
+          break;
+      }
+      case ExpirationPeriod.OneMinute: {
+          potentialExpire = insertTime + msecondsPerMinute;
+          break;
+
+      }
+      case ExpirationPeriod.ThirtyMinutes: {
+         potentialExpire = insertTime + msecondsPerMinute * 30;
+         break;
+      }
+      case ExpirationPeriod.OneHour: {
+          potentialExpire = insertTime + msecondsPerHour;
+          break;
+      }
+      case ExpirationPeriod.TwelveHours: {
+          potentialExpire = insertTime + msecondsPerHour * 12;
+          break;
+      }
+      case ExpirationPeriod.OneDay: {
+          potentialExpire = insertTime + msecondsPerDay;
+          break;
+      }
+      case ExpirationPeriod.OneWeek: {
+          potentialExpire = insertTime + msecondsPerWeek;
+          break;
+      }
+      case ExpirationPeriod.OneMonth: {
+          potentialExpire = insertTime + msecondsPerMonth;
+          break;
+      }
+      case ExpirationPeriod.OneYear: {
+          potentialExpire = insertTime + msecondsPerYear;
+          break;
+      }
+      default:
+          break;
+
+  }
+  return potentialExpire === expireTime;
+
+}
+
 export function userTime(timestamp: number): string {
   var d = new Date(timestamp);
   var year = d.getFullYear();

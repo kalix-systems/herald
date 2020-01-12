@@ -14,10 +14,10 @@ Row {
     property var imageClickedCallBack: function () {
         throw "undefined callback"
     }
-    height: 150
+    height: CmnCfg.attachmentSize / 2
     spacing: CmnCfg.smallMargin
     Rectangle {
-        height: 150
+        height: CmnCfg.attachmentSize / 2
         width: height
         clip: true
         color: "transparent"
@@ -32,7 +32,9 @@ Row {
             asynchronous: true
             MouseArea {
                 onClicked: imageClickedCallBack(parent.source)
+                onPressAndHold: imageLongPressedCallBack(firstImage.path)
                 anchors.fill: parent
+                cursorShape: Qt.PointingHandCursor
             }
         }
     }
@@ -40,13 +42,14 @@ Row {
         width: 150
 
         Rectangle {
-            height: 75 - CmnCfg.smallMargin / 2
-            width: 150
+            height: CmnCfg.attachmentSize / 4 - CmnCfg.smallMargin / 2
+            width: CmnCfg.attachmentSize / 2
             clip: true
             color: "transparent"
             Image {
                 property var dims: JSON.parse(Herald.utils.imageScaling(
-                                                  secondImage.path, 150))
+                                                  secondImage.path,
+                                                  CmnCfg.attachmentSize / 2))
                 source: "file:" + secondImage.path
                 sourceSize.height: dims.height
                 sourceSize.width: dims.width
@@ -55,23 +58,27 @@ Row {
                 asynchronous: true
                 MouseArea {
                     onClicked: imageClickedCallBack(parent.source)
+                    onPressAndHold: imageLongPressedCallBack(secondImage.path)
                     anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
                 }
             }
         }
         spacing: CmnCfg.smallMargin
 
         Row {
-            height: 75
+            height: CmnCfg.attachmentSize / 4
             spacing: CmnCfg.smallMargin
             Rectangle {
-                height: 75 - CmnCfg.smallMargin / 2
+                height: parent.height - CmnCfg.smallMargin / 2
                 width: height
                 clip: true
                 color: "transparent"
                 Image {
-                    property var dims: JSON.parse(Herald.utils.imageScaling(
-                                                      thirdImage.path, 75))
+                    property var dims: JSON.parse(
+                                           Herald.utils.imageScaling(
+                                               thirdImage.path,
+                                               CmnCfg.attachmentSize / 4))
                     source: "file:" + thirdImage.path
                     sourceSize.height: dims.height
                     sourceSize.width: dims.width
@@ -80,19 +87,24 @@ Row {
                     asynchronous: true
                     MouseArea {
                         onClicked: imageClickedCallBack(parent.source)
+                        onPressAndHold: imageLongPressedCallBack(
+                                            thirdImage.path)
                         anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
                     }
                 }
             }
 
             Rectangle {
-                height: 75 - CmnCfg.smallMargin / 2
+                height: parent.height - CmnCfg.smallMargin / 2
                 width: height
                 clip: true
                 color: "transparent"
                 Image {
-                    property var dims: JSON.parse(Herald.utils.imageScaling(
-                                                      fourthImage.path, 75))
+                    property var dims: JSON.parse(
+                                           Herald.utils.imageScaling(
+                                               fourthImage.path,
+                                               CmnCfg.attachmentSize / 4))
 
                     source: "file:" + fourthImage.path
                     sourceSize.height: dims.height
@@ -103,6 +115,7 @@ Row {
                     MouseArea {
                         onClicked: imageClickedCallBack(parent.source)
                         anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
                     }
                 }
 

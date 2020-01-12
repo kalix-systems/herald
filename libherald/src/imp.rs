@@ -11,5 +11,6 @@ pub use crate::members::Members;
 pub use crate::message_search::MessageSearch;
 pub use crate::messages::builder::MessageBuilder;
 pub use crate::messages::Messages;
+pub use crate::shared_conversations::SharedConversations;
 pub use crate::users::Users;
 pub use crate::users_search::UsersSearch;

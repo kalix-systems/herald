@@ -6,7 +6,10 @@
     <g id="forward-arrow-icon" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
         <g id="arrow-forward">
             <polygon id="Path" points="0 0 24 0 24 24 0 24"></polygon>
-            <polygon id="Path" fill="#000000" fill-rule="nonzero" points="12 4 10.59 5.41 16.17 11 4 11 4 13 16.17 13 10.59 18.59 12 20 20 12"></polygon>
+        </g>
+        <g id="Group" transform="translate(11.900000, 12.000000) scale(-1, 1) rotate(90.000000) translate(-11.900000, -12.000000) translate(6.400000, 3.500000)" fill="#000000" fill-rule="nonzero">
+            <polygon id="Shape" points="6.45096321 11.114145 6.45096321 0.5 4.45096321 0.5 4.45096321 11.114145 4.45096321 13.2369739 5.45096321 14.5 6.45096321 13.2369739"></polygon>
+            <polygon id="Combined-Shape" transform="translate(5.449341, 10.810411) rotate(-45.000000) translate(-5.449341, -10.810411) " points="1.60128093 6.95940276 3.40134874 6.95940276 3.40034873 12.8584706 9.30128093 12.8594705 9.30128093 14.6594028 1.59740074 14.6614185"></polygon>
         </g>
     </g>
 </svg>

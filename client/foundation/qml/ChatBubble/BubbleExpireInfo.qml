@@ -10,6 +10,10 @@ Row {
     anchors.top: parent.top
     anchors.topMargin: CmnCfg.smallMargin
     property alias expireTime: expireTime.text
+    property bool isShort: messageModelData.expirationTime
+                           !== undefined ? ((messageModelData.expirationTime
+                                             - messageModelData.insertionTime)
+                                            < 300000 ? true : false) : false
 
     Label {
         id: expireTime
@@ -20,6 +24,7 @@ Row {
         anchors.top: clock.top
         font.family: CmnCfg.chatFont.name
         font.pixelSize: 13
+        color: isShort ? CmnCfg.palette.alertColor : CmnCfg.palette.black
     }
 
     Button {
@@ -27,8 +32,9 @@ Row {
         icon.source: timerIcon
         icon.height: 16
         icon.width: 16
-        icon.color: "grey"
+        icon.color: isShort ? CmnCfg.palette.alertColor : "grey"
         padding: 0
         background: Item {}
+        enabled: false
     }
 }

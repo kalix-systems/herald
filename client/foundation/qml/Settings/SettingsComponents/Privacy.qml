@@ -3,7 +3,7 @@ import QtQuick.Controls 2.13
 import QtQuick.Layouts 1.12
 import LibHerald 1.0
 import Qt.labs.platform 1.0
-import '../../'
+import "../../"
 
 ColumnLayout {
     RowLayout {
@@ -14,6 +14,7 @@ ColumnLayout {
             color: CmnCfg.palette.black
             Layout.leftMargin: CmnCfg.defaultMargin
             Layout.fillWidth: true
+            wrapMode: Label.WrapAtWordBoundaryOrAnywhere
             font: CmnCfg.defaultFont
         }
 

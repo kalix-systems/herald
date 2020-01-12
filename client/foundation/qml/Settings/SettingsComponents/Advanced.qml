@@ -1,8 +1,8 @@
-import QtQuick 2.13
-import QtQuick.Controls 2.13
-import QtQuick.Layouts 1.12
+import QtQuick 2.14
+import QtQuick.Controls 2.14
+import QtQuick.Layouts 1.14
 import LibHerald 1.0
-import '../../'
+import "../../"
 
 ColumnLayout {
 
@@ -12,15 +12,14 @@ ColumnLayout {
             text: qsTr("Language")
             color: CmnCfg.palette.black
             Layout.leftMargin: CmnCfg.defaultMargin
+            Layout.fillWidth: true
             font: CmnCfg.defaultFont
         }
 
-        Item {
-            Layout.fillWidth: true
-        }
-
         StandardCombo {
-            model: ["English", "Espańol", "Deutsche", "français", "et cetera"]
+            Layout.alignment: Qt.AlignRight
+            Layout.rightMargin: CmnCfg.largeMargin
+            model: ["English"]
         }
     }
 

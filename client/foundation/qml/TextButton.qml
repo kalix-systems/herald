@@ -6,10 +6,8 @@ Button {
     id: button
     property bool light: false
 
-    property color bkgrndColor: light ? CmnCfg.palette.lightGrey :
-                                            CmnCfg.palette.offBlack
-    property color textColor: light ? CmnCfg.palette.black :
-                                      CmnCfg.palette.white
+    property color bkgrndColor: light ? CmnCfg.palette.lightGrey : CmnCfg.palette.offBlack
+    property color textColor: light ? CmnCfg.palette.black : CmnCfg.palette.white
     contentItem: Text {
         text: button.text
         font: CmnCfg.defaultFont
@@ -28,7 +26,8 @@ Button {
     MouseArea {
         anchors.fill: parent
         hoverEnabled: true
-        onPressed: mouse.accepted = false
+        propagateComposedEvents: true
+        acceptedButtons: Qt.NoButton
         cursorShape: Qt.PointingHandCursor
     }
 }

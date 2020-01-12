@@ -16,7 +16,7 @@ Row {
     Image {
         id: fileIcon
         source: "qrc:/file-icon.svg"
-        height: 20
+        height: 16
         width: height
     }
 

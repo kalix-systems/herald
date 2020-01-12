@@ -5,59 +5,72 @@ import LibHerald 1.0
 import "../Common"
 import "qrc:/imports/"
 
-RowLayout {
-    anchors {
-        fill: parent
-        rightMargin: CmnCfg.largeMargin
-        leftMargin: CmnCfg.largeMargin
+ToolBar {
+    width: parent.width
+    height: CmnCfg.toolbarHeight
+    background: Rectangle {
+        color: CmnCfg.palette.offBlack
     }
 
     AnimIconButton {
         id: backButton
-        Layout.alignment: Qt.AlignLeft
+        anchors.left: parent.left
+        anchors.leftMargin: CmnCfg.smallMargin
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: CmnCfg.smallMargin
         color: CmnCfg.palette.iconFill
         imageSource: "qrc:/back-arrow-icon.svg"
         onTapped: mainView.pop()
     }
 
-    Label {
-        Layout.alignment: Qt.AlignCenter
-        text: mainView.currentItem.headerTitle
-        font: CmnCfg.headerFont
-        color: CmnCfg.palette.iconFill
-        visible: parent.state != "search"
-    }
-
-    AnimIconButton {
-        id: searchButton
-        Layout.alignment: Qt.AlignRight
-        color: CmnCfg.palette.iconFill
-        imageSource: "qrc:/search-icon.svg"
-        visible: parent.state != "search"
-        onTapped: parent.state = "search"
-    }
-
-    BorderedTextField {
-        id: sta
-        visible: parent.state === "search"
-        Layout.margins: CmnCfg.smallMargin
-        Layout.topMargin: 0
-        Layout.fillWidth: true
-        Layout.alignment: Qt.AlignCenter
-        onVisibleChanged: if (visible)
-                              forceActiveFocus()
-        onTextEdited: {
-            ownedMessages.searchPattern = text
+    RowLayout {
+        anchors.left: backButton.right
+        anchors.leftMargin: CmnCfg.smallMargin
+        anchors.rightMargin: CmnCfg.smallMargin
+        anchors.right: parent.right
+        anchors.verticalCenter: parent.verticalCenter
+        Label {
+            Layout.alignment: Qt.AlignLeft
+            Layout.topMargin: CmnCfg.microMargin
+            text: mainView.currentItem.headerTitle
+            font.family: CmnCfg.headerFont.family
+            font.pixelSize: CmnCfg.headerFontSize
+            color: CmnCfg.palette.iconFill
+            visible: parent.state !== "search"
         }
-    }
 
-    AnimIconButton {
-        id: searchExitButton
-        Layout.alignment: Qt.AlignRight
-        color: CmnCfg.palette.iconFill
-        imageSource: "qrc:/x-icon.svg"
-        visible: parent.state === "search"
-        onTapped: parent.state = "default"
+        AnimIconButton {
+            id: searchButton
+            Layout.alignment: Qt.AlignRight
+            color: CmnCfg.palette.iconFill
+            imageSource: "qrc:/search-icon.svg"
+            visible: parent.state !== "search"
+            onTapped: parent.state = "search"
+        }
+
+        BorderedTextField {
+            visible: parent.state === "search"
+            enabled: visible
+            Layout.margins: CmnCfg.smallMargin
+            Layout.topMargin: CmnCfg.microMargin
+            Layout.fillWidth: true
+            Layout.alignment: Qt.AlignCenter
+            onVisibleChanged: if (visible)
+                                  forceActiveFocus()
+            onTextEdited: {
+                ownedMessages.searchPattern = text
+            }
+            font.pixelSize: CmnCfg.chatTextSize
+        }
+
+        AnimIconButton {
+            id: searchExitButton
+            Layout.alignment: Qt.AlignRight
+            color: CmnCfg.palette.iconFill
+            imageSource: "qrc:/x-icon.svg"
+            visible: parent.state === "search"
+            onTapped: parent.state = "default"
+        }
     }
 
     states: [

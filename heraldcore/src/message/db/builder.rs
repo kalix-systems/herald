@@ -373,7 +373,11 @@ impl InboundMessageBuilder {
         };
 
         if !attachment_paths.is_empty() {
-            attachments::db::add(&tx, &msg_id, attachment_paths.iter().map(|s| s.as_str()))?;
+            w!(attachments::db::add(
+                &tx,
+                &msg_id,
+                attachment_paths.iter().map(|s| s.as_str())
+            ));
         }
 
         w!(tx.commit());

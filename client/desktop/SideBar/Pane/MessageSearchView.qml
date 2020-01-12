@@ -42,7 +42,7 @@ ListView {
                 hoverEnabled: true
                 z: CmnCfg.overlayZ
                 anchors.fill: parent
-
+                cursorShape: Qt.PointingHandCursor
                 onClicked: messageSearchList.messageClicked(
                                messageData.conversation, messageData.msgId)
             }
@@ -51,7 +51,8 @@ ListView {
             labelComponent: Ent.MessageSearchLabel {
                 conversationTitle: messageData.conversationTitle
                 timestamp: Utils.friendlyTimestamp(messageData.time)
-                labelColor: messageRectangle.state !== "" ? CmnCfg.palette.black : CmnCfg.palette.lightGrey
+                labelColor: messageRectangle.state
+                            !== "" ? CmnCfg.palette.black : CmnCfg.palette.lightGrey
                 secondaryLabelColor: messageRectangle.state
                                      !== "" ? CmnCfg.palette.offBlack : CmnCfg.palette.medGrey
                 labelFontSize: CmnCfg.entityLabelSize

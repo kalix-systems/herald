@@ -2,6 +2,7 @@ import QtQuick 2.0
 import QtQuick.Controls 2.12
 import LibHerald 1.0
 import QtGraphicalEffects 1.13
+import QtQuick.Layouts 1.3
 
 Flow {
     spacing: CmnCfg.microMargin
@@ -17,7 +18,7 @@ Flow {
             property var emojiModel: emojiRepeater.model
             property bool outboundReact
             visible: emojiModel[index]["reactionaries"].length !== 0
-            font.pixelSize: 12
+            font.pixelSize: CmnCfg.chatTextSize
             font.family: CmnCfg.chatFont.name
             Component.onCompleted: {
                 outboundReact = emojiModel[index]["reactionaries"].filter(
@@ -26,6 +27,7 @@ Flow {
                             }).length === 1
             }
             MouseArea {
+
                 enabled: !bubbleRoot.moreInfo
                 anchors.fill: parent
                 hoverEnabled: true
@@ -40,32 +42,68 @@ Flow {
                                 emojiModel[index]["content"])
                 }
                 cursorShape: bubbleRoot.moreInfo ? Qt.ArrowCursor : Qt.PointingHandCursor
+                propagateComposedEvents: true
+                onEntered: bubbleActual.hoverHighlight = true
+                onExited: if (!bubbleActual.hitbox.containsMouse) {
+                              bubbleActual.hoverHighlight = false
+                          }
+
+                ToolTip {
+                    delay: 500
+
+                    visible: parent.containsMouse
+                    y: -height
+                    background: Rectangle {
+                        color: CmnCfg.palette.offBlack
+                        border.width: 0
+                    }
+                    padding: 2
+                    contentItem: Column {
+                        Repeater {
+                            id: repeater
+                            model: emojiText.emojiModel[index]["reactionaries"]
+                            delegate: Label {
+                                property var reactData: repeater.model
+                                text: Herald.users.nameById(reactData[index])
+                                font.pixelSize: CmnCfg.minorTextSize
+                                font.weight: Font.Medium
+                                color: CmnCfg.palette.white
+                                font.family: CmnCfg.chatFont.name
+                                padding: 2
+                            }
+                        }
+                    }
+                }
             }
 
-            padding: outboundReact ? CmnCfg.microMargin / 2 : 0
             topPadding: CmnCfg.microMargin / 2
+            padding: 1
 
             contentItem: Row {
                 spacing: CmnCfg.microMargin
                 Label {
                     id: emoji
                     text: emojiModel[index]["content"]
+                    color: outboundReact ? CmnCfg.palette.white : CmnCfg.palette.black
+                    font.pixelSize: CmnCfg.chatTextSize
                 }
                 Label {
                     id: numLabel
                     text: emojiModel[index]["reactionaries"].length
                     font.family: CmnCfg.chatFont.name
-                    color: CmnCfg.palette.offBlack
-                    font.pixelSize: 11
+                    color: outboundReact ? CmnCfg.palette.white : CmnCfg.palette.offBlack
+
+                    font.pixelSize: CmnCfg.chatTextSize
+                    font.weight: Font.Medium
                     anchors.verticalCenter: emoji.verticalCenter
                 }
             }
 
             background: Rectangle {
 
-                border.width: outboundReact ? 1 : 0
-                border.color: CmnCfg.palette.offBlack
-                color: outboundReact ? CmnCfg.palette.lightGrey : "transparent"
+                border.width: outboundReact ? 0 : 1
+                border.color: CmnCfg.palette.darkGrey
+                color: outboundReact ? CmnCfg.palette.darkGrey : CmnCfg.palette.lightGrey
             }
         }
     }
