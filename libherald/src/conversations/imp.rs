@@ -72,6 +72,7 @@ impl Conversations {
         index: usize,
     ) -> Option<String> {
         use heraldcore::message::MsgData;
+
         let cid = &self.list.get(index).as_ref()?.id;
         let mid = shared::last_msg_id(&cid)?;
 
@@ -91,7 +92,9 @@ impl Conversations {
             .attachments()
             .map(|a| !a.is_empty())
             .unwrap_or(false);
-        let status = receipts.values().max().map(|status| *status as u32);
+
+        let receipt_status = receipts.iter().map(|(_, r)| r).max().copied();
+        let status = heraldcore::message::Status::from((send_status, receipt_status)) as u8;
 
         let object = json::object! {
             "author" => author.as_str(),
@@ -99,7 +102,6 @@ impl Conversations {
             "time" => *time.as_i64(),
             "auxCode" => aux_code,
             "status" => status,
-            "sendStatus" => send_status as u8,
             "hasAttachments" => has_attachments
         };
 

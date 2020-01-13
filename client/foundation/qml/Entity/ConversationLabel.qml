@@ -40,7 +40,7 @@ Item {
 
     // OPTION 2: lastReceipt, outbound, lastAuthor, lastTimestamp, and lastBody
     // the value of the latest read receipt according to the ReceiptStatus enum
-    property int lastReceipt: 0
+    property int lastReceipt: !__init ? 0 : lastMessage.status
     // true if the last message was sent by the logged-in user
     property bool outbound: !__init ? false : lastMessage.author === Herald.config.configId
     // user who sent the last message in the conversation
