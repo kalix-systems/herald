@@ -228,16 +228,19 @@ export function initialize(name: string): string {
  * returns the uri of an icon corresponding to the
  * receipt code
  * */
-export function receiptCodeSwitch(receiptCode: MessageReceiptStatus): string {
+export function receiptCodeSwitch(receiptCode: MessageStatus): string {
   switch (receiptCode) {
-    case MessageReceiptStatus.Nil: {
-      return "";
+    case MessageStatus.NoAck: {
+      return "qrc:/read-receipt-sending-icon.svg";
     }
-    case MessageReceiptStatus.Received: {
-      return "qrc:/single-check-receipt-icon.svg";
+    case MessageStatus.Ack: {
+      return "qrc:/read-receipt-sent-icon.svg";
     }
-    case MessageReceiptStatus.Read: {
-      return "qrc:/double-check-receipt-icon.svg";
+    case MessageStatus.Received: {
+      return "qrc:/read-receipt-received-icon.svg";
+    }
+    case MessageStatus.Read: {
+      return "qrc:/read-receipt-read-icon.svg";
     }
     default:
       return "";
@@ -253,10 +256,13 @@ export function timerIcon(expireTime: number, insertTime: number): string {
   else return "qrc:/mini-timer-icons/empty.svg";
 }
 
-export function sameExp(insertTime: number, expireTime: number, conversationExpire: number): boolean {
-
+export function sameExp(
+  insertTime: number,
+  expireTime: number,
+  conversationExpire: number
+): boolean {
   if (conversationExpire === 0) {
-      return false;
+    return false;
   }
 
   const msecondsPerMinute = 60 * 1000;
@@ -269,49 +275,46 @@ export function sameExp(insertTime: number, expireTime: number, conversationExpi
   var potentialExpire = 0;
 
   switch (conversationExpire) {
-      case ExpirationPeriod.ThirtySeconds: {
-          potentialExpire = insertTime + 30 * 1000;
-          break;
-      }
-      case ExpirationPeriod.OneMinute: {
-          potentialExpire = insertTime + msecondsPerMinute;
-          break;
-
-      }
-      case ExpirationPeriod.ThirtyMinutes: {
-         potentialExpire = insertTime + msecondsPerMinute * 30;
-         break;
-      }
-      case ExpirationPeriod.OneHour: {
-          potentialExpire = insertTime + msecondsPerHour;
-          break;
-      }
-      case ExpirationPeriod.TwelveHours: {
-          potentialExpire = insertTime + msecondsPerHour * 12;
-          break;
-      }
-      case ExpirationPeriod.OneDay: {
-          potentialExpire = insertTime + msecondsPerDay;
-          break;
-      }
-      case ExpirationPeriod.OneWeek: {
-          potentialExpire = insertTime + msecondsPerWeek;
-          break;
-      }
-      case ExpirationPeriod.OneMonth: {
-          potentialExpire = insertTime + msecondsPerMonth;
-          break;
-      }
-      case ExpirationPeriod.OneYear: {
-          potentialExpire = insertTime + msecondsPerYear;
-          break;
-      }
-      default:
-          break;
-
+    case ExpirationPeriod.ThirtySeconds: {
+      potentialExpire = insertTime + 30 * 1000;
+      break;
+    }
+    case ExpirationPeriod.OneMinute: {
+      potentialExpire = insertTime + msecondsPerMinute;
+      break;
+    }
+    case ExpirationPeriod.ThirtyMinutes: {
+      potentialExpire = insertTime + msecondsPerMinute * 30;
+      break;
+    }
+    case ExpirationPeriod.OneHour: {
+      potentialExpire = insertTime + msecondsPerHour;
+      break;
+    }
+    case ExpirationPeriod.TwelveHours: {
+      potentialExpire = insertTime + msecondsPerHour * 12;
+      break;
+    }
+    case ExpirationPeriod.OneDay: {
+      potentialExpire = insertTime + msecondsPerDay;
+      break;
+    }
+    case ExpirationPeriod.OneWeek: {
+      potentialExpire = insertTime + msecondsPerWeek;
+      break;
+    }
+    case ExpirationPeriod.OneMonth: {
+      potentialExpire = insertTime + msecondsPerMonth;
+      break;
+    }
+    case ExpirationPeriod.OneYear: {
+      potentialExpire = insertTime + msecondsPerYear;
+      break;
+    }
+    default:
+      break;
   }
   return potentialExpire === expireTime;
-
 }
 
 export function userTime(timestamp: number): string {

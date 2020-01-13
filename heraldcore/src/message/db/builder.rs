@@ -48,7 +48,7 @@ impl OutboundMessageBuilder {
             None => None,
         };
 
-        let send_status = MessageSendStatus::NoAck;
+        let send_status = SendStatus::NoAck;
 
         let time = MessageTime {
             server: None,
@@ -190,7 +190,7 @@ impl OutboundMessageBuilder {
             None => None,
         };
 
-        let send_status = MessageSendStatus::NoAck;
+        let send_status = SendStatus::NoAck;
 
         let time = MessageTime {
             server: None,
@@ -308,7 +308,7 @@ impl InboundMessageBuilder {
         let attachment_paths = res?;
 
         // this can be inferred from the fact that this message was received
-        let send_status = MessageSendStatus::Ack;
+        let send_status = SendStatus::Ack;
 
         let time = MessageTime {
             insertion: Time::now(),
@@ -397,7 +397,7 @@ impl InboundMessageBuilder {
                 op,
             }),
             conversation: conversation_id,
-            send_status: MessageSendStatus::Ack,
+            send_status: SendStatus::Ack,
             time,
             receipts,
             replies,

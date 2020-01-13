@@ -262,7 +262,7 @@ fn test_handle_receipt() {
 
     container.handle_receipt(
         msgmeta2.msg_id,
-        coretypes::messages::MessageReceiptStatus::Read,
+        coretypes::messages::ReceiptStatus::Read,
         "TEST".try_into().expect(womp!()),
         model,
     );
@@ -274,7 +274,7 @@ fn test_handle_receipt() {
             .get_data(&msgmeta2.msg_id)
             .expect(womp!())
             .receipts[&"TEST".try_into().expect(womp!())],
-        coretypes::messages::MessageReceiptStatus::Read
+        coretypes::messages::ReceiptStatus::Read
     );
 }
 

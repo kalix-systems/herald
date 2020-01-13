@@ -33,13 +33,15 @@ declare const enum ExpirationPeriod {
   OneYear = 9
 }
 
-declare const enum MessageReceiptStatus {
-  /// Not acknowledged
-  Nil = 0,
+declare const enum MessageStatus {
+  /// Not acknowledged by server
+  NoAck = 0,
+  // Received by server
+  Ack = 1,
   /// Received by user
-  Received = 1,
+  Received = 2,
   /// Read by the recipient
-  Read = 2
+  Read = 3
 }
 
 declare const enum RegistrationFailureCode {

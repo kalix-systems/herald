@@ -1,6 +1,6 @@
 use super::*;
 
-impl Ser for MessageSendStatus {
+impl Ser for SendStatus {
     fn ser(
         &self,
         s: &mut Serializer,
@@ -9,7 +9,7 @@ impl Ser for MessageSendStatus {
     }
 }
 
-impl De for MessageSendStatus {
+impl De for SendStatus {
     fn de(d: &mut Deserializer) -> Result<Self, KsonError> {
         let u = u8::de(d)?;
 
@@ -17,7 +17,7 @@ impl De for MessageSendStatus {
             E!(
                 CustomError(format!(
                     "expected a value between {} and {}, found {}",
-                    0, 2, u
+                    0, 1, u
                 )),
                 d.data.clone(),
                 d.ix
@@ -26,7 +26,7 @@ impl De for MessageSendStatus {
     }
 }
 
-impl Ser for MessageReceiptStatus {
+impl Ser for ReceiptStatus {
     fn ser(
         &self,
         s: &mut Serializer,
@@ -35,7 +35,7 @@ impl Ser for MessageReceiptStatus {
     }
 }
 
-impl De for MessageReceiptStatus {
+impl De for ReceiptStatus {
     fn de(d: &mut Deserializer) -> Result<Self, KsonError> {
         let u = u8::de(d)?;
 
@@ -43,7 +43,7 @@ impl De for MessageReceiptStatus {
             E!(
                 CustomError(format!(
                     "expected a value between {} and {}, found {}",
-                    0, 3, u
+                    0, 1, u
                 )),
                 d.data.clone(),
                 d.ix

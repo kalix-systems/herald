@@ -75,7 +75,7 @@ impl std::fmt::Display for Error {
         match self {
             SendStatus(n) => write!(
                 out,
-                "Unknown message send status: found {}, expected 0, 1, or 2",
+                "Unknown message send status: found {}, expected 0, or 1",
                 n
             ),
             ReceiptStatus(n) => write!(
@@ -89,53 +89,63 @@ impl std::fmt::Display for Error {
 
 impl std::error::Error for Error {}
 
-impl TryFrom<u8> for MessageSendStatus {
+impl TryFrom<u8> for SendStatus {
     type Error = u8;
 
     fn try_from(n: u8) -> Result<Self, Self::Error> {
         match n {
             0 => Ok(Self::NoAck),
             1 => Ok(Self::Ack),
-            2 => Ok(Self::Timeout),
             i => Err(i),
         }
     }
 }
 
-impl std::convert::TryFrom<i64> for MessageSendStatus {
+impl std::convert::TryFrom<i64> for SendStatus {
     type Error = Error;
 
     fn try_from(n: i64) -> Result<Self, Self::Error> {
         match n {
             0 => Ok(Self::NoAck),
             1 => Ok(Self::Ack),
-            2 => Ok(Self::Timeout),
             i => Err(Error::SendStatus(i as i64)),
         }
     }
 }
 
-impl TryFrom<u8> for MessageReceiptStatus {
+impl From<(SendStatus, Option<ReceiptStatus>)> for Status {
+    fn from((s, r): (SendStatus, Option<ReceiptStatus>)) -> Self {
+        use ReceiptStatus as R;
+        use SendStatus as S;
+
+        match (s, r) {
+            (S::NoAck, _) => Status::NoAck,
+            (S::Ack, None) => Status::Ack,
+            (_, Some(R::Received)) => Status::Received,
+            (_, Some(R::Read)) => Status::Read,
+        }
+    }
+}
+
+impl TryFrom<u8> for ReceiptStatus {
     type Error = u8;
 
     fn try_from(n: u8) -> Result<Self, Self::Error> {
         match n {
-            0 => Ok(Self::Nil),
-            1 => Ok(Self::Received),
-            2 => Ok(Self::Read),
+            0 => Ok(Self::Received),
+            1 => Ok(Self::Read),
             i => Err(i),
         }
     }
 }
 
-impl std::convert::TryFrom<i64> for MessageReceiptStatus {
+impl std::convert::TryFrom<i64> for ReceiptStatus {
     type Error = Error;
 
     fn try_from(n: i64) -> Result<Self, Error> {
         match n {
-            0 => Ok(Self::Nil),
-            1 => Ok(Self::Received),
-            2 => Ok(Self::Read),
+            0 => Ok(Self::Received),
+            1 => Ok(Self::Read),
             i => Err(Error::ReceiptStatus(i)),
         }
     }

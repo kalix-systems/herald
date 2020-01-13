@@ -6,7 +6,7 @@ use crate::{
 use crossbeam_channel::Sender;
 use herald_common::UserId;
 use heraldcore::{
-    message::{Elider, MessageReceiptStatus},
+    message::{Elider, ReceiptStatus},
     types::*,
 };
 use messages_helper::{container::Container, search::SearchState};
@@ -129,7 +129,7 @@ pub(crate) enum MsgUpdate {
     Receipt {
         msg_id: MsgId,
         recipient: UserId,
-        status: MessageReceiptStatus,
+        status: ReceiptStatus,
     },
 
     /// A reaction has been added or removed

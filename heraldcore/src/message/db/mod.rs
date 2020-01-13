@@ -179,7 +179,7 @@ pub(crate) fn get_message_opt(
 pub(crate) fn update_send_status(
     conn: &Conn,
     msg_id: MsgId,
-    status: MessageSendStatus,
+    status: SendStatus,
 ) -> Result<(), HErr> {
     w!(conn.execute(
         include_str!("../sql/update_send_status.sql"),
@@ -189,10 +189,10 @@ pub(crate) fn update_send_status(
     Ok(())
 }
 
-/// Gets messages by `MessageSendStatus`
+/// Gets messages by `SendStatus`
 pub(crate) fn by_send_status(
     conn: &Conn,
-    send_status: MessageSendStatus,
+    send_status: SendStatus,
 ) -> Result<Vec<Message>, HErr> {
     let mut stmt = w!(conn.prepare(include_str!("../sql/by_send_status.sql")));
     let res = w!(

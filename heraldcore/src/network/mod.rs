@@ -1,7 +1,7 @@
 use crate::updates::Notification;
 use crate::{
     errors::HErr::{self, *},
-    message::MessageReceiptStatus,
+    message::ReceiptStatus,
     pending,
     types::*,
     *,
@@ -82,7 +82,7 @@ pub fn send_read_receipt(
         cid,
         &ConversationMessage::Message(NetContent::Receipt(cmessages::Receipt {
             of: msg_id,
-            stat: MessageReceiptStatus::Read,
+            stat: ReceiptStatus::Read,
         })),
     )
 }
