@@ -110,9 +110,16 @@ impl Conversations {
         Some(object.dump())
     }
 
+    pub(crate) fn pairwise_inner(
+        &self,
+        index: usize,
+    ) -> Option<bool> {
+        let id = &self.list.get(index).as_ref()?.id;
+        shared::pairwise(id)
+    }
+
     imp! {
         color_inner, color, u32,
-        pairwise_inner, pairwise, bool,
         muted_inner, muted, bool,
         expiration_inner, expiration_period, ExpirationPeriod,
         status_inner, status, heraldcore::conversation::Status

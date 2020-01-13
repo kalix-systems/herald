@@ -1,1 +1,1 @@
-SELECT conversation_id FROM conversations WHERE pairwise = 1
+SELECT conversation_id FROM conversations WHERE pairwise NOT NULL
