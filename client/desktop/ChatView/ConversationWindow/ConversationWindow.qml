@@ -145,6 +145,16 @@ ListView {
                     defaultWidth: chatListView.width
                     width: parent.width
                     messageModelData: model
+                    authorColor: {
+                        if (!outbound) {
+                            if (conversationItem.pairwise) {
+                                return CmnCfg.palette.avatarColors[conversationItem.color]
+                            }
+                            return CmnCfg.palette.avatarColors[messageModelData.authorColor]
+                        }
+                        CmnCfg.palette.avatarColors[Herald.config.color]
+                    }
+
                     convoExpiration: conversationItem.expirationPeriod
                     ListView.onAdd: {
                         chatScrollBarInner.setPosition(1.0)
