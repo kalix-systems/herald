@@ -1,4 +1,5 @@
 use super::*;
+use heraldcore::message::Status;
 
 impl Messages {
     pub(crate) fn receipt_status_(
@@ -17,7 +18,7 @@ impl Messages {
                 .max()
                 .copied();
 
-            heraldcore::message::Status::from((data.send_status, receipt_status)) as u32
+            Status::from((data.send_status, receipt_status)) as u32
         })?)
     }
 
@@ -25,12 +26,20 @@ impl Messages {
         &self,
         index: usize,
     ) -> Option<String> {
+        let send_status = self
+            .container
+            .access_by_index(index, |data| data.send_status)?;
+
         let receipts = self
             .container
             .access_by_index(index, |data| data.receipts.clone())?
             .into_iter()
             .filter(|(u, _)| Some(u) != self.local_id.as_ref())
-            .map(|(userid, receipt)| (userid.to_string(), json::JsonValue::from(receipt as u32)))
+            .map(|(userid, receipt)| {
+                let status = Status::from((send_status, Some(receipt)));
+
+                (userid.to_string(), json::JsonValue::from(status as u8))
+            })
             .collect::<HashMap<String, json::JsonValue>>();
 
         json::JsonValue::from(receipts).dump().into()

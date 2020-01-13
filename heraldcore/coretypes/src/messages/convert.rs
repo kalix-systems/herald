@@ -119,10 +119,10 @@ impl From<(SendStatus, Option<ReceiptStatus>)> for Status {
         use SendStatus as S;
 
         match (s, r) {
-            (S::NoAck, _) => Status::NoAck,
-            (S::Ack, None) => Status::Ack,
             (_, Some(R::Received)) => Status::Received,
             (_, Some(R::Read)) => Status::Read,
+            (S::NoAck, _) => Status::NoAck,
+            (S::Ack, _) => Status::Ack,
         }
     }
 }
