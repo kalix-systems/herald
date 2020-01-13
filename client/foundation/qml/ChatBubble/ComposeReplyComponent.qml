@@ -6,6 +6,7 @@ import "qrc:/imports/js/utils.mjs" as Utils
 import "qrc:/imports" as Imports
 import "qrc:/imports/ChatBubble/ReplyBubble"
 import "qrc:/imports/ChatBubble" as ChatBubble
+import "qrc:/imports/ChatBubble/ReplyBubble/dyn"
 
 Rectangle {
     id: wrapper
@@ -109,6 +110,7 @@ Rectangle {
         timestamp: friendlyTimestamp
         name: authorName
     }
+
     Row {
         width: maxWidth
         id: wrapperRow
