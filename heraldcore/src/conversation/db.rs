@@ -228,7 +228,7 @@ fn from_db(
         picture: row.get("picture")?,
         color: row.get("color")?,
         muted: row.get("muted")?,
-        pairwise: row.get("pairwise")?,
+        pairwise_uid: row.get("pairwise")?,
         last_active: row.get("last_active_ts")?,
         expiration_period: row.get("expiration_period")?,
         status: row.get("status")?,

@@ -220,7 +220,7 @@ impl UserBuilder {
         } = self;
 
         let mut conv_builder = ConversationBuilder::new();
-        conv_builder.pairwise(true);
+        conv_builder.pairwise(id);
 
         let color = color.unwrap_or_else(|| crate::utils::id_to_color(id.as_str()));
         conv_builder.color(color);

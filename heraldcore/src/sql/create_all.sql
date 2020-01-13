@@ -165,8 +165,8 @@ CREATE TABLE IF NOT EXISTS conversations (
   color INTEGER NOT NULL,
   -- Indicates whether conversation is muted, defaults to false
   muted INTEGER DEFAULT(0),
-  -- Indicates whether a conversation is a canonical pairwise conversation, defaults to false
-  pairwise INTEGER DEFAULT(0),
+  -- The user id associated with the conversation if it is pairwise
+  pairwise TEXT DEFAULT NULL,
   -- Duration in milliseconds until a message in this conversation expires.
   expiration_period INTEGER DEFAULT NULL,
   -- Time of last important activity

@@ -14,7 +14,7 @@ impl ConversationBuilder {
             tagged_picture,
             color,
             muted,
-            pairwise,
+            pairwise_uid,
             expiration_period,
             members,
             status,
@@ -28,7 +28,6 @@ impl ConversationBuilder {
 
         let status = status.unwrap_or_default();
         let color = color.unwrap_or_else(|| crate::utils::id_to_color(&id));
-        let pairwise = pairwise.unwrap_or(false);
         let muted = muted.unwrap_or(false);
 
         let expiration_period = expiration_period
@@ -49,7 +48,7 @@ impl ConversationBuilder {
                 "@title": title,
                 "@picture": picture,
                 "@color": color,
-                "@pairwise": pairwise,
+                "@pairwise": pairwise_uid,
                 "@muted": muted,
                 "@last_active_ts": last_active,
                 "@expiration_period": expiration_period,
@@ -62,7 +61,7 @@ impl ConversationBuilder {
                 conversation_id: id,
                 title,
                 color,
-                pairwise,
+                pairwise_uid,
                 picture,
                 last_active,
                 expiration_period,
