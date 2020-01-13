@@ -68,7 +68,7 @@ Item {
 
     Loader {
         id: groupSettingsLoader
-        width: active ? chatView.width * 0.75 : 0
+        width: active ? chatView.width * 0.66 : 0
         height: active ? chatView.height : 0
         anchors.top: active ? parent.top : undefined
         anchors.right: active ? parent.right : undefined

@@ -12,6 +12,7 @@ import "qrc:/imports/js/utils.mjs" as Utils
 import QtQuick.Layouts 1.3
 import QtQuick.Shapes 1.12
 import "../../SideBar/popups" as SBPopups
+import "qrc:/imports/Settings/SettingsComponents" as SC
 
 Popup {
     id: convoSettingsPopup
@@ -110,19 +111,61 @@ Popup {
 
                 Label {
                     id: optionsHeader
-                    text: qsTr("Options")
-                    font.family: CmnCfg.chatFont.name
-                    color: CmnCfg.palette.darkGrey
+                    text: qsTr("Contact settings")
+                    font.weight: Font.Medium
+                    font.pixelSize: CmnCfg.defaultFontSize
+                    font.family: CmnCfg.labelFont.name
                 }
 
-                Row {
-                    height: implicitHeight
+                Item {
+                    anchors.left: parent.left
+                    anchors.right: parent.right
 
-                    spacing: 14
-                    padding: 0
+                    anchors.leftMargin: CmnCfg.defaultMargin
+                    height: conf.height
+                    Label {
+                        anchors.left: parent.left
+
+                        font.pixelSize: CmnCfg.chatTextSize
+                        text: qsTr("Trusted (share display name and avatar)")
+                        font.family: CmnCfg.chatFont.name
+                        anchors.verticalCenter: conf.verticalCenter
+                    }
+
+                    SC.ConfSwitch {
+                        id: conf
+                        checked: false
+                        anchors.right: parent.right
+                    }
+                }
+
+                Rectangle {
+                    anchors.left: parent.left
+                    width: parent.width
+                    height: 1
+                    color: CmnCfg.palette.medGrey
+                }
+
+                Item {
+                    height: colorDot.height
+                    anchors.left: parent.left
+                    anchors.leftMargin: CmnCfg.defaultMargin
+                    anchors.right: parent.right
+
+                    Label {
+                        anchors.left: parent.left
+
+                        font.pixelSize: CmnCfg.chatTextSize
+                        text: qsTr("Color")
+                        font.family: CmnCfg.chatFont.name
+                        anchors.verticalCenter: colorDot.verticalCenter
+                    }
+
                     Rectangle {
+                        anchors.right: parent.right
+                        anchors.rightMargin: CmnCfg.defaultMargin
                         id: colorDot
-                        height: 22
+                        height: 18
                         width: height
                         radius: width
                         color: CmnCfg.palette.avatarColors[convoData.color]
@@ -134,6 +177,32 @@ Popup {
                             onClicked: {
                                 colorLoader.active = true
                                 colorLoader.item.open()
+                            }
+                            Loader {
+                                id: colorLoader
+                                y: mouse.mouseY
+                                x: mouse.mouseX - width
+                                active: false
+
+                                sourceComponent: SBPopups.ColorPicker {
+
+                                    id: colorpicker
+                                    y: mouse.mouseY
+                                    x: mouse.mouseX - width + colorDot.width
+                                    onClosed: colorLoader.active = false
+                                    colorCallback: function () {
+                                        if (contactMember === undefined)
+                                            return
+                                        var idx = Herald.users.indexById(
+                                                    contactMember.userId)
+                                        if ((idx < 0)
+                                                || (idx >= Herald.users.rowCount(
+                                                        )))
+                                            return
+
+                                        Herald.users.setColor(idx, colorIndex)
+                                    }
+                                }
                             }
                             ToolTip {
                                 visible: mouseArea.containsMouse
@@ -154,36 +223,13 @@ Popup {
                             }
                         }
                     }
+                }
 
-                    Loader {
-                        id: colorLoader
-                        y: mouse.mouseY
-                        active: false
-
-                        sourceComponent: SBPopups.ColorPicker {
-
-                            id: colorpicker
-                            y: mouse.mouseY
-                            onClosed: colorLoader.active = false
-                            colorCallback: function () {
-                                if (contactMember === undefined)
-                                    return
-                                var idx = Herald.users.indexById(
-                                            contactMember.userId)
-                                if ((idx < 0)
-                                        || (idx >= Herald.users.rowCount()))
-                                    return
-
-                                Herald.users.setColor(idx, colorIndex)
-                            }
-                        }
-                    }
-
-                    Label {
-                        text: qsTr("Color")
-                        font.family: CmnCfg.chatFont.name
-                        anchors.verticalCenter: colorDot.verticalCenter
-                    }
+                Rectangle {
+                    anchors.left: parent.left
+                    width: parent.width
+                    height: 1
+                    color: CmnCfg.palette.medGrey
                 }
             }
         }
