@@ -25,17 +25,13 @@ macro_rules! set_imp {
             let id = &self.list.get(index).as_ref()?.id;
             let mut lock = shared::conv_data().write();
             let data = lock.get_mut(id)?;
+
+            if data.pairwise_uid.is_some() {
+                return Some(())
+            }
+
             data.$field = val;
             Some(())
-       })*
-    }
-}
-
-macro_rules! imp_clone {
-    ($($name: ident, $field: ident, $ret: ty),*) => {
-       $(pub(super) fn $name(&self, index: usize) -> Option<$ret> {
-            let id = &self.list.get(index).as_ref()?.id;
-            Some(shared::conv_data().read().get(id)?.$field.clone())
        })*
     }
 }
@@ -118,16 +114,52 @@ impl Conversations {
         shared::pairwise(id)
     }
 
+    pub(crate) fn color_inner(
+        &self,
+        index: usize,
+    ) -> Option<u32> {
+        let id = &self.list.get(index).as_ref()?.id;
+        let read = shared::conv_data().read();
+        let data = read.get(id)?;
+
+        match data.pairwise_uid {
+            Some(uid) => crate::users::shared::color(&uid),
+            None => data.color.into(),
+        }
+    }
+
+    pub(crate) fn title_inner(
+        &self,
+        index: usize,
+    ) -> Option<String> {
+        let id = &self.list.get(index).as_ref()?.id;
+        let read = shared::conv_data().read();
+        let data = read.get(id)?;
+
+        match data.pairwise_uid {
+            Some(uid) => crate::users::shared::name(&uid),
+            None => data.title.clone(),
+        }
+    }
+
+    pub(crate) fn picture_inner(
+        &self,
+        index: usize,
+    ) -> Option<String> {
+        let id = &self.list.get(index).as_ref()?.id;
+        let read = shared::conv_data().read();
+        let data = read.get(id)?;
+
+        match data.pairwise_uid {
+            Some(uid) => crate::users::shared::profile_picture(&uid),
+            None => data.picture.clone(),
+        }
+    }
+
     imp! {
-        color_inner, color, u32,
         muted_inner, muted, bool,
         expiration_inner, expiration_period, ExpirationPeriod,
         status_inner, status, heraldcore::conversation::Status
-    }
-
-    imp_clone! {
-        picture_inner, picture, Option<String>,
-        title_inner, title, Option<String>
     }
 
     set_imp! {

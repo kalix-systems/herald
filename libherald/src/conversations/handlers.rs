@@ -59,6 +59,10 @@ impl Conversations {
                 // update last message
                 self.model.data_changed(pos, pos);
             }
+            UserChanged => {
+                // trigger refresh
+                self.model.data_changed(pos, pos);
+            }
         }
 
         Some(())
