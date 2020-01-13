@@ -59,14 +59,14 @@ pub fn get_message_opt(msg_id: &MsgId) -> Result<Option<Message>, HErr> {
 /// Sets the message status of an item in the database
 pub fn update_send_status(
     msg_id: MsgId,
-    status: MessageSendStatus,
+    status: SendStatus,
 ) -> Result<(), HErr> {
     let db = Database::get()?;
     db::update_send_status(&db, msg_id, status)
 }
 
 /// Get message read receipts by message id
-pub fn get_message_receipts(msg_id: &MsgId) -> Result<HashMap<UserId, MessageReceiptStatus>, HErr> {
+pub fn get_message_receipts(msg_id: &MsgId) -> Result<HashMap<UserId, ReceiptStatus>, HErr> {
     let db = Database::get()?;
     Ok(db::receipts::get_receipts(&db, msg_id)?)
 }
@@ -75,7 +75,7 @@ pub fn get_message_receipts(msg_id: &MsgId) -> Result<HashMap<UserId, MessageRec
 pub fn add_receipt(
     msg_id: MsgId,
     recip: UserId,
-    receipt_status: MessageReceiptStatus,
+    receipt_status: ReceiptStatus,
 ) -> Result<(), HErr> {
     let db = Database::get()?;
 
@@ -109,8 +109,8 @@ pub fn remove_reaction(
     db::reactions::remove_reaction(&db, msg_id, reactionary, react_content).map_err(HErr::from)
 }
 
-/// Gets messages by `MessageSendStatus`
-pub fn by_send_status(send_status: MessageSendStatus) -> Result<Vec<Message>, HErr> {
+/// Gets messages by `SendStatus`
+pub fn by_send_status(send_status: SendStatus) -> Result<Vec<Message>, HErr> {
     let db = Database::get()?;
     db::by_send_status(&db, send_status)
 }

@@ -108,7 +108,7 @@ impl super::Conversations {
         &self,
         index: usize,
     ) -> Option<String> {
-        self.picture_inner(index)?
+        self.picture_inner(index)
     }
 
     pub(crate) fn set_profile_picture_(
@@ -141,7 +141,7 @@ impl super::Conversations {
         &self,
         index: usize,
     ) -> Option<String> {
-        self.title_inner(index)?
+        self.title_inner(index)
     }
 
     pub(crate) fn set_title_(

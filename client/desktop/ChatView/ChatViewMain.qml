@@ -140,9 +140,6 @@ Page {
                                        ownedConversation, chatTextArea)
 
                 // TODO: Tab should cycle through a hierarchy of items as far as focus
-                chatTextArea.timer.chosenPeriod
-                        = (ownedConversation.builder.expirationPeriod
-                           !== undefined) ? ownedConversation.builder.expirationPeriod : conversationItem.expirationPeriod
             }
         }
         emojiButton.onClicked: emojiPopupWrapper.open(

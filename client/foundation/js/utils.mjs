@@ -179,21 +179,22 @@ export function initialize(name) {
     });
     return str;
 }
-
-// TODO add "sending" and "received but not read" states
 /*
  * returns the uri of an icon corresponding to the
  * receipt code
  * */
 export function receiptCodeSwitch(receiptCode) {
     switch (receiptCode) {
-        case 0 /* Nil */: {
-            return "";
+        case 0 /* NoAck */: {
+            return "qrc:/read-receipt-sending-icon.svg";
         }
-        case 1 /* Received */: {
+        case 1 /* Ack */: {
             return "qrc:/read-receipt-sent-icon.svg";
         }
-        case 2 /* Read */: {
+        case 2 /* Received */: {
+            return "qrc:/read-receipt-received-icon.svg";
+        }
+        case 3 /* Read */: {
             return "qrc:/read-receipt-read-icon.svg";
         }
         default:

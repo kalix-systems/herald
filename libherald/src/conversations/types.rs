@@ -1,5 +1,5 @@
 use super::*;
-use herald_common::Time;
+use herald_common::{Time, UserId};
 
 /// Thin wrapper around `ConversationId`,
 /// with an additional field to facilitate filtering
@@ -17,7 +17,7 @@ pub(super) fn split_meta(meta: ConversationMeta) -> (Conversation, Data) {
         picture,
         muted,
         color,
-        pairwise,
+        pairwise_uid,
         last_active,
         expiration_period,
         status,
@@ -34,7 +34,7 @@ pub(super) fn split_meta(meta: ConversationMeta) -> (Conversation, Data) {
             picture,
             color,
             muted,
-            pairwise,
+            pairwise_uid,
             last_active,
             expiration_period,
             status,
@@ -52,8 +52,8 @@ pub(crate) struct Data {
     pub color: u32,
     /// Indicates whether the conversation is muted
     pub muted: bool,
-    /// Indicates whether the conversation is a canonical pairwise conversation
-    pub pairwise: bool,
+    /// Associated user id if the conversation is a canonical pairwise conversation
+    pub pairwise_uid: Option<UserId>,
     /// Last notable activity
     pub last_active: Time,
     /// Time until message expiration

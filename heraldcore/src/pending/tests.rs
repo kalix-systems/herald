@@ -1,5 +1,5 @@
 use super::*;
-use crate::{message::MessageReceiptStatus, types};
+use crate::{message::ReceiptStatus, types};
 
 #[test]
 fn add_get_delete() {
@@ -16,7 +16,7 @@ fn add_get_delete() {
 
     let msg = types::cmessages::Receipt {
         of: [1; 32].into(),
-        stat: MessageReceiptStatus::Nil,
+        stat: ReceiptStatus::Received,
     };
 
     let body = ConversationMessage::Message(network_types::cmessages::Content::Receipt(msg));

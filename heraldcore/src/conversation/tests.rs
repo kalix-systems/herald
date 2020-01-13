@@ -38,6 +38,18 @@ fn add_conversation() {
 }
 
 #[test]
+fn associated_user() {
+    let mut conn = Database::in_memory_with_config().expect(womp!());
+
+    let author = "Hello".try_into().unwrap();
+    let (_, conv) = UserBuilder::new(author).add_db(&mut conn).expect(womp!());
+
+    let uid = db::associated_user(&conn, &conv.meta.conversation_id).expect(womp!());
+
+    assert_eq!(Some(author), uid);
+}
+
+#[test]
 fn add_and_get() {
     let mut conn = Database::in_memory_with_config().expect(womp!());
 

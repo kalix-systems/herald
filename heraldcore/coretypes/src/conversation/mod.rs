@@ -23,8 +23,8 @@ pub struct ConversationMeta {
     pub color: u32,
     /// Indicates whether the conversation is muted
     pub muted: bool,
-    /// Indicates whether the conversation is a canonical pairwise conversation
-    pub pairwise: bool,
+    /// Associated user id if the conversation is pairwise
+    pub pairwise_uid: Option<UserId>,
     /// Last notable activity
     pub last_active: Time,
     /// Time until message expiration

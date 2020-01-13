@@ -23,7 +23,7 @@ impl FromSql for MessageBody {
     }
 }
 
-impl ToSql for MessageSendStatus {
+impl ToSql for SendStatus {
     fn to_sql(&self) -> Result<types::ToSqlOutput, rusqlite::Error> {
         use types::*;
 
@@ -31,7 +31,7 @@ impl ToSql for MessageSendStatus {
     }
 }
 
-impl FromSql for MessageSendStatus {
+impl FromSql for SendStatus {
     fn column_result(value: types::ValueRef) -> FromSqlResult<Self> {
         value
             .as_i64()?
@@ -40,7 +40,7 @@ impl FromSql for MessageSendStatus {
     }
 }
 
-impl ToSql for MessageReceiptStatus {
+impl ToSql for ReceiptStatus {
     fn to_sql(&self) -> Result<types::ToSqlOutput, rusqlite::Error> {
         use types::*;
 
@@ -48,7 +48,7 @@ impl ToSql for MessageReceiptStatus {
     }
 }
 
-impl FromSql for MessageReceiptStatus {
+impl FromSql for ReceiptStatus {
     fn column_result(value: types::ValueRef) -> FromSqlResult<Self> {
         value
             .as_i64()?

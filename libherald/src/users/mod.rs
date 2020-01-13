@@ -187,7 +187,23 @@ impl Interface for Users {
     ) -> bool {
         let uid = none!(self.list.get(row_index), false).id;
 
-        spawn!(user::set_color(uid, color), false);
+        spawn!(
+            {
+                use crate::conversations::shared::{
+                    ConvItemUpdate as C, ConvItemUpdateVariant as CV,
+                };
+
+                err!(user::set_color(uid, color));
+
+                let cid = none!(shared::pairwise_cid(&uid));
+
+                crate::push(C {
+                    cid,
+                    variant: CV::UserChanged,
+                });
+            },
+            false
+        );
 
         {
             let mut lock = user_data().write();

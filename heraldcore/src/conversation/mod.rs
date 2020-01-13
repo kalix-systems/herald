@@ -146,5 +146,11 @@ pub fn get_pairwise_conversations(uids: &[UserId]) -> Result<Vec<ConversationId>
     db::get_pairwise_conversations(&db, uids)
 }
 
+/// Returns user id associated with a pairwise conversation
+pub fn associated_user(cid: &ConversationId) -> Result<Option<UserId>, HErr> {
+    let conn = Database::get()?;
+    Ok(db::associated_user(&conn, cid)?)
+}
+
 #[cfg(test)]
 mod tests;

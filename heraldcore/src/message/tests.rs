@@ -20,8 +20,7 @@ fn dangling_receipt() {
 
     let mid = MsgId::gen_new();
 
-    db::receipts::add_receipt(&conn, mid, receiver.id, MessageReceiptStatus::Received)
-        .expect(womp!());
+    db::receipts::add_receipt(&conn, mid, receiver.id, ReceiptStatus::Received).expect(womp!());
 }
 
 #[test]
@@ -204,13 +203,13 @@ fn message_send_status_updates() {
         super::get_message(&msg_id)
             .expect(womp!("failed to get conversation by author"))
             .send_status,
-        MessageSendStatus::NoAck,
+        SendStatus::NoAck,
     );
 
-    update_send_status(msg_id, MessageSendStatus::Ack).expect(womp!());
+    update_send_status(msg_id, SendStatus::Ack).expect(womp!());
 
     assert_eq!(
-        by_send_status(MessageSendStatus::Ack).expect(womp!())[0]
+        by_send_status(SendStatus::Ack).expect(womp!())[0]
             .text()
             .expect(womp!()),
         "test"
@@ -219,7 +218,7 @@ fn message_send_status_updates() {
     assert_eq!(
         conversation_messages(&conv_id).expect(womp!("failed to get conversation by author"))[0]
             .send_status,
-        MessageSendStatus::Ack
+        SendStatus::Ack
     );
 }
 
@@ -243,25 +242,19 @@ fn message_receipt_status_updates() {
 
     builder.store_db(&mut conn).expect(womp!());
 
-    db::receipts::add_receipt(
-        &mut conn,
-        msg_id,
-        receiver.id,
-        MessageReceiptStatus::Received,
-    )
-    .expect(womp!());
-
-    let receipts = db::receipts::get_receipts(&conn, &msg_id).expect(womp!());
-
-    let receipt = receipts.get(&receiver.id).expect(womp!());
-    assert_eq!(*receipt, MessageReceiptStatus::Received);
-
-    db::receipts::add_receipt(&mut conn, msg_id, receiver.id, MessageReceiptStatus::Read)
+    db::receipts::add_receipt(&mut conn, msg_id, receiver.id, ReceiptStatus::Received)
         .expect(womp!());
 
     let receipts = db::receipts::get_receipts(&conn, &msg_id).expect(womp!());
+
     let receipt = receipts.get(&receiver.id).expect(womp!());
-    assert_eq!(*receipt, MessageReceiptStatus::Read);
+    assert_eq!(*receipt, ReceiptStatus::Received);
+
+    db::receipts::add_receipt(&mut conn, msg_id, receiver.id, ReceiptStatus::Read).expect(womp!());
+
+    let receipts = db::receipts::get_receipts(&conn, &msg_id).expect(womp!());
+    let receipt = receipts.get(&receiver.id).expect(womp!());
+    assert_eq!(*receipt, ReceiptStatus::Read);
 }
 
 #[test]

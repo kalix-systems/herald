@@ -4,7 +4,7 @@ impl Container {
     pub fn handle_receipt<M: MessageModel>(
         &self,
         mid: MsgId,
-        status: MessageReceiptStatus,
+        status: ReceiptStatus,
         recipient: UserId,
         model: &mut M,
     ) -> Option<()> {
@@ -82,7 +82,7 @@ impl Container {
         model: &mut M,
     ) -> Option<()> {
         update(&mid, move |data| {
-            data.send_status = heraldcore::message::MessageSendStatus::Ack;
+            data.send_status = heraldcore::message::SendStatus::Ack;
         })?;
 
         let ix = self
