@@ -5,6 +5,9 @@ use kcl::*;
 use std::error::Error as StdError;
 use thiserror::*;
 
+mod errors;
+pub use errors::*;
+
 #[derive(Ser, De, Eq, PartialEq, Ord, PartialOrd, Hash, Clone, Copy)]
 pub struct PayloadId(random::UQ);
 
@@ -12,6 +15,7 @@ pub struct PayloadId(random::UQ);
 pub enum Payload {
     Noop,
     SigUpdate(Signed<sig::SigUpdate>),
+    Forwarded(UserId, Signed<sig::SigUpdate>),
     Init(Signed<x25519::PublicKey>),
     AddToConvo(ConversationId, Vec<UserId>),
     LeaveConvo(ConversationId),
@@ -19,31 +23,22 @@ pub enum Payload {
 }
 
 #[derive(Ser, De, Eq, PartialEq, Hash, Clone)]
-pub enum Msg<E: StdError + Send + 'static> {
+pub enum Msg {
     Encrypted {
         id: PayloadId,
         header: dr::Header,
         payload: Bytes,
     },
+    Ack(Ack),
+}
+
+#[derive(Ser, De, Eq, PartialEq, Hash, Clone)]
+pub enum Ack {
     Success(PayloadId),
     Failed {
         id: PayloadId,
-        reason: Option<dr::DecryptError<E>>,
+        reason: FailureReason,
     },
-}
-
-#[derive(Error, Debug, Ser, De)]
-pub enum TransitError<E: StdError + Send + 'static> {
-    #[error("Failed to decrypt: {0}")]
-    Decryption(#[from] dr::DecryptError<E>),
-    #[error("Failed to deserialize: {0}")]
-    Kson(String),
-    #[error("Bare store error: {0}")]
-    Store(E),
-    #[error("Tried to retreive ratchet with {0:#?} but none were found")]
-    NoSession(sig::PublicKey),
-    #[error("Tried to encrypt using uninitialized ratchet with {0:#?}, THIS SHOULD NEVER HAPPEN")]
-    Uninit(sig::PublicKey),
 }
 
 pub trait RatchetStore: StoreLike {
@@ -63,7 +58,7 @@ pub fn start_session<S: RatchetStore>(
     store: &mut S,
     me: &sig::KeyPair,
     them: sig::PublicKey,
-) -> Result<Msg<S::Error>, TransitError<S::Error>> {
+) -> Result<Msg, TransitError<S::Error>> {
     let xkp = x25519::KeyPair::gen_new();
     let signed_pub = sig::sign_ser(me, *xkp.public());
     let them_as_kx = x25519::PublicKey::from(them);
@@ -85,7 +80,7 @@ pub fn encrypt_payload<S: RatchetStore>(
     me: &sig::KeyPair,
     to: sig::PublicKey,
     payload: &Payload,
-) -> Result<Msg<S::Error>, TransitError<S::Error>> {
+) -> Result<Msg, TransitError<S::Error>> {
     let id = PayloadId(UQ::gen_new());
     let ad = mk_ad(*me.public(), id);
     let mut ratchet = store
@@ -129,8 +124,7 @@ pub fn decrypt_payload<S: RatchetStore + dr::KeyStore>(
     store
         .store_ratchet(from, ratchet)
         .map_err(TransitError::Store)?;
-    let payload =
-        kson::from_bytes(decrypted.into()).map_err(|e| TransitError::Kson(format!("{}", e)))?;
+    let payload = kson::from_bytes(decrypted.into())?;
 
     Ok(payload)
 }
@@ -189,19 +183,9 @@ pub trait ConversationStore: StoreLike {
     ) -> Result<bool, Self::Error>;
 }
 
-#[derive(Debug, Error)]
-pub enum PayloadError<E: StdError + Send + 'static> {
-    #[error("Bare store error: {0}")]
-    Store(E),
-    #[error("Invalid signature: {0:#?}")]
-    BadSig(SigValid),
-    #[error("Message should not have been sent by this device, the sender is being sketchy")]
-    InvalidSender,
-}
-
 pub struct PayloadResult {
     pub msg: Option<Bytes>,
-    pub forward: bool,
+    pub forward: Option<Payload>,
 }
 
 pub fn handle_payload<S: SigStore + ConversationStore>(
@@ -212,11 +196,30 @@ pub fn handle_payload<S: SigStore + ConversationStore>(
     use Payload::*;
 
     let mut msg = None;
-    let mut forward = false;
+    let mut forward = None;
 
     match payload {
         Noop => {}
+        Forwarded(uid, sig) => {
+            let valid = sig::validate_update(&sig);
+            if valid != SigValid::Yes {
+                return Err(PayloadError::BadSig(valid));
+            }
+
+            if !store
+                .key_is_valid(*sig.signed_by(), uid)
+                .map_err(PayloadError::Store)?
+            {
+                return Err(PayloadError::InvalidSender);
+            }
+
+            store
+                .extend_sigchain(uid, sig)
+                .map_err(PayloadError::Store)?;
+        }
         SigUpdate(sig) => {
+            forward = Some(Forwarded(from.uid, sig));
+
             let valid = sig::validate_update(&sig);
             if valid != SigValid::Yes {
                 return Err(PayloadError::BadSig(valid));
@@ -228,8 +231,6 @@ pub fn handle_payload<S: SigStore + ConversationStore>(
             {
                 return Err(PayloadError::InvalidSender);
             }
-
-            forward = true;
 
             store
                 .extend_sigchain(from.uid, sig)
