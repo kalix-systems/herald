@@ -16,7 +16,7 @@ Row {
         font.family: CmnCfg.chatFont.name
         padding: 0
         font.weight: Font.Bold
-        font.pixelSize: CmnCfg.defaultFontSize
+        font.pixelSize: CmnCfg.chatTextSize
         color: authorColor
         TextMetrics {
             id: authorNameTM
