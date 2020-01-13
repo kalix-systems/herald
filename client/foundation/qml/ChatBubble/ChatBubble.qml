@@ -46,7 +46,8 @@ Rectangle {
                                                                   insertionTime) : ""
     readonly property string receiptImage: outbound ? Utils.receiptCodeSwitch(
                                                           messageModelData.receiptStatus) : ""
-    readonly property color authorColor: CmnCfg.avatarColors[messageModelData.authorColor]
+    //not readonly in order to be assigned tied to convo color for pairwise
+    property color authorColor: CmnCfg.avatarColors[messageModelData.authorColor]
 
     readonly property string pfpUrl: outbound ? Herald.config.profilePicture : messageModelData.authorProfilePicture
     property bool hoverHighlight: false
