@@ -84,8 +84,8 @@ Rectangle {
         anchors {
             left: emojiButton.right
             right: timerButton.left
-            leftMargin: CmnCfg.smallMargin * 0.5
-            //  rightMargin: CmnCfg.smallMargin * 0.5
+            leftMargin: CmnCfg.smallMargin * 2
+            rightMargin: CmnCfg.smallMargin
             bottomMargin: CmnCfg.smallMargin * 0.5
         }
 
