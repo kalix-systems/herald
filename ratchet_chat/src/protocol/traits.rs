@@ -65,3 +65,28 @@ pub trait ConversationStore: StoreLike {
         uid: UserId,
     ) -> Result<bool, Self::Error>;
 }
+
+pub trait PendingStore: StoreLike {
+    fn add_pending_payload(
+        &mut self,
+        id: PayloadId,
+        payload: Payload,
+        to: Vec<sig::PublicKey>,
+    ) -> Result<(), Self::Error>;
+
+    fn get_pending_payload(
+        &mut self,
+        id: PayloadId,
+    ) -> Result<Option<Payload>, Self::Error>;
+
+    fn del_pending(
+        &mut self,
+        id: PayloadId,
+        to: sig::PublicKey,
+    ) -> Result<(), Self::Error>;
+
+    fn get_pending_to(
+        &mut self,
+        to: sig::PublicKey,
+    ) -> Result<Vec<(PayloadId, Payload)>, Self::Error>;
+}
