@@ -17,6 +17,7 @@ Item {
         id: systemPalette
         colorGroup: SystemPalette.Active
     }
+
     readonly property alias sysPalette: systemPalette
     /// standard tiny margin
     readonly property real microMargin: units.dp(4)
