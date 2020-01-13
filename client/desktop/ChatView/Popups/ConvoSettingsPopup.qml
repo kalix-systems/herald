@@ -90,7 +90,7 @@ Popup {
                     width: parent.width
                     Entity.Avatar {
                         id: itemAvatar
-                        color: CmnCfg.avatarColors[contactMember.color]
+                        color: CmnCfg.palette.avatarColors[convoData.color]
                         initials: contactMember.name[0].toUpperCase()
                         pfpPath: Utils.safeStringOrDefault(
                                      contactMember.picture)
@@ -118,14 +118,14 @@ Popup {
                 Row {
                     height: implicitHeight
 
-                    spacing: 14 //CmnCfg.megaMargin
+                    spacing: 14
                     padding: 0
                     Rectangle {
                         id: colorDot
                         height: 22
                         width: height
                         radius: width
-                        color: CmnCfg.palette.avatarColors[contactMember.color]
+                        color: CmnCfg.palette.avatarColors[convoData.color]
                         MouseArea {
                             id: mouseArea
                             anchors.fill: parent
@@ -170,8 +170,6 @@ Popup {
                                     return
                                 var idx = Herald.users.indexById(
                                             contactMember.userId)
-                                print(idx)
-
                                 if ((idx < 0)
                                         || (idx >= Herald.users.rowCount()))
                                     return
