@@ -42,7 +42,7 @@ ColumnLayout {
 
             Entity.Avatar {
                 pfpPath: Herald.config.profilePicture
-                color: CmnCfg.palette.avatarColors[Herald.config.color]
+                color: CmnCfg.palette.avatarColors[Herald.config.configColor]
                 size: parent.height
                 textColor: CmnCfg.palette.iconFill
                 initials: Utils.initialize(Herald.config.name)

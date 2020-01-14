@@ -229,7 +229,7 @@ pub trait ConversationsTrait {
     ) {
     }
 
-    fn color(
+    fn conversation_color(
         &self,
         index: usize,
     ) -> u32;
@@ -501,12 +501,12 @@ pub unsafe extern "C" fn conversations_sort(
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn conversations_data_color(
+pub unsafe extern "C" fn conversations_data_conversation_color(
     ptr: *const Conversations,
     row: c_int,
 ) -> u32 {
     let obj = &*ptr;
-    obj.color(to_usize(row).unwrap_or(0))
+    obj.conversation_color(to_usize(row).unwrap_or(0))
 }
 
 #[no_mangle]

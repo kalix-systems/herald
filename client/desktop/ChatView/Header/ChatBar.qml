@@ -42,7 +42,7 @@ ToolBar {
         Avatar {
             id: avatar
             size: 32
-            color: CmnCfg.avatarColors[conversationItem.color]
+            color: CmnCfg.avatarColors[conversationItem.conversationColor]
             initials: conversationItem.title[0].toUpperCase()
             Layout.alignment: Qt.AlignLeft
             pfpPath: Utils.safeStringOrDefault(conversationItem.picture, "")

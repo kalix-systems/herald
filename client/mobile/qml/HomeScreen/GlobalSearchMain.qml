@@ -45,7 +45,7 @@ Page {
             model: Herald.conversations
             delegate: ConversationItem {
                 itemTitle: title
-                colorCode: model.color
+                colorCode: model.conversationColor
                 imageSource: Utils.safeStringOrDefault(model.picture, "")
                 isGroup: !model.pairwise
                 lastMsgDigest: model.lastMsgDigest

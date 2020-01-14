@@ -221,15 +221,15 @@ pub trait MembersTrait {
     ) {
     }
 
-    fn color(
-        &self,
-        index: usize,
-    ) -> u32;
-
     fn matched(
         &self,
         index: usize,
     ) -> bool;
+
+    fn member_color(
+        &self,
+        index: usize,
+    ) -> u32;
 
     fn name(
         &self,
@@ -425,21 +425,21 @@ pub unsafe extern "C" fn members_sort(
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn members_data_color(
-    ptr: *const Members,
-    row: c_int,
-) -> u32 {
-    let obj = &*ptr;
-    obj.color(to_usize(row).unwrap_or(0))
-}
-
-#[no_mangle]
 pub unsafe extern "C" fn members_data_matched(
     ptr: *const Members,
     row: c_int,
 ) -> bool {
     let obj = &*ptr;
     obj.matched(to_usize(row).unwrap_or(0))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn members_data_member_color(
+    ptr: *const Members,
+    row: c_int,
+) -> u32 {
+    let obj = &*ptr;
+    obj.member_color(to_usize(row).unwrap_or(0))
 }
 
 #[no_mangle]

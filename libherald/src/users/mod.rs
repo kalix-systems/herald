@@ -161,7 +161,7 @@ impl Interface for Users {
     }
 
     /// Returns user's color
-    fn color(
+    fn user_color(
         &self,
         row_index: usize,
     ) -> u32 {
@@ -169,8 +169,8 @@ impl Interface for Users {
         color(&uid).unwrap_or(0)
     }
 
-    /// Returns name if it is set, otherwise returns the user's id.
-    fn color_by_id(
+    /// Returns user's color given user id
+    fn user_color_by_id(
         &self,
         id: ffi::UserId,
     ) -> u32 {
@@ -180,7 +180,7 @@ impl Interface for Users {
     }
 
     /// Sets color
-    fn set_color(
+    fn set_user_color(
         &mut self,
         row_index: usize,
         color: u32,

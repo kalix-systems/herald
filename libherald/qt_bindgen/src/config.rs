@@ -146,7 +146,7 @@ fn conversations() -> Object {
        expirationPeriod: ItemProp::new(QUint8).write(),
        matched: matched_item_prop(),
        picture: picture_item_prop().get_by_value(),
-       color: color_item_prop(),
+       conversationColor: color_item_prop(),
        status: ItemProp::new(QUint8).write(),
 
        lastMsgDigest: ItemProp::new(QString).get_by_value(),
@@ -178,14 +178,14 @@ fn users() -> Object {
        status: ItemProp::new(QUint8).write(),
        matched: matched_item_prop(),
        profilePicture: picture_item_prop().get_by_value(),
-       color: color_item_prop().write()
+       userColor: color_item_prop().write()
     };
 
     let funcs = functions! {
         mut add(id: QString) => QByteArray,
         mut toggleFilterRegex() => Bool,
         mut clearFilter() => Void,
-        const colorById(id: QString) => QUint32,
+        const userColorById(id: QString) => QUint32,
         const nameById(id: QString) => QString,
         const profilePictureById(id: QString) => QString,
         const indexById(id: QString) => Qint64,
@@ -228,7 +228,7 @@ fn members() -> Object {
        status: ItemProp::new(QUint8),
        matched: matched_item_prop(),
        profilePicture: picture_item_prop().get_by_value(),
-       color: color_item_prop()
+       memberColor: color_item_prop()
     };
 
     let funcs = functions! {
@@ -431,7 +431,7 @@ fn config() -> Object {
         configId: Prop::new().simple(QString),
         name: Prop::new().simple(QString).write(),
         profilePicture: Prop::new().simple(QString).optional(),
-        color: Prop::new().simple(QUint32).write(),
+        configColor: Prop::new().simple(QUint32).write(),
         ntsConversationId: Prop::new().simple(QByteArray),
         preferredExpiration: Prop::new().simple(QUint8).write()
     };
@@ -487,7 +487,7 @@ fn users_search() -> Object {
        userId: ItemProp::new(QString).optional(),
        name: ItemProp::new(QString).get_by_value().optional(),
        profilePicture: picture_item_prop().get_by_value().optional(),
-       color: color_item_prop().optional(),
+       userColor: color_item_prop().optional(),
        selected: ItemProp::new(Bool).write(),
        matched: matched_item_prop()
     };

@@ -92,7 +92,7 @@ impl MembersTrait for Members {
     }
 
     /// Returns user's color
-    fn color(
+    fn member_color(
         &self,
         row_index: usize,
     ) -> u32 {
