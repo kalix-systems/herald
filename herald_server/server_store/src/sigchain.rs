@@ -194,6 +194,7 @@ mod tests {
     use super::*;
     use crate::{tests::get_client, w, wa};
     use serial_test_derive::serial;
+    use sig::sign_ser as sign;
     use std::convert::TryInto;
     use womp::*;
 
@@ -206,7 +207,7 @@ mod tests {
 
         let uid: UserId = w!("a".try_into());
         let kp = sig::KeyPair::gen_new();
-        let init = kp.sign(uid);
+        let init = sign(&kp, uid);
 
         // should be empty initially
         assert!(wa!(client.get_sigchain(uid)).is_none());
@@ -223,15 +224,15 @@ mod tests {
         };
 
         let second_kp = sig::KeyPair::gen_new();
-        let first_update = Endorse(second_kp.sign(uid));
-        let signed_first = kp.sign(first_update);
+        let first_update = Endorse(sign(&second_kp, uid));
+        let signed_first = sign(&kp, first_update);
 
-        let second_update = Deprecate(*second_kp.public_key());
-        let signed_second = kp.sign(second_update);
+        let second_update = Deprecate(*second_kp.public());
+        let signed_second = sign(&kp, second_update);
 
         let third_kp = sig::KeyPair::gen_new();
-        let third_update = Endorse(third_kp.sign(uid));
-        let signed_third = second_kp.sign(third_update);
+        let third_update = Endorse(sign(&third_kp, uid));
+        let signed_third = sign(&second_kp, third_update);
 
         // can't deprecate non-existent key
         match wa!(client.add_to_sigchain(signed_second)) {

@@ -4,6 +4,7 @@ use crate::{w, wa};
 use futures::stream::iter;
 use protocol::auth::register::ServeEvent;
 use serial_test_derive::serial;
+use sig::sign_ser as sign;
 use std::collections::BTreeSet as Set;
 use std::convert::TryInto;
 use womp::*;
@@ -15,19 +16,12 @@ impl PushedTo {
             _ => false,
         }
     }
-
-    fn no_recips(&self) -> bool {
-        match self {
-            PushedTo::NoRecipients => true,
-            _ => false,
-        }
-    }
 }
 
 fn setup() -> (Push, UserId, sig::KeyPair) {
     let uid = w!("a".try_into());
     let kp = sig::KeyPair::gen_new();
-    let did = *kp.public_key();
+    let did = *kp.public();
     let gid = GlobalId { uid, did };
 
     (
@@ -85,13 +79,14 @@ async fn one_key() {
 
     let (push, a_uid, a_kp) = setup();
 
+    dbg!();
     let a_kp2 = sig::KeyPair::gen_new();
+    let a_init = sign(&a_kp, a_uid);
+    dbg!();
+    let a_endorse = sig::SigUpdate::Endorse(sign(&a_kp2, a_uid));
+    let a_add = sign(&a_kp, a_endorse);
 
-    let a_init = a_kp.sign(a_uid);
-    let a_endorse = sig::SigUpdate::Endorse(a_kp2.sign(a_uid));
-    let a_add = a_kp.sign(a_endorse);
-
-    let recip = Recip::One(SingleRecip::Key(*a_kp2.public_key()));
+    let recip = Recip::One(SingleRecip::Key(*a_kp2.public()));
 
     assert!(wa!(client.add_to_pending_and_get_valid_devs(&recip, &push)).is_missing());
 
@@ -100,7 +95,7 @@ async fn one_key() {
 
     let devs = match wa!(client.add_to_pending_and_get_valid_devs(&recip, &push)) {
         PushedTo::PushedTo { devs, .. } => {
-            assert_eq!(&devs, &[*a_kp2.public_key()]);
+            assert_eq!(&devs, &[*a_kp2.public()]);
             devs
         }
         _ => panic!(),
@@ -115,11 +110,11 @@ async fn one_user() {
     let mut client = wa!(get_client());
 
     let (push, a_uid, a_kp) = setup();
-    let a_init = a_kp.sign(a_uid);
+    let a_init = sign(&a_kp, a_uid);
 
     let b_uid: UserId = "b".try_into().expect(womp!());
     let b_kp = sig::KeyPair::gen_new();
-    let b_init = b_kp.sign(b_uid);
+    let b_init = sign(&b_kp, b_uid);
 
     let recip = Recip::One(SingleRecip::User(b_uid));
 
@@ -130,7 +125,7 @@ async fn one_user() {
 
     let devs = match wa!(client.add_to_pending_and_get_valid_devs(&recip, &push)) {
         PushedTo::PushedTo { devs, .. } => {
-            assert_eq!(&devs, &[*b_kp.public_key()]);
+            assert_eq!(&devs, &[*b_kp.public()]);
             devs
         }
         _ => panic!(),
@@ -145,17 +140,17 @@ async fn many_keys() {
     let mut client = wa!(get_client());
 
     let (push, a_uid, a_kp) = setup();
-    let a_init = a_kp.sign(a_uid);
+    let a_init = sign(&a_kp, a_uid);
 
     let a_kp2 = sig::KeyPair::gen_new();
-    let a_endorse = sig::SigUpdate::Endorse(a_kp2.sign(a_uid));
-    let a_add = a_kp.sign(a_endorse);
+    let a_endorse = sig::SigUpdate::Endorse(sign(&a_kp2, a_uid));
+    let a_add = sign(&a_kp, a_endorse);
 
     let b_uid: UserId = "b".try_into().expect(womp!());
     let b_kp = sig::KeyPair::gen_new();
-    let b_init = b_kp.sign(b_uid);
+    let b_init = sign(&b_kp, b_uid);
 
-    let keys = vec![*a_kp2.public_key(), *b_kp.public_key()];
+    let keys = vec![*a_kp2.public(), *b_kp.public()];
     let recip = Recip::Many(Recips::Keys(keys.clone()));
 
     assert!(wa!(client.add_to_pending_and_get_valid_devs(&recip, &push)).is_missing());
@@ -181,17 +176,17 @@ async fn many_users() {
     let mut client = wa!(get_client());
 
     let (push, a_uid, a_kp) = setup();
-    let a_init = a_kp.sign(a_uid);
+    let a_init = sign(&a_kp, a_uid);
 
     let b_uid: UserId = "b".try_into().expect(womp!());
     let b_kp = sig::KeyPair::gen_new();
-    let b_init = b_kp.sign(b_uid);
+    let b_init = sign(&b_kp, b_uid);
 
     let c_uid: UserId = "c".try_into().expect(womp!());
     let c_kp = sig::KeyPair::gen_new();
-    let c_init = c_kp.sign(c_uid);
+    let c_init = sign(&c_kp, c_uid);
 
-    let keys = vec![*b_kp.public_key(), *c_kp.public_key()]
+    let keys = vec![*b_kp.public(), *c_kp.public()]
         .into_iter()
         .collect::<Vec<_>>();
     let users = vec![b_uid, c_uid];

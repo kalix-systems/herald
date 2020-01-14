@@ -110,6 +110,7 @@ mod tests {
     use crate::{w, wa};
     use protocol::auth::register::ServeEvent;
     use serial_test_derive::serial;
+    use sig::sign_ser as sign;
     use std::convert::TryInto;
     use womp::*;
 
@@ -121,8 +122,8 @@ mod tests {
         let mut client = wa!(get_client());
 
         let kp = sig::KeyPair::gen_new();
-        assert!(!wa!(client.one_key_exists(kp.public_key())));
-        assert!(!wa!(client.many_keys_exist(vec![*kp.public_key()])));
+        assert!(!wa!(client.one_key_exists(kp.public())));
+        assert!(!wa!(client.many_keys_exist(vec![*kp.public()])));
 
         let uid = "a".try_into().expect(womp!());
         assert!(!wa!(client.one_user_exists(&uid)));
@@ -136,13 +137,13 @@ mod tests {
 
         let a_uid: UserId = "a".try_into().expect(womp!());
         let a_kp = sig::KeyPair::gen_new();
-        let a_init = a_kp.sign(a_uid);
+        let a_init = sign(&a_kp, a_uid);
         assert_eq!(wa!(client.new_user(a_init)), ServeEvent::Success);
         assert!(wa!(client.one_user_exists(&a_uid)));
 
         let b_uid: UserId = "b".try_into().expect(womp!());
         let b_kp = sig::KeyPair::gen_new();
-        let b_init = b_kp.sign(b_uid);
+        let b_init = sign(&b_kp, b_uid);
         assert_eq!(wa!(client.new_user(b_init)), ServeEvent::Success);
 
         assert!(wa!(client.many_users_exist(vec![a_uid, b_uid])));
@@ -158,21 +159,22 @@ mod tests {
 
         let a_uid: UserId = "a".try_into().expect(womp!());
         let a_kp = sig::KeyPair::gen_new();
-        assert!(!wa!(client.one_key_exists(a_kp.public_key())));
-        let a_init = a_kp.sign(a_uid);
+        assert!(!wa!(client.one_key_exists(a_kp.public())));
+
+        let a_init = sign(&a_kp, a_uid);
         assert_eq!(wa!(client.new_user(a_init)), ServeEvent::Success);
-        assert!(wa!(client.one_key_exists(a_kp.public_key())));
+        assert!(wa!(client.one_key_exists(a_kp.public())));
 
         let b_uid: UserId = "b".try_into().expect(womp!());
         let b_kp = sig::KeyPair::gen_new();
-        assert!(!wa!(client.one_key_exists(b_kp.public_key())));
-        let b_init = b_kp.sign(b_uid);
+        assert!(!wa!(client.one_key_exists(b_kp.public())));
+        let b_init = sign(&b_kp, b_uid);
         assert_eq!(wa!(client.new_user(b_init)), ServeEvent::Success);
         assert!(wa!(
-            client.many_keys_exist(vec![*a_kp.public_key(), *b_kp.public_key()])
+            client.many_keys_exist(vec![*a_kp.public(), *b_kp.public()])
         ));
 
         let c_kp = sig::KeyPair::gen_new();
-        assert!(!wa!(client.one_key_exists(c_kp.public_key())));
+        assert!(!wa!(client.one_key_exists(c_kp.public())));
     }
 }

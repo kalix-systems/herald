@@ -150,6 +150,7 @@ pub(crate) mod tests {
     use super::*;
     use protocol::auth::register::ServeEvent;
     use serial_test_derive::serial;
+    use sig::sign_ser as sign;
     use std::convert::TryInto;
     use womp::*;
 
@@ -181,9 +182,9 @@ pub(crate) mod tests {
 
         let uid: UserId = w!("a".try_into());
         let kp = sig::KeyPair::gen_new();
-        let pk = *kp.public_key();
+        let pk = *kp.public();
 
-        let init = kp.sign(uid);
+        let init = sign(&kp, uid);
 
         assert!(wa!(client.user_of(pk)).is_none());
 
@@ -199,9 +200,9 @@ pub(crate) mod tests {
 
         let uid: UserId = w!("a".try_into());
         let kp = sig::KeyPair::gen_new();
-        let pk = *kp.public_key();
+        let pk = *kp.public();
 
-        let init = kp.sign(uid);
+        let init = sign(&kp, uid);
 
         assert!(!wa!(client.key_is_valid(pk)));
 
@@ -220,9 +221,9 @@ pub(crate) mod tests {
         let other_uid: UserId = w!("b".try_into());
 
         let kp = sig::KeyPair::gen_new();
-        let pk = *kp.public_key();
+        let pk = *kp.public();
 
-        let init = kp.sign(uid);
+        let init = sign(&kp, uid);
 
         assert!(!wa!(client.key_is_valid_for_user(&pk, &uid)));
 

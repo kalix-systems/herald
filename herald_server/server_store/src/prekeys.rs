@@ -178,6 +178,7 @@ mod tests {
     use crate::{w, wa};
     use futures::stream::iter;
     use serial_test_derive::serial;
+    use sig::sign_ser as sign;
     use std::convert::TryInto;
     use womp::*;
 
@@ -188,12 +189,12 @@ mod tests {
 
         let uid: UserId = w!("a".try_into());
         let kp = sig::KeyPair::gen_new();
-        let init = kp.sign(uid);
+        let init = sign(&kp, uid);
 
         let pre_kp = sig::KeyPair::gen_new();
-        let pre = w!(Prekey::from_slice(pre_kp.public_key().as_ref()));
+        let pre = w!(Prekey::from_slice(pre_kp.public().as_ref()));
 
-        let signed_pre = kp.sign(pre);
+        let signed_pre = sign(&kp, pre);
 
         let replace = PrekeyReplace {
             old: None,
@@ -212,12 +213,12 @@ mod tests {
             _ => panic!(),
         };
 
-        let tagged = wa!(client.get_random_prekeys(iter(vec![*kp.public_key()])));
+        let tagged = wa!(client.get_random_prekeys(iter(vec![*kp.public()])));
         assert_eq!(tagged.len(), 1);
         assert_eq!(
             tagged[0],
             TaggedPrekey {
-                key: *kp.public_key(),
+                key: *kp.public(),
                 prekey: signed_pre
             }
         );
@@ -228,9 +229,9 @@ mod tests {
         };
 
         let pre_kp2 = sig::KeyPair::gen_new();
-        let pre2 = w!(Prekey::from_slice(pre_kp2.public_key().as_ref()));
+        let pre2 = w!(Prekey::from_slice(pre_kp2.public().as_ref()));
 
-        let signed_pre2 = kp.sign(pre2);
+        let signed_pre2 = sign(&kp, pre2);
 
         let replace = PrekeyReplace {
             old: Some(pre),
@@ -242,12 +243,12 @@ mod tests {
             _ => panic!(),
         };
 
-        let tagged = wa!(client.get_random_prekeys(iter(vec![*kp.public_key()])));
+        let tagged = wa!(client.get_random_prekeys(iter(vec![*kp.public()])));
         assert_eq!(tagged.len(), 1);
         assert_eq!(
             tagged[0],
             TaggedPrekey {
-                key: *kp.public_key(),
+                key: *kp.public(),
                 prekey: signed_pre2
             }
         );
