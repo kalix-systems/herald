@@ -1,3 +1,5 @@
+#![cfg(feature = "async")]
+
 use kson::prelude::*;
 use kson_channel::*;
 use std::time::Duration;
@@ -6,7 +8,6 @@ use tokio::net::*;
 const NUM_STREAMS: usize = 100;
 const NUM_ITERS: usize = 10;
 
-const TIMEOUT: Duration = Duration::from_secs(1);
 const PACKET_SIZE: usize = 1024;
 
 const MSG: &'static [u8] = &[1; PACKET_SIZE * 10];
@@ -32,16 +33,16 @@ async fn echo() {
                 .expect("failed to get next tcp stream");
 
             joins.push(tokio::spawn(async move {
-                let mut framed = Framed::new(stream, TIMEOUT, PACKET_SIZE);
+                let mut framed = Framed::new(stream);
 
                 for i in 0..NUM_ITERS {
                     let msg: Bytes = framed
-                        .read_packeted()
+                        .read_de()
                         .await
                         .expect(&format!("Failed to read ping {}", i));
                     assert_eq!(msg, Bytes::from_static(MSG));
                     framed
-                        .write_packeted(&Bytes::from_static(MSG))
+                        .write_ser(&Bytes::from_static(MSG))
                         .await
                         .expect(&format!("Failed to write pong {}", i));
                 }
@@ -62,14 +63,14 @@ async fn echo() {
                     .await
                     .expect("failed to connect to server");
 
-                let mut framed = Framed::new(stream, TIMEOUT, PACKET_SIZE);
+                let mut framed = Framed::new(stream);
                 for i in 0..NUM_ITERS {
                     framed
-                        .write_packeted(&Bytes::from_static(MSG))
+                        .write_ser(&Bytes::from_static(MSG))
                         .await
                         .expect(&format!("Failed to write ping {}", i));
                     let msg: Bytes = framed
-                        .read_packeted()
+                        .read_de()
                         .await
                         .expect(&format!("Failed to write pong {}", i));
                     assert_eq!(msg, Bytes::from_static(MSG));

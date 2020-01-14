@@ -7,15 +7,8 @@ pub mod error;
 pub use error::FramedError;
 pub mod sync;
 
-// use tokio::{prelude::*, time::*};
-
-// mod packets;
-// use packets::*;
-
 pub struct Framed<S> {
     inner: S,
-    // dur: Duration,
-    // packet_size: usize,
 }
 
 impl<S> Deref for Framed<S> {
@@ -32,16 +25,8 @@ impl<S> DerefMut for Framed<S> {
 }
 
 impl<S> Framed<S> {
-    pub fn new(
-        inner: S,
-        // dur: Duration,
-        // packet_size: usize,
-    ) -> Self {
-        Framed {
-            inner,
-            // dur,
-            // packet_size,
-        }
+    pub fn new(inner: S) -> Self {
+        Framed { inner }
     }
 
     pub fn into_inner(self) -> S {

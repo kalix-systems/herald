@@ -9,7 +9,7 @@ thiserror = "1.0"
 
 [dependencies.tokio]
 version = "0.2"
-features = ["io-util", "time"]
+features = ["io-util", "time", "macros", "rt-core", "net"]
 optional = true
 
 [dependencies.kson]
