@@ -17,7 +17,7 @@ Rectangle {
     property var builderData
     property bool outboundReply: Herald.config.configId === builderData.opAuthor
 
-    property color authorColor: CmnCfg.palette.avatarColors[Herald.users.colorById(
+    property color authorColor: CmnCfg.palette.avatarColors[Herald.users.userColorById(
                                                                 builderData.opAuthor)]
     property string authorName: outboundReply ? Herald.config.name : Herald.users.nameById(
                                                     builderData.opAuthor)
