@@ -48,7 +48,7 @@ Drawer {
                     Common.PlatonicRectangle {
                         id: contactRectangle
                         color: CmnCfg.palette.white
-                        boxColor: drawer.userData.color
+                        boxColor: drawer.userData.userColor
                         boxTitle: drawer.userData.name
                         picture: Utils.safeStringOrDefault(
                                      drawer.userData.profilePicture, "")
@@ -88,7 +88,7 @@ Drawer {
                         height: 22
                         width: height
                         radius: width
-                        color: CmnCfg.palette.avatarColors[userData.color]
+                        color: CmnCfg.palette.avatarColors[userData.userColor]
                         MouseArea {
                             id: mouseArea
                             anchors.fill: parent
@@ -138,7 +138,7 @@ Drawer {
                                         || (idx >= Herald.users.rowCount()))
                                     return
 
-                                Herald.users.setColor(idx, colorIndex)
+                                Herald.users.setUserColor(idx, colorIndex)
                             }
                         }
                     }
