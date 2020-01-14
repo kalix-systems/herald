@@ -28,22 +28,24 @@ ObjectiveUtils::ObjectiveUtils(){
 - (void) openDocumentPicker {
     auto *rvc =  [[UIApplication sharedApplication].keyWindow rootViewController];
     UIDocumentPickerViewController* dp = [[UIDocumentPickerViewController alloc] initWithDocumentTypes:@[(NSString *)kUTTypePDF] inMode:UIDocumentPickerModeImport];
+    dp.allowsMultipleSelection = NO;
     [rvc presentViewController:dp animated: YES completion: nil];
 }
 
 - (void)documentPicker:(UIDocumentPickerViewController *)controller didPickDocumentsAtURLs:(NSArray<NSURL *> *)urls {
-    for(NSURL* url in urls) {
-        NSLog(@"%@", url);
-    }
-    //emit _util->chosen_file(QString("EMIT THE CHOSEN FILE HERE"));
+    (void)controller;
+    const char* fname = [urls[0] UTF8String];
+    emit _util->chosen_file(QString(fname));
 }
 
 - (void)setUtils:(ObjectiveUtils *) util {
    _util = util;
-    emit _util->chosen_file(QString(""));
 }
 
 - (void)documentPickerWasCancelled:(UIDocumentPickerViewController *)controller {
+  (void)controller;
+  emit _util->chosen_file(QString(""));
+
 }
 
 - (void) openCameraView {
