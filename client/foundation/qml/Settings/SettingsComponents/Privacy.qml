@@ -13,12 +13,15 @@ Column {
         width: parent.width
         height: label.height
         leftPadding: CmnCfg.defaultMargin
-        Label {
-            id: label
-            text: qsTr("Default message expiration time")
-            color: CmnCfg.palette.black
-            wrapMode: Label.WrapAtWordBoundaryOrAnywhere
-            font: CmnCfg.defaultFont
+        GridLayout {
+            Label {
+                id: label
+                text: qsTr("Default message expiration for new conversations")
+                Layout.maximumWidth: wrapper.width * 0.66 - CmnCfg.smallMargin
+                color: CmnCfg.palette.black
+                wrapMode: Label.WrapAtWordBoundaryOrAnywhere
+                font: CmnCfg.defaultFont
+            }
         }
 
         Item {
