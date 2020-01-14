@@ -5,16 +5,18 @@ authors = ["theseriousadult <jack@kalix.io>"]
 edition = "2018"
 
 [dependencies]
-# crc32fast = "1.2.0"
-# futures = "0.3"
 thiserror = "1.0"
 
 [dependencies.tokio]
 version = "0.2"
 features = ["io-util", "time"]
+optional = true
 
 [dependencies.kson]
 path = "../kson"
 
 [dev-dependencies]
 port_check = "0.1.2"
+
+[features]
+async = ["tokio"]
