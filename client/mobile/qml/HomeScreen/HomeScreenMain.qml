@@ -31,9 +31,15 @@ Page {
             model: Herald.conversations
             delegate: ConversationItem {
                 property var conversationData: model
-                itemTitle: title
-                colorCode: model.conversationColor
-                imageSource: Utils.safeStringOrDefault(model.picture, "")
+                isNTS: {
+                    Herald.utils.compareByteArray(Herald.config.ntsConversationId,
+                                                  model.conversationId)
+                }
+                itemTitle: !isNTS ? title : qsTr("Note to Self")
+                colorCode: !isNTS ? model.conversationColor : Herald.config.configColor
+                imageSource: !isNTS ? Utils.safeStringOrDefault(model.picture, "") :
+                                      Utils.safeStringOrDefault(
+                                          Herald.config.profilePicture, "")
                 isGroup: !model.pairwise
                 lastMsgDigest: model.lastMsgDigest
                 isEmpty: model.isEmpty

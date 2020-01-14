@@ -16,6 +16,8 @@ Rectangle {
     // path to the conversation's avatar image
     property string imageSource: ''
     property bool isGroup: false
+    // whether this conversation is the "Note to Self" conversation
+    property bool isNTS: false
     // TOOD(cmck) shouldn't need to pass this in
     property ConversationContent convoContent
     // true if the conversation contains no messages

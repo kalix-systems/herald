@@ -22,6 +22,7 @@ Item {
     property int labelFontSize: CmnCfg.entityLabelSize
     property int subLabelFontSize: CmnCfg.entitySubLabelSize
     property alias bodyItalic: bodyText.font.italic
+    property alias receiptFill: receiptImage.icon.color
 
     // json summary
     property string lastMsgDigest
@@ -125,7 +126,7 @@ Item {
             elide: "ElideRight"
             text: lastBody
             Layout.fillWidth: true
-            Layout.alignment: Qt.AlignLeft | Qt.alignTop
+            Layout.alignment: Qt.AlignLeft
             Layout.maximumHeight: labelGrid.height * 0.25
             color: labelColor
             textFormat: Text.StyledText
@@ -133,11 +134,14 @@ Item {
 
         Button {
             id: receiptImage
+            visible: outbound
             icon.source: JS.receiptCodeSwitch(lastReceipt)
-            icon.height: 20
-            icon.width: 20
+            icon.height: 16
+            icon.width: 16
+            Layout.topMargin: 2
             icon.color: CmnCfg.palette.iconFill
             padding: 0
+            Layout.alignment: Qt.AlignRight | Qt.AlignBottom
             background: Item {}
         }
     }
