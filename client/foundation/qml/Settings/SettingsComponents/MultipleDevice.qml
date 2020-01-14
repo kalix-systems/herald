@@ -40,7 +40,7 @@ ColumnLayout {
     }
 
     Rectangle {
-        color: CmnCfg.palette.darkGrey
+        color: CmnCfg.palette.medGrey
         height: 1
         Layout.fillWidth: true
     }

@@ -5,28 +5,36 @@ import LibHerald 1.0
 import Qt.labs.platform 1.0
 import "../../"
 
-ColumnLayout {
-    RowLayout {
-        Layout.fillWidth: true
-
-        StandardLabel {
+Column {
+    width: parent.width
+    spacing: CmnCfg.smallMargin
+    id: wrapper
+    Row {
+        width: parent.width
+        height: label.height
+        leftPadding: CmnCfg.defaultMargin
+        Label {
+            id: label
             text: qsTr("Default message expiration time")
             color: CmnCfg.palette.black
-            Layout.leftMargin: CmnCfg.defaultMargin
-            Layout.fillWidth: true
             wrapMode: Label.WrapAtWordBoundaryOrAnywhere
             font: CmnCfg.defaultFont
         }
 
+        Item {
+            height: 10
+            width: wrapper.width * 0.66 - label.width
+        }
         //TODO: THIS SHOULD COME FROM THE CONFIG MODEL
         StandardCombo {
+            id: combo
             model: ["Off", "1 minute", "1 hour", "1 day", "et cetera"]
         }
     }
 
     Rectangle {
-        color: CmnCfg.palette.darkGrey
+        color: CmnCfg.palette.medGrey
         height: 1
-        Layout.fillWidth: true
+        width: parent.width
     }
 }

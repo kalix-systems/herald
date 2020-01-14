@@ -5,15 +5,16 @@ import LibHerald 1.0
 // TODO move this to foundation
 RadioButton {
     id: control
+    padding: 0
     indicator: Rectangle {
         id: indic
-        implicitWidth: 20
-        implicitHeight: 20
-        radius: 20
+        implicitWidth: 19
+        implicitHeight: 19
+        radius: 18
         border.color: CmnCfg.palette.black
         border.width: 2
         Rectangle {
-            radius: 20
+            radius: 18
             color: CmnCfg.palette.offBlack
             anchors.fill: parent
             anchors.margins: control.checked ? 5 : 10

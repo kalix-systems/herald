@@ -2,7 +2,7 @@ import QtQuick 2.13
 import QtQuick.Controls 2.13
 import QtQuick.Layouts 1.12
 import LibHerald 1.0
-import '../../'
+import "../../"
 
 GridLayout {
     rows: 2
@@ -24,7 +24,7 @@ GridLayout {
     }
 
     StandardLabel {
-        text: qsTr("Last Backup Was : ") + "Never"
+        text: qsTr("Last backup was: ") + "never"
         color: CmnCfg.palette.black
         font: CmnCfg.defaultFont
         Layout.fillWidth: true
@@ -37,5 +37,4 @@ GridLayout {
         Layout.alignment: Qt.AlignCenter
         Layout.rightMargin: CmnCfg.megaMargin
     }
-
 }

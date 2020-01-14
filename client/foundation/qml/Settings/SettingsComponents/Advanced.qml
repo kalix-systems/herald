@@ -24,7 +24,7 @@ ColumnLayout {
     }
 
     Rectangle {
-        color: CmnCfg.palette.darkGrey
+        color: CmnCfg.palette.medGrey
         height: 1
         Layout.fillWidth: true
     }
@@ -33,7 +33,7 @@ ColumnLayout {
         Layout.fillWidth: true
         Layout.rightMargin: CmnCfg.defaultMargin
         StandardLabel {
-            text: qsTr("App Info")
+            text: qsTr("App info")
             color: "black"
             Layout.leftMargin: CmnCfg.defaultMargin
             font: CmnCfg.defaultFont
@@ -44,15 +44,15 @@ ColumnLayout {
         }
 
         StandardLabel {
-            text: qsTr("Version ") + "0.0.1-alpha.1-rc.1"
-            color: "black"
+            text: qsTr("version ") + "0.0.1-alpha"
+            color: CmnCfg.palette.offBlack
             Layout.leftMargin: CmnCfg.defaultMargin
             font: CmnCfg.defaultFont
         }
     }
 
     Rectangle {
-        color: CmnCfg.palette.darkGrey
+        color: CmnCfg.palette.medGrey
         height: 1
         Layout.fillWidth: true
     }

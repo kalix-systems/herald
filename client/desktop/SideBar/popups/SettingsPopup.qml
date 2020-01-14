@@ -13,7 +13,7 @@ Window {
     id: settingsPopup
     width: CmnCfg.settingsPaneWidth
     height: CmnCfg.settingsPaneHeight
-    minimumWidth: 500
+    minimumWidth: 550
     minimumHeight: 250
 
     Component.onCompleted: {

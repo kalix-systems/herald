@@ -7,6 +7,7 @@ Column {
     property Component settingsContent
     leftPadding: CmnCfg.defaultMargin
     property alias content: settingsLoader.item
+    spacing: CmnCfg.defaultMargin
     anchors {
         right: parent.right
         left: parent.left

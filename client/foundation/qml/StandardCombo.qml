@@ -13,7 +13,7 @@ Rectangle {
     property font labelFont: CmnCfg.defaultFont
 
     width: container.width
-    height: 40
+    height: label.height
 
     Menu {
         id: nativeMenu
@@ -47,13 +47,13 @@ Rectangle {
         id: container
         height: parent.height
         spacing: CmnCfg.units.dp(2)
+        padding: 0
 
         Label {
+            id: label
             text: currentItem
             anchors.verticalCenter: parent.verticalCenter
             font: self.labelFont
-            //font.family: CmnCfg.labelFont.name
-            //font.pixelSize: CmnCfg.headerFontSize
         }
 
         Image {
