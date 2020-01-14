@@ -256,8 +256,8 @@ async fn login() {
     .expect("failed to register");
 
     let new_keypair = sig::KeyPair::gen_new();
-    let update = sig::SigUpdate::Endorse(new_keypair.sign(uid));
-    let signed = c1.keys.sign(update);
+    let update = sig::SigUpdate::Endorse(sig::sign_ser(&new_keypair, uid));
+    let signed = sig::sign_ser(&c1.keys, update);
 
     let resp = c1
         .req(Request::NewSig(signed))
@@ -346,7 +346,7 @@ impl<F> TestClient<F> {
             .await
             .context("failed to write auth method")?;
 
-        tx.write_ser(keys.public_key())
+        tx.write_ser(keys.public())
             .await
             .context("failed to write public key")?;
         let res: ClaimResponse = rx.read_de().await.context("failed to read ClaimResponse")?;
@@ -359,7 +359,9 @@ impl<F> TestClient<F> {
         rx.read_exact(&mut cbuf)
             .await
             .context("failed to read challenge")?;
-        let sig = keys.secret_key().sign(&cbuf);
+
+        let sig = sig::sign_ser(&keys, &cbuf as &[u8]).sig();
+
         tx.write_all(sig.as_ref())
             .await
             .context("failed to write challenge response")?;
@@ -395,7 +397,7 @@ impl<F> TestClient<F> {
             "username taken"
         );
 
-        let signed = keys.sign(uid);
+        let signed = sig::sign_ser(&keys, uid);
         tx.write_ser(&ClientEvent::Claim(signed)).await?;
         ensure!(
             ServeEvent::Success == rx.read_de().await?,
@@ -487,7 +489,7 @@ impl<F: Fn(Push) -> BoxFuture<'static, PushAck> + Send + Sync + 'static> KrpcCli
                     msg: msg.clone(),
                     gid: GlobalId {
                         uid: self.uid,
-                        did: *self.keys.public_key(),
+                        did: *self.keys.public(),
                     },
                 };
 

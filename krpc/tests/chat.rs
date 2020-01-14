@@ -1,27 +1,24 @@
 use anyhow::*;
 use async_trait::*;
-use futures::{future::*, stream::*};
 use kcl::random::UQ;
 use krpc::*;
-use kson::prelude::*;
 use std::{
     collections::{HashMap, HashSet},
     iter,
-    net::SocketAddr,
-    sync::Arc,
-    time::Duration,
 };
-use tokio::{
-    prelude::*,
-    sync::{
-        mpsc::{
-            unbounded_channel as unbounded, UnboundedReceiver as Receiver,
-            UnboundedSender as Sender,
-        },
-        Mutex,
+use tokio::sync::{
+    mpsc::{
+        unbounded_channel as unbounded, UnboundedReceiver as Receiver, UnboundedSender as Sender,
     },
-    time,
+    Mutex,
 };
+
+#[cfg(any(feature = "ws", feature = "quic"))]
+use futures::future::*;
+#[cfg(any(feature = "ws", feature = "quic"))]
+use std::{net::SocketAddr, sync::Arc, time::Duration};
+#[cfg(any(feature = "ws", feature = "quic"))]
+use tokio::time;
 
 #[derive(Ser, De, Eq, PartialEq, Hash, Debug, Clone, Copy)]
 struct User(UQ);
@@ -235,6 +232,7 @@ impl KrpcClient<ChatProtocol> for Chatter {
     fn on_close(&self) {}
 }
 
+#[cfg(any(feature = "quic", feature = "ws"))]
 const DELAY: Duration = Duration::from_millis(100);
 
 #[cfg(feature = "quic")]
@@ -390,6 +388,7 @@ mod quic_ {
 #[cfg(feature = "ws")]
 mod ws_ {
     use super::*;
+    use futures::stream::*;
     use ws::*;
 
     async fn start_server() -> (SocketAddr, Vec<u8>, impl Future<Output = ()>) {
