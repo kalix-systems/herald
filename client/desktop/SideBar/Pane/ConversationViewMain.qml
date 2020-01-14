@@ -115,6 +115,8 @@ ListView {
                             !== "" ? CmnCfg.palette.black : CmnCfg.palette.lightGrey
                 minorTextColor: convoRectangle.state
                                 !== "" ? CmnCfg.palette.offBlack : CmnCfg.palette.medGrey
+                receiptFill: convoRectangle.state
+                             !== "" ? CmnCfg.palette.black : CmnCfg.palette.white
             }
 
             MouseArea {
