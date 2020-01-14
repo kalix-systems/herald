@@ -133,6 +133,7 @@ Item {
 
         Button {
             id: receiptImage
+            visible: outbound
             icon.source: JS.receiptCodeSwitch(lastReceipt)
             icon.height: 20
             icon.width: 20
