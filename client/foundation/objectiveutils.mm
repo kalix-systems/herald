@@ -35,7 +35,7 @@ ObjectiveUtils::ObjectiveUtils(){
 - (void)documentPicker:(UIDocumentPickerViewController *)controller didPickDocumentsAtURLs:(NSArray<NSURL *> *)urls {
     (void)controller;
     const char* fname = [urls[0] UTF8String];
-    emit _util->chosen_file(QString(fname));
+    emit _util->fileChosen(QString(fname));
     [self release];
 }
 
@@ -44,7 +44,7 @@ ObjectiveUtils::ObjectiveUtils(){
 }
 
 - (void)documentPickerWasCancelled:(UIDocumentPickerViewController *)controller {
-  emit _util->chosen_file(QString(""));
+  emit _util->fileChosen(QString(""));
   [self release];
 }
 

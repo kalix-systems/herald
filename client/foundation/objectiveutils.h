@@ -15,7 +15,7 @@ public:
   Q_INVOKABLE static void request_notifications();
   Q_INVOKABLE QString launch_file_picker();
 signals:
-   void chosen_file(QString value);
+   void fileChosen(QString filename);
 
 #endif
 };
