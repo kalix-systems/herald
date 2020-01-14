@@ -19,6 +19,9 @@ ApplicationWindow {
         Component.onCompleted: {
             set_status_bar_color(CmnCfg.palette.offBlack)
         }
+        onChosen_file: {
+            print(value)
+        }
     }
 
     Loader {

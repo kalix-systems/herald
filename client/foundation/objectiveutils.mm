@@ -12,11 +12,10 @@ ObjectiveUtils::ObjectiveUtils(){
 #import <MobileCoreServices/MobileCoreServices.h>
 
 
-@interface FileDialogHelper :NSObject<UIDocumentPickerDelegate> {
-  id delegate;
-  NSString* filename;
+@interface FileDialogHelper :NSObject<UIDocumentPickerDelegate>{
+    ObjectiveUtils* _util;
 }
-
+- (void)setUtils:(ObjectiveUtils *) util;
 - (void)openDocumentPicker;
 - (void)openCameraView;
 - (void)documentPicker:(UIDocumentPickerViewController *)controller didPickDocumentsAtURLs:(NSArray<NSURL *> *)urls;
@@ -28,7 +27,7 @@ ObjectiveUtils::ObjectiveUtils(){
 
 - (void) openDocumentPicker {
     auto *rvc =  [[UIApplication sharedApplication].keyWindow rootViewController];
-    UIDocumentPickerViewController* dp = [[UIDocumentPickerViewController alloc] initWithDocumentTypes:@[(NSString *)kUTTypeText,(NSString *)kUTTypePDF,(NSString *)kUTTypeAudiovisualContent, (NSString *)kUTTypeImage] inMode:UIDocumentPickerModeImport];
+    UIDocumentPickerViewController* dp = [[UIDocumentPickerViewController alloc] initWithDocumentTypes:@[(NSString *)kUTTypePDF] inMode:UIDocumentPickerModeImport];
     [rvc presentViewController:dp animated: YES completion: nil];
 }
 
@@ -36,12 +35,15 @@ ObjectiveUtils::ObjectiveUtils(){
     for(NSURL* url in urls) {
         NSLog(@"%@", url);
     }
-    // just return the first item of the urls array for simplicity
-    filename = urls[0].absoluteString;
+    //emit _util->chosen_file(QString("EMIT THE CHOSEN FILE HERE"));
+}
+
+- (void)setUtils:(ObjectiveUtils *) util {
+   _util = util;
+    emit _util->chosen_file(QString(""));
 }
 
 - (void)documentPickerWasCancelled:(UIDocumentPickerViewController *)controller {
-    filename = @"";
 }
 
 - (void) openCameraView {
@@ -68,8 +70,10 @@ void ObjectiveUtils::request_notifications()
 QString ObjectiveUtils::launch_file_picker()
 {
     FileDialogHelper* dialog = [[FileDialogHelper alloc] init];
+    [dialog setUtils: this];
     [dialog openDocumentPicker];
-    return QString([[dialog filename] UTF8String]);
+    [dialog release];
+    return QString();
 }
 
 @end

@@ -13,7 +13,10 @@ public:
 #ifdef Q_OS_IOS
   Q_INVOKABLE static void set_status_bar_color(QColor color);
   Q_INVOKABLE static void request_notifications();
-  Q_INVOKABLE static QString launch_file_picker();
+  Q_INVOKABLE QString launch_file_picker();
+signals:
+   void chosen_file(QString value);
+
 #endif
 };
 

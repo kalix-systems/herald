@@ -69,9 +69,8 @@ Column {
                               ownedMessages.builder.finalize()
                               cta.clear()
                           } else {
-                              if (Qt.platform === "ios") {
-                                  MobileHelper.launch_file_picker()
-                              }
+                              if (Qt.platform.os == "ios")
+                                  mobHelper.launch_file_picker()
                           }
 
                 imageSource: send ? "qrc:/send-icon.svg" : "qrc:/plus-icon.svg"
