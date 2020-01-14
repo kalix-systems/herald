@@ -54,7 +54,7 @@ Column {
             Common.PlatonicRectangle {
                 color: CmnCfg.palette.offBlack
                 id: contactRectangle
-                boxColor: contactData.color
+                boxColor: contactData.userColor
                 boxTitle: contactData.name
                 picture: Utils.safeStringOrDefault(contactData.profilePicture,
                                                    "")
