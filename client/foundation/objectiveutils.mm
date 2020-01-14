@@ -28,7 +28,7 @@ ObjectiveUtils::ObjectiveUtils(){
 - (void) openDocumentPicker {
     auto *rvc =  [[UIApplication sharedApplication].keyWindow rootViewController];
     UIDocumentPickerViewController* dp = [[UIDocumentPickerViewController alloc] initWithDocumentTypes:@[(NSString *)kUTTypePDF] inMode:UIDocumentPickerModeImport];
-    dp.allowsMultipleSelection = NO;
+    dp.delegate = self;
     [rvc presentViewController:dp animated: YES completion: nil];
 }
 
@@ -36,6 +36,7 @@ ObjectiveUtils::ObjectiveUtils(){
     (void)controller;
     const char* fname = [urls[0] UTF8String];
     emit _util->chosen_file(QString(fname));
+    [self release];
 }
 
 - (void)setUtils:(ObjectiveUtils *) util {
@@ -43,9 +44,8 @@ ObjectiveUtils::ObjectiveUtils(){
 }
 
 - (void)documentPickerWasCancelled:(UIDocumentPickerViewController *)controller {
-  (void)controller;
   emit _util->chosen_file(QString(""));
-
+  [self release];
 }
 
 - (void) openCameraView {
@@ -74,7 +74,6 @@ QString ObjectiveUtils::launch_file_picker()
     FileDialogHelper* dialog = [[FileDialogHelper alloc] init];
     [dialog setUtils: this];
     [dialog openDocumentPicker];
-    [dialog release];
     return QString();
 }
 
