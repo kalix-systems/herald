@@ -87,3 +87,26 @@ pub trait KrpcClient<P: Protocol>: Send + Sync + Sized + 'static {
 
     fn on_close(&self);
 }
+
+pub trait SyncClient<P: Protocol>: Sized {
+    type InitInfo;
+
+    fn init<Tx: std::io::Write, Rx: std::io::Read>(
+        info: Self::InitInfo,
+        tx: &mut Framed<Tx>,
+        rx: &mut Framed<Rx>,
+    ) -> Result<Self, Error>;
+
+    fn handle_push(
+        &self,
+        push: P::Push,
+    ) -> P::PushAck;
+
+    fn on_res(
+        &self,
+        req: &P::Req,
+        res: &P::Res,
+    ) -> Result<(), Error>;
+
+    fn on_close(&self);
+}
