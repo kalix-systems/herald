@@ -39,6 +39,8 @@ pub trait SigStore: StoreLike {
         key: sig::PublicKey,
         valid_for: UserId,
     ) -> Result<bool, Self::Error>;
+
+    fn all_active_keys(&mut self) -> Result<Vec<sig::PublicKey>, Self::Error>;
 }
 
 pub trait ConversationStore: StoreLike {
@@ -57,7 +59,7 @@ pub trait ConversationStore: StoreLike {
     fn get_members(
         &mut self,
         cid: ConversationId,
-    ) -> Result<Option<Vec<UserId>>, Self::Error>;
+    ) -> Result<Vec<UserId>, Self::Error>;
 
     fn member_of(
         &mut self,
@@ -71,7 +73,7 @@ pub trait PendingStore: StoreLike {
         &mut self,
         id: PayloadId,
         payload: Payload,
-        to: Vec<sig::PublicKey>,
+        to: &Vec<sig::PublicKey>,
     ) -> Result<(), Self::Error>;
 
     fn get_pending_payload(
