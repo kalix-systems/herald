@@ -136,6 +136,7 @@ Popup {
                         id: conf
                         checked: false
                         anchors.right: parent.right
+                        anchors.rightMargin: CmnCfg.defaultMargin
                     }
                 }
 
@@ -200,7 +201,8 @@ Popup {
                                                         )))
                                             return
 
-                                        Herald.users.setColor(idx, colorIndex)
+                                        Herald.users.setUserColor(idx,
+                                                                  colorIndex)
                                     }
                                 }
                             }

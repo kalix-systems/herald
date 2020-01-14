@@ -12,34 +12,6 @@ impl Interface for Messages {
     ) -> Self {
         Self::new_(emit, model, builder)
     }
-    // TODO remove
-    //    fn is_empty(&self) -> bool {
-    //        self.is_empty_()
-    //    }
-    //
-    //    fn last_author(&self) -> Option<ffi::UserId> {
-    //        self.last_author_()
-    //    }
-    //
-    //    fn last_status(&self) -> Option<u32> {
-    //        self.last_status_()
-    //    }
-    //
-    //    fn last_body(&self) -> Option<String> {
-    //        self.last_body_()
-    //    }
-    //
-    //    fn last_time(&self) -> Option<i64> {
-    //        self.last_time_()
-    //    }
-    //
-    //    fn last_aux_code(&self) -> Option<u8> {
-    //        self.last_aux_code_()
-    //    }
-    //
-    //    fn last_has_attachments(&self) -> Option<bool> {
-    //        self.last_has_attachments_()
-    //    }
 
     fn typing_user_id(&self) -> Option<ffi::UserIdRef> {
         self.typing_user.as_ref()?.as_str().into()

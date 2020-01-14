@@ -90,7 +90,7 @@ Popup {
                         pfpPath: Utils.safeStringOrDefault(convoData.picture,
                                                            "")
 
-                        color: CmnCfg.palette.avatarColors[convoData.color]
+                        color: CmnCfg.palette.avatarColors[convoData.conversationColor]
                         size: parent.height
                         textColor: CmnCfg.palette.iconFill
                         initials: Utils.initialize(convoData.title)
@@ -207,7 +207,7 @@ Popup {
                     property var memberData: model
                     Common.PlatonicRectangle {
                         boxTitle: memberData.name
-                        boxColor: memberData.color
+                        boxColor: memberData.memberColor
                         picture: Utils.safeStringOrDefault(memberData.picture,
                                                            "")
                         color: CmnCfg.palette.white
