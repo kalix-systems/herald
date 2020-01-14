@@ -1,10 +1,18 @@
 use super::*;
 use crate::types::{cmessages, dmessages};
 
+/// Outcome of sending a `ConversationMessage`
+pub enum SendOutcome {
+    /// Message sent succesfully
+    Success,
+    /// Message was placed in pending
+    Pending,
+}
+
 pub(crate) fn send_cmessage(
     cid: ConversationId,
     content: &ConversationMessage,
-) -> Result<(), HErr> {
+) -> Result<SendOutcome, HErr> {
     if CAUGHT_UP.load(Ordering::Acquire) {
         let cm = cmessages::seal(cid, &content)?;
 
@@ -15,7 +23,7 @@ pub(crate) fn send_cmessage(
         let req = push_users::Req { to, exc, msg };
 
         match helper::push_users(&req) {
-            Ok(push_users::Res::Success) => Ok(()),
+            Ok(push_users::Res::Success) => Ok(SendOutcome::Success),
             Ok(push_users::Res::Missing(missing)) => Err(HeraldError(format!(
                 "tried to send messages to nonexistent users {:?}",
                 missing
@@ -31,11 +39,13 @@ pub(crate) fn send_cmessage(
 
                 CAUGHT_UP.store(false, Ordering::Release);
 
-                pending::add_to_pending(cid, content)
+                pending::add_to_pending(cid, content)?;
+                Ok(SendOutcome::Pending)
             }
         }
     } else {
-        pending::add_to_pending(cid, content)
+        pending::add_to_pending(cid, content)?;
+        Ok(SendOutcome::Pending)
     }
 }
 
