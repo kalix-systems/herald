@@ -23,9 +23,6 @@ path = "../kcl"
 path = "../krpc"
 default-features = false
 
-[dependencies.kson_channel]
-path = "../kson_channel"
-
 [dependencies.tokio]
 version = "0.2"
 features = ["io-util"]

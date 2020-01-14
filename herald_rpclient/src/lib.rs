@@ -72,7 +72,7 @@ impl Client {
             .await
             .context("failed to write auth method")?;
 
-        tx.write_ser(keys.public_key())
+        tx.write_ser(keys.public())
             .await
             .context("failed to write public key")?;
         let res: ClaimResponse = rx.read_de().await.context("failed to read ClaimResponse")?;
@@ -85,7 +85,8 @@ impl Client {
         rx.read_exact(&mut cbuf)
             .await
             .context("failed to read challenge")?;
-        let sig = keys.secret_key().sign(&cbuf);
+
+        let sig = keys.secret().sign(&cbuf);
         tx.write_all(sig.as_ref())
             .await
             .context("failed to write challenge response")?;

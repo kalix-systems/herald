@@ -750,7 +750,6 @@ dependencies = [
  "kcl 0.1.0",
  "krpc 0.1.0",
  "kson 0.1.0",
- "kson_channel 0.1.0",
  "rusqlite 0.21.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "tokio 0.2.6 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
