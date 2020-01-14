@@ -19,6 +19,11 @@ private = true
 command = "mkdir"
 args = ["-p", "${OUT_DIR}"]
 
+[tasks.make_out_dir.mac]
+private = true
+command = "mkdir"
+args = ["-p", "build"]
+
 
 # Installs the `linuxdeploy` tool, and plugins
 [tasks.install_linuxdeploy]
@@ -46,6 +51,19 @@ script = [
   '''
 ]
 
+[tasks.check_macdeployqt_installation]
+script = [
+  '''
+  if ! [ -x "$(command -v macdeployqt)" ]; then
+    echo "Error: qmake is not installed." >&2
+    exit 1
+  fi
+  if ! qmake -v | grep "[5-9].1[4-9]"; then 
+    echo "Error: macdeployqt version in the PATH is too low, run Brew update or the qt maintenance tool to get a the correct version" >&2
+    exit 1
+  fi
+  '''
+]
 
 # Runs qmake
 [tasks.run_qmake]
@@ -57,10 +75,18 @@ args = ["client/desktop/herald.pro",
 	"-o", "${OUT_DIR}/Makefile"]
 dependencies = ["check_qmake_installation", "make_out_dir"]
 
+# Runs qmake macos
+[tasks.run_qmake.mac]
+private = true
+command = "qmake"
+args = ["client/desktop/herald.pro",
+	"CONFIG+=qtquickcompiler",
+	"-o", "build/Makefile"]
+dependencies = ["check_qmake_installation","check_macdeployqt_installation", "make_out_dir"]
 
 [tasks.setup_outdir]
 workspace = false
-dependencies = ["install_linuxdeploy", "build_libherald", "run_qmake"]
+dependencies = ["build_libherald", "run_qmake"]
 
 
 [tasks.run_make]
@@ -71,6 +97,15 @@ script = [
 ]
 dependencies = ["setup_outdir"]
 
+[tasks.run_make.mac]
+script = [
+  '''
+ make -C build
+  '''
+]
+dependencies = ["setup_outdir"]
+
+
 
 [tasks.run_make_install]
 workspace = false
@@ -79,6 +114,12 @@ args = ["-C", "${OUT_DIR}",
 	"install", "INSTALL_ROOT=AppDir"]
 dependencies = ["run_make"]
 
+
+[tasks.run_make_install.mac]
+workspace = false
+command = "make"
+args = ["-C", "build"]
+dependencies = ["run_make"]
 
 [tasks.build_appimage]
 workspace = false
@@ -96,3 +137,20 @@ script = [
   '''
 ]
 dependencies = ["run_make_install"]
+
+[tasks.build_appbundle]
+workspace = false
+script = [
+'''
+   export QML_SOURCES_PATHS=../client/desktop
+ 
+   cd build
+
+   macdeployqt \
+     herald.app \
+    -qmldir=../client/desktop 
+ 
+'''
+]
+dependencies = ["run_make_install"]
+

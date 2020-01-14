@@ -14,13 +14,12 @@ ObjectiveUtils::ObjectiveUtils(){
 
 @interface FileDialogHelper :NSObject<UIDocumentPickerDelegate> {
   id delegate;
-  NSArray<NSString *> * filenames;
+  NSString* filename;
 }
 
 - (void)openDocumentPicker;
-
+- (void)openCameraView;
 - (void)documentPicker:(UIDocumentPickerViewController *)controller didPickDocumentsAtURLs:(NSArray<NSURL *> *)urls;
-
 - (void)documentPickerWasCancelled:(UIDocumentPickerViewController *)controller;
 
 @end
@@ -29,16 +28,23 @@ ObjectiveUtils::ObjectiveUtils(){
 
 - (void) openDocumentPicker {
     auto *rvc =  [[UIApplication sharedApplication].keyWindow rootViewController];
-    UIDocumentPickerViewController* dp = [[UIDocumentPickerViewController alloc] initWithDocumentTypes:@[(NSString *)kUTTypePDF] inMode:UIDocumentPickerModeImport];
+    UIDocumentPickerViewController* dp = [[UIDocumentPickerViewController alloc] initWithDocumentTypes:@[(NSString *)kUTTypeText,(NSString *)kUTTypePDF,(NSString *)kUTTypeAudiovisualContent, (NSString *)kUTTypeImage] inMode:UIDocumentPickerModeImport];
     [rvc presentViewController:dp animated: YES completion: nil];
 }
 
 - (void)documentPicker:(UIDocumentPickerViewController *)controller didPickDocumentsAtURLs:(NSArray<NSURL *> *)urls {
-    
-    
+    for(NSURL* url in urls) {
+        NSLog(@"%@", url);
+    }
+    // just return the first item of the urls array for simplicity
+    filename = urls[0].absoluteString;
 }
 
 - (void)documentPickerWasCancelled:(UIDocumentPickerViewController *)controller {
+    filename = @"";
+}
+
+- (void) openCameraView {
     
 }
 
@@ -63,7 +69,7 @@ QString ObjectiveUtils::launch_file_picker()
 {
     FileDialogHelper* dialog = [[FileDialogHelper alloc] init];
     [dialog openDocumentPicker];
-    return QString("");
+    return QString([[dialog filename] UTF8String]);
 }
 
 @end
