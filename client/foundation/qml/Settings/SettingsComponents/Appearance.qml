@@ -19,8 +19,9 @@ Column {
             id: themeLabel
             text: qsTr("Theme")
             color: "black"
-            font: CmnCfg.defaultFont
             anchors.top: parent.top
+                font.family: CmnCfg.chatFont.name
+                font.pixelSize: CmnCfg.chatTextSize
         }
 
         Item {
@@ -35,11 +36,15 @@ Column {
 
             ConfRadio {
                 text: qsTr("Dark")
+                font.family: CmnCfg.chatFont.name
+                font.pixelSize: CmnCfg.chatTextSize
             }
 
             ConfRadio {
                 text: qsTr("Light")
                 checked: true
+                font.family: CmnCfg.chatFont.name
+                font.pixelSize: CmnCfg.chatTextSize
             }
         }
     }

@@ -13,14 +13,14 @@ Column {
         leftPadding: CmnCfg.defaultMargin
         height: notifLabel.height
         width: parent.width
-        Label {
+        StandardLabel {
             id: notifLabel
             text: qsTr("Notifications")
             color: "black"
             wrapMode: Label.WrapAtWordBoundaryOrAnywhere
-            font.pixelSize: CmnCfg.defaultFontSize
-            font.family: CmnCfg.chatFont.name
             anchors.verticalCenter: parent.verticalCenter
+                font.family: CmnCfg.chatFont.name
+                font.pixelSize: CmnCfg.chatTextSize
         }
         Item {
             height: 10
@@ -43,14 +43,14 @@ Column {
         leftPadding: CmnCfg.defaultMargin
         height: silentLabel.height
         width: parent.width
-        Label {
+        StandardLabel {
             id: silentLabel
             text: qsTr("Silent")
             color: "black"
             wrapMode: Label.WrapAtWordBoundaryOrAnywhere
-            font.pixelSize: CmnCfg.defaultFontSize
-            font.family: CmnCfg.chatFont.name
             anchors.verticalCenter: parent.verticalCenter
+                font.family: CmnCfg.chatFont.name
+                font.pixelSize: CmnCfg.chatTextSize
         }
 
         Item {
@@ -73,14 +73,14 @@ Column {
         leftPadding: CmnCfg.defaultMargin
         height: authorLabel.height
         width: parent.width
-        Label {
+        StandardLabel {
             id: authorLabel
             text: qsTr("Show author name")
             color: "black"
             wrapMode: Label.WrapAtWordBoundaryOrAnywhere
-            font.pixelSize: CmnCfg.defaultFontSize
-            font.family: CmnCfg.chatFont.name
             anchors.verticalCenter: parent.verticalCenter
+                font.family: CmnCfg.chatFont.name
+                font.pixelSize: CmnCfg.chatTextSize
         }
 
         Item {
@@ -102,14 +102,14 @@ Column {
         leftPadding: CmnCfg.defaultMargin
         height: messageLabel.height
         width: parent.width
-        Label {
+        StandardLabel {
             id: messageLabel
             text: qsTr("Show message body")
             color: "black"
             wrapMode: Label.WrapAtWordBoundaryOrAnywhere
-            font.pixelSize: CmnCfg.defaultFontSize
-            font.family: CmnCfg.chatFont.name
             anchors.verticalCenter: parent.verticalCenter
+                font.family: CmnCfg.chatFont.name
+                font.pixelSize: CmnCfg.chatTextSize
         }
         Item {
             height: 10

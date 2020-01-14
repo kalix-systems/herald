@@ -53,7 +53,8 @@ Rectangle {
             id: label
             text: currentItem
             anchors.verticalCenter: parent.verticalCenter
-            font: self.labelFont
+            font.family: CmnCfg.chatFont.name
+            font.pixelSize: CmnCfg.chatTextSize
         }
 
         Image {

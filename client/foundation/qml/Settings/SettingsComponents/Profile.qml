@@ -21,12 +21,14 @@ ColumnLayout {
             text: qsTr("Username: ")
             color: "black"
             Layout.leftMargin: CmnCfg.defaultMargin
-            font: CmnCfg.defaultFont
+            font.family: CmnCfg.chatFont.name
+            font.pixelSize: CmnCfg.chatTextSize
         }
         StandardLabel {
             text: Herald.config.configId
             color: CmnCfg.palette.black
-            font: CmnCfg.defaultFont
+            font.family: CmnCfg.chatFont.name
+            font.pixelSize: CmnCfg.chatTextSize
         }
     }
 

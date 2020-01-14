@@ -16,7 +16,8 @@ Column {
             id: language
             text: qsTr("Language")
             color: CmnCfg.palette.black
-            font: CmnCfg.defaultFont
+                font.family: CmnCfg.chatFont.name
+                font.pixelSize: CmnCfg.chatTextSize
         }
 
         Item {
@@ -37,13 +38,13 @@ Column {
 
     Column {
         Row {
-            //  height: app.height
             leftPadding: CmnCfg.defaultMargin
             StandardLabel {
                 id: app
                 text: qsTr("App Info")
                 color: "black"
-                font: CmnCfg.defaultFont
+                font.family: CmnCfg.chatFont.name
+                font.pixelSize: CmnCfg.chatTextSize
             }
 
             Item {
@@ -55,9 +56,10 @@ Column {
                 StandardLabel {
                     text: qsTr("Version ") + "0.0.1-alpha"
                     color: "black"
-                    font: CmnCfg.defaultFont
                     Layout.maximumWidth: wrapper.width * 0.33 - CmnCfg.microMargin
                     wrapMode: Label.WrapAtWordBoundaryOrAnywhere
+                font.family: CmnCfg.chatFont.name
+                font.pixelSize: CmnCfg.chatTextSize
                 }
             }
         }

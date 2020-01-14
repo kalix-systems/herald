@@ -20,7 +20,8 @@ Column {
                 Layout.maximumWidth: wrapper.width * 0.66 - CmnCfg.smallMargin
                 color: CmnCfg.palette.black
                 wrapMode: Label.WrapAtWordBoundaryOrAnywhere
-                font: CmnCfg.defaultFont
+                font.family: CmnCfg.chatFont.name
+                font.pixelSize: CmnCfg.chatTextSize
             }
         }
 

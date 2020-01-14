@@ -28,9 +28,10 @@ RadioButton {
     }
     contentItem: Text {
         text: control.text
-        font: control.font
         anchors.verticalCenter: indic.verticalCenter
         anchors.verticalCenterOffset: 2
+        font.family: CmnCfg.chatFont.name
+        font.pixelSize: CmnCfg.chatTextSize
         leftPadding: control.indicator.width + control.spacing
     }
 }
