@@ -253,7 +253,7 @@ Popup {
                         height: CmnCfg.avatarSize
                         pfpPath: Utils.safeStringOrDefault(
                                      model.profilePicture, "")
-                        color: CmnCfg.avatarColors[model.color]
+                        color: CmnCfg.avatarColors[model.userColor]
                         initials: Utils.initialize(name)
                         MouseArea {
                             cursorShape: Qt.PointingHandCursor

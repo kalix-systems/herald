@@ -57,15 +57,14 @@ Column {
             }
 
             PlatonicRectangle {
-                boxColor: contactData.color
+                boxColor: contactData.userColor
                 boxTitle: contactData.name
-                picture: Utils.safeStringOrDefault(
-                             contactData.profilePicture, "")
+                picture: Utils.safeStringOrDefault(contactData.profilePicture,
+                                                   "")
 
-                labelComponent: Entity.ContactLabel  {
+                labelComponent: Entity.ContactLabel {
                     displayName: contactData.name
                     username: contactData.userId
-
                 }
             }
 

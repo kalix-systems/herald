@@ -196,11 +196,6 @@ pub trait UsersSearchTrait {
     ) {
     }
 
-    fn color(
-        &self,
-        index: usize,
-    ) -> Option<u32>;
-
     fn matched(
         &self,
         index: usize,
@@ -226,6 +221,11 @@ pub trait UsersSearchTrait {
         index: usize,
         _: bool,
     ) -> bool;
+
+    fn user_color(
+        &self,
+        index: usize,
+    ) -> Option<u32>;
 
     fn user_id(
         &self,
@@ -381,15 +381,6 @@ pub unsafe extern "C" fn users_search_sort(
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn users_search_data_color(
-    ptr: *const UsersSearch,
-    row: c_int,
-) -> COption<u32> {
-    let obj = &*ptr;
-    obj.color(to_usize(row).unwrap_or(0)).into()
-}
-
-#[no_mangle]
 pub unsafe extern "C" fn users_search_data_matched(
     ptr: *const UsersSearch,
     row: c_int,
@@ -444,6 +435,15 @@ pub unsafe extern "C" fn users_search_set_data_selected(
     value: bool,
 ) -> bool {
     (&mut *ptr).set_selected(to_usize(row).unwrap_or(0), value)
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn users_search_data_user_color(
+    ptr: *const UsersSearch,
+    row: c_int,
+) -> COption<u32> {
+    let obj = &*ptr;
+    obj.user_color(to_usize(row).unwrap_or(0)).into()
 }
 
 #[no_mangle]

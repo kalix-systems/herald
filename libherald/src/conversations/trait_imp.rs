@@ -18,7 +18,7 @@ impl ConversationsTrait for Conversations {
         self.row_count_()
     }
 
-    fn color(
+    fn conversation_color(
         &self,
         index: usize,
     ) -> u32 {

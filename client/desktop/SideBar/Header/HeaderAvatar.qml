@@ -10,23 +10,22 @@ import "qrc:/imports/js/utils.mjs" as Utils
 
 Avatar {
     id: headerAvatar
-    color: CmnCfg.palette.avatarColors[Herald.config.color]
+    color: CmnCfg.palette.avatarColors[Herald.config.configColor]
     initials: Herald.config.name[0].toUpperCase()
     pfpPath: Utils.safeStringOrDefault(Herald.config.profilePicture, "")
     size: 28
 
-
     // TODO onclicked this should open identity switcher, once that exists;
     // uncomment following code once identity switcher is implemented
-//    MouseArea {
-//        id: avatarHoverHandler
-//        anchors.fill: parent
+    //    MouseArea {
+    //        id: avatarHoverHandler
+    //        anchors.fill: parent
 
-//        cursorShape: Qt.PointingHandCursor
+    //        cursorShape: Qt.PointingHandCursor
 
-//        onPressed: overlay.visible = true
-//        onReleased: overlay.visible = false
-//    }
+    //        onPressed: overlay.visible = true
+    //        onReleased: overlay.visible = false
+    //    }
 
     //TODO dead code?
     ColorOverlay {

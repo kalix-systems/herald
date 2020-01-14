@@ -184,11 +184,6 @@ pub trait UsersTrait {
 
     fn clear_filter(&mut self) -> ();
 
-    fn color_by_id(
-        &self,
-        id: String,
-    ) -> u32;
-
     fn index_by_id(
         &self,
         id: String,
@@ -205,6 +200,11 @@ pub trait UsersTrait {
     ) -> String;
 
     fn toggle_filter_regex(&mut self) -> bool;
+
+    fn user_color_by_id(
+        &self,
+        id: String,
+    ) -> u32;
 
     fn row_count(&self) -> usize;
 
@@ -237,17 +237,6 @@ pub trait UsersTrait {
     ) {
     }
 
-    fn color(
-        &self,
-        index: usize,
-    ) -> u32;
-
-    fn set_color(
-        &mut self,
-        index: usize,
-        _: u32,
-    ) -> bool;
-
     fn matched(
         &self,
         index: usize,
@@ -277,6 +266,17 @@ pub trait UsersTrait {
         &mut self,
         index: usize,
         _: u8,
+    ) -> bool;
+
+    fn user_color(
+        &self,
+        index: usize,
+    ) -> u32;
+
+    fn set_user_color(
+        &mut self,
+        index: usize,
+        _: u32,
     ) -> bool;
 
     fn user_id(
@@ -363,18 +363,6 @@ pub unsafe extern "C" fn users_clear_filter(ptr: *mut Users) {
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn users_color_by_id(
-    ptr: *const Users,
-    id_str: *const c_ushort,
-    id_len: c_int,
-) -> u32 {
-    let obj = &*ptr;
-    let mut id = String::new();
-    set_string_from_utf16(&mut id, id_str, id_len);
-    obj.color_by_id(id)
-}
-
-#[no_mangle]
 pub unsafe extern "C" fn users_index_by_id(
     ptr: *const Users,
     id_str: *const c_ushort,
@@ -422,6 +410,18 @@ pub unsafe extern "C" fn users_profile_picture_by_id(
 pub unsafe extern "C" fn users_toggle_filter_regex(ptr: *mut Users) -> bool {
     let obj = &mut *ptr;
     obj.toggle_filter_regex()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn users_user_color_by_id(
+    ptr: *const Users,
+    id_str: *const c_ushort,
+    id_len: c_int,
+) -> u32 {
+    let obj = &*ptr;
+    let mut id = String::new();
+    set_string_from_utf16(&mut id, id_str, id_len);
+    obj.user_color_by_id(id)
 }
 
 #[no_mangle]
@@ -510,24 +510,6 @@ pub unsafe extern "C" fn users_sort(
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn users_data_color(
-    ptr: *const Users,
-    row: c_int,
-) -> u32 {
-    let obj = &*ptr;
-    obj.color(to_usize(row).unwrap_or(0))
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn users_set_data_color(
-    ptr: *mut Users,
-    row: c_int,
-    value: u32,
-) -> bool {
-    (&mut *ptr).set_color(to_usize(row).unwrap_or(0), value)
-}
-
-#[no_mangle]
 pub unsafe extern "C" fn users_data_matched(
     ptr: *const Users,
     row: c_int,
@@ -593,6 +575,24 @@ pub unsafe extern "C" fn users_set_data_status(
     value: u8,
 ) -> bool {
     (&mut *ptr).set_status(to_usize(row).unwrap_or(0), value)
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn users_data_user_color(
+    ptr: *const Users,
+    row: c_int,
+) -> u32 {
+    let obj = &*ptr;
+    obj.user_color(to_usize(row).unwrap_or(0))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn users_set_data_user_color(
+    ptr: *mut Users,
+    row: c_int,
+    value: u32,
+) -> bool {
+    (&mut *ptr).set_user_color(to_usize(row).unwrap_or(0), value)
 }
 
 #[no_mangle]
