@@ -63,25 +63,17 @@ Column {
             AnimIconButton {
                 color: CmnCfg.palette.black
                 onTapped: if (send) {
-                              const msgText = function () {
-                                  if ((cta.text.length !== 0)
-                                          && (cta.text.length !== 0)) {
-                                      return cta.text + " " + cta.preeditText
-                                  }
-
-                                  if (cta.text.length !== 0) {
-                                      return cta.text
-                                  }
-
-                                  return cta.preeditText
-                              }
-
                               Qt.inputMethod.commit()
-                              ownedMessages.builder.body = cta.text //msgText()
+                              ownedMessages.builder.body = cta.text
                               cta.focus = true
                               ownedMessages.builder.finalize()
                               cta.clear()
+                          } else {
+                              if (Qt.platform === "ios") {
+                                  MobileHelper.launch_file_picker()
+                              }
                           }
+
                 imageSource: send ? "qrc:/send-icon.svg" : "qrc:/plus-icon.svg"
             }
         }
