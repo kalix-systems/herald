@@ -32,7 +32,7 @@ Page {
             delegate: ConversationItem {
                 property var conversationData: model
                 itemTitle: title
-                colorCode: model.color
+                colorCode: model.conversationColor
                 imageSource: Utils.safeStringOrDefault(model.picture, "")
                 isGroup: !model.pairwise
                 lastMsgDigest: model.lastMsgDigest

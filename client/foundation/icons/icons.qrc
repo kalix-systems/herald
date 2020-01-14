@@ -70,5 +70,7 @@
         <file>read-receipt-sending-icon.svg</file>
         <file>read-receipt-sent-icon.svg</file>
         <file>info-icon.svg</file>
+        <file>zoom-in-icon.svg</file>
+        <file>zoom-out-icon.svg</file>
     </qresource>
 </RCC>

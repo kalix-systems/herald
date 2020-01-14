@@ -45,7 +45,7 @@ impl ConfigTrait for Config {
     }
 
     /// Returns the color of the current user.
-    fn color(&self) -> u32 {
+    fn config_color(&self) -> u32 {
         none!(self.inner.as_ref(), 0).color
     }
 
@@ -55,7 +55,7 @@ impl ConfigTrait for Config {
     }
 
     /// Sets the color of the current user.
-    fn set_color(
+    fn set_config_color(
         &mut self,
         color: u32,
     ) {
@@ -63,7 +63,7 @@ impl ConfigTrait for Config {
         spawn!(core::set_color(color));
         inner.color = color;
 
-        self.emit.color_changed();
+        self.emit.config_color_changed();
     }
 
     /// Sets the name of the current user.

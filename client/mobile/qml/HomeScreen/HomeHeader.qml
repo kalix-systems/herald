@@ -17,7 +17,7 @@ ToolBar {
     }
     Avatar {
         id: avatar
-        color: CmnCfg.palette.avatarColors[Herald.config.color]
+        color: CmnCfg.palette.avatarColors[Herald.config.configColor]
         initials: Herald.config.name[0].toUpperCase()
         pfpPath: Utils.safeStringOrDefault(Herald.config.profilePicture, "")
         size: CmnCfg.identityAvatarDiameter

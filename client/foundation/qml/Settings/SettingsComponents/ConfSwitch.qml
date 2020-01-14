@@ -7,8 +7,10 @@ import LibHerald 1.0
 Switch {
     id: control
 
+    padding: 0
     indicator: Rectangle {
         implicitWidth: 32
+
         implicitHeight: 12
         radius: 13
         x: control.leftPadding
@@ -17,8 +19,8 @@ Switch {
         Rectangle {
             id: ctrl
             x: control.checked ? parent.width - width : 0
-            width: 16
-            height: 16
+            width: 18
+            height: 18
             radius: width
             anchors.verticalCenter: parent.verticalCenter
             color: control.checked ? CmnCfg.palette.offBlack : CmnCfg.palette.white

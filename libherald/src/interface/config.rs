@@ -4,7 +4,7 @@ pub struct ConfigQObject;
 
 pub struct ConfigEmitter {
     pub(super) qobject: Arc<AtomicPtr<ConfigQObject>>,
-    pub(super) color_changed: fn(*mut ConfigQObject),
+    pub(super) config_color_changed: fn(*mut ConfigQObject),
     pub(super) config_id_changed: fn(*mut ConfigQObject),
     pub(super) name_changed: fn(*mut ConfigQObject),
     pub(super) nts_conversation_id_changed: fn(*mut ConfigQObject),
@@ -22,7 +22,7 @@ impl ConfigEmitter {
     pub fn clone(&mut self) -> ConfigEmitter {
         ConfigEmitter {
             qobject: self.qobject.clone(),
-            color_changed: self.color_changed,
+            config_color_changed: self.config_color_changed,
             config_id_changed: self.config_id_changed,
             name_changed: self.name_changed,
             nts_conversation_id_changed: self.nts_conversation_id_changed,
@@ -37,11 +37,11 @@ impl ConfigEmitter {
             .store(n as *mut ConfigQObject, Ordering::SeqCst);
     }
 
-    pub fn color_changed(&mut self) {
+    pub fn config_color_changed(&mut self) {
         let ptr = self.qobject.load(Ordering::SeqCst);
 
         if !ptr.is_null() {
-            (self.color_changed)(ptr);
+            (self.config_color_changed)(ptr);
         }
     }
 
@@ -91,9 +91,9 @@ pub trait ConfigTrait {
 
     fn emit(&mut self) -> &mut ConfigEmitter;
 
-    fn color(&self) -> u32;
+    fn config_color(&self) -> u32;
 
-    fn set_color(
+    fn set_config_color(
         &mut self,
         value: u32,
     );
@@ -135,7 +135,7 @@ pub unsafe fn config_new_inner(ptr_bundle: *mut ConfigPtrBundle) -> Config {
 
     let ConfigPtrBundle {
         config,
-        config_color_changed,
+        config_config_color_changed,
         config_config_id_changed,
         config_name_changed,
         config_nts_conversation_id_changed,
@@ -144,7 +144,7 @@ pub unsafe fn config_new_inner(ptr_bundle: *mut ConfigPtrBundle) -> Config {
     } = ptr_bundle;
     let config_emit = ConfigEmitter {
         qobject: Arc::new(AtomicPtr::new(config)),
-        color_changed: config_color_changed,
+        config_color_changed: config_config_color_changed,
         config_id_changed: config_config_id_changed,
         name_changed: config_name_changed,
         nts_conversation_id_changed: config_nts_conversation_id_changed,
@@ -177,16 +177,16 @@ pub unsafe extern "C" fn config_set_profile_picture(
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn config_color_get(ptr: *const Config) -> u32 {
-    (&*ptr).color()
+pub unsafe extern "C" fn config_config_color_get(ptr: *const Config) -> u32 {
+    (&*ptr).config_color()
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn config_color_set(
+pub unsafe extern "C" fn config_config_color_set(
     ptr: *mut Config,
     value: u32,
 ) {
-    (&mut *ptr).set_color(value)
+    (&mut *ptr).set_config_color(value)
 }
 
 #[no_mangle]
@@ -268,7 +268,7 @@ pub unsafe extern "C" fn config_profile_picture_get(
 #[repr(C)]
 pub struct ConfigPtrBundle {
     config: *mut ConfigQObject,
-    config_color_changed: fn(*mut ConfigQObject),
+    config_config_color_changed: fn(*mut ConfigQObject),
     config_config_id_changed: fn(*mut ConfigQObject),
     config_name_changed: fn(*mut ConfigQObject),
     config_nts_conversation_id_changed: fn(*mut ConfigQObject),

@@ -2,7 +2,7 @@ import QtQuick 2.13
 import QtQuick.Controls 2.13
 import QtQuick.Layouts 1.12
 import LibHerald 1.0
-import '../../'
+import "../../"
 
 ColumnLayout {
     spacing: CmnCfg.defaultMargin
@@ -16,7 +16,7 @@ ColumnLayout {
     }
 
     Rectangle {
-        color: CmnCfg.palette.darkGrey
+        color: CmnCfg.palette.medGrey
         height: 1
         Layout.fillWidth: true
     }
@@ -29,7 +29,7 @@ ColumnLayout {
     }
 
     Rectangle {
-        color: CmnCfg.palette.darkGrey
+        color: CmnCfg.palette.medGrey
         height: 1
         Layout.fillWidth: true
     }

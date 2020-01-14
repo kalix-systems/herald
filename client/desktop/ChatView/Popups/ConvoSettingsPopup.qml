@@ -91,7 +91,7 @@ Popup {
                     width: parent.width
                     Entity.Avatar {
                         id: itemAvatar
-                        color: CmnCfg.palette.avatarColors[convoData.color]
+                        color: CmnCfg.palette.avatarColors[convoData.conversationColor]
                         initials: contactMember.name[0].toUpperCase()
                         pfpPath: Utils.safeStringOrDefault(
                                      contactMember.picture)
@@ -168,7 +168,7 @@ Popup {
                         height: 18
                         width: height
                         radius: width
-                        color: CmnCfg.palette.avatarColors[convoData.color]
+                        color: CmnCfg.palette.avatarColors[convoData.conversationColor]
                         MouseArea {
                             id: mouseArea
                             anchors.fill: parent

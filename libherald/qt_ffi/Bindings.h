@@ -43,7 +43,7 @@ using UsersSearchPtrBundle = struct UsersSearchPtrBundle;
 using UtilsPtrBundle = struct UtilsPtrBundle;
 struct ConfigPtrBundle {
   Config *config;
-  void (*config_color_changed)(Config *);
+  void (*config_config_color_changed)(Config *);
   void (*config_config_id_changed)(Config *);
   void (*config_name_changed)(Config *);
   void (*config_nts_conversation_id_changed)(Config *);
@@ -246,7 +246,7 @@ struct ErrorsPtrBundle {
 struct HeraldPtrBundle {
   Herald *herald;
   Config *config;
-  void (*config_color_changed)(Config *);
+  void (*config_config_color_changed)(Config *);
   void (*config_config_id_changed)(Config *);
   void (*config_name_changed)(Config *);
   void (*config_nts_conversation_id_changed)(Config *);
@@ -631,7 +631,8 @@ public:
 private:
   Private *m_d;
   bool m_ownsPrivate;
-  Q_PROPERTY(quint32 color READ color WRITE setColor NOTIFY colorChanged FINAL)
+  Q_PROPERTY(quint32 configColor READ configColor WRITE setConfigColor NOTIFY
+                 configColorChanged FINAL)
   Q_PROPERTY(QString configId READ configId NOTIFY configIdChanged FINAL)
   Q_PROPERTY(QString name READ name WRITE setName NOTIFY nameChanged FINAL)
   Q_PROPERTY(QByteArray ntsConversationId READ ntsConversationId NOTIFY
@@ -645,8 +646,8 @@ private:
 public:
   explicit Config(QObject *parent = nullptr);
   ~Config() override;
-  quint32 color() const;
-  void setColor(quint32 v);
+  quint32 configColor() const;
+  void setConfigColor(quint32 v);
   QString configId() const;
   QString name() const;
   void setName(const QString &v);
@@ -656,7 +657,7 @@ public:
   QString profilePicture() const;
   Q_INVOKABLE void setProfilePicture(const QString &profile_picture);
 Q_SIGNALS:
-  void colorChanged();
+  void configColorChanged();
   void configIdChanged();
   void nameChanged();
   void ntsConversationIdChanged();
@@ -864,7 +865,7 @@ public:
 
   bool setData(const QModelIndex &index, const QVariant &value,
                int role = Qt::EditRole) override;
-  Q_INVOKABLE quint32 color(int row) const;
+  Q_INVOKABLE quint32 conversationColor(int row) const;
   Q_INVOKABLE QByteArray conversationId(int row) const;
   Q_INVOKABLE quint8 expirationPeriod(int row) const;
   Q_INVOKABLE bool setExpirationPeriod(int row, quint8 value);
@@ -1328,8 +1329,8 @@ public:
   removeRows(int row, int count,
              const QModelIndex &parent = QModelIndex()) override;
 
-  Q_INVOKABLE quint32 color(int row) const;
   Q_INVOKABLE bool matched(int row) const;
+  Q_INVOKABLE quint32 memberColor(int row) const;
   Q_INVOKABLE QString name(int row) const;
   Q_INVOKABLE QByteArray pairwiseConversationId(int row) const;
   Q_INVOKABLE QString profilePicture(int row) const;
@@ -1831,11 +1832,11 @@ public:
   void setFilterRegex(bool v);
   Q_INVOKABLE QByteArray add(const QString &id);
   Q_INVOKABLE void clearFilter();
-  Q_INVOKABLE quint32 colorById(const QString &id) const;
   Q_INVOKABLE qint64 indexById(const QString &id) const;
   Q_INVOKABLE QString nameById(const QString &id) const;
   Q_INVOKABLE QString profilePictureById(const QString &id) const;
   Q_INVOKABLE bool toggleFilterRegex();
+  Q_INVOKABLE quint32 userColorById(const QString &id) const;
   int columnCount(const QModelIndex &parent = QModelIndex()) const override;
   QVariant data(const QModelIndex &index,
                 int role = Qt::DisplayRole) const override;
@@ -1863,14 +1864,14 @@ public:
 
   bool setData(const QModelIndex &index, const QVariant &value,
                int role = Qt::EditRole) override;
-  Q_INVOKABLE quint32 color(int row) const;
-  Q_INVOKABLE bool setColor(int row, quint32 value);
   Q_INVOKABLE bool matched(int row) const;
   Q_INVOKABLE QString name(int row) const;
   Q_INVOKABLE QByteArray pairwiseConversationId(int row) const;
   Q_INVOKABLE QString profilePicture(int row) const;
   Q_INVOKABLE quint8 status(int row) const;
   Q_INVOKABLE bool setStatus(int row, quint8 value);
+  Q_INVOKABLE quint32 userColor(int row) const;
+  Q_INVOKABLE bool setUserColor(int row, quint32 value);
   Q_INVOKABLE QString userId(int row) const;
 
 Q_SIGNALS:
@@ -1948,12 +1949,12 @@ public:
 
   bool setData(const QModelIndex &index, const QVariant &value,
                int role = Qt::EditRole) override;
-  Q_INVOKABLE QVariant color(int row) const;
   Q_INVOKABLE bool matched(int row) const;
   Q_INVOKABLE QString name(int row) const;
   Q_INVOKABLE QString profilePicture(int row) const;
   Q_INVOKABLE bool selected(int row) const;
   Q_INVOKABLE bool setSelected(int row, bool value);
+  Q_INVOKABLE QVariant userColor(int row) const;
   Q_INVOKABLE QString userId(int row) const;
 
 Q_SIGNALS:

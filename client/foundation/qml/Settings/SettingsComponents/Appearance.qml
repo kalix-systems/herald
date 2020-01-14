@@ -3,40 +3,55 @@ import QtQuick.Controls 2.13
 import QtQuick.Layouts 1.12
 import QtQuick.Dialogs 1.3
 import LibHerald 1.0
-import '../../'
+import "../../"
 
-GridLayout {
-    columns: 2
-    rows: 1
-    columnSpacing: 0
+Column {
+    id: wrapper
+    width: parent.width
+    spacing: CmnCfg.smallMargin
+    Row {
+        anchors.left: parent.left
+        anchors.leftMargin: CmnCfg.defaultMargin
 
-    StandardLabel {
-        text: qsTr("Theme")
-        color: "black"
-        font: CmnCfg.defaultFont
-        Layout.leftMargin: CmnCfg.defaultMargin
-        Layout.fillWidth: true
-    }
-
-    Column {
-        spacing: CmnCfg.microMargin
-        Layout.rightMargin: CmnCfg.megaMargin
-
-        ConfRadio {
-            text: qsTr("Dark")
+        width: parent.width
+        height: buttonCol.height
+        StandardLabel {
+            id: themeLabel
+            text: qsTr("Theme")
+            color: "black"
+            anchors.top: parent.top
+                font.family: CmnCfg.chatFont.name
+                font.pixelSize: CmnCfg.chatTextSize
         }
 
-        ConfRadio {
-            text: qsTr("Light")
-            checked: true
+        Item {
+            height: 10
+            width: wrapper.width * 0.66 - themeLabel.width
+        }
+
+        Column {
+            id: buttonCol
+            anchors.top: parent.top
+            spacing: CmnCfg.smallMargin
+
+            ConfRadio {
+                text: qsTr("Dark")
+                font.family: CmnCfg.chatFont.name
+                font.pixelSize: CmnCfg.chatTextSize
+            }
+
+            ConfRadio {
+                text: qsTr("Light")
+                checked: true
+                font.family: CmnCfg.chatFont.name
+                font.pixelSize: CmnCfg.chatTextSize
+            }
         }
     }
 
     Rectangle {
-        color: CmnCfg.palette.darkGrey
+        color: CmnCfg.palette.medGrey
         height: 1
-        Layout.fillWidth: true
-        Layout.columnSpan: 2
+        width: parent.width
     }
-
 }

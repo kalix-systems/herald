@@ -71,7 +71,7 @@ impl Messages {
                 status,
             } => {
                 self.container
-                    .handle_receipt(msg_id, status, recipient, model);
+                    .handle_receipt(msg_id, status, recipient, model, emit, cid);
             }
 
             MsgUpdate::Reaction {
@@ -90,7 +90,7 @@ impl Messages {
             }
 
             MsgUpdate::SendDone(mid) => {
-                self.container.handle_send_done(mid, model);
+                self.container.handle_send_done(mid, model, emit, cid);
             }
 
             MsgUpdate::ExpiredMessages(mids) => {

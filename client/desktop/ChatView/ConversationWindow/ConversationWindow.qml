@@ -148,11 +148,11 @@ ListView {
                     authorColor: {
                         if (!outbound) {
                             if (conversationItem.pairwise) {
-                                return CmnCfg.palette.avatarColors[conversationItem.color]
+                                return CmnCfg.palette.avatarColors[conversationItem.conversationColor]
                             }
                             return CmnCfg.palette.avatarColors[messageModelData.authorColor]
                         }
-                        CmnCfg.palette.avatarColors[Herald.config.color]
+                        CmnCfg.palette.avatarColors[Herald.config.configColor]
                     }
 
                     convoExpiration: conversationItem.expirationPeriod

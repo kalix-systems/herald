@@ -259,12 +259,15 @@ fn test_handle_receipt() {
     let _ = container.insert_ord(msgmeta2, msgdata2);
 
     let model = &mut TestModel::new();
+    let mut emit = TestEmit::new();
 
     container.handle_receipt(
         msgmeta2.msg_id,
         coretypes::messages::ReceiptStatus::Read,
         "TEST".try_into().expect(womp!()),
         model,
+        &mut emit,
+        convid,
     );
 
     assert_eq!(model.data_changed_state.len(), 1);

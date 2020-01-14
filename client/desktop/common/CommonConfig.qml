@@ -39,6 +39,7 @@ Item {
     /// default font size for basic UI text
     readonly property int defaultFontSize: 14
     /// standard header size
+    readonly property int labelFontSize: 15
     readonly property int headerFontSize: 16
     /// size for contact/group name labels in lists
     readonly property int entityLabelSize: 14
@@ -96,7 +97,6 @@ Item {
     readonly property int middleZ: 5
     readonly property int bottomZ: 1
     readonly property int underlayZ: -1
-
 
     readonly property int attachmentSize: 300
 

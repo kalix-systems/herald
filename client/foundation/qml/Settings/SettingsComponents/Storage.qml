@@ -2,40 +2,74 @@ import QtQuick 2.13
 import QtQuick.Controls 2.13
 import QtQuick.Layouts 1.12
 import LibHerald 1.0
-import '../../'
+import "../../"
 
-GridLayout {
-    rows: 2
-    columns: 2
+Column {
+    id: wrapper
+    width: parent.width
+    spacing: CmnCfg.smallMargin
 
-    StandardLabel {
-        text: qsTr('Save conversation data to this device')
-        font: CmnCfg.defaultFont
-        color: CmnCfg.palette.black
-        Layout.fillWidth: true
-        Layout.leftMargin: CmnCfg.defaultMargin
-        wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+    Row {
+        height: implicitHeight
+        leftPadding: CmnCfg.defaultMargin
+        GridLayout {
+            anchors.verticalCenter: button.verticalCenter
+            StandardLabel {
+                id: save
+                text: qsTr('Save conversation data to disk')
+                color: CmnCfg.palette.black
+                wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                font.family: CmnCfg.chatFont.name
+                font.pixelSize: CmnCfg.chatTextSize
+                Layout.maximumWidth: wrapper.width * 0.66 - CmnCfg.smallMargin
+            }
+        }
+        Item {
+            height: 10
+            width: wrapper.width * 0.66 - save.width
+        }
+
+        TextButton {
+            id: button
+            text: qsTr("BACKUP")
+        }
     }
 
-    TextButton {
-        text: qsTr("BACK UP")
-        Layout.alignment: Qt.AlignCenter
-        Layout.rightMargin: CmnCfg.megaMargin
+    Rectangle {
+        color: CmnCfg.palette.medGrey
+        height: 1
+        width: parent.width
     }
 
-    StandardLabel {
-        text: qsTr("Last Backup Was : ") + "Never"
-        color: CmnCfg.palette.black
-        font: CmnCfg.defaultFont
-        Layout.fillWidth: true
-        Layout.leftMargin: CmnCfg.defaultMargin
-        wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+    Row {
+        height: implicitHeight
+        leftPadding: CmnCfg.defaultMargin
+        GridLayout {
+            anchors.verticalCenter: restorebutton.verticalCenter
+            StandardLabel {
+                id: load
+                text: qsTr("Load backup")
+                color: CmnCfg.palette.black
+                wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                font.family: CmnCfg.chatFont.name
+                font.pixelSize: CmnCfg.chatTextSize
+                Layout.maximumWidth: wrapper.width * 0.66 - CmnCfg.smallMargin
+            }
+        }
+        Item {
+            height: 10
+            width: wrapper.width * 0.66 - load.width
+        }
+
+        TextButton {
+            id: restorebutton
+            text: qsTr("RESTORE")
+        }
     }
 
-    TextButton {
-        text: qsTr("RESTORE")
-        Layout.alignment: Qt.AlignCenter
-        Layout.rightMargin: CmnCfg.megaMargin
+    Rectangle {
+        color: CmnCfg.palette.medGrey
+        height: 1
+        width: parent.width
     }
-
 }

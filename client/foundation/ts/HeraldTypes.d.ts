@@ -128,7 +128,7 @@ declare class Message extends Item {}
 declare class Users {
   add(userid: UserId): ConversationID;
   setStatus(rowIndex: number, status: UserStatus): boolean;
-  setColor(rowIndex: number, colorCode: number): boolean;
+  setUserColor(rowIndex: number, colorCode: number): boolean;
   pairwiseConversationId(rowIndex: number): ConversationID;
   indexFromConversationId(conversationID: ConversationID): number;
   toggleFilterRegexFilterRegex(): boolean;
@@ -140,7 +140,7 @@ declare class User {
   name?: string;
   profilePicture?: string;
   // TODO const enum for colors
-  color: number;
+  userColor: number;
   status: UserStatus;
   matched: boolean;
 }
@@ -155,7 +155,7 @@ declare class Config {
   name: string;
   pfpUrl?: string;
   // TODO replace this number with a const enum
-  color: number;
+  configColor: number;
 }
 
 declare class Conversations {

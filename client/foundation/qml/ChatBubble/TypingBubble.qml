@@ -9,7 +9,7 @@ Rectangle {
     property var typingUser: parent.typingUser
 
     property string typingUserName: Herald.users.nameById(typingUser)
-    property color typingUserColor: CmnCfg.palette.avatarColors[Herald.users.colorById(
+    property color typingUserColor: CmnCfg.palette.avatarColors[Herald.users.userColorById(
                                                                     typingUser)]
     property string typingUserProfilePicture: Herald.users.profilePictureById(
                                                   typingUser)
