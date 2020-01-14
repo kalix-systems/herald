@@ -209,7 +209,7 @@ Popup {
                     property var memberData: model
                     Common.PlatonicRectangle {
                         boxTitle: memberData.name
-                        boxColor: memberData.color
+                        boxColor: memberData.memberColor
                         picture: Utils.safeStringOrDefault(
                                      memberData.profilePicture, "")
                         property MouseArea hoverHandler
