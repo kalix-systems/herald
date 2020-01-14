@@ -5,14 +5,15 @@ import LibHerald 1.0
 import "../../"
 
 ColumnLayout {
-    spacing: CmnCfg.defaultMargin
+    spacing: CmnCfg.smallMargin
 
     StandardLabel {
         text: qsTr("Open help center")
         color: "#0066cc"
         Layout.leftMargin: CmnCfg.defaultMargin
         Layout.topMargin: CmnCfg.smallMargin
-        font: CmnCfg.defaultFont
+        font.family: CmnCfg.chatFont.name
+        font.pixelSize: CmnCfg.chatTextSize
     }
 
     Rectangle {
@@ -25,7 +26,8 @@ ColumnLayout {
         text: qsTr("Report an issue")
         color: "#0066cc"
         Layout.leftMargin: CmnCfg.defaultMargin
-        font: CmnCfg.defaultFont
+        font.family: CmnCfg.chatFont.name
+        font.pixelSize: CmnCfg.chatTextSize
     }
 
     Rectangle {

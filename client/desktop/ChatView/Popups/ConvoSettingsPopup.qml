@@ -136,6 +136,7 @@ Popup {
                         id: conf
                         checked: false
                         anchors.right: parent.right
+                        anchors.rightMargin: CmnCfg.defaultMargin
                     }
                 }
 
