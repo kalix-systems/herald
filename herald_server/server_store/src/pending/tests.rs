@@ -79,10 +79,8 @@ async fn one_key() {
 
     let (push, a_uid, a_kp) = setup();
 
-    dbg!();
     let a_kp2 = sig::KeyPair::gen_new();
     let a_init = sign(&a_kp, a_uid);
-    dbg!();
     let a_endorse = sig::SigUpdate::Endorse(sign(&a_kp2, a_uid));
     let a_add = sign(&a_kp, a_endorse);
 
