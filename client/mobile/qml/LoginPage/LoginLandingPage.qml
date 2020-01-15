@@ -57,7 +57,7 @@ Page {
 
         anchors {
             horizontalCenter: parent.horizontalCenter
-            bottom: registrationFailureMessage.top
+            bottom: connectAccountButton.top
             bottomMargin: CmnCfg.units.dp(30)
         }
 
@@ -65,6 +65,23 @@ Page {
             Herald.registerNewUser(entryField.text.trim(),
                                    serverAddrTextField.text.trim(),
                                    serverPortTextField.text.trim())
+        }
+    }
+
+    LoginButton {
+        id: connectAccountButton
+
+        lbText: qsTr("Connect Device to Existing Account")
+        lbColor: bgStartColor
+
+        anchors {
+            horizontalCenter: parent.horizontalCenter
+            bottom: registrationFailureMessage.top
+            bottomMargin: CmnCfg.units.dp(30)
+        }
+
+        onClicked: {
+            loginPageLoader.sourceComponent = connectDevicePage
         }
     }
 

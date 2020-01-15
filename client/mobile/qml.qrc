@@ -5,7 +5,6 @@
         <file>qml/ChatView/ChatViewMain.qml</file>
         <file>qml/LoginPage/AssociateDevice.qml</file>
         <file>qml/LoginPage/LoginLandingPage.qml</file>
-        <file>qml/LoginPage/LoginPageMain.qml</file>
         <file>qml/LoginPage/Registration.qml</file>
         <file>qml/Common/CommonConfig.qml</file>
         <file>qml/Common/Divider.qml</file>

@@ -21,15 +21,25 @@ ApplicationWindow {
         }
     }
 
+    Component {
+        id: connectDevicePage
+        LoginPage.AssociateDevice {
+            anchors.fill: parent
+        }
+    }
+    Component {
+        id: lpMain
+        LoginPage.LoginLandingPage {
+            anchors.fill: parent
+        }
+    }
+
     Loader {
         id: loginPageLoader
         active: !Herald.configInit
         anchors.fill: parent
         // windows cannot be filled, unless referred to as parent
-        sourceComponent: LoginPage.LoginLandingPage {
-            id: lpMain
-            anchors.fill: parent
-        }
+        sourceComponent: lpMain
     }
 
     Loader {
