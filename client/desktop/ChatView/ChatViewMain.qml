@@ -177,6 +177,7 @@ Page {
             asynchronous: true
 
             height: active ? 40 : 0
+
             width: active ? parent.width : 0
             anchors.bottom: parent.bottom
             sourceComponent: CB.TypingBubble {

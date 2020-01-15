@@ -156,9 +156,10 @@ Popup {
                     Label {
                         anchors.left: parent.left
 
-                        font.pixelSize: CmnCfg.chatTextSize
+                        font.family: CmnCfg.labelFont.name
+                        font.weight: Font.Medium
+                        font.pixelSize: CmnCfg.labelFontSize
                         text: qsTr("Color")
-                        font.family: CmnCfg.chatFont.name
                         anchors.verticalCenter: colorDot.verticalCenter
                     }
 

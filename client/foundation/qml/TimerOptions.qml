@@ -73,13 +73,14 @@ Menu {
 
                 if (!messageModify) {
 
-                    conversationItem.expirationPeriod = index
-                    return
+                    return conversationItem.expirationPeriod = index
                 }
                 builder.setExpirationPeriod(index)
             }
         }
 
-        onObjectAdded: optMenu.insertItem(index, object)
+        onObjectAdded: {
+            optMenu.insertItem(index, object)
+        }
     }
 }

@@ -55,6 +55,7 @@ Rectangle {
             anchors.verticalCenter: parent.verticalCenter
             font.family: CmnCfg.chatFont.name
             font.pixelSize: CmnCfg.chatTextSize
+            padding: 0
         }
 
         Image {

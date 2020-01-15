@@ -8,6 +8,7 @@ Switch {
     id: control
 
     padding: 0
+    spacing: 0
     indicator: Rectangle {
         implicitWidth: 32
 
