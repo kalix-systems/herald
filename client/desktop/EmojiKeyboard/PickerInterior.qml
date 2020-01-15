@@ -49,12 +49,6 @@ Item {
         }
     }
 
-    MouseArea {
-        anchors.fill: parent
-        z: parent.z - 2
-        hoverEnabled: true
-    }
-
     Item {
         id: header
         height: 30 //enough for search bar of default size w/ margins
@@ -133,11 +127,7 @@ Item {
                     color: menu.model[index]
                 }
             }
-
-            onCurrentIndexChanged: {
-                CmnCfg.skinSwatchIndex = currentIndex
-            }
-
+            onCurrentIndexChanged: CmnCfg.skinSwatchIndex = currentIndex
             contentItem: Rectangle {
                 anchors.fill: parent
                 border.color: CmnCfg.palette.darkGrey
@@ -208,7 +198,7 @@ Item {
             states: [
                 State {
                     name: "default"
-                    when: searchTextArea.text.length != 0
+                    when: searchTextArea.text.length !== 0
                     PropertyChanges {
                         target: listLoader
                         sourceComponent: searchComp

@@ -11,7 +11,6 @@ Loader {
     property bool isReactPopup: false
     sourceComponent: EK.EmojiPicker {
         id: emojiPicker
-        //  z: chatPage.z + 2
         window: convWindow
         Component.onCompleted: {
             emojiPicker.send.connect(function (emoji) {
@@ -21,10 +20,6 @@ Loader {
                     ownedConversation.addReaction(index, emoji)
                 }
             })
-        }
-        MouseArea {
-            anchors.fill: parent
-            z: parent.z - 1
         }
     }
 }

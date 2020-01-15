@@ -79,7 +79,6 @@ Page {
     // wrapper Item to set margins for the popup instead of
     // having to use explicit x and y positioning
     Item {
-
         anchors {
             left: parent.left
             bottom: chatTextArea.top
@@ -87,23 +86,18 @@ Page {
         }
         height: emoKeysPopup.height
         width: emoKeysPopup.width
-
         Popup {
             id: emojiPopupWrapper
-
             onOpened: emoKeysPopup.active = true
             onClosed: emoKeysPopup.active = false
-
-            z: chatPage.z + 2
             height: emoKeysPopup.height
             width: emoKeysPopup.width
 
             Popups.EmojiPopup {
                 id: emoKeysPopup
                 anchors.centerIn: parent
-                onActiveChanged: if (!active) {
+                onActiveChanged: if (!active)
                                      emojiPopupWrapper.close()
-                                 }
             }
         }
     }
@@ -144,12 +138,10 @@ Page {
                 TextJs.enterKeyHandler(event, chatTextArea.chatText,
                                        ownedConversation.builder,
                                        ownedConversation, chatTextArea)
-
                 // TODO: Tab should cycle through a hierarchy of items as far as focus
             }
         }
-        emojiButton.onClicked: emojiPopupWrapper.open(
-                                   ) //emoKeysPopup.active = !!!emoKeysPopup.active
+        emojiButton.onClicked: emojiPopupWrapper.open()
         atcButton.onClicked: chatTextArea.attachmentsDialogue.open()
     }
 
@@ -159,7 +151,7 @@ Page {
         anchors.bottom: divider.top
         height: typingLoader.height
         width: parent.width
-        color: typingLoader.active ? CmnCfg.palette.white : "transparent" //CmnCfg.palette.white
+        color: typingLoader.active ? CmnCfg.palette.white : "transparent"
         Rectangle {
             visible: typingLoader.active
             anchors.top: parent.top
