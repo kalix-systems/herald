@@ -61,11 +61,10 @@ Rectangle {
         onClicked: timerMenu.open()
     }
 
-    Imports.TimerOptions {
+    Imports.TimerOptionsBuilder {
         id: timerMenu
         conversationItem: chatPage.conversationItem
         builder: ownedConversation.builder
-        messageModify: true
     }
 
     Imports.IconButton {

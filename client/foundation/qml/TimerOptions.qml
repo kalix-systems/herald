@@ -10,51 +10,41 @@ Menu {
 
     // Item in `Conversations` model
     property var conversationItem
-    property var builder
-    property int chosenPeriod: {
-        if (!messageModify) {
+    property int chosenPeriod: conversationItem.expirationPeriod
 
-            return conversationItem.expirationPeriod
-        }
-        builder.expirationPeriod !== undefined ? builder.expirationPeriod : (timerModel.length - 1)
-    }
     property string chosenTimer: timerModel[chosenPeriod].path
-    property bool messageModify: false
 
     // TODO real icon
     property var timerModel: [{
             "name": qsTr("Off"),
-            "path": messageModify ? "qrc:/timer-option-icons/off-dark.svg" : "qrc:/timer-option-icons/off.svg"
+            "path": "qrc:/timer-option-icons/off.svg"
         }, {
             "name": qsTr("30 seconds"),
-            "path": messageModify ? "qrc:/timer-option-icons/30s-dark.svg" : "qrc:/timer-option-icons/30s.svg"
+            "path": "qrc:/timer-option-icons/30s.svg"
         }, {
             "name": qsTr("1 minute"),
-            "path": messageModify ? "qrc:/timer-option-icons/1min-dark.svg" : "qrc:/timer-option-icons/1min.svg"
+            "path": "qrc:/timer-option-icons/1min.svg"
         }, {
             "name": qsTr("30 minutes"),
-            "path": messageModify ? "qrc:/timer-option-icons/30min-dark.svg" : "qrc:/timer-option-icons/30min.svg"
+            "path": "qrc:/timer-option-icons/30min.svg"
         }, {
             "name": qsTr("1 hour"),
-            "path": messageModify ? "qrc:/timer-option-icons/1h-dark.svg" : "qrc:/timer-option-icons/1h.svg"
+            "path": "qrc:/timer-option-icons/1h.svg"
         }, {
             "name": qsTr("12 hours"),
-            "path": messageModify ? "qrc:/timer-option-icons/12h-dark.svg" : "qrc:/timer-option-icons/12h.svg"
+            "path": "qrc:/timer-option-icons/12h.svg"
         }, {
             "name": qsTr("1 day"),
-            "path": messageModify ? "qrc:/timer-option-icons/1d-dark.svg" : "qrc:/timer-option-icons/1d.svg"
+            "path": "qrc:/timer-option-icons/1d.svg"
         }, {
             "name": qsTr("1 week"),
-            "path": messageModify ? "qrc:/timer-option-icons/1w-dark.svg" : "qrc:/timer-option-icons/1w.svg"
+            "path": "qrc:/timer-option-icons/1w.svg"
         }, {
             "name": qsTr("1 month"),
-            "path": messageModify ? "qrc:/timer-option-icons/1mo-dark.svg" : "qrc:/timer-option-icons/1mo.svg"
+            "path": "qrc:/timer-option-icons/1mo.svg"
         }, {
             "name": qsTr("1 year"),
-            "path": messageModify ? "qrc:/timer-option-icons/1y-dark.svg" : "qrc:/timer-option-icons/1y.svg"
-        }, {
-            "name": qsTr("Default"),
-            "path": "qrc:/timer-option-icons/blank-dark.svg"
+            "path": "qrc:/timer-option-icons/1y.svg"
         }]
     Instantiator {
         model: timerModel
@@ -62,21 +52,9 @@ Menu {
         MenuItem {
             text: timerModel[index].name
             checkable: true
-            checked: {
-                if (!messageModify) {
+            checked: conversationItem.expirationPeriod === index
 
-                    return conversationItem.expirationPeriod === index
-                }
-                builder.expirationPeriod === undefined ? (index === (timerModel.length - 1)) : builder.expirationPeriod === index
-            }
-            onTriggered: {
-
-                if (!messageModify) {
-
-                    return conversationItem.expirationPeriod = index
-                }
-                builder.setExpirationPeriod(index)
-            }
+            onTriggered: conversationItem.expirationPeriod = index
         }
 
         onObjectAdded: {
