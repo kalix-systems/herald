@@ -15,7 +15,7 @@ Rectangle {
                                                   typingUser)
     property real defaultWidth
 
-    height: 30
+    height: CmnCfg.typeMargin
     width: defaultWidth
 
     color: CmnCfg.palette.white
@@ -41,11 +41,11 @@ Rectangle {
         id: avatar
         color: typingUserColor
         initials: typingUserName[0].toUpperCase()
-        size: 18
+        size: CmnCfg.typeMargin - 8
         anchors {
             left: parent.left
             top: parent.top
-            margins: CmnCfg.smallMargin
+            margins: CmnCfg.microMargin
         }
 
         z: contentRoot.z + 1
@@ -68,10 +68,10 @@ Rectangle {
         anchors.left: avatar.right
         anchors.verticalCenter: avatar.verticalCenter
 
-        spacing: CmnCfg.smallMargin
-        topPadding: CmnCfg.smallMargin
-        leftPadding: CmnCfg.smallMargin
-        bottomPadding: CmnCfg.smallMargin
+        spacing: CmnCfg.microMargin
+        topPadding: CmnCfg.microMargin
+        leftPadding: CmnCfg.microMargin
+        bottomPadding: CmnCfg.microMargin
 
         Text {
             id: actionText

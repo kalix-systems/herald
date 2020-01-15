@@ -56,6 +56,7 @@ Item {
     readonly property int entitySubLabelSize: units.dp(12)
     /// standard button text size
     readonly property real buttonTextSize: units.dp(14)
+    readonly property real typeMargin: units.dp(20)
 
     readonly property FontLoader chatFont: metaTheme.chatFont
     readonly property FontLoader labelFont: metaTheme.cairo

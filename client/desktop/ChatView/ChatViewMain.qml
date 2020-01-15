@@ -185,7 +185,7 @@ Page {
             active: false
             asynchronous: true
 
-            height: 30
+            height: CmnCfg.typeMargin
 
             width: parent.width
             anchors.bottom: parent.bottom

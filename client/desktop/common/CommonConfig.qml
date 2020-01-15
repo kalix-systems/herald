@@ -88,6 +88,7 @@ Item {
 
     readonly property real minChatViewWidth: 300
     readonly property real minContactsWidth: 300
+    readonly property real typeMargin: 26
 
     // MISC
 
