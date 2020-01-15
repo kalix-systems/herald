@@ -2,8 +2,9 @@ use super::*;
 use crossbeam_channel::{unbounded, Receiver, Sender};
 use std::net::*;
 
-fn spawn<F: Fn(): Send + 'static>(f: F) -> Result<(), Error> {
-    std::thread::Builder::spawn(|| f())
+fn spawn<F: FnOnce() + Send + 'static>(f: F) -> Result<(), Error> {
+    std::thread::Builder::new().spawn(move || f())?;
+    Ok(())
 }
 
 struct PendingReq<Req, Res> {
@@ -67,8 +68,6 @@ where
             awaiting: Arc::new(Slab::new()),
             inner: Arc::new(inner),
         };
-
-        
 
         todo!()
     }

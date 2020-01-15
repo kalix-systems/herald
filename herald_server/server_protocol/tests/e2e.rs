@@ -358,7 +358,7 @@ impl<F> TestClient<F> {
             .await
             .context("failed to read challenge")?;
 
-        let sig = sig::sign_ser(&keys, &cbuf as &[u8]).sig();
+        let sig = keys.secret().sign(&cbuf as &[u8]);
 
         tx.write_all(sig.as_ref())
             .await
