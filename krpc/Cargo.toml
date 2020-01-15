@@ -4,18 +4,23 @@ version = "0.1.0"
 authors = ["theseriousadult <jack@kalix.io>"]
 edition = "2018"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
 anyhow = "1.0"
-async-trait = "0.1"
 bytes = "0.5"
 byteorder = "1.3"
-futures = "0.3.1"
 sharded-slab = "0.0.7"
+
+[dependencies.async-trait]
+version = "0.1"
+optional = true
+
+[dependencies.futures]
+version = "0.3"
+optional = true
 
 [dependencies.tokio]
 version = "0.2.4"
+optional = true
 features = ["rt-core", "stream"]
 
 [dependencies.kson]
@@ -60,10 +65,10 @@ optional = true
 
 [features]
 default = []
-quic = ["quinn","quinn-proto", "tokio/rt-threaded"]
+async = ["async-trait", "futures", "tokio"]
+quic = ["quinn","quinn-proto", "tokio", "tokio/rt-threaded", "futures", "kson_channel/async", "async-trait"]
 ws-sync = ["tungstenite", "rustls", "webpki"]
-ws = ["ws-sync", "tokio-tungstenite", "tokio-rustls", "tokio/io-util", "tokio/sync"]
-kson_channel_async = ["kson_channel/async"]
+ws = ["ws-sync", "tokio", "tokio-tungstenite", "tokio-rustls", "tokio/io-util", "tokio/sync", "futures", "kson_channel/async", "async-trait"]
 
 [dev-dependencies]
 portpicker = "0.1"

@@ -1,5 +1,3 @@
-pub mod http;
-
 use bytes::Buf;
 use herald_common::*;
 use server_errors::*;

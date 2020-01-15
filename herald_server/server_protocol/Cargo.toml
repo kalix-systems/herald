@@ -4,8 +4,6 @@ version = "0.1.0"
 authors = ["theseriousadult <jack@kalix.io>"]
 edition = "2018"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
 anyhow = "1.0"
 dashmap         = "1.0"
@@ -25,6 +23,7 @@ path = "../../herald_common"
 
 [dependencies.krpc]
 path = "../../krpc"
+features = ["async"]
 
 [dependencies.server_errors]
 path = "../server_errors"
