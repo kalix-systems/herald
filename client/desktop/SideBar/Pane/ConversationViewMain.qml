@@ -143,7 +143,7 @@ ListView {
         Menu {
             id: convOptionsMenu
             MenuItem {
-                text: "Mute notifications"
+                text: qsTr("Mute notifications")
             }
 
             MenuItem {
@@ -164,7 +164,7 @@ ListView {
         Menu {
             id: unarchiveMenu
             MenuItem {
-                text: "Unarchive conversation"
+                text: qsTr("Unarchive conversation")
                 onTriggered: conversationData.status = 0
             }
         }

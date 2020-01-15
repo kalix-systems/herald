@@ -26,10 +26,6 @@ macro_rules! set_imp {
             let mut lock = shared::conv_data().write();
             let data = lock.get_mut(id)?;
 
-            if data.pairwise_uid.is_some() {
-                return Some(())
-            }
-
             data.$field = val;
             Some(())
        })*

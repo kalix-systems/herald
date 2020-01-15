@@ -313,6 +313,8 @@ impl super::Conversations {
             err!(heraldcore::conversation::set_status(&cid, status)),
             false
         );
+
+        self.model.data_changed(index, index);
         true
     }
 }
