@@ -11,6 +11,40 @@ ObjectiveUtils::ObjectiveUtils(){
 #import <UIKit/UIKit.h>
 #import <MobileCoreServices/MobileCoreServices.h>
 
+@interface QIOSApplicationDelegate
+@end
+@interface QIOSApplicationDelegate (HeraldAppDelegate)
+@end
+@implementation QIOSApplicationDelegate (HeraldAppDelegate)
+
+- (void)didReceiveNotificationRequest:(UNNotificationRequest *)request withContentHandler:(void (^)(UNNotificationContent *contentToDeliver))contentHandler {
+    // code for handling cypher text
+}
+
+- (void)serviceExtensionTimeWillExpire {
+  // code for handling timeout exception
+}
+
+- (void)application:(UIApplication *)application didFailToRegisterForRemoteNotificationsWithError:(NSError *)error {
+    NSLog(@"failed to register for notifications: %@", error);
+}
+
+- (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken {
+    // code for shooting the server a device token
+    NSLog(@"%@", deviceToken);
+}
+
+- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
+    UNUserNotificationCenter* center = [UNUserNotificationCenter currentNotificationCenter];
+    [center requestAuthorizationWithOptions:  UNAuthorizationOptionBadge + UNAuthorizationOptionAlert +  UNAuthorizationOptionSound
+      completionHandler:^(BOOL granted, NSError *error){
+          if(granted == YES) {
+              [[UIApplication sharedApplication]  registerForRemoteNotifications];
+          };
+      }];
+    return YES;
+}
+@end
 
 @interface FileDialogHelper :NSObject<UIDocumentPickerDelegate,UIImagePickerControllerDelegate,UINavigationControllerDelegate>{
     ObjectiveUtils* _util;
@@ -21,12 +55,9 @@ ObjectiveUtils::ObjectiveUtils(){
 - (void)documentPickerWasCancelled:(UIDocumentPickerViewController *)controller;
 - (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary<UIImagePickerControllerInfoKey, id> *)info;
 - (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker;
-
-
 @end
 
 @implementation FileDialogHelper
-
 - (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary<UIImagePickerControllerInfoKey, id> *)info {
     const char * fname = [[info[UIImagePickerControllerImageURL] absoluteString] UTF8String];
     emit _util->fileChosen(fname);
@@ -99,18 +130,8 @@ void ObjectiveUtils::set_status_bar_color(QColor color) {
        UIApplication *app =  [UIApplication sharedApplication];
        app.windows.firstObject.rootViewController.view.backgroundColor
            =  [UIColor colorWithRed:color.redF() green:color.greenF() blue:color.blueF()  alpha:1.0];
-
 }
 
-void ObjectiveUtils::request_notifications()
-{
-  UNUserNotificationCenter* center = [UNUserNotificationCenter currentNotificationCenter];
-  [center requestAuthorizationWithOptions:
-              (UNAuthorizationOptionAlert +
-          UNAuthorizationOptionSound)
-                        completionHandler:^(BOOL granted, NSError * _Nullable error) {
-                        }];
-}
 
 void ObjectiveUtils::launch_file_picker()
 {

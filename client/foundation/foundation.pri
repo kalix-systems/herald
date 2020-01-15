@@ -47,7 +47,8 @@ CONFIG(release, debug|profile|release) {
 iphoneos {
    QMAKE_INFO_PLIST = $$PWD/ios_sources/Info.Plist
    app_launch_images.files = $$PWD/ios_sources/HeraldScreen.xib
-    app_launch_images.files += $$PWD/icons/herald.png
+   app_launch_images.files += $$PWD/icons/herald.png
+   app_launch_images.files += $$PWD/icons/herald.icns
    QMAKE_BUNDLE_DATA += app_launch_images
 }
 
