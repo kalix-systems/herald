@@ -59,6 +59,8 @@ Column {
             AnimIconButton {
                 color: CmnCfg.palette.black
                 imageSource: "qrc:/camera-icon.svg"
+                onTapped: if (Qt.platform.os === "ios")
+                              mobHelper.launch_camera_dialog()
             }
             AnimIconButton {
                 color: CmnCfg.palette.black
@@ -69,7 +71,7 @@ Column {
                               ownedMessages.builder.finalize()
                               cta.clear()
                           } else {
-                              if (Qt.platform.os == "ios")
+                              if (Qt.platform.os === "ios")
                                   mobHelper.launch_file_picker()
                           }
 
