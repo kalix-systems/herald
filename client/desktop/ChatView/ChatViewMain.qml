@@ -133,12 +133,10 @@ Page {
                 TextJs.enterKeyHandler(event, chatTextArea.chatText,
                                        ownedConversation.builder,
                                        ownedConversation, chatTextArea)
-
                 // TODO: Tab should cycle through a hierarchy of items as far as focus
             }
         }
-        emojiButton.onClicked: emojiPopupWrapper.open(
-                                   ) //emoKeysPopup.active = !!!emoKeysPopup.active
+        emojiButton.onClicked: emojiPopupWrapper.open()
         atcButton.onClicked: chatTextArea.attachmentsDialogue.open()
     }
 
@@ -148,7 +146,7 @@ Page {
         anchors.bottom: divider.top
         height: typingLoader.height
         width: parent.width
-        color: typingLoader.active ? CmnCfg.palette.white : "transparent" //CmnCfg.palette.white
+        color: typingLoader.active ? CmnCfg.palette.white : "transparent"
         Rectangle {
             visible: typingLoader.active
             anchors.top: parent.top
