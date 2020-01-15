@@ -79,7 +79,6 @@ Page {
     // wrapper Item to set margins for the popup instead of
     // having to use explicit x and y positioning
     Item {
-
         anchors {
             left: parent.left
             bottom: chatTextArea.top
@@ -87,23 +86,18 @@ Page {
         }
         height: emoKeysPopup.height
         width: emoKeysPopup.width
-
         Popup {
             id: emojiPopupWrapper
-
             onOpened: emoKeysPopup.active = true
             onClosed: emoKeysPopup.active = false
-
-            z: chatPage.z + 2
             height: emoKeysPopup.height
             width: emoKeysPopup.width
 
             Popups.EmojiPopup {
                 id: emoKeysPopup
                 anchors.centerIn: parent
-                onActiveChanged: if (!active) {
+                onActiveChanged: if (!active)
                                      emojiPopupWrapper.close()
-                                 }
             }
         }
     }
