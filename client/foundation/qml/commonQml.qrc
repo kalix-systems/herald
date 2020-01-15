@@ -43,8 +43,8 @@
         <file>TimerOptions.qml</file>
         <file>Units.qml</file>
         <file>errors/ErrorDialog.qml</file>
-        <file alias="/js/Avatar.mjs">../js/Avatar.mjs</file>
-        <file alias="/js/utils.mjs">../js/utils.mjs</file>
+        <file>../js/Avatar.mjs</file>
+        <file>../js/utils.mjs</file>
         <file>themes/Dark.qml</file>
         <file>themes/EarthTones.qml</file>
         <file>themes/Light.qml</file>
