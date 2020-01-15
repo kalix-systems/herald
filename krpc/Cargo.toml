@@ -68,7 +68,8 @@ optional = true
 default = []
 async = ["async-trait",
          "futures",
-         "tokio"]
+         "tokio",
+         "kson_channel/async"]
 
 quic = ["async",
         "quinn",
