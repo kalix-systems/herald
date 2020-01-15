@@ -1,3 +1,5 @@
+#![cfg(feature = "async")]
+
 use anyhow::*;
 use async_trait::*;
 use kcl::random::UQ;

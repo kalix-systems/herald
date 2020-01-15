@@ -21,6 +21,9 @@ pub mod async_client;
 #[cfg(feature = "ws")]
 pub use async_client::Client;
 
+#[cfg(feature = "ws-sync")]
+pub mod sync_client;
+
 trait WsProtocol: Protocol {
     fn max_item_size() -> usize {
         max(

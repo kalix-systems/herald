@@ -28,7 +28,6 @@ path = "../kson"
 
 [dependencies.kson_channel]
 path = "../kson_channel"
-features = ["async"]
 
 [dependencies.location]
 path = "../location"
@@ -65,10 +64,27 @@ optional = true
 
 [features]
 default = []
-async = ["async-trait", "futures", "tokio"]
-quic = ["quinn","quinn-proto", "tokio", "tokio/rt-threaded", "futures", "kson_channel/async", "async-trait"]
-ws-sync = ["tungstenite", "rustls", "webpki"]
-ws = ["ws-sync", "tokio", "tokio-tungstenite", "tokio-rustls", "tokio/io-util", "tokio/sync", "futures", "kson_channel/async", "async-trait"]
+async = ["async-trait",
+         "futures",
+         "tokio"]
+
+quic = ["async",
+        "quinn",
+        "quinn-proto",
+        "tokio/rt-threaded",
+        "kson_channel/async"]
+
+ws-sync = ["tungstenite",
+           "rustls",
+           "webpki"]
+
+ws = ["ws-sync",
+      "async",
+      "tokio-tungstenite",
+      "tokio-rustls",
+      "tokio/io-util",
+      "tokio/sync",
+      "kson_channel/async"]
 
 [dev-dependencies]
 portpicker = "0.1"
