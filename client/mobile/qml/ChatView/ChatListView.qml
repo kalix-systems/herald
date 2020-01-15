@@ -11,6 +11,7 @@ ListView {
     spacing: 0
     highlightFollowsCurrentItem: false
 
+
     // this is set to a higher value in `Component.onCompleted`
     // but is set to `0` here to improve initial load times
     cacheBuffer: 0
@@ -20,6 +21,7 @@ ListView {
         if (chatListView.contentHeight < chatListView.height) {
             chatListView.height = chatListView.contentHeight
         }
+        appRouter.activeChatView = chatListView
     }
     // Note: we load the list view from the bottom up to make
     // scroll behavior more predictable

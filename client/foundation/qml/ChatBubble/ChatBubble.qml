@@ -135,7 +135,8 @@ Rectangle {
         anchors.right: parent.right
         anchors.bottom: parent.bottom
         anchors.bottomMargin: (bubbleIndex === 0) ? CmnCfg.smallMargin
-                                                    + CmnCfg.typeMargin : CmnCfg.smallMargin
+                                                    + (CmnCfg.typeMargin - CmnCfg.microMargin
+                                                       * 1.5) : CmnCfg.smallMargin
         anchors.rightMargin: CmnCfg.smallMargin
 
         icon.source: receiptImage
@@ -163,7 +164,7 @@ Rectangle {
         leftPadding: CmnCfg.smallMargin
         bottomPadding: {
             if (bubbleIndex === 0) {
-                return CmnCfg.defaultMargin + CmnCfg.typeMargin
+                return CmnCfg.defaultMargin + (CmnCfg.typeMargin - CmnCfg.microMargin * 1.5)
             }
 
             isTail ? CmnCfg.defaultMargin : CmnCfg.smallMargin

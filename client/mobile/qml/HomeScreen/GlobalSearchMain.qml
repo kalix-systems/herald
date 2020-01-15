@@ -1,5 +1,5 @@
-import QtQuick.Controls 2.12
-import QtQuick.Layouts 1.12
+import QtQuick.Controls 2.14
+import QtQuick.Layouts 1.14
 import QtQuick 2.12
 import LibHerald 1.0
 import "../ChatView" as ChatView
@@ -15,6 +15,9 @@ Page {
     background: Rectangle {
         color: CmnCfg.palette.white
     }
+
+    Component.onCompleted: appRoot.router.searchView = searchView
+    signal messageClicked(var searchConversationId, var searchMsgId)
 
     Column {
         id: contentCol
@@ -81,8 +84,6 @@ Page {
             // this needs to be uninteractive so that they scroll together
             interactive: false
 
-            signal messageClicked(var searchConversationId, var searchMsgId)
-
             model: Herald.messageSearch
             delegate: Item {
                 height: CmnCfg.convoHeight
@@ -111,7 +112,7 @@ Page {
                     // TODO load messages when data model is fixed
                     TapHandler {
                         onTapped: {
-                            print('someday this will open a conversation')
+                            messageClicked(model.conversation, model.msgId)
                         }
                     }
                 }

@@ -26,6 +26,18 @@ Page {
         anchors.bottom: divider.top
     }
 
+    Connections {
+        target: appRouter
+        onMessagePosRequested: {
+            const msg_idx = ownedMessages.indexById(requestedMsgId)
+            // early return on out of bounds
+            if ((msg_idx < 0) || (msg_idx >= chatList.count))
+                return
+
+            chatList.positionViewAtIndex(msg_idx, ListView.Center)
+        }
+    }
+
     Common.Divider {
         width: parent.width
         id: divider

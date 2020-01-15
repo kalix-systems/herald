@@ -11,6 +11,8 @@ Page {
     anchors.fill: parent
     readonly property alias globalTimer: globalTimer
     property alias stackView: mainView
+    property alias gbsView: globalSearchView
+    property alias router: appRouter
 
     Timer {
         id: globalTimer
@@ -61,6 +63,10 @@ Page {
         }
     }
 
+    Router {
+        id: appRouter
+        stack: appLoader.item.stackView
+    }
     StackView {
         id: mainView
         anchors.fill: parent

@@ -24,6 +24,7 @@ Rectangle {
     property bool isEmpty
     // most recent message content to display in this item
     property var lastMsgDigest
+    property alias ownedCV: ownedChatView
 
     height: CmnCfg.convoHeight
 

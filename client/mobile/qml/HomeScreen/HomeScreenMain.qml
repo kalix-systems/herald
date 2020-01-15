@@ -16,6 +16,8 @@ Page {
     background: Rectangle {
         color: CmnCfg.palette.white
     }
+    Component.onCompleted: appRoot.router.cvView = cvMainView
+    signal messagePositionRequested(var requestMsgId)
 
     // the body of this entire element
     // displays conversations
@@ -32,13 +34,15 @@ Page {
             delegate: ConversationItem {
                 property var conversationData: model
                 isNTS: {
-                    Herald.utils.compareByteArray(Herald.config.ntsConversationId,
-                                                  model.conversationId)
+                    Herald.utils.compareByteArray(
+                                Herald.config.ntsConversationId,
+                                model.conversationId)
                 }
                 itemTitle: !isNTS ? title : qsTr("Note to Self")
                 colorCode: !isNTS ? model.conversationColor : Herald.config.configColor
-                imageSource: !isNTS ? Utils.safeStringOrDefault(model.picture, "") :
-                                      Utils.safeStringOrDefault(
+                imageSource: !isNTS ? Utils.safeStringOrDefault(
+                                          model.picture,
+                                          "") : Utils.safeStringOrDefault(
                                           Herald.config.profilePicture, "")
                 isGroup: !model.pairwise
                 lastMsgDigest: model.lastMsgDigest
@@ -46,6 +50,20 @@ Page {
                 convoContent: ConversationContent {
                     id: convContent
                     conversationId: model.conversationId
+                }
+            }
+            Connections {
+                target: appRoot.router
+                onConvoRequest: {
+                    const conv_idx = Herald.conversations.indexById(
+                                       searchConversationId)
+
+                    // early return on out of bounds
+                    if ((conv_idx < 0) || (conv_idx >= cvListView.count))
+                        return
+
+                    stackView.push(cvListView.itemAtIndex(conv_idx).ownedCV)
+                    messagePositionRequested(searchMsgId)
                 }
             }
         }

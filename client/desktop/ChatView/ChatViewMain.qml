@@ -113,6 +113,11 @@ Page {
         height: 1
         color: CmnCfg.palette.black
         anchors.bottom: chatTextArea.top
+        Drawer {
+            id: drawer
+            width: parent.width
+            height: CmnCfg.typeMargin
+        }
     }
 
     ///--- Text entry area, for typing
@@ -165,19 +170,6 @@ Page {
 
         property int __secondsSinceLastReset: 0
         property bool __aUserIsTyping: __secondsSinceLastReset < 5
-        onHeightChanged: {
-            if (convWindow.height < convWindow.contentHeight) {
-                return
-            }
-
-            //            if (height === 0) {
-            //                convWindow.anchors.bottom = chatTextArea.top
-            //                convWindow.height = convWindow.contentHeight
-            //            } else {
-            //                convWindow.anchors.bottom = typingIndicator.top
-            //                convWindow.height = convWindow.contentHeight
-            //            }
-        }
 
         Loader {
             id: typingLoader
