@@ -48,7 +48,7 @@ Page {
         focus: true
         anchors {
             top: parent.top
-            bottom: typingIndicator.top
+            bottom: divider.top
             left: parent.left
             right: parent.right
         }
@@ -154,8 +154,9 @@ Page {
         anchors.bottom: divider.top
         height: typingLoader.height
         width: parent.width
-        color: CmnCfg.palette.white
+        color: typingLoader.active ? CmnCfg.palette.white : "transparent" //CmnCfg.palette.white
         Rectangle {
+            visible: typingLoader.active
             anchors.top: parent.top
             width: parent.width
             height: 1
@@ -169,13 +170,13 @@ Page {
                 return
             }
 
-            if (height === 0) {
-                convWindow.anchors.bottom = chatTextArea.top
-                convWindow.height = convWindow.contentHeight
-            } else {
-                convWindow.anchors.bottom = typingIndicator.top
-                convWindow.height = convWindow.contentHeight
-            }
+            //            if (height === 0) {
+            //                convWindow.anchors.bottom = chatTextArea.top
+            //                convWindow.height = convWindow.contentHeight
+            //            } else {
+            //                convWindow.anchors.bottom = typingIndicator.top
+            //                convWindow.height = convWindow.contentHeight
+            //            }
         }
 
         Loader {

@@ -134,7 +134,8 @@ Rectangle {
         id: receipt
         anchors.right: parent.right
         anchors.bottom: parent.bottom
-        anchors.margins: CmnCfg.smallMargin
+        anchors.bottomMargin: (bubbleIndex === 0) ? CmnCfg.smallMargin + 30 : CmnCfg.smallMargin
+        anchors.rightMargin: CmnCfg.smallMargin
 
         icon.source: receiptImage
         icon.height: 16
@@ -159,7 +160,13 @@ Rectangle {
         spacing: CmnCfg.smallMargin
         topPadding: isHead ? CmnCfg.smallMargin : CmnCfg.smallMargin
         leftPadding: CmnCfg.smallMargin
-        bottomPadding: isTail ? CmnCfg.defaultMargin : CmnCfg.smallMargin
+        bottomPadding: {
+            if (bubbleIndex === 0) {
+                return CmnCfg.defaultMargin + 30
+            }
+
+            isTail ? CmnCfg.defaultMargin : CmnCfg.smallMargin
+        }
 
         BubbleLabel {
             visible: isHead
