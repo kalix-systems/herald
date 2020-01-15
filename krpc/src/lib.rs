@@ -34,10 +34,9 @@ mod asynchronous;
 pub trait SyncClient<P: Protocol>: Sized {
     type InitInfo;
 
-    fn init<Tx: std::io::Write, Rx: std::io::Read>(
+    fn init<T: std::io::Write + std::io::Read>(
         info: Self::InitInfo,
-        tx: &mut Framed<Tx>,
-        rx: &mut Framed<Rx>,
+        framed: &mut Framed<T>,
     ) -> Result<Self, Error>;
 
     fn handle_push(
