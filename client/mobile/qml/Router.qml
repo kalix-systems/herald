@@ -25,7 +25,6 @@ Item {
         sourceComponent: Connections {
             target: router.cvView
             onMessagePositionRequested: {
-
                 messagePosRequested(requestMsgId)
             }
         }
