@@ -17,8 +17,10 @@ Item {
         id: systemPalette
         colorGroup: SystemPalette.Active
     }
-    property bool themeIsDark: ((systemPalette.window.r / Qt.red + systemPalette.window.g
-                                 / Qt.greensystemPalette.window.b / Qt.blue) / 256) < 0.5
+
+    property bool themeIsDark: ((systemPalette.window.r / Qt.red + systemPalette.window.g / Qt.green
+                                 + systemPalette.window.b / Qt.blue) / 256) < 0.5
+
     readonly property alias sysPalette: systemPalette
     /// standard tiny margin
     readonly property real microMargin: units.dp(4)
