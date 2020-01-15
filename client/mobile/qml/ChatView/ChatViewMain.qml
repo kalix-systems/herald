@@ -35,6 +35,9 @@ Page {
                 return
 
             chatList.positionViewAtIndex(msg_idx, ListView.Center)
+            chatList.highlightAnimation.target = chatList.itemAtIndex(
+                        msg_idx).highlightItem
+            chatList.highlightAnimation.start()
         }
     }
 

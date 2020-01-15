@@ -11,6 +11,14 @@ ListView {
     spacing: 0
     highlightFollowsCurrentItem: false
 
+    property NumberAnimation highlightAnimation: NumberAnimation {
+        id: bubbleHighlightAnimation
+        property: "opacity"
+        from: 0.4
+        to: 0.0
+        duration: 800
+        easing.type: Easing.InCubic
+    }
 
     // this is set to a higher value in `Component.onCompleted`
     // but is set to `0` here to improve initial load times
@@ -54,7 +62,7 @@ ListView {
         readonly property bool outbound: author === Herald.config.configId
         readonly property bool elided: body.length !== fullBody.length
         property var messageModelData: model
-
+        property var highlightItem: bubbleLoader.item.highlightItem
         anchors.left: parent.left
         anchors.right: parent.right
         bottomPadding: 0
@@ -72,6 +80,7 @@ ListView {
                 dropdown: optionsDropdown
                 anchors.fill: parent
             }
+
             Component {
                 id: msgBubble
                 CB.ChatBubble {
@@ -88,6 +97,7 @@ ListView {
                     }
                 }
             }
+
             Component {
                 id: auxBubble
                 CB.AuxBubble {
