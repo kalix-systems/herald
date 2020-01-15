@@ -109,6 +109,7 @@ Page {
     }
 
     Common.Divider {
+        id: divider
         height: 1
         color: CmnCfg.palette.black
         anchors.bottom: chatTextArea.top
@@ -148,11 +149,12 @@ Page {
     }
 
     //item that wraps type bubble; will eventually wrap a flow in the loader to show multiple typing indicators
-    Item {
+    Rectangle {
         id: typingIndicator
-        anchors.bottom: chatTextArea.top
+        anchors.bottom: divider.top
         height: typingLoader.height
         width: parent.width
+        color: CmnCfg.palette.white
         Rectangle {
             anchors.top: parent.top
             width: parent.width
@@ -182,7 +184,7 @@ Page {
             active: false
             asynchronous: true
 
-            height: 40
+            height: 30
 
             width: parent.width
             anchors.bottom: parent.bottom

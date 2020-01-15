@@ -15,7 +15,7 @@ Rectangle {
                                                   typingUser)
     property real defaultWidth
 
-    height: 40
+    height: 30
     width: defaultWidth
 
     color: CmnCfg.palette.white
@@ -41,7 +41,7 @@ Rectangle {
         id: avatar
         color: typingUserColor
         initials: typingUserName[0].toUpperCase()
-        size: 24
+        size: 18
         anchors {
             left: parent.left
             top: parent.top
