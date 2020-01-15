@@ -3,8 +3,8 @@ use derive_getters::Getters;
 use kson::prelude::*;
 use typed_builder::TypedBuilder;
 
-pub const PUBLIC_KEY_LEN: usize = ffi::crypto_core_ed25519_BYTES as usize;
-pub const SECRET_KEY_LEN: usize = ffi::crypto_core_ed25519_SCALARBYTES as usize;
+pub const PUBLIC_KEY_LEN: usize = ffi::crypto_sign_ed25519_PUBLICKEYBYTES as usize;
+pub const SECRET_KEY_LEN: usize = ffi::crypto_sign_ed25519_SECRETKEYBYTES as usize;
 pub const SEED_LEN: usize = ffi::crypto_sign_ed25519_SEEDBYTES as usize;
 
 new_type! {

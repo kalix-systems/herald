@@ -49,8 +49,6 @@ async fn setup_server<O: Into<Option<usize>>>(
     (trigger, s_socket, server_cert, state)
 }
 
-type OnPush = Box<dyn Fn(Push) -> BoxFuture<'static, PushAck> + Send + Sync + 'static>;
-
 async fn register_client<F: Fn(Push) -> BoxFuture<'static, PushAck> + Send + Sync + 'static>(
     uid: UserId,
     on_push: F,

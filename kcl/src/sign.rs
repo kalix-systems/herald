@@ -47,3 +47,19 @@ impl PublicKey {
         ret_code == 0
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    #[test]
+    fn sign_verify() {
+        init();
+        let keypair = KeyPair::gen_new();
+        let mut data = [0u8; 64];
+        for _ in 0..100 {
+            random::gen_into(&mut data);
+            let sig = keypair.secret().sign(&data);
+            assert!(keypair.public().verify(&data, sig));
+        }
+    }
+}

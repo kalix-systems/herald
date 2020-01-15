@@ -300,3 +300,86 @@ fn mk_ad(
         .copied()
         .collect()
 }
+
+pub struct MsgResult {
+    ack: Option<Ack>,
+    forward: Option<Payload>,
+    output: Option<Bytes>,
+    response: Option<Msg>,
+}
+
+#[allow(unused_mut)]
+fn handle_ack<S>(
+    store: &mut S,
+    _me: &sig::KeyPair,
+    them: sig::PublicKey,
+    ack: Ack,
+) -> Result<Option<Msg>, TransitError<S::Error>>
+where
+    S: dr::KeyStore + RatchetStore + PendingStore,
+{
+    let mut out = None;
+    match ack {
+        Ack::Success(id) => {
+            store.del_pending(id, them).map_err(TransitError::Store)?;
+        }
+        Ack::Failed { .. } => {
+            // error handling can be much smarter, for now we just fail
+            todo!();
+        }
+    }
+    Ok(out)
+}
+
+pub fn handle_incoming<S>(
+    store: &mut S,
+    me: &sig::KeyPair,
+    from: GlobalId,
+    msg: Msg,
+) -> Result<MsgResult, TransitError<S::Error>>
+where
+    S: dr::KeyStore + RatchetStore + PendingStore + SigStore + ConversationStore,
+{
+    let mut res = MsgResult {
+        ack: None,
+        forward: None,
+        output: None,
+        response: None,
+    };
+
+    match msg {
+        Msg::Ack(a) => {
+            if let Some(m) = handle_ack(store, me, from.did, a)? {
+                res.response.replace(m);
+            }
+        }
+        Msg::Encrypted {
+            id,
+            header,
+            payload,
+        } => {
+            match decrypt_payload(store, me, from.did, id, header, payload) {
+                Err(e) => {
+                    res.ack.replace(Ack::Failed {
+                        id,
+                        reason: e.into(),
+                    });
+                }
+                Ok(payload) => match handle_payload(store, from, payload) {
+                    Err(e) => {
+                        res.ack.replace(Ack::Failed {
+                            id,
+                            reason: e.into(),
+                        });
+                    }
+                    Ok(PayloadResult { msg, forward }) => {
+                        res.forward = forward;
+                        res.output = msg;
+                    }
+                },
+            };
+        }
+    }
+
+    Ok(res)
+}

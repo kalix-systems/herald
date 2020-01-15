@@ -199,7 +199,7 @@ pub mod sig {
             sig,
             signed_by: *keys.public(),
         };
-        debug_assert!(signed.verify_sig() == SigValid::Yes);
+        debug_assert_eq!(signed.verify_sig(), SigValid::Yes);
         signed
     }
 
