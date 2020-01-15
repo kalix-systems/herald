@@ -112,9 +112,9 @@ Popup {
                 Label {
                     id: optionsHeader
                     text: qsTr("Contact settings")
-                    font.weight: Font.Medium
-                    font.pixelSize: CmnCfg.defaultFontSize
                     font.family: CmnCfg.labelFont.name
+                    font.weight: Font.Medium
+                    font.pixelSize: CmnCfg.labelFontSize
                 }
 
                 Item {
@@ -126,8 +126,8 @@ Popup {
                     Label {
                         anchors.left: parent.left
 
-                        font.pixelSize: CmnCfg.chatTextSize
                         text: qsTr("Trusted (share display name and avatar)")
+                        font.pixelSize: CmnCfg.chatTextSize
                         font.family: CmnCfg.chatFont.name
                         anchors.verticalCenter: conf.verticalCenter
                     }
@@ -156,9 +156,8 @@ Popup {
                     Label {
                         anchors.left: parent.left
 
-                        font.family: CmnCfg.labelFont.name
-                        font.weight: Font.Medium
-                        font.pixelSize: CmnCfg.labelFontSize
+                        font.pixelSize: CmnCfg.chatTextSize
+                        font.family: CmnCfg.chatFont.name
                         text: qsTr("Color")
                         anchors.verticalCenter: colorDot.verticalCenter
                     }

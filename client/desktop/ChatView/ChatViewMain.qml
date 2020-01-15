@@ -153,6 +153,12 @@ Page {
         anchors.bottom: chatTextArea.top
         height: typingLoader.height
         width: parent.width
+        Rectangle {
+            anchors.top: parent.top
+            width: parent.width
+            height: 1
+            color: CmnCfg.palette.medGrey
+        }
 
         property int __secondsSinceLastReset: 0
         property bool __aUserIsTyping: __secondsSinceLastReset < 5
@@ -176,9 +182,9 @@ Page {
             active: false
             asynchronous: true
 
-            height: active ? 40 : 0
+            height: 40
 
-            width: active ? parent.width : 0
+            width: parent.width
             anchors.bottom: parent.bottom
             sourceComponent: CB.TypingBubble {
                 id: typeBubble
