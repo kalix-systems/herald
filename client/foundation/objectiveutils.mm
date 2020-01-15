@@ -28,15 +28,18 @@ ObjectiveUtils::ObjectiveUtils(){
 @implementation FileDialogHelper
 
 - (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary<UIImagePickerControllerInfoKey, id> *)info {
-    [picker release];
+    const char * fname = [[info[UIImagePickerControllerImageURL] absoluteString] UTF8String];
+    emit _util->fileChosen(fname);
+    auto* rvc =  [[UIApplication sharedApplication].keyWindow rootViewController];
+    [rvc dismissViewControllerAnimated:YES completion:nil];
     [self release];
 }
 
 - (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker {
-    [picker release];
+    auto* rvc =  [[UIApplication sharedApplication].keyWindow rootViewController];
+    [rvc dismissViewControllerAnimated:YES completion:nil];
     [self release];
 }
-
 
 - (void) openDocumentPicker {
     auto *rvc =  [[UIApplication sharedApplication].keyWindow rootViewController];
@@ -47,41 +50,39 @@ ObjectiveUtils::ObjectiveUtils(){
 }
 
 - (void)documentPicker:(UIDocumentPickerViewController *)controller didPickDocumentsAtURLs:(NSArray<NSURL *> *)urls {
-    (void)controller;
     if (urls.count > 0) {
         const char * fname = [[urls[0] absoluteString] UTF8String];
         emit _util->fileChosen(QString(fname));
     }
-    [controller release];
     [self release];
 }
 
 - (void)documentPickerWasCancelled:(UIDocumentPickerViewController *)controller {
-    [controller release];
     [self release];
  }
 
 
 - (void)setUtils:(ObjectiveUtils *) util {
    _util = util;
-
 }
 
 - (void) openImageDialog {
-    auto *rvc =  [[UIApplication sharedApplication].keyWindow rootViewController];
+    
+    auto* rvc =  [[UIApplication sharedApplication].keyWindow rootViewController];
     auto* alert = [UIAlertController  alertControllerWithTitle:nil message:nil  preferredStyle:UIAlertControllerStyleActionSheet];
+    
     [alert addAction: [UIAlertAction actionWithTitle: @"Cancel" style:UIAlertActionStyleCancel handler:^(UIAlertAction* action){
         (void)action;
     }]];
+    
     [alert addAction: [UIAlertAction actionWithTitle: @"Select From Gallery" style:UIAlertActionStyleDefault  handler:^(UIAlertAction* action){
-        (void)action;
         auto picker = [[UIImagePickerController alloc] init];
         picker.sourceType = UIImagePickerControllerSourceTypeSavedPhotosAlbum;
         picker.delegate = self;
         [rvc presentViewController:picker animated: YES completion: nil];
     }]];
+    
     [alert addAction:  [UIAlertAction actionWithTitle: @"Use Camera"  style:UIAlertActionStyleDefault handler:^(UIAlertAction* action){
-        (void)action;
         auto picker = [[UIImagePickerController alloc] init];
         if([UIImagePickerController isSourceTypeAvailable: UIImagePickerControllerSourceTypeCamera]) {
         picker.sourceType = UIImagePickerControllerSourceTypeCamera;
@@ -89,6 +90,7 @@ ObjectiveUtils::ObjectiveUtils(){
         [rvc presentViewController:picker animated: YES completion: nil];
         }
     }]];
+    
     [rvc presentViewController:alert animated: YES completion: nil];
 }
 
