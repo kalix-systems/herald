@@ -13,10 +13,6 @@ impl Interface for Messages {
         Self::new_(emit, model, builder)
     }
 
-    fn typing_user_id(&self) -> Option<ffi::UserIdRef> {
-        self.typing_user.as_ref()?.as_str().into()
-    }
-
     fn index_by_id(
         &self,
         msg_id: ffi::MsgIdRef,

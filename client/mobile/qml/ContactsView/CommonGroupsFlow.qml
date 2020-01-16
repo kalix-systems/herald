@@ -11,14 +11,14 @@ Flow {
     anchors.horizontalCenter: parent.horizontalCenter
     anchors.verticalCenter: parent.verticalCenter
     spacing: CmnCfg.microMargin
-    width: CmnCfg.units.dp(100)
+    width: CmnCfg.units.dp(66)
 
     Repeater {
         model: userRect.sharedConvos
         delegate: Avatar {
             id: groupAv
             property var groupData: model
-            size: CmnCfg.units.dp(25)
+            size: CmnCfg.units.dp(20)
             isGroup: true
             visible: index < 6
 
@@ -49,14 +49,8 @@ Flow {
                     color: "black"
                     opacity: 0.5
                 }
-                MouseArea {
-                    anchors.fill: parent
-                    preventStealing: true
-                    propagateComposedEvents: false
-                    z: groupAv.z + 1
-                    hoverEnabled: false
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: {
+                TapHandler {
+                    onTapped: {
                         drawer.userData = userData
                         drawer.open()
                     }
@@ -68,7 +62,7 @@ Flow {
                     color: "white"
                     font.family: CmnCfg.chatFont.name
                     font.weight: Font.DemiBold
-                    font.pixelSize: CmnCfg.headerFontSize
+                    font.pixelSize: CmnCfg.defaultFontSize
                 }
             }
         }

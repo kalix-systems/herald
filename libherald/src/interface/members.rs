@@ -7,6 +7,7 @@ pub struct MembersEmitter {
     pub(super) filter_changed: fn(*mut MembersQObject),
     pub(super) filter_regex_changed: fn(*mut MembersQObject),
     pub(super) new_data_ready: fn(*mut MembersQObject),
+    pub(super) new_typing_indicator: fn(*mut MembersQObject),
 }
 
 impl MembersEmitter {
@@ -21,6 +22,7 @@ impl MembersEmitter {
             qobject: self.qobject.clone(),
             filter_changed: self.filter_changed,
             filter_regex_changed: self.filter_regex_changed,
+            new_typing_indicator: self.new_typing_indicator,
             new_data_ready: self.new_data_ready,
         }
     }
@@ -44,6 +46,14 @@ impl MembersEmitter {
 
         if !ptr.is_null() {
             (self.filter_regex_changed)(ptr);
+        }
+    }
+
+    pub fn new_typing_indicator(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+
+        if !ptr.is_null() {
+            (self.new_typing_indicator)(ptr);
         }
     }
 
@@ -190,6 +200,8 @@ pub trait MembersTrait {
 
     fn toggle_filter_regex(&mut self) -> bool;
 
+    fn typing_members(&self) -> String;
+
     fn row_count(&self) -> usize;
 
     fn insert_rows(
@@ -220,6 +232,11 @@ pub trait MembersTrait {
         _: SortOrder,
     ) {
     }
+
+    fn last_typing(
+        &self,
+        index: usize,
+    ) -> Option<i64>;
 
     fn matched(
         &self,
@@ -282,12 +299,14 @@ pub unsafe fn members_new_inner(ptr_bundle: *mut MembersPtrBundle) -> Members {
         members_end_move_rows,
         members_begin_remove_rows,
         members_end_remove_rows,
+        members_new_typing_indicator,
     } = ptr_bundle;
     let members_emit = MembersEmitter {
         qobject: Arc::new(AtomicPtr::new(members)),
         filter_changed: members_filter_changed,
         filter_regex_changed: members_filter_regex_changed,
         new_data_ready: members_new_data_ready,
+        new_typing_indicator: members_new_typing_indicator,
     };
     let model = MembersList {
         qobject: members,
@@ -337,6 +356,18 @@ pub unsafe extern "C" fn members_remove_from_conversation_by_index(
 pub unsafe extern "C" fn members_toggle_filter_regex(ptr: *mut Members) -> bool {
     let obj = &mut *ptr;
     obj.toggle_filter_regex()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn members_typing_members(
+    ptr: *const Members,
+    data: *mut QString,
+    set: fn(*mut QString, str_: *const c_char, len: c_int),
+) {
+    let obj = &*ptr;
+    let ret = obj.typing_members();
+    let str_: *const c_char = ret.as_ptr() as (*const c_char);
+    set(data, str_, ret.len() as i32);
 }
 
 #[no_mangle]
@@ -422,6 +453,15 @@ pub unsafe extern "C" fn members_sort(
     order: SortOrder,
 ) {
     (&mut *ptr).sort(column, order)
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn members_data_last_typing(
+    ptr: *const Members,
+    row: c_int,
+) -> COption<i64> {
+    let obj = &*ptr;
+    obj.last_typing(to_usize(row).unwrap_or(0)).into()
 }
 
 #[no_mangle]
@@ -523,4 +563,5 @@ pub struct MembersPtrBundle {
     members_end_move_rows: fn(*mut MembersQObject),
     members_begin_remove_rows: fn(*mut MembersQObject, usize, usize),
     members_end_remove_rows: fn(*mut MembersQObject),
+    members_new_typing_indicator: fn(*mut MembersQObject),
 }

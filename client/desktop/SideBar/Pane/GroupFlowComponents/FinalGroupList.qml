@@ -31,6 +31,8 @@ ListView {
             boxColor: memberColor
             boxTitle: memberName
             picture: memberProfilePicture
+            topTextMargin: CmnCfg.smallMargin
+            bottomTextMargin: CmnCfg.defaultMargin
 
             //no hover state
             states: []

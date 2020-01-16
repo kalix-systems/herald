@@ -14,7 +14,11 @@ impl Members {
             .into_iter()
             .map(|u| {
                 let id = u.id;
-                User { id, matched: true }
+                User {
+                    id,
+                    matched: true,
+                    last_typing: None,
+                }
             })
             .collect();
         self.model.end_insert_rows();

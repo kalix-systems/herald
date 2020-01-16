@@ -7,28 +7,31 @@ import "qrc:/imports/js/utils.mjs" as Utils
 Page {
     id: contactsPopup
     readonly property Component headerComponent: ContactsHeader {}
+    ContactPage {
+        id: contactPage
+    }
 
     Item {
         id: rowLabel
-        height: CmnCfg.toolbarHeight - 10
+        height: CmnCfg.units.dp(CmnCfg.toolbarHeight - 30)
         width: parent.width
 
         Item {
             width: CmnCfg.avatarSize
             anchors.left: parent.left
             id: avatarFiller
-            anchors.leftMargin: CmnCfg.defaultMargin
+            anchors.leftMargin: CmnCfg.smallMargin
         }
 
         Text {
             id: nameHeader
             anchors.left: avatarFiller.right
-            anchors.leftMargin: CmnCfg.megaMargin
+            anchors.leftMargin: CmnCfg.smallMargin
             text: "Name"
             anchors.verticalCenter: parent.verticalCenter
             font.family: CmnCfg.chatFont.name
             color: CmnCfg.palette.offBlack
-            font.pixelSize: CmnCfg.defaultFontSize
+            font.pixelSize: CmnCfg.chatTextSize
             font.weight: Font.Medium
         }
 
@@ -39,7 +42,7 @@ Page {
             anchors.horizontalCenter: parent.horizontalCenter
             font.family: CmnCfg.chatFont.name
             color: CmnCfg.palette.offBlack
-            font.pixelSize: CmnCfg.defaultFontSize
+            font.pixelSize: CmnCfg.chatTextSize
             font.weight: Font.Medium
         }
         Rectangle {
@@ -51,12 +54,6 @@ Page {
             height: 1
             color: CmnCfg.palette.medGrey
         }
-    }
-
-    ContactDrawer {
-        id: drawer
-        height: parent.height
-        width: parent.width * 0.8
     }
 
     //contacts list view
@@ -86,11 +83,11 @@ Page {
             width: parent.width
             height: visible ? row.height + 1 : 0
 
+            visible: (userData.userId !== Herald.config.configId && matched)
+
             property var sharedConvos: SharedConversations {
                 userId: userData.userId
             }
-            visible: (userData.userId !== Herald.config.configId && matched)
-
             //top header
             Rectangle {
                 anchors {
@@ -121,15 +118,15 @@ Page {
             Item {
                 id: row
                 width: contactsPopup.width
-                height: 70
+                height: CmnCfg.units.dp(48)
 
                 //avatar
                 Avatar {
                     id: avatar
                     anchors.left: parent.left
-                    anchors.leftMargin: CmnCfg.defaultMargin
+                    anchors.leftMargin: CmnCfg.smallMargin
                     anchors.verticalCenter: parent.verticalCenter
-                    height: CmnCfg.avatarSize
+                    height: CmnCfg.units.dp(CmnCfg.avatarSize - 10)
                     pfpPath: Utils.safeStringOrDefault(model.profilePicture, "")
                     color: CmnCfg.avatarColors[model.userColor]
                     initials: Utils.initialize(name)
@@ -137,8 +134,8 @@ Page {
                         cursorShape: Qt.PointingHandCursor
                         anchors.fill: parent
                         onClicked: {
-                            //drawer.userData = userData
-                            drawer.open()
+                            contactPage.userData = userRect.userData
+                            stackView.push(contactPage)
                         }
                     }
                 }
@@ -147,11 +144,11 @@ Page {
                     width: labelCol.width
                     cursorShape: Qt.PointingHandCursor
                     anchors.left: avatar.right
-                    anchors.leftMargin: CmnCfg.megaMargin
+                    anchors.leftMargin: CmnCfg.defaultMargin
                     anchors.verticalCenter: avatar.verticalCenter
                     onClicked: {
-                        //drawer.userData = userData
-                        drawer.open()
+                        contactPage.userData = userRect.userData
+                        stackView.push(contactPage)
                     }
 
                     //contact label
@@ -160,7 +157,7 @@ Page {
                         spacing: 2
                         Label {
                             font.weight: Font.DemiBold
-                            font.pixelSize: CmnCfg.headerFontSize
+                            font.pixelSize: CmnCfg.defaultFontSize
                             font.family: CmnCfg.chatFont.name
                             text: userId
                             color: CmnCfg.palette.offBlack
@@ -169,14 +166,13 @@ Page {
                             text: "@" + name
                             font.family: CmnCfg.chatFont.name
                             color: CmnCfg.palette.offBlack
-                            font.pixelSize: CmnCfg.defaultFontSize
+                            font.pixelSize: CmnCfg.chatTextSize
                         }
                     }
                 }
-            }
-            //common groups
-            CommonGroupsFlow {
-                anchors.left: parent.horizontalCenter
+                //common groups
+                CommonGroupsFlow {//   anchors.left: parent.horizontalCenter
+                }
             }
         }
     }

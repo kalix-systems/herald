@@ -14,9 +14,10 @@ Rectangle {
     property string typingUserProfilePicture: Herald.users.profilePictureById(
                                                   typingUser)
     property real defaultWidth
+    property alias text: actionText.text
 
     height: CmnCfg.typeMargin
-    width: defaultWidth
+    width: actionText.width + avatar.width + CmnCfg.microMargin
 
     color: CmnCfg.palette.white
 

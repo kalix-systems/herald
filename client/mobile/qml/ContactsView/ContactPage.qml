@@ -6,15 +6,17 @@ import "qrc:/imports"
 import "qrc:/imports/Entity"
 import "qrc:/imports/js/utils.mjs" as Utils
 
-Drawer {
-    dragMargin: 0
-    edge: Qt.RightEdge
+Page {
+    id: page
     property var userData
-    width: 0.80 * parent.width
-    height: parent.height
-    closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside | Popup.CloseOnReleaseOutside
+    property var headerComponent: Component {
+        ContactInfoHeader {
+            contactName: userData !== undefined ? userData.name : ""
+        }
+    }
     Loader {
         anchors.fill: parent
+        active: page.userData !== undefined
         sourceComponent: Flickable {
             boundsBehavior: Flickable.StopAtBounds
             boundsMovement: Flickable.StopAtBounds
@@ -43,7 +45,7 @@ Drawer {
                 Row {
                     height: implicitHeight
 
-                    spacing: 14 //CmnCfg.megaMargin
+                    spacing: CmnCfg.units.dp(14) //CmnCfg.megaMargin
                     padding: 0
                     Rectangle {
                         id: colorDot
@@ -99,7 +101,7 @@ Drawer {
                     id: groups
                     model: SharedConversations {
                         id: sharedconvos
-                        userId: drawer.userData.userId
+                        userId: page.userData.userId
                     }
                     width: parent.width
                     height: contentHeight
@@ -125,8 +127,7 @@ Drawer {
                                 cursorShape: Qt.PointingHandCursor
                                 hoverEnabled: true
                                 onClicked: {
-                                    drawer.close()
-                                    drawer.modal = false
+                                    page.close()
                                     groupClicked(groupData.conversationId)
                                     contactsPopup.close()
                                     contactsLoader.active = false

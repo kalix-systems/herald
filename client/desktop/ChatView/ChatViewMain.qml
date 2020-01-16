@@ -160,47 +160,95 @@ Page {
             color: CmnCfg.palette.medGrey
         }
 
-        property int __secondsSinceLastReset: 0
-        property bool __aUserIsTyping: __secondsSinceLastReset < 5
-
-        Loader {
-            id: typingLoader
-            property var typingUser
-            active: false
-            asynchronous: true
-
-            height: CmnCfg.typeMargin
-
-            width: parent.width
-            anchors.bottom: parent.bottom
-            sourceComponent: CB.TypingBubble {
-                id: typeBubble
-
-                defaultWidth: convWindow.width
-            }
-        }
-
-        // listens for typing indicators
         Connections {
-            target: ownedConversation
+            target: conversationMembers
             onNewTypingIndicator: {
                 typingIndicator.__secondsSinceLastReset = 0
-                typingLoader.typingUser = ownedConversation.typingUserId
-                typingLoader.active = true
             }
         }
 
         Connections {
             target: appRoot.globalTimer
             onRefreshTime: {
-                typingIndicator.__secondsSinceLastReset += 1
-                if (!typingIndicator.__aUserIsTyping) {
+                if (typingLoader.active)
+                    typingIndicator.__secondsSinceLastReset += 1
+            }
+        }
+
+        property int __secondsSinceLastReset: 5
+        property bool __aUserIsTyping: __secondsSinceLastReset < 4
+
+        property string typeText
+        Connections {
+            target: conversationMembers
+            onNewTypingIndicator: {
+                typingIndicator.typeText = ""
+                if (conversationMembers.typingMembers() === "") {
                     typingLoader.active = false
-                    typingLoader.typingUser = undefined
+                    return
                 }
+                const typers = JSON.parse(conversationMembers.typingMembers())
+
+                const num = typers.length
+                const last = num - 1
+
+                if (num <= 0) {
+                    typingLoader.active = false
+                    return
+                }
+
+                typers.forEach(function (item, index) {
+                    const typingUserName = item
+                    if (num === 1) {
+                        typingIndicator.typeText += typingUserName + qsTr(
+                                    " is typing...")
+                        return
+                    }
+
+                    if (num > 4) {
+                        typingIndicator.typeText = "Several people are typing..."
+                        return
+                    }
+                    if (num === 2 && index === 0) {
+                        typingIndicator.typeText += typingUserName + qsTr(
+                                    " and ")
+                        return
+                    }
+
+                    if (index < last - 1) {
+                        typingIndicator.typeText += typingUserName + ", "
+                        return
+                    }
+
+                    if (index < last) {
+                        typingIndicator.typeText += typingUserName + " and "
+                        return
+                    }
+
+                    typingIndicator.typeText += typingUserName + qsTr(
+                                " are typing...")
+                    return
+                })
+            }
+        }
+
+        Loader {
+            id: typingLoader
+            active: typingIndicator.__aUserIsTyping
+            asynchronous: true
+
+            height: CmnCfg.typeMargin
+
+            width: parent.width
+            anchors.bottom: parent.bottom
+            sourceComponent: Label {
+                id: typeLabel
+
+                text: typingIndicator.typeText
             }
         }
     }
+
     MessageDialog {
         id: clearHistoryPrompt
         text: qsTr("Clear conversation history")

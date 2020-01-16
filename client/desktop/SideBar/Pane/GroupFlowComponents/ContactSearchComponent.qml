@@ -59,6 +59,8 @@ Column {
                 picture: Utils.safeStringOrDefault(contactData.profilePicture,
                                                    "")
 
+                        topTextMargin: CmnCfg.smallMargin
+                        bottomTextMargin: CmnCfg.defaultMargin
                 labelComponent: Entity.ContactLabel {
                     displayName: contactData.name
                     labelColor: contactRectangle.state

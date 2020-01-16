@@ -135,10 +135,10 @@ Rectangle {
             text: friendlyTimestamp
             font.family: CmnCfg.chatFont.name
             font.italic: true
-            font.pixelSize: 12
             color: CmnCfg.palette.darkGrey
             elide: Text.ElideRight
             width: bubbleRoot.maxWidth
+            font.pixelSize: CmnCfg.chatTextSize
         }
         GridLayout {
 
@@ -148,6 +148,7 @@ Rectangle {
                                                    auxData.content)
                 font.family: CmnCfg.chatFont.name
                 font.italic: true
+                font.pixelSize: CmnCfg.chatTextSize
                 Layout.maximumWidth: bubbleRoot.maxWidth
                 wrapMode: Text.WrapAtWordBoundaryOrAnywhere
             }

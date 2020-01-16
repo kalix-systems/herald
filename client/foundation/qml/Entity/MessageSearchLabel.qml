@@ -37,7 +37,7 @@ Item {
                 pixelSize: labelFontSize
             }
 
-            Layout.topMargin: labelGrid.rows > 2 ? - 6 : 0
+            Layout.topMargin: labelGrid.rows > 2 ? -6 : 0
             Layout.alignment: Qt.AlignLeft | Qt.AlignTop
             Layout.fillWidth: true
             elide: "ElideRight"
@@ -75,8 +75,8 @@ Item {
             elide: "ElideRight"
             text: if (beforeMatch.length === 0) {
                       match + afterMatch
-                  } else if (prefix.length === beforeMatch.length) {
-                      prefix.elidedText + match + afterMatch
+                  } else if (prefix.elidedText.length === beforeMatch.length) {
+                      prefix.text + match + afterMatch
                   } else {
                       "..." + prefix.elidedText + match + afterMatch
                   }

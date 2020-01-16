@@ -91,6 +91,7 @@ struct ConversationContentPtrBundle {
   void (*members_end_move_rows)(Members *);
   void (*members_begin_remove_rows)(Members *, int, int);
   void (*members_end_remove_rows)(Members *);
+  void (*members_newTypingIndicator)(const Members *);
   Messages *messages;
   MessageBuilder *message_builder;
   void (*message_builder_body_changed)(MessageBuilder *);
@@ -158,7 +159,6 @@ struct ConversationContentPtrBundle {
   void (*messages_search_num_matches_changed)(Messages *);
   void (*messages_search_pattern_changed)(Messages *);
   void (*messages_search_regex_changed)(Messages *);
-  void (*messages_typing_user_id_changed)(Messages *);
 
   void (*messages_new_data_ready)(const Messages *);
   void (*messages_layout_about_to_be_changed)(Messages *);
@@ -172,7 +172,6 @@ struct ConversationContentPtrBundle {
   void (*messages_end_move_rows)(Messages *);
   void (*messages_begin_remove_rows)(Messages *, int, int);
   void (*messages_end_remove_rows)(Messages *);
-  void (*messages_newTypingIndicator)(const Messages *);
   void (*conversation_content_tryPoll)(const ConversationContent *);
 };
 struct ConversationsPtrBundle {
@@ -378,6 +377,7 @@ struct MembersPtrBundle {
   void (*members_end_move_rows)(Members *);
   void (*members_begin_remove_rows)(Members *, int, int);
   void (*members_end_remove_rows)(Members *);
+  void (*members_newTypingIndicator)(const Members *);
 };
 struct MessageBuilderPtrBundle {
   MessageBuilder *message_builder;
@@ -528,7 +528,6 @@ struct MessagesPtrBundle {
   void (*messages_search_num_matches_changed)(Messages *);
   void (*messages_search_pattern_changed)(Messages *);
   void (*messages_search_regex_changed)(Messages *);
-  void (*messages_typing_user_id_changed)(Messages *);
 
   void (*messages_new_data_ready)(const Messages *);
   void (*messages_layout_about_to_be_changed)(Messages *);
@@ -542,7 +541,6 @@ struct MessagesPtrBundle {
   void (*messages_end_move_rows)(Messages *);
   void (*messages_begin_remove_rows)(Messages *, int, int);
   void (*messages_end_remove_rows)(Messages *);
-  void (*messages_newTypingIndicator)(const Messages *);
 };
 struct SharedConversationsPtrBundle {
   SharedConversations *shared_conversations;
@@ -1304,6 +1302,7 @@ public:
   Q_INVOKABLE bool addToConversation(const QString &id);
   Q_INVOKABLE bool removeFromConversationByIndex(quint64 row_index);
   Q_INVOKABLE bool toggleFilterRegex();
+  Q_INVOKABLE QString typingMembers() const;
   int columnCount(const QModelIndex &parent = QModelIndex()) const override;
   QVariant data(const QModelIndex &index,
                 int role = Qt::DisplayRole) const override;
@@ -1329,6 +1328,7 @@ public:
   removeRows(int row, int count,
              const QModelIndex &parent = QModelIndex()) override;
 
+  Q_INVOKABLE QVariant lastTyping(int row) const;
   Q_INVOKABLE bool matched(int row) const;
   Q_INVOKABLE quint32 memberColor(int row) const;
   Q_INVOKABLE QString name(int row) const;
@@ -1348,6 +1348,7 @@ private:
 Q_SIGNALS:
   void filterChanged();
   void filterRegexChanged();
+  void newTypingIndicator() const;
 };
 class MessageBuilder : public QAbstractItemModel {
   Q_OBJECT
@@ -1605,8 +1606,6 @@ private:
                  NOTIFY searchPatternChanged FINAL)
   Q_PROPERTY(bool searchRegex READ searchRegex WRITE setSearchRegex NOTIFY
                  searchRegexChanged FINAL)
-  Q_PROPERTY(
-      QString typingUserId READ typingUserId NOTIFY typingUserIdChanged FINAL)
   explicit Messages(bool owned, QObject *parent);
 
 public:
@@ -1622,7 +1621,6 @@ public:
   void setSearchPattern(const QString &v);
   bool searchRegex() const;
   void setSearchRegex(bool v);
-  QString typingUserId() const;
   Q_INVOKABLE void addReaction(quint64 index, const QString &content);
   Q_INVOKABLE bool clearConversationHistory();
   Q_INVOKABLE void clearSearch();
@@ -1712,8 +1710,6 @@ Q_SIGNALS:
   void searchNumMatchesChanged();
   void searchPatternChanged();
   void searchRegexChanged();
-  void typingUserIdChanged();
-  void newTypingIndicator() const;
 };
 class SharedConversations : public QAbstractItemModel {
   Q_OBJECT
