@@ -9,5 +9,5 @@ lazy_static! {
 
 #[tokio::main]
 async fn main() {
-    herald_server::http::serve(&HANDLER, 8080).await;
+    // herald_server::http::serve(&HANDLER, 8080).await;
 }
