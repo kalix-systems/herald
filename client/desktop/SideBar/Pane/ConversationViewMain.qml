@@ -62,6 +62,8 @@ ListView {
         }
 
         ListView.delayRemove: true
+        property int __secondsSinceLastReset: 0
+        property int __typing: __secondsSinceLastReset < 5
 
         property Component childChatView: Component {
             CV.ChatViewMain {
@@ -72,6 +74,23 @@ ListView {
             }
         }
 
+        Connections {
+            target: convContent.messages
+            onNewTypingIndicator: {
+                conversationItem.__secondsSinceLastReset = 0
+                convoRectangle.label.typeActive = true
+            }
+        }
+
+        Connections {
+            target: appRoot.globalTimer
+            onRefreshTime: {
+                conversationItem.__secondsSinceLastReset += 1
+                if (!conversationItem.__typing) {
+                    convoRectangle.label.typeActive = false
+                }
+            }
+        }
         Connections {
             target: contactsLoader.item
             onGroupClicked: {
@@ -117,8 +136,6 @@ ListView {
                 id: conversationLabel
                 width: parent.width
                 height: parent.height
-                // width: convoRectangle.width - CmnCfg.avatarSize - CmnCfg.defaultMargin * 2
-                // height: convoRectangle.height - CmnCfg.defaultMargin * 2
                 lastMsgDigest: conversationItem.conversationData.lastMsgDigest
                 isEmpty: conversationItem.conversationData.isEmpty
                 convoTitle: !convoRectangle.nts ? title : qsTr("Note to Self")

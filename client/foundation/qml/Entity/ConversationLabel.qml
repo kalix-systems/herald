@@ -22,9 +22,9 @@ Item {
     property color minorTextColor: CmnCfg.palette.offBlack
     property int labelFontSize: CmnCfg.entityLabelSize
     property int subLabelFontSize: CmnCfg.entitySubLabelSize
-    property alias bodyItalic: bodyText.font.italic
     property alias receiptFill: receiptImage.icon.color
 
+    property bool typeActive: false
     // json summary
     property string lastMsgDigest
 
@@ -84,12 +84,6 @@ Item {
         return ''
     }
 
-    //    GridLayout {
-    //        id: labelGrid
-    //        rows: 2
-    //        columns: 2
-    //        width: parent.width
-    //        height: parent.height
     GridLayout {
         id: nameGrid
         anchors.top: parent.top
@@ -102,7 +96,6 @@ Item {
                 weight: Font.Medium
             }
             Layout.maximumWidth: wrapper.width - ts.width
-            // Layout.preferredHeight: labelGrid.height * 0.25
             elide: "ElideRight"
             text: convoTitle
             color: labelColor
@@ -119,44 +112,73 @@ Item {
         }
         text: lastTimestamp
         padding: 0
-        //        Layout.preferredHeight: labelGrid.height * 0.25
-        //  Layout.alignment: Qt.AlignRight | Qt.AlignTop
         color: minorTextColor
     }
-    GridLayout {
-        id: bodyGrid
+
+    Loader {
+        id: textLoader
+        active: !typeActive
         anchors.left: parent.left
         anchors.bottom: parent.bottom
-        Label {
-            id: bodyText
-            font {
-                family: CmnCfg.chatFont.name
-                pixelSize: subLabelFontSize
+        width: active ? item.implicitWidth : 0
+        height: active ? item.implicitHeight : 0
+
+        sourceComponent: GridLayout {
+            id: bodyGrid
+            Label {
+
+                id: bodyText
+                font {
+                    family: CmnCfg.chatFont.name
+                    pixelSize: subLabelFontSize
+                }
+                background: Item {}
+                elide: "ElideRight"
+                text: lastBody
+                Layout.maximumWidth: wrapper.width - CmnCfg.defaultMargin * 2
+                color: labelColor
+                textFormat: Text.StyledText
+                padding: 0
             }
-            elide: "ElideRight"
-            text: lastBody
-            Layout.maximumWidth: wrapper.width - CmnCfg.defaultMargin * 2
-            //Layout.fillWidth: true
-            //  Layout.alignment: Qt.AlignLeft
-            //  Layout.maximumHeight: labelGrid.height * 0.25
-            color: labelColor
-            textFormat: Text.StyledText
-            padding: 0
+        }
+    }
+
+    Loader {
+        id: typeLoader
+        active: typeActive
+        anchors.left: parent.left
+        anchors.bottom: parent.bottom
+        width: active ? item.implicitWidth : 0
+        height: active ? item.implicitHeight : 0
+        sourceComponent: GridLayout {
+            id: typeGrid
+            Label {
+                id: type
+                font {
+                    family: CmnCfg.chatFont.name
+                    pixelSize: subLabelFontSize
+                }
+                background: Item {}
+                elide: "ElideRight"
+                text: "<i>" + qsTr("Someone is typing") + "...</i>"
+                Layout.maximumWidth: wrapper.width - CmnCfg.defaultMargin * 2
+                color: labelColor
+                textFormat: Text.StyledText
+                padding: 0
+            }
         }
     }
 
     Button {
         id: receiptImage
-        visible: outbound
+        visible: outbound && !typeActive
         icon.source: JS.receiptCodeSwitch(lastReceipt)
         icon.height: 16
         icon.width: 16
-        anchors.bottom: bodyGrid.bottom
+        anchors.bottom: textLoader.bottom
         anchors.right: parent.right
-        //  Layout.topMargin: 2
         icon.color: CmnCfg.palette.iconFill
         padding: 0
-        // Layout.alignment: Qt.AlignRight | Qt.AlignBottom
         background: Item {}
     }
 } //}

@@ -22,6 +22,7 @@ Rectangle {
     property bool isMessageResult: false
     property int topTextMargin: 5
     property int bottomTextMargin: isMessageResult ? CmnCfg.smallMargin : CmnCfg.defaultMargin
+    property alias label: conversationItemLabel.item
 
     Avatar {
         id: itemAvatar
