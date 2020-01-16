@@ -53,7 +53,6 @@
         <file>SideBar/popups/ContactsPopup.qml</file>
         <file>SideBar/popups/ContactsPopup/CommonGroupsFlow.qml</file>
         <file>SideBar/popups/ContactsPopup/ContactDrawer.qml</file>
-        <file>SideBar/popups/ContactsPopup/ContactsPopupHeader.qml</file>
         <file>SideBar/popups/ContextOptionsMenu.qml</file>
         <file>SideBar/popups/ImageCropPopup.qml</file>
         <file>SideBar/popups/NewMessagePopup.qml</file>

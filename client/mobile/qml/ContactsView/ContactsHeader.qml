@@ -1,6 +1,6 @@
-import QtQuick.Controls 2.14
-import QtQuick.Layouts 1.14
 import QtQuick 2.14
+import QtQuick.Controls 2.14
+import QtQuick.Layouts 1.12
 import LibHerald 1.0
 import "../Common"
 
@@ -14,7 +14,7 @@ RowLayout {
 
     AnimIconButton {
         id: backButton
-        Layout.alignment: Qt.AlignLeft
+        Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
         color: CmnCfg.palette.iconFill
         imageSource: "qrc:/back-arrow-icon.svg"
         onTapped: mainView.pop()
@@ -25,7 +25,7 @@ RowLayout {
     }
 
     Label {
-        text: "More Info"
+        text: "Contacts"
         font: CmnCfg.headerFont
         color: CmnCfg.palette.iconFill
         Layout.alignment: Qt.AlignCenter

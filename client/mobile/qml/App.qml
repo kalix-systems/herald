@@ -3,6 +3,7 @@ import QtQuick.Controls 2.12
 import LibHerald 1.0
 import "./HomeScreen" as HomeScreen
 import "./NewContactView" as NewContactView
+import "./ContactsView" as Contacts
 import "./ChatView" as ChatView
 import "qrc:/imports/Settings" as Settings
 
@@ -63,10 +64,16 @@ Page {
         }
     }
 
+    Component {
+        id: contactsViewMain
+        Contacts.ContactViewMain {}
+    }
+
     Router {
         id: appRouter
         stack: appLoader.item.stackView
     }
+
     StackView {
         id: mainView
         anchors.fill: parent
