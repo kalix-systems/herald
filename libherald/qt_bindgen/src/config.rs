@@ -199,7 +199,7 @@ fn users() -> Object {
 fn conversation_content() -> Object {
     let props = props! {
         members: Prop::new().object(members()),
-        messages: Prop::new().object(messages()),
+        messages: Prop::new(                 ).object(messages()),
         conversationId: conv_id_prop()
     };
 
@@ -218,8 +218,7 @@ fn conversation_content() -> Object {
 }
 
 fn members() -> Object {
-    let mut props = props! {};
-    props.append(&mut filter_props());
+    let props = filter_props();
 
     let item_props = item_props! {
        userId: ItemProp::new(QString),
@@ -228,17 +227,23 @@ fn members() -> Object {
        status: ItemProp::new(QUint8),
        matched: matched_item_prop(),
        profilePicture: picture_item_prop().get_by_value(),
-       memberColor: color_item_prop()
+       memberColor: color_item_prop(),
+       lastTyping: ItemProp::new(Qint64).optional()
     };
 
     let funcs = functions! {
         mut addToConversation(id: QString) => Bool,
         mut removeFromConversationByIndex(row_index: QUint64) => Bool,
         mut toggleFilterRegex() => Bool,
+        const typingMembers() => QString,
+    };
+
+    let hooks = signals! {
+       newTypingIndicator(),|
     };
 
     obj! {
-        Members: Obj::new().list().props(props).funcs(funcs).item_props(item_props)
+        Members: Obj::new().list().props(props).funcs(funcs).item_props(item_props).hooks(hooks)
     }
 }
 
@@ -272,10 +277,6 @@ fn emoji_picker() -> Object {
 
 fn messages() -> Object {
     let props = props! {
-        // User id of the last user to send a typing notification
-        typingUserId: Prop::new().simple(QString).optional(),
-
-
         searchPattern: filter_prop(),
         searchRegex: filter_regex_prop(),
         searchActive: Prop::new().simple(Bool).write(),
@@ -355,10 +356,6 @@ fn messages() -> Object {
         opDocAttachments: ItemProp::new(QString).get_by_value()
     };
 
-    let hooks = signals! {
-       newTypingIndicator(),|
-    };
-
     let funcs = functions! {
         mut deleteMessage(row_index: QUint64) => Bool,
         mut deleteMessageById(id: QByteArray) => Bool,
@@ -379,7 +376,7 @@ fn messages() -> Object {
     };
 
     obj! {
-        Messages: Obj::new().list().funcs(funcs).item_props(item_props).props(props).hooks(hooks)
+        Messages: Obj::new().list().funcs(funcs).item_props(item_props).props(props)
     }
 }
 

@@ -38,7 +38,6 @@ impl Messages {
             builder,
             elider: Default::default(),
 
-            typing_user: Default::default(),
             typing_sender: Default::default(),
         }
     }

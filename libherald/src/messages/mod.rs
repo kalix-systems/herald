@@ -33,7 +33,6 @@ pub struct Messages {
     builder: MessageBuilder,
     elider: Elider,
 
-    typing_user: Option<UserId>,
     typing_sender: Option<Sender<()>>,
 }
 
@@ -109,12 +108,6 @@ impl Messages {
                 self.model.end_insert_rows();
                 self.emit_last_changed();
             }
-
-            MsgUpdate::TypingIndicator(uid) => {
-                self.typing_user.replace(uid);
-                self.emit.typing_user_id_changed();
-                self.emit.new_typing_indicator();
-            }
         }
     }
 }
@@ -139,9 +132,6 @@ pub(crate) enum MsgUpdate {
         content: heraldcore::message::ReactContent,
         remove: bool,
     },
-
-    /// A typing indicator has been received
-    TypingIndicator(UserId),
 
     /// A rendered message from the `MessageBuilder`
     BuilderMsg(Box<heraldcore::message::Message>),

@@ -160,47 +160,89 @@ Page {
             color: CmnCfg.palette.medGrey
         }
 
-        property int __secondsSinceLastReset: 0
-        property bool __aUserIsTyping: __secondsSinceLastReset < 5
-
-        Loader {
-            id: typingLoader
-            property var typingUser
-            active: false
-            asynchronous: true
-
-            height: CmnCfg.typeMargin
-
-            width: parent.width
-            anchors.bottom: parent.bottom
-            sourceComponent: CB.TypingBubble {
-                id: typeBubble
-
-                defaultWidth: convWindow.width
-            }
-        }
-
-        // listens for typing indicators
         Connections {
-            target: ownedConversation
+            target: conversationMembers
             onNewTypingIndicator: {
                 typingIndicator.__secondsSinceLastReset = 0
-                typingLoader.typingUser = ownedConversation.typingUserId
-                typingLoader.active = true
             }
         }
 
         Connections {
             target: appRoot.globalTimer
             onRefreshTime: {
-                typingIndicator.__secondsSinceLastReset += 1
-                if (!typingIndicator.__aUserIsTyping) {
-                    typingLoader.active = false
-                    typingLoader.typingUser = undefined
+                if (typingLoader.active)
+                    typingIndicator.__secondsSinceLastReset += 1
+            }
+        }
+
+        property int __secondsSinceLastReset: 5
+        property bool __aUserIsTyping: __secondsSinceLastReset < 5
+
+        Loader {
+            id: typingLoader
+            active: typingIndicator.__aUserIsTyping
+            asynchronous: true
+
+            height: CmnCfg.typeMargin
+
+            width: parent.width
+            anchors.bottom: parent.bottom
+            sourceComponent: Label {
+                id: typeLabel
+                property string typeText: ""
+
+                onTypeTextChanged: print(typeText)
+                text: typeText
+                Connections {
+                    target: conversationMembers
+                    onNewTypingIndicator: {
+                        typeLabel.typeText = ""
+                        const typers = JSON.parse(
+                                         conversationMembers.typingMembers())
+
+                        const num = typers.length
+
+                        if (num === 0) {
+                            return
+                        }
+
+                        typers.forEach(function (item, index) {
+                            const typingUserName = item
+                            if (num === 1) {
+                                typeLabel.typeText += typingUserName + qsTr(
+                                            " is typing...")
+                                return
+                            }
+
+                            if (num > 4) {
+                                typeLabel.typeText = "Several people are typing..."
+                                return
+                            }
+
+                            if (index < num) {
+                                if (typeList.typeActive < 2) {
+                                    typeLabel.typeText += " and "
+                                    return
+                                }
+
+                                typeLabel.typeText += typingUserName + ", "
+                                return
+                            }
+
+                            if (index < num) {
+                                typeLabel.typeText += typingUserName + " and "
+                                return
+                            }
+                            typeLabel.typeText += typingUserName + qsTr(
+                                        " are typing...")
+                            return
+                        })
+                    }
                 }
             }
         }
     }
+
     MessageDialog {
         id: clearHistoryPrompt
         text: qsTr("Clear conversation history")

@@ -75,7 +75,7 @@ ListView {
         }
 
         Connections {
-            target: convContent.messages
+            target: convContent.members
             onNewTypingIndicator: {
                 conversationItem.__secondsSinceLastReset = 0
                 convoRectangle.label.typeActive = true
