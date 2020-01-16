@@ -248,6 +248,7 @@ impl MembersTrait for Members {
             .list
             .iter()
             .filter_map(|u| u.last_typing.map(|t| check(t, &u.id)))
+            .filter(|n| n.is_some())
             .collect::<Vec<_>>();
 
         json::JsonValue::from(names).dump()

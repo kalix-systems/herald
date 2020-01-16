@@ -176,7 +176,61 @@ Page {
         }
 
         property int __secondsSinceLastReset: 5
-        property bool __aUserIsTyping: __secondsSinceLastReset < 5
+        property bool __aUserIsTyping: __secondsSinceLastReset < 4
+
+        property string typeText
+        Connections {
+            target: conversationMembers
+            onNewTypingIndicator: {
+                typingIndicator.typeText = ""
+                if (conversationMembers.typingMembers() === "") {
+                    typingLoader.active = false
+                    return
+                }
+                const typers = JSON.parse(conversationMembers.typingMembers())
+
+                const num = typers.length
+                const last = num - 1
+
+                if (num <= 0) {
+                    typingLoader.active = false
+                    return
+                }
+
+                typers.forEach(function (item, index) {
+                    const typingUserName = item
+                    if (num === 1) {
+                        typingIndicator.typeText += typingUserName + qsTr(
+                                    " is typing...")
+                        return
+                    }
+
+                    if (num > 4) {
+                        typingIndicator.typeText = "Several people are typing..."
+                        return
+                    }
+                    if (num === 2 && index === 0) {
+                        typingIndicator.typeText += typingUserName + qsTr(
+                                    " and ")
+                        return
+                    }
+
+                    if (index < last - 1) {
+                        typingIndicator.typeText += typingUserName + ", "
+                        return
+                    }
+
+                    if (index < last) {
+                        typingIndicator.typeText += typingUserName + " and "
+                        return
+                    }
+
+                    typingIndicator.typeText += typingUserName + qsTr(
+                                " are typing...")
+                    return
+                })
+            }
+        }
 
         Loader {
             id: typingLoader
@@ -189,56 +243,8 @@ Page {
             anchors.bottom: parent.bottom
             sourceComponent: Label {
                 id: typeLabel
-                property string typeText: ""
 
-                onTypeTextChanged: print(typeText)
-                text: typeText
-                Connections {
-                    target: conversationMembers
-                    onNewTypingIndicator: {
-                        typeLabel.typeText = ""
-                        const typers = JSON.parse(
-                                         conversationMembers.typingMembers())
-
-                        const num = typers.length
-
-                        if (num === 0) {
-                            return
-                        }
-
-                        typers.forEach(function (item, index) {
-                            const typingUserName = item
-                            if (num === 1) {
-                                typeLabel.typeText += typingUserName + qsTr(
-                                            " is typing...")
-                                return
-                            }
-
-                            if (num > 4) {
-                                typeLabel.typeText = "Several people are typing..."
-                                return
-                            }
-
-                            if (index < num) {
-                                if (typeList.typeActive < 2) {
-                                    typeLabel.typeText += " and "
-                                    return
-                                }
-
-                                typeLabel.typeText += typingUserName + ", "
-                                return
-                            }
-
-                            if (index < num) {
-                                typeLabel.typeText += typingUserName + " and "
-                                return
-                            }
-                            typeLabel.typeText += typingUserName + qsTr(
-                                        " are typing...")
-                            return
-                        })
-                    }
-                }
+                text: typingIndicator.typeText
             }
         }
     }
