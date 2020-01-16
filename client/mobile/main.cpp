@@ -52,6 +52,7 @@ int main(int argc, char* argv[])
   qmlRegisterAnonymousType<MessageBuilder>("LibHerald", 1);
   qmlRegisterAnonymousType<MediaAttachments>("LibHerald", 1);
   qmlRegisterAnonymousType<DocumentAttachments>("LibHerald", 1);
+  qmlRegisterType<SharedConversations>("LibHerald", 1, 0, "SharedConversations");
 
   qmlRegisterSingletonType(QUrl("qrc:/qml/Common/CommonConfig.qml"),
                            "LibHerald", 1, 0, "CmnCfg");

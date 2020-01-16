@@ -15,9 +15,7 @@ ApplicationWindow {
 
     MobileHelper {
         id: mobHelper
-        Component.onCompleted: {
-            set_status_bar_color(CmnCfg.palette.offBlack)
-        }
+        Component.onCompleted: set_status_bar_color(CmnCfg.palette.offBlack)
     }
 
     Component {

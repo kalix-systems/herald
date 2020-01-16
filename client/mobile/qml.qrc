@@ -41,5 +41,9 @@
         <file>qml/SettingsHeader.qml</file>
         <file>qml/HeadersMain.qml</file>
         <file>qml/Router.qml</file>
+        <file>qml/ContactsView/ContactViewMain.qml</file>
+        <file>qml/ContactsView/ContactsHeader.qml</file>
+        <file>qml/ContactsView/ContactDrawer.qml</file>
+        <file>qml/ContactsView/CommonGroupsFlow.qml</file>
     </qresource>
 </RCC>
