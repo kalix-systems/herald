@@ -2,10 +2,10 @@ import QtQuick 2.14
 import QtQuick.Controls 2.14
 import LibHerald 1.0
 import "qrc:/imports/Entity"
-import "qrc:/imports/js/utils.mjs" as UTils
+import "qrc:/imports/js/utils.mjs" as Utils
 
 Page {
-    anchors.fill: parent
+    id: contactsPopup
     readonly property Component headerComponent: ContactsHeader {}
 
     Item {
@@ -33,6 +33,7 @@ Page {
         }
 
         Text {
+            id: groupHeader
             text: "Groups"
             anchors.verticalCenter: parent.verticalCenter
             anchors.horizontalCenter: parent.horizontalCenter
@@ -82,7 +83,7 @@ Page {
             id: userRect
             property var userData: model
             color: CmnCfg.palette.white
-            width: contactsPopup.width
+            width: parent.width
             height: visible ? row.height + 1 : 0
 
             property var sharedConvos: SharedConversations {
@@ -136,7 +137,7 @@ Page {
                         cursorShape: Qt.PointingHandCursor
                         anchors.fill: parent
                         onClicked: {
-                            drawer.userData = userData
+                            //drawer.userData = userData
                             drawer.open()
                         }
                     }
@@ -172,9 +173,10 @@ Page {
                         }
                     }
                 }
-
-                //common groups
-                //CommonGroupsFlow {}
+            }
+            //common groups
+            CommonGroupsFlow {
+                anchors.left: parent.horizontalCenter
             }
         }
     }

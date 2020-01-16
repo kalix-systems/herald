@@ -34,4 +34,10 @@ RowLayout {
     Item {
         Layout.fillWidth: true
     }
+
+    AnimIconButton {
+        Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
+        color: CmnCfg.palette.iconFill
+        imageSource: "qrc:/search-icon.svg"
+    }
 }
