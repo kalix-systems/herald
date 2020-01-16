@@ -254,6 +254,22 @@ pub mod sig {
                 )
                 .1
         }
+
+        pub fn active_keys(&self) -> Vec<sig::PublicKey> {
+            let mut keys = std::collections::HashSet::new();
+            keys.insert(*self.initial.signed_by());
+            for update in self.sig_chain.iter() {
+                match &update.data {
+                    SigUpdate::Endorse(e) => {
+                        keys.insert(*e.signed_by());
+                    }
+                    SigUpdate::Deprecate(k) => {
+                        keys.remove(k);
+                    }
+                }
+            }
+            keys.into_iter().collect()
+        }
     }
 }
 

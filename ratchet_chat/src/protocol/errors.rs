@@ -1,6 +1,6 @@
 use super::*;
 
-#[derive(Ser, De, Eq, PartialEq, Hash, Clone, Copy)]
+#[derive(Ser, De, Eq, PartialEq, Hash, Clone, Copy, Debug)]
 pub enum FailureReason {
     Decryption,
     Deserialization,

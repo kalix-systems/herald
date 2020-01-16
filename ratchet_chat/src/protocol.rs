@@ -10,10 +10,10 @@ mod traits;
 pub use errors::*;
 pub use traits::*;
 
-#[derive(Ser, De, Eq, PartialEq, Ord, PartialOrd, Hash, Clone, Copy)]
+#[derive(Ser, De, Eq, PartialEq, Ord, PartialOrd, Hash, Clone, Copy, Debug)]
 pub struct PayloadId(random::UQ);
 
-#[derive(Ser, De, Eq, PartialEq, Hash, Clone)]
+#[derive(Ser, De, Eq, PartialEq, Hash, Clone, Debug)]
 pub enum Payload {
     Noop,
     SigUpdate(Signed<sig::SigUpdate>),
@@ -24,7 +24,7 @@ pub enum Payload {
     Msg(Bytes),
 }
 
-#[derive(Ser, De, Eq, PartialEq, Hash, Clone)]
+#[derive(Ser, De, Eq, PartialEq, Hash, Clone, Debug)]
 pub enum Msg {
     Encrypted {
         id: PayloadId,
@@ -34,7 +34,7 @@ pub enum Msg {
     Ack(Ack),
 }
 
-#[derive(Ser, De, Eq, PartialEq, Hash, Clone)]
+#[derive(Ser, De, Eq, PartialEq, Hash, Clone, Debug)]
 pub enum Ack {
     Success(PayloadId),
     Failed {
@@ -383,3 +383,6 @@ where
 
     Ok(res)
 }
+
+#[cfg(test)]
+mod test;
