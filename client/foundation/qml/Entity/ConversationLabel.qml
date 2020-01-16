@@ -14,6 +14,7 @@ import "qrc:/imports/js/utils.mjs" as JS
 // TODO this should probably be called something to reflect that it's also used
 // for contacts, not just conversations
 Item {
+    id: wrapper
     // the group name or displayName of the conversation
     property string convoTitle
 
@@ -83,13 +84,16 @@ Item {
         return ''
     }
 
+    //    GridLayout {
+    //        id: labelGrid
+    //        rows: 2
+    //        columns: 2
+    //        width: parent.width
+    //        height: parent.height
     GridLayout {
-        id: labelGrid
-        rows: 2
-        columns: 2
-        width: parent.width
-        height: parent.height
-
+        id: nameGrid
+        anchors.top: parent.top
+        anchors.left: parent.left
         Label {
             id: name
             font {
@@ -97,26 +101,32 @@ Item {
                 pixelSize: labelFontSize
                 weight: Font.Medium
             }
-            Layout.alignment: Qt.AlignLeft | Qt.AlignTop
-            Layout.preferredHeight: labelGrid.height * 0.25
-            Layout.fillWidth: true
+            Layout.maximumWidth: wrapper.width - ts.width
+            // Layout.preferredHeight: labelGrid.height * 0.25
             elide: "ElideRight"
             text: convoTitle
             color: labelColor
+            padding: 0
         }
-
-        Label {
-            id: ts
-            font {
-                family: CmnCfg.chatFont.name
-                pixelSize: CmnCfg.minorTextSize
-            }
-            text: lastTimestamp
-            Layout.preferredHeight: labelGrid.height * 0.25
-            Layout.alignment: Qt.AlignRight | Qt.AlignTop
-            color: minorTextColor
+    }
+    Label {
+        anchors.right: parent.right
+        anchors.top: nameGrid.top
+        id: ts
+        font {
+            family: CmnCfg.chatFont.name
+            pixelSize: CmnCfg.minorTextSize
         }
-
+        text: lastTimestamp
+        padding: 0
+        //        Layout.preferredHeight: labelGrid.height * 0.25
+        //  Layout.alignment: Qt.AlignRight | Qt.AlignTop
+        color: minorTextColor
+    }
+    GridLayout {
+        id: bodyGrid
+        anchors.left: parent.left
+        anchors.bottom: parent.bottom
         Label {
             id: bodyText
             font {
@@ -125,24 +135,28 @@ Item {
             }
             elide: "ElideRight"
             text: lastBody
-            Layout.fillWidth: true
-            Layout.alignment: Qt.AlignLeft
-            Layout.maximumHeight: labelGrid.height * 0.25
+            Layout.maximumWidth: wrapper.width - CmnCfg.defaultMargin * 2
+            //Layout.fillWidth: true
+            //  Layout.alignment: Qt.AlignLeft
+            //  Layout.maximumHeight: labelGrid.height * 0.25
             color: labelColor
             textFormat: Text.StyledText
-        }
-
-        Button {
-            id: receiptImage
-            visible: outbound
-            icon.source: JS.receiptCodeSwitch(lastReceipt)
-            icon.height: 16
-            icon.width: 16
-            Layout.topMargin: 2
-            icon.color: CmnCfg.palette.iconFill
             padding: 0
-            Layout.alignment: Qt.AlignRight | Qt.AlignBottom
-            background: Item {}
         }
     }
-}
+
+    Button {
+        id: receiptImage
+        visible: outbound
+        icon.source: JS.receiptCodeSwitch(lastReceipt)
+        icon.height: 16
+        icon.width: 16
+        anchors.bottom: bodyGrid.bottom
+        anchors.right: parent.right
+        //  Layout.topMargin: 2
+        icon.color: CmnCfg.palette.iconFill
+        padding: 0
+        // Layout.alignment: Qt.AlignRight | Qt.AlignBottom
+        background: Item {}
+    }
+} //}

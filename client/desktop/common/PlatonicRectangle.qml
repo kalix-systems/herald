@@ -20,7 +20,7 @@ Rectangle {
     property string picture
     property bool isGroupPicture: false
     property bool isMessageResult: false
-    property int topTextMargin: CmnCfg.smallMargin
+    property int topTextMargin: 5
     property int bottomTextMargin: isMessageResult ? CmnCfg.smallMargin : CmnCfg.defaultMargin
 
     Avatar {
@@ -42,7 +42,7 @@ Rectangle {
             leftMargin: CmnCfg.defaultMargin
             rightMargin: CmnCfg.defaultMargin
             topMargin: topTextMargin
-            bottomMargin: bottomTextMargin
+            bottomMargin: 6
             left: itemAvatar.right
             right: parent.right
             top: parent.top

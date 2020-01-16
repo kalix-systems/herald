@@ -115,6 +115,10 @@ ListView {
 
             labelComponent: Ent.ConversationLabel {
                 id: conversationLabel
+                width: parent.width
+                height: parent.height
+                // width: convoRectangle.width - CmnCfg.avatarSize - CmnCfg.defaultMargin * 2
+                // height: convoRectangle.height - CmnCfg.defaultMargin * 2
                 lastMsgDigest: conversationItem.conversationData.lastMsgDigest
                 isEmpty: conversationItem.conversationData.isEmpty
                 convoTitle: !convoRectangle.nts ? title : qsTr("Note to Self")
