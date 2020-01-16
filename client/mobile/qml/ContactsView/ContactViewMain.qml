@@ -17,13 +17,13 @@ Page {
             width: CmnCfg.avatarSize
             anchors.left: parent.left
             id: avatarFiller
-            anchors.leftMargin: CmnCfg.defaultMargin
+            anchors.leftMargin: CmnCfg.smallMargin
         }
 
         Text {
             id: nameHeader
             anchors.left: avatarFiller.right
-            anchors.leftMargin: CmnCfg.defaultMargin
+            anchors.leftMargin: CmnCfg.smallMargin
             text: "Name"
             anchors.verticalCenter: parent.verticalCenter
             font.family: CmnCfg.chatFont.name
@@ -86,11 +86,11 @@ Page {
             width: parent.width
             height: visible ? row.height + 1 : 0
 
+            visible: (userData.userId !== Herald.config.configId && matched)
+
             property var sharedConvos: SharedConversations {
                 userId: userData.userId
             }
-            visible: (userData.userId !== Herald.config.configId && matched)
-
             //top header
             Rectangle {
                 anchors {
@@ -121,15 +121,15 @@ Page {
             Item {
                 id: row
                 width: contactsPopup.width
-                height: 70
+                height: CmnCfg.units.dp(48)
 
                 //avatar
                 Avatar {
                     id: avatar
                     anchors.left: parent.left
-                    anchors.leftMargin: CmnCfg.defaultMargin
+                    anchors.leftMargin: CmnCfg.smallMargin
                     anchors.verticalCenter: parent.verticalCenter
-                    height: CmnCfg.avatarSize
+                    height: CmnCfg.units.dp(CmnCfg.avatarSize - 10)
                     pfpPath: Utils.safeStringOrDefault(model.profilePicture, "")
                     color: CmnCfg.avatarColors[model.userColor]
                     initials: Utils.initialize(name)
@@ -147,7 +147,7 @@ Page {
                     width: labelCol.width
                     cursorShape: Qt.PointingHandCursor
                     anchors.left: avatar.right
-                    anchors.leftMargin: CmnCfg.defaultMargin
+                    anchors.leftMargin: CmnCfg.smallMargin
                     anchors.verticalCenter: avatar.verticalCenter
                     onClicked: {
                         drawer.userData = userRect.userData
@@ -160,7 +160,7 @@ Page {
                         spacing: 2
                         Label {
                             font.weight: Font.DemiBold
-                            font.pixelSize: CmnCfg.headerFontSize
+                            font.pixelSize: CmnCfg.defaultFontSize
                             font.family: CmnCfg.chatFont.name
                             text: userId
                             color: CmnCfg.palette.offBlack
@@ -169,14 +169,13 @@ Page {
                             text: "@" + name
                             font.family: CmnCfg.chatFont.name
                             color: CmnCfg.palette.offBlack
-                            font.pixelSize: CmnCfg.defaultFontSize
+                            font.pixelSize: CmnCfg.chatTextSize
                         }
                     }
                 }
-            }
-            //common groups
-            CommonGroupsFlow {
-                anchors.left: parent.horizontalCenter
+                //common groups
+                CommonGroupsFlow {//   anchors.left: parent.horizontalCenter
+                }
             }
         }
     }
