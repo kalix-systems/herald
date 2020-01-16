@@ -17,7 +17,7 @@ impl Messages {
         if match_status.is_match() {
             messages_helper::search::highlight_message(pattern.as_ref()?, &body).into()
         } else {
-            elider.elided_body(body).into()
+            elider.elided_body(&body).into()
         }
     }
 

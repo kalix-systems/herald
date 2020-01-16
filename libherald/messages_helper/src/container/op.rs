@@ -36,7 +36,7 @@ impl Container {
 
         access(&mid, |m| m.text().map(ToString::to_string))
             .flatten()
-            .map(|b| self.op_body_elider.elided_body(b))
+            .map(|b| self.op_body_elider.elided_body(&b))
     }
 
     pub fn op_insertion_time(

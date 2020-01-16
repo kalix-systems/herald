@@ -45,34 +45,57 @@ impl Elider {
 
     pub fn elided_body(
         &self,
-        body: String,
+        body: &str,
     ) -> String {
-        let graphemes = UnicodeSegmentation::graphemes(body.as_str(), true);
+        let body = body.trim();
 
         let mut char_count = 0;
         let mut line_count = 0;
 
-        for s in graphemes {
-            if char_count >= self.char_count || line_count >= self.line_count {
-                break;
+        let mut out = String::new();
+        let mut empty_lines = 0;
+
+        'outer: for (ix, line) in body.lines().take(self.line_count).enumerate() {
+            if char_count >= self.char_count {
+                break 'outer;
             }
 
-            char_count += 1;
-            line_count += s.lines().count().saturating_sub(1);
+            let graphemes = UnicodeSegmentation::graphemes(line, true);
+
+            if ix != 0 {
+                out.push_str("\n");
+            }
+
+            let mut chars = 0;
+
+            for s in graphemes {
+                if char_count >= self.char_count {
+                    break 'outer;
+                }
+
+                out.push_str(s);
+
+                char_count += 1;
+                chars += 1;
+            }
+
+            if chars == 0 {
+                empty_lines += 1;
+            }
+
+            if empty_lines >= 4 {
+                return out.trim_end().to_string();
+            }
+
+            line_count += 1;
         }
 
         if char_count < self.char_count && line_count < self.line_count {
-            return body;
+            return body.to_string();
         }
 
-        let chars_to_take = self.char_count.min(self.line_count * self.char_per_line);
-
-        let mut out: String = UnicodeSegmentation::graphemes(body.as_str(), true)
-            .take(chars_to_take)
-            .collect();
-
+        let mut out = out.trim_end().to_string();
         out.push_str("...");
-
         out
     }
 }
