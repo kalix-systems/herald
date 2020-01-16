@@ -137,7 +137,7 @@ Page {
                         cursorShape: Qt.PointingHandCursor
                         anchors.fill: parent
                         onClicked: {
-                            //drawer.userData = userData
+                            drawer.userData = userRect.userData
                             drawer.open()
                         }
                     }
@@ -150,7 +150,7 @@ Page {
                     anchors.leftMargin: CmnCfg.defaultMargin
                     anchors.verticalCenter: avatar.verticalCenter
                     onClicked: {
-                        //drawer.userData = userData
+                        drawer.userData = userRect.userData
                         drawer.open()
                     }
 

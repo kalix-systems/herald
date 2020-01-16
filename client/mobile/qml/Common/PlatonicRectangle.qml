@@ -19,7 +19,7 @@ Rectangle {
     property bool isMessageResult: false
     property int topTextMargin: CmnCfg.defaultMargin
     property int bottomTextMargin: isMessageResult ? CmnCfg.smallMargin : CmnCfg.units.dp(
-                                                         10)
+                                                         8)
 
     Avatar {
         id: itemAvatar

@@ -7,6 +7,7 @@ import "qrc:/imports/Entity"
 import "qrc:/imports/js/utils.mjs" as Utils
 
 Drawer {
+    id: drawer
     dragMargin: 0
     edge: Qt.RightEdge
     property var userData
@@ -15,6 +16,7 @@ Drawer {
     closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside | Popup.CloseOnReleaseOutside
     Loader {
         anchors.fill: parent
+        active: drawer.userData !== undefined
         sourceComponent: Flickable {
             boundsBehavior: Flickable.StopAtBounds
             boundsMovement: Flickable.StopAtBounds
