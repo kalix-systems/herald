@@ -1,6 +1,8 @@
 import QtQuick 2.14
 import QtQuick.Controls 2.14
 import LibHerald 1.0
+import "qrc:/imports/Entity"
+import "qrc:/imports/js/utils.mjs" as UTils
 
 Page {
     anchors.fill: parent
@@ -50,6 +52,12 @@ Page {
         }
     }
 
+    ContactDrawer {
+        id: drawer
+        height: parent.height
+        width: parent.width * 0.8
+    }
+
     //contacts list view
     ListView {
         id: listView
@@ -77,9 +85,9 @@ Page {
             width: contactsPopup.width
             height: visible ? row.height + 1 : 0
 
-            //            property var sharedConvos: SharedConversations {
-            //                userId: userData.userId
-            //            }
+            property var sharedConvos: SharedConversations {
+                userId: userData.userId
+            }
             visible: (userData.userId !== Herald.config.configId && matched)
 
             //top header
@@ -115,24 +123,24 @@ Page {
                 height: 70
 
                 //avatar
-                //                Avatar {
-                //                    id: avatar
-                //                    anchors.left: parent.left
-                //                    anchors.leftMargin: CmnCfg.defaultMargin
-                //                    anchors.verticalCenter: parent.verticalCenter
-                //                    height: CmnCfg.avatarSize
-                //                    pfpPath: Utils.safeStringOrDefault(model.profilePicture, "")
-                //                    color: CmnCfg.avatarColors[model.userColor]
-                //                    initials: Utils.initialize(name)
-                //                    MouseArea {
-                //                        cursorShape: Qt.PointingHandCursor
-                //                        anchors.fill: parent
-                //                        onClicked: {
-                //                            drawer.userData = userData
-                //                            drawer.open()
-                //                        }
-                //                    }
-                //                }
+                Avatar {
+                    id: avatar
+                    anchors.left: parent.left
+                    anchors.leftMargin: CmnCfg.defaultMargin
+                    anchors.verticalCenter: parent.verticalCenter
+                    height: CmnCfg.avatarSize
+                    pfpPath: Utils.safeStringOrDefault(model.profilePicture, "")
+                    color: CmnCfg.avatarColors[model.userColor]
+                    initials: Utils.initialize(name)
+                    MouseArea {
+                        cursorShape: Qt.PointingHandCursor
+                        anchors.fill: parent
+                        onClicked: {
+                            drawer.userData = userData
+                            drawer.open()
+                        }
+                    }
+                }
                 MouseArea {
                     height: labelCol.height
                     width: labelCol.width
@@ -141,7 +149,7 @@ Page {
                     anchors.leftMargin: CmnCfg.megaMargin
                     anchors.verticalCenter: avatar.verticalCenter
                     onClicked: {
-                        drawer.userData = userData
+                        //drawer.userData = userData
                         drawer.open()
                     }
 

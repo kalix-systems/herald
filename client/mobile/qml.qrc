@@ -43,5 +43,6 @@
         <file>qml/Router.qml</file>
         <file>qml/ContactsView/ContactViewMain.qml</file>
         <file>qml/ContactsView/ContactsHeader.qml</file>
+        <file>qml/ContactsView/ContactDrawer.qml</file>
     </qresource>
 </RCC>
