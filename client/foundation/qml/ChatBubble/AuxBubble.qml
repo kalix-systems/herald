@@ -75,7 +75,7 @@ Rectangle {
     Avatar {
         id: avatar
         visible: false
-        size: CmnCfg.chatAvatarSize
+        size: CmnCfg.headerAvatarSize
         anchors {
             left: parent.left
             top: parent.top

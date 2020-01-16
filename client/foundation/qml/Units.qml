@@ -28,7 +28,7 @@ import QtQuick.Window 2.14
 QtObject {
 
     // Screen.pixelDensity is in mm. 25.4 mm per inch; 25.4 mm per in;
-    //readonly property real deviceDotsPerInch: (Screen.pixelDensity * 25.4) / 72
+    // 72 dpi on most displays
     readonly property real deviceDotsPerInch: (Screen.logicalPixelDensity * 25.4) / 72
     function dp(dips) {
         return dips * deviceDotsPerInch
