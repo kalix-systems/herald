@@ -56,9 +56,12 @@ ListView {
         readonly property var conversationIdProxy: conversationId
         property bool isPairwise: pairwise
         property bool outbound: convContent.messages.lastAuthor === Herald.config.configId
+
         property ConversationContent convContent: ConversationContent {
             conversationId: conversationIdProxy
         }
+
+        ListView.delayRemove: true
 
         property Component childChatView: Component {
             CV.ChatViewMain {

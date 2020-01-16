@@ -18,6 +18,14 @@ ApplicationWindow {
         id: errPopup
     }
 
+    property alias ccMap: ccMap.map
+    Item {
+        // conversation content map
+        id: ccMap
+
+        property var map: ({})
+    }
+
     Connections {
         target: Herald.errors
         onNewError: {

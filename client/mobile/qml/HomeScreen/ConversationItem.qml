@@ -25,6 +25,7 @@ Rectangle {
     // most recent message content to display in this item
     property var lastMsgDigest
     property alias ownedCV: ownedChatView
+    property alias tapEnabled: tapHandler.enabled
 
     height: CmnCfg.convoHeight
 
@@ -100,6 +101,7 @@ Rectangle {
     }
 
     TapHandler {
+        id: tapHandler
         onTapped: {
             splash.x = eventPoint.position.x
             splash.y = eventPoint.position.y
