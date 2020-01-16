@@ -116,7 +116,6 @@ Drawer {
                                                      !== undefined ? groupData.conversationColor : 0
                             pfpPath: Utils.safeStringOrDefault(
                                          groupData.conversationPicture, "")
-
                             color: CmnCfg.avatarColors[groupColor]
                             initials: Utils.initialize(
                                           Utils.safeStringOrDefault(
