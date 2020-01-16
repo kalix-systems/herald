@@ -43,6 +43,7 @@ ToolBar {
         spacing: CmnCfg.defaultMargin
         layoutDirection: Qt.RightToLeft
         anchors.verticalCenter: parent.verticalCenter
+
         AnimIconButton {
             id: optionsButton
             color: CmnCfg.palette.iconFill
@@ -55,6 +56,13 @@ ToolBar {
             color: CmnCfg.palette.iconFill
             imageSource: "qrc:/search-icon.svg"
             onTapped: mainView.push(globalSearchView)
+        }
+
+        AnimIconButton {
+            id: contactsButton
+            color: CmnCfg.palette.iconFill
+            imageSource: "qrc:/directory-icon.svg"
+            onTapped: mainView.push(contactsViewMain)
         }
     }
 }

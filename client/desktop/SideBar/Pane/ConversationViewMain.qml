@@ -56,9 +56,14 @@ ListView {
         readonly property var conversationIdProxy: conversationId
         property bool isPairwise: pairwise
         property bool outbound: convContent.messages.lastAuthor === Herald.config.configId
+
         property ConversationContent convContent: ConversationContent {
             conversationId: conversationIdProxy
         }
+
+        ListView.delayRemove: true
+        property int __secondsSinceLastReset: 0
+        property int __typing: __secondsSinceLastReset < 5
 
         property Component childChatView: Component {
             CV.ChatViewMain {
@@ -69,6 +74,23 @@ ListView {
             }
         }
 
+        Connections {
+            target: convContent.messages
+            onNewTypingIndicator: {
+                conversationItem.__secondsSinceLastReset = 0
+                convoRectangle.label.typeActive = true
+            }
+        }
+
+        Connections {
+            target: appRoot.globalTimer
+            onRefreshTime: {
+                conversationItem.__secondsSinceLastReset += 1
+                if (!conversationItem.__typing) {
+                    convoRectangle.label.typeActive = false
+                }
+            }
+        }
         Connections {
             target: contactsLoader.item
             onGroupClicked: {
@@ -112,6 +134,8 @@ ListView {
 
             labelComponent: Ent.ConversationLabel {
                 id: conversationLabel
+                width: parent.width
+                height: parent.height
                 lastMsgDigest: conversationItem.conversationData.lastMsgDigest
                 isEmpty: conversationItem.conversationData.isEmpty
                 convoTitle: !convoRectangle.nts ? title : qsTr("Note to Self")

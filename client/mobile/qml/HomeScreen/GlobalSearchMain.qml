@@ -18,6 +18,7 @@ Page {
 
     Component.onCompleted: appRoot.router.searchView = searchView
     signal messageClicked(var searchConversationId, var searchMsgId)
+    signal convoClicked(var searchConversationId)
 
     Column {
         id: contentCol
@@ -53,15 +54,12 @@ Page {
                 isGroup: !model.pairwise
                 lastMsgDigest: model.lastMsgDigest
                 isEmpty: model.isEmpty
-                // TODO(cmck) avoid instantiating multiple ConversationContent
-                // items per conversation (HomeScreenMain already carestes one
-                // per conversation). Future refactor: create a single
-                // ConversationContent for a ChatView when it's pushed
-                //                convoContent: ConversationContent {
-                //                    conversationId: model.conversationId
-                //                }
+                tapEnabled: false
                 visible: model.matched
                 height: visible ? CmnCfg.convoHeight : 0
+                TapHandler {
+                    onTapped: convoClicked(model.conversationId)
+                }
             }
         }
 
@@ -109,7 +107,6 @@ Page {
                         afterMatch: model.afterFirstMatch
                     }
 
-                    // TODO load messages when data model is fixed
                     TapHandler {
                         onTapped: {
                             messageClicked(model.conversation, model.msgId)

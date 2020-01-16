@@ -14,6 +14,7 @@ import "qrc:/imports/js/utils.mjs" as JS
 // TODO this should probably be called something to reflect that it's also used
 // for contacts, not just conversations
 Item {
+    id: wrapper
     // the group name or displayName of the conversation
     property string convoTitle
 
@@ -21,9 +22,9 @@ Item {
     property color minorTextColor: CmnCfg.palette.offBlack
     property int labelFontSize: CmnCfg.entityLabelSize
     property int subLabelFontSize: CmnCfg.entitySubLabelSize
-    property alias bodyItalic: bodyText.font.italic
     property alias receiptFill: receiptImage.icon.color
 
+    property bool typeActive: false
     // json summary
     property string lastMsgDigest
 
@@ -84,12 +85,9 @@ Item {
     }
 
     GridLayout {
-        id: labelGrid
-        rows: 2
-        columns: 2
-        width: parent.width
-        height: parent.height
-
+        id: nameGrid
+        anchors.top: parent.top
+        anchors.left: parent.left
         Label {
             id: name
             font {
@@ -97,52 +95,90 @@ Item {
                 pixelSize: labelFontSize
                 weight: Font.Medium
             }
-            Layout.alignment: Qt.AlignLeft | Qt.AlignTop
-            Layout.preferredHeight: labelGrid.height * 0.25
-            Layout.fillWidth: true
+            Layout.maximumWidth: wrapper.width - ts.width
             elide: "ElideRight"
             text: convoTitle
             color: labelColor
-        }
-
-        Label {
-            id: ts
-            font {
-                family: CmnCfg.chatFont.name
-                pixelSize: CmnCfg.minorTextSize
-            }
-            text: lastTimestamp
-            Layout.preferredHeight: labelGrid.height * 0.25
-            Layout.alignment: Qt.AlignRight | Qt.AlignTop
-            color: minorTextColor
-        }
-
-        Label {
-            id: bodyText
-            font {
-                family: CmnCfg.chatFont.name
-                pixelSize: subLabelFontSize
-            }
-            elide: "ElideRight"
-            text: lastBody
-            Layout.fillWidth: true
-            Layout.alignment: Qt.AlignLeft
-            Layout.maximumHeight: labelGrid.height * 0.25
-            color: labelColor
-            textFormat: Text.StyledText
-        }
-
-        Button {
-            id: receiptImage
-            visible: outbound
-            icon.source: JS.receiptCodeSwitch(lastReceipt)
-            icon.height: 16
-            icon.width: 16
-            Layout.topMargin: 2
-            icon.color: CmnCfg.palette.iconFill
             padding: 0
-            Layout.alignment: Qt.AlignRight | Qt.AlignBottom
-            background: Item {}
         }
     }
-}
+    Label {
+        anchors.right: parent.right
+        anchors.top: nameGrid.top
+        id: ts
+        font {
+            family: CmnCfg.chatFont.name
+            pixelSize: CmnCfg.minorTextSize
+        }
+        text: lastTimestamp
+        padding: 0
+        color: minorTextColor
+    }
+
+    Loader {
+        id: textLoader
+        active: !typeActive
+        anchors.left: parent.left
+        anchors.bottom: parent.bottom
+        width: active ? item.implicitWidth : 0
+        height: active ? item.implicitHeight : 0
+
+        sourceComponent: GridLayout {
+            id: bodyGrid
+            Label {
+
+                id: bodyText
+                font {
+                    family: CmnCfg.chatFont.name
+                    pixelSize: subLabelFontSize
+                }
+                background: Item {}
+                elide: "ElideRight"
+                text: lastBody
+                Layout.maximumWidth: wrapper.width - CmnCfg.defaultMargin * 2
+                color: labelColor
+                textFormat: Text.StyledText
+                padding: 0
+            }
+        }
+    }
+
+    Loader {
+        id: typeLoader
+        active: typeActive
+        anchors.left: parent.left
+        anchors.bottom: parent.bottom
+        width: active ? item.implicitWidth : 0
+        height: active ? item.implicitHeight : 0
+        sourceComponent: GridLayout {
+            id: typeGrid
+            Label {
+                id: type
+                font {
+                    family: CmnCfg.chatFont.name
+                    pixelSize: subLabelFontSize
+                }
+                background: Item {}
+                elide: "ElideRight"
+                text: "<i>" + qsTr("Someone is typing") + "...</i>"
+                Layout.maximumWidth: wrapper.width - CmnCfg.defaultMargin * 2
+                color: labelColor
+                textFormat: Text.StyledText
+                padding: 0
+            }
+        }
+    }
+
+    Button {
+        id: receiptImage
+        visible: outbound && !typeActive
+        icon.source: JS.receiptCodeSwitch(lastReceipt)
+        icon.height: 16
+        icon.width: 16
+        anchors.bottom: textLoader.bottom
+        anchors.right: parent.right
+        icon.color: CmnCfg.palette.iconFill
+        padding: 0
+        background: Item {}
+    }
+} //}

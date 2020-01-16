@@ -32,6 +32,11 @@ Item {
         selectExisting: false
     }
 
+    readonly property alias appRouter: appRouter
+    Router {
+        id: appRouter
+    }
+
     readonly property alias globalTimer: globalTimer
     Timer {
         id: globalTimer
