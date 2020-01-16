@@ -20,8 +20,9 @@ Rectangle {
     property string picture
     property bool isGroupPicture: false
     property bool isMessageResult: false
-    property int topTextMargin: 5
-    property int bottomTextMargin: isMessageResult ? CmnCfg.smallMargin : CmnCfg.defaultMargin
+    property int topTextMargin: CmnCfg.units.dp(6)
+    property int bottomTextMargin: isMessageResult ? CmnCfg.largeMargin : CmnCfg.units.dp(
+                                                         6)
     property alias label: conversationItemLabel.item
 
     Avatar {
@@ -43,7 +44,7 @@ Rectangle {
             leftMargin: CmnCfg.defaultMargin
             rightMargin: CmnCfg.defaultMargin
             topMargin: topTextMargin
-            bottomMargin: 6
+            bottomMargin: bottomTextMargin
             left: itemAvatar.right
             right: parent.right
             top: parent.top

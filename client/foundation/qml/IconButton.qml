@@ -14,8 +14,8 @@ ToolButton {
     padding: 0
     icon.source: source
     icon.color: fill
-    icon.width: 22
-    icon.height: 22
+    icon.width: CmnCfg.units.dp(18)
+    icon.height: CmnCfg.units.dp(18)
     MouseArea {
         id: mouse
         anchors.fill: parent

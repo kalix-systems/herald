@@ -93,7 +93,7 @@ Flow {
                     font.family: CmnCfg.chatFont.name
                     color: outboundReact ? CmnCfg.palette.white : CmnCfg.palette.offBlack
 
-                    font.pixelSize: CmnCfg.chatTextSize
+                    font.pixelSize: CmnCfg.minorTextSize
                     font.weight: Font.Medium
                     anchors.verticalCenter: emoji.verticalCenter
                 }

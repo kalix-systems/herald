@@ -283,7 +283,7 @@ Popup {
                             spacing: 2
                             Label {
                                 font.weight: Font.DemiBold
-                                font.pixelSize: CmnCfg.headerFontSize
+                                font.pixelSize: CmnCfg.labelFontSize
                                 font.family: CmnCfg.chatFont.name
                                 text: userId
                                 color: CmnCfg.palette.offBlack

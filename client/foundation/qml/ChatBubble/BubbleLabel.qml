@@ -35,7 +35,7 @@ Row {
         text: time.text
         color: CmnCfg.palette.darkGrey
         font.family: CmnCfg.chatFont.name
-        anchors.verticalCenter: authorLabel.verticalCenter
+        anchors.baseline: authorLabel.baseline
         TextMetrics {
             id: time
             font.family: CmnCfg.chatFont.name
