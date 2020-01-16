@@ -23,15 +23,15 @@ Item {
 
     readonly property alias sysPalette: systemPalette
     /// standard tiny margin
-    readonly property real microMargin: units.dp(4)
+    readonly property real microMargin: units.dp(2)
     /// standard small margin
-    readonly property real smallMargin: units.dp(8)
+    readonly property real smallMargin: units.dp(6)
     /// standard margin size
-    readonly property real defaultMargin: units.dp(12)
+    readonly property real defaultMargin: units.dp(10)
     /// standard large margin size
-    readonly property real largeMargin: units.dp(16)
+    readonly property real largeMargin: units.dp(14)
     /// standard very large margin
-    readonly property real megaMargin: units.dp(24)
+    readonly property real megaMargin: units.dp(20)
 
     // TODO shouldn't use spacers
     /// gap used for tool bars, avatar margins, etc
@@ -46,7 +46,7 @@ Item {
     /// size of labels
     readonly property real labelFontSize: units.dp(12)
     /// font size for minor text (e.g. timestamps)
-    readonly property int minorTextSize: units.dp(0)
+    readonly property int minorTextSize: units.dp(11)
     /// standard chat text size
     readonly property real chatTextSize: units.dp(11)
     readonly property real defaultFontSize: units.dp(12)
@@ -88,7 +88,7 @@ Item {
     /// logged-in user avatar size
     readonly property real identityAvatarDiameter: units.dp(24)
     /// standard avatar size
-    readonly property real avatarSize: units.dp(42)
+    readonly property real avatarSize: units.dp(36)
     readonly property int chatAvatarSize: units.dp(24)
     /// standard conversation/contact height
     readonly property int convoHeight: avatarSize * 1.5
