@@ -17,6 +17,7 @@ ListView {
     clip: true
     currentIndex: -1
 
+    //  cacheBuffer: contentHeight * 10
     // conversations and messages are in a single column,
     // this needs to be uninteractive so that they scroll together
     interactive: false
@@ -24,6 +25,9 @@ ListView {
     property bool archiveView: false
 
     signal messagePositionRequested(var requestedMsgId)
+
+    onContentHeightChanged: if (contentHeight > 0)
+                                cacheBuffer = contentHeight * 10
 
     // Jump to message on message searched.
     Connections {
@@ -52,9 +56,12 @@ ListView {
         readonly property var conversationIdProxy: conversationId
         property bool isPairwise: pairwise
         property bool outbound: convContent.messages.lastAuthor === Herald.config.configId
+
         property ConversationContent convContent: ConversationContent {
             conversationId: conversationIdProxy
         }
+
+        ListView.delayRemove: true
 
         property Component childChatView: Component {
             CV.ChatViewMain {

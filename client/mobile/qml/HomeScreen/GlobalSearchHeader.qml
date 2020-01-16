@@ -47,7 +47,7 @@ ToolBar {
         BorderedTextField {
             id: searchField
             color: CmnCfg.palette.white
-            borderColor: "Transparent"
+            borderColor: "transparent"
             placeholderText: qsTr('Search your conversations')
             // Load previous search query in search field in case returns gets
             // to this view via back button and expects state to be preserved
