@@ -23,7 +23,7 @@ Page {
         Text {
             id: nameHeader
             anchors.left: avatarFiller.right
-            anchors.leftMargin: CmnCfg.megaMargin
+            anchors.leftMargin: CmnCfg.defaultMargin
             text: "Name"
             anchors.verticalCenter: parent.verticalCenter
             font.family: CmnCfg.chatFont.name
@@ -147,7 +147,7 @@ Page {
                     width: labelCol.width
                     cursorShape: Qt.PointingHandCursor
                     anchors.left: avatar.right
-                    anchors.leftMargin: CmnCfg.megaMargin
+                    anchors.leftMargin: CmnCfg.defaultMargin
                     anchors.verticalCenter: avatar.verticalCenter
                     onClicked: {
                         //drawer.userData = userData

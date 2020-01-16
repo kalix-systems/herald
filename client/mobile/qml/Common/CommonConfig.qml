@@ -46,7 +46,7 @@ Item {
     /// size of labels
     readonly property real labelFontSize: units.dp(12)
     /// font size for minor text (e.g. timestamps)
-    readonly property int minorTextSize: units.dp(0)
+    readonly property int minorTextSize: units.dp(11)
     /// standard chat text size
     readonly property real chatTextSize: units.dp(11)
     readonly property real defaultFontSize: units.dp(12)
