@@ -17,6 +17,7 @@ ListView {
     clip: true
     currentIndex: -1
 
+    //  cacheBuffer: contentHeight * 10
     // conversations and messages are in a single column,
     // this needs to be uninteractive so that they scroll together
     interactive: false
@@ -24,6 +25,9 @@ ListView {
     property bool archiveView: false
 
     signal messagePositionRequested(var requestedMsgId)
+
+    onContentHeightChanged: if (contentHeight > 0)
+                                cacheBuffer = contentHeight * 10
 
     // Jump to message on message searched.
     Connections {

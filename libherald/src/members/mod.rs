@@ -275,6 +275,7 @@ impl Members {
 }
 
 /// Conversation member related updates
+#[derive(Debug)]
 pub enum MemberUpdate {
     /// Response to a conversation add request
     ReqResp(UserId, bool),

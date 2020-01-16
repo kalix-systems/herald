@@ -30,6 +30,7 @@ pub(super) fn emitters() -> &'static Mutex<HashMap<ConversationId, Emitter>> {
 }
 
 /// An update to a conversation's message model or members model
+#[derive(Debug)]
 pub(crate) enum ContentUpdate {
     /// Messages model update
     Msg(MsgUpdate),
@@ -60,28 +61,34 @@ pub(crate) fn content_push<T: Into<ContentUpdate>>(
         maybe
     };
 
-    let tx = match maybe_tx {
-        Some(tx) => tx,
-        None => {
-            let (tx, rx) = unbounded();
+    let new_channel = || {
+        let (tx, rx) = unbounded();
 
-            {
-                let mut tx_lock = txs().write();
-                tx_lock.insert(cid_addr, (&tx).clone());
-                drop(tx_lock);
-            }
-
-            {
-                let mut rx_lock = rxs().write();
-                rx_lock.insert(cid_addr, rx);
-                drop(rx_lock);
-            }
-
-            tx
+        {
+            let mut tx_lock = txs().write();
+            tx_lock.insert(cid_addr, (&tx).clone());
+            drop(tx_lock);
         }
+
+        {
+            let mut rx_lock = rxs().write();
+            rx_lock.insert(cid_addr, rx);
+            drop(rx_lock);
+        }
+
+        tx
     };
 
-    tx.send(update.into()).map_err(|_| channel_send_err!())?;
+    let tx = match maybe_tx {
+        Some(tx) => tx,
+        None => new_channel(),
+    };
+
+    if let Err(update) = tx.send(update.into()) {
+        let tx = new_channel();
+        tx.send(update.into_inner())
+            .map_err(|_| channel_send_err!())?;
+    }
 
     let mut emit_lock = emitters().lock();
     let mut maybe_emitter = emit_lock.get_mut(&cid_addr).map(|e| e.clone());
@@ -127,9 +134,13 @@ impl Drop for ConversationContent {
     fn drop(&mut self) {
         use shared::*;
         if let Some(cid) = self.id {
-            emitters().lock().remove(&cid);
-            txs().write().remove(&cid);
-            rxs().write().remove(&cid);
+            let mut tx_lock = txs().write();
+            let mut rx_lock = rxs().write();
+            let mut emitter_lock = emitters().lock();
+
+            emitter_lock.remove(&cid);
+            tx_lock.remove(&cid);
+            rx_lock.remove(&cid);
         }
     }
 }
