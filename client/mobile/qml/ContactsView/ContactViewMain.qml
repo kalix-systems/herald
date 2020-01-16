@@ -7,10 +7,13 @@ import "qrc:/imports/js/utils.mjs" as Utils
 Page {
     id: contactsPopup
     readonly property Component headerComponent: ContactsHeader {}
+    ContactPage {
+        id: contactPage
+    }
 
     Item {
         id: rowLabel
-        height: CmnCfg.toolbarHeight - 10
+        height: CmnCfg.units.dp(CmnCfg.toolbarHeight - 30)
         width: parent.width
 
         Item {
@@ -28,7 +31,7 @@ Page {
             anchors.verticalCenter: parent.verticalCenter
             font.family: CmnCfg.chatFont.name
             color: CmnCfg.palette.offBlack
-            font.pixelSize: CmnCfg.defaultFontSize
+            font.pixelSize: CmnCfg.chatTextSize
             font.weight: Font.Medium
         }
 
@@ -39,7 +42,7 @@ Page {
             anchors.horizontalCenter: parent.horizontalCenter
             font.family: CmnCfg.chatFont.name
             color: CmnCfg.palette.offBlack
-            font.pixelSize: CmnCfg.defaultFontSize
+            font.pixelSize: CmnCfg.chatTextSize
             font.weight: Font.Medium
         }
         Rectangle {
@@ -51,12 +54,6 @@ Page {
             height: 1
             color: CmnCfg.palette.medGrey
         }
-    }
-
-    ContactDrawer {
-        id: drawer
-        height: parent.height
-        width: parent.width * 0.8
     }
 
     //contacts list view
@@ -137,8 +134,8 @@ Page {
                         cursorShape: Qt.PointingHandCursor
                         anchors.fill: parent
                         onClicked: {
-                            drawer.userData = userRect.userData
-                            drawer.open()
+                            contactPage.userData = userRect.userData
+                            stackView.push(contactPage)
                         }
                     }
                 }
@@ -147,11 +144,11 @@ Page {
                     width: labelCol.width
                     cursorShape: Qt.PointingHandCursor
                     anchors.left: avatar.right
-                    anchors.leftMargin: CmnCfg.smallMargin
+                    anchors.leftMargin: CmnCfg.defaultMargin
                     anchors.verticalCenter: avatar.verticalCenter
                     onClicked: {
-                        drawer.userData = userRect.userData
-                        drawer.open()
+                        contactPage.userData = userRect.userData
+                        stackView.push(contactPage)
                     }
 
                     //contact label

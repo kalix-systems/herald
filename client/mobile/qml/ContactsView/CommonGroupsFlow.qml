@@ -49,14 +49,8 @@ Flow {
                     color: "black"
                     opacity: 0.5
                 }
-                MouseArea {
-                    anchors.fill: parent
-                    preventStealing: true
-                    propagateComposedEvents: false
-                    z: groupAv.z + 1
-                    hoverEnabled: false
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: {
+                TapHandler {
+                    onTapped: {
                         drawer.userData = userData
                         drawer.open()
                     }
