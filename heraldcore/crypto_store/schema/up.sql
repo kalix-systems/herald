@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS members (
 );
 
 CREATE TABLE IF NOT EXISTS ratchets (
-    public_key BLOB NOT NULL,
+    public_key BLOB NOT NULL UNIQUE,
     ratchet BLOB NOT NULL,
     PRIMARY KEY(public_key, ratchet)
 );
