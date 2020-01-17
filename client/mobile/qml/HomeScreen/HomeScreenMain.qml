@@ -93,7 +93,7 @@ Page {
         opacity: 0.5
 
         TapHandler {
-            //grabPermissions: PointerHandler.TakeOverForbidden
+            gesturePolicy: TapHandler.ReleaseWithinBounds
             onTapped: cvMainView.state = "default"
         }
     }
@@ -107,7 +107,9 @@ Page {
         id: plusButton
         ComposeButton {
             iconSource: "qrc:/plus-icon.svg"
+
             TapHandler {
+                gesturePolicy: TapHandler.ReleaseWithinBounds
                 onTapped: {
                     cvMainView.state = "fabButtonState"
                     buttonLoader.sourceComponent = fab
