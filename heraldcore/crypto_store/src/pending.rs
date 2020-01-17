@@ -11,6 +11,10 @@ impl<'conn> PendingStore for Conn<'conn> {
         payload: Payload,
         to: &[sig::PublicKey],
     ) -> Result<(), Self::Error> {
+        if to.is_empty() {
+            return Ok(());
+        }
+
         w!(self.add_payload(&id, &payload));
         w!(self.add_pending(&id, to));
         Ok(())
@@ -27,7 +31,7 @@ impl<'conn> PendingStore for Conn<'conn> {
 
         let raw: Vec<u8> = w!(ok_none!(res.next()));
 
-        Ok(w!(kson::from_slice(&raw)))
+        Ok(Some(w!(kson::from_slice(&raw))))
     }
 
     fn del_pending(
@@ -77,5 +81,51 @@ impl<'conn> Conn<'conn> {
         let mut stmt = st!(self, "pending", "gc");
         w!(stmt.execute(NO_PARAMS));
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::connection::in_memory;
+    use coremacros::womp;
+
+    #[test]
+    fn pending_ops() {
+        let mut conn = in_memory();
+        let mut conn = Conn::from(conn.transaction().expect(womp!()));
+
+        let id1 = PayloadId::gen_new();
+
+        // I hate typing clone
+        let payload = || Payload::Noop;
+
+        // trivial add
+        conn.add_pending_payload(id1, payload(), &[])
+            .expect(womp!());
+
+        // should be nothing
+        assert!(conn.get_pending_payload(id1).expect(womp!()).is_none());
+
+        let id2 = PayloadId::gen_new();
+
+        let recips = (0..2)
+            .map(|_| *sig::KeyPair::gen_new().public())
+            .collect::<Vec<_>>();
+
+        conn.add_pending_payload(id2, payload(), &recips)
+            .expect(womp!());
+
+        let stored_payload = conn.get_pending_payload(id2).expect(womp!());
+        assert_eq!(stored_payload, Some(payload()));
+
+        conn.del_pending(id2, recips[0]).expect(womp!());
+
+        let stored_payload = conn.get_pending_payload(id2).expect(womp!());
+        assert_eq!(stored_payload, Some(payload()));
+
+        conn.del_pending(id2, recips[1]).expect(womp!());
+
+        assert!(conn.get_pending_payload(id1).expect(womp!()).is_none());
     }
 }

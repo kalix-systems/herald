@@ -15,6 +15,10 @@ pub use traits::*;
 pub struct PayloadId(random::UQ);
 
 impl PayloadId {
+    pub fn gen_new() -> Self {
+        Self(random::UQ::gen_new())
+    }
+
     pub fn as_slice(&self) -> &[u8] {
         self.0.as_ref()
     }
