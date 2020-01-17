@@ -66,7 +66,13 @@ impl SearchState {
 
         let index = match self.matches.binary_search(&Match(*closest_message)) {
             Ok(ix) => ix,
-            Err(ix) => ix.saturating_sub(1),
+            Err(ix) => {
+                if ix < container.len() {
+                    ix
+                } else {
+                    ix.saturating_sub(1)
+                }
+            }
         };
 
         self.start_index.replace(index);
@@ -93,7 +99,7 @@ impl SearchState {
         matches: Vec<Match>,
         emit: &mut E,
     ) {
-        self.set_matches_inner(matches);
+        self.set_matches_inner(matches.into_iter().rev().collect());
         emit.search_num_matches_changed();
         emit.search_index_changed();
     }
@@ -138,11 +144,11 @@ impl SearchState {
         Ok(())
     }
 
-    pub fn initial_prev_index(&self) -> usize {
+    pub fn initial_next_index(&self) -> usize {
         self.start_index.unwrap_or(1)
     }
 
-    pub fn initial_next_index(&self) -> usize {
+    pub fn initial_prev_index(&self) -> usize {
         self.start_index
             .unwrap_or_else(|| self.num_matches().saturating_sub(1))
     }
@@ -152,7 +158,7 @@ impl SearchState {
         self.matches.get(ix).copied()
     }
 
-    pub fn prev_match(&mut self) -> Option<Match> {
+    pub fn next_match(&mut self) -> Option<Match> {
         if self.active.not() {
             return None;
         }
@@ -173,7 +179,7 @@ impl SearchState {
         }
     }
 
-    pub fn next_match(&mut self) -> Option<Match> {
+    pub fn prev_match(&mut self) -> Option<Match> {
         if self.active.not() {
             return None;
         }

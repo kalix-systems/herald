@@ -58,7 +58,6 @@ ToolBar {
 
                 const x = chatList.scrollBar.position
                 const y = chatList.scrollBar.size
-                //TODO: why doesn't this work?
                 ownedMessages.setSearchHint(x, y)
                 if (ownedMessages.searchNumMatches > 0) {
                     chatList.positionViewAtIndex(ownedMessages.prevSearchMatch(
@@ -93,6 +92,15 @@ ToolBar {
             onTapped: chatList.positionViewAtIndex(
                           ownedMessages.nextSearchMatch(), ListView.Center)
         }
+
+        //        Label {
+        //            bottomPadding: CmnCfg.units.dp(2)
+
+        //            //placeholderText: "Enter text"
+        //            font: CmnCfg.defaultFont
+        //            color: CmnCfg.palette.white
+        //            verticalAlignment: TextInput.AlignBottom
+        //        }
     }
 
     AnimIconButton {
