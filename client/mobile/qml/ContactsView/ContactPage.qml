@@ -31,8 +31,26 @@ Page {
                 Item {
                     id: contactWrapper
                     anchors.left: parent.left
-                    height: 60
+                    height: CmnCfg.units.dp(60)
                     width: parent.width
+
+                    PlatonicRectangle {
+                        id: contactRectangle
+                        color: CmnCfg.palette.white
+                        boxColor: page.userData.userColor
+                        boxTitle: page.userData.name
+                        picture: Utils.safeStringOrDefault(
+                                     page.userData.profilePicture, "")
+                        conversationItemAvatar.size: CmnCfg.units.dp(48)
+
+                        labelComponent: ContactLabel {
+                            displayName: page.userData.name
+                            username: page.userData.userId
+                            labelColor: CmnCfg.palette.black
+                            displayNameSize: CmnCfg.labelFontSize
+                            usernameSize: CmnCfg.defaultFontSize
+                        }
+                    }
                 }
 
                 Label {
@@ -40,6 +58,7 @@ Page {
                     text: qsTr("Options")
                     font.family: CmnCfg.chatFont.name
                     color: CmnCfg.palette.darkGrey
+                    font.pixelSize: CmnCfg.defaultFontSize
                 }
 
                 Row {
@@ -49,7 +68,7 @@ Page {
                     padding: 0
                     Rectangle {
                         id: colorDot
-                        height: 22
+                        height: CmnCfg.units.dp(20)
                         width: height
                         radius: width
                         color: CmnCfg.palette.avatarColors[userData.userColor]
@@ -68,7 +87,7 @@ Page {
                                 contentItem: Text {
                                     text: qsTr("Set color")
                                     font.family: CmnCfg.chatFont.name
-                                    font.pixelSize: 12
+                                    font.pixelSize: CmnCfg.chatTextSize
                                     color: CmnCfg.sysPalette.text
                                 }
                                 background: Rectangle {
@@ -86,6 +105,7 @@ Page {
                         text: qsTr("Color")
                         font.family: CmnCfg.chatFont.name
                         anchors.verticalCenter: colorDot.verticalCenter
+                        font.pixelSize: CmnCfg.chatTextSize
                     }
                 }
 
@@ -95,6 +115,7 @@ Page {
                     font.family: CmnCfg.chatFont.name
                     color: CmnCfg.palette.darkGrey
                     visible: groups.count > 0
+                    font.pixelSize: CmnCfg.defaultFontSize
                 }
 
                 ListView {
@@ -144,6 +165,7 @@ Page {
                             color: CmnCfg.palette.offBlack
                             font.family: CmnCfg.chatFont.name
                             anchors.verticalCenter: groupPic.verticalCenter
+                            font.pixelSize: CmnCfg.chatTextSize
                         }
                     }
                 }

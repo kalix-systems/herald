@@ -13,13 +13,14 @@ Page {
 
     Item {
         id: rowLabel
-        height: CmnCfg.units.dp(CmnCfg.toolbarHeight - 30)
+        height: CmnCfg.units.dp(CmnCfg.toolbarHeight - 10)
         width: parent.width
 
         Item {
-            width: CmnCfg.avatarSize
+            width: CmnCfg.units.dp(CmnCfg.avatarSize - 10)
             anchors.left: parent.left
             id: avatarFiller
+            height: CmnCfg.units.dp(10)
             anchors.leftMargin: CmnCfg.smallMargin
         }
 
@@ -157,7 +158,7 @@ Page {
                         spacing: 2
                         Label {
                             font.weight: Font.DemiBold
-                            font.pixelSize: CmnCfg.defaultFontSize
+                            font.pixelSize: CmnCfg.entityLabelSize
                             font.family: CmnCfg.chatFont.name
                             text: userId
                             color: CmnCfg.palette.offBlack
@@ -166,7 +167,7 @@ Page {
                             text: "@" + name
                             font.family: CmnCfg.chatFont.name
                             color: CmnCfg.palette.offBlack
-                            font.pixelSize: CmnCfg.chatTextSize
+                            font.pixelSize: CmnCfg.entitySubLabelSize
                         }
                     }
                 }
