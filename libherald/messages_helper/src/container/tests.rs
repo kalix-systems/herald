@@ -213,13 +213,13 @@ fn test_container_search() {
     );
 
     assert_eq!(
-        &searchstate.next_match().expect(womp!()).0,
-        container.get(2).expect(womp!())
+        &searchstate.prev_match().expect(womp!()).0,
+        container.get(1).expect(womp!())
     );
 
     assert_eq!(
-        &searchstate.prev_match().expect(womp!()).0,
-        container.get(1).expect(womp!())
+        &searchstate.next_match().expect(womp!()).0,
+        container.get(2).expect(womp!())
     );
 
     container.clear_search(model);
