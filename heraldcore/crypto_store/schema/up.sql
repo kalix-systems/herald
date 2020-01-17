@@ -45,6 +45,6 @@ CREATE TABLE IF NOT EXISTS sigchain_deprecations (
     signature BLOB NOT NULL,
     signed_by BLOB NOT NULL,
 
-    key BLOB NOT NULL
+    key BLOB NOT NULL,
     user_id TEXT NOT NULL
 );
