@@ -14,6 +14,12 @@ pub use traits::*;
 #[derive(Ser, De, Eq, PartialEq, Ord, PartialOrd, Hash, Clone, Copy, Debug)]
 pub struct PayloadId(random::UQ);
 
+impl PayloadId {
+    pub fn as_slice(&self) -> &[u8] {
+        self.0.as_ref()
+    }
+}
+
 #[derive(Ser, De, Eq, PartialEq, Hash, Clone, Debug)]
 pub enum Payload {
     Noop,

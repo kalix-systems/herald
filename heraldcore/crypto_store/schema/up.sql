@@ -10,6 +10,17 @@ CREATE TABLE IF NOT EXISTS ratchets (
     PRIMARY KEY(public_key, ratchet)
 );
 
+CREATE TABLE IF NOT EXISTS payloads (
+    payload_id BLOB NOT NULL PRIMARY KEY,
+    payload BLOB NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS pending (
+    pending_payload_id BLOB NOT NULL,
+    recipient BLOB NOT NULL
+);
+
+-- Sigchain tables
 CREATE TABLE IF NOT EXISTS sigchain_genesis (
     user_id TEXT NOT NULL PRIMARY KEY,
     ts INTEGER NOT NULL,
