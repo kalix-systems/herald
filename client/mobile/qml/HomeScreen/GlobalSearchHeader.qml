@@ -6,14 +6,17 @@ import "../Common"
 import "qrc:/imports/"
 
 ToolBar {
-
     property alias searchText: searchField.text
+    property alias searchPlaceholderText: searchField.placeholderText
+
+    property var parentPage
 
     width: parent.width
     height: CmnCfg.toolbarHeight
     background: Rectangle {
         color: CmnCfg.palette.offBlack
     }
+
     AnimIconButton {
         id: backButton
         anchors.left: parent.left
@@ -48,8 +51,10 @@ ToolBar {
             id: searchField
             color: CmnCfg.palette.white
             borderColor: "transparent"
-            placeholderText: qsTr('Search your conversations')
-            // Load previous search query in search field in case returns gets
+            placeholderText: parentPage.state === "fromComposeButton" ?
+                                 qsTr("Enter username or group title") :
+                                 qsTr("Search your conversations")
+            // Load previous search query in search field in case user gets
             // to this view via back button and expects state to be preserved
             text: Herald.conversations.filter
             font.pixelSize: CmnCfg.chatTextSize
