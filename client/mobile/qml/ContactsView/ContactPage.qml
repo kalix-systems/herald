@@ -81,23 +81,6 @@ Page {
                                 colorLoader.active = true
                                 colorLoader.item.open()
                             }
-                            ToolTip {
-                                visible: mouseArea.containsMouse
-
-                                contentItem: Text {
-                                    text: qsTr("Set color")
-                                    font.family: CmnCfg.chatFont.name
-                                    font.pixelSize: CmnCfg.chatTextSize
-                                    color: CmnCfg.sysPalette.text
-                                }
-                                background: Rectangle {
-                                    color: CmnCfg.sysPalette.window
-                                    border.width: 1
-                                    border.color: CmnCfg.sysPalette.midlight
-                                }
-                                delay: 1000
-                                padding: CmnCfg.microMargin
-                            }
                         }
                     }
 

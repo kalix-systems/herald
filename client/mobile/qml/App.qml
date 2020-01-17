@@ -59,9 +59,7 @@ Page {
 
     Component {
         id: globalSearchView
-        HomeScreen.GlobalSearchMain {
-            headerLoader: rootHeader.headerLoader
-        }
+        HomeScreen.GlobalSearchMain {}
     }
 
     Component {

@@ -9,8 +9,10 @@ import "qrc:/imports/Entity" as Entity
 
 Page {
     id: searchView
-    readonly property Component headerComponent: GlobalSearchHeader {}
-    property Loader headerLoader
+    readonly property Component headerComponent:
+        GlobalSearchHeader {
+          parentPage: searchView
+        }
 
     background: Rectangle {
         color: CmnCfg.palette.white
@@ -60,6 +62,9 @@ Page {
                 visible: model.matched
                 height: visible ? CmnCfg.convoHeight : 0
                 TapHandler {
+                    // TODO if state is fromComposeButton we should probably
+                    // pop this view off the stack, so ChatView back button
+                    // goes to home screen
                     onTapped: convoClicked(model.conversationId)
                 }
             }
@@ -72,6 +77,8 @@ Page {
                 leftMargin: CmnCfg.smallMargin
                 topMargin: CmnCfg.smallMargin
             }
+            visible: searchView.state === "fromComposeButton" ? false : true
+
             bottomPadding: 0
             font.family: CmnCfg.labelFont.name
             font.weight: Font.DemiBold
@@ -86,6 +93,7 @@ Page {
             // conversations and messages are in a single column,
             // this needs to be uninteractive so that they scroll together
             interactive: false
+            visible: searchView.state === "fromComposeButton" ? false : true
 
             model: Herald.messageSearch
             delegate: Item {
@@ -121,4 +129,13 @@ Page {
             }
         }
     }
+
+    states: [
+        State {
+            name: "default"
+        },
+        State {
+            name: "fromComposeButton"
+        }
+    ]
 }

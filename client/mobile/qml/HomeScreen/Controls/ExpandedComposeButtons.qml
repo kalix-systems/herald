@@ -28,7 +28,7 @@ Column {
         TapHandler {
             gesturePolicy: TapHandler.ReleaseWithinBounds
             onTapped: {
-                mainView.push(newGroupViewMain)
+                mainView.push(newContactViewMain)
                 cvMainView.state = "default"
             }
         }
@@ -96,7 +96,7 @@ Column {
             anchors.right: parent.left
             anchors.verticalCenter: parent.verticalCenter
             anchors.rightMargin: CmnCfg.defaultMargin
-            text: qsTr("New conversation")
+            text: qsTr("Message existing conversation")
             font.pointSize: 12
             padding: CmnCfg.smallMargin
             background: Rectangle {
@@ -116,6 +116,15 @@ Column {
                                               1.3) : CmnCfg.palette.lightGrey
             anchors.fill: parent
             radius: height
+        }
+
+        TapHandler {
+            gesturePolicy: TapHandler.ReleaseWithinBounds
+            onTapped: {
+                mainView.push(globalSearchView, {"state": "fromComposeButton"},
+                              StackView.Immediate)
+                cvMainView.state = "default"
+            }
         }
     }
 }
