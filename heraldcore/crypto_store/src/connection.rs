@@ -20,6 +20,12 @@ impl<'conn> std::ops::Deref for Conn<'conn> {
     }
 }
 
+impl<'conn> Conn<'conn> {
+    fn commit(self) -> Result<(), rusqlite::Error> {
+        self.0.commit()
+    }
+}
+
 impl StoreLike for Conn<'_> {
     type Error = errors::Error;
 }
@@ -40,6 +46,17 @@ pub fn raw_conn() -> &'static Mutex<rusqlite::Connection> {
     })
 }
 
+pub fn reset() -> Result<(), rusqlite::Error> {
+    let mut raw = raw_conn().lock();
+    let conn = Conn::from(raw.transaction()?);
+
+    conn.execute_batch(include_str!("../schema/down.sql"))?;
+    conn.execute_batch(include_str!("../schema/up.sql"))?;
+
+    conn.commit()?;
+    Ok(())
+}
+
 #[cfg(test)]
 pub(crate) fn in_memory() -> rusqlite::Connection {
     use coremacros::womp;
@@ -52,4 +69,20 @@ pub(crate) fn in_memory() -> rusqlite::Connection {
     tx.commit().expect(womp!());
 
     conn
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn get() {
+        let mut raw = raw_conn().lock();
+        let _conn = Conn::from(raw.transaction().unwrap());
+    }
+
+    #[test]
+    fn reset() {
+        super::reset().unwrap();
+    }
 }
