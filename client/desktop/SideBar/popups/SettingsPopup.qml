@@ -85,9 +85,6 @@ Window {
             ListElement {
                 name: qsTr("Devices")
             }
-            ListElement {
-                name: qsTr("Data & Storage")
-            }
 
             ListElement {
                 name: qsTr("Advanced")

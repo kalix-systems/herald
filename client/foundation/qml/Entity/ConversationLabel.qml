@@ -173,8 +173,8 @@ Item {
         id: receiptImage
         visible: outbound && !typeActive
         icon.source: JS.receiptCodeSwitch(lastReceipt)
-        icon.height: 18
-        icon.width: 18
+        icon.height: CmnCfg.units.dp(14)
+        icon.width: CmnCfg.units.dp(14)
         anchors.bottom: textLoader.bottom
         anchors.right: parent.right
         icon.color: CmnCfg.palette.iconFill

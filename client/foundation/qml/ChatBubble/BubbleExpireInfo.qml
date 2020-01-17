@@ -32,7 +32,7 @@ Row {
         icon.source: timerIcon
         icon.height: 16
         icon.width: 16
-        icon.color: isShort ? CmnCfg.palette.alertColor : "grey"
+        icon.color: isShort ? CmnCfg.palette.alertColor : CmnCfg.palette.darkGrey
         padding: 0
         background: Item {}
         enabled: false
