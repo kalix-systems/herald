@@ -140,9 +140,6 @@ impl Messages {
     }
 
     pub(crate) fn search_index_(&self) -> u64 {
-        self.search
-            .index
-            .map(|ix| self.search.num_matches().saturating_sub(ix))
-            .unwrap_or(0) as u64
+        self.search.index.map(|ix| ix + 1).unwrap_or(0) as u64
     }
 }
