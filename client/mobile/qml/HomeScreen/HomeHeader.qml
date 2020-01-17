@@ -15,6 +15,7 @@ ToolBar {
     background: Rectangle {
         color: CmnCfg.palette.offBlack
     }
+
     Avatar {
         id: avatar
         color: CmnCfg.palette.avatarColors[Herald.config.configColor]
@@ -47,7 +48,7 @@ ToolBar {
             id: searchButton
             color: CmnCfg.palette.iconFill
             imageSource: "qrc:/search-icon.svg"
-            onTapped: mainView.push(globalSearchView)
+            onTapped: mainView.push(globalSearchView, StackView.Immediate)
         }
 
         AnimIconButton {

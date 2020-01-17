@@ -31,7 +31,7 @@ ToolBar {
             Herald.users.clearFilter()
             Herald.conversations.clearFilter()
             Herald.messageSearch.clearSearch()
-            mainView.pop()
+            mainView.pop(StackView.Immediate)
         }
     }
 
@@ -81,7 +81,8 @@ ToolBar {
             Layout.alignment: Qt.AlignRight
             color: CmnCfg.palette.iconFill
             imageSource: "qrc:/x-icon.svg"
-            onTapped: searchField.text = ''
+            visible: searchField.text === "" ? false : true
+            onTapped: searchField.text = ""
             // TODO then focus search field again
         }
     }

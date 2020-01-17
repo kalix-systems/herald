@@ -24,19 +24,21 @@ Page {
         id: contentCol
         anchors {
             fill: parent
-            leftMargin: CmnCfg.smallMargin
-            rightMargin: CmnCfg.smallMargin
         }
 
         Text {
             text: qsTr("Conversations")
-            Layout.alignment: Qt.AlignLeft
-            Layout.leftMargin: CmnCfg.smallMargin
-            Layout.topMargin: CmnCfg.microMargin
+            anchors {
+                left: parent.left
+                leftMargin: CmnCfg.smallMargin
+                topMargin: CmnCfg.smallMargin
+            }
+
             font.family: CmnCfg.labelFont.name
             font.weight: Font.DemiBold
             font.pixelSize: CmnCfg.labelFontSize
             color: CmnCfg.palette.offBlack
+            bottomPadding: 0
         }
 
         ListView {
@@ -65,9 +67,12 @@ Page {
 
         Text {
             text: qsTr("Messages")
-            Layout.alignment: Qt.AlignLeft
-            Layout.leftMargin: CmnCfg.smallMargin
-            Layout.topMargin: CmnCfg.microMargin
+            anchors {
+                left: parent.left
+                leftMargin: CmnCfg.smallMargin
+                topMargin: CmnCfg.smallMargin
+            }
+            bottomPadding: 0
             font.family: CmnCfg.labelFont.name
             font.weight: Font.DemiBold
             font.pixelSize: CmnCfg.labelFontSize

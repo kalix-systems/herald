@@ -89,7 +89,7 @@ Item {
     readonly property real identityAvatarDiameter: units.dp(24)
     /// standard avatar size
     readonly property real avatarSize: units.dp(44)
-    readonly property int chatAvatarSize: units.dp(24)
+    readonly property int headerAvatarSize: units.dp(24)
     /// standard conversation/contact height
     readonly property int convoHeight: avatarSize * 1.5
 
