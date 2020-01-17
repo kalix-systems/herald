@@ -153,7 +153,8 @@ Rectangle {
                 Layout.rightMargin: CmnCfg.smallMargin
                 Layout.alignment: Qt.AlignLeft
                 Layout.fillWidth: true
-
+                font.family: CmnCfg.chatFont.name
+                font.pixelSize: CmnCfg.chatTextSize
                 wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                 selectByMouse: true
                 selectByKeyboard: true

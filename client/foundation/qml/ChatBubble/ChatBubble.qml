@@ -140,8 +140,8 @@ Rectangle {
         anchors.rightMargin: CmnCfg.smallMargin
 
         icon.source: receiptImage
-        icon.height: 16
-        icon.width: 16
+        icon.height: CmnCfg.units.dp(12)
+        icon.width: CmnCfg.units.dp(12)
         icon.color: CmnCfg.palette.iconMatte
         padding: 0
         background: Item {}

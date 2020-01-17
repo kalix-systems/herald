@@ -21,6 +21,8 @@ ListView {
         easing.type: Easing.InCubic
     }
 
+    signal closeDropdown
+
     // this is set to a higher value in `Component.onCompleted`
     // but is set to `0` here to improve initial load times
     cacheBuffer: 0
