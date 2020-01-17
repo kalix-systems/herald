@@ -59,7 +59,7 @@ pub const MAX_SKIP: Counter = 1000;
 /// Message Counter (as seen in the header)
 pub type Counter = u32;
 
-#[derive(TypedBuilder, Getters, Debug, Clone)]
+#[derive(TypedBuilder, Getters, Debug, Clone, Ser, De)]
 pub struct DoubleRatchet {
     dhs: kx::KeyPair,
     #[builder(default)]
