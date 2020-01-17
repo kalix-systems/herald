@@ -145,7 +145,6 @@ Page {
         atcButton.onClicked: chatTextArea.attachmentsDialogue.open()
     }
 
-    //item that wraps type bubble; will eventually wrap a flow in the loader to show multiple typing indicators
     Rectangle {
         id: typingIndicator
         anchors.bottom: divider.top
@@ -242,9 +241,13 @@ Page {
             width: parent.width
             anchors.bottom: parent.bottom
             sourceComponent: Label {
+                topPadding: CmnCfg.microMargin
+                leftPadding: CmnCfg.smallMargin
                 id: typeLabel
-
+                font.pixelSize: CmnCfg.chatTextSize
+                font.italic: true
                 text: typingIndicator.typeText
+                font.family: CmnCfg.chatFont.name
             }
         }
     }

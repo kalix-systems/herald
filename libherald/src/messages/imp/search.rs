@@ -25,7 +25,7 @@ impl Messages {
             return;
         }
 
-        let percentage = (1.0 - scroll_position) + scroll_height / 2.0;
+        let percentage = (1.0 - scroll_position) - scroll_height / 2.0;
         self.search.start_hint(percentage, &self.container);
     }
 
