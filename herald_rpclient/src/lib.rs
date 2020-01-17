@@ -41,11 +41,9 @@ async fn registration_loop<Tx: AsyncWrite + Send + Unpin, Rx: AsyncRead + Send +
         tx.write_ser(&cev).await?;
         let sev = rx.read_de().await?;
         resps.send(sev).await?;
-        match (cev, sev) {
-            (ClientEvent::Claim(s), ServeEvent::Success) => {
-                return Ok(*s.data());
-            }
-            _ => {}
+
+        if let (ClientEvent::Claim(s), ServeEvent::Success) = (cev, sev) {
+            return Ok(*s.data());
         }
     }
 

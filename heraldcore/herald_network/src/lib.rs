@@ -1,17 +1,33 @@
+use anyhow::anyhow;
 use anyhow::Error;
 use herald_client::HClient as Client;
-use herald_common::{protocol::auth::register, *};
-use once_cell::sync::OnceCell;
-use parking_lot::RwLock;
+use herald_common::{
+    protocol::{
+        auth::register,
+        requests::{Request, Response},
+    },
+    *,
+};
 use std::thread::Builder as Thread;
 use tokio::runtime::Builder as Runtime;
-use tokio::sync::mpsc::channel;
-pub use tokio::sync::mpsc::Sender as RegistrationSender;
+use tokio::sync::mpsc::{channel, unbounded_channel};
+pub use tokio::sync::mpsc::{Sender, UnboundedReceiver, UnboundedSender};
 
-static CLIENT: OnceCell<RwLock<Client>> = OnceCell::new();
+pub use requests::Requester;
 
+mod client;
+mod registration;
+mod requests;
 mod setup;
 
+type ResponseHandler = Box<dyn FnMut(Result<Response, Error>) + Send + 'static>;
+type HandledReq = (Request, ResponseHandler);
+
+pub type RequestTx = UnboundedSender<HandledReq>;
+pub type RequestRx = UnboundedReceiver<HandledReq>;
+pub type RegistrationTx = Sender<register::ClientEvent>;
+
+#[inline]
 pub fn login<PH, CF>(
     uid: UserId,
     keys: sig::KeyPair,
@@ -19,11 +35,13 @@ pub fn login<PH, CF>(
     server_port: u16,
     push_handler: PH,
     connection_failed: CF,
-) -> Result<(), Error>
+) -> Result<Requester, Error>
 where
     PH: FnMut(Push) + Send + 'static,
-    CF: FnOnce() + Send + 'static,
+    CF: FnOnce(Error) + Send + 'static,
 {
+    let (tx, rx) = unbounded_channel();
+
     Thread::new().spawn(move || {
         let mut rt = Runtime::new().basic_scheduler().build()?;
 
@@ -34,14 +52,46 @@ where
             server_port,
             push_handler,
             connection_failed,
+            rx,
         ))?;
 
         Ok::<(), Error>(())
     })?;
 
-    Ok(())
+    Ok(tx.into())
 }
 
+#[derive(Clone)]
+pub struct RegistrationHandle {
+    registration_tx: RegistrationTx,
+    request_tx: RequestTx,
+}
+
+impl RegistrationHandle {
+    pub fn check_user_id(
+        &mut self,
+        uid: UserId,
+    ) -> Result<(), Error> {
+        self.registration_tx
+            .try_send(register::ClientEvent::Check(uid))
+            .map_err(|_| anyhow!("Failed to check user id: {}", uid))?;
+
+        Ok(())
+    }
+
+    pub fn claim_user_id(
+        &mut self,
+        uid: Signed<UserId>,
+    ) -> Result<(), Error> {
+        self.registration_tx
+            .try_send(register::ClientEvent::Claim(uid))
+            .map_err(|_| anyhow!("Failed to claim user id: {}", uid.data()))?;
+
+        Ok(())
+    }
+}
+
+#[inline]
 pub fn register<PH, RH, CF>(
     keys: sig::KeyPair,
     server_dns: String,
@@ -49,29 +99,41 @@ pub fn register<PH, RH, CF>(
     push_handler: PH,
     response_handler: RH,
     connection_failed: CF,
-) -> Result<RegistrationSender<register::ClientEvent>, Error>
+) -> Result<RegistrationHandle, Error>
 where
     PH: FnMut(Push) + Send + 'static,
     RH: FnMut(register::ServeEvent) + Send + 'static,
-    CF: FnOnce() + Send + 'static,
+    CF: FnOnce(Error) + Send + 'static,
 {
-    let (client_tx, client_rx) = channel(1);
+    let (registration_tx, registration_rx) = channel(10);
+    let (req_tx, req_rx) = unbounded_channel();
 
     Thread::new().spawn(move || {
         let mut rt = Runtime::new().basic_scheduler().build()?;
 
-        rt.block_on(setup::register_inner(
-            client_rx,
+        rt.block_on(registration::register_inner(
+            registration_rx,
             keys,
-            server_dns,
-            server_port,
-            push_handler,
-            response_handler,
-            connection_failed,
+            (server_dns, server_port),
+            (push_handler, response_handler, connection_failed),
+            req_rx,
         ))?;
 
         Ok::<(), Error>(())
     })?;
 
-    Ok(client_tx)
+    Ok(RegistrationHandle {
+        registration_tx,
+        request_tx: req_tx,
+    })
+}
+
+pub fn quit() -> Result<(), Error> {
+    let client = client::get().ok_or_else(|| {
+        anyhow!("Failed to acquire handle to connection while attempting to close")
+    })?;
+
+    client.read().quit()?;
+
+    Ok(())
 }

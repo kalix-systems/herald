@@ -93,7 +93,6 @@ where
             })
             .and_then(|b| future::ready(<ServerFrame<P::Res, P::Push>>::from_bytes(b)))
             .try_for_each_concurrent(P::MAX_CONCURRENT_PUSHES + P::MAX_CONCURRENT_REQS, {
-                let cframe_tx = cframe_tx.clone();
                 let client = acli.clone();
                 move |s| {
                     let cframe_tx = cframe_tx.clone();
@@ -148,7 +147,7 @@ where
                 req: req.clone(),
                 out: tx,
             })
-            .ok_or(anyhow!("requests slab was at capacity"))?;
+            .ok_or_else(|| anyhow!("requests slab was at capacity"))?;
 
         if let Err(e) = self.rtx.send(ClientFrame::Req(u as u64, req.clone())) {
             self.awaiting.remove(u);

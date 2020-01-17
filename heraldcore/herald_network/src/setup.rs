@@ -1,9 +1,6 @@
 use super::*;
-
-use tokio::sync::{
-    mpsc::{channel, Receiver, UnboundedReceiver},
-    oneshot,
-};
+use crate::client;
+use tokio::sync::{mpsc::UnboundedReceiver, oneshot};
 
 pub(super) async fn login_inner<PH, CF>(
     uid: UserId,
@@ -12,60 +9,43 @@ pub(super) async fn login_inner<PH, CF>(
     server_port: u16,
     push_handler: PH,
     connection_failed: CF,
+    request_rx: RequestRx,
 ) -> Result<(), Error>
 where
     PH: FnMut(Push) + Send + 'static,
-    CF: FnOnce() + Send + 'static,
+    CF: FnOnce(Error) + Send + 'static,
 {
     let (client, rx, err_rx) = Client::login(uid, keys, &server_dns, server_port).await?;
 
-    update_client(client);
-    handle_events(push_handler, connection_failed, rx, err_rx).await;
+    client::update(client);
+    handle_events(push_handler, connection_failed, rx, err_rx, request_rx).await;
 
     Ok::<(), Error>(())
 }
 
-pub(super) async fn register_inner<PH, RH, CF>(
-    client_rx: Receiver<register::ClientEvent>,
-    keys: sig::KeyPair,
-    server_dns: String,
-    server_port: u16,
-    push_handler: PH,
-    mut response_handler: RH,
-    connection_failed: CF,
-) -> Result<(), Error>
-where
-    PH: FnMut(Push) + Send + 'static,
-    RH: FnMut(register::ServeEvent) + Send + 'static,
-    CF: FnOnce() + Send + 'static,
-{
-    let (response_tx, mut response_rx) = channel(1);
-
-    let (client, rx, err_rx) =
-        Client::register(client_rx, response_tx, keys, &server_dns, server_port).await?;
-
-    while let Some(response) = response_rx.recv().await {
-        response_handler(response);
-    }
-
-    update_client(client);
-    handle_events(push_handler, connection_failed, rx, err_rx).await;
-
-    Ok::<(), Error>(())
-}
-
-async fn handle_events<PH, CF>(
+pub(crate) async fn handle_events<PH, CF>(
     mut push_handler: PH,
     connection_failed: CF,
     mut rx: UnboundedReceiver<Push>,
     err_rx: oneshot::Receiver<Error>,
+    mut req_rx: RequestRx,
 ) where
     PH: FnMut(Push) + Send + 'static,
-    CF: FnOnce() + Send + 'static,
+    CF: FnOnce(Error) + Send + 'static,
 {
+    tokio::spawn(handle_connection_failure(connection_failed, err_rx));
     tokio::spawn(async move {
-        if err_rx.await.is_err() {
-            connection_failed();
+        while let Some((request, mut f)) = req_rx.recv().await {
+            if let Some(client) = client::get() {
+                let response_res = client.read().req(request);
+                match response_res {
+                    Ok(rx) => match rx.await {
+                        Ok(response) => f(Ok(response)),
+                        Err(e) => f(Err(e.into())),
+                    },
+                    Err(e) => f(Err(e)),
+                }
+            }
         }
     });
 
@@ -73,16 +53,16 @@ async fn handle_events<PH, CF>(
         push_handler(push);
     }
 
-    drop(CLIENT.get().map(|c| c.read().quit()));
+    drop(crate::quit());
 }
 
-fn update_client(client: Client) {
-    // try to set the client
-    if let Err(client) = CLIENT.set(RwLock::new(client)) {
-        // if it fails, this means the client is already set, so we should replace it
-        if let Some(lock) = CLIENT.get() {
-            let mut locked = lock.write();
-            *locked = client.into_inner();
-        }
+async fn handle_connection_failure<CF>(
+    connection_failed: CF,
+    err_rx: oneshot::Receiver<Error>,
+) where
+    CF: FnOnce(Error) + Send + 'static,
+{
+    if let Ok(e) = err_rx.await {
+        connection_failed(e);
     }
 }
