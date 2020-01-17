@@ -112,7 +112,6 @@ Page {
                 gesturePolicy: TapHandler.ReleaseWithinBounds
                 onTapped: {
                     cvMainView.state = "fabButtonState"
-                    buttonLoader.sourceComponent = fab
                 }
             }
         }

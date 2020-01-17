@@ -28,7 +28,7 @@ Column {
         TapHandler {
             gesturePolicy: TapHandler.ReleaseWithinBounds
             onTapped: {
-                mainView.push(newGroupViewMain)
+                mainView.push(newContactViewMain)
                 cvMainView.state = "default"
             }
         }
@@ -121,7 +121,6 @@ Column {
         TapHandler {
             gesturePolicy: TapHandler.ReleaseWithinBounds
             onTapped: {
-                //mainView.push(globalSearchView, StackView.Immediate)
                 mainView.push(globalSearchView, {"state": "fromComposeButton"},
                               StackView.Immediate)
                 cvMainView.state = "default"
