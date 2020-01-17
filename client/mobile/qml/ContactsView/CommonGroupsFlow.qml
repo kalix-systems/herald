@@ -31,11 +31,9 @@ Flow {
             initials: Utils.initialize(Utils.safeStringOrDefault(
                                            groupData.conversationTitle))
 
-            MouseArea {
+            TapHandler {
                 enabled: !overlay.visible
-                anchors.fill: parent
-                cursorShape: Qt.PointingHandCursor
-                hoverEnabled: true
+                onTapped: groupClicked(groupData.conversationId)
             }
 
             Rectangle {

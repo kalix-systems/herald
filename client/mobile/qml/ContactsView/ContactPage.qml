@@ -14,6 +14,7 @@ Page {
             contactName: userData !== undefined ? userData.name : ""
         }
     }
+
     Loader {
         anchors.fill: parent
         active: page.userData !== undefined
@@ -134,6 +135,7 @@ Page {
                     width: parent.width
                     height: contentHeight
 
+                    interactive: false
                     delegate: Item {
                         width: parent.width
                         property var groupData: model
@@ -155,10 +157,7 @@ Page {
                                 cursorShape: Qt.PointingHandCursor
                                 hoverEnabled: true
                                 onClicked: {
-                                    page.close()
                                     groupClicked(groupData.conversationId)
-                                    contactsPopup.close()
-                                    contactsLoader.active = false
                                 }
                             }
                         }

@@ -8,9 +8,11 @@ Item {
     property var searchView
     property var cvView
     property var activeChatView
+    property var contactView
     signal convoRequest(var searchConversationId, var searchMsgId)
     signal messagePosRequested(var requestedMsgId)
     signal convoClicked(var searchConversationId)
+    signal groupRequested(var groupId)
 
     Loader {
         active: searchView !== null && searchView !== undefined
@@ -18,6 +20,16 @@ Item {
             target: router.searchView
             onMessageClicked: router.convoRequest(searchConversationId,
                                                   searchMsgId)
+        }
+    }
+
+    Loader {
+        active: contactView !== undefined
+        sourceComponent: Connections {
+            target: router.contactView
+            onGroupClicked: {
+                groupRequested(groupId)
+            }
         }
     }
 

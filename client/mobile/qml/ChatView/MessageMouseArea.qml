@@ -9,6 +9,7 @@ MouseArea {
 
     pressAndHoldInterval: 350
     hoverEnabled: true
+    propagateComposedEvents: true
 
     anchors.fill: parent
     z: CmnCfg.overlayZ

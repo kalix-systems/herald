@@ -46,6 +46,7 @@ Page {
                 messageModelData: messageData
                 width: parent.width
                 anchors.horizontalCenter: parent.horizontalCenter
+                moreInfo: false
             }
 
             Column {
@@ -54,9 +55,9 @@ Page {
                     text: qsTr("From: ")
 
                     font {
-                        bold: true
-                        family: CmnCfg.labelFont.name
-                        pixelSize: CmnCfg.units.dp(18)
+                        family: CmnCfg.chatFont.name
+                        pixelSize: CmnCfg.chatTextSize
+                        weight: Font.Medium
                     }
                 }
 
@@ -88,8 +89,9 @@ Page {
                                      "Sent at: ") + Utils.userTime(
                                      messageData.serverTime)
                 font.family: CmnCfg.chatFont.name
-                font.weight: Font.DemiBold
+                font.weight: Font.Medium
                 color: CmnCfg.palette.black
+                font.pixelSize: CmnCfg.chatTextSize
             }
 
             Label {
@@ -97,18 +99,19 @@ Page {
                 text: qsTr("Received at: ") + Utils.userTime(
                           messageData.insertionTime)
                 font.family: CmnCfg.chatFont.name
-                font.weight: Font.DemiBold
+                font.weight: Font.Medium
                 color: CmnCfg.palette.black
                 visible: !outbound
+                font.pixelSize: CmnCfg.chatTextSize
             }
 
             Column {
                 Label {
                     text: qsTr("To: ")
                     font {
-                        bold: true
-                        family: CmnCfg.labelFont.name
-                        pixelSize: CmnCfg.units.dp(18)
+                        weight: Font.Medium
+                        family: CmnCfg.chatFont.name
+                        pixelSize: CmnCfg.chatTextSize
                     }
                 }
 
@@ -142,9 +145,9 @@ Page {
                                 anchors.right: parent.right
                                 icon.source: Utils.receiptCodeSwitch(
                                                  receiptData[memberData.userId])
-                                icon.height: 16
-                                icon.width: 16
-                                icon.color: CmnCfg.palette.black
+                                icon.height: CmnCfg.units.dp(16)
+                                icon.width: CmnCfg.units.dp(16)
+                                icon.color: CmnCfg.palette.darkGrey
                                 padding: 0
                                 anchors.verticalCenter: parent.verticalCenter
                                 background: Item {}

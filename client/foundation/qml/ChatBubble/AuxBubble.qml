@@ -15,6 +15,7 @@ Rectangle {
     property var messageModelData
     property bool outbound: messageModelData.author === Herald.config.configId
 
+    property var ownedConversation
     property alias highlightItem: bubbleHighlight
     readonly property color bubbleColor: CmnCfg.palette.lightGrey
 

@@ -114,6 +114,8 @@ ListView {
                     messageModelData: containerCol.messageModelData
                     convContainer: parent
                     convoExpiration: convoItem.expirationPeriod
+                    ownedConversation: ownedMessages
+                    bubbleIndex: index
                     property Component infoPage: Component {
                         InfoPage {
                             members: convContent.members
@@ -133,6 +135,7 @@ ListView {
                     width: parent.width
                     defaultWidth: chatListView.width
                     bubbleIndex: index
+                    ownedConversation: ownedMessages
                 }
             }
         }
