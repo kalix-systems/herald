@@ -47,6 +47,7 @@ impl StoreLike for Conn<'_> {
 
 mod conversation;
 mod errors;
+mod pending;
 mod ratchet;
 mod sigstore;
 
@@ -55,5 +56,5 @@ pub use errors::Error;
 pub mod prelude {
     pub use crate::errors::Error;
     pub use crate::Conn;
-    pub use ratchet_chat::protocol::{ConversationStore, RatchetStore, SigStore};
+    pub use ratchet_chat::protocol::{ConversationStore, PendingStore, RatchetStore, SigStore};
 }

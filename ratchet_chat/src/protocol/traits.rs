@@ -79,7 +79,7 @@ pub trait PendingStore: StoreLike {
         &mut self,
         id: PayloadId,
         payload: Payload,
-        to: &Vec<sig::PublicKey>,
+        to: &[sig::PublicKey],
     ) -> Result<(), Self::Error>;
 
     fn get_pending_payload(
