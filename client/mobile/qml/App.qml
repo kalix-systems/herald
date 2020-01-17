@@ -59,16 +59,13 @@ Page {
 
     Component {
         id: globalSearchView
-        HomeScreen.GlobalSearchMain {
-            headerLoader: rootHeader.headerLoader
-        }
+        HomeScreen.GlobalSearchMain {}
     }
 
     Component {
         id: contactsViewMain
         Contacts.ContactViewMain {}
     }
-
 
     Router {
         id: appRouter

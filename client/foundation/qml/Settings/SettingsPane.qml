@@ -57,12 +57,6 @@ Flickable {
         }
 
         SetsComps.SettingsListItem {
-            id: storage
-            headerText: qsTr("Data & Storage")
-            settingsContent: SetsComps.Storage {}
-        }
-
-        SetsComps.SettingsListItem {
             id: advanced
             headerText: qsTr("Advanced")
             settingsContent: SetsComps.Advanced {}

@@ -107,12 +107,10 @@ Page {
         id: plusButton
         ComposeButton {
             iconSource: "qrc:/plus-icon.svg"
-
             TapHandler {
                 gesturePolicy: TapHandler.ReleaseWithinBounds
                 onTapped: {
                     cvMainView.state = "fabButtonState"
-                    buttonLoader.sourceComponent = fab
                 }
             }
         }
