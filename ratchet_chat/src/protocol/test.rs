@@ -188,7 +188,7 @@ impl PendingStore for Stores {
         &mut self,
         id: PayloadId,
         payload: Payload,
-        to: &Vec<sig::PublicKey>,
+        to: &[sig::PublicKey],
     ) -> Result<(), Self::Error> {
         let (_, by_id) = self
             .pending_by_id
