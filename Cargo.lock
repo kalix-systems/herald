@@ -212,7 +212,7 @@ dependencies = [
  "herald_ids 0.1.0",
  "kcl 0.1.0",
  "location 0.1.0",
- "once_cell 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "once_cell 1.3.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "parking_lot 0.9.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "platform_dirs 0.1.0",
  "rusqlite 0.21.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -382,6 +382,18 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "generic-array 0.12.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "subtle 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "crypto_store"
+version = "0.1.0"
+dependencies = [
+ "coremacros 0.1.0",
+ "herald_common 0.1.0",
+ "once_cell 1.3.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "parking_lot 0.9.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "ratchet_chat 0.1.0",
+ "rusqlite 0.21.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -702,7 +714,7 @@ dependencies = [
  "location 0.1.0",
  "messages_helper 0.1.0",
  "notify-rust 3.6.3 (registry+https://github.com/rust-lang/crates.io-index)",
- "once_cell 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "once_cell 1.3.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "parking_lot 0.10.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "riqtshaw_types 0.1.0 (git+https://github.com/kalix-systems/riqtshaw_types?rev=ee0af86c4db49f9c554aef9c122255d3230d3b99)",
  "search_pattern 0.1.0",
@@ -734,7 +746,7 @@ dependencies = [
  "herald_common 0.1.0",
  "krpc 0.1.0",
  "location 0.1.0",
- "once_cell 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "once_cell 1.3.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "rustls 0.16.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "rustls-native-certs 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "tokio 0.2.6 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -771,7 +783,7 @@ dependencies = [
  "futures 0.3.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "herald_client 0.1.0",
  "herald_common 0.1.0",
- "once_cell 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "once_cell 1.3.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "parking_lot 0.10.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "tokio 0.2.6 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
@@ -785,7 +797,7 @@ dependencies = [
  "dashmap 1.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "herald_common 0.1.0",
  "lazy_static 1.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "once_cell 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "once_cell 1.3.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "rcgen 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "rustls 0.16.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "serial_test 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -828,7 +840,7 @@ dependencies = [
  "kcl 0.1.0",
  "location 0.1.0",
  "network_types 0.1.0",
- "once_cell 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "once_cell 1.3.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "parking_lot 0.10.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "platform_dirs 0.1.0",
  "rusqlite 0.21.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -1259,7 +1271,7 @@ dependencies = [
  "herald_common 0.1.0",
  "heraldcore 0.1.0",
  "lru 0.4.3 (registry+https://github.com/rust-lang/crates.io-index)",
- "once_cell 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "once_cell 1.3.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "parking_lot 0.10.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
@@ -1276,7 +1288,7 @@ dependencies = [
  "json 0.12.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "lru 0.4.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "message_cache 0.1.0",
- "once_cell 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "once_cell 1.3.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "parking_lot 0.10.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "revec 0.1.0",
  "search_pattern 0.1.0",
@@ -1446,7 +1458,7 @@ dependencies = [
 
 [[package]]
 name = "once_cell"
-version = "1.2.0"
+version = "1.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
@@ -1587,7 +1599,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 name = "platform_dirs"
 version = "0.1.0"
 dependencies = [
- "once_cell 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "once_cell 1.3.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -1928,6 +1940,7 @@ dependencies = [
  "derive-getters 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "double-ratchet 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "herald_common 0.1.0",
+ "herald_ids 0.1.0",
  "kcl 0.1.0",
  "kson 0.1.0",
  "serial_test 0.3.2 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -3062,7 +3075,7 @@ dependencies = [
 "checksum objc 0.2.7 (registry+https://github.com/rust-lang/crates.io-index)" = "915b1b472bc21c53464d6c8461c9d3af805ba1ef837e1cac254428f4a77177b1"
 "checksum objc-foundation 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)" = "1add1b659e36c9607c7aab864a76c7a4c2760cd0cd2e120f3fb8b952c7e22bf9"
 "checksum objc_id 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)" = "c92d4ddb4bd7b50d730c215ff871754d0da6b2178849f8a2a2ab69712d0c073b"
-"checksum once_cell 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)" = "891f486f630e5c5a4916c7e16c4b24a53e78c860b646e9f8e005e4f16847bfed"
+"checksum once_cell 1.3.0 (registry+https://github.com/rust-lang/crates.io-index)" = "f5941ec2d5ee5916c709580d71553b81a633df245bcc73c04dcbd62152ceefc4"
 "checksum opaque-debug 0.2.3 (registry+https://github.com/rust-lang/crates.io-index)" = "2839e79665f131bdb5782e51f2c6c9599c133c6098982a54c794358bf432529c"
 "checksum openssl-probe 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)" = "77af24da69f9d9341038eba93a073b1fdaaa1b788221b00a69bce9e762cb32de"
 "checksum owning_ref 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)" = "49a4b8ea2179e6a2e27411d3bca09ca6dd630821cf6894c6c7c8467a8ee7ef13"

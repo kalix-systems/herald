@@ -1,4 +1,5 @@
 use super::*;
+
 pub trait RatchetStore: StoreLike {
     fn get_ratchet(
         &mut self,

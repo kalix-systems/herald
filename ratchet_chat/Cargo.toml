@@ -22,5 +22,8 @@ path = "../kson"
 [dependencies.herald_common]
 path = "../herald_common"
 
+[dependencies.herald_ids]
+path = "../heraldcore/herald_ids"
+
 [dev-dependencies]
 serial_test = "0.3.2"

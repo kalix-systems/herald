@@ -2,8 +2,8 @@
 
 members = [
   "channel_ratchet",
-  "herald_rpclient",
   "herald_common",
+  "herald_rpclient",
   "herald_server",
   "herald_server/server_errors",
   "herald_server/server_protocol",
@@ -12,9 +12,10 @@ members = [
   "heraldcore/chainkeys",
   "heraldcore/coremacros",
   "heraldcore/coretypes",
+  "heraldcore/crypto_store",
   "heraldcore/herald_attachments",
-  "heraldcore/herald_network",
   "heraldcore/herald_ids",
+  "heraldcore/herald_network",
   "heraldcore/herald_user",
   "heraldcore/image_utils",
   "heraldcore/network_types",

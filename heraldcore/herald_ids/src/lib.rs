@@ -116,6 +116,10 @@ impl TryFrom<&[u8]> for MsgId {
     }
 }
 
+#[derive(Hash, Debug, Clone, PartialEq, Eq, Copy, Ser, De)]
+/// Conversation ID
+pub struct ConversationId(pub UQ);
+
 impl FromSql for ConversationId {
     fn column_result(value: types::ValueRef) -> FromSqlResult<Self> {
         ConversationId::try_from(value.as_blob()?).map_err(|_| FromSqlError::InvalidType)
@@ -130,6 +134,11 @@ impl ToSql for ConversationId {
 }
 
 impl ConversationId {
+    /// Creates a new random `ConversationId`
+    pub fn gen_new() -> Self {
+        Self(UQ::gen_new())
+    }
+
     /// Converts [`ConversationId`] to `Vec<u8>`
     pub fn to_vec(&self) -> Vec<u8> {
         self.0.as_ref().to_vec()
