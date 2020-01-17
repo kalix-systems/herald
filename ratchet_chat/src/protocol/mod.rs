@@ -19,7 +19,6 @@ pub enum Payload {
     Noop,
     SigUpdate(Signed<sig::SigUpdate>),
     Forwarded(UserId, Signed<sig::SigUpdate>),
-    Init(Signed<x25519::PublicKey>),
     AddToConvo(ConversationId, Vec<UserId>),
     LeaveConvo(ConversationId),
     Msg(Bytes),
@@ -48,22 +47,17 @@ pub fn start_session<S: RatchetStore>(
     store: &mut S,
     me: &sig::KeyPair,
     them: sig::PublicKey,
-) -> Result<Msg, TransitError<S::Error>> {
-    let xkp = x25519::KeyPair::gen_new();
-    let signed_pub = sig::sign_ser(me, *xkp.public());
+) -> Result<dr::DoubleRatchet, TransitError<S::Error>> {
+    let me_as_kx = x25519::KeyPair::from(me.clone());
     let them_as_kx = x25519::PublicKey::from(them);
-    let secret = dr::diffie_hellman(&xkp, &them_as_kx);
-
+    let secret = dr::diffie_hellman(&me_as_kx, &them_as_kx);
     let ratchet = dr::DoubleRatchet::new_alice(&secret, them_as_kx, None);
+
     store
-        .store_ratchet(them, ratchet)
+        .store_ratchet(them, ratchet.clone())
         .map_err(TransitError::Store)?;
 
-    let payload = Payload::Init(signed_pub);
-    let id = PayloadId(UQ::gen_new());
-    let msg = encrypt_payload(store, me, them, id, &payload)?;
-
-    Ok(msg)
+    Ok(ratchet)
 }
 
 pub fn encrypt_payload<S: RatchetStore>(
@@ -73,11 +67,12 @@ pub fn encrypt_payload<S: RatchetStore>(
     id: PayloadId,
     payload: &Payload,
 ) -> Result<Msg, TransitError<S::Error>> {
-    let ad = mk_ad(*me.public(), id);
-    let mut ratchet = store
-        .get_ratchet(to)
-        .map_err(TransitError::Store)?
-        .ok_or(TransitError::NoSession(to))?;
+    let ad = mk_ad(to, id);
+    let mut ratchet = if let Some(r) = store.get_ratchet(to).map_err(TransitError::Store)? {
+        r
+    } else {
+        start_session(store, me, to)?
+    };
     let (header, ct) = ratchet
         .ratchet_encrypt(&kson::to_vec(&payload), ad.as_ref())
         .ok_or(TransitError::Uninit(to))?;
@@ -95,25 +90,26 @@ pub fn encrypt_payload<S: RatchetStore>(
 pub fn decrypt_payload<S: RatchetStore + dr::KeyStore>(
     store: &mut S,
     me: &sig::KeyPair,
-    from: sig::PublicKey,
+    them: sig::PublicKey,
     id: PayloadId,
     header: dr::Header,
     payload: Bytes,
 ) -> Result<Payload, TransitError<S::Error>> {
     let ad = mk_ad(*me.public(), id);
     let mut ratchet = store
-        .get_ratchet(from)
+        .get_ratchet(them)
         .map_err(TransitError::Store)?
         .unwrap_or_else(|| {
-            let xkp = x25519::KeyPair::from(me.clone());
-            let secret = dr::diffie_hellman(&xkp, header.dh());
-            let ratchet = dr::DoubleRatchet::new_bob(secret, xkp, *header.dh(), None);
+            let me_as_kx = x25519::KeyPair::from(me.clone());
+            let them_as_kx = x25519::PublicKey::from(them);
+            let secret = dr::diffie_hellman(&me_as_kx, &them_as_kx);
+            let ratchet = dr::DoubleRatchet::new_bob(secret, me_as_kx, them_as_kx, None);
             ratchet
         });
 
     let decrypted = ratchet.ratchet_decrypt(store, &header, &payload, &ad)?;
     store
-        .store_ratchet(from, ratchet)
+        .store_ratchet(them, ratchet)
         .map_err(TransitError::Store)?;
     let payload = kson::from_bytes(decrypted.into())?;
 
@@ -172,16 +168,6 @@ pub fn handle_payload<S: SigStore + ConversationStore>(
             store
                 .extend_sigchain(from.uid, sig)
                 .map_err(PayloadError::Store)?;
-        }
-        Init(sig) => {
-            let valid = sig.verify_sig();
-            if valid != SigValid::Yes {
-                return Err(PayloadError::BadSig(valid));
-            }
-            // TODO: remove this check after setting up a "KnownSigner" struct, eventually...
-            if *sig.signed_by() != from.did {
-                return Err(PayloadError::InvalidSender);
-            }
         }
         AddToConvo(cid, mems) => {
             if !store
@@ -290,6 +276,19 @@ where
     prepare_send_to_keys(store, my_keypair, keys, payload)
 }
 
+pub fn prepare_send_to_user<S>(
+    store: &mut S,
+    my_keypair: &sig::KeyPair,
+    uid: UserId,
+    payload: Payload,
+) -> Result<Vec<(sig::PublicKey, Msg)>, TransitError<S::Error>>
+where
+    S: dr::KeyStore + RatchetStore + PendingStore + SigStore,
+{
+    let keys = store.active_keys(uid).map_err(TransitError::Store)?;
+    prepare_send_to_keys(store, my_keypair, keys, payload)
+}
+
 // TODO: replace this with [u8;64]
 fn mk_ad(
     pk: sig::PublicKey,
@@ -326,7 +325,7 @@ where
         }
         Ack::Failed { .. } => {
             // error handling can be much smarter, for now we just fail
-            todo!();
+            todo!("{:?}", ack);
         }
     }
     Ok(out)
@@ -374,6 +373,7 @@ where
                         });
                     }
                     Ok(PayloadResult { msg, forward }) => {
+                        res.ack.replace(Ack::Success(id));
                         res.forward = forward;
                         res.output = msg;
                     }

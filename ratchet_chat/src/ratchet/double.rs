@@ -666,6 +666,7 @@ mod tests {
 
         let a_pair = KeyPair::gen_new();
         let b_pair = KeyPair::gen_new();
+        // let secret1 = RootKey::gen_new();
         let secret = diffie_hellman(&a_pair, b_pair.public());
         let (secret, ck_init) = kdf_rk(&secret, &secret);
         let alice = DR::new_alice(&secret, *b_pair.public(), Some(ck_init));
