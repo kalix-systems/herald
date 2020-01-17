@@ -47,5 +47,6 @@
         <file>qml/ContactsView/CommonGroupsFlow.qml</file>
         <file>qml/ContactsView/ContactInfoHeader.qml</file>
         <file>qml/ChatView/ImageAttachments.qml</file>
+        <file>qml/HomeScreen/Controls/OptionsMenu.qml</file>
     </qresource>
 </RCC>
