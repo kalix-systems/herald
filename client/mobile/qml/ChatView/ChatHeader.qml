@@ -11,7 +11,9 @@ ToolBar {
     background: Rectangle {
         color: CmnCfg.palette.offBlack
     }
+    id: chatBar
 
+    property bool search: false
     AnimIconButton {
         id: backButton
         anchors.left: parent.left
@@ -36,7 +38,7 @@ ToolBar {
             font.family: CmnCfg.headerFont.family
             font.pixelSize: CmnCfg.headerFontSize
             color: CmnCfg.palette.iconFill
-            visible: parent.state !== "search"
+            visible: chatBar.state !== "search"
         }
 
         AnimIconButton {
@@ -44,12 +46,13 @@ ToolBar {
             Layout.alignment: Qt.AlignRight
             color: CmnCfg.palette.iconFill
             imageSource: "qrc:/search-icon.svg"
-            visible: parent.state !== "search"
-            onTapped: parent.state = "search"
+            visible: chatBar.state !== "search"
+            onTapped: chatBar.state = "search"
         }
 
         BorderedTextField {
-            visible: parent.state === "search"
+            id: searchField
+            visible: chatBar.state === "search"
             enabled: visible
             Layout.margins: CmnCfg.smallMargin
             Layout.topMargin: CmnCfg.microMargin
@@ -68,8 +71,8 @@ ToolBar {
             Layout.alignment: Qt.AlignRight
             color: CmnCfg.palette.iconFill
             imageSource: "qrc:/x-icon.svg"
-            visible: parent.state === "search"
-            onTapped: parent.state = "default"
+            visible: chatBar.state === "search"
+            onTapped: chatBar.state = "default"
         }
     }
 
@@ -79,6 +82,7 @@ ToolBar {
             StateChangeScript {
                 script: {
                     ownedMessages.searchActive = false
+                    searchField.text = ""
                     // clear search
                 }
             }

@@ -87,6 +87,7 @@ Item {
 
     /// logged-in user avatar size
     readonly property real identityAvatarDiameter: units.dp(24)
+    readonly property real headerAvatarSize: units.dp(24)
     /// standard avatar size
     readonly property real avatarSize: units.dp(44)
     readonly property int chatAvatarSize: units.dp(24)
@@ -106,7 +107,7 @@ Item {
     readonly property real miniFabDiameter: units.dp(40)
 
     // MISC
-    readonly property int attachmentSize: CmnCfg.units.dp(150)
+    readonly property int attachmentSize: units.dp(150)
     /// standard z values
     readonly property int overlayZ: 10
     readonly property int topZ: 9

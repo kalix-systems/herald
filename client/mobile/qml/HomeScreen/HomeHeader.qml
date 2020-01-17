@@ -20,24 +20,29 @@ ToolBar {
         color: CmnCfg.palette.avatarColors[Herald.config.configColor]
         initials: Herald.config.name[0].toUpperCase()
         pfpPath: Utils.safeStringOrDefault(Herald.config.profilePicture, "")
-        size: CmnCfg.headerAvatarSize
+        size: CmnCfg.identityAvatarDiameter
         anchors.verticalCenter: parent.verticalCenter
         anchors.left: parent.left
         anchors.leftMargin: CmnCfg.defaultMargin
     }
 
-    Label {
-        id: stateLabel
-        text: qsTr("Conversations")
-        font.family: CmnCfg.headerFont.family
-        font.pixelSize: CmnCfg.headerFontSize
+    GridLayout {
+        id: stateGrid
         anchors.verticalCenter: parent.verticalCenter
         anchors.left: avatar.right
         anchors.leftMargin: CmnCfg.defaultMargin
-        color: CmnCfg.palette.iconFill
+        Label {
+            id: stateLabel
+            text: qsTr("Conversations")
+            font.family: CmnCfg.headerFont.family
+            font.pixelSize: CmnCfg.headerFontSize
+            Layout.maximumWidth: parent.width - avatar.width - buttonRow.implicitWidth
+            color: CmnCfg.palette.iconFill
+        }
     }
 
     Row {
+        id: buttonRow
         anchors.rightMargin: CmnCfg.defaultMargin
         anchors.right: parent.right
         spacing: CmnCfg.defaultMargin
