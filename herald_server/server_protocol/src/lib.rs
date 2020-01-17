@@ -242,7 +242,7 @@ impl KrpcServer<HeraldProtocol> for State {
             Ok(match req {
                 Request::GetSigchain(u) => Response::GetSigchain(self.get_sigchain(u).await?),
                 Request::RecipExists(r) => Response::RecipExists(self.recip_exists(r).await?),
-                Request::NewSig(n) => Response::NewSig(self.new_sig(n).await?),
+                Request::NewSig(n) => Response::NewSig(self.new_sig(*n).await?),
                 Request::NewPrekey(keys) => Response::NewPrekey(self.new_prekeys(keys).await?),
                 Request::GetPrekey(keys) => Response::GetPrekey(self.get_prekeys(keys).await?),
                 Request::Push(push::Req { to, msg }) => {
