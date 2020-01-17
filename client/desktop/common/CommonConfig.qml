@@ -71,7 +71,7 @@ Item {
 
     /// standard avatar size
     readonly property int avatarSize: units.dp(38)
-    readonly property int chatAvatarSize: units.dp(24)
+    readonly property int headerAvatarSize: units.dp(24)
     /// standard conversation/contact height
     readonly property int convoHeight: units.dp(50)
     /// standard toolbar height

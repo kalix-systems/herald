@@ -23,7 +23,7 @@ Item {
 
     readonly property alias sysPalette: systemPalette
     /// standard tiny margin
-    readonly property real microMargin: units.dp(2)
+    readonly property real microMargin: units.dp(4)
     /// standard small margin
     readonly property real smallMargin: units.dp(6)
     /// standard margin size
@@ -42,21 +42,21 @@ Item {
     // FONTS
 
     /// standard header size
-    readonly property real headerFontSize: units.dp(14)
+    readonly property real headerFontSize: units.dp(17)
     /// size of labels
-    readonly property real labelFontSize: units.dp(12)
+    readonly property real labelFontSize: units.dp(16)
     /// font size for minor text (e.g. timestamps)
-    readonly property int minorTextSize: units.dp(11)
+    readonly property int minorTextSize: units.dp(13)
     /// standard chat text size
-    readonly property real chatTextSize: units.dp(11)
-    readonly property real defaultFontSize: units.dp(12)
+    readonly property real chatTextSize: units.dp(14)
+    readonly property real defaultFontSize: units.dp(15)
     /// size for contact/group name labels in lists
-    readonly property int entityLabelSize: units.dp(14)
+    readonly property int entityLabelSize: units.dp(16)
     /// size for contact/group name labels in lists
-    readonly property int entitySubLabelSize: units.dp(12)
+    readonly property int entitySubLabelSize: units.dp(14)
     /// standard button text size
-    readonly property real buttonTextSize: units.dp(14)
-    readonly property real typeMargin: units.dp(20)
+    readonly property real buttonTextSize: units.dp(15)
+    readonly property real typeMargin: units.dp(21)
 
     readonly property FontLoader chatFont: metaTheme.chatFont
     readonly property FontLoader labelFont: metaTheme.cairo
@@ -85,11 +85,9 @@ Item {
     /// standard toolbar height
     readonly property real toolbarHeight: units.dp(40)
 
-    /// logged-in user avatar size
-    readonly property real identityAvatarDiameter: units.dp(24)
     /// standard avatar size
-    readonly property real avatarSize: units.dp(36)
-    readonly property int chatAvatarSize: units.dp(24)
+    readonly property real avatarSize: units.dp(44)
+    readonly property int headerAvatarSize: units.dp(24)
     /// standard conversation/contact height
     readonly property int convoHeight: avatarSize * 1.5
 
@@ -97,7 +95,7 @@ Item {
     readonly property int accentBarWidth: 4
 
     /// height & width of icon buttons
-    readonly property real iconSize: units.dp(20)
+    readonly property real iconSize: units.dp(22)
 
     /// height of floating action buttons on home screen
     readonly property real fabDiameter: units.dp(56)
@@ -106,7 +104,7 @@ Item {
     readonly property real miniFabDiameter: units.dp(40)
 
     // MISC
-    readonly property int attachmentSize: 150
+    readonly property int attachmentSize: units.dp(150)
     /// standard z values
     readonly property int overlayZ: 10
     readonly property int topZ: 9

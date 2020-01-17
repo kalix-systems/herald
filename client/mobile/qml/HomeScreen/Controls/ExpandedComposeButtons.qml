@@ -25,10 +25,14 @@ Column {
             }
         }
 
-        onClicked: {
-            mainView.push(newContactViewMain)
-            cvMainView.state = "default"
+        TapHandler {
+            gesturePolicy: TapHandler.ReleaseWithinBounds
+            onTapped: {
+                mainView.push(newGroupViewMain)
+                cvMainView.state = "default"
+            }
         }
+
         icon.source: "qrc:/add-contact-icon.svg"
         icon.color: CmnCfg.palette.black
         icon.height: CmnCfg.iconSize
@@ -76,6 +80,7 @@ Column {
         }
 
         TapHandler {
+            gesturePolicy: TapHandler.ReleaseWithinBounds
             onTapped: {
                 mainView.push(newGroupViewMain)
                 cvMainView.state = "default"
