@@ -229,43 +229,47 @@ impl PendingStore for Stores {
     }
 }
 
+fn setup(name: &str) -> (sig::KeyPair, GlobalId, Stores, Signed<UserId>) {
+    let keys = sig::KeyPair::gen_new();
+    let gid = GlobalId {
+        did: *keys.public(),
+        uid: name.try_into().expect(&format!("invalid uid: {}", name)),
+    };
+    let mut store = Stores::default();
+    let signed = sig::sign_ser(&keys, gid.uid);
+    store
+        .start_sigchain(signed)
+        .expect(&format!("failed to create sigchain for {}", name));
+    (keys, gid, store, signed)
+}
+
+fn get_pid(msg: &Msg) -> PayloadId {
+    match msg {
+        Msg::Encrypted { id, .. } => *id,
+        m => panic!("encrypted message should be Encrypted{{..}}, as {:?}", m),
+    }
+}
+
 #[test]
 fn init_recv() {
     kcl::init();
 
-    let alice = sig::KeyPair::gen_new();
-    let alice_gid = GlobalId {
-        did: *alice.public(),
-        uid: "alice".try_into().expect("failed to make alice uid"),
-    };
-    let mut alice_store = Stores::default();
-    let alice_signed = sig::sign_ser(&alice, alice_gid.uid);
-    alice_store
-        .start_sigchain(alice_signed)
-        .expect("failed to create alice sigchain");
-
-    let bob = sig::KeyPair::gen_new();
-    let mut bob_store = Stores::default();
-    let bob_gid = GlobalId {
-        did: *bob.public(),
-        uid: "bob".try_into().expect("failed to make bob uid"),
-    };
-    let bob_signed = sig::sign_ser(&bob, bob_gid.uid);
-    bob_store
-        .start_sigchain(bob_signed)
-        .expect("failed to create bob sigchain");
+    let (alice, alice_gid, mut alice_store, alice_signed) = setup("alice");
+    let (bob, bob_gid, mut bob_store, bob_signed) = setup("bob");
 
     // now alice gets bob's keys from the server
     alice_store
         .start_sigchain(bob_signed)
         .expect("failed to create bob sigchain for alice");
 
+    // alice sends noop to initialize the session
     let msgs = prepare_send_to_user(&mut alice_store, &alice, bob_gid.uid, Payload::Noop)
         .expect("failed to prepare messages");
 
     assert_eq!(msgs.len(), 1);
     let (did, msg) = msgs.into_iter().next().unwrap();
     assert_eq!(did, bob_gid.did);
+    let pid = get_pid(&msg);
 
     let MsgResult {
         ack,
@@ -275,10 +279,10 @@ fn init_recv() {
     } = handle_incoming(&mut bob_store, &bob, alice_gid, msg)
         .expect("failed to handle init msg from alice");
 
-    assert!(ack.is_some());
-    assert!(forward.is_none());
-    assert!(output.is_none());
-    assert!(response.is_none());
+    assert_eq!(ack, Some(Ack::Success(pid)));
+    assert_eq!(forward, None);
+    assert_eq!(output, None);
+    assert_eq!(response, None);
 
     // now bob requests keys from the server for alice, which we simulate by magically giving them to him
     bob_store
@@ -295,10 +299,10 @@ fn init_recv() {
     } = handle_incoming(&mut alice_store, &alice, bob_gid, bob_ack)
         .expect("alice failed to handle ack from bob");
 
-    assert!(ack.is_none());
-    assert!(forward.is_none());
-    assert!(output.is_none());
-    assert!(response.is_none());
+    assert_eq!(ack, None);
+    assert_eq!(forward, None);
+    assert_eq!(output, None);
+    assert_eq!(response, None);
 
     let msgs = prepare_send_to_user(&mut bob_store, &bob, alice_gid.uid, Payload::Noop)
         .expect("failed to prepare messages from bob");
@@ -306,6 +310,7 @@ fn init_recv() {
     assert_eq!(msgs.len(), 1);
     let (did, msg) = msgs.into_iter().next().unwrap();
     assert_eq!(did, alice_gid.did);
+    let pid = get_pid(&msg);
 
     let MsgResult {
         ack,
@@ -315,10 +320,10 @@ fn init_recv() {
     } = handle_incoming(&mut alice_store, &alice, bob_gid, msg)
         .expect("alice failed to handle noop msg from bob");
 
-    assert!(ack.is_some());
-    assert!(forward.is_none());
-    assert!(output.is_none());
-    assert!(response.is_none());
+    assert_eq!(ack, Some(Ack::Success(pid)));
+    assert_eq!(forward, None);
+    assert_eq!(output, None);
+    assert_eq!(response, None);
 
     let alice_ack = Msg::Ack(ack.unwrap());
 
@@ -330,8 +335,8 @@ fn init_recv() {
     } = handle_incoming(&mut bob_store, &bob, alice_gid, alice_ack)
         .expect("bob failed to handle ack from alice");
 
-    assert!(ack.is_none());
-    assert!(forward.is_none());
-    assert!(output.is_none());
-    assert!(response.is_none());
+    assert_eq!(ack, None);
+    assert_eq!(forward, None);
+    assert_eq!(output, None);
+    assert_eq!(response, None);
 }

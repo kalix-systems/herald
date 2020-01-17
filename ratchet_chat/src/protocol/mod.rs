@@ -14,21 +14,9 @@ pub use traits::*;
 #[derive(Ser, De, Eq, PartialEq, Ord, PartialOrd, Hash, Clone, Copy, Debug)]
 pub struct PayloadId(random::UQ);
 
-impl PayloadId {
-    pub fn gen_new() -> Self {
-        Self(random::UQ::gen_new())
-    }
-
-    pub fn as_slice(&self) -> &[u8] {
-        self.0.as_ref()
-    }
-}
-
 #[derive(Ser, De, Eq, PartialEq, Hash, Clone, Debug)]
 pub enum Payload {
     Noop,
-    SigUpdate(Signed<sig::SigUpdate>),
-    Forwarded(UserId, Signed<sig::SigUpdate>),
     AddToConvo(ConversationId, Vec<UserId>),
     LeaveConvo(ConversationId),
     Msg(Bytes),
@@ -42,6 +30,8 @@ pub enum Msg {
         payload: Bytes,
     },
     Ack(Ack),
+    SigUpdate(Signed<sig::SigUpdate>),
+    Forwarded(UserId, Signed<sig::SigUpdate>),
 }
 
 #[derive(Ser, De, Eq, PartialEq, Hash, Clone, Debug)]
@@ -128,57 +118,19 @@ pub fn decrypt_payload<S: RatchetStore + dr::KeyStore>(
 
 pub struct PayloadResult {
     pub msg: Option<Bytes>,
-    pub forward: Option<Payload>,
 }
 
 pub fn handle_payload<S: SigStore + ConversationStore>(
     store: &mut S,
     from: GlobalId,
     payload: Payload,
-) -> Result<PayloadResult, PayloadError<S::Error>> {
+) -> Result<Option<Bytes>, PayloadError<S::Error>> {
     use Payload::*;
 
     let mut msg = None;
-    let mut forward = None;
 
     match payload {
         Noop => {}
-        Forwarded(uid, sig) => {
-            let valid = sig::validate_update(&sig);
-            if valid != SigValid::Yes {
-                return Err(PayloadError::BadSig(valid));
-            }
-
-            if !store
-                .key_is_valid(*sig.signed_by(), uid)
-                .map_err(PayloadError::Store)?
-            {
-                return Err(PayloadError::InvalidSender);
-            }
-
-            store
-                .extend_sigchain(uid, sig)
-                .map_err(PayloadError::Store)?;
-        }
-        SigUpdate(sig) => {
-            forward = Some(Forwarded(from.uid, sig));
-
-            let valid = sig::validate_update(&sig);
-            if valid != SigValid::Yes {
-                return Err(PayloadError::BadSig(valid));
-            }
-
-            if !store
-                .key_is_valid(from.did, from.uid)
-                .map_err(PayloadError::Store)?
-            {
-                return Err(PayloadError::InvalidSender);
-            }
-
-            store
-                .extend_sigchain(from.uid, sig)
-                .map_err(PayloadError::Store)?;
-        }
         AddToConvo(cid, mems) => {
             if !store
                 .member_of(cid, from.uid)
@@ -198,7 +150,7 @@ pub fn handle_payload<S: SigStore + ConversationStore>(
         }
     }
 
-    Ok(PayloadResult { msg, forward })
+    Ok(msg)
 }
 
 fn keys_of_cid<S: ConversationStore + SigStore>(
@@ -313,7 +265,7 @@ fn mk_ad(
 
 pub struct MsgResult {
     ack: Option<Ack>,
-    forward: Option<Payload>,
+    forward: Option<Msg>,
     output: Option<Bytes>,
     response: Option<Msg>,
 }
@@ -363,6 +315,42 @@ where
                 res.response.replace(m);
             }
         }
+        Msg::Forwarded(uid, sig) => {
+            let valid = sig::validate_update(&sig);
+            if valid != SigValid::Yes {
+                return Err(TransitError::BadSig(valid));
+            }
+
+            if !store
+                .key_is_valid(*sig.signed_by(), uid)
+                .map_err(TransitError::Store)?
+            {
+                return Err(TransitError::InvalidSender);
+            }
+
+            store
+                .extend_sigchain(uid, sig)
+                .map_err(TransitError::Store)?;
+        }
+        Msg::SigUpdate(sig) => {
+            res.forward.replace(Msg::Forwarded(from.uid, sig));
+
+            let valid = sig::validate_update(&sig);
+            if valid != SigValid::Yes {
+                return Err(TransitError::BadSig(valid));
+            }
+
+            if !store
+                .key_is_valid(from.did, from.uid)
+                .map_err(TransitError::Store)?
+            {
+                return Err(TransitError::InvalidSender);
+            }
+
+            store
+                .extend_sigchain(from.uid, sig)
+                .map_err(TransitError::Store)?;
+        }
         Msg::Encrypted {
             id,
             header,
@@ -382,9 +370,8 @@ where
                             reason: e.into(),
                         });
                     }
-                    Ok(PayloadResult { msg, forward }) => {
+                    Ok(msg) => {
                         res.ack.replace(Ack::Success(id));
-                        res.forward = forward;
                         res.output = msg;
                     }
                 },

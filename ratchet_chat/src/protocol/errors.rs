@@ -22,6 +22,10 @@ pub enum TransitError<E: StdError + Send + 'static> {
     NoSession(sig::PublicKey),
     #[error("Tried to encrypt using uninitialized ratchet with {0:#?}, THIS SHOULD NEVER HAPPEN")]
     Uninit(sig::PublicKey),
+    #[error("Invalid signature: {0:#?}")]
+    BadSig(SigValid),
+    #[error("Message should not have been sent by this device, the sender is being sketchy")]
+    InvalidSender,
 }
 
 impl<E: StdError + Send + 'static> From<TransitError<E>> for FailureReason {
@@ -35,6 +39,8 @@ impl<E: StdError + Send + 'static> From<TransitError<E>> for FailureReason {
             TransitError::Store(_) => FailureReason::StoreError,
             TransitError::NoSession(_) => FailureReason::WhoKnows,
             TransitError::Uninit(_) => FailureReason::WhoKnows,
+            TransitError::BadSig(v) => FailureReason::BadSig(v),
+            TransitError::InvalidSender => FailureReason::InvalidSender,
         }
     }
 }
