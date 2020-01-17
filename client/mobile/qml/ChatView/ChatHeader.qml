@@ -22,16 +22,23 @@ ToolBar {
         anchors.bottomMargin: CmnCfg.smallMargin
         color: CmnCfg.palette.iconFill
         imageSource: "qrc:/back-arrow-icon.svg"
-        onTapped: mainView.pop()
+        onTapped: {
+            if (chatBar.state === "search")
+                chatBar.state = "default"
+            else
+                mainView.pop()
+        }
     }
 
     RowLayout {
         id: searchRow
-        anchors.left: backButton.right
-        anchors.leftMargin: CmnCfg.smallMargin
-        anchors.rightMargin: CmnCfg.smallMargin
-        anchors.right: searchExitButton.left
-        anchors.verticalCenter: parent.verticalCenter
+        anchors {
+            left: backButton.right
+            leftMargin: CmnCfg.smallMargin
+            right: parent.right
+            rightMargin: CmnCfg.defaultMargin
+            verticalCenter: parent.verticalCenter
+        }
         Label {
             Layout.alignment: Qt.AlignLeft
             Layout.topMargin: CmnCfg.microMargin
@@ -67,6 +74,7 @@ ToolBar {
             }
             font.pixelSize: CmnCfg.chatTextSize
         }
+
         Label {
             property int searchIndex: ownedMessages.searchNumMatches
                                       > 0 ? ownedMessages.searchIndex : 0
@@ -81,6 +89,7 @@ ToolBar {
             color: CmnCfg.palette.white
             verticalAlignment: TextInput.AlignBottom
         }
+
         AnimIconButton {
             id: back
             imageSource: "qrc:/up-chevron-icon.svg"
@@ -106,6 +115,16 @@ ToolBar {
 
             onTapped: chatList.positionViewAtIndex(
                           ownedMessages.nextSearchMatch(), ListView.Center)
+        }
+
+        AnimIconButton {
+            id: clearButton
+            imageSource: "qrc:/x-icon.svg"
+            iconSize: CmnCfg.units.dp(20)
+            color: CmnCfg.palette.iconFill
+            Layout.alignment: Qt.AlignVCenter
+            visible: (chatBar.state === "search" && searchField.text !== "")
+            onTapped: searchField.text = ""
         }
     }
 
@@ -135,16 +154,16 @@ ToolBar {
         }
     }
 
-    AnimIconButton {
-        id: searchExitButton
-        anchors.verticalCenter: parent.verticalCenter
-        anchors.right: parent.right
-        anchors.rightMargin: CmnCfg.smallMargin
-        color: CmnCfg.palette.iconFill
-        imageSource: "qrc:/x-icon.svg"
-        visible: chatBar.state === "search"
-        onTapped: chatBar.state = "default"
-    }
+//    AnimIconButton {
+//        id: clearButton
+//        anchors.verticalCenter: parent.verticalCenter
+//        anchors.right: parent.right
+//        anchors.rightMargin: CmnCfg.smallMargin
+//        color: CmnCfg.palette.iconFill
+//        imageSource: "qrc:/x-icon.svg"
+//        visible: chatBar.state === "search"
+//        onTapped: chatBar.state = "default"
+//    }
 
     Rectangle {
         height: 1
