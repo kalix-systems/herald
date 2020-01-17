@@ -69,7 +69,6 @@ Page {
         Contacts.ContactViewMain {}
     }
 
-
     Router {
         id: appRouter
         stack: appLoader.item.stackView

@@ -21,7 +21,7 @@ Page {
         anchors {
             horizontalCenter: newAccButton.horizontalCenter
             bottom: serverAddrTextField.top
-            bottomMargin: CmnCfg.units.dp(30)
+            bottomMargin: CmnCfg.units.dp(15)
         }
     }
 
@@ -30,7 +30,7 @@ Page {
         anchors {
             horizontalCenter: newAccButton.horizontalCenter
             bottom: serverPortTextField.top
-            bottomMargin: CmnCfg.units.dp(30)
+            bottomMargin: CmnCfg.units.dp(15)
         }
         width: parent.width - 2 * CmnCfg.megaMargin
         placeholderText: qsTr("Server address")
@@ -58,7 +58,7 @@ Page {
         anchors {
             horizontalCenter: parent.horizontalCenter
             bottom: connectAccountButton.top
-            bottomMargin: CmnCfg.units.dp(30)
+            bottomMargin: CmnCfg.units.dp(15)
         }
 
         onClicked: {
@@ -77,7 +77,7 @@ Page {
         anchors {
             horizontalCenter: parent.horizontalCenter
             bottom: registrationFailureMessage.top
-            bottomMargin: CmnCfg.units.dp(30)
+            bottomMargin: CmnCfg.units.dp(15)
         }
 
         onClicked: {

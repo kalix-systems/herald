@@ -15,6 +15,15 @@ Column {
     property string chatName: 'conversation'
     width: parent.width
     spacing: 0
+
+    Connections {
+        target: mobHelper
+        onFileChosen: {
+            ownedMessages.builder.addAttachment(Herald.utils.stripUrlPrefix(
+                                                    filename))
+        }
+    }
+
     Loader {
         id: replyLoader
         width: parent.width
