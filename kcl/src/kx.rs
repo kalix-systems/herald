@@ -101,3 +101,23 @@ impl KeyPair {
         hasher.finalize_into(secret_buf);
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn symmetric_kx_is_symmetric() {
+        crate::init();
+        let alice = KeyPair::gen_new();
+        let bob = KeyPair::gen_new();
+
+        let mut alice_buf = [0u8; 32];
+        let mut bob_buf = [0u8; 32];
+
+        alice.symmetric_kx_into(bob.public, &mut alice_buf);
+        bob.symmetric_kx_into(alice.public, &mut bob_buf);
+
+        assert_eq!(alice_buf, bob_buf);
+    }
+}

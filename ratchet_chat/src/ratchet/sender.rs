@@ -26,7 +26,7 @@ impl Ratchet {
     }
 
     pub fn gen_new(generation: u32) -> Self {
-        let base_key = hash::Key::new();
+        let base_key = hash::Key::gen_new();
 
         let mut rkey_buf = [0u8; RATCHET_KEY_LEN];
         base_key.hash_into(&mut rkey_buf, &generation.to_le_bytes());

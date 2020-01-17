@@ -1,5 +1,8 @@
 use super::*;
-use std::collections::{HashMap, HashSet};
+use std::{
+    collections::{HashMap, HashSet},
+    convert::TryInto,
+};
 
 #[derive(Debug, Default)]
 pub struct Stores {
@@ -185,7 +188,7 @@ impl PendingStore for Stores {
         &mut self,
         id: PayloadId,
         payload: Payload,
-        to: &Vec<sig::PublicKey>,
+        to: &[sig::PublicKey],
     ) -> Result<(), Self::Error> {
         let (_, by_id) = self
             .pending_by_id
@@ -227,4 +230,108 @@ impl PendingStore for Stores {
 }
 
 #[test]
-fn init_recv() {}
+fn init_recv() {
+    kcl::init();
+
+    let alice = sig::KeyPair::gen_new();
+    let alice_gid = GlobalId {
+        did: *alice.public(),
+        uid: "alice".try_into().expect("failed to make alice uid"),
+    };
+    let mut alice_store = Stores::default();
+    let alice_signed = sig::sign_ser(&alice, alice_gid.uid);
+    alice_store
+        .start_sigchain(alice_signed)
+        .expect("failed to create alice sigchain");
+
+    let bob = sig::KeyPair::gen_new();
+    let mut bob_store = Stores::default();
+    let bob_gid = GlobalId {
+        did: *bob.public(),
+        uid: "bob".try_into().expect("failed to make bob uid"),
+    };
+    let bob_signed = sig::sign_ser(&bob, bob_gid.uid);
+    bob_store
+        .start_sigchain(bob_signed)
+        .expect("failed to create bob sigchain");
+
+    // now alice gets bob's keys from the server
+    alice_store
+        .start_sigchain(bob_signed)
+        .expect("failed to create bob sigchain for alice");
+
+    let msgs = prepare_send_to_user(&mut alice_store, &alice, bob_gid.uid, Payload::Noop)
+        .expect("failed to prepare messages");
+
+    assert_eq!(msgs.len(), 1);
+    let (did, msg) = msgs.into_iter().next().unwrap();
+    assert_eq!(did, bob_gid.did);
+
+    let MsgResult {
+        ack,
+        forward,
+        output,
+        response,
+    } = handle_incoming(&mut bob_store, &bob, alice_gid, msg)
+        .expect("failed to handle init msg from alice");
+
+    assert!(ack.is_some());
+    assert!(forward.is_none());
+    assert!(output.is_none());
+    assert!(response.is_none());
+
+    // now bob requests keys from the server for alice, which we simulate by magically giving them to him
+    bob_store
+        .start_sigchain(alice_signed)
+        .expect("failed to create sigchain for alice in bob store");
+
+    let bob_ack = Msg::Ack(ack.unwrap());
+
+    let MsgResult {
+        ack,
+        forward,
+        output,
+        response,
+    } = handle_incoming(&mut alice_store, &alice, bob_gid, bob_ack)
+        .expect("alice failed to handle ack from bob");
+
+    assert!(ack.is_none());
+    assert!(forward.is_none());
+    assert!(output.is_none());
+    assert!(response.is_none());
+
+    let msgs = prepare_send_to_user(&mut bob_store, &bob, alice_gid.uid, Payload::Noop)
+        .expect("failed to prepare messages from bob");
+
+    assert_eq!(msgs.len(), 1);
+    let (did, msg) = msgs.into_iter().next().unwrap();
+    assert_eq!(did, alice_gid.did);
+
+    let MsgResult {
+        ack,
+        forward,
+        output,
+        response,
+    } = handle_incoming(&mut alice_store, &alice, bob_gid, msg)
+        .expect("alice failed to handle noop msg from bob");
+
+    assert!(ack.is_some());
+    assert!(forward.is_none());
+    assert!(output.is_none());
+    assert!(response.is_none());
+
+    let alice_ack = Msg::Ack(ack.unwrap());
+
+    let MsgResult {
+        ack,
+        forward,
+        output,
+        response,
+    } = handle_incoming(&mut bob_store, &bob, alice_gid, alice_ack)
+        .expect("bob failed to handle ack from alice");
+
+    assert!(ack.is_none());
+    assert!(forward.is_none());
+    assert!(output.is_none());
+    assert!(response.is_none());
+}
