@@ -41,20 +41,11 @@ Component {
             width: parent.width - CmnCfg.megaMargin
         }
 
-        Rectangle {
-            id: bigDivider
-            anchors.top: titleText.bottom
-            anchors.topMargin: CmnCfg.megaMargin
-            height: 1
-            width: parent.width
-            color: CmnCfg.palette.lightGrey
-        }
-
         //component for searching contacts to add
         ContactSearchComponent {
             id: groupSelectText
-            anchors.top: bigDivider.bottom
-            anchors.topMargin: 20
+            anchors.top: titleText.bottom
+            anchors.topMargin: CmnCfg.megaMargin
         }
 
         //create group button

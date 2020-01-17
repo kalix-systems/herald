@@ -4,10 +4,13 @@ import LibHerald 1.0
 
 Button {
     id: button
+
+    // whether this button has a light background with dark text
     property bool light: false
 
     property color bkgrndColor: light ? CmnCfg.palette.lightGrey : CmnCfg.palette.offBlack
     property color textColor: light ? CmnCfg.palette.black : CmnCfg.palette.white
+
     contentItem: Text {
         text: button.text
         font: CmnCfg.defaultFont

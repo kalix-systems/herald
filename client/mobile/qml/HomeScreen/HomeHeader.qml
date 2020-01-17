@@ -21,7 +21,7 @@ ToolBar {
         color: CmnCfg.palette.avatarColors[Herald.config.configColor]
         initials: Herald.config.name[0].toUpperCase()
         pfpPath: Utils.safeStringOrDefault(Herald.config.profilePicture, "")
-        size: CmnCfg.identityAvatarDiameter
+        size: CmnCfg.headerAvatarSize
         anchors.verticalCenter: parent.verticalCenter
         anchors.left: parent.left
         anchors.leftMargin: CmnCfg.defaultMargin

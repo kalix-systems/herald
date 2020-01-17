@@ -85,9 +85,6 @@ Item {
     /// standard toolbar height
     readonly property real toolbarHeight: units.dp(40)
 
-    /// logged-in user avatar size
-    readonly property real identityAvatarDiameter: units.dp(24)
-    readonly property real headerAvatarSize: units.dp(24)
     /// standard avatar size
     readonly property real avatarSize: units.dp(44)
     readonly property int headerAvatarSize: units.dp(24)

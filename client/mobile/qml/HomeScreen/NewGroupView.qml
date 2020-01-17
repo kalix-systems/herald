@@ -22,36 +22,11 @@ Page {
         color: CmnCfg.palette.white
     }
 
-    //    RowLayout {
-    //        anchors.fill: parent
-    //        Row {
-    //            Layout.alignment: Qt.AlignLeft
-    //            Layout.leftMargin: CmnCfg.units.dp(12)
-    //            spacing: CmnCfg.units.dp(16)
-    //            AnimIconButton {
-    //                id: backButton
-    //                color: CmnCfg.palette.iconFill
-    //                imageSource: "qrc:/back-arrow-icon.svg"
-    //                onTapped: mainView.pop(null)
-    //            }
-    //        }
-
-    //        Label {
-    //            id: stateLabel
-    //            text: qsTr("New group")
-    //            font {
-    //                pixelSize: CmnCfg.headerFontSize
-    //                family: CmnCfg.labelFont.name
-    //            }
-    //            Layout.alignment: Qt.AlignVCenter
-    //            color: CmnCfg.palette.iconFill
-    //        }
-    //    }
     ColumnLayout {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.top: parent.top
-        anchors.topMargin: CmnCfg.units.dp(40)
+        anchors.topMargin: CmnCfg.megaMargin
 
         GroupImageSelector {
             id: imageSelector
@@ -73,50 +48,22 @@ Page {
             Layout.fillWidth: parent
             Layout.leftMargin: CmnCfg.megaMargin
             Layout.rightMargin: CmnCfg.megaMargin
-        }
-
-        //TODO: This doesn't do anything yet
-        CheckBox {
-            topPadding: CmnCfg.units.dp(12)
-            text: qsTr("Enable channels")
-            font.family: CmnCfg.chatFont.name
-            checked: false
-            indicator.width: CmnCfg.units.dp(18)
-            indicator.height: CmnCfg.units.dp(18)
-            Layout.leftMargin: CmnCfg.megaMargin
-        }
-
-        Rectangle {
-            //anchors.top: topRect.bottom
-            id: bigDivider
-            height: 1
-            width: parent.width
-            color: CmnCfg.palette.black
+            Layout.topMargin: CmnCfg.defaultMargin
         }
 
         ContactsSearchComponent {
             id: groupSelectText
-
             Layout.alignment: Qt.AlignHCenter
         }
 
-        Button {
+        Imports.TextButton {
+            text: qsTr("CREATE")
+
             Layout.preferredWidth: CmnCfg.units.dp(80)
             Layout.preferredHeight: CmnCfg.units.dp(40)
             Layout.alignment: Qt.AlignRight
             Layout.rightMargin: CmnCfg.megaMargin
 
-            background: Rectangle {
-                anchors.fill: parent
-                color: CmnCfg.palette.offBlack
-            }
-
-            Text {
-                text: qsTr("CREATE")
-                anchors.centerIn: parent
-                color: CmnCfg.palette.white
-                font.family: CmnCfg.labelFont.name
-            }
             TapHandler {
                 onTapped: {
                     if (titleText.text === "") {
