@@ -23,6 +23,30 @@ Page {
             anchors.fill: parent
             contentHeight: wrapperCol.height
             clip: true
+
+            Loader {
+                id: colorLoader
+                active: false
+                width: active ? item.width : 0
+                height: width
+
+                anchors.centerIn: parent
+                sourceComponent: ColorPicker {
+
+                    id: colorpicker
+                    onClosed: colorLoader.active = false
+                    colorCallback: function () {
+                        if (userData === undefined)
+                            return
+                        var idx = Herald.users.indexById(userData.userId)
+
+                        if ((idx < 0) || (idx >= Herald.users.rowCount()))
+                            return
+
+                        Herald.users.setUserColor(idx, colorIndex)
+                    }
+                }
+            }
             Column {
                 id: wrapperCol
                 padding: CmnCfg.defaultMargin

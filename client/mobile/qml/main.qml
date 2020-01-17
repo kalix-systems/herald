@@ -18,6 +18,10 @@ ApplicationWindow {
         Component.onCompleted: set_status_bar_color(CmnCfg.palette.offBlack)
     }
 
+    EmojiPicker {
+        id: emojiPickerModel
+    }
+
     Component {
         id: connectDevicePage
         LoginPage.AssociateDevice {

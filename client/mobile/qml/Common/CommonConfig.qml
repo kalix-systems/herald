@@ -115,16 +115,28 @@ Item {
     /// user settable cfg
     readonly property int theme: 0
 
-    /// emoji skin color
-    Settings {
-        id: settings
-        property alias theme: cfg.theme
-    }
-
     Themes.MetaThemes {
         id: metaTheme
     }
     /// palette :
     readonly property QtObject palette: metaTheme.themes[theme]
     readonly property var avatarColors: palette.avatarColors
+
+    /// list of recent emojis
+    property var recentEmojis: []
+    /// fitzpatrick emoji swatch codes
+    readonly property var skinSwatchList: ["", "🏻", "🏼", "🏽", "🏾", "🏿"]
+    /// emoji skin color
+    property int skinSwatchIndex: 0
+
+    Settings {
+        id: settings
+        readonly property alias theme: cfg.palette
+        readonly property alias skinSwatchIndex: cfg.skinSwatchIndex
+        property string recentEmojisJson: "[]"
+
+        Component.onCompleted: {
+            recentEmojis = JSON.parse(recentEmojisJson)
+        }
+    }
 }

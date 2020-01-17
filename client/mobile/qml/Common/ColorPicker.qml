@@ -1,14 +1,13 @@
 import QtQuick 2.13
-import QtQuick.Controls 2.13
+import QtQuick.Controls 2.14
 import LibHerald 1.0
 import QtQuick.Layouts 1.12
 import QtQuick.Window 2.13
 import QtGraphicalEffects 1.0
 
-//TODO: Make Color Settings Exist
 Popup {
     id: colorWindow
-    width: 180
+    width: CmnCfg.units.dp(108)
     height: width
     property var colorCallback: function () {}
 
@@ -51,27 +50,26 @@ Popup {
         padding: 0
 
         Repeater {
-            model: CmnCfg.avatarColors
+            model: CmnCfg.palette.avatarColors
 
             Rectangle {
-                width: 48
+                id: colorDot
+                width: CmnCfg.units.dp(28)
                 height: width
-                color: !mouse.containsPress ? modelData : Qt.darker(modelData,
-                                                                    1.1)
                 radius: width / 2
-                border.width: mouse.containsMouse || mouse.containsPress ? 2 : 0
-                border.color: CmnCfg.palette.offBlack
+                color: modelData
 
-                MouseArea {
-                    id: mouse
-                    anchors.fill: parent
-                    cursorShape: Qt.PointingHandCursor
-                    hoverEnabled: true
-                    onClicked: {
+                TapHandler {
+                    id: tap
+                    onLongPressed: {
+
+                        colorDot.color = Qt.darker(modelData, 1.1)
+                    }
+
+                    onTapped: {
                         colorIndex = index
                         colorCallback()
 
-                        parent.border.width = 0
                         colorWindow.close()
                     }
                 }
