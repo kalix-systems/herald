@@ -74,7 +74,6 @@
         <file>Settings/SettingsComponents/Privacy.qml</file>
         <file>Settings/SettingsComponents/Profile.qml</file>
         <file>Settings/SettingsComponents/SettingsListItem.qml</file>
-        <file>Settings/SettingsComponents/Storage.qml</file>
         <file>Settings/SettingsPane.qml</file>
         <file>FileDialogWrapper.qml</file>
         <file>ChatBubble/ImageLayouts/FourImageLayout.qml</file>

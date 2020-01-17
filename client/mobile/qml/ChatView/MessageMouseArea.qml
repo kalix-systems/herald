@@ -16,6 +16,7 @@ MouseArea {
     onPressAndHold: {
         cb.hoverHighlight = true
         dropdown.activate()
+        chatList.closeDropdown()
     }
     onReleased: {
         cb.hoverHighlight = false
