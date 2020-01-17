@@ -125,9 +125,11 @@ impl State {
                 to_send.iter().map(|(p, _): &(Push, i64)| p),
             ))
             .await?;
+
             if rx.read_u8().await? != 1 {
-                Err(anyhow!("catchup failed").context(format!("{:x?}", pk)))?;
+                return Err(anyhow!("catchup failed").context(format!("{:x?}", pk)));
             }
+
             self.new_connection()
                 .await?
                 .del_pending(
@@ -203,14 +205,16 @@ impl KrpcServer<HeraldProtocol> for State {
         match catchup.await {
             Err(e) => {
                 sem.add_permits(usize::max_value());
-                self.active.remove(&meta.did).map(|(_, s)| s.interrupt());
+                if let Some((_, s)) = self.active.remove(&meta.did) {
+                    s.interrupt();
+                }
                 Err(e)
             }
             Ok(()) => {
                 sem.add_permits(1);
-                self.active.async_get_mut(meta.did).await.map(|mut s| {
+                if let Some(mut s) = self.active.async_get_mut(meta.did).await {
                     s.ready();
-                });
+                }
                 Ok(output)
             }
         }
@@ -238,7 +242,7 @@ impl KrpcServer<HeraldProtocol> for State {
             Ok(match req {
                 Request::GetSigchain(u) => Response::GetSigchain(self.get_sigchain(u).await?),
                 Request::RecipExists(r) => Response::RecipExists(self.recip_exists(r).await?),
-                Request::NewSig(n) => Response::NewSig(self.new_sig(n).await?),
+                Request::NewSig(n) => Response::NewSig(self.new_sig(*n).await?),
                 Request::NewPrekey(keys) => Response::NewPrekey(self.new_prekeys(keys).await?),
                 Request::GetPrekey(keys) => Response::GetPrekey(self.get_prekeys(keys).await?),
                 Request::Push(push::Req { to, msg }) => {
@@ -255,6 +259,8 @@ impl KrpcServer<HeraldProtocol> for State {
         &self,
         gid: Self::ConnInfo,
     ) {
-        self.active.remove(&gid.did).map(|(_, s)| s.interrupt());
+        if let Some((_, s)) = self.active.remove(&gid.did) {
+            s.interrupt()
+        }
     }
 }

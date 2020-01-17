@@ -52,7 +52,7 @@ pub mod recip_exists {
 pub mod new_sig {
     use super::*;
 
-    pub type Req = Signed<sig::SigUpdate>;
+    pub type Req = Box<Signed<sig::SigUpdate>>;
     pub type Res = PKIResponse;
 }
 
@@ -98,7 +98,7 @@ pub mod push {
 }
 
 macro_rules! proto_enum {
-    ($name:ident, $inner:ident, [ $($extra:tt)* ]) => {
+    ($name:ident, $inner:ident, | $($extra:tt)* ) => {
         #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
         pub enum $name {
             GetSigchain(get_sigchain::$inner),
@@ -115,9 +115,9 @@ macro_rules! proto_enum {
         }
     };
     ($name:ident, $inner:ident) => {
-        proto_enum!($name,$inner,[]);
+        proto_enum!($name,$inner,|);
     };
 }
 
 proto_enum!(Request, Req);
-proto_enum!(Response, Res, [Err(String)]);
+proto_enum!(Response, Res, | Err(String));
