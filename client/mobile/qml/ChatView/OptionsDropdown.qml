@@ -14,11 +14,21 @@ Rectangle {
     color: CmnCfg.palette.offBlack
     onActivate: height = 50
     onDeactivate: height = 0
+    height: 0
+    property bool active: height > 0
 
     Behavior on height {
         NumberAnimation {
             easing.type: Easing.InOutQuad
             duration: 100
+        }
+    }
+
+    Connections {
+        target: chatList
+        onCloseDropdown: {
+            if (active)
+                deactivate()
         }
     }
 

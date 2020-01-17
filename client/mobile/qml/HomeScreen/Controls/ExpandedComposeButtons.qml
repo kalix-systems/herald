@@ -96,7 +96,7 @@ Column {
             anchors.right: parent.left
             anchors.verticalCenter: parent.verticalCenter
             anchors.rightMargin: CmnCfg.defaultMargin
-            text: qsTr("Message existing conversation")
+            text: qsTr("Send a message")
             font.pointSize: 12
             padding: CmnCfg.smallMargin
             background: Rectangle {

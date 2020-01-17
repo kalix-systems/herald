@@ -106,12 +106,15 @@ Rectangle {
     Button {
         id: receipt
         anchors.right: parent.right
+        anchors.rightMargin: CmnCfg.smallMargin
         anchors.bottom: parent.bottom
-        anchors.margins: CmnCfg.smallMargin
 
+        anchors.bottomMargin: (bubbleIndex === 0) ? CmnCfg.smallMargin
+                                                    + (CmnCfg.typeMargin - CmnCfg.microMargin
+                                                       * 1.5) : CmnCfg.smallMargin
         icon.source: receiptImage
-        icon.height: 16
-        icon.width: 16
+        icon.height: CmnCfg.units.dp(12)
+        icon.width: CmnCfg.units.dp(12)
         icon.color: CmnCfg.palette.iconMatte
         padding: 0
         background: Item {}
@@ -130,7 +133,13 @@ Rectangle {
         spacing: CmnCfg.smallMargin
         topPadding: isHead ? CmnCfg.smallMargin : CmnCfg.smallMargin
         leftPadding: CmnCfg.smallMargin
-        bottomPadding: isTail ? CmnCfg.defaultMargin : CmnCfg.smallMargin
+        bottomPadding: {
+            if (bubbleIndex === 0) {
+                return CmnCfg.defaultMargin + (CmnCfg.typeMargin - CmnCfg.microMargin * 1.5)
+            }
+
+            isTail ? CmnCfg.defaultMargin : CmnCfg.smallMargin
+        }
         Text {
             text: friendlyTimestamp
             font.family: CmnCfg.chatFont.name

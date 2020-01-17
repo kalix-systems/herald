@@ -10,8 +10,8 @@ ToolButton {
     }
     property string imageSource: ""
     property color color: QmlCfg.palette.iconMatte
-    property size iconSize: Qt.size(QmlCfg.iconSizes.small,
-                                    QmlCfg.iconSizes.small)
+    property int iconSize: CmnCfg.iconSize
+
     background: Rectangle {
         id: splash
         color: QmlCfg.palette.iconMatte
@@ -29,8 +29,8 @@ ToolButton {
 
     icon.source: imageSource
     icon.color: color
-    icon.width: iconSize.width
-    icon.height: iconSize.height
+    icon.width: iconSize
+    icon.height: iconSize
 
     ParallelAnimation {
         id: tapAnim
