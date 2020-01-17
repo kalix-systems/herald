@@ -32,7 +32,12 @@ pub trait SigStore: StoreLike {
     fn active_keys(
         &mut self,
         of: UserId,
-    ) -> Result<Vec<sig::PublicKey>, Self::Error>;
+    ) -> Result<Vec<sig::PublicKey>, Self::Error> {
+        Ok(self
+            .get_sigchain(of)?
+            .map(|s| s.active_keys().into_iter().collect())
+            .unwrap_or(vec![]))
+    }
 
     fn key_is_valid(
         &mut self,
@@ -86,9 +91,4 @@ pub trait PendingStore: StoreLike {
         id: PayloadId,
         to: sig::PublicKey,
     ) -> Result<(), Self::Error>;
-
-    fn get_pending_to(
-        &mut self,
-        to: sig::PublicKey,
-    ) -> Result<Vec<(PayloadId, Payload)>, Self::Error>;
 }

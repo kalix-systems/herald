@@ -255,7 +255,7 @@ pub mod sig {
                 .1
         }
 
-        pub fn active_keys(&self) -> Vec<sig::PublicKey> {
+        pub fn active_keys(&self) -> std::collections::HashSet<sig::PublicKey> {
             let mut keys = std::collections::HashSet::new();
             keys.insert(*self.initial.signed_by());
             for update in self.sig_chain.iter() {
@@ -268,7 +268,7 @@ pub mod sig {
                     }
                 }
             }
-            keys.into_iter().collect()
+            keys
         }
     }
 }

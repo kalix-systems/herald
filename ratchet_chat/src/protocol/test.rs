@@ -1,12 +1,13 @@
 use super::*;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct Stores {
     ratchets: HashMap<sig::PublicKey, dr::DoubleRatchet>,
     sigs: HashMap<UserId, sig::SigChain>,
-    convos: HashMap<ConversationId, UserId>,
-    pending: HashMap<sig::PublicKey, HashMap<PayloadId, Payload>>,
+    convos: HashMap<ConversationId, HashSet<UserId>>,
+    pending_by_id: HashMap<PayloadId, (Payload, HashSet<sig::PublicKey>)>,
+    pending_by_to: HashMap<sig::PublicKey, HashSet<PayloadId>>,
     keys: HashMap<kx::PublicKey, HashMap<dr::Counter, aead::Key>>,
 }
 
@@ -66,7 +67,7 @@ impl RatchetStore for Stores {
         &mut self,
         with: sig::PublicKey,
     ) -> Result<Option<dr::DoubleRatchet>, Self::Error> {
-        todo!()
+        Ok(self.ratchets.get(&with).cloned())
     }
 
     fn store_ratchet(
@@ -74,16 +75,22 @@ impl RatchetStore for Stores {
         with: sig::PublicKey,
         ratchet: dr::DoubleRatchet,
     ) -> Result<(), Self::Error> {
-        todo!()
+        self.ratchets.insert(with, ratchet);
+        Ok(())
     }
 }
 
 impl SigStore for Stores {
     fn start_sigchain(
         &mut self,
-        init: Signed<UserId>,
+        initial: Signed<UserId>,
     ) -> Result<(), Self::Error> {
-        todo!()
+        let sigchain = sig::SigChain {
+            initial,
+            sig_chain: vec![],
+        };
+        self.sigs.insert(*initial.data(), sigchain);
+        Ok(())
     }
 
     fn extend_sigchain(
@@ -91,21 +98,17 @@ impl SigStore for Stores {
         from: UserId,
         update: Signed<sig::SigUpdate>,
     ) -> Result<(), Self::Error> {
-        todo!()
+        if let Some(s) = self.sigs.get_mut(&from) {
+            s.sig_chain.push(update);
+        }
+        Ok(())
     }
 
     fn get_sigchain(
         &mut self,
         of: UserId,
     ) -> Result<Option<sig::SigChain>, Self::Error> {
-        todo!()
-    }
-
-    fn active_keys(
-        &mut self,
-        of: UserId,
-    ) -> Result<Vec<sig::PublicKey>, Self::Error> {
-        todo!()
+        Ok(self.sigs.get(&of).cloned())
     }
 
     fn key_is_valid(
@@ -113,11 +116,20 @@ impl SigStore for Stores {
         key: sig::PublicKey,
         valid_for: UserId,
     ) -> Result<bool, Self::Error> {
-        todo!()
+        if let Some(chain) = self.sigs.get(&valid_for) {
+            Ok(chain.active_keys().contains(&key))
+        } else {
+            Ok(false)
+        }
     }
 
     fn all_active_keys(&mut self) -> Result<Vec<sig::PublicKey>, Self::Error> {
-        todo!()
+        let keys = self
+            .sigs
+            .values()
+            .flat_map(|chain| chain.active_keys().into_iter())
+            .collect();
+        Ok(keys)
     }
 }
 impl ConversationStore for Stores {
@@ -126,7 +138,11 @@ impl ConversationStore for Stores {
         cid: ConversationId,
         members: Vec<UserId>,
     ) -> Result<(), Self::Error> {
-        todo!()
+        let c = self.convos.entry(cid).or_default();
+        for member in members {
+            c.insert(member);
+        }
+        Ok(())
     }
 
     fn left_convo(
@@ -134,14 +150,21 @@ impl ConversationStore for Stores {
         cid: ConversationId,
         from: UserId,
     ) -> Result<(), Self::Error> {
-        todo!()
+        if let Some(c) = self.convos.get_mut(&cid) {
+            c.remove(&from);
+        }
+        Ok(())
     }
 
     fn get_members(
         &mut self,
         cid: ConversationId,
     ) -> Result<Vec<UserId>, Self::Error> {
-        todo!()
+        Ok(self
+            .convos
+            .get(&cid)
+            .map(|c| c.iter().copied().collect())
+            .unwrap_or(vec![]))
     }
 
     fn member_of(
@@ -149,7 +172,11 @@ impl ConversationStore for Stores {
         cid: ConversationId,
         uid: UserId,
     ) -> Result<bool, Self::Error> {
-        todo!()
+        Ok(self
+            .convos
+            .get(&cid)
+            .map(|c| c.contains(&uid))
+            .unwrap_or(false))
     }
 }
 
@@ -160,14 +187,22 @@ impl PendingStore for Stores {
         payload: Payload,
         to: &Vec<sig::PublicKey>,
     ) -> Result<(), Self::Error> {
-        todo!()
+        let (_, by_id) = self
+            .pending_by_id
+            .entry(id)
+            .or_insert((payload, HashSet::new()));
+        for key in to {
+            self.pending_by_to.entry(*key).or_default().insert(id);
+            by_id.insert(*key);
+        }
+        Ok(())
     }
 
     fn get_pending_payload(
         &mut self,
         id: PayloadId,
     ) -> Result<Option<Payload>, Self::Error> {
-        todo!()
+        Ok(self.pending_by_id.get(&id).map(|(p, _)| p.clone()))
     }
 
     fn del_pending(
@@ -175,14 +210,19 @@ impl PendingStore for Stores {
         id: PayloadId,
         to: sig::PublicKey,
     ) -> Result<(), Self::Error> {
-        todo!()
-    }
-
-    fn get_pending_to(
-        &mut self,
-        to: sig::PublicKey,
-    ) -> Result<Vec<(PayloadId, Payload)>, Self::Error> {
-        todo!()
+        if let Some(pends) = self.pending_by_to.get_mut(&to) {
+            pends.remove(&id);
+            if pends.is_empty() {
+                self.pending_by_to.remove(&to);
+            }
+        }
+        if let Some((_, by_id)) = self.pending_by_id.get_mut(&id) {
+            by_id.remove(&to);
+            if by_id.is_empty() {
+                self.pending_by_id.remove(&id);
+            }
+        }
+        Ok(())
     }
 }
 
