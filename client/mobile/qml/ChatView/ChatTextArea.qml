@@ -4,6 +4,8 @@ import QtQuick.Controls 2.13
 import "qrc:/imports/ChatBubble" as CB
 import LibHerald 1.0
 import "../Common"
+import Qt.labs.platform 1.1
+import QtQuick.Dialogs 1.3
 
 Column {
     id: chatRowLayout
@@ -24,14 +26,28 @@ Column {
         }
     }
 
-    Loader {
-        id: replyLoader
-        width: parent.width
+    Column {
+
+        anchors.left: parent.left
+        anchors.right: parent.right
         anchors.margins: CmnCfg.smallMargin
-        height: item ? item.height : 0
-        active: ownedMessages.builder.isReply
-        sourceComponent: CB.ComposeReplyComponent {
-            builderData: ownedMessages.builder
+        topPadding: replyLoader.height > 0 ? CmnCfg.microMargin : 0
+        Loader {
+            id: replyLoader
+            width: parent.width
+            height: item ? item.height : 0
+            active: ownedMessages.builder.isReply
+            sourceComponent: CB.ComposeReplyComponent {
+                builderData: ownedMessages.builder
+            }
+        }
+
+        Loader {
+            id: imageLoader
+            width: parent.width
+            height: item ? item.height : 0
+            active: ownedMessages.builder.hasMediaAttachment
+            sourceComponent: ImageAttachments {}
         }
     }
 
@@ -68,20 +84,23 @@ Column {
             AnimIconButton {
                 color: CmnCfg.palette.black
                 imageSource: "qrc:/camera-icon.svg"
-                onTapped: if (Qt.platform.os === "ios")
-                              mobHelper.launch_camera_dialog()
+                onTapped: {
+                    if (Qt.platform.os === "ios")
+                        return mobHelper.launch_camera_dialog()
+                }
             }
             AnimIconButton {
                 color: CmnCfg.palette.black
                 onTapped: if (send) {
                               Qt.inputMethod.commit()
-                              ownedMessages.builder.body = cta.text
+                              ownedMessages.builder.body = cta.text.trim()
                               cta.focus = true
                               ownedMessages.builder.finalize()
                               cta.clear()
                           } else {
-                              if (Qt.platform.os === "ios")
-                                  mobHelper.launch_file_picker()
+                              if (Qt.platform.os === "ios") {
+                                  return mobHelper.launch_file_picker()
+                              }
                           }
 
                 imageSource: send ? "qrc:/send-icon.svg" : "qrc:/plus-icon.svg"

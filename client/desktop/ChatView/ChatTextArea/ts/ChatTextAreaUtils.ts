@@ -20,7 +20,7 @@ export function enterKeyHandler(
   }
 
   // clear before positional reset
-  const text = target.text;
+  const text = target.text.trim();
   target.clear();
 
   builder.body = text;

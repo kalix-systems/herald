@@ -41,8 +41,16 @@ Rectangle {
 
         CMN.AnimIconButton {
             icon.color: CmnCfg.palette.white
-            onTapped: deactivate()
-            imageSource: "qrc:/x-icon.svg"
+            imageSource: "qrc:/reply-icon.svg"
+            anchors.verticalCenter: parent.verticalCenter
+            onTapped: {
+                ownedMessages.builder.opId = msgId
+                deactivate()
+            }
+        }
+        CMN.AnimIconButton {
+            imageSource: "qrc:/emoticon-icon.svg"
+            icon.color: CmnCfg.palette.white
             anchors.verticalCenter: parent.verticalCenter
         }
 
@@ -56,20 +64,11 @@ Rectangle {
                 deactivate()
             }
         }
-
-        CMN.AnimIconButton {
-            imageSource: "qrc:/emoticon-icon.svg"
-            icon.color: CmnCfg.palette.white
-            anchors.verticalCenter: parent.verticalCenter
-        }
         CMN.AnimIconButton {
             icon.color: CmnCfg.palette.white
-            imageSource: "qrc:/reply-icon.svg"
+            onTapped: deactivate()
+            imageSource: "qrc:/x-icon.svg"
             anchors.verticalCenter: parent.verticalCenter
-            onTapped: {
-                ownedMessages.builder.opId = msgId
-                deactivate()
-            }
         }
     }
 }
