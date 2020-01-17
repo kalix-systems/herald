@@ -13,6 +13,15 @@ impl<'conn> std::ops::Deref for Conn<'conn> {
     }
 }
 
+macro_rules! ok_none {
+    ($maybe: expr) => {
+        match $maybe {
+            Some(val) => val,
+            None => return Ok(None),
+        }
+    };
+}
+
 macro_rules! sql {
     ($category:literal, $file:literal) => {
         include_str!(concat!(
@@ -28,18 +37,24 @@ macro_rules! sql {
 
 macro_rules! st {
     ($slf: ident, $category:literal, $file:literal) => {
-        w!($slf.prepare_cached(sql!($category, $file)))
+        coremacros::w!($slf.prepare_cached(sql!($category, $file)))
     };
 }
 
 impl StoreLike for Conn<'_> {
-    type Error = rusqlite::Error;
+    type Error = errors::Error;
 }
 
 mod conversation;
+mod errors;
+mod pending;
 mod ratchet;
+mod sigstore;
+
+pub use errors::Error;
 
 pub mod prelude {
+    pub use crate::errors::Error;
     pub use crate::Conn;
-    pub use ratchet_chat::protocol::{ConversationStore, RatchetStore};
+    pub use ratchet_chat::protocol::{ConversationStore, PendingStore, RatchetStore, SigStore};
 }

@@ -37,7 +37,7 @@ pub trait SigStore: StoreLike {
         Ok(self
             .get_sigchain(of)?
             .map(|s| s.active_keys().into_iter().collect())
-            .unwrap_or(vec![]))
+            .unwrap_or_default())
     }
 
     fn key_is_valid(
@@ -79,7 +79,7 @@ pub trait PendingStore: StoreLike {
         &mut self,
         id: PayloadId,
         payload: Payload,
-        to: &Vec<sig::PublicKey>,
+        to: &[sig::PublicKey],
     ) -> Result<(), Self::Error>;
 
     fn get_pending_payload(
