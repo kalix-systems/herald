@@ -113,9 +113,9 @@ Rectangle {
                                                     + (CmnCfg.typeMargin - CmnCfg.microMargin
                                                        * 1.5) : CmnCfg.smallMargin
         icon.source: receiptImage
-        icon.height: CmnCfg.units.dp(12)
-        icon.width: CmnCfg.units.dp(12)
-        icon.color: CmnCfg.palette.iconMatte
+        icon.height: CmnCfg.units.dp(14)
+        icon.width: CmnCfg.units.dp(14)
+        icon.color: CmnCfg.palette.darkGrey
         padding: 0
         background: Item {}
     }

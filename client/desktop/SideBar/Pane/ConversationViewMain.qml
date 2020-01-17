@@ -144,7 +144,7 @@ ListView {
                 minorTextColor: convoRectangle.state
                                 !== "" ? CmnCfg.palette.offBlack : CmnCfg.palette.medGrey
                 receiptFill: convoRectangle.state
-                             !== "" ? CmnCfg.palette.black : CmnCfg.palette.white
+                             !== "" ? CmnCfg.palette.offBlack : CmnCfg.palette.white
             }
 
             MouseArea {
@@ -156,7 +156,7 @@ ListView {
                 cursorShape: conversationList.currentIndex
                              === index ? Qt.ArrowCursor : Qt.PointingHandCursor
                 onClicked: {
-                    if (mouse.button == Qt.RightButton) {
+                    if (mouse.button === Qt.RightButton) {
                         !archiveView ? convOptionsMenu.open(
                                            ) : unarchiveMenu.open()
                     } else {
@@ -178,14 +178,6 @@ ListView {
                 text: "Archive"
                 onTriggered: {
                     conversationData.status = 1
-                    //                    if (Herald.utils.compareByteArray(
-                    //                                chatView.currentConvoId,
-                    //                                conversationData.conversationId)) {
-
-                    //                        conversationList.currentIndex = -1
-                    //                        chatView.sourceComponent = splash
-                    //                        chatView.currentConvoId = undefined
-                    //                    }
                 }
             }
         }

@@ -1,6 +1,6 @@
 import QtQuick 2.14
 import LibHerald 1.0
-import "../../EmojiKeyboard" as EK
+import "qrc:/imports/EmojiKeyboard" as EK
 import "../ChatTextArea/js/ChatTextAreaUtils.mjs" as JS
 
 Loader {
