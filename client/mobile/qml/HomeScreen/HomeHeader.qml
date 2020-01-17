@@ -15,12 +15,13 @@ ToolBar {
     background: Rectangle {
         color: CmnCfg.palette.offBlack
     }
+
     Avatar {
         id: avatar
         color: CmnCfg.palette.avatarColors[Herald.config.configColor]
         initials: Herald.config.name[0].toUpperCase()
         pfpPath: Utils.safeStringOrDefault(Herald.config.profilePicture, "")
-        size: CmnCfg.identityAvatarDiameter
+        size: CmnCfg.headerAvatarSize
         anchors.verticalCenter: parent.verticalCenter
         anchors.left: parent.left
         anchors.leftMargin: CmnCfg.defaultMargin
@@ -52,7 +53,7 @@ ToolBar {
             id: searchButton
             color: CmnCfg.palette.iconFill
             imageSource: "qrc:/search-icon.svg"
-            onTapped: mainView.push(globalSearchView)
+            onTapped: mainView.push(globalSearchView, StackView.Immediate)
         }
 
         AnimIconButton {
