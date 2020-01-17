@@ -30,8 +30,14 @@ ObjectiveUtils::ObjectiveUtils(){
 }
 
 - (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken {
+  NSUInteger len = deviceToken.length;
+  const char *buffer = reinterpret_cast<const char*>(deviceToken.bytes);
+  NSMutableString *hexString  = [NSMutableString stringWithCapacity:(len * 2)];
+  for (uint i = 0; i < len; ++i) {
+    [hexString appendFormat:@"%02.2hhx", buffer[i]];
+  }
     // code for shooting the server a device token
-    NSLog(@"%@", deviceToken);
+    NSLog(@"%@", hexString);
 }
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
