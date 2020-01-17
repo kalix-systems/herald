@@ -1,6 +1,5 @@
 use super::*;
 use arrayvec::ArrayString;
-use kcl::random::*;
 use kson::*;
 use std::convert::TryFrom;
 
@@ -64,22 +63,6 @@ impl TryFrom<&str> for UserId {
                 ArrayString::from(val).map_err(|_| InvalidUserId::CapacityError)?,
             ))
         }
-    }
-}
-
-#[derive(Hash, Debug, Clone, PartialEq, Eq, Copy, Ser, De)]
-/// Conversation ID
-pub struct ConversationId(pub UQ);
-
-impl ConversationId {
-    /// Creates a new random `ConversationId`
-    pub fn gen_new() -> Self {
-        Self(UQ::gen_new())
-    }
-
-    /// Returns byte slice from `ConversationId`
-    pub fn as_slice(&self) -> &[u8] {
-        self.0.as_ref()
     }
 }
 

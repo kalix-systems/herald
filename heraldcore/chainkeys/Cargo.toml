@@ -33,7 +33,7 @@ path = "../herald_ids"
 path = "../../kcl"
 
 [dependencies.platform_dirs]
-path             = "../platform_dirs"
+path = "../platform_dirs"
 
 
 [dependencies.rusqlite]

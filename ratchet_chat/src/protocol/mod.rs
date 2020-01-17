@@ -1,6 +1,7 @@
 use super::*;
 use crate::ratchet::double as dr;
 use herald_common::*;
+use herald_ids::ConversationId;
 use kcl::*;
 use std::error::Error as StdError;
 use thiserror::*;
