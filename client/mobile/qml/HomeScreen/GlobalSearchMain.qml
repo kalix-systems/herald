@@ -70,6 +70,65 @@ Page {
             }
         }
 
+        Repeater {
+            model: ListModel {
+                ListElement {
+                    flow: "group"
+                    iconSource: "qrc:/contacts-icon.svg"
+                    label: qsTr("Create new group")
+                }
+
+                ListElement {
+                    flow: "contact"
+                    iconSource: "qrc:/add-contact-icon.svg"
+                    label: qsTr("Message new contact")
+                }
+            }
+
+            Rectangle {
+                height: CmnCfg.avatarSize
+                width: parent.width
+
+                Button {
+                    id: createGroupIcon
+                    icon.source: model.iconSource
+                    icon.height: CmnCfg.iconSize
+                    icon.width: CmnCfg.iconSize
+                    anchors {
+                        left: parent.left
+                        leftMargin: CmnCfg.microMargin +
+                                    (CmnCfg.avatarSize - CmnCfg.iconSize) / 2
+                        verticalCenter: parent.verticalCenter
+                    }
+
+                    padding: 0
+                    background: Item {}
+                }
+
+                Label {
+                    text: model.label
+                    font.family: CmnCfg.chatFont.name
+                    font.pixelSize: CmnCfg.units.dp(15)
+                    font.weight: Font.Medium
+                    anchors {
+                        left: createGroupIcon.right
+                        leftMargin: (CmnCfg.avatarSize - CmnCfg.iconSize) / 2 +
+                                    CmnCfg.defaultMargin
+                        verticalCenter: parent.verticalCenter
+                    }
+                }
+
+                TapHandler {
+                    onTapped: {
+                        if (model.flow === "group")
+                            mainView.push(newGroupViewMain)
+                        if (model.flow === "contact")
+                            mainView.push(newContactViewMain)
+                    }
+                }
+            }
+        }
+
         Text {
             text: qsTr("Messages")
             anchors {

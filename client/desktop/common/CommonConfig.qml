@@ -14,9 +14,7 @@ Item {
     Imports.Units {
         id: units
     }
-    // TODO do we use this radius anywhere?
-    /// edge rounding for all rectangles that use the radius property
-    readonly property int radius: 10
+
     SystemPalette {
         id: sysPalette
         colorGroup: SystemPalette.Active
@@ -69,6 +67,7 @@ Item {
 
     // STANDARD COMPONENT SIZES
 
+    readonly property int iconSize: units.dp(18)
     /// standard avatar size
     readonly property int avatarSize: units.dp(38)
     readonly property int headerAvatarSize: units.dp(24)
