@@ -39,7 +39,7 @@ impl ConversationStore for Conn<'_> {
 
         let res = stmt.query_map_named(params, |row| row.get("user_id"));
 
-        w!(res).collect()
+        w!(res).map(|r| Ok(w!(r))).collect()
     }
 
     fn member_of(
@@ -50,6 +50,6 @@ impl ConversationStore for Conn<'_> {
         let mut stmt = st!(self, "members", "member_of");
         let params = np!("@conversation_id": cid, "@user_id": uid);
 
-        stmt.query_row_named(params, |row| row.get(0))
+        Ok(w!(stmt.query_row_named(params, |row| row.get(0))))
     }
 }

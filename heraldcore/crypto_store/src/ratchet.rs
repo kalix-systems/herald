@@ -2,7 +2,6 @@ use crate::*;
 use coremacros::w;
 use herald_common::{kson, sig};
 use ratchet_chat::{protocol::RatchetStore, ratchet::double as dr};
-use rusqlite::types::Type;
 
 impl<'conn> RatchetStore for Conn<'conn> {
     fn get_ratchet(
@@ -14,13 +13,9 @@ impl<'conn> RatchetStore for Conn<'conn> {
         let params = np!("@public_key": with.as_ref());
         let mut res = w!(stmt.query_map_named(params, |row| row.get::<_, Vec<u8>>("ratchet")));
 
-        let bytes = match w!(res.next().transpose()) {
-            Some(bytes) => bytes,
-            None => return Ok(None),
-        };
+        let bytes = ok_none!(w!(res.next().transpose()));
 
-        let ratchet = w!(kson::from_slice(&bytes)
-            .map_err(|e| Self::Error::FromSqlConversionFailure(0, Type::Blob, Box::new(e))));
+        let ratchet = w!(kson::from_slice(&bytes));
 
         Ok(Some(ratchet))
     }
