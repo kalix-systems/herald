@@ -5,7 +5,7 @@
     <desc>Created with Sketch.</desc>
     <g id="read-receipt-received-icon" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
         <rect id="Rectangle" x="0" y="0" width="24" height="24"></rect>
-        <path d="M14.8892749,6 L16.5,7.6093924 L5.76183286,18.3386751 L5.701,18.279 L5.69794813,18.2831224 L1,13.5890612 L2.61072507,11.9796688 L5.758,15.124 L14.8892749,6 Z" id="Combined-Shape" stroke="#000000" stroke-width="1.4"></path>
-        <polygon id="Polygon" stroke="#000000" stroke-width="1.4" points="21.3892749 6 23 7.6093924 12.2618329 18.3437836 10.6511078 16.7292827"></polygon>
+        <path d="M2.40187345,7.779869 L17.5816528,7.7881234 L17.5825951,10.779869 L5.40387345,10.772869 L5.40668039,15.2045996 L2.41029728,15.2036572 L2.40687345,10.770869 L2.40281579,10.7716146 L2.40187345,7.779869 Z" id="Combined-Shape" stroke="#000000" stroke-width="1.4" transform="translate(9.992234, 11.492234) scale(1, -1) rotate(45.000000) translate(-9.992234, -11.492234) "></path>
+        <polygon id="Combined-Shape" stroke="#000000" stroke-width="1.4" transform="translate(15.927856, 13.056613) scale(1, -1) rotate(45.000000) translate(-15.927856, -13.056613) " points="8.33749495 11.5566128 23.5172743 11.5648672 23.5182166 14.5566128 8.3384373 14.5483584"></polygon>
     </g>
 </svg>
