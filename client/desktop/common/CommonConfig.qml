@@ -107,10 +107,6 @@ Item {
     /// emoji skin color
     property int skinSwatchIndex: 0
 
-    Imports.Units {
-        id: importUnits
-    }
-
     Settings {
         id: settings
         readonly property alias theme: cfg.colorScheme
@@ -120,6 +116,12 @@ Item {
             recentEmojis = JSON.parse(recentEmojisJson)
         }
     }
+
+    Imports.Units {
+        id: importUnits
+    }
+
+
 
     readonly property int colorScheme: 0
 
