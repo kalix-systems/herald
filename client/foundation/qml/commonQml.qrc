@@ -85,5 +85,11 @@
         <file>Settings/SettingsComponents/MultipleDevice.qml</file>
         <file>Settings/SettingsComponents/NewDevicePage.qml</file>
         <file>TimerOptionsBuilder.qml</file>
+        <file>EmojiKeyboard/AnchorButton.qml</file>
+        <file>EmojiKeyboard/EmojiButton.qml</file>
+        <file>EmojiKeyboard/EmojiPicker.qml</file>
+        <file>EmojiKeyboard/PickerInterior.qml</file>
+        <file>EmojiKeyboard/SearchInteriorComponent.qml</file>
+        <file>EmojiKeyboard/StandardInterior.qml</file>
     </qresource>
 </RCC>

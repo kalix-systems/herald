@@ -7,7 +7,7 @@ import "./ChatTextArea" as CTA
 import "./Header" as Header
 import "./ChatTextArea/js/ChatTextAreaUtils.mjs" as TextJs
 import "js/KeyNavigation.mjs" as KeyNav
-import "../EmojiKeyboard" as EK
+import "qrc:/imports/EmojiKeyboard" as EK
 import "../common" as Common
 import "Popups" as Popups
 import QtQuick.Dialogs 1.2
