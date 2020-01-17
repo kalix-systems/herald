@@ -19,8 +19,8 @@ Column {
     Connections {
         target: mobHelper
         onFileChosen: {
-            ownedMessages.builder.addAttachment(Herald.utils.stripUrlPrefix(
-                                                    filename))
+            ownedMessages.builder.addAttachment(filename.slice(7,
+                                                               filename.length))
         }
     }
 
