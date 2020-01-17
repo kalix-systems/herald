@@ -67,7 +67,9 @@ Rectangle {
                 icon.color: CmnCfg.palette.white
                 anchors.verticalCenter: parent.verticalCenter
                 onTapped: {
+                    deactivate()
                     emoKeysPopup.active = true
+                    emojiPopup.open()
                 }
             }
 
@@ -88,12 +90,35 @@ Rectangle {
                 anchors.verticalCenter: parent.verticalCenter
             }
         }
-        Loader {
-            id: emoKeysPopup
-            active: false
-            height: active ? 250 : 0
+        Popup {
+            id: emojiPopup
+            parent: chatListView
             width: parent.width
-            sourceComponent: EmojiPicker {}
+            height: reactPopup.height
+            anchors.centerIn: parent
+            property alias reactPopup: emoKeysPopup
+            background: Item {}
+            modal: true
+
+            onClosed: {
+                reactPopup.active = false
+            }
+            Loader {
+                id: emoKeysPopup
+                active: false
+                height: active ? CmnCfg.units.dp(200) : 0
+                width: parent.width
+                sourceComponent: EmojiPicker {
+                    id: emojiPicker
+                    horizontal: true
+
+                    Component.onCompleted: {
+                        emojiPicker.send.connect(function (emoji) {
+                            ownedMessages.addReaction(index, emoji)
+                        })
+                    }
+                }
+            }
         }
     }
 }

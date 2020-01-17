@@ -55,6 +55,28 @@ ListView {
         }
     }
 
+    Popup {
+        id: emojiPopup
+        width: parent.contentWidth
+        height: reactPopup.height
+        property var chatBubble
+        anchors.centerIn: parent
+        property alias reactPopup: emoKeysPopup
+        background: Item {}
+        modal: true
+
+        onClosed: {
+            reactPopup.active = false
+        }
+        Loader {
+            id: emoKeysPopup
+            active: false
+            height: active ? CmnCfg.units.dp(200) : 0
+            width: parent.width
+            sourceComponent: EmojiPicker {}
+        }
+    }
+
     model: messageListModel
     // TODO: Delegate should just be the ChatBubble
     delegate: Column {
@@ -87,7 +109,7 @@ ListView {
             Component {
                 id: msgBubble
                 CB.ChatBubble {
-                    id: chatBubble
+                    id: bubbleActual
                     defaultWidth: chatListView.width
                     messageModelData: containerCol.messageModelData
                     convContainer: parent
@@ -95,7 +117,7 @@ ListView {
                     property Component infoPage: Component {
                         InfoPage {
                             members: convContent.members
-                            messageData: chatBubble.messageModelData
+                            messageData: bubbleActual.messageModelData
                         }
                     }
                 }

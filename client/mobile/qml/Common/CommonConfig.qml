@@ -17,6 +17,7 @@ Item {
         id: systemPalette
         colorGroup: SystemPalette.Active
     }
+    property alias settings: settings
 
     property bool themeIsDark: ((systemPalette.window.r / Qt.red + systemPalette.window.g / Qt.green
                                  + systemPalette.window.b / Qt.blue) / 256) < 0.5

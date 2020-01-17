@@ -1,4 +1,4 @@
-import QtQuick 2.0
+import QtQuick 2.14
 import QtQuick.Controls 2.12
 import LibHerald 1.0
 import QtGraphicalEffects 1.13
@@ -26,11 +26,29 @@ Flow {
                                 return reactionary === Herald.config.configId
                             }).length === 1
             }
+
+            //for mobile
+            TapHandler {
+
+                onTapped: {
+
+                    if (outboundReact) {
+                        return ownedConversation.removeReaction(
+                                    bubbleActual.bubbleIndex,
+                                    emojiModel[index]["content"])
+                    }
+                    return ownedConversation.addReaction(
+                                bubbleActual.bubbleIndex,
+                                emojiModel[index]["content"])
+                }
+            }
+
             MouseArea {
 
                 enabled: !bubbleRoot.moreInfo
                 anchors.fill: parent
                 hoverEnabled: true
+
                 onClicked: {
                     if (outboundReact) {
                         return ownedConversation.removeReaction(
@@ -85,7 +103,7 @@ Flow {
                     id: emoji
                     text: emojiModel[index]["content"]
                     color: outboundReact ? CmnCfg.palette.white : CmnCfg.palette.black
-                    font.pixelSize: CmnCfg.chatTextSize
+                    font.pixelSize: CmnCfg.minorTextSize
                 }
                 Label {
                     id: numLabel

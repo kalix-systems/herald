@@ -15,17 +15,27 @@ ListView {
     readonly property var emoji_boundaries: [0, emojiPickerModel.smileys_index, emojiPickerModel.nature_index, emojiPickerModel.food_index, emojiPickerModel.locations_index, emojiPickerModel.activities_index, emojiPickerModel.objects_index, emojiPickerModel.symbols_index, emojiPickerModel.flags_index, emojiPickerModel.rowCount(
             )]
 
+    id: list
     anchors.fill: parent
     boundsBehavior: Flickable.StopAtBounds
     boundsMovement: Flickable.StopAtBounds
     clip: true
-    ScrollBar.vertical: ScrollBar {}
+    ScrollBar.vertical: ScrollBar {
+        active: !maskShape.horizontal
+    }
+
+    snapMode: maskShape.horizontal ? ListView.SnapOneItem : ListView.NoSnap
+
     maximumFlickVelocity: 700
     flickDeceleration: emojiList.height * 10
     model: emoji_boundaries.length - 1 // the number of sections
+    orientation: maskShape.horizontal ? ListView.Horizontal : ListView.Vertical
+
+    highlightFollowsCurrentItem: true
     delegate: Column {
         spacing: 1
-        width: parent.width
+        width: visible ? list.width : 0
+
         Label {
             font {
                 family: CmnCfg.labelFont.name
@@ -42,8 +52,10 @@ ListView {
             readonly property bool recents: index == 0
             model: recents ? CmnCfg.recentEmojis : emoji_boundaries[index + 1]
                              - emoji_boundaries[index]
+
             width: parent.width
             height: rep.contentHeight
+
             cellWidth: parent.width / 10
             cellHeight: cellWidth
             property int base: emoji_boundaries[index]
