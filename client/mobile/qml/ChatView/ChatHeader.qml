@@ -26,10 +26,11 @@ ToolBar {
     }
 
     RowLayout {
+        id: searchRow
         anchors.left: backButton.right
         anchors.leftMargin: CmnCfg.smallMargin
         anchors.rightMargin: CmnCfg.smallMargin
-        anchors.right: parent.right
+        anchors.right: searchExitButton.left
         anchors.verticalCenter: parent.verticalCenter
         Label {
             Layout.alignment: Qt.AlignLeft
@@ -41,39 +42,130 @@ ToolBar {
             visible: chatBar.state !== "search"
         }
 
-        AnimIconButton {
-            id: searchButton
-            Layout.alignment: Qt.AlignRight
-            color: CmnCfg.palette.iconFill
-            imageSource: "qrc:/search-icon.svg"
-            visible: chatBar.state !== "search"
-            onTapped: chatBar.state = "search"
-        }
-
         BorderedTextField {
             id: searchField
             visible: chatBar.state === "search"
             enabled: visible
+            borderColor: "transparent"
             Layout.margins: CmnCfg.smallMargin
             Layout.topMargin: CmnCfg.microMargin
             Layout.fillWidth: true
             Layout.alignment: Qt.AlignCenter
+            placeholderText: qsTr("Search conversation")
             onVisibleChanged: if (visible)
                                   forceActiveFocus()
             onTextEdited: {
                 ownedMessages.searchPattern = text
+
+                const x = chatList.scrollBar.position
+                const y = chatList.scrollBar.size
+                ownedMessages.setSearchHint(x, y)
+                if (ownedMessages.searchNumMatches > 0) {
+                    chatList.positionViewAtIndex(ownedMessages.prevSearchMatch(
+                                                     ), ListView.Center)
+                }
             }
             font.pixelSize: CmnCfg.chatTextSize
         }
+        Label {
+            property int searchIndex: ownedMessages.searchNumMatches
+                                      > 0 ? ownedMessages.searchIndex : 0
+            property int searchNum: ownedMessages.searchNumMatches
+                                    > 0 ? ownedMessages.searchNumMatches : 0
+            bottomPadding: CmnCfg.units.dp(2)
+            text: searchIndex + "/" + searchNum
+            Layout.alignment: Qt.AlignVCenter
+            visible: (chatBar.state === "search"
+                      && ownedMessages.searchNumMatches > 0)
+            font: CmnCfg.defaultFont
+            color: CmnCfg.palette.white
+            verticalAlignment: TextInput.AlignBottom
+        }
+        AnimIconButton {
+            id: back
+            imageSource: "qrc:/up-chevron-icon.svg"
+            color: CmnCfg.palette.lightGrey
+            Layout.alignment: Qt.AlignVCenter
+            enabled: (chatBar.state === "search"
+                      && ownedMessages.searchNumMatches > 0)
+            visible: chatBar.state === "search"
+            opacity: enabled ? 1 : 0.5
+            onTapped: chatList.positionViewAtIndex(
+                          ownedMessages.prevSearchMatch(), ListView.Center)
+        }
 
         AnimIconButton {
-            id: searchExitButton
-            Layout.alignment: Qt.AlignRight
-            color: CmnCfg.palette.iconFill
-            imageSource: "qrc:/x-icon.svg"
+            id: forward
+            imageSource: "qrc:/down-chevron-icon.svg"
+            color: CmnCfg.palette.lightGrey
+            Layout.alignment: Qt.AlignVCenter
+            enabled: (chatBar.state === "search"
+                      && ownedMessages.searchNumMatches > 0)
             visible: chatBar.state === "search"
-            onTapped: chatBar.state = "default"
+            opacity: enabled ? 1 : 0.5
+
+            onTapped: chatList.positionViewAtIndex(
+                          ownedMessages.nextSearchMatch(), ListView.Center)
         }
+    }
+
+    Row {
+        anchors.right: parent.right
+        anchors.verticalCenter: parent.verticalCenter
+        anchors.rightMargin: CmnCfg.defaultMargin
+        spacing: CmnCfg.defaultMargin
+        layoutDirection: Qt.RightToLeft
+        visible: chatBar.state !== "search"
+
+        AnimIconButton {
+            id: timerButton
+            anchors.verticalCenter: parent.verticalCenter
+            imageSource: timerMenu.chosenTimer
+            color: "transparent"
+            topPadding: 1
+            onTapped: timerMenu.open()
+        }
+
+        AnimIconButton {
+            id: searchButton
+            anchors.verticalCenter: parent.verticalCenter
+            color: CmnCfg.palette.iconFill
+            imageSource: "qrc:/search-icon.svg"
+            onTapped: chatBar.state = "search"
+        }
+    }
+
+    AnimIconButton {
+        id: searchExitButton
+        anchors.verticalCenter: parent.verticalCenter
+        anchors.right: parent.right
+        anchors.rightMargin: CmnCfg.smallMargin
+        color: CmnCfg.palette.iconFill
+        imageSource: "qrc:/x-icon.svg"
+        visible: chatBar.state === "search"
+        onTapped: chatBar.state = "default"
+    }
+
+    Rectangle {
+        height: 1
+        color: CmnCfg.palette.lightGrey
+        visible: chatBar.state === "search"
+        anchors {
+            bottomMargin: CmnCfg.smallMargin + 1
+            bottom: parent.bottom
+            left: searchRow.left
+            leftMargin: CmnCfg.microMargin
+            right: searchRow.right
+        }
+    }
+
+    TimerOptions {
+        id: timerMenu
+        conversationItem: chatPage.convoItem
+    }
+
+    Component.onDestruction: {
+        ownedMessages.searchActive = false
     }
 
     states: [

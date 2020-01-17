@@ -10,6 +10,7 @@ ListView {
     property Messages messageListModel
     spacing: 0
     highlightFollowsCurrentItem: false
+    property alias scrollBar: chatScrollBarInner
 
     property NumberAnimation highlightAnimation: NumberAnimation {
         id: bubbleHighlightAnimation
