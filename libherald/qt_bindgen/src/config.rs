@@ -147,6 +147,9 @@ fn conversations() -> Object {
        matched: matched_item_prop(),
        picture: picture_item_prop().get_by_value(),
        conversationColor: color_item_prop(),
+
+       // 0 => not archived
+       // 1 => is archived
        status: ItemProp::new(QUint8).write(),
 
        lastMsgDigest: ItemProp::new(QString).get_by_value(),

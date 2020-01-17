@@ -12,7 +12,11 @@ import QtGraphicalEffects 1.0
 // contains a list of conversations by default
 Page {
     id: cvMainView
-    readonly property Component headerComponent: HomeHeader {}
+    readonly property Component headerComponent:
+        HomeHeader {
+            parentPage: cvMainView
+        }
+
     background: Rectangle {
         color: CmnCfg.palette.white
     }
@@ -51,6 +55,10 @@ Page {
                     id: convContent
                     conversationId: model.conversationId
                 }
+                visible: (cvMainView.state === "archiveState" &&
+                          model.status === 1) ||
+                         (cvMainView.state !== "archiveState" &&
+                          model.status === 0)
             }
             Connections {
                 target: appRoot.router
@@ -129,6 +137,10 @@ Page {
     states: [
         State {
             name: "default"
+            PropertyChanges {
+                target: buttonLoader
+                visible: true
+            }
         },
         State {
             name: "fabButtonState"
@@ -139,6 +151,13 @@ Page {
             PropertyChanges {
                 target: buttonLoader
                 sourceComponent: fab
+            }
+        },
+        State {
+            name: "archiveState"
+            PropertyChanges {
+                target: buttonLoader
+                visible: false
             }
         }
     ]
