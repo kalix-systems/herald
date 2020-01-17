@@ -51,8 +51,9 @@ Flow {
                 }
                 TapHandler {
                     onTapped: {
-                        drawer.userData = userData
-                        drawer.open()
+                        contactPage.userData = userData
+
+                        stackView.push(contactPage)
                     }
                 }
 

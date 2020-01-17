@@ -4,8 +4,6 @@ import QtQuick.Controls 2.13
 import "qrc:/imports/ChatBubble" as CB
 import LibHerald 1.0
 import "../Common"
-import Qt.labs.platform 1.1
-import QtQuick.Dialogs 1.3
 
 Column {
     id: chatRowLayout
