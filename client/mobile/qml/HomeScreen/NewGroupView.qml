@@ -91,6 +91,7 @@ Page {
                     }
 
                     Herald.conversationBuilder.finalize()
+                    // TODO this should be mainView.replace(<new group convo>)
                     mainView.pop()
                 }
             }

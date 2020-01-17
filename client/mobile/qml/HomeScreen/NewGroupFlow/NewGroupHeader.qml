@@ -15,7 +15,7 @@ ToolBar {
         id: backButton
         color: CmnCfg.palette.iconFill
         imageSource: "qrc:/back-arrow-icon.svg"
-        onTapped: mainView.pop(null)
+        onTapped: mainView.pop()
         anchors.verticalCenter: parent.verticalCenter
         anchors.left: parent.left
         anchors.leftMargin: CmnCfg.defaultMargin

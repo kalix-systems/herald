@@ -42,7 +42,7 @@ ToolBar {
         id: searchRow
         anchors.left: backButton.right
         anchors.leftMargin: CmnCfg.smallMargin
-        anchors.rightMargin: CmnCfg.smallMargin
+        anchors.rightMargin: CmnCfg.defaultMargin
         anchors.right: parent.right
         anchors.verticalCenter: parent.verticalCenter
         height: implicitHeight //searchField.height //parent.height - CmnCfg.microMargin
