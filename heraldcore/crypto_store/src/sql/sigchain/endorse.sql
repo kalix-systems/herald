@@ -7,7 +7,7 @@ INSERT INTO sigchain_endorsements (
     inner_signature,
     inner_signed_by,
 
-    user_id TEXT
+    user_id
 )
 VALUES (
     @outer_ts,
