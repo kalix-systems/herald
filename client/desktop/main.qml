@@ -2,6 +2,7 @@ import QtQuick 2.14
 import QtQuick.Window 2.14
 import QtQuick.Controls 2.14
 import LibHerald 1.0
+import Qt.labs.platform 1.1
 import "qrc:/imports/errors"
 import "ChatView/Popups" as CvPopups
 
@@ -16,6 +17,15 @@ ApplicationWindow {
 
     ErrorDialog {
         id: errPopup
+    }
+
+    SystemTrayIcon {
+        id: tray
+        icon.source: "qrc:/herald.png"
+        icon.mask: true
+        Component.onCompleted: {
+        show()
+    }
     }
 
     property alias ccMap: ccMap.map
