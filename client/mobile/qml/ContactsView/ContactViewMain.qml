@@ -38,7 +38,7 @@ Page {
             font.pixelSize: CmnCfg.chatTextSize
             font.weight: Font.Medium
             anchors.right: groupHeader.left
-            anchors.rightMargin: CmnCfg.largeMargin
+            anchors.rightMargin: CmnCfg.megaMargin
         }
 
         Text {
@@ -181,8 +181,7 @@ Page {
                     }
                 }
                 //common groups
-                CommonGroupsFlow {//   anchors.left: parent.horizontalCenter
-                }
+                CommonGroupsFlow {}
             }
         }
     }

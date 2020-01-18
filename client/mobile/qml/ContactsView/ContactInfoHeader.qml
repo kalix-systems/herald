@@ -32,5 +32,8 @@ ToolBar {
         font.family: CmnCfg.headerFont.family
         font.pixelSize: CmnCfg.headerFontSize
         anchors.leftMargin: CmnCfg.defaultMargin
+        anchors.right: parent.right
+        anchors.rightMargin: CmnCfg.defaultMargin
+        elide: Label.ElideRight
     }
 }
