@@ -53,8 +53,8 @@ Rectangle {
         id: timerButton
         source: timerMenu.chosenTimer
         fill: "transparent"
-        anchors.right: attachmentsButton.left
-        anchors.rightMargin: CmnCfg.smallMargin
+        anchors.left: parent.left
+        anchors.leftMargin: CmnCfg.smallMargin
         anchors.bottom: parent.bottom
         bottomPadding: CmnCfg.smallMargin * 0.5
         topPadding: 1
@@ -69,8 +69,8 @@ Rectangle {
 
     Imports.IconButton {
         id: emojiButton
-        anchors.left: parent.left
-        anchors.leftMargin: CmnCfg.smallMargin
+        anchors.right: attachmentsButton.left
+        anchors.rightMargin: CmnCfg.smallMargin
         anchors.bottom: parent.bottom
         bottomPadding: CmnCfg.smallMargin * 0.5
         source: "qrc:/emoticon-icon.svg"
@@ -81,16 +81,16 @@ Rectangle {
         id: containerCol
 
         anchors {
-            left: emojiButton.right
-            right: timerButton.left
+            left: timerButton.right
+            right: emojiButton.left
             leftMargin: CmnCfg.smallMargin * 2
             rightMargin: CmnCfg.smallMargin
             bottomMargin: CmnCfg.smallMargin * 0.5
         }
 
         topPadding: CmnCfg.smallMargin * 0.5
-        bottomPadding: CmnCfg.smallMargin * 0.5
 
+        //   bottomPadding: CmnCfg.units.dp(1)
         Column {
             width: textWrapperRect.width
             spacing: CmnCfg.smallMargin
@@ -171,8 +171,8 @@ Rectangle {
                 selectByMouse: true
                 wrapMode: TextArea.WrapAtWordBoundaryOrAnywhere
                 width: containerCol.width
-                topPadding: CmnCfg.units.dp(6)
-                bottomPadding: CmnCfg.units.dp(2)
+                topPadding: CmnCfg.units.dp(5)
+                bottomPadding: CmnCfg.units.dp(5)
                 rightPadding: CmnCfg.smallMargin
 
                 font.pixelSize: CmnCfg.chatTextSize

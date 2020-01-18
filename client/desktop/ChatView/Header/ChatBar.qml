@@ -67,8 +67,9 @@ ToolBar {
 
         Loader {
             id: searchLoader
+            active: false
             Layout.alignment: Qt.AlignLeft
-            height: parent.height
+            width: 0
         }
 
         Row {
@@ -152,17 +153,31 @@ ToolBar {
         }
     }
 
-    states: State {
-        name: "searchState"
+    states: [
+        State {
+            name: "searchState"
 
-        PropertyChanges {
-            target: searchButton
-            visible: false
-        }
+            PropertyChanges {
+                target: searchButton
+                visible: false
+            }
 
-        PropertyChanges {
-            target: searchLoader
-            sourceComponent: chatSearchComponent
+            PropertyChanges {
+                target: searchLoader
+                active: true
+                sourceComponent: chatSearchComponent
+            }
+        },
+
+        State {
+            name: "default"
+            PropertyChanges {
+                target: searchLoader
+                active: false
+                sourceComponent: undefined
+                width: 0
+                Layout.preferredWidth: 0
+            }
         }
-    }
+    ]
 }

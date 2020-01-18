@@ -80,7 +80,7 @@ Page {
     // having to use explicit x and y positioning
     Item {
         anchors {
-            left: parent.left
+            right: parent.right
             bottom: chatTextArea.top
             margins: 12
         }
