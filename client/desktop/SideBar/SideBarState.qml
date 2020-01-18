@@ -20,7 +20,6 @@ Item {
             PropertyChanges {
                 target: headerLoader
                 sourceComponent: altContextHeader
-                searchPlaceholder: qsTr("Search your conversations")
                 headerText: qsTr("Add contact")
             }
         },

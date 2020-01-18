@@ -29,16 +29,18 @@ Flickable {
     Column {
         id: wrapperCol
         width: parent.width
+        bottomPadding: CmnCfg.smallMargin
 
         Text {
             text: qsTr("Conversations")
             anchors.left: parent.left
             anchors.leftMargin: CmnCfg.smallMargin
             topPadding: CmnCfg.smallMargin
-            font.bold: true
             font.family: CmnCfg.chatFont.name
+            font.pixelSize: CmnCfg.defaultFontSize
             color: CmnCfg.palette.lightGrey
             visible: sideBarState.state === "globalSearch"
+            font.weight: Font.Medium
         }
 
         Loader {
@@ -49,6 +51,7 @@ Flickable {
                     id: convosLvComponent
                     model: Herald.conversations
                     state: sideBarBodyLoader.archiveState ? "archivestate" : ""
+                    height: sideBarFlowLoader.active ? 0 : contentHeight
                 }
             }
             width: parent.width
@@ -82,19 +85,15 @@ Flickable {
                 visible: sideBarState.state === "globalSearch"
                 height: CmnCfg.avatarSize
                 width: parent.width
-                color: hoverHandler.containsMouse ?
-                           CmnCfg.palette.lightGrey : "transparent"
+                color: hoverHandler.containsMouse ? CmnCfg.palette.lightGrey : "transparent"
 
                 Imports.IconButton {
                     id: createGroupIcon
                     icon.source: model.iconSource
-                    icon.color: hoverHandler.containsMouse ?
-                                    CmnCfg.palette.black :
-                                    CmnCfg.palette.iconFill
+                    icon.color: hoverHandler.containsMouse ? CmnCfg.palette.black : CmnCfg.palette.iconFill
                     anchors {
                         left: parent.left
-                        leftMargin: CmnCfg.smallMargin +
-                                    (CmnCfg.avatarSize - CmnCfg.iconSize) / 2
+                        leftMargin: CmnCfg.smallMargin + (CmnCfg.avatarSize - CmnCfg.iconSize) / 2
                         verticalCenter: parent.verticalCenter
                     }
 
@@ -105,15 +104,12 @@ Flickable {
                 Label {
                     text: model.label
                     font.family: CmnCfg.chatFont.name
-                    font.pixelSize: CmnCfg.entityLabelSize
+                    font.pixelSize: CmnCfg.defaultFontSize
                     font.weight: Font.Medium
-                    color: hoverHandler.containsMouse ?
-                               CmnCfg.palette.black :
-                               CmnCfg.palette.lightGrey
+                    color: hoverHandler.containsMouse ? CmnCfg.palette.black : CmnCfg.palette.lightGrey
                     anchors {
                         left: createGroupIcon.right
-                        leftMargin: (CmnCfg.avatarSize - CmnCfg.iconSize) / 2 +
-                                    CmnCfg.defaultMargin
+                        leftMargin: (CmnCfg.avatarSize - CmnCfg.iconSize) / 2 + CmnCfg.defaultMargin
                         verticalCenter: parent.verticalCenter
                     }
                 }
@@ -134,16 +130,18 @@ Flickable {
             anchors.left: parent.left
             anchors.leftMargin: CmnCfg.smallMargin
             topPadding: CmnCfg.smallMargin
-            font.bold: true
             font.family: CmnCfg.chatFont.name
             color: CmnCfg.palette.lightGrey
             visible: sideBarState.state === "globalSearch"
+            font.pixelSize: CmnCfg.defaultFontSize
+            font.weight: Font.Medium
         }
 
         Loader {
             id: messageSearchLoader
             width: parent.width
             property var searchModel
+            active: sideBarState.state === "globalSearchState"
 
             //model loaded into search view only in search state
             sourceComponent: Component {

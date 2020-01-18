@@ -23,7 +23,7 @@ Row {
             text: authorName
             font.weight: Font.Bold
             font.family: CmnCfg.chatFont.name
-            elideWidth: maxWidth
+            elideWidth: maxWidth - timeLabel.width - CmnCfg.megaMargin * 3
 
             elide: Text.ElideRight
         }
@@ -40,7 +40,6 @@ Row {
             id: time
             font.family: CmnCfg.chatFont.name
             elide: Text.ElideRight
-            elideWidth: maxWidth - authorLabel.width - timeLabel.width - CmnCfg.smallMargin * 3
         }
 
         padding: 0

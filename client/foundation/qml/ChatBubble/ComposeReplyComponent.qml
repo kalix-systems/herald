@@ -103,7 +103,7 @@ Rectangle {
 
     ChatBubble.BubbleLabel {
         id: label
-        topPadding: CmnCfg.smallMargin
+        //topPadding: CmnCfg.smallMargin
         anchors.left: accent.right
         anchors.leftMargin: CmnCfg.smallMargin
 

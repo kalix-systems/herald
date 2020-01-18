@@ -69,16 +69,11 @@ Popup {
                     }
                 }
 
-                IconButton {
-                    id: settingsButton
-                    fill: CmnCfg.palette.lightGrey
-                    source: "qrc:/options-icon.svg"
-                    anchors.verticalCenter: parent.verticalCenter
-                }
                 RowLayout {
                     spacing: 0
                     anchors.verticalCenter: parent.verticalCenter
                     height: parent.height
+                    id: searchRow
                     IconButton {
                         id: searchButton
                         property bool search: false
@@ -95,6 +90,7 @@ Popup {
                         selectByMouse: true
                         Layout.bottomMargin: CmnCfg.smallMargin
                         Layout.leftMargin: CmnCfg.smallMargin
+                        borderColor: "transparent"
                         onTextChanged: {
                             Qt.callLater(function (text) {
                                 Herald.users.filter = text
@@ -123,7 +119,9 @@ Popup {
                         Rectangle {
                             id: divider
                             anchors.bottom: parent.bottom
-                            width: searchX.width
+                            anchors.right: parent.right
+                            width: searchRow.width - searchButton.width - CmnCfg.units.dp(
+                                       6)
                             color: CmnCfg.palette.lightGrey
                             height: 1
                         }
