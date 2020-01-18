@@ -157,10 +157,13 @@ Popup {
                 color: CmnCfg.palette.offBlack
                 font.pixelSize: CmnCfg.defaultFontSize
                 font.weight: Font.Medium
+                anchors.right: groupHeader.left
+                anchors.rightMargin: CmnCfg.megaMargin
             }
 
             Text {
                 text: "Groups"
+                id: groupHeader
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.horizontalCenter: parent.horizontalCenter
                 font.family: CmnCfg.chatFont.name
@@ -281,15 +284,21 @@ Popup {
                         Column {
                             id: labelCol
                             spacing: 2
-                            Label {
-                                font.weight: Font.DemiBold
-                                font.pixelSize: CmnCfg.labelFontSize
-                                font.family: CmnCfg.chatFont.name
-                                text: userId
-                                color: CmnCfg.palette.offBlack
+                            width: row.width
+                            GridLayout {
+                                width: labelCol.width
+                                Label {
+                                    font.weight: Font.DemiBold
+                                    font.pixelSize: CmnCfg.labelFontSize
+                                    font.family: CmnCfg.chatFont.name
+                                    text: name
+                                    color: CmnCfg.palette.offBlack
+                                    Layout.maximumWidth: nameHeader.width
+                                    elide: Label.ElideRight
+                                }
                             }
                             Label {
-                                text: "@" + name
+                                text: "@" + userId
                                 font.family: CmnCfg.chatFont.name
                                 color: CmnCfg.palette.offBlack
                                 font.pixelSize: CmnCfg.defaultFontSize
@@ -298,7 +307,9 @@ Popup {
                     }
 
                     //common groups
-                    CommonGroupsFlow {}
+                    CommonGroupsFlow {
+                        id: groups
+                    }
                 }
             }
         }

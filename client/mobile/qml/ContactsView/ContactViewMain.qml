@@ -3,6 +3,7 @@ import QtQuick.Controls 2.14
 import LibHerald 1.0
 import "qrc:/imports/Entity"
 import "qrc:/imports/js/utils.mjs" as Utils
+import QtQuick.Layouts 1.2
 
 Page {
     id: contactsPopup
@@ -36,6 +37,8 @@ Page {
             color: CmnCfg.palette.offBlack
             font.pixelSize: CmnCfg.chatTextSize
             font.weight: Font.Medium
+            anchors.right: groupHeader.left
+            anchors.rightMargin: CmnCfg.largeMargin
         }
 
         Text {
@@ -158,15 +161,19 @@ Page {
                     Column {
                         id: labelCol
                         spacing: 2
-                        Label {
-                            font.weight: Font.DemiBold
-                            font.pixelSize: CmnCfg.entityLabelSize
-                            font.family: CmnCfg.chatFont.name
-                            text: userId
-                            color: CmnCfg.palette.offBlack
+                        GridLayout {
+                            Label {
+                                font.weight: Font.DemiBold
+                                font.pixelSize: CmnCfg.entityLabelSize
+                                font.family: CmnCfg.chatFont.name
+                                text: name
+                                color: CmnCfg.palette.offBlack
+                                Layout.maximumWidth: nameHeader.width
+                                elide: Label.ElideRight
+                            }
                         }
                         Label {
-                            text: "@" + name
+                            text: "@" + userId
                             font.family: CmnCfg.chatFont.name
                             color: CmnCfg.palette.offBlack
                             font.pixelSize: CmnCfg.entitySubLabelSize

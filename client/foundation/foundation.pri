@@ -1,4 +1,4 @@
-QT += quick svg xml gui
+QT += quick svg xml widgets gui quickcontrols2
 VERSION = 0.0.1
 
 INCLUDEPATH += $$PWD/../../libherald/qt_ffi \
@@ -98,9 +98,9 @@ windows {
 }
 android {
      QT += androidextras
-    ANDROID_ABIS = armeabi-v7a
+     ANDROID_ABIS = armeabi-v7a
 
-   # ANDROID_ABIS = x86
+     #ANDROID_ABIS = x86
 
      LIBS +=  $${PWD}/../../target/armv7-linux-androideabi/$${RUST_BUILD_TYPE}/libherald.a
      #LIBS +=  $${PWD}/../../target/i686-linux-android/$${RUST_BUILD_TYPE}/libherald.a
