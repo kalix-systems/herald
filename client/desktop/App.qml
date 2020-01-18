@@ -221,6 +221,7 @@ Item {
         id: tray
         icon.source: "qrc:/herald.png"
         icon.mask: true
+
         Component.onCompleted: if (Qt.platform.os === "windows")
                                    show()
     }

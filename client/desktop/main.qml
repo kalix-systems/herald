@@ -19,15 +19,6 @@ ApplicationWindow {
         id: errPopup
     }
 
-    SystemTrayIcon {
-        id: tray
-        icon.source: "qrc:/herald.png"
-        icon.mask: true
-        Component.onCompleted: {
-        show()
-    }
-    }
-
     property alias ccMap: ccMap.map
     Item {
         // conversation content map

@@ -1,7 +1,6 @@
 #include "Bindings.h"
 #include <QApplication>
 #include <QQmlApplicationEngine>
-#include <QSystemTrayIcon>
 #include <QStandardPaths>
 #include <QtQml/qqml.h>
 #include <QWindow>
@@ -32,12 +31,7 @@ int main(int argc, char* argv[])
         Herald* state = new Herald();
         state->setAppLocalDataDir(path);
 
-//#ifdef Q_OS_WIN
-//       QSystemTrayIcon* tray = new QSystemTrayIcon();
-//       tray->setIcon(QIcon(":/herald.png"));
-//       tray->show();
-//       QObject::connect(state, &Herald::destroyed, [=](){tray->showMessage("hello","there");});
-//#endif
+
         return state;
       });
 
