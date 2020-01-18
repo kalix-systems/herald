@@ -224,8 +224,4 @@ Item {
         Component.onCompleted: if (Qt.platform.os === "windows")
                                    show()
     }
-
-    Connections {
-        target: Herald
-    }
 }
