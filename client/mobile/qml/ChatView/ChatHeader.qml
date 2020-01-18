@@ -35,18 +35,24 @@ ToolBar {
         anchors {
             left: backButton.right
             leftMargin: CmnCfg.smallMargin
-            right: parent.right
+            right: searchButtons.left
+
             rightMargin: CmnCfg.defaultMargin
             verticalCenter: parent.verticalCenter
         }
-        Label {
+
+        GridLayout {
             Layout.alignment: Qt.AlignLeft
             Layout.topMargin: CmnCfg.microMargin
-            text: mainView.currentItem.headerTitle
-            font.family: CmnCfg.headerFont.family
-            font.pixelSize: CmnCfg.headerFontSize
-            color: CmnCfg.palette.iconFill
             visible: chatBar.state !== "search"
+            Label {
+                elide: Label.ElideRight
+                text: mainView.currentItem.headerTitle
+                font.family: CmnCfg.headerFont.family
+                font.pixelSize: CmnCfg.headerFontSize
+                color: CmnCfg.palette.iconFill
+                Layout.maximumWidth: searchRow.width
+            }
         }
 
         BorderedTextField {
@@ -129,12 +135,14 @@ ToolBar {
     }
 
     Row {
+        id: searchButtons
         anchors.right: parent.right
         anchors.verticalCenter: parent.verticalCenter
         anchors.rightMargin: CmnCfg.defaultMargin
         spacing: CmnCfg.defaultMargin
         layoutDirection: Qt.RightToLeft
         visible: chatBar.state !== "search"
+        width: visible ? implicitWidth : 0
 
         AnimIconButton {
             id: timerButton
@@ -154,17 +162,16 @@ ToolBar {
         }
     }
 
-//    AnimIconButton {
-//        id: clearButton
-//        anchors.verticalCenter: parent.verticalCenter
-//        anchors.right: parent.right
-//        anchors.rightMargin: CmnCfg.smallMargin
-//        color: CmnCfg.palette.iconFill
-//        imageSource: "qrc:/x-icon.svg"
-//        visible: chatBar.state === "search"
-//        onTapped: chatBar.state = "default"
-//    }
-
+    //    AnimIconButton {
+    //        id: clearButton
+    //        anchors.verticalCenter: parent.verticalCenter
+    //        anchors.right: parent.right
+    //        anchors.rightMargin: CmnCfg.smallMargin
+    //        color: CmnCfg.palette.iconFill
+    //        imageSource: "qrc:/x-icon.svg"
+    //        visible: chatBar.state === "search"
+    //        onTapped: chatBar.state = "default"
+    //    }
     Rectangle {
         height: 1
         color: CmnCfg.palette.lightGrey

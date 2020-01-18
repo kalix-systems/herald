@@ -12,10 +12,9 @@ import QtGraphicalEffects 1.0
 // contains a list of conversations by default
 Page {
     id: cvMainView
-    readonly property Component headerComponent:
-        HomeHeader {
-            parentPage: cvMainView
-        }
+    readonly property Component headerComponent: HomeHeader {
+        parentPage: cvMainView
+    }
 
     background: Rectangle {
         color: CmnCfg.palette.white
@@ -55,10 +54,10 @@ Page {
                     id: convContent
                     conversationId: model.conversationId
                 }
-                visible: (cvMainView.state === "archiveState" &&
-                          model.status === 1) ||
-                         (cvMainView.state !== "archiveState" &&
-                          model.status === 0)
+                visible: (cvMainView.state === "archiveState"
+                          && model.status === 1)
+                         || (cvMainView.state !== "archiveState"
+                             && model.status === 0)
             }
             Connections {
                 target: appRoot.router
@@ -86,6 +85,20 @@ Page {
                     if ((conv_idx < 0) || (conv_idx >= cvListView.count))
                         return
 
+                    stackView.push(cvListView.itemAtIndex(conv_idx).ownedCV)
+                }
+            }
+            Connections {
+                target: appRouter
+                onGroupRequested: {
+
+                    const conv_idx = Herald.conversations.indexById(groupId)
+
+                    // early return on out of bounds
+                    if ((conv_idx < 0) || (conv_idx >= cvListView.count))
+                        return
+
+                    stackView.pop(null, StackView.Immediate)
                     stackView.push(cvListView.itemAtIndex(conv_idx).ownedCV)
                 }
             }

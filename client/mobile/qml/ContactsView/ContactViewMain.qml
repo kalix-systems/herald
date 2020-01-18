@@ -11,6 +11,8 @@ Page {
         id: contactPage
     }
 
+    Component.onCompleted: appRouter.contactView = contactsPopup
+    signal groupClicked(var groupId)
     Item {
         id: rowLabel
         height: CmnCfg.units.dp(CmnCfg.toolbarHeight - 10)
