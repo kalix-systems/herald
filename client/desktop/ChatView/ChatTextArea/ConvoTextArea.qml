@@ -149,29 +149,49 @@ Rectangle {
             }
         }
 
-        ScrollView {
+        Flickable {
             id: scrollView
-            height: Math.min(contentHeight, 100)
+            height: Math.min(Math.max(chatText.contentHeight,
+                                      chatText.height), 100)
             width: containerCol.width
             focus: true
+            contentWidth: width
+            clip: true
+            contentHeight: Math.max(chatText.contentHeight, chatText.height)
+            leftMargin: 0
 
-            TextArea {
+            ScrollBar.vertical: ScrollBar {}
+            boundsBehavior: Flickable.StopAtBounds
+            boundsMovement: Flickable.StopAtBounds
+            contentY: chatText.cursorRectangle.y
+            TextEdit {
                 id: chatText
-                background: Rectangle {
-                    color: CmnCfg.palette.white
-                }
-
-                //TODO: use system palette.
-                leftPadding: CmnCfg.microMargin
-                bottomPadding: CmnCfg.smallMargin * 0.5
                 selectionColor: CmnCfg.palette.highlightColor
                 color: CmnCfg.palette.black
                 selectByMouse: true
                 wrapMode: TextArea.WrapAtWordBoundaryOrAnywhere
-                placeholderText: qsTr("Message") + " "
-                                 + (!Herald.utils.compareByteArray(
-                                        conversationItem.conversationId,
-                                        Herald.config.ntsConversationId) ? conversationItem.title : qsTr("Note to Self"))
+                width: containerCol.width
+                topPadding: CmnCfg.units.dp(6)
+                bottomPadding: CmnCfg.units.dp(2)
+                rightPadding: CmnCfg.smallMargin
+
+                font.pixelSize: CmnCfg.chatTextSize
+                Text {
+                    text: qsTr("Message") + " "
+                          + (!Herald.utils.compareByteArray(
+                                 conversationItem.conversationId,
+                                 Herald.config.ntsConversationId) ? conversationItem.title : qsTr(
+                                                                        "Note to Self"))
+                    color: CmnCfg.palette.darkGrey
+                    opacity: (chatText.text.length === 0) ? 1.0 : 0.0
+                    anchors.baseline: parent.baseline
+                    width: containerCol.width
+                    elide: Text.ElideRight
+                    font.pixelSize: CmnCfg.chatTextSize
+                    font.family: CmnCfg.chatFont.name
+                    font.weight: Font.Light
+                    padding: 0
+                }
 
                 Keys.forwardTo: keysProxy
                 Keys.onEscapePressed: focus = false
