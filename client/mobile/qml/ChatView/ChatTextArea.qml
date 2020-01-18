@@ -69,6 +69,13 @@ Column {
                             }
             anchors.left: parent.left
             anchors.right: buttons.left
+            onTextChanged: {
+                if (text !== "") {
+                    Qt.callLater(function () {
+                        ownedMessages.sendTypingIndicator()
+                    })
+                }
+            }
         }
         Grid {
             // TODO: Collapse options into plus when typing

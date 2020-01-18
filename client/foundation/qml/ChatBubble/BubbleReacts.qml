@@ -27,22 +27,6 @@ Flow {
                             }).length === 1
             }
 
-            //for mobile
-            TapHandler {
-
-                onTapped: {
-
-                    if (outboundReact) {
-                        return ownedConversation.removeReaction(
-                                    bubbleActual.bubbleIndex,
-                                    emojiModel[index]["content"])
-                    }
-                    return ownedConversation.addReaction(
-                                bubbleActual.bubbleIndex,
-                                emojiModel[index]["content"])
-                }
-            }
-
             MouseArea {
 
                 enabled: !bubbleRoot.moreInfo

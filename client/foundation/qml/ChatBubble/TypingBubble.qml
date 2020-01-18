@@ -1,86 +1,109 @@
 import QtQuick 2.13
-import QtQuick.Layouts 1.12
 import QtQuick.Controls 2.13
 import LibHerald 1.0
-import "../Entity"
 
 Rectangle {
-    id: bubbleRoot
-    property var typingUser: parent.typingUser
-
-    property string typingUserName: Herald.users.nameById(typingUser)
-    property color typingUserColor: CmnCfg.palette.avatarColors[Herald.users.userColorById(
-                                                                    typingUser)]
-    property string typingUserProfilePicture: Herald.users.profilePictureById(
-                                                  typingUser)
-    property real defaultWidth
-    property alias text: actionText.text
-
-    height: CmnCfg.typeMargin
-    width: actionText.width + avatar.width + CmnCfg.microMargin
-
-    color: CmnCfg.palette.white
-
+    id: typingIndicator
+    height: typingLoader.height
+    width: parent.width
+    color: typingLoader.active ? CmnCfg.palette.white : "transparent"
+    property var conversationMembers
     Rectangle {
+        visible: typingLoader.active
         anchors.top: parent.top
         width: parent.width
         height: 1
         color: CmnCfg.palette.medGrey
-        z: accent.z + 1
     }
 
-    Rectangle {
-        anchors.bottom: parent.bottom
-        width: parent.width
-
-        height: 1
-        color: CmnCfg.palette.medGrey
-        z: accent.z + 1
-    }
-
-    Avatar {
-        id: avatar
-        color: typingUserColor
-        initials: typingUserName[0].toUpperCase()
-        size: CmnCfg.typeMargin - 8
-        anchors {
-            left: parent.left
-            top: parent.top
-            margins: CmnCfg.microMargin
+    Connections {
+        target: conversationMembers
+        onNewTypingIndicator: {
+            typingIndicator.__secondsSinceLastReset = 0
         }
-
-        z: contentRoot.z + 1
-        pfpPath: typingUserProfilePicture
     }
 
-    Rectangle {
-        id: accent
-        anchors.top: parent.top
+    Connections {
+        target: appRoot.globalTimer
+        onRefreshTime: {
+            if (typingLoader.active)
+                typingIndicator.__secondsSinceLastReset += 1
+        }
+    }
+
+    property int __secondsSinceLastReset: 5
+    property bool __aUserIsTyping: __secondsSinceLastReset < 4
+
+    property string typeText
+    Connections {
+        target: conversationMembers
+        onNewTypingIndicator: {
+            typingIndicator.typeText = ""
+            if (conversationMembers.typingMembers() === "") {
+                typingLoader.active = false
+                return
+            }
+            const typers = JSON.parse(conversationMembers.typingMembers())
+
+            const num = typers.length
+            const last = num - 1
+
+            if (num <= 0) {
+                typingLoader.active = false
+                return
+            }
+
+            typers.forEach(function (item, index) {
+                const typingUserName = item
+                if (num === 1) {
+                    typingIndicator.typeText += typingUserName + qsTr(
+                                " is typing...")
+                    return
+                }
+
+                if (num > 4) {
+                    typingIndicator.typeText = "Several people are typing..."
+                    return
+                }
+                if (num === 2 && index === 0) {
+                    typingIndicator.typeText += typingUserName + qsTr(" and ")
+                    return
+                }
+
+                if (index < last - 1) {
+                    typingIndicator.typeText += typingUserName + ", "
+                    return
+                }
+
+                if (index < last) {
+                    typingIndicator.typeText += typingUserName + " and "
+                    return
+                }
+
+                typingIndicator.typeText += typingUserName + qsTr(
+                            " are typing...")
+                return
+            })
+        }
+    }
+
+    Loader {
+        id: typingLoader
+        active: typingIndicator.__aUserIsTyping
+        asynchronous: true
+
+        height: CmnCfg.typeMargin
+
+        width: parent.width
         anchors.bottom: parent.bottom
-
-        width: CmnCfg.accentBarWidth
-        anchors.left: avatar.right
-        anchors.leftMargin: CmnCfg.smallMargin
-        visible: false
-    }
-
-    Column {
-        id: contentRoot
-        anchors.left: avatar.right
-        anchors.verticalCenter: avatar.verticalCenter
-
-        spacing: CmnCfg.microMargin
-        topPadding: CmnCfg.microMargin
-        leftPadding: CmnCfg.microMargin
-        bottomPadding: CmnCfg.microMargin
-
-        Text {
-            id: actionText
-            text: typingUserName + " is typing..."
-            font.family: CmnCfg.chatFont.name
+        sourceComponent: Label {
+            topPadding: CmnCfg.microMargin
+            leftPadding: CmnCfg.smallMargin
+            id: typeLabel
+            font.pixelSize: CmnCfg.chatTextSize
             font.italic: true
-            elide: Text.ElideRight
-            width: bubbleRoot.maxWidth
+            text: typingIndicator.typeText
+            font.family: CmnCfg.chatFont.name
         }
     }
 }
