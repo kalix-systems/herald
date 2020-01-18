@@ -27,3 +27,57 @@ where
 
     Ok::<(), Error>(())
 }
+
+#[derive(Clone)]
+pub struct RegistrationHandle {
+    pub(crate) registration_tx: RegistrationTx,
+    pub(crate) request_tx: RequestTx,
+}
+
+#[derive(Debug, Clone, Copy)]
+#[must_use]
+pub enum Outcome {
+    Wait,
+    Sending,
+}
+impl RegistrationHandle {
+    pub fn check_user_id(
+        &mut self,
+        uid: UserId,
+    ) -> Result<Outcome, Error> {
+        if let Err(e) = self
+            .registration_tx
+            .try_send(register::ClientEvent::Check(uid))
+        {
+            {
+                use tokio::sync::mpsc::error::TrySendError as E;
+                match e {
+                    E::Full(_) => return Ok(Outcome::Wait),
+                    E::Closed(_) => anyhow!("Failed to check user id: {}", uid),
+                }
+            };
+        }
+
+        Ok(Outcome::Sending)
+    }
+
+    pub fn claim_user_id(
+        &mut self,
+        uid: Signed<UserId>,
+    ) -> Result<Outcome, Error> {
+        if let Err(e) = self
+            .registration_tx
+            .try_send(register::ClientEvent::Claim(uid))
+        {
+            {
+                use tokio::sync::mpsc::error::TrySendError as E;
+                match e {
+                    E::Full(_) => return Ok(Outcome::Wait),
+                    E::Closed(_) => anyhow!("Failed to claim user id: {}", uid.data()),
+                }
+            };
+        }
+
+        Ok(Outcome::Sending)
+    }
+}

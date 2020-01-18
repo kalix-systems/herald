@@ -13,10 +13,11 @@ use tokio::runtime::Builder as Runtime;
 use tokio::sync::mpsc::{channel, unbounded_channel};
 pub use tokio::sync::mpsc::{Sender, UnboundedReceiver, UnboundedSender};
 
+pub use registration::RegistrationHandle;
 pub use requests::Requester;
 
 mod client;
-mod registration;
+pub mod registration;
 mod requests;
 mod setup;
 
@@ -59,36 +60,6 @@ where
     })?;
 
     Ok(tx.into())
-}
-
-#[derive(Clone)]
-pub struct RegistrationHandle {
-    registration_tx: RegistrationTx,
-    request_tx: RequestTx,
-}
-
-impl RegistrationHandle {
-    pub fn check_user_id(
-        &mut self,
-        uid: UserId,
-    ) -> Result<(), Error> {
-        self.registration_tx
-            .try_send(register::ClientEvent::Check(uid))
-            .map_err(|_| anyhow!("Failed to check user id: {}", uid))?;
-
-        Ok(())
-    }
-
-    pub fn claim_user_id(
-        &mut self,
-        uid: Signed<UserId>,
-    ) -> Result<(), Error> {
-        self.registration_tx
-            .try_send(register::ClientEvent::Claim(uid))
-            .map_err(|_| anyhow!("Failed to claim user id: {}", uid.data()))?;
-
-        Ok(())
-    }
 }
 
 #[inline]
