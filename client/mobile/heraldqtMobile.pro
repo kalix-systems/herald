@@ -1,6 +1,6 @@
 TEMPLATE = app
 
-QT      += quick svg xml
+QT += quick svg xml gui quickcontrols2 widgets
 VERSION = 0.0.1
 CONFIG  += c++11
 

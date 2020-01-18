@@ -17,6 +17,7 @@ Item {
         id: systemPalette
         colorGroup: SystemPalette.Active
     }
+    property alias settings: settings
 
     property bool themeIsDark: ((systemPalette.window.r / Qt.red + systemPalette.window.g / Qt.green
                                  + systemPalette.window.b / Qt.blue) / 256) < 0.5
@@ -56,7 +57,7 @@ Item {
     readonly property int entitySubLabelSize: units.dp(14)
     /// standard button text size
     readonly property real buttonTextSize: units.dp(15)
-    readonly property real typeMargin: units.dp(21)
+    readonly property real typeMargin: units.dp(28)
 
     readonly property FontLoader chatFont: metaTheme.chatFont
     readonly property FontLoader labelFont: metaTheme.cairo
@@ -131,7 +132,6 @@ Item {
 
     Settings {
         id: settings
-        readonly property alias theme: cfg.palette
         readonly property alias skinSwatchIndex: cfg.skinSwatchIndex
         property string recentEmojisJson: "[]"
 

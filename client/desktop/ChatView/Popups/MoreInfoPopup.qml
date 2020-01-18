@@ -208,7 +208,7 @@ Popup {
                 currentIndex: -1
                 delegate: Item {
                     height: visible ? CmnCfg.convoHeight : 0
-                    width: 300
+                    width: moreInfoPopup.width * 0.75
                     // TODO special-case Note to Self conversations so they
                     // don't have an empty recipient list
                     visible: convoMembers.rowCount(

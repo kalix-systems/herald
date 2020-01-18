@@ -4,6 +4,7 @@ import QtQuick.Controls 2.13
 import "qrc:/imports/ChatBubble" as CB
 import LibHerald 1.0
 import "../Common"
+import Qt.labs.platform 1.0
 
 Column {
     id: chatRowLayout
@@ -23,7 +24,6 @@ Column {
                                                                filename.length))
         }
     }
-
     Column {
 
         anchors.left: parent.left
@@ -69,6 +69,13 @@ Column {
                             }
             anchors.left: parent.left
             anchors.right: buttons.left
+            onTextChanged: {
+                if (text !== "") {
+                    Qt.callLater(function () {
+                        ownedMessages.sendTypingIndicator()
+                    })
+                }
+            }
         }
         Grid {
             // TODO: Collapse options into plus when typing
@@ -99,9 +106,18 @@ Column {
                               if (Qt.platform.os === "ios") {
                                   return mobHelper.launch_file_picker()
                               }
+                              fileDialog.open()
                           }
 
                 imageSource: send ? "qrc:/send-icon.svg" : "qrc:/plus-icon.svg"
+            }
+        }
+
+        FileDialog {
+            id: fileDialog
+            onAccepted: {
+                print(file)
+                print(ownedMessages.builder.addAttachment(file)) //print(foo)
             }
         }
     }

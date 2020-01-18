@@ -85,9 +85,8 @@ Popup {
                 property var contactMember: model
                 height: visible ? contentHeight : 0
                 visible: contactMember.userId !== Herald.config.configId
-                Row {
-                    spacing: CmnCfg.megaMargin
-                    height: 72
+                Item {
+                    height: CmnCfg.units.dp(60)
                     width: parent.width
                     Entity.Avatar {
                         id: itemAvatar
@@ -95,17 +94,22 @@ Popup {
                         initials: contactMember.name[0].toUpperCase()
                         pfpPath: Utils.safeStringOrDefault(
                                      contactMember.picture)
-                        size: 60
+                        size: CmnCfg.units.dp(48)
+                        anchors.left: parent.left
                     }
-
-                    Entity.ContactLabel {
-                        anchors.fill: undefined
+                    Item {
+                        anchors.left: itemAvatar.right
+                        anchors.right: parent.right
+                        anchors.margins: CmnCfg.largeMargin
+                        height: CmnCfg.units.dp(40)
                         anchors.verticalCenter: itemAvatar.verticalCenter
-                        displayNameSize: CmnCfg.headerFontSize
-                        width: 60
-                        displayName: contactMember.name
-                        username: contactMember.userId
-                        height: 40
+                        Entity.ContactLabel {
+                            anchors.fill: parent
+                            displayNameSize: CmnCfg.labelFontSize
+                            usernameSize: CmnCfg.defaultFontSize
+                            displayName: contactMember.name
+                            username: contactMember.userId
+                        }
                     }
                 }
 

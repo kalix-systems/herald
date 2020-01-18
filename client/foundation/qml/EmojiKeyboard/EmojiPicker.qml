@@ -16,6 +16,7 @@ Rectangle {
     color: CmnCfg.palette.offBlack
     border.color: "#FFFFFF"
 
+    property bool horizontal: false
     PickerInterior {
         z: 2
         anchors {

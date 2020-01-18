@@ -10,7 +10,7 @@ import QtGraphicalEffects 1.0
 Flow {
     anchors.horizontalCenter: parent.horizontalCenter
     anchors.verticalCenter: parent.verticalCenter
-    spacing: CmnCfg.units.dp(2)
+    spacing: CmnCfg.units.dp(1)
     width: CmnCfg.units.dp(80)
 
     Repeater {
@@ -31,11 +31,9 @@ Flow {
             initials: Utils.initialize(Utils.safeStringOrDefault(
                                            groupData.conversationTitle))
 
-            MouseArea {
+            TapHandler {
                 enabled: !overlay.visible
-                anchors.fill: parent
-                cursorShape: Qt.PointingHandCursor
-                hoverEnabled: true
+                onTapped: groupClicked(groupData.conversationId)
             }
 
             Rectangle {

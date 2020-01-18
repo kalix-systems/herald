@@ -16,6 +16,7 @@ Rectangle {
     property Item convContainer
     property var messageModelData
 
+    property var ownedConversation
     property alias highlightItem: bubbleHighlight
     readonly property color bubbleColor: CmnCfg.palette.lightGrey
     readonly property bool highlight: messageModelData.matchStatus === 2

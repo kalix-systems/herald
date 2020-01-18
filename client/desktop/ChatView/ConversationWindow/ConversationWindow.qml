@@ -119,6 +119,7 @@ ListView {
                     width: parent.width
                     defaultWidth: chatListView.width
                     bubbleIndex: index
+                    ownedConversation: chatPage.ownedConversation
                     hitbox: hover
                     ListView.onAdd: {
                         chatScrollBarInner.setPosition(1.0)
@@ -145,6 +146,7 @@ ListView {
                     defaultWidth: chatListView.width
                     width: parent.width
                     messageModelData: model
+                    ownedConversation: chatPage.ownedConversation
                     authorColor: {
                         if (!outbound) {
                             if (conversationItem.pairwise) {

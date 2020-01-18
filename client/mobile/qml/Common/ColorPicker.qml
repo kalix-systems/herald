@@ -7,12 +7,11 @@ import QtGraphicalEffects 1.0
 
 Popup {
     id: colorWindow
-    width: CmnCfg.units.dp(108)
+    width: CmnCfg.units.dp(180)
     height: width
     property var colorCallback: function () {}
 
     padding: 0
-    // anchors.centerIn: parent
     modal: true
     property int colorIndex: -1
     property int selectedIndex: -1
@@ -54,7 +53,7 @@ Popup {
 
             Rectangle {
                 id: colorDot
-                width: CmnCfg.units.dp(28)
+                width: CmnCfg.units.dp(52)
                 height: width
                 radius: width / 2
                 color: modelData

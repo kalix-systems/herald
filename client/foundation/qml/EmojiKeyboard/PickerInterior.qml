@@ -68,10 +68,10 @@ Item {
             color: "#33000000" // transparent
             border.color: CmnCfg.palette.medGrey
             height: 24
-            Row {
+            Item {
                 anchors.fill: parent
-                spacing: 0
                 Button {
+                    id: search
                     padding: 0
                     background: Item {}
                     icon.source: "qrc:/search-icon.svg"
@@ -79,6 +79,8 @@ Item {
                     icon.height: 17
                     icon.width: 17
                     anchors.verticalCenter: parent.verticalCenter
+                    anchors.left: parent.left
+                    anchors.leftMargin: CmnCfg.microMargin
                 }
 
                 TextArea {
@@ -92,6 +94,10 @@ Item {
                     width: 185
                     height: parent.height
                     onTextChanged: emojiPickerModel.setSearchString(text)
+                    anchors.left: search.right
+                    anchors.leftMargin: CmnCfg.microMargin
+                    anchors.right: exitButton.left
+                    anchors.rightMargin: CmnCfg.smallMargin
                 }
 
                 Button {
@@ -104,6 +110,8 @@ Item {
                     icon.width: 17
                     onClicked: emoKeysPopup.active = false
                     anchors.verticalCenter: parent.verticalCenter
+                    anchors.right: parent.right
+                    anchors.rightMargin: CmnCfg.microMargin
                 }
             }
         }
