@@ -31,6 +31,7 @@ Page {
                 width: active ? item.width : 0
                 height: width
 
+                parent: page
                 anchors.centerIn: parent
                 sourceComponent: ColorPicker {
 

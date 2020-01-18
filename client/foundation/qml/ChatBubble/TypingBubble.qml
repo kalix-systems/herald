@@ -31,8 +31,8 @@ Rectangle {
         }
     }
 
-    property int __secondsSinceLastReset: 5
-    property bool __aUserIsTyping: __secondsSinceLastReset < 4
+    property int __secondsSinceLastReset: 8
+    property bool __aUserIsTyping: __secondsSinceLastReset < 7
 
     property string typeText
     Connections {

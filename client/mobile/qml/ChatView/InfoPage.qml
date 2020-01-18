@@ -171,9 +171,8 @@ Page {
                 }
                 onClicked: {
                     mainView.pop()
-                    ownedMessages.deleteMessage(
-                                ownedMessages.indexById(
-                                    referredChatBubble.messageModelData.msgId))
+                    ownedMessages.deleteMessage(ownedMessages.indexById(
+                                                    messageData.msgId))
                 }
             }
         }
