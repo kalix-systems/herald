@@ -16,15 +16,14 @@ Row {
         font.family: CmnCfg.chatFont.name
         padding: 0
         font.weight: Font.Bold
-        font.pixelSize: CmnCfg.defaultFontSize
+        font.pixelSize: CmnCfg.chatTextSize
         color: authorColor
         TextMetrics {
             id: authorNameTM
             text: authorName
             font.weight: Font.Bold
             font.family: CmnCfg.chatFont.name
-            elideWidth: bubbleRoot.maxWidth - expireInfo.width - timeLabel.width
-                        - CmnCfg.smallMargin * 3
+            elideWidth: maxWidth - timeLabel.width - CmnCfg.megaMargin * 3
 
             elide: Text.ElideRight
         }
@@ -36,7 +35,7 @@ Row {
         text: time.text
         color: CmnCfg.palette.darkGrey
         font.family: CmnCfg.chatFont.name
-        anchors.verticalCenter: authorLabel.verticalCenter
+        anchors.baseline: authorLabel.baseline
         TextMetrics {
             id: time
             font.family: CmnCfg.chatFont.name

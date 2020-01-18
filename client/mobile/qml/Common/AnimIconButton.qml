@@ -8,7 +8,7 @@ ToolButton {
     id: tb
     property string imageSource: ""
     property color color: CmnCfg.palette.iconMatte
-    property size iconSize: Qt.size(CmnCfg.iconSize, CmnCfg.iconSize)
+    property int iconSize: CmnCfg.iconSize
     signal tapped
 
     TapHandler {
@@ -33,8 +33,8 @@ ToolButton {
     padding: 0
     icon.source: imageSource
     icon.color: color
-    icon.width: iconSize.width
-    icon.height: iconSize.height
+    icon.width: iconSize
+    icon.height: iconSize
 
     ParallelAnimation {
         id: tapAnim

@@ -26,7 +26,7 @@ pub(crate) fn inbound_aux<T: Into<AuxItem>>(
     };
 
     // this can be inferred from the fact that this message was received
-    let send_status = MessageSendStatus::Ack;
+    let send_status = SendStatus::Ack;
 
     let aux_item: AuxItem = aux_item.into();
 
@@ -67,7 +67,7 @@ pub(crate) fn inbound_aux<T: Into<AuxItem>>(
         message_id: mid,
         author: uid,
         conversation: cid,
-        send_status: MessageSendStatus::Ack,
+        send_status: SendStatus::Ack,
         receipts,
         reactions,
         replies,
@@ -96,7 +96,7 @@ pub(crate) fn outbound_aux<T: Into<AuxItem>>(
         insertion: timestamp,
     };
 
-    let send_status = MessageSendStatus::NoAck;
+    let send_status = SendStatus::NoAck;
     let mid = MsgId::gen_new();
 
     let aux_item = aux.into();
@@ -105,7 +105,7 @@ pub(crate) fn outbound_aux<T: Into<AuxItem>>(
         message_id: mid,
         author,
         conversation: *cid,
-        send_status: MessageSendStatus::Ack,
+        send_status: SendStatus::Ack,
         receipts: Default::default(),
         reactions: Default::default(),
         replies: Default::default(),

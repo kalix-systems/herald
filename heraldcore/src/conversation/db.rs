@@ -143,6 +143,17 @@ pub(crate) fn all_meta(conn: &rusqlite::Connection) -> Result<Vec<ConversationMe
     Ok(meta)
 }
 
+pub(crate) fn associated_user(
+    conn: &rusqlite::Connection,
+    cid: &ConversationId,
+) -> Result<Option<UserId>, rusqlite::Error> {
+    let mut stmt = w!(conn.prepare(include_str!("sql/associated_user.sql")));
+
+    stmt.query_row_named(named_params!["@conversation_id": cid], |row| {
+        row.get("pairwise")
+    })
+}
+
 pub(crate) fn get_all_pairwise_conversations(
     conn: &rusqlite::Connection
 ) -> Result<Vec<ConversationId>, HErr> {
@@ -228,7 +239,7 @@ fn from_db(
         picture: row.get("picture")?,
         color: row.get("color")?,
         muted: row.get("muted")?,
-        pairwise: row.get("pairwise")?,
+        pairwise_uid: row.get("pairwise")?,
         last_active: row.get("last_active_ts")?,
         expiration_period: row.get("expiration_period")?,
         status: row.get("status")?,

@@ -34,9 +34,9 @@ pub struct Message {
     /// Message time information
     pub time: MessageTime,
     /// Send status
-    pub send_status: MessageSendStatus,
+    pub send_status: SendStatus,
     /// Receipts
-    pub receipts: HashMap<UserId, MessageReceiptStatus>,
+    pub receipts: HashMap<UserId, ReceiptStatus>,
     /// Messages that replied to this message
     pub replies: HashSet<MsgId>,
     /// Reactions to this message
@@ -95,7 +95,7 @@ pub struct MessageReceipt {
     /// The recipient of the message
     pub recipient: UserId,
     /// The message receipt status
-    pub status: MessageReceiptStatus,
+    pub status: ReceiptStatus,
 }
 
 #[derive(Clone, Copy, Debug, Ser, De, Eq, PartialEq, Hash)]
@@ -228,34 +228,38 @@ pub struct MessageTime {
     pub expiration: Option<Time>,
 }
 
-#[derive(Hash, Debug, Clone, PartialEq, Eq, Copy)]
+#[derive(Hash, Debug, Clone, PartialEq, Eq, Copy, Ord, PartialOrd)]
 #[repr(u8)]
 /// Send status of a message
-pub enum MessageSendStatus {
+pub enum SendStatus {
     /// No ack from server
     NoAck = 0,
     /// Acknowledged by server
     Ack = 1,
-    /// The message has timed-out.
-    Timeout = 2,
 }
 
 #[derive(Hash, Debug, Clone, PartialEq, Eq, Copy, Ord, PartialOrd)]
 #[repr(u8)]
 /// Receipt status of a message
-pub enum MessageReceiptStatus {
-    /// Not acknowledged
-    Nil = 0,
+pub enum ReceiptStatus {
     /// Received by user
-    Received = 1,
+    Received = 0,
     /// Read by the recipient
-    Read = 2,
+    Read = 1,
 }
 
-impl Default for MessageReceiptStatus {
-    fn default() -> Self {
-        MessageReceiptStatus::Nil
-    }
+#[derive(Hash, Debug, Clone, PartialEq, Eq, Copy, Ord, PartialOrd)]
+#[repr(u8)]
+/// Status of a message
+pub enum Status {
+    /// No ack from server
+    NoAck = 0,
+    /// Acknowledged by server
+    Ack = 1,
+    /// Received by user
+    Received = 2,
+    /// Read by the recipient
+    Read = 3,
 }
 
 #[derive(Clone, Debug)]
@@ -263,8 +267,8 @@ pub struct MsgData {
     pub author: UserId,
     pub content: Item,
     pub time: MessageTime,
-    pub receipts: HashMap<UserId, MessageReceiptStatus>,
-    pub send_status: MessageSendStatus,
+    pub receipts: HashMap<UserId, ReceiptStatus>,
+    pub send_status: SendStatus,
     pub replies: HashSet<MsgId>,
     pub reactions: Option<Reactions>,
 }

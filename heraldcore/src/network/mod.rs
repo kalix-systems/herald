@@ -1,7 +1,7 @@
 use crate::updates::Notification;
 use crate::{
     errors::HErr::{self, *},
-    message::MessageReceiptStatus,
+    message::ReceiptStatus,
     pending,
     types::*,
     *,
@@ -27,6 +27,7 @@ use message_handlers::*;
 
 mod message_senders;
 pub(crate) use message_senders::send_cmessage;
+pub use message_senders::SendOutcome;
 use message_senders::*;
 
 mod event;
@@ -82,9 +83,10 @@ pub fn send_read_receipt(
         cid,
         &ConversationMessage::Message(NetContent::Receipt(cmessages::Receipt {
             of: msg_id,
-            stat: MessageReceiptStatus::Read,
+            stat: ReceiptStatus::Read,
         })),
-    )
+    )?;
+    Ok(())
 }
 
 /// Sends a typing indicator
@@ -92,7 +94,9 @@ pub fn send_typing_indicator(cid: ConversationId) -> Result<(), HErr> {
     send_cmessage(
         cid,
         &ConversationMessage::Message(NetContent::Typing(Time::now())),
-    )
+    )?;
+
+    Ok(())
 }
 
 /// Sends a user request to `uid` with a proposed conversation id `cid`.
@@ -111,8 +115,22 @@ pub fn send_user_req(
 pub(crate) fn send_normal_message(
     cid: ConversationId,
     msg: cmessages::Msg,
-) -> Result<(), HErr> {
-    send_cmessage(cid, &ConversationMessage::Message(NetContent::Msg(msg)))
+) -> Result<SendOutcome, HErr> {
+    let mid = msg.mid;
+    let outcome = send_cmessage(cid, &ConversationMessage::Message(NetContent::Msg(msg)))?;
+
+    if let SendOutcome::Success = outcome {
+        {
+            let conn = crate::db::Database::get()?;
+            crate::message::db::update_send_status(
+                &conn,
+                mid,
+                coretypes::messages::SendStatus::Ack,
+            )?;
+        }
+    }
+
+    Ok(outcome)
 }
 
 pub(crate) fn send_group_settings_message(
@@ -121,16 +139,16 @@ pub(crate) fn send_group_settings_message(
     expiration: Option<Time>,
     update: cmessages::GroupSettingsUpdate,
 ) -> Result<(), HErr> {
-    send_normal_message(
+    if let SendOutcome::Success = send_normal_message(
         cid,
         cmessages::Msg {
             mid,
             expiration,
             content: cmessages::MsgContent::GroupSettings(update),
         },
-    )?;
-
-    crate::push(crate::message::OutboundAux::SendDone(cid, mid));
+    )? {
+        crate::push(crate::message::OutboundAux::SendDone(cid, mid));
+    }
     Ok(())
 }
 
@@ -172,7 +190,8 @@ pub fn send_reaction(
             react_content,
             remove: false,
         })),
-    )
+    )?;
+    Ok(())
 }
 
 /// Sends a reaction removal update
@@ -188,7 +207,8 @@ pub fn send_reaction_removal(
             react_content,
             remove: true,
         })),
-    )
+    )?;
+    Ok(())
 }
 
 pub(crate) fn server_url(ext: &str) -> String {

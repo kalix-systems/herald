@@ -92,6 +92,6 @@ pub(super) fn handle_dmessage(
 fn form_ack(mid: MsgId) -> ConversationMessage {
     ConversationMessage::Message(NetContent::Receipt(cmessages::Receipt {
         of: mid,
-        stat: MessageReceiptStatus::Received,
+        stat: ReceiptStatus::Received,
     }))
 }

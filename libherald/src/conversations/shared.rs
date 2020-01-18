@@ -42,6 +42,8 @@ pub enum ConvItemUpdateVariant {
     TitleChanged(Option<String>),
     /// The last message in the conversation has been changed
     LastChanged,
+    /// Pairwise user data changed
+    UserChanged,
 }
 
 impl From<(ConversationId, CoreSettingsUpdate)> for crate::Update {
@@ -104,7 +106,7 @@ pub(crate) fn color(cid: &ConversationId) -> Option<u32> {
 }
 
 pub(crate) fn pairwise(cid: &ConversationId) -> Option<bool> {
-    Some(conv_data().read().get(cid)?.pairwise)
+    Some(conv_data().read().get(cid)?.pairwise_uid.is_some())
 }
 
 pub(crate) fn conv_data() -> &'static RwLock<HashMap<ConversationId, Data>> {

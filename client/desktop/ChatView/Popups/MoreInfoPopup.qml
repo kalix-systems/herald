@@ -122,8 +122,9 @@ Popup {
                 anchors.left: bubbleInfo.left
                 text: "From:"
                 font.family: CmnCfg.chatFont.name
-                font.weight: Font.DemiBold
+                font.weight: Font.Medium
                 color: CmnCfg.palette.black
+                font.pixelSize: CmnCfg.chatTextSize
             }
 
             Item {
@@ -133,6 +134,8 @@ Popup {
                 width: parent.width
                 Common.PlatonicRectangle {
 
+                    topTextMargin: CmnCfg.smallMargin
+                    bottomTextMargin: CmnCfg.defaultMargin
                     boxTitle: messageData.authorName
                     boxColor: messageData.authorColor
                     picture: Utils.safeStringOrDefault(
@@ -156,8 +159,9 @@ Popup {
                                      messageData.insertionTime) : "Sent at: " + Utils.userTime(
                                      messageData.serverTime)
                 font.family: CmnCfg.chatFont.name
-                font.weight: Font.DemiBold
+                font.weight: Font.Medium
                 color: CmnCfg.palette.black
+                font.pixelSize: CmnCfg.chatTextSize
             }
 
             Label {
@@ -166,9 +170,10 @@ Popup {
                 text: "Received at: " + Utils.userTime(
                           messageData.insertionTime)
                 font.family: CmnCfg.chatFont.name
-                font.weight: Font.DemiBold
-                color: CmnCfg.palette.black
+                font.weight: Font.Medium
+                color: CmnCfg.palette.offBlack
                 visible: !outbound
+                font.pixelSize: CmnCfg.chatTextSize
             }
 
             Label {
@@ -179,8 +184,9 @@ Popup {
                       !== undefined ? "Expires at: " + Utils.userTime(
                                           messageData.expirationTime) : ""
                 font.family: CmnCfg.chatFont.name
-                font.weight: Font.DemiBold
+                font.weight: Font.Medium
                 color: CmnCfg.palette.black
+                font.pixelSize: CmnCfg.chatTextSize
             }
 
             Label {
@@ -188,8 +194,9 @@ Popup {
                 anchors.left: timeInfo.left
                 text: "To:"
                 font.family: CmnCfg.chatFont.name
-                font.weight: Font.DemiBold
+                font.weight: Font.Medium
                 color: CmnCfg.palette.black
+                font.pixelSize: CmnCfg.chatTextSize
             }
 
             ListView {
@@ -201,7 +208,7 @@ Popup {
                 currentIndex: -1
                 delegate: Item {
                     height: visible ? CmnCfg.convoHeight : 0
-                    width: 300
+                    width: moreInfoPopup.width * 0.75
                     // TODO special-case Note to Self conversations so they
                     // don't have an empty recipient list
                     visible: convoMembers.rowCount(
@@ -209,10 +216,12 @@ Popup {
                     property var memberData: model
                     Common.PlatonicRectangle {
                         boxTitle: memberData.name
-                        boxColor: memberData.color
+                        boxColor: memberData.memberColor
                         picture: Utils.safeStringOrDefault(
                                      memberData.profilePicture, "")
                         property MouseArea hoverHandler
+                        topTextMargin: CmnCfg.smallMargin
+                        bottomTextMargin: CmnCfg.defaultMargin
                         color: CmnCfg.palette.white
                         labelComponent: Ent.ContactLabel {
                             displayName: memberData.name

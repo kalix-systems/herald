@@ -104,6 +104,7 @@ pub unsafe fn conversation_content_new_inner(
         members_end_move_rows,
         members_begin_remove_rows,
         members_end_remove_rows,
+        members_new_typing_indicator,
         messages,
         builder,
         builder_body_changed,
@@ -162,7 +163,6 @@ pub unsafe fn conversation_content_new_inner(
         messages_search_num_matches_changed,
         messages_search_pattern_changed,
         messages_search_regex_changed,
-        messages_typing_user_id_changed,
         messages_new_data_ready,
         messages_layout_about_to_be_changed,
         messages_layout_changed,
@@ -175,7 +175,6 @@ pub unsafe fn conversation_content_new_inner(
         messages_end_move_rows,
         messages_begin_remove_rows,
         messages_end_remove_rows,
-        messages_new_typing_indicator,
         conversation_content_try_poll,
     } = ptr_bundle;
     let members_emit = MembersEmitter {
@@ -183,6 +182,7 @@ pub unsafe fn conversation_content_new_inner(
         filter_changed: members_filter_changed,
         filter_regex_changed: members_filter_regex_changed,
         new_data_ready: members_new_data_ready,
+        new_typing_indicator: members_new_typing_indicator,
     };
     let model = MembersList {
         qobject: members,
@@ -281,9 +281,7 @@ pub unsafe fn conversation_content_new_inner(
         search_num_matches_changed: messages_search_num_matches_changed,
         search_pattern_changed: messages_search_pattern_changed,
         search_regex_changed: messages_search_regex_changed,
-        typing_user_id_changed: messages_typing_user_id_changed,
         new_data_ready: messages_new_data_ready,
-        new_typing_indicator: messages_new_typing_indicator,
     };
     let model = MessagesList {
         qobject: messages,
@@ -388,6 +386,7 @@ pub struct ConversationContentPtrBundle {
     members_end_move_rows: fn(*mut MembersQObject),
     members_begin_remove_rows: fn(*mut MembersQObject, usize, usize),
     members_end_remove_rows: fn(*mut MembersQObject),
+    members_new_typing_indicator: fn(*mut MembersQObject),
     messages: *mut MessagesQObject,
     builder: *mut MessageBuilderQObject,
     builder_body_changed: fn(*mut MessageBuilderQObject),
@@ -446,7 +445,6 @@ pub struct ConversationContentPtrBundle {
     messages_search_num_matches_changed: fn(*mut MessagesQObject),
     messages_search_pattern_changed: fn(*mut MessagesQObject),
     messages_search_regex_changed: fn(*mut MessagesQObject),
-    messages_typing_user_id_changed: fn(*mut MessagesQObject),
     messages_new_data_ready: fn(*mut MessagesQObject),
     messages_layout_about_to_be_changed: fn(*mut MessagesQObject),
     messages_layout_changed: fn(*mut MessagesQObject),
@@ -459,6 +457,5 @@ pub struct ConversationContentPtrBundle {
     messages_end_move_rows: fn(*mut MessagesQObject),
     messages_begin_remove_rows: fn(*mut MessagesQObject, usize, usize),
     messages_end_remove_rows: fn(*mut MessagesQObject),
-    messages_new_typing_indicator: fn(*mut MessagesQObject),
     conversation_content_try_poll: fn(*mut ConversationContentQObject),
 }

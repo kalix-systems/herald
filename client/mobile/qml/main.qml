@@ -7,7 +7,6 @@ import LibHerald 1.0
 
 ApplicationWindow {
     id: root
-    property alias router: router
     visible: true
     // for desktop prototyping
     // removed implicitly in production
@@ -16,9 +15,23 @@ ApplicationWindow {
 
     MobileHelper {
         id: mobHelper
-        Component.onCompleted: {
-            set_status_bar_color(CmnCfg.palette.offBlack)
-            //   open_gallery()
+        Component.onCompleted: set_status_bar_color(CmnCfg.palette.offBlack)
+    }
+
+    EmojiPicker {
+        id: emojiPickerModel
+    }
+
+    Component {
+        id: connectDevicePage
+        LoginPage.AssociateDevice {
+            anchors.fill: parent
+        }
+    }
+    Component {
+        id: lpMain
+        LoginPage.LoginLandingPage {
+            anchors.fill: parent
         }
     }
 
@@ -27,10 +40,7 @@ ApplicationWindow {
         active: !Herald.configInit
         anchors.fill: parent
         // windows cannot be filled, unless referred to as parent
-        sourceComponent: LoginPage.LoginLandingPage {
-            id: lpMain
-            anchors.fill: parent
-        }
+        sourceComponent: lpMain
     }
 
     Loader {
@@ -38,10 +48,5 @@ ApplicationWindow {
         active: Herald.configInit
         anchors.fill: parent
         sourceComponent: App {}
-
-        Router {
-            id: router
-            stack: appLoader.item.stackView
-        }
     }
 }

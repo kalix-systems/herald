@@ -18,8 +18,8 @@ pub struct ConversationBuilder {
     pub color: Option<u32>,
     /// Indicates whether the conversation is muted
     pub muted: Option<bool>,
-    /// Indicates whether the conversation is a canonical pairwise conversation
-    pub pairwise: Option<bool>,
+    /// Associated user id if the conversation is a canonical pairwise conversation
+    pub pairwise_uid: Option<UserId>,
     /// The default period that passes before a message expires
     pub expiration_period: Option<ExpirationPeriod>,
     /// Status
@@ -88,9 +88,9 @@ impl ConversationBuilder {
     /// Sets whether or not conversation is pairwise.
     pub fn pairwise(
         &mut self,
-        pairwise: bool,
+        uid: UserId,
     ) -> &mut Self {
-        self.pairwise.replace(pairwise);
+        self.pairwise_uid.replace(uid);
         self
     }
 

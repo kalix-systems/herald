@@ -6,7 +6,7 @@ use crate::{
 use crossbeam_channel::Sender;
 use herald_common::UserId;
 use heraldcore::{
-    message::{Elider, MessageReceiptStatus},
+    message::{Elider, ReceiptStatus},
     types::*,
 };
 use messages_helper::{container::Container, search::SearchState};
@@ -33,7 +33,6 @@ pub struct Messages {
     builder: MessageBuilder,
     elider: Elider,
 
-    typing_user: Option<UserId>,
     typing_sender: Option<Sender<()>>,
 }
 
@@ -71,7 +70,7 @@ impl Messages {
                 status,
             } => {
                 self.container
-                    .handle_receipt(msg_id, status, recipient, model);
+                    .handle_receipt(msg_id, status, recipient, model, emit, cid);
             }
 
             MsgUpdate::Reaction {
@@ -90,7 +89,7 @@ impl Messages {
             }
 
             MsgUpdate::SendDone(mid) => {
-                self.container.handle_send_done(mid, model);
+                self.container.handle_send_done(mid, model, emit, cid);
             }
 
             MsgUpdate::ExpiredMessages(mids) => {
@@ -109,12 +108,6 @@ impl Messages {
                 self.model.end_insert_rows();
                 self.emit_last_changed();
             }
-
-            MsgUpdate::TypingIndicator(uid) => {
-                self.typing_user.replace(uid);
-                self.emit.typing_user_id_changed();
-                self.emit.new_typing_indicator();
-            }
         }
     }
 }
@@ -129,7 +122,7 @@ pub(crate) enum MsgUpdate {
     Receipt {
         msg_id: MsgId,
         recipient: UserId,
-        status: MessageReceiptStatus,
+        status: ReceiptStatus,
     },
 
     /// A reaction has been added or removed
@@ -139,9 +132,6 @@ pub(crate) enum MsgUpdate {
         content: heraldcore::message::ReactContent,
         remove: bool,
     },
-
-    /// A typing indicator has been received
-    TypingIndicator(UserId),
 
     /// A rendered message from the `MessageBuilder`
     BuilderMsg(Box<heraldcore::message::Message>),

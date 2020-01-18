@@ -14,36 +14,35 @@ Item {
     Imports.Units {
         id: units
     }
-    // TODO do we use this radius anywhere?
-    /// edge rounding for all rectangles that use the radius property
-    readonly property int radius: 10
+
     SystemPalette {
         id: sysPalette
         colorGroup: SystemPalette.Active
     }
     /// standard margin size used to interior objects
-    readonly property int microMargin: 4
-    readonly property int smallMargin: 8
-    readonly property int defaultMargin: 12
-    readonly property int largeMargin: 16
-    readonly property int megaMargin: 24
+    readonly property int microMargin: units.dp(4)
+    readonly property int smallMargin: units.dp(8)
+    readonly property int defaultMargin: units.dp(12)
+    readonly property int largeMargin: units.dp(16)
+    readonly property int megaMargin: units.dp(24)
 
     // FONTS
     readonly property FontLoader chatFont: metaTheme.chatFont
     readonly property FontLoader labelFont: metaTheme.cairo
 
     /// Font size for minor text (e.g. timestamps)
-    readonly property int minorTextSize: 11
+    readonly property int minorTextSize: units.dp(10)
     /// standard chat text size
-    readonly property int chatTextSize: 12
+    readonly property int chatTextSize: units.dp(11)
     /// default font size for basic UI text
-    readonly property int defaultFontSize: 14
+    readonly property int defaultFontSize: units.dp(12)
     /// standard header size
-    readonly property int headerFontSize: 16
+    readonly property int labelFontSize: units.dp(14)
+    readonly property int headerFontSize: units.dp(15)
     /// size for contact/group name labels in lists
-    readonly property int entityLabelSize: 14
+    readonly property int entityLabelSize: units.dp(13)
     /// size for contact/group name labels in lists
-    readonly property int entitySubLabelSize: 13
+    readonly property int entitySubLabelSize: units.dp(11)
 
     // default font for basic UI text
     readonly property font defaultFont: Qt.font({
@@ -68,25 +67,27 @@ Item {
 
     // STANDARD COMPONENT SIZES
 
+    readonly property int iconSize: units.dp(18)
     /// standard avatar size
-    readonly property int avatarSize: 44
-    readonly property int chatAvatarSize: 36
+    readonly property int avatarSize: units.dp(38)
+    readonly property int headerAvatarSize: units.dp(24)
     /// standard conversation/contact height
-    readonly property int convoHeight: 56
+    readonly property int convoHeight: units.dp(50)
     /// standard toolbar height
-    readonly property int toolbarHeight: 40
+    readonly property int toolbarHeight: units.dp(36)
     /// width of chat bubble left accent bar
-    readonly property int accentBarWidth: 4
+    readonly property int accentBarWidth: units.dp(4)
 
     /// standard popup height and width
-    readonly property int popupWidth: 200
-    readonly property int popupHeight: 250
+    readonly property int popupWidth: units.dp(200)
+    readonly property int popupHeight: units.dp(250)
     /// standard settings pane width and height
-    readonly property int settingsPaneWidth: 750
-    readonly property int settingsPaneHeight: 500
+    readonly property int settingsPaneWidth: units.dp(750)
+    readonly property int settingsPaneHeight: units.dp(500)
 
-    readonly property real minChatViewWidth: 300
-    readonly property real minContactsWidth: 300
+    readonly property real minChatViewWidth: units.dp(300)
+    readonly property real minContactsWidth: units.dp(300)
+    readonly property real typeMargin: units.dp(20)
 
     // MISC
 
@@ -97,7 +98,6 @@ Item {
     readonly property int bottomZ: 1
     readonly property int underlayZ: -1
 
-
     readonly property int attachmentSize: 300
 
     /// list of recent emojis
@@ -106,10 +106,6 @@ Item {
     readonly property var skinSwatchList: ["", "🏻", "🏼", "🏽", "🏾", "🏿"]
     /// emoji skin color
     property int skinSwatchIndex: 0
-
-    Imports.Units {
-        id: importUnits
-    }
 
     Settings {
         id: settings
@@ -120,6 +116,12 @@ Item {
             recentEmojis = JSON.parse(recentEmojisJson)
         }
     }
+
+    Imports.Units {
+        id: importUnits
+    }
+
+
 
     readonly property int colorScheme: 0
 

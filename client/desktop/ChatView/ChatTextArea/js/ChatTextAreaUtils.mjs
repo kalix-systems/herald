@@ -10,7 +10,7 @@ export function enterKeyHandler(event, target, builder, messageModel, textAreaFo
         return;
     }
     // clear before positional reset
-    const text = target.text;
+    const text = target.text.trim();
     target.clear();
     builder.body = text;
     builder.finalize();

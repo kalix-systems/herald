@@ -7,6 +7,7 @@ Column {
     property Component settingsContent
     leftPadding: CmnCfg.defaultMargin
     property alias content: settingsLoader.item
+    spacing: CmnCfg.defaultMargin
     anchors {
         right: parent.right
         left: parent.left
@@ -14,7 +15,9 @@ Column {
 
     Label {
         text: headerText
-        font: CmnCfg.sectionHeaderFont
+        font.family: CmnCfg.labelFont.name
+        font.weight: Font.Medium
+        font.pixelSize: CmnCfg.labelFontSize
     }
 
     Loader {

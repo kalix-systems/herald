@@ -213,13 +213,13 @@ fn test_container_search() {
     );
 
     assert_eq!(
-        &searchstate.next_match().expect(womp!()).0,
-        container.get(2).expect(womp!())
+        &searchstate.prev_match().expect(womp!()).0,
+        container.get(1).expect(womp!())
     );
 
     assert_eq!(
-        &searchstate.prev_match().expect(womp!()).0,
-        container.get(1).expect(womp!())
+        &searchstate.next_match().expect(womp!()).0,
+        container.get(2).expect(womp!())
     );
 
     container.clear_search(model);
@@ -259,12 +259,15 @@ fn test_handle_receipt() {
     let _ = container.insert_ord(msgmeta2, msgdata2);
 
     let model = &mut TestModel::new();
+    let mut emit = TestEmit::new();
 
     container.handle_receipt(
         msgmeta2.msg_id,
-        coretypes::messages::MessageReceiptStatus::Read,
+        coretypes::messages::ReceiptStatus::Read,
         "TEST".try_into().expect(womp!()),
         model,
+        &mut emit,
+        convid,
     );
 
     assert_eq!(model.data_changed_state.len(), 1);
@@ -274,7 +277,7 @@ fn test_handle_receipt() {
             .get_data(&msgmeta2.msg_id)
             .expect(womp!())
             .receipts[&"TEST".try_into().expect(womp!())],
-        coretypes::messages::MessageReceiptStatus::Read
+        coretypes::messages::ReceiptStatus::Read
     );
 }
 

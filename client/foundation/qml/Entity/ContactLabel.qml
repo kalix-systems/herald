@@ -1,6 +1,6 @@
 import QtQuick 2.12
-import QtQuick.Layouts 1.12
-import QtQuick.Controls 2.12
+import QtQuick.Layouts 1.14
+import QtQuick.Controls 2.14
 import LibHerald 1.0
 import "qrc:/imports/js/utils.mjs" as JS
 
@@ -27,6 +27,7 @@ ColumnLayout {
         color: labelColor
 
         width: parent.width
+        Layout.maximumWidth: parent.width
         Layout.preferredHeight: parent.height * 0.5
     }
 
@@ -40,7 +41,7 @@ ColumnLayout {
         color: labelColor
 
         width: parent.width
+        Layout.maximumWidth: parent.width
         Layout.preferredHeight: parent.height * 0.5
     }
 }
-

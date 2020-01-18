@@ -6,14 +6,17 @@ import "../Common"
 import "qrc:/imports/"
 
 ToolBar {
-
     property alias searchText: searchField.text
+    property alias searchPlaceholderText: searchField.placeholderText
+
+    property var parentPage
 
     width: parent.width
     height: CmnCfg.toolbarHeight
     background: Rectangle {
         color: CmnCfg.palette.offBlack
     }
+
     AnimIconButton {
         id: backButton
         anchors.left: parent.left
@@ -31,7 +34,7 @@ ToolBar {
             Herald.users.clearFilter()
             Herald.conversations.clearFilter()
             Herald.messageSearch.clearSearch()
-            mainView.pop()
+            mainView.pop(StackView.Immediate)
         }
     }
 
@@ -39,7 +42,7 @@ ToolBar {
         id: searchRow
         anchors.left: backButton.right
         anchors.leftMargin: CmnCfg.smallMargin
-        anchors.rightMargin: CmnCfg.smallMargin
+        anchors.rightMargin: CmnCfg.defaultMargin
         anchors.right: parent.right
         anchors.verticalCenter: parent.verticalCenter
         height: implicitHeight //searchField.height //parent.height - CmnCfg.microMargin
@@ -47,9 +50,11 @@ ToolBar {
         BorderedTextField {
             id: searchField
             color: CmnCfg.palette.white
-            borderColor: "Transparent"
-            placeholderText: qsTr('Search your conversations')
-            // Load previous search query in search field in case returns gets
+            borderColor: "transparent"
+            placeholderText: parentPage.state === "fromComposeButton" ?
+                                 qsTr("Enter username or group title") :
+                                 qsTr("Search your conversations")
+            // Load previous search query in search field in case user gets
             // to this view via back button and expects state to be preserved
             text: Herald.conversations.filter
             font.pixelSize: CmnCfg.chatTextSize
@@ -81,7 +86,8 @@ ToolBar {
             Layout.alignment: Qt.AlignRight
             color: CmnCfg.palette.iconFill
             imageSource: "qrc:/x-icon.svg"
-            onTapped: searchField.text = ''
+            visible: searchField.text === "" ? false : true
+            onTapped: searchField.text = ""
             // TODO then focus search field again
         }
     }

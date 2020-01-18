@@ -68,7 +68,7 @@ impl UsersSearchTrait for UsersSearch {
     }
 
     /// Returns user's color
-    fn color(
+    fn user_color(
         &self,
         row_index: usize,
     ) -> Option<u32> {

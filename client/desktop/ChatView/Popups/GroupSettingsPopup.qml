@@ -90,7 +90,7 @@ Popup {
                         pfpPath: Utils.safeStringOrDefault(convoData.picture,
                                                            "")
 
-                        color: CmnCfg.palette.avatarColors[convoData.color]
+                        color: CmnCfg.palette.avatarColors[convoData.conversationColor]
                         size: parent.height
                         textColor: CmnCfg.palette.iconFill
                         initials: Utils.initialize(convoData.title)
@@ -138,7 +138,7 @@ Popup {
                     selectionColor: CmnCfg.palette.highlightColor
                     readOnly: true
                     font.family: CmnCfg.chatFont.name
-                    font.pixelSize: CmnCfg.headerFontSize
+                    font.pixelSize: CmnCfg.labelFontSize
                     font.weight: Font.Medium
                     color: CmnCfg.palette.black
                     borderColor: CmnCfg.palette.white
@@ -181,7 +181,8 @@ Popup {
                     text: "Members"
                     id: memberHeader
                     font.family: CmnCfg.chatFont.name
-                    font.weight: Font.DemiBold
+                    font.weight: Font.Medium
+                    font.pixelSize: CmnCfg.defaultFontSize
                 }
 
                 Imports.IconButton {
@@ -207,10 +208,12 @@ Popup {
                     property var memberData: model
                     Common.PlatonicRectangle {
                         boxTitle: memberData.name
-                        boxColor: memberData.color
+                        boxColor: memberData.memberColor
                         picture: Utils.safeStringOrDefault(memberData.picture,
                                                            "")
                         color: CmnCfg.palette.white
+                        topTextMargin: CmnCfg.smallMargin
+                        bottomTextMargin: CmnCfg.defaultMargin
                         labelComponent: Entity.ContactLabel {
                             displayName: memberData.name
                             username: memberData.userId

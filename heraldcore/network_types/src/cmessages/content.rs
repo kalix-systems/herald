@@ -69,7 +69,7 @@ pub struct Receipt {
     /// The message id.
     pub of: MsgId,
     /// The receipt status of the message.
-    pub stat: MessageReceiptStatus,
+    pub stat: ReceiptStatus,
 }
 
 /// A message reaction

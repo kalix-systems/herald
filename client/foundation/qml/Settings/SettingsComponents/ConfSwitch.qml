@@ -7,9 +7,12 @@ import LibHerald 1.0
 Switch {
     id: control
 
+    padding: 0
+    spacing: 0
     indicator: Rectangle {
-        implicitWidth: 36
-        implicitHeight: 14
+        implicitWidth: 32
+
+        implicitHeight: 12
         radius: 13
         x: control.leftPadding
         y: parent.height / 2 - height / 2
@@ -17,9 +20,9 @@ Switch {
         Rectangle {
             id: ctrl
             x: control.checked ? parent.width - width : 0
-            width: 20
-            height: 20
-            radius: 13
+            width: 18
+            height: 18
+            radius: width
             anchors.verticalCenter: parent.verticalCenter
             color: control.checked ? CmnCfg.palette.offBlack : CmnCfg.palette.white
             Behavior on x {
@@ -35,7 +38,7 @@ Switch {
         }
         DropShadow {
             color: "#000000"
-            radius: 3.2
+            radius: 4
             samples: 9
             anchors.fill: ctrl
             source: ctrl

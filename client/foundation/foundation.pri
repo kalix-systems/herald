@@ -1,4 +1,4 @@
-QT += quick svg xml gui
+QT += quick svg xml widgets gui quickcontrols2
 VERSION = 0.0.1
 
 INCLUDEPATH += $$PWD/../../libherald/qt_ffi \
@@ -47,7 +47,8 @@ CONFIG(release, debug|profile|release) {
 iphoneos {
    QMAKE_INFO_PLIST = $$PWD/ios_sources/Info.Plist
    app_launch_images.files = $$PWD/ios_sources/HeraldScreen.xib
-    app_launch_images.files += $$PWD/icons/herald.png
+   app_launch_images.files += $$PWD/icons/herald.png
+   app_launch_images.files += $$PWD/icons/herald.icns
    QMAKE_BUNDLE_DATA += app_launch_images
 }
 
@@ -97,11 +98,12 @@ windows {
 }
 android {
      QT += androidextras
-    ANDROID_ABIS = armeabi-v7a
-    #ANDROID_ABIS = x86
+     ANDROID_ABIS = armeabi-v7a
+
+     #ANDROID_ABIS = x86
 
      LIBS +=  $${PWD}/../../target/armv7-linux-androideabi/$${RUST_BUILD_TYPE}/libherald.a
-    # LIBS +=  $${PWD}/../../target/i686-linux-android/$${RUST_BUILD_TYPE}/libherald.a
+     #LIBS +=  $${PWD}/../../target/i686-linux-android/$${RUST_BUILD_TYPE}/libherald.a
      HEADERS +=  $$PWD/androidhelper.h
      SOURCES +=  $$PWD/androidhelper.cpp
 

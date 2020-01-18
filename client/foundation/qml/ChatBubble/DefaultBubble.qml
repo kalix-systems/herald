@@ -135,9 +135,9 @@ Rectangle {
         anchors.margins: CmnCfg.smallMargin
 
         icon.source: receiptImage
-        icon.height: 16
-        icon.width: 16
-        icon.color: CmnCfg.palette.iconMatte
+        icon.height: CmnCfg.units.dp(14)
+        icon.width: CmnCfg.units.dp(14)
+        icon.color: CmnCfg.palette.darkGrey
         padding: 0
         background: Item {}
     }

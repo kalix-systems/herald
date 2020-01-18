@@ -54,11 +54,13 @@ Column {
             Common.PlatonicRectangle {
                 color: CmnCfg.palette.offBlack
                 id: contactRectangle
-                boxColor: contactData.color
+                boxColor: contactData.userColor
                 boxTitle: contactData.name
                 picture: Utils.safeStringOrDefault(contactData.profilePicture,
                                                    "")
 
+                        topTextMargin: CmnCfg.smallMargin
+                        bottomTextMargin: CmnCfg.defaultMargin
                 labelComponent: Entity.ContactLabel {
                     displayName: contactData.name
                     labelColor: contactRectangle.state

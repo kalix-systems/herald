@@ -9,6 +9,7 @@ MouseArea {
 
     pressAndHoldInterval: 350
     hoverEnabled: true
+    propagateComposedEvents: true
 
     anchors.fill: parent
     z: CmnCfg.overlayZ
@@ -16,6 +17,7 @@ MouseArea {
     onPressAndHold: {
         cb.hoverHighlight = true
         dropdown.activate()
+        chatList.closeDropdown()
     }
     onReleased: {
         cb.hoverHighlight = false

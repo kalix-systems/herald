@@ -17,17 +17,22 @@ Item {
         id: systemPalette
         colorGroup: SystemPalette.Active
     }
+    property alias settings: settings
+
+    property bool themeIsDark: ((systemPalette.window.r / Qt.red + systemPalette.window.g / Qt.green
+                                 + systemPalette.window.b / Qt.blue) / 256) < 0.5
+
     readonly property alias sysPalette: systemPalette
     /// standard tiny margin
     readonly property real microMargin: units.dp(4)
     /// standard small margin
-    readonly property real smallMargin: units.dp(8)
+    readonly property real smallMargin: units.dp(6)
     /// standard margin size
-    readonly property real defaultMargin: units.dp(12)
+    readonly property real defaultMargin: units.dp(10)
     /// standard large margin size
-    readonly property real largeMargin: units.dp(16)
+    readonly property real largeMargin: units.dp(14)
     /// standard very large margin
-    readonly property real megaMargin: units.dp(24)
+    readonly property real megaMargin: units.dp(20)
 
     // TODO shouldn't use spacers
     /// gap used for tool bars, avatar margins, etc
@@ -38,20 +43,21 @@ Item {
     // FONTS
 
     /// standard header size
-    readonly property real headerFontSize: units.dp(14)
+    readonly property real headerFontSize: units.dp(17)
     /// size of labels
-    readonly property real labelFontSize: units.dp(12)
+    readonly property real labelFontSize: units.dp(16)
     /// font size for minor text (e.g. timestamps)
-    readonly property int minorTextSize: units.dp(0)
+    readonly property int minorTextSize: units.dp(13)
     /// standard chat text size
-    readonly property real chatTextSize: units.dp(11)
-    readonly property real defaultFontSize: units.dp(12)
+    readonly property real chatTextSize: units.dp(14)
+    readonly property real defaultFontSize: units.dp(15)
     /// size for contact/group name labels in lists
-    readonly property int entityLabelSize: units.dp(14)
+    readonly property int entityLabelSize: units.dp(16)
     /// size for contact/group name labels in lists
-    readonly property int entitySubLabelSize: units.dp(12)
+    readonly property int entitySubLabelSize: units.dp(14)
     /// standard button text size
-    readonly property real buttonTextSize: units.dp(14)
+    readonly property real buttonTextSize: units.dp(15)
+    readonly property real typeMargin: units.dp(28)
 
     readonly property FontLoader chatFont: metaTheme.chatFont
     readonly property FontLoader labelFont: metaTheme.cairo
@@ -80,11 +86,9 @@ Item {
     /// standard toolbar height
     readonly property real toolbarHeight: units.dp(40)
 
-    /// logged-in user avatar size
-    readonly property real identityAvatarDiameter: units.dp(24)
     /// standard avatar size
-    readonly property real avatarSize: units.dp(42)
-    readonly property int chatAvatarSize: units.dp(24)
+    readonly property real avatarSize: units.dp(44)
+    readonly property int headerAvatarSize: units.dp(24)
     /// standard conversation/contact height
     readonly property int convoHeight: avatarSize * 1.5
 
@@ -92,7 +96,7 @@ Item {
     readonly property int accentBarWidth: 4
 
     /// height & width of icon buttons
-    readonly property real iconSize: units.dp(20)
+    readonly property real iconSize: units.dp(22)
 
     /// height of floating action buttons on home screen
     readonly property real fabDiameter: units.dp(56)
@@ -101,7 +105,7 @@ Item {
     readonly property real miniFabDiameter: units.dp(40)
 
     // MISC
-    readonly property int attachmentSize: 150
+    readonly property int attachmentSize: units.dp(150)
     /// standard z values
     readonly property int overlayZ: 10
     readonly property int topZ: 9
@@ -112,16 +116,27 @@ Item {
     /// user settable cfg
     readonly property int theme: 0
 
-    /// emoji skin color
-    Settings {
-        id: settings
-        property alias theme: cfg.theme
-    }
-
     Themes.MetaThemes {
         id: metaTheme
     }
     /// palette :
     readonly property QtObject palette: metaTheme.themes[theme]
     readonly property var avatarColors: palette.avatarColors
+
+    /// list of recent emojis
+    property var recentEmojis: []
+    /// fitzpatrick emoji swatch codes
+    readonly property var skinSwatchList: ["", "🏻", "🏼", "🏽", "🏾", "🏿"]
+    /// emoji skin color
+    property int skinSwatchIndex: 0
+
+    Settings {
+        id: settings
+        readonly property alias skinSwatchIndex: cfg.skinSwatchIndex
+        property string recentEmojisJson: "[]"
+
+        Component.onCompleted: {
+            recentEmojis = JSON.parse(recentEmojisJson)
+        }
+    }
 }

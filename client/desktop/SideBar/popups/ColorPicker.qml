@@ -6,7 +6,6 @@ import QtQuick.Window 2.13
 import QtGraphicalEffects 1.0
 
 //TODO: Make Color Settings Exist
-// UNREACHABLE !
 Popup {
     id: colorWindow
     width: 180

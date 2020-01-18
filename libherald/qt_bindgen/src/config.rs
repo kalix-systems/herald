@@ -146,7 +146,10 @@ fn conversations() -> Object {
        expirationPeriod: ItemProp::new(QUint8).write(),
        matched: matched_item_prop(),
        picture: picture_item_prop().get_by_value(),
-       color: color_item_prop(),
+       conversationColor: color_item_prop(),
+
+       // 0 => not archived
+       // 1 => is archived
        status: ItemProp::new(QUint8).write(),
 
        lastMsgDigest: ItemProp::new(QString).get_by_value(),
@@ -178,14 +181,14 @@ fn users() -> Object {
        status: ItemProp::new(QUint8).write(),
        matched: matched_item_prop(),
        profilePicture: picture_item_prop().get_by_value(),
-       color: color_item_prop().write()
+       userColor: color_item_prop().write()
     };
 
     let funcs = functions! {
         mut add(id: QString) => QByteArray,
         mut toggleFilterRegex() => Bool,
         mut clearFilter() => Void,
-        const colorById(id: QString) => QUint32,
+        const userColorById(id: QString) => QUint32,
         const nameById(id: QString) => QString,
         const profilePictureById(id: QString) => QString,
         const indexById(id: QString) => Qint64,
@@ -199,7 +202,7 @@ fn users() -> Object {
 fn conversation_content() -> Object {
     let props = props! {
         members: Prop::new().object(members()),
-        messages: Prop::new().object(messages()),
+        messages: Prop::new(                 ).object(messages()),
         conversationId: conv_id_prop()
     };
 
@@ -218,8 +221,7 @@ fn conversation_content() -> Object {
 }
 
 fn members() -> Object {
-    let mut props = props! {};
-    props.append(&mut filter_props());
+    let props = filter_props();
 
     let item_props = item_props! {
        userId: ItemProp::new(QString),
@@ -228,17 +230,23 @@ fn members() -> Object {
        status: ItemProp::new(QUint8),
        matched: matched_item_prop(),
        profilePicture: picture_item_prop().get_by_value(),
-       color: color_item_prop()
+       memberColor: color_item_prop(),
+       lastTyping: ItemProp::new(Qint64).optional()
     };
 
     let funcs = functions! {
         mut addToConversation(id: QString) => Bool,
         mut removeFromConversationByIndex(row_index: QUint64) => Bool,
         mut toggleFilterRegex() => Bool,
+        const typingMembers() => QString,
+    };
+
+    let hooks = signals! {
+       newTypingIndicator(),|
     };
 
     obj! {
-        Members: Obj::new().list().props(props).funcs(funcs).item_props(item_props)
+        Members: Obj::new().list().props(props).funcs(funcs).item_props(item_props).hooks(hooks)
     }
 }
 
@@ -272,10 +280,6 @@ fn emoji_picker() -> Object {
 
 fn messages() -> Object {
     let props = props! {
-        // User id of the last user to send a typing notification
-        typingUserId: Prop::new().simple(QString).optional(),
-
-
         searchPattern: filter_prop(),
         searchRegex: filter_regex_prop(),
         searchActive: Prop::new().simple(Bool).write(),
@@ -355,10 +359,6 @@ fn messages() -> Object {
         opDocAttachments: ItemProp::new(QString).get_by_value()
     };
 
-    let hooks = signals! {
-       newTypingIndicator(),|
-    };
-
     let funcs = functions! {
         mut deleteMessage(row_index: QUint64) => Bool,
         mut deleteMessageById(id: QByteArray) => Bool,
@@ -379,7 +379,7 @@ fn messages() -> Object {
     };
 
     obj! {
-        Messages: Obj::new().list().funcs(funcs).item_props(item_props).props(props).hooks(hooks)
+        Messages: Obj::new().list().funcs(funcs).item_props(item_props).props(props)
     }
 }
 
@@ -431,7 +431,7 @@ fn config() -> Object {
         configId: Prop::new().simple(QString),
         name: Prop::new().simple(QString).write(),
         profilePicture: Prop::new().simple(QString).optional(),
-        color: Prop::new().simple(QUint32).write(),
+        configColor: Prop::new().simple(QUint32).write(),
         ntsConversationId: Prop::new().simple(QByteArray),
         preferredExpiration: Prop::new().simple(QUint8).write()
     };
@@ -487,7 +487,7 @@ fn users_search() -> Object {
        userId: ItemProp::new(QString).optional(),
        name: ItemProp::new(QString).get_by_value().optional(),
        profilePicture: picture_item_prop().get_by_value().optional(),
-       color: color_item_prop().optional(),
+       userColor: color_item_prop().optional(),
        selected: ItemProp::new(Bool).write(),
        matched: matched_item_prop()
     };

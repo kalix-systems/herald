@@ -24,12 +24,13 @@ int main(int argc, char* argv[])
         Q_UNUSED(engine)
         Q_UNUSED(scriptEngine)
 
-       auto local = QStandardPaths::AppDataLocation;
-
+        auto local = QStandardPaths::AppDataLocation;
         QString path = QStandardPaths::writableLocation(local);
+
 
         Herald* state = new Herald();
         state->setAppLocalDataDir(path);
+
 
         return state;
       });
@@ -58,8 +59,8 @@ int main(int argc, char* argv[])
 
   QQmlApplicationEngine engine;
 
-  engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
 
+  engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
   if (engine.rootObjects().isEmpty()) return -1;
 
   return QApplication::exec();

@@ -29,6 +29,12 @@ Component {
                 sideBarState.state = ""
             }
         }
+        MouseArea {
+            z: parent.z - 1
+            anchors.fill: parent
+            hoverEnabled: true
+            propagateComposedEvents: false
+        }
 
         Rectangle {
             id: bigDivider

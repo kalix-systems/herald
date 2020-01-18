@@ -43,8 +43,8 @@
         <file>TimerOptions.qml</file>
         <file>Units.qml</file>
         <file>errors/ErrorDialog.qml</file>
-        <file alias="/js/Avatar.mjs">../js/Avatar.mjs</file>
-        <file alias="/js/utils.mjs">../js/utils.mjs</file>
+        <file>../js/Avatar.mjs</file>
+        <file>../js/utils.mjs</file>
         <file>themes/Dark.qml</file>
         <file>themes/EarthTones.qml</file>
         <file>themes/Light.qml</file>
@@ -74,7 +74,6 @@
         <file>Settings/SettingsComponents/Privacy.qml</file>
         <file>Settings/SettingsComponents/Profile.qml</file>
         <file>Settings/SettingsComponents/SettingsListItem.qml</file>
-        <file>Settings/SettingsComponents/Storage.qml</file>
         <file>Settings/SettingsPane.qml</file>
         <file>FileDialogWrapper.qml</file>
         <file>ChatBubble/ImageLayouts/FourImageLayout.qml</file>
@@ -85,5 +84,12 @@
         <file>ChatBubble/TypingBubble.qml</file>
         <file>Settings/SettingsComponents/MultipleDevice.qml</file>
         <file>Settings/SettingsComponents/NewDevicePage.qml</file>
+        <file>TimerOptionsBuilder.qml</file>
+        <file>EmojiKeyboard/AnchorButton.qml</file>
+        <file>EmojiKeyboard/EmojiButton.qml</file>
+        <file>EmojiKeyboard/EmojiPicker.qml</file>
+        <file>EmojiKeyboard/PickerInterior.qml</file>
+        <file>EmojiKeyboard/SearchInteriorComponent.qml</file>
+        <file>EmojiKeyboard/StandardInterior.qml</file>
     </qresource>
 </RCC>

@@ -1,6 +1,6 @@
 import QtQuick 2.14
 import LibHerald 1.0
-import "../../EmojiKeyboard" as EK
+import "qrc:/imports/EmojiKeyboard" as EK
 import "../ChatTextArea/js/ChatTextAreaUtils.mjs" as JS
 
 Loader {
@@ -11,7 +11,6 @@ Loader {
     property bool isReactPopup: false
     sourceComponent: EK.EmojiPicker {
         id: emojiPicker
-        //  z: chatPage.z + 2
         window: convWindow
         Component.onCompleted: {
             emojiPicker.send.connect(function (emoji) {
@@ -21,10 +20,6 @@ Loader {
                     ownedConversation.addReaction(index, emoji)
                 }
             })
-        }
-        MouseArea {
-            anchors.fill: parent
-            z: parent.z - 1
         }
     }
 }

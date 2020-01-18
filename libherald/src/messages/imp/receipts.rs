@@ -1,4 +1,5 @@
 use super::*;
+use heraldcore::message::Status;
 
 impl Messages {
     pub(crate) fn receipt_status_(
@@ -7,30 +8,38 @@ impl Messages {
     ) -> Option<u32> {
         let local_id = self.local_id?;
 
-        Some(
-            self.container
-                .access_by_index(index, |data| {
-                    let author = data.author;
-                    data.receipts
-                        .iter()
-                        .filter(|(k, _)| k != &&local_id && k != &&author)
-                        .map(|(_, r)| *r as u32)
-                        .max()
-                })?
-                .unwrap_or(MessageReceiptStatus::Nil as u32),
-        )
+        Some(self.container.access_by_index(index, |data| {
+            let author = data.author;
+            let receipt_status = data
+                .receipts
+                .iter()
+                .filter(|(k, _)| k != &&local_id && k != &&author)
+                .map(|(_, r)| r)
+                .max()
+                .copied();
+
+            Status::from((data.send_status, receipt_status)) as u32
+        })?)
     }
 
     pub(crate) fn user_receipts_(
         &self,
         index: usize,
     ) -> Option<String> {
+        let send_status = self
+            .container
+            .access_by_index(index, |data| data.send_status)?;
+
         let receipts = self
             .container
             .access_by_index(index, |data| data.receipts.clone())?
             .into_iter()
             .filter(|(u, _)| Some(u) != self.local_id.as_ref())
-            .map(|(userid, receipt)| (userid.to_string(), json::JsonValue::from(receipt as u32)))
+            .map(|(userid, receipt)| {
+                let status = Status::from((send_status, Some(receipt)));
+
+                (userid.to_string(), json::JsonValue::from(status as u8))
+            })
             .collect::<HashMap<String, json::JsonValue>>();
 
         json::JsonValue::from(receipts).dump().into()
@@ -50,12 +59,15 @@ impl Messages {
                 return false;
             }
 
-            let status = data.receipts.entry(local_id).or_default();
+            let status = data
+                .receipts
+                .entry(local_id)
+                .or_insert(ReceiptStatus::Received);
 
             match *status {
-                MessageReceiptStatus::Read => false,
+                ReceiptStatus::Read => false,
                 _ => {
-                    *status = MessageReceiptStatus::Read;
+                    *status = ReceiptStatus::Read;
                     true
                 }
             }
@@ -73,7 +85,7 @@ impl Messages {
             err!(heraldcore::message::add_receipt(
                 msg_id,
                 local_id,
-                MessageReceiptStatus::Read
+                ReceiptStatus::Read
             ));
             err!(heraldcore::network::send_read_receipt(cid, msg_id));
         });

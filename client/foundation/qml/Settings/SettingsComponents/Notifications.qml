@@ -4,88 +4,126 @@ import QtQuick.Layouts 1.12
 import LibHerald 1.0
 import "../../"
 
-GridLayout {
-    columns: 2
-    rows: 8
+Column {
     width: parent.width
 
-    StandardLabel {
-        text: qsTr("Notifications Enabled")
-        color: "black"
-        Layout.leftMargin: CmnCfg.defaultMargin
-        wrapMode: Label.WrapAtWordBoundaryOrAnywhere
-        font.pixelSize: CmnCfg.entityLabelSize
-        font.family: CmnCfg.chatFont.name
-    }
+    id: wrapper
+    spacing: CmnCfg.smallMargin
+    Row {
+        leftPadding: CmnCfg.defaultMargin
+        height: notifLabel.height
+        width: parent.width
+        StandardLabel {
+            id: notifLabel
+            text: qsTr("Notifications")
+            color: "black"
+            wrapMode: Label.WrapAtWordBoundaryOrAnywhere
+            anchors.verticalCenter: parent.verticalCenter
+                font.family: CmnCfg.chatFont.name
+                font.pixelSize: CmnCfg.chatTextSize
+        }
+        Item {
+            height: 10
+            width: wrapper.width * 0.66 - notifLabel.width
+        }
 
-    ConfSwitch {
-        checked: true
-    }
-
-    Rectangle {
-        color: CmnCfg.palette.darkGrey
-        height: 1
-        Layout.fillWidth: true
-        Layout.columnSpan: 2
-    }
-
-    StandardLabel {
-        text: qsTr("Silent")
-        color: "black"
-        Layout.leftMargin: CmnCfg.defaultMargin
-        wrapMode: Label.WrapAtWordBoundaryOrAnywhere
-        font.pixelSize: CmnCfg.entityLabelSize
-        font.family: CmnCfg.chatFont.name
-    }
-
-    ConfSwitch {
-        checked: false
+        ConfSwitch {
+            checked: true
+            anchors.verticalCenter: parent.verticalCenter
+        }
     }
 
     Rectangle {
-        color: CmnCfg.palette.darkGrey
+        color: CmnCfg.palette.medGrey
         height: 1
-        Layout.fillWidth: true
-        Layout.columnSpan: 2
+        width: parent.width
     }
 
-    StandardLabel {
-        text: qsTr("Show author in notification")
-        color: "black"
-        Layout.leftMargin: CmnCfg.defaultMargin
-        wrapMode: Label.WrapAtWordBoundaryOrAnywhere
-        font.pixelSize: CmnCfg.entityLabelSize
-        font.family: CmnCfg.chatFont.name
-    }
+    Row {
+        leftPadding: CmnCfg.defaultMargin
+        height: silentLabel.height
+        width: parent.width
+        StandardLabel {
+            id: silentLabel
+            text: qsTr("Silent")
+            color: "black"
+            wrapMode: Label.WrapAtWordBoundaryOrAnywhere
+            anchors.verticalCenter: parent.verticalCenter
+                font.family: CmnCfg.chatFont.name
+                font.pixelSize: CmnCfg.chatTextSize
+        }
 
-    ConfSwitch {
-        checked: false
+        Item {
+            height: 10
+            width: wrapper.width * 0.66 - silentLabel.width
+        }
+        ConfSwitch {
+            checked: false
+            anchors.verticalCenter: parent.verticalCenter
+        }
     }
 
     Rectangle {
-        color: CmnCfg.palette.darkGrey
+        color: CmnCfg.palette.medGrey
         height: 1
-        Layout.fillWidth: true
-        Layout.columnSpan: 2
+        width: parent.width
     }
 
-    StandardLabel {
-        text: qsTr("Show message body in notification")
-        color: CmnCfg.palette.black
-        Layout.minimumWidth: 0
-        Layout.leftMargin: CmnCfg.defaultMargin
-        font.pixelSize: CmnCfg.entityLabelSize
-        font.family: CmnCfg.labelFont.name
-    }
+    Row {
+        leftPadding: CmnCfg.defaultMargin
+        height: authorLabel.height
+        width: parent.width
+        StandardLabel {
+            id: authorLabel
+            text: qsTr("Show author name")
+            color: "black"
+            wrapMode: Label.WrapAtWordBoundaryOrAnywhere
+            anchors.verticalCenter: parent.verticalCenter
+                font.family: CmnCfg.chatFont.name
+                font.pixelSize: CmnCfg.chatTextSize
+        }
 
-    ConfSwitch {
-        checked: false
+        Item {
+            height: 10
+            width: wrapper.width * 0.66 - authorLabel.width
+        }
+        ConfSwitch {
+            checked: true
+            anchors.verticalCenter: parent.verticalCenter
+        }
     }
 
     Rectangle {
-        color: CmnCfg.palette.darkGrey
+        color: CmnCfg.palette.medGrey
         height: 1
-        Layout.fillWidth: true
-        Layout.columnSpan: 2
+        width: parent.width
+    }
+    Row {
+        leftPadding: CmnCfg.defaultMargin
+        height: messageLabel.height
+        width: parent.width
+        StandardLabel {
+            id: messageLabel
+            text: qsTr("Show message body")
+            color: "black"
+            wrapMode: Label.WrapAtWordBoundaryOrAnywhere
+            anchors.verticalCenter: parent.verticalCenter
+                font.family: CmnCfg.chatFont.name
+                font.pixelSize: CmnCfg.chatTextSize
+        }
+        Item {
+            height: 10
+            width: wrapper.width * 0.66 - messageLabel.width
+        }
+
+        ConfSwitch {
+            checked: true
+            anchors.verticalCenter: parent.verticalCenter
+        }
+    }
+    Rectangle {
+        color: CmnCfg.palette.medGrey
+        height: 1
+        width: parent.width
     }
 }

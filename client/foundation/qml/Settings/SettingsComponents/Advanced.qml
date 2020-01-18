@@ -4,56 +4,70 @@ import QtQuick.Layouts 1.14
 import LibHerald 1.0
 import "../../"
 
-ColumnLayout {
+Column {
+    id: wrapper
+    width: parent.width
 
-    RowLayout {
-        Layout.fillWidth: true
+    spacing: CmnCfg.smallMargin
+    Row {
+        leftPadding: CmnCfg.defaultMargin
+        height: language.height
         StandardLabel {
+            id: language
             text: qsTr("Language")
             color: CmnCfg.palette.black
-            Layout.leftMargin: CmnCfg.defaultMargin
-            Layout.fillWidth: true
-            font: CmnCfg.defaultFont
+                font.family: CmnCfg.chatFont.name
+                font.pixelSize: CmnCfg.chatTextSize
+        }
+
+        Item {
+            height: 10
+            width: wrapper.width * 0.66 - language.width
         }
 
         StandardCombo {
-            Layout.alignment: Qt.AlignRight
-            Layout.rightMargin: CmnCfg.largeMargin
             model: ["English"]
         }
     }
 
     Rectangle {
-        color: CmnCfg.palette.darkGrey
+        color: CmnCfg.palette.medGrey
         height: 1
-        Layout.fillWidth: true
+        width: parent.width
     }
 
-    RowLayout {
-        Layout.fillWidth: true
-        Layout.rightMargin: CmnCfg.defaultMargin
-        StandardLabel {
-            text: qsTr("App Info")
-            color: "black"
-            Layout.leftMargin: CmnCfg.defaultMargin
-            font: CmnCfg.defaultFont
-        }
+    Column {
+        Row {
+            leftPadding: CmnCfg.defaultMargin
+            StandardLabel {
+                id: app
+                text: qsTr("App Info")
+                color: "black"
+                font.family: CmnCfg.chatFont.name
+                font.pixelSize: CmnCfg.chatTextSize
+            }
 
-        Item {
-            Layout.fillWidth: true
-        }
+            Item {
+                width: wrapper.width * 0.66 - app.width
+                height: 10
+            }
 
-        StandardLabel {
-            text: qsTr("Version ") + "0.0.1-alpha.1-rc.1"
-            color: "black"
-            Layout.leftMargin: CmnCfg.defaultMargin
-            font: CmnCfg.defaultFont
+            GridLayout {
+                StandardLabel {
+                    text: qsTr("Version ") + "0.0.1-alpha"
+                    color: "black"
+                    Layout.maximumWidth: wrapper.width * 0.33 - CmnCfg.microMargin
+                    wrapMode: Label.WrapAtWordBoundaryOrAnywhere
+                font.family: CmnCfg.chatFont.name
+                font.pixelSize: CmnCfg.chatTextSize
+                }
+            }
         }
     }
 
     Rectangle {
-        color: CmnCfg.palette.darkGrey
+        color: CmnCfg.palette.medGrey
         height: 1
-        Layout.fillWidth: true
+        width: parent.width
     }
 }

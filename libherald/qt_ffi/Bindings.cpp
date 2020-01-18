@@ -96,7 +96,9 @@ inline QVariant cleanNullQVariant(const QVariant &v) {
   return (v.isNull()) ? QVariant() : v;
 }
 
-inline void configColorChanged(Config *o) { Q_EMIT o->colorChanged(); }
+inline void configConfigColorChanged(Config *o) {
+  Q_EMIT o->configColorChanged();
+}
 inline void configConfigIdChanged(Config *o) { Q_EMIT o->configIdChanged(); }
 inline void configNameChanged(Config *o) { Q_EMIT o->nameChanged(); }
 inline void configNtsConversationIdChanged(Config *o) {
@@ -223,9 +225,6 @@ inline void messagesSearchPatternChanged(Messages *o) {
 inline void messagesSearchRegexChanged(Messages *o) {
   Q_EMIT o->searchRegexChanged();
 }
-inline void messagesTypingUserIdChanged(Messages *o) {
-  Q_EMIT o->typingUserIdChanged();
-}
 inline void sharedConversationsUserIdChanged(SharedConversations *o) {
   Q_EMIT o->userIdChanged();
 }
@@ -240,8 +239,8 @@ inline void usersSearchFilterChanged(UsersSearch *o) {
 extern "C" {
 Config::Private *config_new(ConfigPtrBundle *);
 void config_free(Config::Private *);
-quint32 config_color_get(const Config::Private *);
-void config_color_set(Config::Private *, quint32);
+quint32 config_config_color_get(const Config::Private *);
+void config_config_color_set(Config::Private *, quint32);
 void config_config_id_get(const Config::Private *, QString *, qstring_set);
 void config_name_get(const Config::Private *, QString *, qstring_set);
 void config_name_set(Config::Private *, const ushort *str, int len);
@@ -444,7 +443,8 @@ conversation_content_messages_get(const ConversationContent::Private *);
 void conversation_content_poll_update(ConversationContent::Private *);
 }
 extern "C" {
-quint32 conversations_data_color(const Conversations::Private *, int);
+quint32 conversations_data_conversation_color(const Conversations::Private *,
+                                              int);
 void conversations_data_conversation_id(const Conversations::Private *, int,
                                         QByteArray *, qbytearray_set);
 quint8 conversations_data_expiration_period(const Conversations::Private *,
@@ -529,8 +529,8 @@ Qt::ItemFlags Conversations::flags(const QModelIndex &i) const {
   return flags;
 }
 
-quint32 Conversations::color(int row) const {
-  return conversations_data_color(m_d, row);
+quint32 Conversations::conversationColor(int row) const {
+  return conversations_data_conversation_color(m_d, row);
 }
 
 QByteArray Conversations::conversationId(int row) const {
@@ -635,7 +635,7 @@ QVariant Conversations::data(const QModelIndex &index, int role) const {
   case 0:
     switch (role) {
     case Qt::UserRole + 0:
-      return QVariant::fromValue(color(index.row()));
+      return QVariant::fromValue(conversationColor(index.row()));
     case Qt::UserRole + 1:
       return QVariant::fromValue(conversationId(index.row()));
     case Qt::UserRole + 2:
@@ -674,7 +674,7 @@ int Conversations::role(const char *name) const {
 }
 QHash<int, QByteArray> Conversations::roleNames() const {
   QHash<int, QByteArray> names = QAbstractItemModel::roleNames();
-  names.insert(Qt::UserRole + 0, "color");
+  names.insert(Qt::UserRole + 0, "conversationColor");
   names.insert(Qt::UserRole + 1, "conversationId");
   names.insert(Qt::UserRole + 2, "expirationPeriod");
   names.insert(Qt::UserRole + 3, "isEmpty");
@@ -1179,8 +1179,9 @@ MediaAttachments::Private *media_attachments_new(MediaAttachmentsPtrBundle *);
 void media_attachments_free(MediaAttachments::Private *);
 }
 extern "C" {
-quint32 members_data_color(const Members::Private *, int);
+option_qint64 members_data_last_typing(const Members::Private *, int);
 bool members_data_matched(const Members::Private *, int);
+quint32 members_data_member_color(const Members::Private *, int);
 void members_data_name(const Members::Private *, int, QString *, qstring_set);
 void members_data_pairwise_conversation_id(const Members::Private *, int,
                                            QByteArray *, qbytearray_set);
@@ -1248,9 +1249,17 @@ Qt::ItemFlags Members::flags(const QModelIndex &i) const {
   return flags;
 }
 
-quint32 Members::color(int row) const { return members_data_color(m_d, row); }
+QVariant Members::lastTyping(int row) const {
+  QVariant v;
+  v = members_data_last_typing(m_d, row);
+  return v;
+}
 
 bool Members::matched(int row) const { return members_data_matched(m_d, row); }
+
+quint32 Members::memberColor(int row) const {
+  return members_data_member_color(m_d, row);
+}
 
 QString Members::name(int row) const {
   QString s;
@@ -1284,19 +1293,21 @@ QVariant Members::data(const QModelIndex &index, int role) const {
   case 0:
     switch (role) {
     case Qt::UserRole + 0:
-      return QVariant::fromValue(color(index.row()));
+      return lastTyping(index.row());
     case Qt::UserRole + 1:
       return QVariant::fromValue(matched(index.row()));
     case Qt::UserRole + 2:
-      return QVariant::fromValue(name(index.row()));
+      return QVariant::fromValue(memberColor(index.row()));
     case Qt::UserRole + 3:
-      return QVariant::fromValue(pairwiseConversationId(index.row()));
+      return QVariant::fromValue(name(index.row()));
     case Qt::UserRole + 4:
+      return QVariant::fromValue(pairwiseConversationId(index.row()));
+    case Qt::UserRole + 5:
       return cleanNullQVariant(
           QVariant::fromValue(profilePicture(index.row())));
-    case Qt::UserRole + 5:
-      return QVariant::fromValue(status(index.row()));
     case Qt::UserRole + 6:
+      return QVariant::fromValue(status(index.row()));
+    case Qt::UserRole + 7:
       return QVariant::fromValue(userId(index.row()));
     }
     break;
@@ -1316,13 +1327,14 @@ int Members::role(const char *name) const {
 }
 QHash<int, QByteArray> Members::roleNames() const {
   QHash<int, QByteArray> names = QAbstractItemModel::roleNames();
-  names.insert(Qt::UserRole + 0, "color");
+  names.insert(Qt::UserRole + 0, "lastTyping");
   names.insert(Qt::UserRole + 1, "matched");
-  names.insert(Qt::UserRole + 2, "name");
-  names.insert(Qt::UserRole + 3, "pairwiseConversationId");
-  names.insert(Qt::UserRole + 4, "profilePicture");
-  names.insert(Qt::UserRole + 5, "status");
-  names.insert(Qt::UserRole + 6, "userId");
+  names.insert(Qt::UserRole + 2, "memberColor");
+  names.insert(Qt::UserRole + 3, "name");
+  names.insert(Qt::UserRole + 4, "pairwiseConversationId");
+  names.insert(Qt::UserRole + 5, "profilePicture");
+  names.insert(Qt::UserRole + 6, "status");
+  names.insert(Qt::UserRole + 7, "userId");
   return names;
 }
 
@@ -1356,6 +1368,7 @@ void members_filter_regex_set(Members::Private *, bool);
 bool members_add_to_conversation(Members::Private *, const ushort *, int);
 bool members_remove_from_conversation_by_index(Members::Private *, quint64);
 bool members_toggle_filter_regex(Members::Private *);
+void members_typing_members(const Members::Private *, QString *, qstring_set);
 }
 extern "C" {
 void message_builder_sort(MessageBuilder::Private *, unsigned char column,
@@ -2194,8 +2207,6 @@ void messages_search_pattern_set(Messages::Private *, const ushort *str,
                                  int len);
 bool messages_search_regex_get(const Messages::Private *);
 void messages_search_regex_set(Messages::Private *, bool);
-void messages_typing_user_id_get(const Messages::Private *, QString *,
-                                 qstring_set);
 void messages_add_reaction(Messages::Private *, quint64, const ushort *, int);
 bool messages_clear_conversation_history(Messages::Private *);
 void messages_clear_search(Messages::Private *);
@@ -2384,8 +2395,6 @@ void shared_conversations_user_id_set_none(SharedConversations::Private *);
 void shared_conversations_load(SharedConversations::Private *);
 }
 extern "C" {
-quint32 users_data_color(const Users::Private *, int);
-bool users_set_data_color(Users::Private *, int, quint32);
 bool users_data_matched(const Users::Private *, int);
 void users_data_name(const Users::Private *, int, QString *, qstring_set);
 void users_data_pairwise_conversation_id(const Users::Private *, int,
@@ -2394,6 +2403,8 @@ void users_data_profile_picture(const Users::Private *, int, QString *,
                                 qstring_set);
 quint8 users_data_status(const Users::Private *, int);
 bool users_set_data_status(Users::Private *, int, quint8);
+quint32 users_data_user_color(const Users::Private *, int);
+bool users_set_data_user_color(Users::Private *, int, quint32);
 void users_data_user_id(const Users::Private *, int, QString *, qstring_set);
 void users_sort(Users::Private *, unsigned char column,
                 Qt::SortOrder order = Qt::AscendingOrder);
@@ -2456,19 +2467,6 @@ Qt::ItemFlags Users::flags(const QModelIndex &i) const {
   return flags;
 }
 
-quint32 Users::color(int row) const { return users_data_color(m_d, row); }
-
-bool Users::setColor(int row, quint32 value) {
-  bool set = false;
-  set = users_set_data_color(m_d, row, value);
-
-  if (set) {
-    QModelIndex index = createIndex(row, 0, row);
-    Q_EMIT dataChanged(index, index);
-  }
-  return set;
-}
-
 bool Users::matched(int row) const { return users_data_matched(m_d, row); }
 
 QString Users::name(int row) const {
@@ -2502,6 +2500,21 @@ bool Users::setStatus(int row, quint8 value) {
   return set;
 }
 
+quint32 Users::userColor(int row) const {
+  return users_data_user_color(m_d, row);
+}
+
+bool Users::setUserColor(int row, quint32 value) {
+  bool set = false;
+  set = users_set_data_user_color(m_d, row, value);
+
+  if (set) {
+    QModelIndex index = createIndex(row, 0, row);
+    Q_EMIT dataChanged(index, index);
+  }
+  return set;
+}
+
 QString Users::userId(int row) const {
   QString s;
   users_data_user_id(m_d, row, &s, set_qstring);
@@ -2514,18 +2527,18 @@ QVariant Users::data(const QModelIndex &index, int role) const {
   case 0:
     switch (role) {
     case Qt::UserRole + 0:
-      return QVariant::fromValue(color(index.row()));
-    case Qt::UserRole + 1:
       return QVariant::fromValue(matched(index.row()));
-    case Qt::UserRole + 2:
+    case Qt::UserRole + 1:
       return QVariant::fromValue(name(index.row()));
-    case Qt::UserRole + 3:
+    case Qt::UserRole + 2:
       return QVariant::fromValue(pairwiseConversationId(index.row()));
-    case Qt::UserRole + 4:
+    case Qt::UserRole + 3:
       return cleanNullQVariant(
           QVariant::fromValue(profilePicture(index.row())));
-    case Qt::UserRole + 5:
+    case Qt::UserRole + 4:
       return QVariant::fromValue(status(index.row()));
+    case Qt::UserRole + 5:
+      return QVariant::fromValue(userColor(index.row()));
     case Qt::UserRole + 6:
       return QVariant::fromValue(userId(index.row()));
     }
@@ -2546,12 +2559,12 @@ int Users::role(const char *name) const {
 }
 QHash<int, QByteArray> Users::roleNames() const {
   QHash<int, QByteArray> names = QAbstractItemModel::roleNames();
-  names.insert(Qt::UserRole + 0, "color");
-  names.insert(Qt::UserRole + 1, "matched");
-  names.insert(Qt::UserRole + 2, "name");
-  names.insert(Qt::UserRole + 3, "pairwiseConversationId");
-  names.insert(Qt::UserRole + 4, "profilePicture");
-  names.insert(Qt::UserRole + 5, "status");
+  names.insert(Qt::UserRole + 0, "matched");
+  names.insert(Qt::UserRole + 1, "name");
+  names.insert(Qt::UserRole + 2, "pairwiseConversationId");
+  names.insert(Qt::UserRole + 3, "profilePicture");
+  names.insert(Qt::UserRole + 4, "status");
+  names.insert(Qt::UserRole + 5, "userColor");
   names.insert(Qt::UserRole + 6, "userId");
   return names;
 }
@@ -2578,14 +2591,14 @@ bool Users::setHeaderData(int section, Qt::Orientation orientation,
 
 bool Users::setData(const QModelIndex &index, const QVariant &value, int role) {
   if (index.column() == 0) {
-    if (role == Qt::UserRole + 0) {
-      if (value.canConvert(qMetaTypeId<quint32>())) {
-        return setColor(index.row(), value.value<quint32>());
+    if (role == Qt::UserRole + 4) {
+      if (value.canConvert(qMetaTypeId<quint8>())) {
+        return setStatus(index.row(), value.value<quint8>());
       }
     }
     if (role == Qt::UserRole + 5) {
-      if (value.canConvert(qMetaTypeId<quint8>())) {
-        return setStatus(index.row(), value.value<quint8>());
+      if (value.canConvert(qMetaTypeId<quint32>())) {
+        return setUserColor(index.row(), value.value<quint32>());
       }
     }
   }
@@ -2602,16 +2615,15 @@ void users_filter_regex_set(Users::Private *, bool);
 void users_add(Users::Private *, const ushort *, int, QByteArray *,
                qbytearray_set);
 void users_clear_filter(Users::Private *);
-quint32 users_color_by_id(const Users::Private *, const ushort *, int);
 qint64 users_index_by_id(const Users::Private *, const ushort *, int);
 void users_name_by_id(const Users::Private *, const ushort *, int, QString *,
                       qstring_set);
 void users_profile_picture_by_id(const Users::Private *, const ushort *, int,
                                  QString *, qstring_set);
 bool users_toggle_filter_regex(Users::Private *);
+quint32 users_user_color_by_id(const Users::Private *, const ushort *, int);
 }
 extern "C" {
-option_quint32 users_search_data_color(const UsersSearch::Private *, int);
 bool users_search_data_matched(const UsersSearch::Private *, int);
 void users_search_data_name(const UsersSearch::Private *, int, QString *,
                             qstring_set);
@@ -2619,6 +2631,7 @@ void users_search_data_profile_picture(const UsersSearch::Private *, int,
                                        QString *, qstring_set);
 bool users_search_data_selected(const UsersSearch::Private *, int);
 bool users_search_set_data_selected(UsersSearch::Private *, int, bool);
+option_quint32 users_search_data_user_color(const UsersSearch::Private *, int);
 void users_search_data_user_id(const UsersSearch::Private *, int, QString *,
                                qstring_set);
 void users_search_sort(UsersSearch::Private *, unsigned char column,
@@ -2683,12 +2696,6 @@ Qt::ItemFlags UsersSearch::flags(const QModelIndex &i) const {
   return flags;
 }
 
-QVariant UsersSearch::color(int row) const {
-  QVariant v;
-  v = users_search_data_color(m_d, row);
-  return v;
-}
-
 bool UsersSearch::matched(int row) const {
   return users_search_data_matched(m_d, row);
 }
@@ -2720,6 +2727,12 @@ bool UsersSearch::setSelected(int row, bool value) {
   return set;
 }
 
+QVariant UsersSearch::userColor(int row) const {
+  QVariant v;
+  v = users_search_data_user_color(m_d, row);
+  return v;
+}
+
 QString UsersSearch::userId(int row) const {
   QString s;
   users_search_data_user_id(m_d, row, &s, set_qstring);
@@ -2732,16 +2745,16 @@ QVariant UsersSearch::data(const QModelIndex &index, int role) const {
   case 0:
     switch (role) {
     case Qt::UserRole + 0:
-      return color(index.row());
-    case Qt::UserRole + 1:
       return QVariant::fromValue(matched(index.row()));
-    case Qt::UserRole + 2:
+    case Qt::UserRole + 1:
       return cleanNullQVariant(QVariant::fromValue(name(index.row())));
-    case Qt::UserRole + 3:
+    case Qt::UserRole + 2:
       return cleanNullQVariant(
           QVariant::fromValue(profilePicture(index.row())));
-    case Qt::UserRole + 4:
+    case Qt::UserRole + 3:
       return QVariant::fromValue(selected(index.row()));
+    case Qt::UserRole + 4:
+      return userColor(index.row());
     case Qt::UserRole + 5:
       return cleanNullQVariant(QVariant::fromValue(userId(index.row())));
     }
@@ -2762,11 +2775,11 @@ int UsersSearch::role(const char *name) const {
 }
 QHash<int, QByteArray> UsersSearch::roleNames() const {
   QHash<int, QByteArray> names = QAbstractItemModel::roleNames();
-  names.insert(Qt::UserRole + 0, "color");
-  names.insert(Qt::UserRole + 1, "matched");
-  names.insert(Qt::UserRole + 2, "name");
-  names.insert(Qt::UserRole + 3, "profilePicture");
-  names.insert(Qt::UserRole + 4, "selected");
+  names.insert(Qt::UserRole + 0, "matched");
+  names.insert(Qt::UserRole + 1, "name");
+  names.insert(Qt::UserRole + 2, "profilePicture");
+  names.insert(Qt::UserRole + 3, "selected");
+  names.insert(Qt::UserRole + 4, "userColor");
   names.insert(Qt::UserRole + 5, "userId");
   return names;
 }
@@ -2794,7 +2807,7 @@ bool UsersSearch::setHeaderData(int section, Qt::Orientation orientation,
 bool UsersSearch::setData(const QModelIndex &index, const QVariant &value,
                           int role) {
   if (index.column() == 0) {
-    if (role == Qt::UserRole + 4) {
+    if (role == Qt::UserRole + 3) {
       if (value.canConvert(qMetaTypeId<bool>())) {
         return setSelected(index.row(), value.value<bool>());
       }
@@ -2838,9 +2851,9 @@ Config::Config(bool /*owned*/, QObject *parent)
 Config::Config(QObject *parent)
     : QObject(parent),
       m_d(config_new(new ConfigPtrBundle{
-          this, configColorChanged, configConfigIdChanged, configNameChanged,
-          configNtsConversationIdChanged, configPreferredExpirationChanged,
-          configProfilePictureChanged})),
+          this, configConfigColorChanged, configConfigIdChanged,
+          configNameChanged, configNtsConversationIdChanged,
+          configPreferredExpirationChanged, configProfilePictureChanged})),
       m_ownsPrivate(true) {}
 
 Config::~Config() {
@@ -2849,8 +2862,8 @@ Config::~Config() {
   }
 }
 
-quint32 Config::color() const { return config_color_get(m_d); }
-void Config::setColor(quint32 v) { config_color_set(m_d, v); }
+quint32 Config::configColor() const { return config_config_color_get(m_d); }
+void Config::setConfigColor(quint32 v) { config_config_color_set(m_d, v); }
 
 QString Config::configId() const {
   QString v;
@@ -3014,6 +3027,7 @@ ConversationContent::ConversationContent(QObject *parent)
           [](Members *o) { o->endRemoveRows(); }
 
           ,
+          [](const Members *o) { Q_EMIT o->newTypingIndicator(); },
           m_messages,
           m_messages->m_builder,
           messageBuilderBodyChanged,
@@ -3123,7 +3137,6 @@ ConversationContent::ConversationContent(QObject *parent)
           messagesSearchNumMatchesChanged,
           messagesSearchPatternChanged,
           messagesSearchRegexChanged,
-          messagesTypingUserIdChanged,
           [](const Messages *o) { Q_EMIT o->newDataReady(QModelIndex()); },
           [](Messages *o) { Q_EMIT o->layoutAboutToBeChanged(); },
           [](Messages *o) {
@@ -3151,7 +3164,6 @@ ConversationContent::ConversationContent(QObject *parent)
           [](Messages *o) { o->endRemoveRows(); }
 
           ,
-          [](const Messages *o) { Q_EMIT o->newTypingIndicator(); },
           [](const ConversationContent *o) { Q_EMIT o->tryPoll(); }})),
       m_ownsPrivate(true) {
   m_members->m_d = conversation_content_members_get(m_d);
@@ -3507,7 +3519,7 @@ Herald::Herald(QObject *parent)
       m_d(herald_new(new HeraldPtrBundle{
           this,
           m_config,
-          configColorChanged,
+          configConfigColorChanged,
           configConfigIdChanged,
           configNameChanged,
           configNtsConversationIdChanged,
@@ -3862,7 +3874,8 @@ Members::Members(QObject *parent)
           },
           [](Members *o) { o->endRemoveRows(); }
 
-      })),
+          ,
+          [](const Members *o) { Q_EMIT o->newTypingIndicator(); }})),
       m_ownsPrivate(true) {
   connect(
       this, &Members::newDataReady, this,
@@ -3896,6 +3909,11 @@ bool Members::removeFromConversationByIndex(quint64 row_index) {
   return members_remove_from_conversation_by_index(m_d, row_index);
 }
 bool Members::toggleFilterRegex() { return members_toggle_filter_regex(m_d); }
+QString Members::typingMembers() const {
+  QString s;
+  members_typing_members(m_d, &s, set_qstring);
+  return s;
+}
 
 MessageBuilder::MessageBuilder(bool /*owned*/, QObject *parent)
     : QAbstractItemModel(parent),
@@ -4367,7 +4385,6 @@ Messages::Messages(QObject *parent)
           messagesSearchNumMatchesChanged,
           messagesSearchPatternChanged,
           messagesSearchRegexChanged,
-          messagesTypingUserIdChanged,
           [](const Messages *o) { Q_EMIT o->newDataReady(QModelIndex()); },
           [](Messages *o) { Q_EMIT o->layoutAboutToBeChanged(); },
           [](Messages *o) {
@@ -4394,8 +4411,7 @@ Messages::Messages(QObject *parent)
           },
           [](Messages *o) { o->endRemoveRows(); }
 
-          ,
-          [](const Messages *o) { Q_EMIT o->newTypingIndicator(); }})),
+      })),
       m_ownsPrivate(true) {
   m_builder->m_d = messages_builder_get(m_d);
   m_builder->m_documentAttachments->m_d =
@@ -4459,12 +4475,6 @@ void Messages::setSearchPattern(const QString &v) {
 
 bool Messages::searchRegex() const { return messages_search_regex_get(m_d); }
 void Messages::setSearchRegex(bool v) { messages_search_regex_set(m_d, v); }
-
-QString Messages::typingUserId() const {
-  QString v;
-  messages_typing_user_id_get(m_d, &v, set_qstring);
-  return v;
-}
 void Messages::addReaction(quint64 index, const QString &content) {
   return messages_add_reaction(m_d, index, content.utf16(), content.size());
 }
@@ -4650,9 +4660,6 @@ QByteArray Users::add(const QString &id) {
   return s;
 }
 void Users::clearFilter() { return users_clear_filter(m_d); }
-quint32 Users::colorById(const QString &id) const {
-  return users_color_by_id(m_d, id.utf16(), id.size());
-}
 qint64 Users::indexById(const QString &id) const {
   return users_index_by_id(m_d, id.utf16(), id.size());
 }
@@ -4667,6 +4674,9 @@ QString Users::profilePictureById(const QString &id) const {
   return s;
 }
 bool Users::toggleFilterRegex() { return users_toggle_filter_regex(m_d); }
+quint32 Users::userColorById(const QString &id) const {
+  return users_user_color_by_id(m_d, id.utf16(), id.size());
+}
 
 UsersSearch::UsersSearch(bool /*owned*/, QObject *parent)
     : QAbstractItemModel(parent), m_d(nullptr), m_ownsPrivate(false) {

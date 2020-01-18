@@ -1,12 +1,14 @@
 use super::*;
 
 impl Container {
-    pub fn handle_receipt<M: MessageModel>(
+    pub fn handle_receipt<M: MessageModel, E: MessageEmit>(
         &self,
         mid: MsgId,
-        status: MessageReceiptStatus,
+        status: ReceiptStatus,
         recipient: UserId,
         model: &mut M,
+        emit: &mut E,
+        cid: ConversationId,
     ) -> Option<()> {
         let res = update(&mid, |msg| {
             msg.receipts
@@ -31,6 +33,9 @@ impl Container {
             .rposition(|m| m.msg_id == mid)?;
 
         model.entry_changed(ix);
+        if ix == 0 {
+            emit.last_changed(cid, Some(mid));
+        }
 
         Some(())
     }
@@ -76,13 +81,15 @@ impl Container {
         Some(())
     }
 
-    pub fn handle_send_done<M: MessageModel>(
+    pub fn handle_send_done<M: MessageModel, E: MessageEmit>(
         &self,
         mid: MsgId,
         model: &mut M,
+        emit: &mut E,
+        cid: ConversationId,
     ) -> Option<()> {
         update(&mid, move |data| {
-            data.send_status = heraldcore::message::MessageSendStatus::Ack;
+            data.send_status = heraldcore::message::SendStatus::Ack;
         })?;
 
         let ix = self
@@ -93,6 +100,10 @@ impl Container {
             .rposition(|m| m.msg_id == mid)?;
 
         model.entry_changed(ix);
+
+        if ix == 0 {
+            emit.last_changed(cid, Some(mid));
+        }
 
         Some(())
     }

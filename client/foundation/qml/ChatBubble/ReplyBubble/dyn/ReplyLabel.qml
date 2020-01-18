@@ -16,6 +16,7 @@ Row {
         padding: 0
         color: opColor
         horizontalAlignment: Text.AlignLeft
+        font.pixelSize: CmnCfg.chatTextSize
 
         TextMetrics {
             id: opNameTM
@@ -38,7 +39,7 @@ Row {
     Label {
         id: replyTs
 
-        font.pixelSize: 11
+        font.pixelSize: CmnCfg.chatTextSize
         text: Utils.friendlyTimestamp(messageModelData.opInsertionTime)
         color: CmnCfg.palette.darkGrey
         anchors.verticalCenter: replyLabel.verticalCenter

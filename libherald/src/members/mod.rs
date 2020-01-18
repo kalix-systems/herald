@@ -1,5 +1,5 @@
 use crate::{err, ffi, interface::*, none};
-use herald_common::UserId;
+use herald_common::{Time, UserId};
 use heraldcore::{types::*, user};
 use search_pattern::SearchPattern;
 use std::convert::{TryFrom, TryInto};
@@ -16,6 +16,7 @@ pub(crate) mod imp;
 pub struct User {
     id: UserId,
     matched: bool,
+    last_typing: Option<Time>,
 }
 
 /// A wrapper around a vector of `User`s, with additional
@@ -92,7 +93,7 @@ impl MembersTrait for Members {
     }
 
     /// Returns user's color
-    fn color(
+    fn member_color(
         &self,
         row_index: usize,
     ) -> u32 {
@@ -202,6 +203,7 @@ impl MembersTrait for Members {
                 .map(|filter| crate::users::shared::matches(&user_id, filter))
                 .unwrap_or(true),
             id: user_id,
+            last_typing: None,
         });
         self.model.end_insert_rows();
         true
@@ -220,6 +222,36 @@ impl MembersTrait for Members {
 
         err!(heraldcore::members::remove_member(&conv_id, uid), false);
         true
+    }
+
+    fn last_typing(
+        &self,
+        index: usize,
+    ) -> Option<i64> {
+        let ts = *self.list.get(index).as_ref()?.last_typing?.as_i64();
+        ts.into()
+    }
+
+    fn typing_members(&self) -> String {
+        let time = Time::now();
+
+        let check = |t: Time, uid| {
+            if !t.within(6_000, time) {
+                return None;
+            }
+
+            let name = crate::users::shared::name(uid).unwrap_or_else(|| uid.to_string());
+            Some(name)
+        };
+
+        let names = self
+            .list
+            .iter()
+            .filter_map(|u| u.last_typing.map(|t| check(t, &u.id)))
+            .filter(|n| n.is_some())
+            .collect::<Vec<_>>();
+
+        json::JsonValue::from(names).dump()
     }
 }
 
@@ -252,7 +284,7 @@ impl Members {
     pub(crate) fn process_update(
         &mut self,
         update: MemberUpdate,
-    ) {
+    ) -> Option<()> {
         use MemberUpdate::*;
 
         match update {
@@ -264,18 +296,36 @@ impl Members {
                         .map(|filter| crate::users::shared::matches(&uid, filter))
                         .unwrap_or(true);
 
-                    let user = User { matched, id: uid };
+                    let user = User {
+                        matched,
+                        id: uid,
+                        last_typing: None,
+                    };
                     self.list.push(user);
                 } else {
                     println!("PLACEHOLDER: {} is too good for your group chat", uid);
                 }
             }
-        }
+
+            TypingIndicator(uid) => {
+                let pos = self.list.iter().position(|u| u.id == uid)?;
+                self.list.get_mut(pos)?.last_typing.replace(Time::now());
+                self.model.data_changed(pos, pos);
+
+                self.emit.new_typing_indicator();
+            }
+        };
+
+        Some(())
     }
 }
 
 /// Conversation member related updates
+#[derive(Debug)]
 pub enum MemberUpdate {
     /// Response to a conversation add request
     ReqResp(UserId, bool),
+
+    /// A typing indicator has been received
+    TypingIndicator(UserId),
 }

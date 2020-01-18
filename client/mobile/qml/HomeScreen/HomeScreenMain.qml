@@ -12,10 +12,15 @@ import QtGraphicalEffects 1.0
 // contains a list of conversations by default
 Page {
     id: cvMainView
-    readonly property Component headerComponent: HomeHeader {}
+    readonly property Component headerComponent: HomeHeader {
+        parentPage: cvMainView
+    }
+
     background: Rectangle {
         color: CmnCfg.palette.white
     }
+    Component.onCompleted: appRoot.router.cvView = cvMainView
+    signal messagePositionRequested(var requestMsgId)
 
     // the body of this entire element
     // displays conversations
@@ -31,15 +36,70 @@ Page {
             model: Herald.conversations
             delegate: ConversationItem {
                 property var conversationData: model
-                itemTitle: title
-                colorCode: model.color
-                imageSource: Utils.safeStringOrDefault(model.picture, "")
+                isNTS: {
+                    Herald.utils.compareByteArray(
+                                Herald.config.ntsConversationId,
+                                model.conversationId)
+                }
+                itemTitle: !isNTS ? title : qsTr("Note to Self")
+                colorCode: !isNTS ? model.conversationColor : Herald.config.configColor
+                imageSource: !isNTS ? Utils.safeStringOrDefault(
+                                          model.picture,
+                                          "") : Utils.safeStringOrDefault(
+                                          Herald.config.profilePicture, "")
                 isGroup: !model.pairwise
                 lastMsgDigest: model.lastMsgDigest
                 isEmpty: model.isEmpty
                 convoContent: ConversationContent {
                     id: convContent
                     conversationId: model.conversationId
+                }
+                visible: (cvMainView.state === "archiveState"
+                          && model.status === 1)
+                         || (cvMainView.state !== "archiveState"
+                             && model.status === 0)
+            }
+            Connections {
+                target: appRoot.router
+                onConvoRequest: {
+                    const conv_idx = Herald.conversations.indexById(
+                                       searchConversationId)
+
+                    // early return on out of bounds
+                    if ((conv_idx < 0) || (conv_idx >= cvListView.count))
+                        return
+
+                    stackView.push(cvListView.itemAtIndex(conv_idx).ownedCV)
+                    messagePositionRequested(searchMsgId)
+                }
+            }
+
+            Connections {
+                target: appRouter
+                onConvoClicked: {
+
+                    const conv_idx = Herald.conversations.indexById(
+                                       searchConversationId)
+
+                    // early return on out of bounds
+                    if ((conv_idx < 0) || (conv_idx >= cvListView.count))
+                        return
+
+                    stackView.push(cvListView.itemAtIndex(conv_idx).ownedCV)
+                }
+            }
+            Connections {
+                target: appRouter
+                onGroupRequested: {
+
+                    const conv_idx = Herald.conversations.indexById(groupId)
+
+                    // early return on out of bounds
+                    if ((conv_idx < 0) || (conv_idx >= cvListView.count))
+                        return
+
+                    stackView.pop(null, StackView.Immediate)
+                    stackView.push(cvListView.itemAtIndex(conv_idx).ownedCV)
                 }
             }
         }
@@ -54,7 +114,7 @@ Page {
         opacity: 0.5
 
         TapHandler {
-            //grabPermissions: PointerHandler.TakeOverForbidden
+            gesturePolicy: TapHandler.ReleaseWithinBounds
             onTapped: cvMainView.state = "default"
         }
     }
@@ -69,9 +129,9 @@ Page {
         ComposeButton {
             iconSource: "qrc:/plus-icon.svg"
             TapHandler {
+                gesturePolicy: TapHandler.ReleaseWithinBounds
                 onTapped: {
                     cvMainView.state = "fabButtonState"
-                    buttonLoader.sourceComponent = fab
                 }
             }
         }
@@ -90,6 +150,10 @@ Page {
     states: [
         State {
             name: "default"
+            PropertyChanges {
+                target: buttonLoader
+                visible: true
+            }
         },
         State {
             name: "fabButtonState"
@@ -100,6 +164,13 @@ Page {
             PropertyChanges {
                 target: buttonLoader
                 sourceComponent: fab
+            }
+        },
+        State {
+            name: "archiveState"
+            PropertyChanges {
+                target: buttonLoader
+                visible: false
             }
         }
     ]

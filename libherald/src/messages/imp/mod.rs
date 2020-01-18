@@ -6,7 +6,7 @@ use crate::{
 };
 use heraldcore::{
     config,
-    message::{self, MessageReceiptStatus, MsgData},
+    message::{self, MsgData, ReceiptStatus},
 };
 use messages_helper::search::SearchState;
 use std::collections::HashMap;
@@ -38,7 +38,6 @@ impl Messages {
             builder,
             elider: Default::default(),
 
-            typing_user: Default::default(),
             typing_sender: Default::default(),
         }
     }

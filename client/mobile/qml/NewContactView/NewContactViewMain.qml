@@ -13,10 +13,6 @@ Page {
         spacing: CmnCfg.defaultMargin
         anchors.leftMargin: parent.width * 0.1
 
-        Label {
-            text: qsTr("Request a new contact")
-        }
-
         Imports.BorderedTextField {
             id: usernameTextArea
             Layout.preferredWidth: parent.width * 0.8
@@ -36,7 +32,7 @@ Page {
         }
 
         Button {
-            text: qsTr("Send")
+            text: qsTr("Send Request")
             onClicked: {
                 Herald.users.add(usernameTextArea.text.trim())
                 mainView.pop()

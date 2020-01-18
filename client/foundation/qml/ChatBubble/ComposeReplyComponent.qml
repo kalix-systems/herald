@@ -6,6 +6,7 @@ import "qrc:/imports/js/utils.mjs" as Utils
 import "qrc:/imports" as Imports
 import "qrc:/imports/ChatBubble/ReplyBubble"
 import "qrc:/imports/ChatBubble" as ChatBubble
+import "qrc:/imports/ChatBubble/ReplyBubble/dyn"
 
 Rectangle {
     id: wrapper
@@ -16,7 +17,7 @@ Rectangle {
     property var builderData
     property bool outboundReply: Herald.config.configId === builderData.opAuthor
 
-    property color authorColor: CmnCfg.palette.avatarColors[Herald.users.colorById(
+    property color authorColor: CmnCfg.palette.avatarColors[Herald.users.userColorById(
                                                                 builderData.opAuthor)]
     property string authorName: outboundReply ? Herald.config.name : Herald.users.nameById(
                                                     builderData.opAuthor)
@@ -102,13 +103,14 @@ Rectangle {
 
     ChatBubble.BubbleLabel {
         id: label
-        topPadding: CmnCfg.smallMargin
+        //topPadding: CmnCfg.smallMargin
         anchors.left: accent.right
         anchors.leftMargin: CmnCfg.smallMargin
 
         timestamp: friendlyTimestamp
         name: authorName
     }
+
     Row {
         width: maxWidth
         id: wrapperRow
@@ -151,7 +153,8 @@ Rectangle {
                 Layout.rightMargin: CmnCfg.smallMargin
                 Layout.alignment: Qt.AlignLeft
                 Layout.fillWidth: true
-
+                font.family: CmnCfg.chatFont.name
+                font.pixelSize: CmnCfg.chatTextSize
                 wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                 selectByMouse: true
                 selectByKeyboard: true

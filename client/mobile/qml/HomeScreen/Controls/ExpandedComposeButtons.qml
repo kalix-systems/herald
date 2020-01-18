@@ -25,10 +25,14 @@ Column {
             }
         }
 
-        onClicked: {
-            mainView.push(newContactViewMain)
-            cvMainView.state = "default"
+        TapHandler {
+            gesturePolicy: TapHandler.ReleaseWithinBounds
+            onTapped: {
+                mainView.push(newContactViewMain)
+                cvMainView.state = "default"
+            }
         }
+
         icon.source: "qrc:/add-contact-icon.svg"
         icon.color: CmnCfg.palette.black
         icon.height: CmnCfg.iconSize
@@ -76,6 +80,7 @@ Column {
         }
 
         TapHandler {
+            gesturePolicy: TapHandler.ReleaseWithinBounds
             onTapped: {
                 mainView.push(newGroupViewMain)
                 cvMainView.state = "default"
@@ -91,7 +96,7 @@ Column {
             anchors.right: parent.left
             anchors.verticalCenter: parent.verticalCenter
             anchors.rightMargin: CmnCfg.defaultMargin
-            text: qsTr("New conversation")
+            text: qsTr("Send a message")
             font.pointSize: 12
             padding: CmnCfg.smallMargin
             background: Rectangle {
@@ -111,6 +116,15 @@ Column {
                                               1.3) : CmnCfg.palette.lightGrey
             anchors.fill: parent
             radius: height
+        }
+
+        TapHandler {
+            gesturePolicy: TapHandler.ReleaseWithinBounds
+            onTapped: {
+                mainView.push(globalSearchView, {"state": "fromComposeButton"},
+                              StackView.Immediate)
+                cvMainView.state = "default"
+            }
         }
     }
 }

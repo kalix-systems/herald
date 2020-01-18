@@ -25,17 +25,9 @@ macro_rules! set_imp {
             let id = &self.list.get(index).as_ref()?.id;
             let mut lock = shared::conv_data().write();
             let data = lock.get_mut(id)?;
+
             data.$field = val;
             Some(())
-       })*
-    }
-}
-
-macro_rules! imp_clone {
-    ($($name: ident, $field: ident, $ret: ty),*) => {
-       $(pub(super) fn $name(&self, index: usize) -> Option<$ret> {
-            let id = &self.list.get(index).as_ref()?.id;
-            Some(shared::conv_data().read().get(id)?.$field.clone())
        })*
     }
 }
@@ -76,6 +68,7 @@ impl Conversations {
         index: usize,
     ) -> Option<String> {
         use heraldcore::message::MsgData;
+
         let cid = &self.list.get(index).as_ref()?.id;
         let mid = shared::last_msg_id(&cid)?;
 
@@ -95,7 +88,9 @@ impl Conversations {
             .attachments()
             .map(|a| !a.is_empty())
             .unwrap_or(false);
-        let status = receipts.values().max().map(|status| *status as u32);
+
+        let receipt_status = receipts.iter().map(|(_, r)| r).max().copied();
+        let status = heraldcore::message::Status::from((send_status, receipt_status)) as u8;
 
         let object = json::object! {
             "author" => author.as_str(),
@@ -103,24 +98,66 @@ impl Conversations {
             "time" => *time.as_i64(),
             "auxCode" => aux_code,
             "status" => status,
-            "sendStatus" => send_status as u8,
             "hasAttachments" => has_attachments
         };
 
         Some(object.dump())
     }
 
+    pub(crate) fn pairwise_inner(
+        &self,
+        index: usize,
+    ) -> Option<bool> {
+        let id = &self.list.get(index).as_ref()?.id;
+        shared::pairwise(id)
+    }
+
+    pub(crate) fn color_inner(
+        &self,
+        index: usize,
+    ) -> Option<u32> {
+        let id = &self.list.get(index).as_ref()?.id;
+        let read = shared::conv_data().read();
+        let data = read.get(id)?;
+
+        match data.pairwise_uid {
+            Some(uid) => crate::users::shared::color(&uid),
+            None => data.color.into(),
+        }
+    }
+
+    pub(crate) fn title_inner(
+        &self,
+        index: usize,
+    ) -> Option<String> {
+        let id = &self.list.get(index).as_ref()?.id;
+        let read = shared::conv_data().read();
+        let data = read.get(id)?;
+
+        match data.pairwise_uid {
+            Some(uid) => crate::users::shared::name(&uid),
+            None => data.title.clone(),
+        }
+    }
+
+    pub(crate) fn picture_inner(
+        &self,
+        index: usize,
+    ) -> Option<String> {
+        let id = &self.list.get(index).as_ref()?.id;
+        let read = shared::conv_data().read();
+        let data = read.get(id)?;
+
+        match data.pairwise_uid {
+            Some(uid) => crate::users::shared::profile_picture(&uid),
+            None => data.picture.clone(),
+        }
+    }
+
     imp! {
-        color_inner, color, u32,
-        pairwise_inner, pairwise, bool,
         muted_inner, muted, bool,
         expiration_inner, expiration_period, ExpirationPeriod,
         status_inner, status, heraldcore::conversation::Status
-    }
-
-    imp_clone! {
-        picture_inner, picture, Option<String>,
-        title_inner, title, Option<String>
     }
 
     set_imp! {

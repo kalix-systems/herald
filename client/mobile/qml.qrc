@@ -5,7 +5,6 @@
         <file>qml/ChatView/ChatViewMain.qml</file>
         <file>qml/LoginPage/AssociateDevice.qml</file>
         <file>qml/LoginPage/LoginLandingPage.qml</file>
-        <file>qml/LoginPage/LoginPageMain.qml</file>
         <file>qml/LoginPage/Registration.qml</file>
         <file>qml/Common/CommonConfig.qml</file>
         <file>qml/Common/Divider.qml</file>
@@ -42,5 +41,13 @@
         <file>qml/SettingsHeader.qml</file>
         <file>qml/HeadersMain.qml</file>
         <file>qml/Router.qml</file>
+        <file>qml/ContactsView/ContactViewMain.qml</file>
+        <file>qml/ContactsView/ContactsHeader.qml</file>
+        <file>qml/ContactsView/ContactPage.qml</file>
+        <file>qml/ContactsView/CommonGroupsFlow.qml</file>
+        <file>qml/ContactsView/ContactInfoHeader.qml</file>
+        <file>qml/ChatView/ImageAttachments.qml</file>
+        <file>qml/HomeScreen/Controls/OptionsMenu.qml</file>
+        <file>qml/Common/ColorPicker.qml</file>
     </qresource>
 </RCC>

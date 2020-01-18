@@ -15,6 +15,7 @@ Rectangle {
     property var messageModelData
     property bool outbound: messageModelData.author === Herald.config.configId
 
+    property var ownedConversation
     property alias highlightItem: bubbleHighlight
     readonly property color bubbleColor: CmnCfg.palette.lightGrey
 
@@ -75,7 +76,7 @@ Rectangle {
     Avatar {
         id: avatar
         visible: false
-        size: CmnCfg.chatAvatarSize
+        size: CmnCfg.headerAvatarSize
         anchors {
             left: parent.left
             top: parent.top
@@ -106,13 +107,16 @@ Rectangle {
     Button {
         id: receipt
         anchors.right: parent.right
+        anchors.rightMargin: CmnCfg.smallMargin
         anchors.bottom: parent.bottom
-        anchors.margins: CmnCfg.smallMargin
 
+        anchors.bottomMargin: (bubbleIndex === 0) ? CmnCfg.smallMargin
+                                                    + (CmnCfg.typeMargin - CmnCfg.microMargin
+                                                       * 1.5) : CmnCfg.smallMargin
         icon.source: receiptImage
-        icon.height: 16
-        icon.width: 16
-        icon.color: CmnCfg.palette.iconMatte
+        icon.height: CmnCfg.units.dp(14)
+        icon.width: CmnCfg.units.dp(14)
+        icon.color: CmnCfg.palette.darkGrey
         padding: 0
         background: Item {}
     }
@@ -130,15 +134,21 @@ Rectangle {
         spacing: CmnCfg.smallMargin
         topPadding: isHead ? CmnCfg.smallMargin : CmnCfg.smallMargin
         leftPadding: CmnCfg.smallMargin
-        bottomPadding: isTail ? CmnCfg.defaultMargin : CmnCfg.smallMargin
+        bottomPadding: {
+            if (bubbleIndex === 0) {
+                return CmnCfg.defaultMargin + (CmnCfg.typeMargin - CmnCfg.microMargin * 1.5)
+            }
+
+            isTail ? CmnCfg.defaultMargin : CmnCfg.smallMargin
+        }
         Text {
             text: friendlyTimestamp
             font.family: CmnCfg.chatFont.name
             font.italic: true
-            font.pixelSize: 12
             color: CmnCfg.palette.darkGrey
             elide: Text.ElideRight
             width: bubbleRoot.maxWidth
+            font.pixelSize: CmnCfg.chatTextSize
         }
         GridLayout {
 
@@ -148,6 +158,7 @@ Rectangle {
                                                    auxData.content)
                 font.family: CmnCfg.chatFont.name
                 font.italic: true
+                font.pixelSize: CmnCfg.chatTextSize
                 Layout.maximumWidth: bubbleRoot.maxWidth
                 wrapMode: Text.WrapAtWordBoundaryOrAnywhere
             }

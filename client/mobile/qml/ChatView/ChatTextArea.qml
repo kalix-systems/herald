@@ -4,6 +4,7 @@ import QtQuick.Controls 2.13
 import "qrc:/imports/ChatBubble" as CB
 import LibHerald 1.0
 import "../Common"
+import Qt.labs.platform 1.0
 
 Column {
     id: chatRowLayout
@@ -15,14 +16,36 @@ Column {
     property string chatName: 'conversation'
     width: parent.width
     spacing: 0
-    Loader {
-        id: replyLoader
-        width: parent.width
+
+    Connections {
+        target: mobHelper
+        onFileChosen: {
+            ownedMessages.builder.addAttachment(filename.slice(7,
+                                                               filename.length))
+        }
+    }
+    Column {
+
+        anchors.left: parent.left
+        anchors.right: parent.right
         anchors.margins: CmnCfg.smallMargin
-        height: item ? item.height : 0
-        active: ownedMessages.builder.isReply
-        sourceComponent: CB.ComposeReplyComponent {
-            builderData: ownedMessages.builder
+        topPadding: replyLoader.height > 0 ? CmnCfg.microMargin : 0
+        Loader {
+            id: replyLoader
+            width: parent.width
+            height: item ? item.height : 0
+            active: ownedMessages.builder.isReply
+            sourceComponent: CB.ComposeReplyComponent {
+                builderData: ownedMessages.builder
+            }
+        }
+
+        Loader {
+            id: imageLoader
+            width: parent.width
+            height: item ? item.height : 0
+            active: ownedMessages.builder.hasMediaAttachment
+            sourceComponent: ImageAttachments {}
         }
     }
 
@@ -46,6 +69,13 @@ Column {
                             }
             anchors.left: parent.left
             anchors.right: buttons.left
+            onTextChanged: {
+                if (text !== "") {
+                    Qt.callLater(function () {
+                        ownedMessages.sendTypingIndicator()
+                    })
+                }
+            }
         }
         Grid {
             // TODO: Collapse options into plus when typing
@@ -59,30 +89,35 @@ Column {
             AnimIconButton {
                 color: CmnCfg.palette.black
                 imageSource: "qrc:/camera-icon.svg"
+                onTapped: {
+                    if (Qt.platform.os === "ios")
+                        return mobHelper.launch_camera_dialog()
+                }
             }
             AnimIconButton {
                 color: CmnCfg.palette.black
                 onTapped: if (send) {
-                              const msgText = function () {
-                                  if ((cta.text.length !== 0)
-                                          && (cta.text.length !== 0)) {
-                                      return cta.text + " " + cta.preeditText
-                                  }
-
-                                  if (cta.text.length !== 0) {
-                                      return cta.text
-                                  }
-
-                                  return cta.preeditText
-                              }
-
                               Qt.inputMethod.commit()
-                              ownedMessages.builder.body = cta.text //msgText()
+                              ownedMessages.builder.body = cta.text.trim()
                               cta.focus = true
                               ownedMessages.builder.finalize()
                               cta.clear()
+                          } else {
+                              if (Qt.platform.os === "ios") {
+                                  return mobHelper.launch_file_picker()
+                              }
+                              fileDialog.open()
                           }
+
                 imageSource: send ? "qrc:/send-icon.svg" : "qrc:/plus-icon.svg"
+            }
+        }
+
+        FileDialog {
+            id: fileDialog
+            onAccepted: {
+                print(file)
+                print(ownedMessages.builder.addAttachment(file)) //print(foo)
             }
         }
     }

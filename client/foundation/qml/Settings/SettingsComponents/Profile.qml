@@ -21,12 +21,14 @@ ColumnLayout {
             text: qsTr("Username: ")
             color: "black"
             Layout.leftMargin: CmnCfg.defaultMargin
-            font: CmnCfg.defaultFont
+            font.family: CmnCfg.chatFont.name
+            font.pixelSize: CmnCfg.chatTextSize
         }
         StandardLabel {
             text: Herald.config.configId
             color: CmnCfg.palette.black
-            font: CmnCfg.defaultFont
+            font.family: CmnCfg.chatFont.name
+            font.pixelSize: CmnCfg.chatTextSize
         }
     }
 
@@ -42,7 +44,7 @@ ColumnLayout {
 
             Entity.Avatar {
                 pfpPath: Herald.config.profilePicture
-                color: CmnCfg.palette.avatarColors[Herald.config.color]
+                color: CmnCfg.palette.avatarColors[Herald.config.configColor]
                 size: parent.height
                 textColor: CmnCfg.palette.iconFill
                 initials: Utils.initialize(Herald.config.name)
@@ -169,7 +171,7 @@ ColumnLayout {
     }
 
     Rectangle {
-        color: CmnCfg.palette.darkGrey
+        color: CmnCfg.palette.medGrey
         height: 1
         Layout.fillWidth: true
     }

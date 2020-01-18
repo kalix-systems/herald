@@ -17,6 +17,7 @@ ListView {
     clip: true
     currentIndex: -1
 
+    //  cacheBuffer: contentHeight * 10
     // conversations and messages are in a single column,
     // this needs to be uninteractive so that they scroll together
     interactive: false
@@ -24,6 +25,9 @@ ListView {
     property bool archiveView: false
 
     signal messagePositionRequested(var requestedMsgId)
+
+    onContentHeightChanged: if (contentHeight > 0)
+                                cacheBuffer = contentHeight * 10
 
     // Jump to message on message searched.
     Connections {
@@ -52,9 +56,14 @@ ListView {
         readonly property var conversationIdProxy: conversationId
         property bool isPairwise: pairwise
         property bool outbound: convContent.messages.lastAuthor === Herald.config.configId
+
         property ConversationContent convContent: ConversationContent {
             conversationId: conversationIdProxy
         }
+
+        ListView.delayRemove: true
+        property int __secondsSinceLastReset: 0
+        property int __typing: __secondsSinceLastReset < 5
 
         property Component childChatView: Component {
             CV.ChatViewMain {
@@ -65,6 +74,23 @@ ListView {
             }
         }
 
+        Connections {
+            target: convContent.members
+            onNewTypingIndicator: {
+                conversationItem.__secondsSinceLastReset = 0
+                convoRectangle.label.typeActive = true
+            }
+        }
+
+        Connections {
+            target: appRoot.globalTimer
+            onRefreshTime: {
+                conversationItem.__secondsSinceLastReset += 1
+                if (!conversationItem.__typing) {
+                    convoRectangle.label.typeActive = false
+                }
+            }
+        }
         Connections {
             target: contactsLoader.item
             onGroupClicked: {
@@ -99,7 +125,7 @@ ListView {
                                               conversationData.conversationId)
             }
             boxTitle: !nts ? title : qsTr("Note to Self")
-            boxColor: !nts ? conversationData.color : Herald.config.color
+            boxColor: !nts ? conversationData.conversationColor : Herald.config.configColor
             picture: !nts ? Utils.safeStringOrDefault(
                                 conversationData.picture,
                                 "") : Utils.safeStringOrDefault(
@@ -108,6 +134,8 @@ ListView {
 
             labelComponent: Ent.ConversationLabel {
                 id: conversationLabel
+                width: parent.width
+                height: parent.height
                 lastMsgDigest: conversationItem.conversationData.lastMsgDigest
                 isEmpty: conversationItem.conversationData.isEmpty
                 convoTitle: !convoRectangle.nts ? title : qsTr("Note to Self")
@@ -115,6 +143,8 @@ ListView {
                             !== "" ? CmnCfg.palette.black : CmnCfg.palette.lightGrey
                 minorTextColor: convoRectangle.state
                                 !== "" ? CmnCfg.palette.offBlack : CmnCfg.palette.medGrey
+                receiptFill: convoRectangle.state
+                             !== "" ? CmnCfg.palette.offBlack : CmnCfg.palette.white
             }
 
             MouseArea {
@@ -126,7 +156,7 @@ ListView {
                 cursorShape: conversationList.currentIndex
                              === index ? Qt.ArrowCursor : Qt.PointingHandCursor
                 onClicked: {
-                    if (mouse.button == Qt.RightButton) {
+                    if (mouse.button === Qt.RightButton) {
                         !archiveView ? convOptionsMenu.open(
                                            ) : unarchiveMenu.open()
                     } else {
@@ -141,28 +171,20 @@ ListView {
         Menu {
             id: convOptionsMenu
             MenuItem {
-                text: "Mute notifications"
+                text: qsTr("Mute notifications")
             }
 
             MenuItem {
                 text: "Archive"
                 onTriggered: {
                     conversationData.status = 1
-                    //                    if (Herald.utils.compareByteArray(
-                    //                                chatView.currentConvoId,
-                    //                                conversationData.conversationId)) {
-
-                    //                        conversationList.currentIndex = -1
-                    //                        chatView.sourceComponent = splash
-                    //                        chatView.currentConvoId = undefined
-                    //                    }
                 }
             }
         }
         Menu {
             id: unarchiveMenu
             MenuItem {
-                text: "Unarchive conversation"
+                text: qsTr("Unarchive conversation")
                 onTriggered: conversationData.status = 0
             }
         }

@@ -68,7 +68,7 @@ Item {
 
     Loader {
         id: groupSettingsLoader
-        width: active ? chatView.width * 0.75 : 0
+        width: active ? chatView.width * 0.66 : 0
         height: active ? chatView.height : 0
         anchors.top: active ? parent.top : undefined
         anchors.right: active ? parent.right : undefined
@@ -106,9 +106,6 @@ Item {
         id: convoMenu
     }
 
-    //    Popups.ImageCropPopup {//  id: imageCrop
-    //    }
-    // TODO: move into seperate file
     Component {
         id: splash
 
@@ -188,7 +185,6 @@ Item {
             Rectangle {
 
                 anchors.horizontalCenter: parent.left
-                //  anchors.rightMargin: 2
                 width: 9
                 height: parent.height
                 color: "transparent"
@@ -220,4 +216,13 @@ Item {
     }
 
     Component.onCompleted: Herald.login()
+
+    SystemTrayIcon {
+        id: tray
+        icon.source: "qrc:/herald.png"
+        icon.mask: true
+
+        Component.onCompleted: if (Qt.platform.os === "windows")
+                                   show()
+    }
 }

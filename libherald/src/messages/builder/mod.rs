@@ -175,12 +175,16 @@ impl MessageBuilderTrait for MessageBuilder {
 
             if self.media_attachments.add_attachment(path).is_some() && was_empty {
                 self.emit.has_media_attachment_changed();
+            } else {
+                return false;
             }
         } else {
             let was_empty = self.document_attachments.is_empty();
 
             if self.document_attachments.add_attachment(path).is_some() && was_empty {
                 self.emit.has_doc_attachment_changed();
+            } else {
+                return false;
             }
         }
 

@@ -48,11 +48,11 @@ Drawer {
                     Common.PlatonicRectangle {
                         id: contactRectangle
                         color: CmnCfg.palette.white
-                        boxColor: drawer.userData.color
+                        boxColor: drawer.userData.userColor
                         boxTitle: drawer.userData.name
                         picture: Utils.safeStringOrDefault(
                                      drawer.userData.profilePicture, "")
-                        conversationItemAvatar.size: 56
+                        conversationItemAvatar.size: CmnCfg.units.dp(44)
 
                         //no hover state
                         states: []
@@ -65,7 +65,7 @@ Drawer {
                             displayName: drawer.userData.name
                             username: drawer.userData.userId
                             labelColor: CmnCfg.palette.black
-                            displayNameSize: CmnCfg.headerFontSize
+                            displayNameSize: CmnCfg.labelFontSize
                             usernameSize: CmnCfg.defaultFontSize
                         }
                     }
@@ -76,19 +76,20 @@ Drawer {
                     text: qsTr("Options")
                     font.family: CmnCfg.chatFont.name
                     color: CmnCfg.palette.darkGrey
+                    font.pixelSize: CmnCfg.defaultFontSize
                 }
 
                 Row {
                     height: implicitHeight
 
-                    spacing: 14 //CmnCfg.megaMargin
+                    spacing: CmnCfg.units.dp(14) //CmnCfg.megaMargin
                     padding: 0
                     Rectangle {
                         id: colorDot
-                        height: 22
+                        height: CmnCfg.units.dp(18)
                         width: height
                         radius: width
-                        color: CmnCfg.palette.avatarColors[userData.color]
+                        color: CmnCfg.palette.avatarColors[userData.userColor]
                         MouseArea {
                             id: mouseArea
                             anchors.fill: parent
@@ -104,7 +105,7 @@ Drawer {
                                 contentItem: Text {
                                     text: qsTr("Set color")
                                     font.family: CmnCfg.chatFont.name
-                                    font.pixelSize: 12
+                                    font.pixelSize: CmnCfg.minorTextSize
                                     color: CmnCfg.sysPalette.text
                                 }
                                 background: Rectangle {
@@ -138,7 +139,7 @@ Drawer {
                                         || (idx >= Herald.users.rowCount()))
                                     return
 
-                                Herald.users.setColor(idx, colorIndex)
+                                Herald.users.setUserColor(idx, colorIndex)
                             }
                         }
                     }
@@ -147,6 +148,7 @@ Drawer {
                         text: qsTr("Color")
                         font.family: CmnCfg.chatFont.name
                         anchors.verticalCenter: colorDot.verticalCenter
+                        font.pixelSize: CmnCfg.chatTextSize
                     }
                 }
 
@@ -155,6 +157,7 @@ Drawer {
                     text: qsTr("Common groups")
                     font.family: CmnCfg.chatFont.name
                     color: CmnCfg.palette.darkGrey
+                    font.pixelSize: CmnCfg.defaultFontSize
                     visible: groups.count > 0
                 }
 
@@ -209,6 +212,7 @@ Drawer {
                             color: CmnCfg.palette.offBlack
                             font.family: CmnCfg.chatFont.name
                             anchors.verticalCenter: groupPic.verticalCenter
+                            font.pixelSize: CmnCfg.chatTextSize
                         }
                     }
                 }

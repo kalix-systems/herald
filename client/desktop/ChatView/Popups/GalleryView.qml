@@ -111,7 +111,7 @@ Popup {
 
         IconButton {
             id: zoomIn
-            source: "qrc:/plus-icon.svg"
+            source: "qrc:/zoom-in-icon.svg"
             action: zoomAction
             fill: CmnCfg.palette.white
             icon.height: 30
@@ -122,7 +122,7 @@ Popup {
         }
         IconButton {
             id: zoomOut
-            source: "qrc:/minus-icon.svg"
+            source: "qrc:/zoom-out-icon.svg"
             action: zoomOutAction
             fill: CmnCfg.palette.white
             icon.height: 30

@@ -48,7 +48,7 @@ impl OutboundMessageBuilder {
             None => None,
         };
 
-        let send_status = MessageSendStatus::NoAck;
+        let send_status = SendStatus::NoAck;
 
         let time = MessageTime {
             server: None,
@@ -152,9 +152,11 @@ impl OutboundMessageBuilder {
             expiration,
         };
 
-        e!(crate::network::send_normal_message(conversation_id, msg));
-
-        crate::push(StoreAndSend::SendDone(conversation_id, msg_id));
+        if let crate::network::SendOutcome::Success =
+            e!(crate::network::send_normal_message(conversation_id, msg))
+        {
+            crate::push(StoreAndSend::SendDone(conversation_id, msg_id));
+        }
     }
 
     pub(crate) fn store_db(
@@ -190,7 +192,7 @@ impl OutboundMessageBuilder {
             None => None,
         };
 
-        let send_status = MessageSendStatus::NoAck;
+        let send_status = SendStatus::NoAck;
 
         let time = MessageTime {
             server: None,
@@ -308,7 +310,7 @@ impl InboundMessageBuilder {
         let attachment_paths = res?;
 
         // this can be inferred from the fact that this message was received
-        let send_status = MessageSendStatus::Ack;
+        let send_status = SendStatus::Ack;
 
         let time = MessageTime {
             insertion: Time::now(),
@@ -397,7 +399,7 @@ impl InboundMessageBuilder {
                 op,
             }),
             conversation: conversation_id,
-            send_status: MessageSendStatus::Ack,
+            send_status: SendStatus::Ack,
             time,
             receipts,
             replies,

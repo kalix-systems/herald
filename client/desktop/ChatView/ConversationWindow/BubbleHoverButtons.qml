@@ -116,7 +116,6 @@ Rectangle {
                 color: downloadButton.mouseArea.containsMouse ? CmnCfg.palette.lightGrey : CmnCfg.palette.white
             }
             mouseArea.onEntered: {
-
                 bubbleActual.hoverHighlight = true
                 bubbleActual.expireInfo.visible = false
             }
@@ -143,11 +142,12 @@ Rectangle {
                 border.width: 1
                 color: messageOptionsButton.mouseArea.containsMouse ? CmnCfg.palette.lightGrey : CmnCfg.palette.white
             }
-            mouseArea.onEntered: {
 
+            mouseArea.onEntered: {
                 bubbleActual.hoverHighlight = true
                 bubbleActual.expireInfo.visible = false
             }
+
             mouseArea.onExited: {
                 if (!bubbleActual.hitbox.containsMouse)
                     bubbleActual.hoverHighlight = false

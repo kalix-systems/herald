@@ -61,11 +61,10 @@ Rectangle {
         onClicked: timerMenu.open()
     }
 
-    Imports.TimerOptions {
+    Imports.TimerOptionsBuilder {
         id: timerMenu
         conversationItem: chatPage.conversationItem
         builder: ownedConversation.builder
-        messageModify: true
     }
 
     Imports.IconButton {
@@ -84,8 +83,8 @@ Rectangle {
         anchors {
             left: emojiButton.right
             right: timerButton.left
-            leftMargin: CmnCfg.smallMargin * 0.5
-            //  rightMargin: CmnCfg.smallMargin * 0.5
+            leftMargin: CmnCfg.smallMargin * 2
+            rightMargin: CmnCfg.smallMargin
             bottomMargin: CmnCfg.smallMargin * 0.5
         }
 

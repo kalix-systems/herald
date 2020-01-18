@@ -7,7 +7,7 @@ import "./ChatTextArea" as CTA
 import "./Header" as Header
 import "./ChatTextArea/js/ChatTextAreaUtils.mjs" as TextJs
 import "js/KeyNavigation.mjs" as KeyNav
-import "../EmojiKeyboard" as EK
+import "qrc:/imports/EmojiKeyboard" as EK
 import "../common" as Common
 import "Popups" as Popups
 import QtQuick.Dialogs 1.2
@@ -48,7 +48,7 @@ Page {
         focus: true
         anchors {
             top: parent.top
-            bottom: typingIndicator.top
+            bottom: divider.top
             left: parent.left
             right: parent.right
         }
@@ -79,7 +79,6 @@ Page {
     // wrapper Item to set margins for the popup instead of
     // having to use explicit x and y positioning
     Item {
-
         anchors {
             left: parent.left
             bottom: chatTextArea.top
@@ -87,31 +86,32 @@ Page {
         }
         height: emoKeysPopup.height
         width: emoKeysPopup.width
-
         Popup {
             id: emojiPopupWrapper
-
             onOpened: emoKeysPopup.active = true
             onClosed: emoKeysPopup.active = false
-
-            z: chatPage.z + 2
             height: emoKeysPopup.height
             width: emoKeysPopup.width
 
             Popups.EmojiPopup {
                 id: emoKeysPopup
                 anchors.centerIn: parent
-                onActiveChanged: if (!active) {
+                onActiveChanged: if (!active)
                                      emojiPopupWrapper.close()
-                                 }
             }
         }
     }
 
     Common.Divider {
+        id: divider
         height: 1
         color: CmnCfg.palette.black
         anchors.bottom: chatTextArea.top
+        Drawer {
+            id: drawer
+            width: parent.width
+            height: CmnCfg.typeMargin
+        }
     }
 
     ///--- Text entry area, for typing
@@ -138,78 +138,20 @@ Page {
                 TextJs.enterKeyHandler(event, chatTextArea.chatText,
                                        ownedConversation.builder,
                                        ownedConversation, chatTextArea)
-
                 // TODO: Tab should cycle through a hierarchy of items as far as focus
-                chatTextArea.timer.chosenPeriod
-                        = (ownedConversation.builder.expirationPeriod
-                           !== undefined) ? ownedConversation.builder.expirationPeriod : conversationItem.expirationPeriod
             }
         }
-        emojiButton.onClicked: emojiPopupWrapper.open(
-                                   ) //emoKeysPopup.active = !!!emoKeysPopup.active
+        emojiButton.onClicked: emojiPopupWrapper.open()
         atcButton.onClicked: chatTextArea.attachmentsDialogue.open()
     }
 
-    //item that wraps type bubble; will eventually wrap a flow in the loader to show multiple typing indicators
-    Item {
+    CB.TypingBubble {
+
         id: typingIndicator
-        anchors.bottom: chatTextArea.top
-        height: typingLoader.height
-        width: parent.width
-
-        property int __secondsSinceLastReset: 0
-        property bool __aUserIsTyping: __secondsSinceLastReset < 5
-        onHeightChanged: {
-            if (convWindow.height < convWindow.contentHeight) {
-                return
-            }
-
-            if (height === 0) {
-                convWindow.anchors.bottom = chatTextArea.top
-                convWindow.height = convWindow.contentHeight
-            } else {
-                convWindow.anchors.bottom = typingIndicator.top
-                convWindow.height = convWindow.contentHeight
-            }
-        }
-
-        Loader {
-            id: typingLoader
-            property var typingUser
-            active: false
-            asynchronous: true
-
-            height: active ? 40 : 0
-            width: active ? parent.width : 0
-            anchors.bottom: parent.bottom
-            sourceComponent: CB.TypingBubble {
-                id: typeBubble
-
-                defaultWidth: convWindow.width
-            }
-        }
-
-        // listens for typing indicators
-        Connections {
-            target: ownedConversation
-            onNewTypingIndicator: {
-                typingIndicator.__secondsSinceLastReset = 0
-                typingLoader.typingUser = ownedConversation.typingUserId
-                typingLoader.active = true
-            }
-        }
-
-        Connections {
-            target: appRoot.globalTimer
-            onRefreshTime: {
-                typingIndicator.__secondsSinceLastReset += 1
-                if (!typingIndicator.__aUserIsTyping) {
-                    typingLoader.active = false
-                    typingLoader.typingUser = undefined
-                }
-            }
-        }
+        anchors.bottom: divider.top
+        conversationMembers: chatPage.conversationMembers
     }
+
     MessageDialog {
         id: clearHistoryPrompt
         text: qsTr("Clear conversation history")

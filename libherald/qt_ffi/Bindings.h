@@ -43,7 +43,7 @@ using UsersSearchPtrBundle = struct UsersSearchPtrBundle;
 using UtilsPtrBundle = struct UtilsPtrBundle;
 struct ConfigPtrBundle {
   Config *config;
-  void (*config_color_changed)(Config *);
+  void (*config_config_color_changed)(Config *);
   void (*config_config_id_changed)(Config *);
   void (*config_name_changed)(Config *);
   void (*config_nts_conversation_id_changed)(Config *);
@@ -91,6 +91,7 @@ struct ConversationContentPtrBundle {
   void (*members_end_move_rows)(Members *);
   void (*members_begin_remove_rows)(Members *, int, int);
   void (*members_end_remove_rows)(Members *);
+  void (*members_newTypingIndicator)(const Members *);
   Messages *messages;
   MessageBuilder *message_builder;
   void (*message_builder_body_changed)(MessageBuilder *);
@@ -158,7 +159,6 @@ struct ConversationContentPtrBundle {
   void (*messages_search_num_matches_changed)(Messages *);
   void (*messages_search_pattern_changed)(Messages *);
   void (*messages_search_regex_changed)(Messages *);
-  void (*messages_typing_user_id_changed)(Messages *);
 
   void (*messages_new_data_ready)(const Messages *);
   void (*messages_layout_about_to_be_changed)(Messages *);
@@ -172,7 +172,6 @@ struct ConversationContentPtrBundle {
   void (*messages_end_move_rows)(Messages *);
   void (*messages_begin_remove_rows)(Messages *, int, int);
   void (*messages_end_remove_rows)(Messages *);
-  void (*messages_newTypingIndicator)(const Messages *);
   void (*conversation_content_tryPoll)(const ConversationContent *);
 };
 struct ConversationsPtrBundle {
@@ -246,7 +245,7 @@ struct ErrorsPtrBundle {
 struct HeraldPtrBundle {
   Herald *herald;
   Config *config;
-  void (*config_color_changed)(Config *);
+  void (*config_config_color_changed)(Config *);
   void (*config_config_id_changed)(Config *);
   void (*config_name_changed)(Config *);
   void (*config_nts_conversation_id_changed)(Config *);
@@ -378,6 +377,7 @@ struct MembersPtrBundle {
   void (*members_end_move_rows)(Members *);
   void (*members_begin_remove_rows)(Members *, int, int);
   void (*members_end_remove_rows)(Members *);
+  void (*members_newTypingIndicator)(const Members *);
 };
 struct MessageBuilderPtrBundle {
   MessageBuilder *message_builder;
@@ -528,7 +528,6 @@ struct MessagesPtrBundle {
   void (*messages_search_num_matches_changed)(Messages *);
   void (*messages_search_pattern_changed)(Messages *);
   void (*messages_search_regex_changed)(Messages *);
-  void (*messages_typing_user_id_changed)(Messages *);
 
   void (*messages_new_data_ready)(const Messages *);
   void (*messages_layout_about_to_be_changed)(Messages *);
@@ -542,7 +541,6 @@ struct MessagesPtrBundle {
   void (*messages_end_move_rows)(Messages *);
   void (*messages_begin_remove_rows)(Messages *, int, int);
   void (*messages_end_remove_rows)(Messages *);
-  void (*messages_newTypingIndicator)(const Messages *);
 };
 struct SharedConversationsPtrBundle {
   SharedConversations *shared_conversations;
@@ -631,7 +629,8 @@ public:
 private:
   Private *m_d;
   bool m_ownsPrivate;
-  Q_PROPERTY(quint32 color READ color WRITE setColor NOTIFY colorChanged FINAL)
+  Q_PROPERTY(quint32 configColor READ configColor WRITE setConfigColor NOTIFY
+                 configColorChanged FINAL)
   Q_PROPERTY(QString configId READ configId NOTIFY configIdChanged FINAL)
   Q_PROPERTY(QString name READ name WRITE setName NOTIFY nameChanged FINAL)
   Q_PROPERTY(QByteArray ntsConversationId READ ntsConversationId NOTIFY
@@ -645,8 +644,8 @@ private:
 public:
   explicit Config(QObject *parent = nullptr);
   ~Config() override;
-  quint32 color() const;
-  void setColor(quint32 v);
+  quint32 configColor() const;
+  void setConfigColor(quint32 v);
   QString configId() const;
   QString name() const;
   void setName(const QString &v);
@@ -656,7 +655,7 @@ public:
   QString profilePicture() const;
   Q_INVOKABLE void setProfilePicture(const QString &profile_picture);
 Q_SIGNALS:
-  void colorChanged();
+  void configColorChanged();
   void configIdChanged();
   void nameChanged();
   void ntsConversationIdChanged();
@@ -864,7 +863,7 @@ public:
 
   bool setData(const QModelIndex &index, const QVariant &value,
                int role = Qt::EditRole) override;
-  Q_INVOKABLE quint32 color(int row) const;
+  Q_INVOKABLE quint32 conversationColor(int row) const;
   Q_INVOKABLE QByteArray conversationId(int row) const;
   Q_INVOKABLE quint8 expirationPeriod(int row) const;
   Q_INVOKABLE bool setExpirationPeriod(int row, quint8 value);
@@ -1303,6 +1302,7 @@ public:
   Q_INVOKABLE bool addToConversation(const QString &id);
   Q_INVOKABLE bool removeFromConversationByIndex(quint64 row_index);
   Q_INVOKABLE bool toggleFilterRegex();
+  Q_INVOKABLE QString typingMembers() const;
   int columnCount(const QModelIndex &parent = QModelIndex()) const override;
   QVariant data(const QModelIndex &index,
                 int role = Qt::DisplayRole) const override;
@@ -1328,8 +1328,9 @@ public:
   removeRows(int row, int count,
              const QModelIndex &parent = QModelIndex()) override;
 
-  Q_INVOKABLE quint32 color(int row) const;
+  Q_INVOKABLE QVariant lastTyping(int row) const;
   Q_INVOKABLE bool matched(int row) const;
+  Q_INVOKABLE quint32 memberColor(int row) const;
   Q_INVOKABLE QString name(int row) const;
   Q_INVOKABLE QByteArray pairwiseConversationId(int row) const;
   Q_INVOKABLE QString profilePicture(int row) const;
@@ -1347,6 +1348,7 @@ private:
 Q_SIGNALS:
   void filterChanged();
   void filterRegexChanged();
+  void newTypingIndicator() const;
 };
 class MessageBuilder : public QAbstractItemModel {
   Q_OBJECT
@@ -1604,8 +1606,6 @@ private:
                  NOTIFY searchPatternChanged FINAL)
   Q_PROPERTY(bool searchRegex READ searchRegex WRITE setSearchRegex NOTIFY
                  searchRegexChanged FINAL)
-  Q_PROPERTY(
-      QString typingUserId READ typingUserId NOTIFY typingUserIdChanged FINAL)
   explicit Messages(bool owned, QObject *parent);
 
 public:
@@ -1621,7 +1621,6 @@ public:
   void setSearchPattern(const QString &v);
   bool searchRegex() const;
   void setSearchRegex(bool v);
-  QString typingUserId() const;
   Q_INVOKABLE void addReaction(quint64 index, const QString &content);
   Q_INVOKABLE bool clearConversationHistory();
   Q_INVOKABLE void clearSearch();
@@ -1711,8 +1710,6 @@ Q_SIGNALS:
   void searchNumMatchesChanged();
   void searchPatternChanged();
   void searchRegexChanged();
-  void typingUserIdChanged();
-  void newTypingIndicator() const;
 };
 class SharedConversations : public QAbstractItemModel {
   Q_OBJECT
@@ -1831,11 +1828,11 @@ public:
   void setFilterRegex(bool v);
   Q_INVOKABLE QByteArray add(const QString &id);
   Q_INVOKABLE void clearFilter();
-  Q_INVOKABLE quint32 colorById(const QString &id) const;
   Q_INVOKABLE qint64 indexById(const QString &id) const;
   Q_INVOKABLE QString nameById(const QString &id) const;
   Q_INVOKABLE QString profilePictureById(const QString &id) const;
   Q_INVOKABLE bool toggleFilterRegex();
+  Q_INVOKABLE quint32 userColorById(const QString &id) const;
   int columnCount(const QModelIndex &parent = QModelIndex()) const override;
   QVariant data(const QModelIndex &index,
                 int role = Qt::DisplayRole) const override;
@@ -1863,14 +1860,14 @@ public:
 
   bool setData(const QModelIndex &index, const QVariant &value,
                int role = Qt::EditRole) override;
-  Q_INVOKABLE quint32 color(int row) const;
-  Q_INVOKABLE bool setColor(int row, quint32 value);
   Q_INVOKABLE bool matched(int row) const;
   Q_INVOKABLE QString name(int row) const;
   Q_INVOKABLE QByteArray pairwiseConversationId(int row) const;
   Q_INVOKABLE QString profilePicture(int row) const;
   Q_INVOKABLE quint8 status(int row) const;
   Q_INVOKABLE bool setStatus(int row, quint8 value);
+  Q_INVOKABLE quint32 userColor(int row) const;
+  Q_INVOKABLE bool setUserColor(int row, quint32 value);
   Q_INVOKABLE QString userId(int row) const;
 
 Q_SIGNALS:
@@ -1948,12 +1945,12 @@ public:
 
   bool setData(const QModelIndex &index, const QVariant &value,
                int role = Qt::EditRole) override;
-  Q_INVOKABLE QVariant color(int row) const;
   Q_INVOKABLE bool matched(int row) const;
   Q_INVOKABLE QString name(int row) const;
   Q_INVOKABLE QString profilePicture(int row) const;
   Q_INVOKABLE bool selected(int row) const;
   Q_INVOKABLE bool setSelected(int row, bool value);
+  Q_INVOKABLE QVariant userColor(int row) const;
   Q_INVOKABLE QString userId(int row) const;
 
 Q_SIGNALS:

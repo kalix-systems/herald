@@ -168,9 +168,11 @@ fn profile_change(
 
     match change {
         U::Color(color) => {
-            crate::user::set_color(uid, color)?;
-            ev.notifications
-                .push(Notification::UserChanged(uid, Color(color)));
+            if uid == crate::config::id()? {
+                crate::user::set_color(uid, color)?;
+                ev.notifications
+                    .push(Notification::UserChanged(uid, Color(color)));
+            }
         }
 
         U::DisplayName(name) => {

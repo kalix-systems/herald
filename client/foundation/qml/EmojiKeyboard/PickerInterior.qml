@@ -49,12 +49,6 @@ Item {
         }
     }
 
-    MouseArea {
-        anchors.fill: parent
-        z: parent.z - 2
-        hoverEnabled: true
-    }
-
     Item {
         id: header
         height: 30 //enough for search bar of default size w/ margins
@@ -74,10 +68,10 @@ Item {
             color: "#33000000" // transparent
             border.color: CmnCfg.palette.medGrey
             height: 24
-            Row {
+            Item {
                 anchors.fill: parent
-                spacing: 0
                 Button {
+                    id: search
                     padding: 0
                     background: Item {}
                     icon.source: "qrc:/search-icon.svg"
@@ -85,6 +79,8 @@ Item {
                     icon.height: 17
                     icon.width: 17
                     anchors.verticalCenter: parent.verticalCenter
+                    anchors.left: parent.left
+                    anchors.leftMargin: CmnCfg.microMargin
                 }
 
                 TextArea {
@@ -98,6 +94,10 @@ Item {
                     width: 185
                     height: parent.height
                     onTextChanged: emojiPickerModel.setSearchString(text)
+                    anchors.left: search.right
+                    anchors.leftMargin: CmnCfg.microMargin
+                    anchors.right: exitButton.left
+                    anchors.rightMargin: CmnCfg.smallMargin
                 }
 
                 Button {
@@ -110,6 +110,8 @@ Item {
                     icon.width: 17
                     onClicked: emoKeysPopup.active = false
                     anchors.verticalCenter: parent.verticalCenter
+                    anchors.right: parent.right
+                    anchors.rightMargin: CmnCfg.microMargin
                 }
             }
         }
@@ -133,11 +135,7 @@ Item {
                     color: menu.model[index]
                 }
             }
-
-            onCurrentIndexChanged: {
-                CmnCfg.skinSwatchIndex = currentIndex
-            }
-
+            onCurrentIndexChanged: CmnCfg.skinSwatchIndex = currentIndex
             contentItem: Rectangle {
                 anchors.fill: parent
                 border.color: CmnCfg.palette.darkGrey
@@ -208,7 +206,7 @@ Item {
             states: [
                 State {
                     name: "default"
-                    when: searchTextArea.text.length != 0
+                    when: searchTextArea.text.length !== 0
                     PropertyChanges {
                         target: listLoader
                         sourceComponent: searchComp

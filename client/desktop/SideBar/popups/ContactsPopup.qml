@@ -69,16 +69,11 @@ Popup {
                     }
                 }
 
-                IconButton {
-                    id: settingsButton
-                    fill: CmnCfg.palette.lightGrey
-                    source: "qrc:/options-icon.svg"
-                    anchors.verticalCenter: parent.verticalCenter
-                }
                 RowLayout {
                     spacing: 0
                     anchors.verticalCenter: parent.verticalCenter
                     height: parent.height
+                    id: searchRow
                     IconButton {
                         id: searchButton
                         property bool search: false
@@ -95,6 +90,7 @@ Popup {
                         selectByMouse: true
                         Layout.bottomMargin: CmnCfg.smallMargin
                         Layout.leftMargin: CmnCfg.smallMargin
+                        borderColor: "transparent"
                         onTextChanged: {
                             Qt.callLater(function (text) {
                                 Herald.users.filter = text
@@ -123,7 +119,9 @@ Popup {
                         Rectangle {
                             id: divider
                             anchors.bottom: parent.bottom
-                            width: searchX.width
+                            anchors.right: parent.right
+                            width: searchRow.width - searchButton.width - CmnCfg.units.dp(
+                                       6)
                             color: CmnCfg.palette.lightGrey
                             height: 1
                         }
@@ -157,10 +155,13 @@ Popup {
                 color: CmnCfg.palette.offBlack
                 font.pixelSize: CmnCfg.defaultFontSize
                 font.weight: Font.Medium
+                anchors.right: groupHeader.left
+                anchors.rightMargin: CmnCfg.megaMargin
             }
 
             Text {
                 text: "Groups"
+                id: groupHeader
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.horizontalCenter: parent.horizontalCenter
                 font.family: CmnCfg.chatFont.name
@@ -253,7 +254,7 @@ Popup {
                         height: CmnCfg.avatarSize
                         pfpPath: Utils.safeStringOrDefault(
                                      model.profilePicture, "")
-                        color: CmnCfg.avatarColors[model.color]
+                        color: CmnCfg.avatarColors[model.userColor]
                         initials: Utils.initialize(name)
                         MouseArea {
                             cursorShape: Qt.PointingHandCursor
@@ -281,15 +282,21 @@ Popup {
                         Column {
                             id: labelCol
                             spacing: 2
-                            Label {
-                                font.weight: Font.DemiBold
-                                font.pixelSize: CmnCfg.headerFontSize
-                                font.family: CmnCfg.chatFont.name
-                                text: userId
-                                color: CmnCfg.palette.offBlack
+                            width: row.width
+                            GridLayout {
+                                width: labelCol.width
+                                Label {
+                                    font.weight: Font.DemiBold
+                                    font.pixelSize: CmnCfg.labelFontSize
+                                    font.family: CmnCfg.chatFont.name
+                                    text: name
+                                    color: CmnCfg.palette.offBlack
+                                    Layout.maximumWidth: nameHeader.width
+                                    elide: Label.ElideRight
+                                }
                             }
                             Label {
-                                text: "@" + name
+                                text: "@" + userId
                                 font.family: CmnCfg.chatFont.name
                                 color: CmnCfg.palette.offBlack
                                 font.pixelSize: CmnCfg.defaultFontSize
@@ -298,7 +305,9 @@ Popup {
                     }
 
                     //common groups
-                    CommonGroupsFlow {}
+                    CommonGroupsFlow {
+                        id: groups
+                    }
                 }
             }
         }

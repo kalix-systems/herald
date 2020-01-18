@@ -1,5 +1,5 @@
-import QtQuick.Controls 2.12
-import QtQuick.Layouts 1.12
+import QtQuick.Controls 2.14
+import QtQuick.Layouts 1.14
 import QtQuick 2.12
 import LibHerald 1.0
 import "../ChatView" as ChatView
@@ -9,30 +9,38 @@ import "qrc:/imports/Entity" as Entity
 
 Page {
     id: searchView
-    readonly property Component headerComponent: GlobalSearchHeader {}
-    property Loader headerLoader
+    readonly property Component headerComponent:
+        GlobalSearchHeader {
+          parentPage: searchView
+        }
 
     background: Rectangle {
         color: CmnCfg.palette.white
     }
 
+    Component.onCompleted: appRoot.router.searchView = searchView
+    signal messageClicked(var searchConversationId, var searchMsgId)
+    signal convoClicked(var searchConversationId)
+
     Column {
         id: contentCol
         anchors {
             fill: parent
-            leftMargin: CmnCfg.smallMargin
-            rightMargin: CmnCfg.smallMargin
         }
 
         Text {
             text: qsTr("Conversations")
-            Layout.alignment: Qt.AlignLeft
-            Layout.leftMargin: CmnCfg.smallMargin
-            Layout.topMargin: CmnCfg.microMargin
+            anchors {
+                left: parent.left
+                leftMargin: CmnCfg.smallMargin
+                topMargin: CmnCfg.smallMargin
+            }
+
             font.family: CmnCfg.labelFont.name
             font.weight: Font.DemiBold
             font.pixelSize: CmnCfg.labelFontSize
             color: CmnCfg.palette.offBlack
+            bottomPadding: 0
         }
 
         ListView {
@@ -45,28 +53,92 @@ Page {
             model: Herald.conversations
             delegate: ConversationItem {
                 itemTitle: title
-                colorCode: model.color
+                colorCode: model.conversationColor
                 imageSource: Utils.safeStringOrDefault(model.picture, "")
                 isGroup: !model.pairwise
                 lastMsgDigest: model.lastMsgDigest
                 isEmpty: model.isEmpty
-                // TODO(cmck) avoid instantiating multiple ConversationContent
-                // items per conversation (HomeScreenMain already carestes one
-                // per conversation). Future refactor: create a single
-                // ConversationContent for a ChatView when it's pushed
-                //                convoContent: ConversationContent {
-                //                    conversationId: model.conversationId
-                //                }
+                tapEnabled: false
                 visible: model.matched
                 height: visible ? CmnCfg.convoHeight : 0
+                TapHandler {
+                    // TODO if state is fromComposeButton we should probably
+                    // pop this view off the stack, so ChatView back button
+                    // goes to home screen
+                    onTapped: convoClicked(model.conversationId)
+                }
+            }
+        }
+
+        Repeater {
+            model: ListModel {
+                ListElement {
+                    flow: "group"
+                    iconSource: "qrc:/contacts-icon.svg"
+                    label: qsTr("Create new group")
+                }
+
+                ListElement {
+                    flow: "contact"
+                    iconSource: "qrc:/add-contact-icon.svg"
+                    label: qsTr("Message new contact")
+                }
+            }
+
+            Rectangle {
+                height: CmnCfg.avatarSize
+                width: parent.width
+
+                Button {
+                    id: createGroupIcon
+                    icon.source: model.iconSource
+                    icon.height: CmnCfg.iconSize
+                    icon.width: CmnCfg.iconSize
+                    anchors {
+                        left: parent.left
+                        leftMargin: CmnCfg.microMargin +
+                                    (CmnCfg.avatarSize - CmnCfg.iconSize) / 2
+                        verticalCenter: parent.verticalCenter
+                    }
+
+                    padding: 0
+                    background: Item {}
+                }
+
+                Label {
+                    text: model.label
+                    font.family: CmnCfg.chatFont.name
+                    font.pixelSize: CmnCfg.units.dp(15)
+                    font.weight: Font.Medium
+                    anchors {
+                        left: createGroupIcon.right
+                        leftMargin: (CmnCfg.avatarSize - CmnCfg.iconSize) / 2 +
+                                    CmnCfg.defaultMargin
+                        verticalCenter: parent.verticalCenter
+                    }
+                }
+
+                TapHandler {
+                    onTapped: {
+                        if (model.flow === "group")
+                            mainView.push(newGroupViewMain)
+                        if (model.flow === "contact")
+                            mainView.push(newContactViewMain)
+                    }
+                }
             }
         }
 
         Text {
             text: qsTr("Messages")
-            Layout.alignment: Qt.AlignLeft
-            Layout.leftMargin: CmnCfg.smallMargin
-            Layout.topMargin: CmnCfg.microMargin
+            anchors {
+                left: parent.left
+                leftMargin: CmnCfg.smallMargin
+                topMargin: CmnCfg.smallMargin
+            }
+            visible: searchView.state === "fromComposeButton" ? false : true
+
+            bottomPadding: 0
             font.family: CmnCfg.labelFont.name
             font.weight: Font.DemiBold
             font.pixelSize: CmnCfg.labelFontSize
@@ -80,8 +152,7 @@ Page {
             // conversations and messages are in a single column,
             // this needs to be uninteractive so that they scroll together
             interactive: false
-
-            signal messageClicked(var searchConversationId, var searchMsgId)
+            visible: searchView.state === "fromComposeButton" ? false : true
 
             model: Herald.messageSearch
             delegate: Item {
@@ -108,14 +179,22 @@ Page {
                         afterMatch: model.afterFirstMatch
                     }
 
-                    // TODO load messages when data model is fixed
                     TapHandler {
                         onTapped: {
-                            print('someday this will open a conversation')
+                            messageClicked(model.conversation, model.msgId)
                         }
                     }
                 }
             }
         }
     }
+
+    states: [
+        State {
+            name: "default"
+        },
+        State {
+            name: "fromComposeButton"
+        }
+    ]
 }

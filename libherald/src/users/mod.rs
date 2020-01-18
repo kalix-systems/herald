@@ -161,7 +161,7 @@ impl Interface for Users {
     }
 
     /// Returns user's color
-    fn color(
+    fn user_color(
         &self,
         row_index: usize,
     ) -> u32 {
@@ -169,8 +169,8 @@ impl Interface for Users {
         color(&uid).unwrap_or(0)
     }
 
-    /// Returns name if it is set, otherwise returns the user's id.
-    fn color_by_id(
+    /// Returns user's color given user id
+    fn user_color_by_id(
         &self,
         id: ffi::UserId,
     ) -> u32 {
@@ -180,14 +180,30 @@ impl Interface for Users {
     }
 
     /// Sets color
-    fn set_color(
+    fn set_user_color(
         &mut self,
         row_index: usize,
         color: u32,
     ) -> bool {
         let uid = none!(self.list.get(row_index), false).id;
 
-        spawn!(user::set_color(uid, color), false);
+        spawn!(
+            {
+                use crate::conversations::shared::{
+                    ConvItemUpdate as C, ConvItemUpdateVariant as CV,
+                };
+
+                err!(user::set_color(uid, color));
+
+                let cid = none!(shared::pairwise_cid(&uid));
+
+                crate::push(C {
+                    cid,
+                    variant: CV::UserChanged,
+                });
+            },
+            false
+        );
 
         {
             let mut lock = user_data().write();

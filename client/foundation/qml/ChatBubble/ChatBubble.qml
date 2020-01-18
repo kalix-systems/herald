@@ -16,6 +16,7 @@ Rectangle {
     property Item convContainer
     property var messageModelData
 
+    property var ownedConversation
     property alias highlightItem: bubbleHighlight
     readonly property color bubbleColor: CmnCfg.palette.lightGrey
     readonly property bool highlight: messageModelData.matchStatus === 2
@@ -46,7 +47,8 @@ Rectangle {
                                                                   insertionTime) : ""
     readonly property string receiptImage: outbound ? Utils.receiptCodeSwitch(
                                                           messageModelData.receiptStatus) : ""
-    readonly property color authorColor: CmnCfg.avatarColors[messageModelData.authorColor]
+    //not readonly in order to be assigned tied to convo color for pairwise
+    property color authorColor: CmnCfg.avatarColors[messageModelData.authorColor]
 
     readonly property string pfpUrl: outbound ? Herald.config.profilePicture : messageModelData.authorProfilePicture
     property bool hoverHighlight: false
@@ -106,7 +108,7 @@ Rectangle {
         id: avatar
         color: authorColor
         initials: authorName[0].toUpperCase()
-        size: CmnCfg.chatAvatarSize
+        size: CmnCfg.headerAvatarSize
         visible: isHead ? true : false
         anchors {
             left: parent.left
@@ -133,12 +135,15 @@ Rectangle {
         id: receipt
         anchors.right: parent.right
         anchors.bottom: parent.bottom
-        anchors.margins: CmnCfg.smallMargin
+        anchors.bottomMargin: (bubbleIndex === 0) ? CmnCfg.smallMargin
+                                                    + (CmnCfg.typeMargin - CmnCfg.microMargin
+                                                       * 1.5) : CmnCfg.smallMargin
+        anchors.rightMargin: CmnCfg.smallMargin
 
         icon.source: receiptImage
-        icon.height: 16
-        icon.width: 16
-        icon.color: CmnCfg.palette.iconMatte
+        icon.height: CmnCfg.units.dp(14)
+        icon.width: CmnCfg.units.dp(14)
+        icon.color: CmnCfg.palette.darkGrey
         padding: 0
         background: Item {}
     }
@@ -158,7 +163,13 @@ Rectangle {
         spacing: CmnCfg.smallMargin
         topPadding: isHead ? CmnCfg.smallMargin : CmnCfg.smallMargin
         leftPadding: CmnCfg.smallMargin
-        bottomPadding: isTail ? CmnCfg.defaultMargin : CmnCfg.smallMargin
+        bottomPadding: {
+            if (bubbleIndex === 0) {
+                return CmnCfg.defaultMargin + (CmnCfg.typeMargin - CmnCfg.microMargin * 1.5)
+            }
+
+            isTail ? CmnCfg.defaultMargin : CmnCfg.smallMargin
+        }
 
         BubbleLabel {
             visible: isHead

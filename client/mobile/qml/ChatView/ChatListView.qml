@@ -10,6 +10,18 @@ ListView {
     property Messages messageListModel
     spacing: 0
     highlightFollowsCurrentItem: false
+    property alias scrollBar: chatScrollBarInner
+
+    property NumberAnimation highlightAnimation: NumberAnimation {
+        id: bubbleHighlightAnimation
+        property: "opacity"
+        from: 0.4
+        to: 0.0
+        duration: 800
+        easing.type: Easing.InCubic
+    }
+
+    signal closeDropdown
 
     // this is set to a higher value in `Component.onCompleted`
     // but is set to `0` here to improve initial load times
@@ -20,6 +32,7 @@ ListView {
         if (chatListView.contentHeight < chatListView.height) {
             chatListView.height = chatListView.contentHeight
         }
+        appRouter.activeChatView = chatListView
     }
     // Note: we load the list view from the bottom up to make
     // scroll behavior more predictable
@@ -42,6 +55,28 @@ ListView {
         }
     }
 
+    Popup {
+        id: emojiPopup
+        width: parent.contentWidth
+        height: reactPopup.height
+        property var chatBubble
+        anchors.centerIn: parent
+        property alias reactPopup: emoKeysPopup
+        background: Item {}
+        modal: true
+
+        onClosed: {
+            reactPopup.active = false
+        }
+        Loader {
+            id: emoKeysPopup
+            active: false
+            height: active ? CmnCfg.units.dp(200) : 0
+            width: parent.width
+            sourceComponent: EmojiPicker {}
+        }
+    }
+
     model: messageListModel
     // TODO: Delegate should just be the ChatBubble
     delegate: Column {
@@ -52,7 +87,7 @@ ListView {
         readonly property bool outbound: author === Herald.config.configId
         readonly property bool elided: body.length !== fullBody.length
         property var messageModelData: model
-
+        property var highlightItem: bubbleLoader.item.highlightItem
         anchors.left: parent.left
         anchors.right: parent.right
         bottomPadding: 0
@@ -70,22 +105,26 @@ ListView {
                 dropdown: optionsDropdown
                 anchors.fill: parent
             }
+
             Component {
                 id: msgBubble
                 CB.ChatBubble {
-                    id: chatBubble
+                    id: bubbleActual
                     defaultWidth: chatListView.width
                     messageModelData: containerCol.messageModelData
                     convContainer: parent
                     convoExpiration: convoItem.expirationPeriod
+                    ownedConversation: ownedMessages
+                    bubbleIndex: index
                     property Component infoPage: Component {
                         InfoPage {
                             members: convContent.members
-                            messageData: chatBubble.messageModelData
+                            messageData: bubbleActual.messageModelData
                         }
                     }
                 }
             }
+
             Component {
                 id: auxBubble
                 CB.AuxBubble {
@@ -96,6 +135,7 @@ ListView {
                     width: parent.width
                     defaultWidth: chatListView.width
                     bubbleIndex: index
+                    ownedConversation: ownedMessages
                 }
             }
         }

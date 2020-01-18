@@ -21,7 +21,7 @@ Page {
         anchors {
             horizontalCenter: newAccButton.horizontalCenter
             bottom: serverAddrTextField.top
-            bottomMargin: CmnCfg.units.dp(30)
+            bottomMargin: CmnCfg.units.dp(15)
         }
     }
 
@@ -30,7 +30,7 @@ Page {
         anchors {
             horizontalCenter: newAccButton.horizontalCenter
             bottom: serverPortTextField.top
-            bottomMargin: CmnCfg.units.dp(30)
+            bottomMargin: CmnCfg.units.dp(15)
         }
         width: parent.width - 2 * CmnCfg.megaMargin
         placeholderText: qsTr("Server address")
@@ -57,14 +57,31 @@ Page {
 
         anchors {
             horizontalCenter: parent.horizontalCenter
-            bottom: registrationFailureMessage.top
-            bottomMargin: CmnCfg.units.dp(30)
+            bottom: connectAccountButton.top
+            bottomMargin: CmnCfg.units.dp(15)
         }
 
         onClicked: {
             Herald.registerNewUser(entryField.text.trim(),
                                    serverAddrTextField.text.trim(),
                                    serverPortTextField.text.trim())
+        }
+    }
+
+    LoginButton {
+        id: connectAccountButton
+
+        lbText: qsTr("Connect Device to Existing Account")
+        lbColor: bgStartColor
+
+        anchors {
+            horizontalCenter: parent.horizontalCenter
+            bottom: registrationFailureMessage.top
+            bottomMargin: CmnCfg.units.dp(15)
+        }
+
+        onClicked: {
+            loginPageLoader.sourceComponent = connectDevicePage
         }
     }
 

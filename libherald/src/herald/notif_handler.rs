@@ -11,6 +11,7 @@ impl NotifHandler {
         notif: Notification,
     ) {
         use crate::conversations::shared::*;
+        use crate::members::MemberUpdate;
         use crate::users::shared::*;
         use heraldcore::message;
         use messages::MsgUpdate;
@@ -53,7 +54,7 @@ impl NotifHandler {
                 }
             )),
             TypingIndicator(cid, uid) => {
-                err!(content_push(cid, MsgUpdate::TypingIndicator(uid)));
+                err!(content_push(cid, MemberUpdate::TypingIndicator(uid)));
             }
             NewUser(update) => {
                 let (user, meta) = *update;
@@ -78,7 +79,6 @@ impl NotifHandler {
                 }
             }
             AddConversationResponse(cid, uid, accepted) => {
-                use crate::members::MemberUpdate;
                 err!(content_push(cid, MemberUpdate::ReqResp(uid, accepted)));
             }
             Settings(cid, settings) => {
