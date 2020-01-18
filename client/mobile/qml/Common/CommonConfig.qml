@@ -132,7 +132,6 @@ Item {
 
     Settings {
         id: settings
-        readonly property alias theme: cfg.palette
         readonly property alias skinSwatchIndex: cfg.skinSwatchIndex
         property string recentEmojisJson: "[]"
 
