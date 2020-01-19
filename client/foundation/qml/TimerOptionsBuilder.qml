@@ -16,10 +16,11 @@ Menu {
 
     property string chosenTimer: timerModel[chosenPeriod].path
     property bool builderDefault: true
+    font: CmnCfg.chatFont.name
 
     // TODO real icon
     property var timerModel: [{
-            "name": qsTr("Default"),
+            "name": qsTr("Conversation default"),
             "path": "qrc:/timer-option-icons/blank-dark.svg"
         }, {
             "name": qsTr("Off"),

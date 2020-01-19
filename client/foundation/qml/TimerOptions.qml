@@ -13,6 +13,7 @@ Menu {
     property int chosenPeriod: conversationItem.expirationPeriod
 
     property string chosenTimer: timerModel[chosenPeriod].path
+    font: CmnCfg.chatFont.name
 
     // TODO real icon
     property var timerModel: [{

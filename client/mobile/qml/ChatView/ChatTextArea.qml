@@ -5,6 +5,7 @@ import "qrc:/imports/ChatBubble" as CB
 import LibHerald 1.0
 import "../Common"
 import Qt.labs.platform 1.0
+import "qrc:/imports" as Imports
 
 Column {
     id: chatRowLayout
@@ -53,6 +54,24 @@ Column {
         width: parent.width
         height: scroll.height
 
+        AnimIconButton {
+
+            id: timerButton
+            imageSource: timerMenu.chosenTimer
+            color: "transparent"
+            anchors.left: parent.left
+            anchors.leftMargin: CmnCfg.microMargin
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: CmnCfg.microMargin
+            topPadding: 1
+            onTapped: timerMenu.open()
+        }
+
+        Imports.TimerOptionsBuilder {
+            id: timerMenu
+            conversationItem: chatPage.convoItem
+            builder: ownedMessages.builder
+        }
         ScrollView {
             id: scroll
             focus: true
@@ -60,7 +79,7 @@ Column {
             height: Math.min(contentHeight, CmnCfg.units.dp(120))
 
             anchors.bottom: parent.bottom
-            anchors.left: parent.left
+            anchors.left: timerButton.right
             anchors.right: buttons.left
             TextArea {
                 id: cta
