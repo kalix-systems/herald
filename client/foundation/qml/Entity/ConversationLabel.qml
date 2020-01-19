@@ -27,6 +27,7 @@ Item {
     property bool typeActive: false
     // json summary
     property string lastMsgDigest
+    property color typeColor
 
     // This component expects one of the following groups of properties,
     // either a lastMsgDigest property (a JSON object), or the subsequent group of
@@ -148,23 +149,84 @@ Item {
         active: typeActive
         anchors.left: parent.left
         anchors.bottom: parent.bottom
+        anchors.bottomMargin: CmnCfg.microMargin
         width: active ? item.implicitWidth : 0
         height: active ? item.implicitHeight : 0
-        sourceComponent: GridLayout {
+        onActiveChanged: if (active) {
+                             item.animation.start()
+                         }
+
+        sourceComponent: RowLayout {
             id: typeGrid
-            Label {
-                id: type
-                font {
-                    family: CmnCfg.chatFont.name
-                    pixelSize: subLabelFontSize
+            spacing: CmnCfg.units.dp(6)
+            property alias animation: anim
+            Rectangle {
+                id: rect1
+                height: CmnCfg.smallMargin
+                width: height
+                radius: width
+                color: typeColor
+            }
+            Rectangle {
+                id: rect2
+                height: CmnCfg.smallMargin
+                width: height
+                radius: width
+                color: typeColor
+            }
+            Rectangle {
+                id: rect3
+                height: CmnCfg.smallMargin
+                width: height
+                radius: width
+                color: typeColor
+            }
+
+            SequentialAnimation {
+                id: anim
+                loops: Animation.Infinite
+                PropertyAnimation {
+                    target: rect1
+                    property: "color"
+                    to: Qt.darker(typeColor, 1.4)
                 }
-                background: Item {}
-                elide: "ElideRight"
-                text: "<i>" + qsTr("Someone is typing") + "...</i>"
-                Layout.maximumWidth: wrapper.width - CmnCfg.defaultMargin * 2
-                color: labelColor
-                textFormat: Text.StyledText
-                padding: 0
+                PauseAnimation {
+                    duration: 100
+                }
+                PropertyAnimation {
+                    target: rect1
+                    property: "color"
+                    to: typeColor
+                }
+                PropertyAnimation {
+                    target: rect2
+                    property: "color"
+                    to: Qt.darker(typeColor, 1.4)
+                }
+                PauseAnimation {
+                    duration: 100
+                }
+                PropertyAnimation {
+                    target: rect2
+                    property: "color"
+                    to: typeColor
+                }
+                PropertyAnimation {
+                    target: rect3
+                    property: "color"
+                    to: Qt.darker(typeColor, 1.4)
+                }
+                PauseAnimation {
+                    duration: 100
+                }
+                PropertyAnimation {
+                    target: rect3
+                    property: "color"
+                    to: typeColor
+                }
+                PauseAnimation {
+                    duration: 140
+                }
             }
         }
     }

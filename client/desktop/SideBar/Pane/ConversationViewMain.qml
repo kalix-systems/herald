@@ -63,7 +63,7 @@ ListView {
 
         ListView.delayRemove: true
         property int __secondsSinceLastReset: 0
-        property int __typing: __secondsSinceLastReset < 5
+        property int __typing: __secondsSinceLastReset < 8
 
         property Component childChatView: Component {
             CV.ChatViewMain {
@@ -78,6 +78,7 @@ ListView {
             target: convContent.members
             onNewTypingIndicator: {
                 conversationItem.__secondsSinceLastReset = 0
+
                 convoRectangle.label.typeActive = true
             }
         }
@@ -99,7 +100,6 @@ ListView {
                 if ((groupIdx < 0) || (groupIdx >= conversationList.count))
                     return
 
-                //conversationItem.convContent.conversationId = groupId
                 conversationList.currentIndex = groupIdx
                 chatView.sourceComponent = conversationList.currentItem.childChatView
                 chatView.currentConvoId = groupId
@@ -145,6 +145,7 @@ ListView {
                                 !== "" ? CmnCfg.palette.offBlack : CmnCfg.palette.medGrey
                 receiptFill: convoRectangle.state
                              !== "" ? CmnCfg.palette.offBlack : CmnCfg.palette.white
+                typeColor: Qt.darker(CmnCfg.palette.medGrey, 1.2)
             }
 
             MouseArea {
@@ -178,6 +179,18 @@ ListView {
                 text: "Archive"
                 onTriggered: {
                     conversationData.status = 1
+
+                    const convIdx = Herald.conversations.indexById(
+                                      conversationData.conversationId)
+                    if ((convIdx < 0) || (convIdx >= conversationList.count))
+                        return
+
+                    if (conversationList.currentIndex === convIdx) {
+
+                        conversationList.currentIndex = -1
+                        print(conversationList.currentIndex)
+                        chatView.sourceComponent = splash
+                    }
                 }
             }
         }
