@@ -12,13 +12,16 @@ Menu {
     // Item in `Conversations` model
     property var conversationItem
     property var builder
-    property int chosenPeriod: builder.expirationPeriod
-                               !== undefined ? builder.expirationPeriod : (timerModel.length - 1)
+    property int chosenPeriod: builderDefault ? 0 : (builder.expirationPeriod + 1)
 
     property string chosenTimer: timerModel[chosenPeriod].path
+    property bool builderDefault: true
 
     // TODO real icon
     property var timerModel: [{
+            "name": qsTr("Default"),
+            "path": "qrc:/timer-option-icons/blank-dark.svg"
+        }, {
             "name": qsTr("Off"),
             "path": "qrc:/timer-option-icons/off-dark.svg"
         }, {
@@ -48,10 +51,8 @@ Menu {
         }, {
             "name": qsTr("1 year"),
             "path": "qrc:/timer-option-icons/1y-dark.svg"
-        }, {
-            "name": qsTr("Default"),
-            "path": "qrc:/timer-option-icons/blank-dark.svg"
         }]
+
     Instantiator {
         model: timerModel
 
@@ -59,11 +60,18 @@ Menu {
             text: timerModel[index].name
             checkable: true
             checked: {
-                builder.expirationPeriod === undefined ? (index === (timerModel.length - 1)) : builder.expirationPeriod === index
+                builderDefault ? (index === (0)) : builder.expirationPeriod === index - 1
             }
             onTriggered: {
 
-                builder.setExpirationPeriod(index)
+                if (index === 0) {
+                    builderDefault = true
+                    return builder.setExpirationPeriod(
+                                conversationItem.expirationPeriod)
+                }
+
+                builder.setExpirationPeriod(index - 1)
+                builderDefault = false
             }
         }
 
