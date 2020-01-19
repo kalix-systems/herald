@@ -51,29 +51,40 @@ Column {
 
     Item {
         width: parent.width
-        height: cta.height
-        TextArea {
-            id: cta
-            placeholderText: qsTr('Message ') + chatRowLayout.chatName
-            wrapMode: TextArea.WrapAtWordBoundaryOrAnywhere
-            color: CmnCfg.palette.black
-            selectionColor: CmnCfg.palette.highlightColor
-            font {
-                pixelSize: CmnCfg.chatTextSize
-                family: CmnCfg.chatFont.name
-            }
-            Keys.onPressed: if ((event.key === Qt.Key_Backspace
-                                 || event.key === Qt.Key_Delete)
-                                    && cta.text.length === 0) {
-                                Qt.inputMethod.hide()
-                            }
+        height: scroll.height
+
+        ScrollView {
+            id: scroll
+            focus: true
+            clip: true
+            height: Math.min(contentHeight, CmnCfg.units.dp(120))
+
+            anchors.bottom: parent.bottom
             anchors.left: parent.left
             anchors.right: buttons.left
-            onTextChanged: {
-                if (text !== "") {
-                    Qt.callLater(function () {
-                        ownedMessages.sendTypingIndicator()
-                    })
+            TextArea {
+                id: cta
+                width: parent.width
+                padding: CmnCfg.microMargin
+                placeholderText: qsTr('Message ') + chatRowLayout.chatName
+                wrapMode: TextArea.WrapAtWordBoundaryOrAnywhere
+                color: CmnCfg.palette.black
+                selectionColor: CmnCfg.palette.highlightColor
+                font {
+                    pixelSize: CmnCfg.chatTextSize
+                    family: CmnCfg.chatFont.name
+                }
+                Keys.onPressed: if ((event.key === Qt.Key_Backspace
+                                     || event.key === Qt.Key_Delete)
+                                        && cta.text.length === 0) {
+                                    Qt.inputMethod.hide()
+                                }
+                onTextChanged: {
+                    if (text !== "") {
+                        Qt.callLater(function () {
+                            ownedMessages.sendTypingIndicator()
+                        })
+                    }
                 }
             }
         }

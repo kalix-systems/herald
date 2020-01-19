@@ -95,7 +95,7 @@ Item {
                 pixelSize: labelFontSize
                 weight: Font.Medium
             }
-            Layout.maximumWidth: wrapper.width - ts.width
+            Layout.maximumWidth: wrapper.width - ts.width - CmnCfg.smallMargin
             elide: "ElideRight"
             text: convoTitle
             color: labelColor

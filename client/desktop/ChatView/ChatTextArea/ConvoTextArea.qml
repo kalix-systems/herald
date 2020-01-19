@@ -45,7 +45,7 @@ Rectangle {
         anchors.right: parent.right
         anchors.rightMargin: CmnCfg.smallMargin
         anchors.bottom: parent.bottom
-        bottomPadding: CmnCfg.smallMargin * 0.5
+        bottomPadding: CmnCfg.units.dp(4)
         source: "qrc:/attach-icon.svg"
     }
     Imports.IconButton {
@@ -56,7 +56,7 @@ Rectangle {
         anchors.left: parent.left
         anchors.leftMargin: CmnCfg.smallMargin
         anchors.bottom: parent.bottom
-        bottomPadding: CmnCfg.smallMargin * 0.5
+        bottomPadding: CmnCfg.units.dp(3)
         topPadding: 1
         onClicked: timerMenu.open()
     }
@@ -72,7 +72,7 @@ Rectangle {
         anchors.right: attachmentsButton.left
         anchors.rightMargin: CmnCfg.smallMargin
         anchors.bottom: parent.bottom
-        bottomPadding: CmnCfg.smallMargin * 0.5
+        bottomPadding: CmnCfg.units.dp(3)
         source: "qrc:/emoticon-icon.svg"
     }
 
