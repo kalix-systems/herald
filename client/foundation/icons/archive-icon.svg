@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 57.1 (83088) - https://sketch.com -->
+    <title>archive-icon</title>
+    <desc>Created with Sketch.</desc>
+    <g id="archive-icon" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <polygon id="Path" points="0 0 24 0 24 24 0 24"></polygon>
+        <path d="M17.9823919,4 L6.02663817,4 L4,6.64 L4,20 L20,20 L20,6.64 L17.9823919,4 Z M6.66666667,5.33333333 L17.3333333,5.33333333 L18.4444444,6.66666667 L5.55555556,6.66666667 L6.66666667,5.33333333 Z M5.33333333,18.6666667 L5.33333333,8 L18.6666667,8 L18.6666667,18.6666667 L5.33333333,18.6666667 Z" id="Shape" fill="#000000" fill-rule="nonzero"></path>
+        <polygon id="↵" fill="#000000" fill-rule="nonzero" transform="translate(12.041606, 13.549783) rotate(-90.000000) translate(-12.041606, -13.549783) " points="8.49182312 13.5077435 12.0416064 10.0739625 12.0913897 12.8055029 15.5913897 12.8055029 15.5913897 14.2099841 12.0913897 14.2099841 12.0913897 17.0256041"></polygon>
+    </g>
+</svg>
