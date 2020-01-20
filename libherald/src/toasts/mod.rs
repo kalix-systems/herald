@@ -83,7 +83,7 @@ mod imp {
 
 #[cfg(target_os = "windows")]
 mod imp {
-    use crate::herald::shared::{push, Update};
+    use crate::herald::{push, Update};
     use heraldcore::message::Message;
 
     pub fn new_msg_toast(msg: &Message) {
