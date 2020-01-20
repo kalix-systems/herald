@@ -87,7 +87,7 @@ mod imp {
     use heraldcore::message::Message;
 
     pub fn new_msg_toast(msg: &Message) {
-        msg_json = format!(
+        let msg_json = format!(
             "{{ msg: {}, author: {} }}",
             msg.text().unwrap_or(""),
             msg.author
