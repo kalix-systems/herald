@@ -73,7 +73,7 @@ mod imp {
     }
 }
 
-#[cfg(any(target_os = "android", target_os = "ios", target_os = "windows"))]
+#[cfg(any(target_os = "android", target_os = "ios"))]
 mod imp {
     use heraldcore::message::Message;
 
