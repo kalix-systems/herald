@@ -221,8 +221,15 @@ Item {
         id: tray
         icon.source: "qrc:/herald.png"
         icon.mask: true
-
         Component.onCompleted: if (Qt.platform.os === "windows")
                                    show()
+    }
+
+    Connections {
+        target: Herald
+        onNotify: {
+            if (Qt.platform.os === "windows")
+                tray.showMessage()
+        }
     }
 }

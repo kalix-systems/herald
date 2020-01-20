@@ -92,6 +92,7 @@ fn herald() -> Object {
     };
 
     let hooks = signals! {
+        notify(),
         tryPoll(),
         | connect tryPoll pollUpdate
     };
