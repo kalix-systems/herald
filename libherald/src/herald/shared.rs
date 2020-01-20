@@ -18,8 +18,12 @@ impl Into<Update> for RegistrationFailureCode {
     }
 }
 
+// some of these enums may only ever be constructed outside of
+// this crate
+#[allow(dead_code)]
 pub enum Update {
     RegistrationSuccess,
+    Notification(String),
     RegistrationFailed(RegistrationFailureCode),
     Conv(crate::conversations::shared::ConvUpdate),
     User(crate::users::shared::UserUpdate),
@@ -86,6 +90,9 @@ impl super::Herald {
         for update in updates() {
             use Update::*;
             match update {
+                Notification(msg) => {
+                    self.notifications.handle_notifications(msg);
+                }
                 RegistrationSuccess => {
                     self.load_props.setup();
                     self.emit.config_init_changed();

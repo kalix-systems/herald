@@ -84,6 +84,7 @@ pub trait HeraldTrait {
         conversations: Conversations,
         errors: Errors,
         message_search: MessageSearch,
+        notifications: Notifications,
         users: Users,
         users_search: UsersSearch,
         utils: Utils,
@@ -116,6 +117,10 @@ pub trait HeraldTrait {
     fn message_search(&self) -> &MessageSearch;
 
     fn message_search_mut(&mut self) -> &mut MessageSearch;
+
+    fn notifications(&self) -> &Notifications;
+
+    fn notifications_mut(&mut self) -> &mut Notifications;
 
     fn registration_failure_code(&self) -> Option<u8>;
 
@@ -215,6 +220,8 @@ pub unsafe fn herald_new_inner(ptr_bundle: *mut HeraldPtrBundle) -> Herald {
         message_search_end_move_rows,
         message_search_begin_remove_rows,
         message_search_end_remove_rows,
+        notifications,
+        notifications_notify,
         herald_registration_failure_code_changed,
         users,
         users_filter_changed,
@@ -325,6 +332,11 @@ pub unsafe fn herald_new_inner(ptr_bundle: *mut HeraldPtrBundle) -> Herald {
         end_remove_rows: message_search_end_remove_rows,
     };
     let d_message_search = MessageSearch::new(message_search_emit, model);
+    let notifications_emit = NotificationsEmitter {
+        qobject: Arc::new(AtomicPtr::new(notifications)),
+        notify: notifications_notify,
+    };
+    let d_notifications = Notifications::new(notifications_emit);
     let users_emit = UsersEmitter {
         qobject: Arc::new(AtomicPtr::new(users)),
         filter_changed: users_filter_changed,
@@ -385,6 +397,7 @@ pub unsafe fn herald_new_inner(ptr_bundle: *mut HeraldPtrBundle) -> Herald {
         d_conversations,
         d_errors,
         d_message_search,
+        d_notifications,
         d_users,
         d_users_search,
         d_utils,
@@ -484,6 +497,11 @@ pub unsafe extern "C" fn herald_message_search_get(ptr: *mut Herald) -> *mut Mes
 }
 
 #[no_mangle]
+pub unsafe extern "C" fn herald_notifications_get(ptr: *mut Herald) -> *mut Notifications {
+    (&mut *ptr).notifications_mut()
+}
+
+#[no_mangle]
 pub unsafe extern "C" fn herald_registration_failure_code_get(ptr: *const Herald) -> COption<u8> {
     match (&*ptr).registration_failure_code() {
         Some(value) => COption {
@@ -572,6 +590,8 @@ pub struct HeraldPtrBundle {
     message_search_end_move_rows: fn(*mut MessageSearchQObject),
     message_search_begin_remove_rows: fn(*mut MessageSearchQObject, usize, usize),
     message_search_end_remove_rows: fn(*mut MessageSearchQObject),
+    notifications: *mut NotificationsQObject,
+    notifications_notify: fn(*mut NotificationsQObject),
     herald_registration_failure_code_changed: fn(*mut HeraldQObject),
     users: *mut UsersQObject,
     users_filter_changed: fn(*mut UsersQObject),

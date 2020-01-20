@@ -81,4 +81,19 @@ mod imp {
     pub fn new_msg_toast(_: &Message) {}
 }
 
+#[cfg(target_os = "windows")]
+mod imp {
+    use crate::herald::shared::{push, Update};
+    use heraldcore::message::Message;
+
+    pub fn new_msg_toast(msg: &Message) {
+        msg_json = format!(
+            "{{ msg: {}, author: {} }}",
+            msg.text().unwrap_or(""),
+            msg.author
+        );
+        push(Update::Notification(msg_json));
+    }
+}
+
 pub(crate) use imp::new_msg_toast;

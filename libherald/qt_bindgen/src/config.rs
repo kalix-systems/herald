@@ -45,7 +45,7 @@ fn objects() -> BTreeMap<String, Rc<Object>> {
        users_search(),
        utils(),
        errors(),
-
+       notifications(),
        members(),
 
        conversation_content(),
@@ -78,6 +78,7 @@ fn herald() -> Object {
         conversationBuilder: Prop::new().object(conversation_builder()),
         conversations: Prop::new().object(conversations()),
         errors: Prop::new().object(errors()),
+        notifications: Prop::new().object(notifications()),
         messageSearch: Prop::new().object(message_search()),
         users: Prop::new().object(users()),
         usersSearch: Prop::new().object(users_search()),
@@ -112,6 +113,21 @@ fn errors() -> Object {
 
     obj! {
         Errors: Obj::new().funcs(functions).hooks(hooks)
+    }
+}
+
+fn notifications() -> Object {
+    let functions = functions! {
+        // Json representation of the message,  { msg: String, author: String }
+        mut nextNotif() => QString,
+    };
+
+    let hooks = signals! {
+        notify(), |
+    };
+
+    obj! {
+      Notifications: Obj::new().funcs(functions).hooks(hooks)
     }
 }
 

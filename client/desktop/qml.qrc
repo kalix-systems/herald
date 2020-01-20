@@ -60,5 +60,7 @@
         <file>common/PlatonicRectangle.qml</file>
         <file>common/TextContextMenu.qml</file>
         <file>main.qml</file>
+        <file>TrayIcon.qml</file>
+        <file>+windows/TrayIcon.qml</file>
     </qresource>
 </RCC>
