@@ -5,6 +5,7 @@ import "qrc:/imports/ChatBubble" as CB
 import LibHerald 1.0
 import "../Common"
 import Qt.labs.platform 1.0
+import "qrc:/imports" as Imports
 
 Column {
     id: chatRowLayout
@@ -51,29 +52,58 @@ Column {
 
     Item {
         width: parent.width
-        height: cta.height
-        TextArea {
-            id: cta
-            placeholderText: qsTr('Message ') + chatRowLayout.chatName
-            wrapMode: TextArea.WrapAtWordBoundaryOrAnywhere
-            color: CmnCfg.palette.black
-            selectionColor: CmnCfg.palette.highlightColor
-            font {
-                pixelSize: CmnCfg.chatTextSize
-                family: CmnCfg.chatFont.name
-            }
-            Keys.onPressed: if ((event.key === Qt.Key_Backspace
-                                 || event.key === Qt.Key_Delete)
-                                    && cta.text.length === 0) {
-                                Qt.inputMethod.hide()
-                            }
+        height: scroll.height
+
+        AnimIconButton {
+
+            id: timerButton
+            imageSource: timerMenu.chosenTimer
+            color: "transparent"
             anchors.left: parent.left
+            anchors.leftMargin: CmnCfg.microMargin
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: CmnCfg.microMargin
+            topPadding: 1
+            onTapped: timerMenu.open()
+        }
+
+        Imports.TimerOptionsBuilder {
+            id: timerMenu
+            conversationItem: chatPage.convoItem
+            builder: ownedMessages.builder
+        }
+        ScrollView {
+            id: scroll
+            focus: true
+            clip: true
+            height: Math.min(contentHeight, CmnCfg.units.dp(120))
+
+            anchors.bottom: parent.bottom
+            anchors.left: timerButton.right
             anchors.right: buttons.left
-            onTextChanged: {
-                if (text !== "") {
-                    Qt.callLater(function () {
-                        ownedMessages.sendTypingIndicator()
-                    })
+            TextArea {
+                id: cta
+                width: parent.width
+                padding: CmnCfg.microMargin
+                placeholderText: qsTr('Message ') + chatRowLayout.chatName
+                wrapMode: TextArea.WrapAtWordBoundaryOrAnywhere
+                color: CmnCfg.palette.black
+                selectionColor: CmnCfg.palette.highlightColor
+                font {
+                    pixelSize: CmnCfg.chatTextSize
+                    family: CmnCfg.chatFont.name
+                }
+                Keys.onPressed: if ((event.key === Qt.Key_Backspace
+                                     || event.key === Qt.Key_Delete)
+                                        && cta.text.length === 0) {
+                                    Qt.inputMethod.hide()
+                                }
+                onTextChanged: {
+                    if (text !== "") {
+                        Qt.callLater(function () {
+                            ownedMessages.sendTypingIndicator()
+                        })
+                    }
                 }
             }
         }
@@ -117,7 +147,7 @@ Column {
             id: fileDialog
             onAccepted: {
                 print(file)
-                print(ownedMessages.builder.addAttachment(file)) //print(foo)
+                print(ownedMessages.builder.addAttachment(file))
             }
         }
     }

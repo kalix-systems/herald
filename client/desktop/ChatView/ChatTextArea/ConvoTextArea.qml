@@ -45,7 +45,7 @@ Rectangle {
         anchors.right: parent.right
         anchors.rightMargin: CmnCfg.smallMargin
         anchors.bottom: parent.bottom
-        bottomPadding: CmnCfg.smallMargin * 0.5
+        bottomPadding: CmnCfg.units.dp(4)
         source: "qrc:/attach-icon.svg"
     }
     Imports.IconButton {
@@ -56,9 +56,10 @@ Rectangle {
         anchors.left: parent.left
         anchors.leftMargin: CmnCfg.smallMargin
         anchors.bottom: parent.bottom
-        bottomPadding: CmnCfg.smallMargin * 0.5
+        bottomPadding: CmnCfg.units.dp(3)
         topPadding: 1
         onClicked: timerMenu.open()
+        tooltipText: "Set single-message expiration"
     }
 
     Imports.TimerOptionsBuilder {
@@ -72,7 +73,7 @@ Rectangle {
         anchors.right: attachmentsButton.left
         anchors.rightMargin: CmnCfg.smallMargin
         anchors.bottom: parent.bottom
-        bottomPadding: CmnCfg.smallMargin * 0.5
+        bottomPadding: CmnCfg.units.dp(3)
         source: "qrc:/emoticon-icon.svg"
     }
 
@@ -151,14 +152,17 @@ Rectangle {
 
         Flickable {
             id: scrollView
-            height: Math.min(Math.max(chatText.contentHeight,
-                                      chatText.height), 100)
+            height: Math.min(Math.max(chatText.contentHeight, chatText.height),
+                             CmnCfg.units.dp(100))
             width: containerCol.width
             focus: true
             contentWidth: width
             clip: true
             contentHeight: Math.max(chatText.contentHeight, chatText.height)
             leftMargin: 0
+
+            maximumFlickVelocity: 1200
+            flickDeceleration: chatText.height * 10
 
             ScrollBar.vertical: ScrollBar {}
             boundsBehavior: Flickable.StopAtBounds

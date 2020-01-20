@@ -33,6 +33,7 @@ Component {
                 placeholderText: headerLoader.searchPlaceholder
                 selectByMouse: true
 
+                font.pixelSize: CmnCfg.chatTextSize
                 Layout.alignment: Qt.AlignBottom | Qt.AlignHCenter
                 Layout.fillWidth: true
                 Layout.bottomMargin: CmnCfg.smallMargin

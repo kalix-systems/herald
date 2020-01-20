@@ -29,6 +29,9 @@ ListView {
     Component.onCompleted: {
         cacheBuffer = chatListView.height * 5
 
+        ownedMessages.setElisionLineCount(20)
+        ownedMessages.setElisionCharCount(20 * 30)
+        ownedMessages.setElisionCharsPerLine(30)
         if (chatListView.contentHeight < chatListView.height) {
             chatListView.height = chatListView.contentHeight
         }

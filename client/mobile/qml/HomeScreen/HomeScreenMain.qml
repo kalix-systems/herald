@@ -35,6 +35,7 @@ Page {
             anchors.fill: parent
             model: Herald.conversations
             delegate: ConversationItem {
+                id: conversationItem
                 property var conversationData: model
                 isNTS: {
                     Herald.utils.compareByteArray(
@@ -54,6 +55,8 @@ Page {
                     id: convContent
                     conversationId: model.conversationId
                 }
+
+
                 visible: (cvMainView.state === "archiveState"
                           && model.status === 1)
                          || (cvMainView.state !== "archiveState"
