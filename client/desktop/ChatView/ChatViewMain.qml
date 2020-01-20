@@ -24,6 +24,15 @@ Page {
     property var conversationMembers
     property alias convoTimer: messageBar.timerMenu
 
+    Connections {
+        target: ownedConversation
+        onRowsInserted: {
+            if (Qt.platform.os === "windows" && !root.active
+                    && ownedConversation.author(0) !== Herald.config.name)
+                tray.showMessage("Herald", ownedConversation.body(0))
+        }
+    }
+
     background: Rectangle {
         color: CmnCfg.palette.white
     }

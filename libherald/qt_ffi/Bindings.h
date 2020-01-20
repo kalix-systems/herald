@@ -336,7 +336,6 @@ struct HeraldPtrBundle {
   void (*users_search_begin_remove_rows)(UsersSearch*, int, int);
   void (*users_search_end_remove_rows)(UsersSearch*);
   Utils* utils;
-  void (*herald_notify)(const Herald*);
   void (*herald_tryPoll)(const Herald*);
 };
 struct MediaAttachmentsPtrBundle {
@@ -1182,7 +1181,6 @@ Q_SIGNALS:
   void usersChanged();
   void usersSearchChanged();
   void utilsChanged();
-  void notify() const;
   void tryPoll() const;
 };
 class MediaAttachments : public QAbstractItemModel {

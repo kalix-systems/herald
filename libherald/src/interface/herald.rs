@@ -8,7 +8,6 @@ pub struct HeraldEmitter {
     pub(super) connection_pending_changed: fn(*mut HeraldQObject),
     pub(super) connection_up_changed: fn(*mut HeraldQObject),
     pub(super) registration_failure_code_changed: fn(*mut HeraldQObject),
-    pub(super) notify: fn(*mut HeraldQObject),
     pub(super) try_poll: fn(*mut HeraldQObject),
 }
 
@@ -26,7 +25,6 @@ impl HeraldEmitter {
             connection_pending_changed: self.connection_pending_changed,
             connection_up_changed: self.connection_up_changed,
             registration_failure_code_changed: self.registration_failure_code_changed,
-            notify: self.notify,
             try_poll: self.try_poll,
         }
     }
@@ -66,14 +64,6 @@ impl HeraldEmitter {
 
         if !ptr.is_null() {
             (self.registration_failure_code_changed)(ptr);
-        }
-    }
-
-    pub fn notify(&mut self) {
-        let ptr = self.qobject.load(Ordering::SeqCst);
-
-        if !ptr.is_null() {
-            (self.notify)(ptr);
         }
     }
 
@@ -256,7 +246,6 @@ pub unsafe fn herald_new_inner(ptr_bundle: *mut HeraldPtrBundle) -> Herald {
         users_search_begin_remove_rows,
         users_search_end_remove_rows,
         utils,
-        herald_notify,
         herald_try_poll,
     } = ptr_bundle;
     let config_emit = ConfigEmitter {
@@ -387,7 +376,6 @@ pub unsafe fn herald_new_inner(ptr_bundle: *mut HeraldPtrBundle) -> Herald {
         connection_pending_changed: herald_connection_pending_changed,
         connection_up_changed: herald_connection_up_changed,
         registration_failure_code_changed: herald_registration_failure_code_changed,
-        notify: herald_notify,
         try_poll: herald_try_poll,
     };
     let d_herald = Herald::new(
@@ -615,6 +603,5 @@ pub struct HeraldPtrBundle {
     users_search_begin_remove_rows: fn(*mut UsersSearchQObject, usize, usize),
     users_search_end_remove_rows: fn(*mut UsersSearchQObject),
     utils: *mut UtilsQObject,
-    herald_notify: fn(*mut HeraldQObject),
     herald_try_poll: fn(*mut HeraldQObject),
 }

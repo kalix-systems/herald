@@ -4063,7 +4063,6 @@ Herald::Herald(QObject* parent)
 
           ,
           m_utils,
-          [](const Herald* o) { Q_EMIT o->notify(); },
           [](const Herald* o) { Q_EMIT o->tryPoll(); }})),
       m_ownsPrivate(true)
 {
