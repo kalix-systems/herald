@@ -147,7 +147,7 @@ Column {
             id: fileDialog
             onAccepted: {
                 print(file)
-                print(ownedMessages.builder.addAttachment(file)) //print(foo)
+                print(ownedMessages.builder.addAttachment(file))
             }
         }
     }

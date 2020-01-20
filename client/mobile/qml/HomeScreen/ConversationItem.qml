@@ -38,6 +38,27 @@ Rectangle {
         right: parent.right
     }
 
+    property int __secondsSinceLastReset: 0
+    property int __typing: __secondsSinceLastReset < 8
+
+    Connections {
+        target: convContent.members
+        onNewTypingIndicator: {
+            conversationItem.__secondsSinceLastReset = 0
+
+            convoRectangle.label.typeActive = true
+        }
+    }
+
+    Connections {
+        target: appRoot.globalTimer
+        onRefreshTime: {
+            conversationItem.__secondsSinceLastReset += 1
+            if (!conversationItem.__typing) {
+                convoRectangle.label.typeActive = false
+            }
+        }
+    }
     Common.PlatonicRectangle {
         id: convoRectangle
         boxTitle: itemTitle
@@ -50,6 +71,8 @@ Rectangle {
             convoTitle: itemTitle
             lastMsgDigest: conversationItem.lastMsgDigest
             isEmpty: conversationItem.isEmpty
+            typeColor: CmnCfg.palette.medGrey
+            typeSize: CmnCfg.defaultMargin
         }
     }
 

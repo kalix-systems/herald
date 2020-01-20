@@ -23,6 +23,7 @@ Item {
     property int labelFontSize: CmnCfg.entityLabelSize
     property int subLabelFontSize: CmnCfg.entitySubLabelSize
     property alias receiptFill: receiptImage.icon.color
+    property int typeSize: CmnCfg.smallMargin
 
     property bool typeActive: false
     // json summary
@@ -162,21 +163,21 @@ Item {
             property alias animation: anim
             Rectangle {
                 id: rect1
-                height: CmnCfg.smallMargin
+                height: typeSize
                 width: height
                 radius: width
                 color: typeColor
             }
             Rectangle {
                 id: rect2
-                height: CmnCfg.smallMargin
+                height: typeSize
                 width: height
                 radius: width
                 color: typeColor
             }
             Rectangle {
                 id: rect3
-                height: CmnCfg.smallMargin
+                height: typeSize
                 width: height
                 radius: width
                 color: typeColor
