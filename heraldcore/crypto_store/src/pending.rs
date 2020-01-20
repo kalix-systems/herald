@@ -11,12 +11,8 @@ impl<'conn> PendingStore for Conn<'conn> {
         payload: Payload,
         to: &[sig::PublicKey],
     ) -> Result<(), Self::Error> {
-        if to.is_empty() {
-            return Ok(());
-        }
-
-        w!(self.add_payload(&id, &payload));
-        w!(self.add_pending(&id, to));
+        let id = kson::to_vec(&id);
+        w!(self.add_pending_payload_raw(&id, payload, to));
         Ok(())
     }
 
@@ -24,8 +20,44 @@ impl<'conn> PendingStore for Conn<'conn> {
         &mut self,
         id: PayloadId,
     ) -> Result<Option<Payload>, Self::Error> {
+        let id = kson::to_vec(&id);
+        Ok(w!(self.get_pending_payload_raw(&id)))
+    }
+
+    fn del_pending(
+        &mut self,
+        id: PayloadId,
+        to: sig::PublicKey,
+    ) -> Result<(), Self::Error> {
+        let id = kson::to_vec(&id);
+
+        w!(self.del_pending_raw(&id, to));
+
+        Ok(())
+    }
+}
+
+impl<'conn> Conn<'conn> {
+    fn del_pending_raw(
+        &mut self,
+        id: &[u8],
+        to: sig::PublicKey,
+    ) -> Result<(), rusqlite::Error> {
+        let mut stmt = st!(self, "pending", "del");
+        let params = np!("@id": id, "@recipient": to.as_ref());
+
+        w!(stmt.execute_named(params));
+        w!(self.gc_pending());
+
+        Ok(())
+    }
+
+    fn get_pending_payload_raw(
+        &mut self,
+        id: &[u8],
+    ) -> Result<Option<Payload>, crate::Error> {
         let mut stmt = st!(self, "pending", "payload");
-        let params = np!("@id": id.as_slice());
+        let params = np!("@id": &id);
 
         let mut res = w!(stmt.query_map_named(params, |row| { row.get::<_, Vec<u8>>("payload") }));
 
@@ -34,45 +66,45 @@ impl<'conn> PendingStore for Conn<'conn> {
         Ok(Some(w!(kson::from_slice(&raw))))
     }
 
-    fn del_pending(
+    fn add_pending_payload_raw(
         &mut self,
-        id: PayloadId,
-        to: sig::PublicKey,
-    ) -> Result<(), Self::Error> {
-        let mut stmt = st!(self, "pending", "del");
-        let params = np!("@id": id.as_slice(), "@recipient": to.as_ref());
+        id: &[u8],
+        payload: Payload,
+        to: &[sig::PublicKey],
+    ) -> Result<(), rusqlite::Error> {
+        if to.is_empty() {
+            return Ok(());
+        }
 
-        w!(stmt.execute_named(params));
-        w!(self.gc_pending());
+        w!(self.add_payload_raw(&id, &payload));
+        w!(self.add_pending_raw(&id, to));
 
         Ok(())
     }
-}
 
-impl<'conn> Conn<'conn> {
-    fn add_pending(
+    fn add_pending_raw(
         &self,
-        id: &PayloadId,
+        id: &[u8],
         recips: &[sig::PublicKey],
     ) -> Result<(), rusqlite::Error> {
         let mut stmt = st!(self, "pending", "add_pending");
 
         for recip in recips {
-            let params = np!("@id": id.as_slice(), "@recipient": recip.as_ref());
+            let params = np!("@id": id, "@recipient": recip.as_ref());
             w!(stmt.execute_named(params));
         }
 
         Ok(())
     }
 
-    fn add_payload(
+    fn add_payload_raw(
         &self,
-        id: &PayloadId,
+        id: &[u8],
         payload: &Payload,
     ) -> Result<(), rusqlite::Error> {
         let mut stmt = st!(self, "pending", "add_payload");
 
-        let params = np!("@id": id.as_slice(), "@payload": kson::to_vec(payload));
+        let params = np!("@id": id, "@payload": kson::to_vec(payload));
         w!(stmt.execute_named(params));
         Ok(())
     }
@@ -95,37 +127,39 @@ mod tests {
         let mut conn = in_memory();
         let mut conn = Conn::from(conn.transaction().expect(womp!()));
 
-        let id1 = PayloadId::gen_new();
+        let id = |i: u8| [i; 32];
+
+        let id1 = &id(1);
 
         // I hate typing clone
         let payload = || Payload::Noop;
 
         // trivial add
-        conn.add_pending_payload(id1, payload(), &[])
+        conn.add_pending_payload_raw(id1, payload(), &[])
             .expect(womp!());
 
         // should be nothing
-        assert!(conn.get_pending_payload(id1).expect(womp!()).is_none());
+        assert!(conn.get_pending_payload_raw(id1).expect(womp!()).is_none());
 
-        let id2 = PayloadId::gen_new();
+        let id2 = &id(2);
 
         let recips = (0..2)
             .map(|_| *sig::KeyPair::gen_new().public())
             .collect::<Vec<_>>();
 
-        conn.add_pending_payload(id2, payload(), &recips)
+        conn.add_pending_payload_raw(id2, payload(), &recips)
             .expect(womp!());
 
-        let stored_payload = conn.get_pending_payload(id2).expect(womp!());
+        let stored_payload = conn.get_pending_payload_raw(id2).expect(womp!());
         assert_eq!(stored_payload, Some(payload()));
 
-        conn.del_pending(id2, recips[0]).expect(womp!());
+        conn.del_pending_raw(id2, recips[0]).expect(womp!());
 
-        let stored_payload = conn.get_pending_payload(id2).expect(womp!());
+        let stored_payload = conn.get_pending_payload_raw(id2).expect(womp!());
         assert_eq!(stored_payload, Some(payload()));
 
-        conn.del_pending(id2, recips[1]).expect(womp!());
+        conn.del_pending_raw(id2, recips[1]).expect(womp!());
 
-        assert!(conn.get_pending_payload(id1).expect(womp!()).is_none());
+        assert!(conn.get_pending_payload_raw(id1).expect(womp!()).is_none());
     }
 }
