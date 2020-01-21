@@ -3,6 +3,12 @@
 #include "Bindings.h"
 #include <QHash>
 
+
+/// If you are reading this file please read this preface before hand.
+/// ConversationContent objects are just thin routing wrappers on top
+/// of a messages and members model. as such this is not the massive
+/// memory leak which it appears to be. the actual content of these
+/// conversations is treasured away in a database.
 class ConversationMap: public QObject {
   Q_OBJECT
 public:
