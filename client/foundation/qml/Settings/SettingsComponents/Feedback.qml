@@ -8,12 +8,13 @@ ColumnLayout {
     spacing: CmnCfg.smallMargin
 
     StandardLabel {
-        text: qsTr("Open help center")
-        color: "#0066cc"
+        text: "<a href='https://github.com/kalix-systems/herald/wiki/Trouble-Shooting'>" + qsTr(
+                  "Open help center") + "</a>"
         Layout.leftMargin: CmnCfg.defaultMargin
         Layout.topMargin: CmnCfg.smallMargin
         font.family: CmnCfg.chatFont.name
         font.pixelSize: CmnCfg.chatTextSize
+        onLinkActivated: Qt.openUrlExternally(link)
     }
 
     Rectangle {
@@ -23,11 +24,12 @@ ColumnLayout {
     }
 
     StandardLabel {
-        text: qsTr("Report an issue")
-        color: "#0066cc"
+        text: "<a href='https://github.com/kalix-systems/herald/issues'>" + qsTr(
+                  "Report an issue") + "</a>"
         Layout.leftMargin: CmnCfg.defaultMargin
         font.family: CmnCfg.chatFont.name
         font.pixelSize: CmnCfg.chatTextSize
+        onLinkActivated: Qt.openUrlExternally(link)
     }
 
     Rectangle {
