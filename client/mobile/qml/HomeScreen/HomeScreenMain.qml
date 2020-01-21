@@ -22,6 +22,20 @@ Page {
     Component.onCompleted: appRoot.router.cvView = cvMainView
     signal messagePositionRequested(var requestMsgId)
 
+    Label {
+        anchors {
+            top: parent.top
+            topMargin: CmnCfg.defaultMargin
+            horizontalCenter: parent.horizontalCenter
+            //left: parent.left
+        }
+        text: "No conversations to show"
+        font.family: CmnCfg.chatFont.name
+        font.pixelSize: CmnCfg.chatTextSize
+        font.italic: true
+        horizontalAlignment: Text.AlighHCenter
+    }
+
     // the body of this entire element
     // displays conversations
     // TODO: figure out why this is in a loader.

@@ -51,8 +51,7 @@ Rectangle {
             }
             icon.color: CmnCfg.palette.white
             onTapped: {
-                Herald.conversations.setStatusById(
-                            conversationItem.convoContent.conversationId, 1)
+                conversationItem.conversationData.status = 1
                 conversationItem.isSelected = false
                 deactivate()
             }
@@ -68,8 +67,7 @@ Rectangle {
             }
             icon.color: CmnCfg.palette.white
             onTapped: {
-                Herald.conversations.setStatusById(
-                            conversationItem.convoContent.conversationId, 0)
+                conversationItem.conversationData.status = 0
                 conversationItem.isSelected = false
                 deactivate()
             }
@@ -85,8 +83,8 @@ Rectangle {
                 verticalCenter: parent.verticalCenter
             }
             onTapped: {
-                deactivate()
                 conversationItem.isSelected = false
+                deactivate()
             }
         }
     }
