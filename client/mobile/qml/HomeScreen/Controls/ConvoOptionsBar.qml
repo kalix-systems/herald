@@ -25,13 +25,15 @@ Rectangle {
         }
     }
 
-    //    Connections {
-    //        target: chatList
-    //        onCloseDropdown: {
-    //            if (active)
-    //                deactivate()
-    //        }
-    //    }
+    Connections {
+        target: cvMainView
+        onCloseAllOptionsBars: {
+            if (active)
+                deactivate()
+                conversationItem.isSelected = false
+        }
+    }
+
     Item {
         id: content
         height: boundHeight

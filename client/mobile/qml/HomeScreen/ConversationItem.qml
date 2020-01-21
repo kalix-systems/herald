@@ -160,10 +160,9 @@ Rectangle {
             }
 
             onLongPressed: {
+                cvMainView.closeAllOptionsBars()
                 isSelected = true
                 optionsBar.activate()
-                //            if (optionsBar.active === false)
-                //                optionsBar.activate()
             }
         }
     }

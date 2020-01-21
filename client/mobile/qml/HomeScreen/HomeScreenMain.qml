@@ -21,8 +21,11 @@ Page {
     }
     Component.onCompleted: appRoot.router.cvView = cvMainView
     signal messagePositionRequested(var requestMsgId)
+    // Used to close any open per-convo options menu bars when new one opened
+    signal closeAllOptionsBars
 
     Label {
+        id: noConvosLabel
         anchors {
             top: parent.top
             topMargin: CmnCfg.defaultMargin
@@ -34,6 +37,7 @@ Page {
         font.pixelSize: CmnCfg.chatTextSize
         font.italic: true
         horizontalAlignment: Text.AlighHCenter
+        visible: false
     }
 
     // the body of this entire element
@@ -181,6 +185,10 @@ Page {
             PropertyChanges {
                 target: buttonLoader
                 visible: false
+            }
+            PropertyChanges {
+                target: noConvosLabel
+                visible: true
             }
         }
     ]
