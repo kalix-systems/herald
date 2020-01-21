@@ -196,6 +196,12 @@ pub trait ConversationsTrait {
         profile_picture: String,
     ) -> ();
 
+    fn set_status_by_id(
+        &mut self,
+        conversation_id: &[u8],
+        status: u8,
+    ) -> ();
+
     fn toggle_filter_regex(&mut self) -> bool;
 
     fn row_count(&self) -> usize;
@@ -407,6 +413,18 @@ pub unsafe extern "C" fn conversations_set_profile_picture(
         profile_picture_len,
     );
     obj.set_profile_picture(index, profile_picture)
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn conversations_set_status_by_id(
+    ptr: *mut Conversations,
+    conversation_id_str: *const c_char,
+    conversation_id_len: c_int,
+    status: u8,
+) {
+    let obj = &mut *ptr;
+    let conversation_id = { qba_slice!(conversation_id_str, conversation_id_len) };
+    obj.set_status_by_id(conversation_id, status)
 }
 
 #[no_mangle]

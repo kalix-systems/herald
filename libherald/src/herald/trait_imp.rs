@@ -39,6 +39,7 @@ impl HeraldTrait for Herald {
         conversations: Conversations,
         errors: Errors,
         message_search: MessageSearch,
+        notifications: Notifications,
         users: Users,
         users_search: UsersSearch,
         utils: Utils,
@@ -49,6 +50,7 @@ impl HeraldTrait for Herald {
             conversation_builder,
             conversations,
             errors,
+            notifications,
             message_search,
             users,
             users_search,
@@ -102,6 +104,7 @@ impl HeraldTrait for Herald {
 
     props! {
         errors, errors_mut, Errors,
+        notifications, notifications_mut, Notifications,
         message_search, message_search_mut, MessageSearch,
         users_search, users_search_mut, UsersSearch,
         utils, utils_mut, Utils

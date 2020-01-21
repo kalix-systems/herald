@@ -35,6 +35,8 @@ pub mod members;
 pub mod message_search;
 /// Messages object
 pub mod messages;
+/// a notifications queue, this is only used on windows.
+pub mod notifications;
 /// Conversations shared with a given user
 pub mod shared_conversations;
 /// Desktop push notifications

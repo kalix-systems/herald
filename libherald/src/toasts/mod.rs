@@ -73,12 +73,26 @@ mod imp {
     }
 }
 
-#[cfg(any(target_os = "android", target_os = "ios", target_os = "windows"))]
+#[cfg(any(target_os = "android", target_os = "ios"))]
 mod imp {
     use heraldcore::message::Message;
 
     /// No-op
     pub fn new_msg_toast(_: &Message) {}
+}
+
+#[cfg(target_os = "windows")]
+mod imp {
+    use crate::herald::{push, Update};
+    use heraldcore::message::Message;
+
+    pub fn new_msg_toast(msg: &Message) {
+        let msg_json = json::object! {
+           "msg" => msg.text().unwrap_or_default(),
+           "author" => msg.author.as_str()
+        };
+        push(Update::Notification(msg_json));
+    }
 }
 
 pub(crate) use imp::new_msg_toast;
