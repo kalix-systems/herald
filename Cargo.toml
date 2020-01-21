@@ -9,7 +9,6 @@ members = [
   "herald_server/server_protocol",
   "herald_server/server_store",
   "heraldcore",
-  "heraldcore/chainkeys",
   "heraldcore/coremacros",
   "heraldcore/coretypes",
   "heraldcore/crypto_store",

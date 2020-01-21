@@ -11,6 +11,7 @@ once_cell            = "1.2"
 parking_lot          = "0.10"
 tar                  = "0.4"
 unicode-segmentation = "1.6"
+anyhow = "1.0.26"
 
 [dependencies.herald_common]
 path             = "../herald_common"
@@ -19,9 +20,6 @@ features         = ["rusqlite_"]
 
 [dependencies.kcl]
 path = "../kcl"
-
-[dependencies.channel_ratchet]
-path = "../channel_ratchet"
 
 [dependencies.coretypes]
 path = "./coretypes"
@@ -53,8 +51,11 @@ path = "./platform_dirs"
 [dependencies.image_utils]
 path = "./image_utils"
 
-[dependencies.chainkeys]
-path = "./chainkeys"
+[dependencies.crypto_store]
+path = "./crypto_store"
+
+[dependencies.herald_network]
+path = "./herald_network"
 
 [dependencies.websocket]
 version          = "0.23"

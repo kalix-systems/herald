@@ -1,6 +1,6 @@
 //! Core logic for herald client.
 
-#![warn(missing_docs)]
+#![allow(warnings)]
 /// User configuration
 pub mod config;
 /// Conversations
@@ -30,7 +30,7 @@ pub mod utils;
 
 pub use image_utils;
 pub use platform_dirs::set_data_dir;
-pub(crate) use updates::{err, push};
+pub(crate) use updates::{err, push, Notification};
 
 #[cfg(test)]
 #[macro_use]

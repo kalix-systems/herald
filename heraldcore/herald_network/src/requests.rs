@@ -6,15 +6,15 @@ pub struct Requester {
 }
 
 impl Requester {
-    pub fn send<R: Into<Request>, F: FnMut(Result<Response, Error>) + Send + 'static>(
+    pub fn send<F: FnMut(Result<Response, Error>) + Send + 'static>(
         &mut self,
-        req: R,
+        req: Request,
         f: F,
     ) -> Result<(), Error> {
-        let req = req.into();
         let boxed = Box::new(f);
 
         // TODO: should this trigger a reconnect?
+        // this should probably also go in pending sometimes
         self.tx
             .send((req, boxed))
             .map_err(|_| anyhow!("Failed to send request"))?;

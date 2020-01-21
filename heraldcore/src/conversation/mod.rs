@@ -13,46 +13,47 @@ pub use builder::*;
 
 /// Starts the conversation, sending it to the proposed members.
 pub fn start(conversation: Conversation) -> Result<(), HErr> {
-    use channel_ratchet::*;
-    use std::fs;
+    todo!();
+    //use channel_ratchet::*;
+    //use std::fs;
 
-    let Conversation { members, meta } = conversation;
+    //let Conversation { members, meta } = conversation;
 
-    let ConversationMeta {
-        title,
-        conversation_id: cid,
-        picture: picture_path,
-        expiration_period,
-        ..
-    } = meta;
+    //let ConversationMeta {
+    //    title,
+    //    conversation_id: cid,
+    //    picture: picture_path,
+    //    expiration_period,
+    //    ..
+    //} = meta;
 
-    let ratchet = RatchetState::new();
-    chainkeys::store_state(cid, &ratchet)?;
+    //let ratchet = RatchetState::new();
+    //chainkeys::store_state(cid, &ratchet)?;
 
-    let picture = match picture_path {
-        Some(path) => Some(fs::read(path)?),
-        None => None,
-    };
+    //let picture = match picture_path {
+    //    Some(path) => Some(fs::read(path)?),
+    //    None => None,
+    //};
 
-    let pairwise = get_pairwise_conversations(&members)?;
+    //let pairwise = get_pairwise_conversations(&members)?;
 
-    let body = ConversationMessage::AddedToConvo {
-        info: Box::new(cmessages::AddedToConvo {
-            members,
-            cid,
-            title,
-            expiration_period,
-            picture,
-        }),
+    //let body = ConversationMessage::AddedToConvo {
+    //    info: Box::new(cmessages::AddedToConvo {
+    //        members,
+    //        cid,
+    //        title,
+    //        expiration_period,
+    //        picture,
+    //    }),
 
-        ratchet,
-    };
+    //    ratchet,
+    //};
 
-    for pw_cid in pairwise {
-        crate::network::send_cmessage(pw_cid, &body)?;
-    }
+    //for pw_cid in pairwise {
+    //    crate::network::send_cmessage(pw_cid, &body)?;
+    //}
 
-    Ok(())
+    //Ok(())
 }
 
 /// Get conversation metadata

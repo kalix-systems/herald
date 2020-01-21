@@ -124,18 +124,20 @@ pub(crate) fn preferred_expiration(
 
 /// Gets the current user's keypair
 pub(crate) fn keypair(conn: &rusqlite::Connection) -> Result<sig::KeyPair, HErr> {
-    Ok(w!(conn.query_row(
-        include_str!("sql/get_keypair.sql"),
-        NO_PARAMS,
-        |row| { row.get(0) }
-    )))
+    todo!()
+    //Ok(w!(conn.query_row(
+    //    include_str!("sql/get_keypair.sql"),
+    //    NO_PARAMS,
+    //    |row| { row.get(0) }
+    //)))
 }
 
 /// Gets the current user's GlobalId
 pub(crate) fn gid(conn: &rusqlite::Connection) -> Result<GlobalId, HErr> {
-    let uid = id(conn)?;
-    let did = *keypair(conn)?.public_key();
-    Ok(GlobalId { uid, did })
+    todo!()
+    //let uid = id(conn)?;
+    //let did = *keypair(conn)?.public_key();
+    //Ok(GlobalId { uid, did })
 }
 
 /// Gets the server address where the current user is registered
@@ -185,34 +187,35 @@ impl ConfigBuilder {
 
         user_builder = user_builder.color(color);
 
-        let tx = w!(conn.transaction());
-        w!(tx.execute_named(
-            include_str!("sql/add_config.sql"),
-            named_params! {
-                "@id": id,
-                "@kp": keypair,
-                "@colorscheme": colorscheme,
-                "@home_server": home_server.to_string(),
-                "@preferred_expiration": preferred_expiration
-            },
-        ));
+        todo!();
+        //let tx = w!(conn.transaction());
+        //w!(tx.execute_named(
+        //    include_str!("sql/add_config.sql"),
+        //    named_params! {
+        //        "@id": id,
+        //        "@kp": keypair,
+        //        "@colorscheme": colorscheme,
+        //        "@home_server": home_server.to_string(),
+        //        "@preferred_expiration": preferred_expiration
+        //    },
+        //));
 
-        let (user, _conv) = w!(user_builder.add_with_tx(&tx));
+        //let (user, _conv) = w!(user_builder.add_with_tx(&tx));
 
-        w!(tx.commit());
+        //w!(tx.commit());
 
-        let config = Config {
-            id: user.id,
-            name: user.name,
-            profile_picture: user.profile_picture,
-            color,
-            colorscheme,
-            nts_conversation: user.pairwise_conversation,
-            home_server,
-            preferred_expiration,
-        };
+        //let config = Config {
+        //    id: user.id,
+        //    name: user.name,
+        //    profile_picture: user.profile_picture,
+        //    color,
+        //    colorscheme,
+        //    nts_conversation: user.pairwise_conversation,
+        //    home_server,
+        //    preferred_expiration,
+        //};
 
-        Ok(config)
+        //Ok(config)
     }
 }
 

@@ -1,14 +1,6 @@
 use super::*;
 use crate::types::{cmessages, dmessages};
 
-/// Outcome of sending a `ConversationMessage`
-pub enum SendOutcome {
-    /// Message sent succesfully
-    Success,
-    /// Message was placed in pending
-    Pending,
-}
-
 pub(crate) fn send_cmessage(
     cid: ConversationId,
     content: &ConversationMessage,

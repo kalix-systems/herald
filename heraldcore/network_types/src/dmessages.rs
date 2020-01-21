@@ -1,4 +1,3 @@
-use channel_ratchet::*;
 use herald_common::*;
 use herald_ids::ConversationId;
 use kcl::box_;
@@ -22,8 +21,8 @@ pub struct DeviceMessage {
 #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
 /// A contact request.
 pub struct UserReq {
-    /// The genesis block for the conversation.
-    pub ratchet: RatchetState,
+    ///// The genesis block for the conversation.
+    //pub ratchet: RatchetState,
     /// The proposed conversation id.
     pub cid: ConversationId,
 }

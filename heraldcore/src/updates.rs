@@ -7,9 +7,11 @@ use herald_common::UserId;
 use herald_ids::{ConversationId, MsgId};
 use once_cell::sync::OnceCell;
 
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 /// `Notification`s contain info about what updates were made to the client's database.
 pub enum Notification {
+    /// Network connection has failed
+    ConnectionDown(HErr),
     /// A new message has been received.
     NewMsg(Box<message::Message>),
     /// A message has been received.

@@ -20,7 +20,7 @@ where
     client::update(client);
     handle_events(push_handler, connection_failed, rx, err_rx, request_rx).await;
 
-    Ok::<(), Error>(())
+    Ok(())
 }
 
 pub(crate) async fn handle_events<PH, CF>(
@@ -38,6 +38,7 @@ pub(crate) async fn handle_events<PH, CF>(
         while let Some((request, mut f)) = req_rx.recv().await {
             if let Some(client) = client::get() {
                 let response_res = client.read().req(request);
+
                 match response_res {
                     Ok(rx) => match rx.await {
                         Ok(response) => f(Ok(response)),
@@ -65,4 +66,6 @@ async fn handle_connection_failure<CF>(
     if let Ok(e) = err_rx.await {
         connection_failed(e);
     }
+
+    drop(crate::quit());
 }

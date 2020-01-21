@@ -1,4 +1,3 @@
-use channel_ratchet::*;
 use coretypes::{
     conversation,
     messages::{MessageBody, ReactContent, ReceiptStatus},
@@ -22,8 +21,8 @@ pub enum ConversationMessage {
     /// A message a user receives upon being added to a conversation
     AddedToConvo {
         info: Box<AddedToConvo>,
-        /// The genesis block for the new conversation
-        ratchet: RatchetState,
+        ///// The genesis block for the new conversation
+        //ratchet: RatchetState,
     },
     /// User content
     Message(Content),

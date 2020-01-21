@@ -1,6 +1,5 @@
 use super::*;
 use crate::errors::{HErr, HErr::*};
-use chainkeys::*;
 use herald_common::*;
 
 pub use herald_ids::*;

@@ -104,9 +104,10 @@ impl ConfigBuilder {
         let mut db = Database::get()?;
         let conf = self.add_db(&mut db)?;
 
-        let ratchet = channel_ratchet::RatchetState::new();
-        chainkeys::store_state(conf.nts_conversation, &ratchet)?;
-        Ok(conf)
+        //let ratchet = channel_ratchet::RatchetState::new();
+        //chainkeys::store_state(conf.nts_conversation, &ratchet)?;
+        //Ok(conf)
+        todo!()
     }
 }
 
@@ -141,9 +142,10 @@ pub fn preferred_expiration() -> Result<ExpirationPeriod, HErr> {
 }
 
 /// Gets the server address where the current user is registered
-pub fn home_server() -> Result<std::net::SocketAddr, HErr> {
+pub fn home_server() -> Result<(String, u16), HErr> {
     let db = Database::get()?;
-    db::home_server(&db)
+    //db::home_server(&db)
+    todo!()
 }
 
 /// Updates user's display name
