@@ -1,10 +1,11 @@
 #include "Bindings.h"
+#include "conversationmap.h"
 #include <QApplication>
 #include <QQmlApplicationEngine>
 #include <QStandardPaths>
 #include <QtQml/qqml.h>
 #include <QWindow>
- #include <QDebug>
+#include <QDebug>
 
 int main(int argc, char* argv[])
 {
@@ -16,7 +17,6 @@ int main(int argc, char* argv[])
   QApplication app(argc, argv);
   QIcon icon = QIcon(":/herald.png");
   QApplication::setWindowIcon(icon);
-
 
   qmlRegisterSingletonType<Herald>(
       "LibHerald", 1, 0, "Herald",
@@ -34,6 +34,14 @@ int main(int argc, char* argv[])
 
         return state;
       });
+
+  qRegisterMetaType<ConversationContent*>("ConversationContent");
+  qmlRegisterSingletonType<ConversationMap>("LibHerald", 1,0, "ContentMap",
+    [](QQmlEngine* engine, QJSEngine* scriptEngine){
+        Q_UNUSED(engine)
+        Q_UNUSED(scriptEngine)
+        return new ConversationMap();
+    });
 
   qmlRegisterAnonymousType<Users>("LibHerald", 1);
   qmlRegisterAnonymousType<Config>("LibHerald", 1);
