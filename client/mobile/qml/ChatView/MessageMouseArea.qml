@@ -16,20 +16,13 @@ MouseArea {
 
     // TODO message highlight should persist until options menu is closed
     onPressAndHold: {
-        cb.hoverHighlight = true
-        dropdown.activate()
         chatList.closeDropdown()
+        cb.isSelected = true
+        dropdown.activate()
     }
 
     onPressed: {
+        cb.isSelected = false
         dropdown.deactivate()
-    }
-
-    onReleased: {
-        cb.hoverHighlight = false
-    }
-
-    onExited: {
-        cb.hoverHighlight = false
     }
 }
