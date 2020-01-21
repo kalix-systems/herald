@@ -21,6 +21,8 @@ Page {
     }
     Component.onCompleted: appRoot.router.cvView = cvMainView
     signal messagePositionRequested(var requestMsgId)
+    // Used to close any open per-convo options menu bars when new one opened
+    signal closeAllOptionsBars
 
     Label {
         anchors {
