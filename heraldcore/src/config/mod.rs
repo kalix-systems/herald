@@ -22,7 +22,7 @@ pub struct ConfigBuilder {
     /// Color of the local user
     color: Option<u32>,
     nts_conversation: Option<ConversationId>,
-    home_server: Option<SocketAddr>,
+    home_server: (String, u16),
     preferred_expiration: Option<ExpirationPeriod>,
 }
 
@@ -31,15 +31,16 @@ impl ConfigBuilder {
     pub fn new(
         id: UserId,
         keypair: sig::KeyPair,
+        home_server: (String, u16),
     ) -> Self {
         Self {
             id,
             keypair,
+            home_server,
             name: None,
             color: None,
             colorscheme: None,
             nts_conversation: None,
-            home_server: None,
             preferred_expiration: None,
         }
     }
@@ -78,15 +79,6 @@ impl ConfigBuilder {
         conv_id: ConversationId,
     ) -> Self {
         self.nts_conversation = Some(conv_id);
-        self
-    }
-
-    /// Sets the home server for this user
-    pub fn home_server(
-        mut self,
-        home_server: SocketAddr,
-    ) -> Self {
-        self.home_server.replace(home_server);
         self
     }
 

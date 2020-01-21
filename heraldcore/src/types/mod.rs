@@ -1,5 +1,5 @@
 use super::*;
-use crate::errors::{HErr, HErr::*};
+use crate::errors::HErr;
 use herald_common::*;
 
 pub use herald_ids::*;

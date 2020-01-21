@@ -46,6 +46,11 @@ pub fn raw_conn() -> &'static Mutex<rusqlite::Connection> {
     })
 }
 
+pub fn as_conn(raw: &mut rusqlite::Connection) -> Result<Conn, rusqlite::Error> {
+    let tx = raw.transaction()?;
+    Ok(tx.into())
+}
+
 pub fn reset() -> Result<(), rusqlite::Error> {
     let mut raw = raw_conn().lock();
     let conn = Conn::from(raw.transaction()?);

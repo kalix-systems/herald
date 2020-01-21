@@ -73,6 +73,7 @@ pub fn encrypt_payload<S: RatchetStore>(
     } else {
         start_session(store, me, to)?
     };
+
     let (header, ct) = ratchet
         .ratchet_encrypt(&kson::to_vec(&payload), ad.as_ref())
         .ok_or(TransitError::Uninit(to))?;

@@ -23,8 +23,6 @@ pub mod types;
 pub mod updates;
 /// Functions and data structures related to users.
 pub mod user;
-/// User keys
-mod user_keys;
 /// Utils
 pub mod utils;
 

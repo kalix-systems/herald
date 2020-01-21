@@ -173,8 +173,6 @@ impl ConfigBuilder {
         let color = color.unwrap_or_else(|| crate::utils::id_to_color(id.as_str()));
         let colorscheme = colorscheme.unwrap_or(0);
 
-        let home_server = home_server.unwrap_or_else(|| *crate::network::default_server());
-
         let mut user_builder = crate::user::UserBuilder::new(id).local();
 
         if let Some(name) = name {
@@ -223,7 +221,7 @@ impl ConfigBuilder {
 pub(crate) fn test_config(conn: &mut rusqlite::Connection) -> crate::config::Config {
     use std::convert::TryInto;
     let uid = "111NOCONFLICT111".try_into().expect("Bad user id");
-    crate::config::ConfigBuilder::new(uid, sig::KeyPair::gen_new())
+    crate::config::ConfigBuilder::new(uid, sig::KeyPair::gen_new(), ("".into(), 0))
         .add_db(conn)
         .expect("Failed to create config")
 }

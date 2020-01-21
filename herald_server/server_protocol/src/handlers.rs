@@ -83,7 +83,6 @@ impl State {
             .collect())
     }
 
-    // FIXME: check that a user is part of a group before they push to it
     pub async fn send_push(
         &self,
         from: GlobalId,

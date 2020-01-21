@@ -17,8 +17,8 @@ pub(super) fn update(handle: Requester) {
     }
 }
 
-pub(super) fn send<R: Into<Request>, F: FnMut(Result<Response, HErr>) + Send + 'static>(
-    req: R,
+pub(super) fn send<F: FnMut(Result<Response, HErr>) + Send + 'static>(
+    req: Request,
     f: F,
 ) -> Result<(), HErr> {
     let handle: &Mutex<Requester> = HANDLE

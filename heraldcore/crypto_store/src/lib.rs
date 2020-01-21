@@ -6,9 +6,9 @@ pub use coremacros::w;
 pub use errors::Error;
 pub mod connection;
 pub mod prelude {
-    pub use crate::connection::{raw_conn, Conn};
+    pub use crate::connection::{as_conn, raw_conn, Conn};
     pub use crate::errors::Error;
-    pub use ratchet_chat::protocol::{ConversationStore, PendingStore, RatchetStore, SigStore};
+    pub use ratchet_chat::protocol::*;
 }
 
 macro_rules! ok_none {

@@ -11,7 +11,6 @@ use websocket::{message::OwnedMessage as WMessage, sync::client as wsclient};
 mod requester;
 
 mod statics;
-pub(crate) use statics::default_server;
 use statics::*;
 
 //mod login_imp;
@@ -63,10 +62,26 @@ pub fn begin_registration((dns, port): (String, u16)) -> Result<hn::Registration
         kp,
         dns,
         port,
-        |_| todo!(),
+        handle_push,
         |_| todo!(),
         |e| push(Notification::ConnectionDown(e)),
     )
+}
+
+fn handle_push(
+    Push {
+        timestamp,
+        msg,
+        gid,
+        ..
+    }: Push
+) {
+    use crypto_store::prelude::{Msg as PLMsg, *};
+    let payload: PLMsg = kson::from_bytes(msg).unwrap();
+    let kp = crate::config::keypair().unwrap();
+    let mut raw = raw_conn().lock();
+    let mut tx: Conn = raw.transaction().unwrap().into();
+    handle_incoming(&mut tx, &kp, gid, payload);
 }
 
 /// To be call this upon successful registration
@@ -80,18 +95,24 @@ pub fn login() -> Result<(), HErr> {
     let uid = crate::config::id()?;
     let (dns, port) = crate::config::home_server()?;
 
-    let handle = hn::login(
-        uid,
-        kp,
-        dns,
-        port,
-        |_| todo!(),
-        |e| push(Notification::ConnectionDown(e)),
-    )?;
+    let handle = hn::login(uid, kp, dns, port, handle_push, |e| {
+        push(Notification::ConnectionDown(e))
+    })?;
 
     std::thread::Builder::new().spawn(move || {
+        use crypto_store::prelude::*;
+        let mut conn = raw_conn().lock();
+
+        let tx = match conn.transaction() {
+            Ok(tx) => tx,
+            Err(e) => {
+                err(e);
+                return;
+            }
+        };
+
         // TODO
-        // - send pending
+        // - send pending somehow?
         requester::update(handle);
     })?;
 
@@ -240,10 +261,6 @@ pub fn send_reaction_removal(
     //    })),
     //)?;
     //Ok(())
-}
-
-pub(crate) fn server_url(ext: &str) -> String {
-    format!("http://{}/{}", home_server(), ext)
 }
 
 macro_rules! get_of_helper {
