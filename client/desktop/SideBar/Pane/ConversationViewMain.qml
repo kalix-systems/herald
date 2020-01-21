@@ -145,6 +145,8 @@ ListView {
                 receiptFill: convoRectangle.state
                              !== "" ? CmnCfg.palette.offBlack : CmnCfg.palette.white
                 typeColor: Qt.darker(CmnCfg.palette.medGrey, 1.2)
+                typeColorAnim: convoRectangle.state
+                               !== "" ? CmnCfg.palette.darkGrey : CmnCfg.palette.lightGrey
             }
 
             MouseArea {

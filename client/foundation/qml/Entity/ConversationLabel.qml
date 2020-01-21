@@ -29,6 +29,7 @@ Item {
     // json summary
     property string lastMsgDigest
     property color typeColor
+    property color typeColorAnim: Qt.darker(typeColor, 1.4)
 
     // This component expects one of the following groups of properties,
     // either a lastMsgDigest property (a JSON object), or the subsequent group of
@@ -161,6 +162,12 @@ Item {
             id: typeGrid
             spacing: CmnCfg.units.dp(6)
             property alias animation: anim
+            Connections {
+                target: wrapper
+                onTypeColorAnimChanged: {
+                    animation.restart()
+                }
+            }
             Rectangle {
                 id: rect1
                 height: typeSize
@@ -189,7 +196,7 @@ Item {
                 PropertyAnimation {
                     target: rect1
                     property: "color"
-                    to: Qt.darker(typeColor, 1.4)
+                    to: typeColorAnim
                 }
                 PauseAnimation {
                     duration: 100
@@ -202,7 +209,7 @@ Item {
                 PropertyAnimation {
                     target: rect2
                     property: "color"
-                    to: Qt.darker(typeColor, 1.4)
+                    to: typeColorAnim
                 }
                 PauseAnimation {
                     duration: 100
@@ -215,7 +222,7 @@ Item {
                 PropertyAnimation {
                     target: rect3
                     property: "color"
-                    to: Qt.darker(typeColor, 1.4)
+                    to: typeColorAnim
                 }
                 PauseAnimation {
                     duration: 100
