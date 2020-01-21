@@ -179,6 +179,7 @@ fn conversations() -> Object {
         // `profile_picture` is a path and bounding rectangle encoded as JSON.
         // See `heraldcore/image_utils`.
         mut setProfilePicture(index: QUint64, profile_picture: QString) => Void,
+        mut setStatusById(conversation_id: QByteArray, status: QUint8) => Void,
         const indexById(conversation_id: QByteArray) => Qint64,
     };
 
