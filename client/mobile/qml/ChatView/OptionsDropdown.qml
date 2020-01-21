@@ -35,18 +35,33 @@ Rectangle {
         }
     }
 
-    Column {
+    Item {
         id: content
+        height: boundHeight
+        visible: !emoKeysPopup.active
+
         anchors {
             right: parent.right
             left: parent.left
         }
-        Row {
-            height: boundHeight
-            visible: !emoKeysPopup.active
+
+        CMN.AnimIconButton {
+            icon.color: CmnCfg.palette.white
+            imageSource: "qrc:/x-icon.svg"
             anchors {
-                right: parent.right
                 left: parent.left
+                leftMargin: CmnCfg.defaultMargin
+                verticalCenter: parent.verticalCenter
+            }
+            onTapped: {
+                deactivate()
+            }
+        }
+
+        Row {
+            anchors {
+                verticalCenter: parent.verticalCenter
+                right: parent.right
                 rightMargin: CmnCfg.defaultMargin
             }
             clip: true
@@ -83,13 +98,8 @@ Rectangle {
                     deactivate()
                 }
             }
-            CMN.AnimIconButton {
-                icon.color: CmnCfg.palette.white
-                onTapped: deactivate()
-                imageSource: "qrc:/x-icon.svg"
-                anchors.verticalCenter: parent.verticalCenter
-            }
         }
+
         Popup {
             id: emojiPopup
             parent: chatListView

@@ -21,6 +21,7 @@ ListView {
         easing.type: Easing.InCubic
     }
 
+    // Used to close other OptionsDropdowns when a new one is opened
     signal closeDropdown
 
     // this is set to a higher value in `Component.onCompleted`

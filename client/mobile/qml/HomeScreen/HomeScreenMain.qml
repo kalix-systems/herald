@@ -3,7 +3,7 @@ import QtQuick.Layouts 1.12
 import QtQuick 2.12
 import LibHerald 1.0
 // Includes CVFLoatingButton. ListItem, and Header
-import "./Controls"
+import "./Controls" as Controls
 import "../Common" as Common
 import "qrc:/imports/js/utils.mjs" as Utils
 import QtGraphicalEffects 1.0
@@ -52,10 +52,9 @@ Page {
                 lastMsgDigest: model.lastMsgDigest
                 isEmpty: model.isEmpty
                 convoContent: ContentMap.get(model.conversationId)
-                visible: (cvMainView.state === "archiveState"
-                          && model.status === 1)
-                         || (cvMainView.state !== "archiveState"
-                             && model.status === 0)
+                isArchived: model.status === 1
+                visible: (cvMainView.state === "archiveState" && isArchived) ||
+                         (cvMainView.state !== "archiveState" && !isArchived)
             }
             Connections {
                 target: appRoot.router
@@ -75,7 +74,6 @@ Page {
             Connections {
                 target: appRouter
                 onConvoClicked: {
-
                     const conv_idx = Herald.conversations.indexById(
                                        searchConversationId)
 
@@ -86,10 +84,10 @@ Page {
                     stackView.push(cvListView.itemAtIndex(conv_idx).ownedCV)
                 }
             }
+
             Connections {
                 target: appRouter
                 onGroupRequested: {
-
                     const conv_idx = Herald.conversations.indexById(groupId)
 
                     // early return on out of bounds
@@ -119,12 +117,12 @@ Page {
 
     Component {
         id: fab
-        ExpandedComposeButtons {}
+        Controls.ExpandedComposeButtons {}
     }
 
     Component {
         id: plusButton
-        ComposeButton {
+        Controls.ComposeButton {
             iconSource: "qrc:/plus-icon.svg"
             TapHandler {
                 gesturePolicy: TapHandler.ReleaseWithinBounds

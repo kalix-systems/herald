@@ -21,6 +21,8 @@ Rectangle {
     property int bottomTextMargin: CmnCfg.defaultMargin
     property alias label: conversationItemLabel.item
 
+    color: "transparent"
+
     Avatar {
         id: itemAvatar
         anchors {
