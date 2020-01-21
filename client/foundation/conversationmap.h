@@ -13,15 +13,15 @@ class ConversationMap: public QObject {
   Q_OBJECT
 public:
         ConversationMap(){}
-        /// get(msgid), attempts to get a pointer to a conversation
-        /// with Id msgid, if it does not exist, it is allocated and inserted
-        Q_INVOKABLE QVariant get(const QByteArray msgId)  {
-          auto iter = conversationHash.find(msgId);
+        /// get(convId), attempts to get a pointer to a conversation
+        /// with Id convId, if it does not exist, it is allocated and inserted
+        Q_INVOKABLE QVariant get(const QByteArray convId)  {
+          auto iter = conversationHash.find(convId);
           if(iter == conversationHash.end()) {
             // conversation does not exist
             auto conv = new ConversationContent();
-            conv->setConversationId(msgId);
-            conversationHash.insert(msgId, conv);
+            conv->setConversationId(convId);
+            conversationHash.insert(convId, conv);
             return QVariant::fromValue(conv);
           } else {
             // conversation exists
