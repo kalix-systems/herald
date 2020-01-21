@@ -25,14 +25,13 @@ Rectangle {
         }
     }
 
-//    Connections {
-//        target: chatList
-//        onCloseDropdown: {
-//            if (active)
-//                deactivate()
-//        }
-//    }
-
+    //    Connections {
+    //        target: chatList
+    //        onCloseDropdown: {
+    //            if (active)
+    //                deactivate()
+    //        }
+    //    }
     Item {
         id: content
         height: boundHeight
@@ -51,8 +50,7 @@ Rectangle {
             }
             icon.color: CmnCfg.palette.white
             onTapped: {
-                Herald.conversations.setStatusById(
-                            conversationItem.convoContent.conversationId, 1)
+                conversationData.status = 1
                 conversationItem.isSelected = false
                 deactivate()
             }
@@ -68,8 +66,7 @@ Rectangle {
             }
             icon.color: CmnCfg.palette.white
             onTapped: {
-                Herald.conversations.setStatusById(
-                            conversationItem.convoContent.conversationId, 0)
+                conversationData.status = 0
                 conversationItem.isSelected = false
                 deactivate()
             }
