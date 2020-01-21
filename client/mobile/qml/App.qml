@@ -6,6 +6,7 @@ import "./NewContactView" as NewContactView
 import "./ContactsView" as Contacts
 import "./ChatView" as ChatView
 import "qrc:/imports/Settings" as Settings
+import "./Zombie" as Dummies
 
 Page {
     id: appRoot
@@ -80,16 +81,7 @@ Page {
             // upon pushing a page set the header to the proper component
             rootHeader.headerComponent = currentItem.headerComponent
         }
-
-        Connections {
-            target: root
-            onClosing: {
-                if (Qt.system.os === "android" && mainView.depth > 1) {
-                    close.accepted = false
-                    mainView.pop()
-                }
-            }
-        }
+        Dummies.DummyConnections {}
     }
 
     Component.onCompleted: Herald.login()

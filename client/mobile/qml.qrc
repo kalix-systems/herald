@@ -49,5 +49,7 @@
         <file>qml/ChatView/ImageAttachments.qml</file>
         <file>qml/HomeScreen/Controls/OptionsMenu.qml</file>
         <file>qml/Common/ColorPicker.qml</file>
+        <file>qml/Zombie/DummyConnections.qml</file>
+        <file>qml/Zombie/+android/DummyConnections.qml</file>
     </qresource>
 </RCC>
