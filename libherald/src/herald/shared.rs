@@ -23,7 +23,7 @@ impl Into<Update> for RegistrationFailureCode {
 #[allow(dead_code)]
 pub enum Update {
     RegistrationSuccess,
-    Notification(String),
+    Notification(json::JsonValue),
     RegistrationFailed(RegistrationFailureCode),
     Conv(crate::conversations::shared::ConvUpdate),
     User(crate::users::shared::UserUpdate),

@@ -4,7 +4,7 @@ use std::collections::VecDeque;
 /// A Notifications queue used only on windows
 pub struct Notifications {
     emit: Emitter,
-    notifications: VecDeque<String>,
+    notifications: VecDeque<json::JsonValue>,
 }
 
 impl Interface for Notifications {
@@ -16,7 +16,10 @@ impl Interface for Notifications {
     }
 
     fn next_notif(&mut self) -> String {
-        self.notifications.pop_back().unwrap_or_default()
+        self.notifications
+            .pop_back()
+            .map(|v| v.dump())
+            .unwrap_or_default()
     }
 
     fn emit(&mut self) -> &mut Emitter {
@@ -27,7 +30,7 @@ impl Interface for Notifications {
 impl Notifications {
     pub(crate) fn handle_notifications(
         &mut self,
-        notif: String,
+        notif: json::JsonValue,
     ) {
         self.notifications.push_front(notif);
         self.emit.notify();
