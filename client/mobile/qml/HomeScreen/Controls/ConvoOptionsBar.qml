@@ -25,14 +25,13 @@ Rectangle {
         }
     }
 
-//    Connections {
-//        target: chatList
-//        onCloseDropdown: {
-//            if (active)
-//                deactivate()
-//        }
-//    }
-
+    //    Connections {
+    //        target: chatList
+    //        onCloseDropdown: {
+    //            if (active)
+    //                deactivate()
+    //        }
+    //    }
     Item {
         id: content
         height: boundHeight

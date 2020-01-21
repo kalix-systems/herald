@@ -57,9 +57,8 @@ ListView {
         property bool isPairwise: pairwise
         property bool outbound: convContent.messages.lastAuthor === Herald.config.configId
 
-        property ConversationContent convContent: ConversationContent {
-            conversationId: conversationIdProxy
-        }
+        property ConversationContent convContent: ContentMap.get(
+                                                      conversationIdProxy)
 
         property int __secondsSinceLastReset: 0
         property int __typing: __secondsSinceLastReset < 8
@@ -145,6 +144,8 @@ ListView {
                 receiptFill: convoRectangle.state
                              !== "" ? CmnCfg.palette.offBlack : CmnCfg.palette.white
                 typeColor: Qt.darker(CmnCfg.palette.medGrey, 1.2)
+                typeColorAnim: convoRectangle.state
+                               !== "" ? CmnCfg.palette.darkGrey : CmnCfg.palette.lightGrey
             }
 
             MouseArea {

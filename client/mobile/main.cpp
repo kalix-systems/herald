@@ -1,4 +1,5 @@
 #include "Bindings.h"
+#include "conversationmap.h"
 #include "objectiveutils.h"
 #include "androidhelper.h"
 #include <QScreen>
@@ -35,6 +36,14 @@ int main(int argc, char* argv[])
 
         return state;
       });
+
+  qRegisterMetaType<ConversationContent*>("ConversationContent");
+  qmlRegisterSingletonType<ConversationMap>("LibHerald", 1,0, "ContentMap",
+                                            [](QQmlEngine* engine, QJSEngine* scriptEngine){
+                                              Q_UNUSED(engine)
+                                              Q_UNUSED(scriptEngine)
+                                              return new ConversationMap();
+                                            });
 
   qmlRegisterAnonymousType<Users>("LibHerald", 1);
   qmlRegisterAnonymousType<Config>("LibHerald", 1);
