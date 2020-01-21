@@ -69,6 +69,7 @@ ListView {
                 conversationItem: conversationData
                 ownedConversation: convContent.messages
                 conversationMembers: convContent.members
+                convId: conversationData.conversationId
             }
         }
 
