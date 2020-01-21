@@ -61,7 +61,6 @@ ListView {
             conversationId: conversationIdProxy
         }
 
-        ListView.delayRemove: true
         property int __secondsSinceLastReset: 0
         property int __typing: __secondsSinceLastReset < 8
 
