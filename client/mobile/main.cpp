@@ -11,8 +11,6 @@
 
 int main(int argc, char* argv[])
 {
-
-
   QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
   QApplication::setOrganizationName("Kalix Systems");
   QApplication::setOrganizationDomain("kalix.io");
@@ -20,14 +18,14 @@ int main(int argc, char* argv[])
 
   QApplication app(argc, argv);
 
+  // Main app state
   qmlRegisterSingletonType<Herald>(
       "LibHerald", 1, 0, "Herald",
       [](QQmlEngine* engine, QJSEngine* scriptEngine) {
         Q_UNUSED(engine)
         Q_UNUSED(scriptEngine)
 
-        QStandardPaths::StandardLocation local =
-            QStandardPaths::AppDataLocation;
+        auto local = QStandardPaths::AppDataLocation;
 
         QString path = QStandardPaths::writableLocation(local);
 
@@ -37,7 +35,37 @@ int main(int argc, char* argv[])
         return state;
       });
 
-  qRegisterMetaType<ConversationContent*>("ConversationContent");
+  auto errMsg = [](QString type, QString access) {
+    return (type + " should not be created from QML, access through " + access);
+  };
+
+  auto heraldMsg = [errMsg](QString type) { return errMsg(type, "Herald"); };
+
+  qmlRegisterUncreatableType<Users>("LibHerald", 1, 0, "Users",
+                                    heraldMsg("Users"));
+  qmlRegisterUncreatableType<Config>("LibHerald", 1, 0, "Config",
+                                     heraldMsg("Config"));
+
+  qmlRegisterUncreatableType<Utils>("LibHerald", 1, 0, "Utils",
+                                    heraldMsg("Utils"));
+
+  qmlRegisterUncreatableType<Errors>("LibHerald", 1, 0, "Errors",
+                                     heraldMsg("Errors"));
+
+  qmlRegisterUncreatableType<ConversationBuilder>(
+      "LibHerald", 1, 0, "ConversationBuilder",
+      heraldMsg("ConversationBuilder"));
+
+  qmlRegisterUncreatableType<UsersSearch>("LibHerald", 1, 0, "UsersSearch",
+                                          heraldMsg("UsersSearch"));
+
+  qmlRegisterUncreatableType<MessageSearch>("LibHerald", 1, 0, "MessageSearch",
+                                            heraldMsg("MessageSearch"));
+
+  qmlRegisterUncreatableType<Conversations>("LibHerald", 1, 0, "Conversations",
+                                            heraldMsg("Conversations"));
+
+  // Provides access to per conversation content
   qmlRegisterSingletonType<ConversationMap>(
       "LibHerald", 1, 0, "ContentMap",
       [](QQmlEngine* engine, QJSEngine* scriptEngine) {
@@ -49,32 +77,37 @@ int main(int argc, char* argv[])
         return contentMap;
       });
 
-  qmlRegisterAnonymousType<Users>("LibHerald", 1);
-  qmlRegisterAnonymousType<Config>("LibHerald", 1);
-  qmlRegisterAnonymousType<Utils>("LibHerald", 1);
-  qmlRegisterAnonymousType<Errors>("LibHerald", 1);
-  qmlRegisterAnonymousType<ConversationBuilder>("LibHerald", 1);
-  qmlRegisterAnonymousType<UsersSearch>("LibHerald", 1);
-  qmlRegisterAnonymousType<MessageSearch>("LibHerald", 1);
-  qmlRegisterAnonymousType<Conversations>("LibHerald", 1);
-
+  // per conversation content
   qmlRegisterUncreatableType<ConversationContent>(
       "LibHerald", 1, 0, "ConversationContent",
-      "ConversationContent should not be directly constructed from QML, please "
-      "use ContentMap");
+      errMsg("ConversationContent", "ContentMap"));
 
+  qmlRegisterUncreatableType<Members>("LibHerald", 1, 0, "Members",
+                                      errMsg("Members", "ConversationContent"));
+
+  // messages and support types
   qmlRegisterUncreatableType<Messages>(
-      "LibHerald", 1, 0, "Messages",
-      "Messages should not be created from QML, see ConversationContent");
-  qmlRegisterAnonymousType<Members>("LibHerald", 1);
-  qmlRegisterAnonymousType<MessageBuilder>("LibHerald", 1);
-  qmlRegisterAnonymousType<MediaAttachments>("LibHerald", 1);
-  qmlRegisterAnonymousType<DocumentAttachments>("LibHerald", 1);
+      "LibHerald", 1, 0, "Messages", errMsg("Messages", "ConversationContent"));
+
+  qmlRegisterUncreatableType<MessageBuilder>(
+      "LibHerald", 1, 0, "MessageBuilder",
+      errMsg("MessagesBuilder", "Messages"));
+
+  qmlRegisterUncreatableType<MediaAttachments>(
+      "LibHerald", 1, 0, "MediaAttachments",
+      errMsg("MediaAttachments", "MessageBuilder"));
+
+  qmlRegisterUncreatableType<DocumentAttachments>(
+      "LibHerald", 1, 0, "DocumentAttachments",
+      errMsg("DocumentAttachments", "MessageBuilder"));
 
   qmlRegisterType<SharedConversations>("LibHerald", 1, 0,
                                        "SharedConversations");
+
+  // Support model for emoji input
   qmlRegisterType<EmojiPicker>("LibHerald", 1, 0, "EmojiPicker");
 
+  // bundle of constants used in the UI
   qmlRegisterSingletonType(QUrl("qrc:/qml/Common/CommonConfig.qml"),
                            "LibHerald", 1, 0, "CmnCfg");
 
