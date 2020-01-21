@@ -51,7 +51,9 @@ Rectangle {
     property color authorColor: CmnCfg.avatarColors[messageModelData.authorColor]
 
     readonly property string pfpUrl: outbound ? Herald.config.profilePicture : messageModelData.authorProfilePicture
-    property bool hoverHighlight: false
+    // true if this message's options menu is open (mobile only)
+    property bool isSelected: false
+    property bool hoverHighlight: isSelected || false
     property alias expireInfo: expireInfo
     property int bubbleIndex
     property bool moreInfo: false

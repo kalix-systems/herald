@@ -32,6 +32,7 @@ Rectangle {
         onCloseDropdown: {
             if (active)
                 deactivate()
+                cb.isSelected = false
         }
     }
 
@@ -55,6 +56,7 @@ Rectangle {
             }
             onTapped: {
                 deactivate()
+                cb.isSelected = false
             }
         }
 
@@ -75,6 +77,7 @@ Rectangle {
                 onTapped: {
                     ownedMessages.builder.opId = msgId
                     deactivate()
+                    cb.isSelected = false
                 }
             }
             CMN.AnimIconButton {
@@ -83,6 +86,7 @@ Rectangle {
                 anchors.verticalCenter: parent.verticalCenter
                 onTapped: {
                     deactivate()
+                    cb.isSelected = false
                     emoKeysPopup.active = true
                     emojiPopup.open()
                 }
@@ -96,6 +100,7 @@ Rectangle {
                 onTapped: {
                     mainView.push(cb.infoPage)
                     deactivate()
+                    cb.isSelected = false
                 }
             }
         }
