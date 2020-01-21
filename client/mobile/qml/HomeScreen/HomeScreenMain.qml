@@ -55,11 +55,9 @@ Page {
                     id: convContent
                     conversationId: model.conversationId
                 }
-
-                visible: (cvMainView.state === "archiveState"
-                          && model.status === 1)
-                         || (cvMainView.state !== "archiveState"
-                             && model.status === 0)
+                isArchived: model.status === 1
+                visible: (cvMainView.state === "archiveState" && isArchived) ||
+                         (cvMainView.state !== "archiveState" && !isArchived)
             }
             Connections {
                 target: appRoot.router

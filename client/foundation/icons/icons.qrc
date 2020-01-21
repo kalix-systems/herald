@@ -74,5 +74,6 @@
         <file>zoom-out-icon.svg</file>
         <file>trash-icon.svg</file>
         <file>archive-icon.svg</file>
+        <file>unarchive-icon.svg</file>
     </qresource>
 </RCC>

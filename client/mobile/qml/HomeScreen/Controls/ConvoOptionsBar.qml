@@ -5,17 +5,18 @@ import LibHerald 1.0
 import "../../Common"
 
 Rectangle {
-    //property var cb
     signal deactivate
     signal activate
     property real boundHeight: 0
-    visible: height != 0
-    color: CmnCfg.palette.offBlack
     onActivate: boundHeight = 50
     onDeactivate: boundHeight = 0
+
+    visible: height != 0
+    color: CmnCfg.palette.offBlack
     height: content.height
 
     property bool active: height > 0
+    property bool isArchived: false
 
     Behavior on height {
         NumberAnimation {
@@ -52,8 +53,27 @@ Rectangle {
             onTapped: {
                 Herald.conversations.setStatusById(
                             conversationItem.convoContent.conversationId, 1)
+                conversationItem.isSelected = false
                 deactivate()
             }
+            visible: !isArchived
+        }
+
+        AnimIconButton {
+            imageSource: "qrc:/unarchive-icon.svg"
+            anchors {
+                right: parent.right
+                rightMargin: CmnCfg.defaultMargin
+                verticalCenter: parent.verticalCenter
+            }
+            icon.color: CmnCfg.palette.white
+            onTapped: {
+                Herald.conversations.setStatusById(
+                            conversationItem.convoContent.conversationId, 0)
+                conversationItem.isSelected = false
+                deactivate()
+            }
+            visible: isArchived
         }
 
         AnimIconButton {

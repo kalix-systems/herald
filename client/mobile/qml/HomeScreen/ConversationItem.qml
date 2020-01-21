@@ -23,6 +23,8 @@ Rectangle {
     property ConversationContent convoContent
     // true if the conversation contains no messages
     property bool isEmpty
+    // true if the conversation is archived
+    property bool isArchived
     // true if this message is selected (via long press)
     property bool isSelected: false
     // most recent message content to display in this item
@@ -31,7 +33,7 @@ Rectangle {
     property alias tapEnabled: tapHandler.enabled
 
     //height: CmnCfg.convoHeight + optionsBar.height
-    height: convoRectWrapper.height + optionsBar.height
+    height: visible ? convoRectWrapper.height + optionsBar.height : 0
 
     // prevent animation spill over
     clip: true
@@ -170,6 +172,7 @@ Rectangle {
         id: optionsBar
         width: parent.width
         anchors.top: convoRectWrapper.bottom
+        isArchived: conversationItem.isArchived
     }
 
 }
