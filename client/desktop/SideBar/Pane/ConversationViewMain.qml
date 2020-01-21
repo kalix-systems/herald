@@ -57,8 +57,7 @@ ListView {
         property bool isPairwise: pairwise
         property bool outbound: convContent.messages.lastAuthor === Herald.config.configId
 
-        property ConversationContent convContent: ContentMap.get(
-                                                      conversationIdProxy)
+        property var convContent: ContentMap.get(conversationIdProxy)
 
         property int __secondsSinceLastReset: 0
         property int __typing: __secondsSinceLastReset < 8

@@ -35,13 +35,16 @@ int main(int argc, char* argv[])
         return state;
       });
 
-  qRegisterMetaType<ConversationContent*>("ConversationContent");
-  qmlRegisterSingletonType<ConversationMap>("LibHerald", 1,0, "ContentMap",
-    [](QQmlEngine* engine, QJSEngine* scriptEngine){
-        Q_UNUSED(engine)
+  qmlRegisterSingletonType<ConversationMap>(
+      "LibHerald", 1, 0, "ContentMap",
+      [](QQmlEngine* engine, QJSEngine* scriptEngine) {
         Q_UNUSED(scriptEngine)
-        return new ConversationMap();
-    });
+
+        ConversationMap* contentMap = new ConversationMap();
+        engine->setObjectOwnership(contentMap, QQmlEngine::CppOwnership);
+
+        return contentMap;
+      });
 
   qmlRegisterAnonymousType<Users>("LibHerald", 1);
   qmlRegisterAnonymousType<Config>("LibHerald", 1);
@@ -51,19 +54,20 @@ int main(int argc, char* argv[])
   qmlRegisterAnonymousType<UsersSearch>("LibHerald", 1);
   qmlRegisterAnonymousType<MessageSearch>("LibHerald", 1);
   qmlRegisterAnonymousType<Conversations>("LibHerald", 1);
-
-  qmlRegisterType<ConversationContent>("LibHerald", 1, 0,
-                                       "ConversationContent");
   qmlRegisterAnonymousType<Messages>("LibHerald", 1);
   qmlRegisterAnonymousType<Members>("LibHerald", 1);
   qmlRegisterAnonymousType<MessageBuilder>("LibHerald", 1);
   qmlRegisterAnonymousType<MediaAttachments>("LibHerald", 1);
   qmlRegisterAnonymousType<DocumentAttachments>("LibHerald", 1);
+
+  qmlRegisterAnonymousType<ConversationContent>("LibHerald", 1);
+
+  qmlRegisterType<SharedConversations>("LibHerald", 1, 0,
+                                       "SharedConversations");
   qmlRegisterType<EmojiPicker>("LibHerald", 1, 0, "EmojiPicker");
 
   qmlRegisterSingletonType(QUrl("qrc:///common/CommonConfig.qml"), "LibHerald",
                            1, 0, "CmnCfg");
-  qmlRegisterType<SharedConversations>("LibHerald", 1, 0, "SharedConversations");
 
   QQmlApplicationEngine engine;
 

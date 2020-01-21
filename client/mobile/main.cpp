@@ -38,12 +38,16 @@ int main(int argc, char* argv[])
       });
 
   qRegisterMetaType<ConversationContent*>("ConversationContent");
-  qmlRegisterSingletonType<ConversationMap>("LibHerald", 1,0, "ContentMap",
-                                            [](QQmlEngine* engine, QJSEngine* scriptEngine){
-                                              Q_UNUSED(engine)
-                                              Q_UNUSED(scriptEngine)
-                                              return new ConversationMap();
-                                            });
+  qmlRegisterSingletonType<ConversationMap>(
+      "LibHerald", 1, 0, "ContentMap",
+      [](QQmlEngine* engine, QJSEngine* scriptEngine) {
+        Q_UNUSED(scriptEngine)
+
+        ConversationMap* contentMap = new ConversationMap();
+        engine->setObjectOwnership(contentMap, QQmlEngine::CppOwnership);
+
+        return contentMap;
+      });
 
   qmlRegisterAnonymousType<Users>("LibHerald", 1);
   qmlRegisterAnonymousType<Config>("LibHerald", 1);
@@ -54,18 +58,25 @@ int main(int argc, char* argv[])
   qmlRegisterAnonymousType<MessageSearch>("LibHerald", 1);
   qmlRegisterAnonymousType<Conversations>("LibHerald", 1);
 
-  qmlRegisterType<ConversationContent>("LibHerald", 1, 0,
-                                       "ConversationContent");
-  qmlRegisterType<Messages>("LibHerald", 1, 0, "Messages");
+  qmlRegisterUncreatableType<ConversationContent>(
+      "LibHerald", 1, 0, "ConversationContent",
+      "ConversationContent should not be directly constructed from QML, please "
+      "use ContentMap");
+
+  qmlRegisterUncreatableType<Messages>(
+      "LibHerald", 1, 0, "Messages",
+      "Messages should not be created from QML, see ConversationContent");
   qmlRegisterAnonymousType<Members>("LibHerald", 1);
   qmlRegisterAnonymousType<MessageBuilder>("LibHerald", 1);
   qmlRegisterAnonymousType<MediaAttachments>("LibHerald", 1);
   qmlRegisterAnonymousType<DocumentAttachments>("LibHerald", 1);
-  qmlRegisterType<SharedConversations>("LibHerald", 1, 0, "SharedConversations");
+
+  qmlRegisterType<SharedConversations>("LibHerald", 1, 0,
+                                       "SharedConversations");
   qmlRegisterType<EmojiPicker>("LibHerald", 1, 0, "EmojiPicker");
+
   qmlRegisterSingletonType(QUrl("qrc:/qml/Common/CommonConfig.qml"),
                            "LibHerald", 1, 0, "CmnCfg");
-
 
 #ifdef Q_OS_IOS
   qmlRegisterType<ObjectiveUtils>("LibHerald", 1, 0, "MobileHelper");
