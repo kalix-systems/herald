@@ -48,7 +48,7 @@ Rectangle {
     property int __typing: __secondsSinceLastReset < 8
 
     Connections {
-        target: convoContent.members
+        target: ContentMap.get(conversationData.conversationId).members
         onNewTypingIndicator: {
             conversationItem.__secondsSinceLastReset = 0
 
@@ -173,5 +173,4 @@ Rectangle {
         anchors.top: convoRectWrapper.bottom
         isArchived: conversationItem.isArchived
     }
-
 }
