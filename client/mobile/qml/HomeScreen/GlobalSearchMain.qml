@@ -9,10 +9,9 @@ import "qrc:/imports/Entity" as Entity
 
 Page {
     id: searchView
-    readonly property Component headerComponent:
-        GlobalSearchHeader {
-          parentPage: searchView
-        }
+    readonly property Component headerComponent: GlobalSearchHeader {
+        parentPage: searchView
+    }
 
     background: Rectangle {
         color: CmnCfg.palette.white
@@ -96,8 +95,7 @@ Page {
                     icon.width: CmnCfg.iconSize
                     anchors {
                         left: parent.left
-                        leftMargin: CmnCfg.microMargin +
-                                    (CmnCfg.avatarSize - CmnCfg.iconSize) / 2
+                        leftMargin: CmnCfg.microMargin + (CmnCfg.avatarSize - CmnCfg.iconSize) / 2
                         verticalCenter: parent.verticalCenter
                     }
 
@@ -112,8 +110,7 @@ Page {
                     font.weight: Font.Medium
                     anchors {
                         left: createGroupIcon.right
-                        leftMargin: (CmnCfg.avatarSize - CmnCfg.iconSize) / 2 +
-                                    CmnCfg.defaultMargin
+                        leftMargin: (CmnCfg.avatarSize - CmnCfg.iconSize) / 2 + CmnCfg.defaultMargin
                         verticalCenter: parent.verticalCenter
                     }
                 }
