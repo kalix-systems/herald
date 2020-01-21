@@ -53,6 +53,7 @@ pub(crate) fn content_push<T: Into<ContentUpdate>>(
     update: T,
 ) -> Result<(), HErr> {
     let update = update.into();
+
     std::thread::Builder::new().spawn(move || {
         let chan_lock = chans().read();
         let mut emit_lock = emitters().lock();
