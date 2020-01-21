@@ -80,6 +80,16 @@ Page {
             // upon pushing a page set the header to the proper component
             rootHeader.headerComponent = currentItem.headerComponent
         }
+
+        Connections {
+            target: root
+            onClosing: {
+                if (Qt.system.os === "android" && mainView.depth > 1) {
+                    close.accepted = false
+                    mainView.pop()
+                }
+            }
+        }
     }
 
     Component.onCompleted: Herald.login()
