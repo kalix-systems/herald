@@ -69,12 +69,15 @@ fn emit_new_data() -> Option<()> {
 }
 
 pub(crate) fn push<T: Into<Update>>(update: T) {
-    // if this fails, our typical error reporting machinery is broken
-    // (which would be odd given that the channel should never be dropped)
-    // but we might want to log it some other way.  TODO
-    if bus().tx.clone().send(update.into()).is_ok() {
-        emit_new_data();
-    }
+    let update = update.into();
+    drop(std::thread::Builder::new().spawn(move || {
+        // if this fails, our typical error reporting machinery is broken
+        // (which would be odd given that the channel should never be dropped)
+        // but we might want to log it some other way. TODO?
+        if bus().tx.clone().send(update).is_ok() {
+            emit_new_data();
+        }
+    }));
 }
 
 pub(super) fn set_emitter(emit: crate::interface::HeraldEmitter) {
