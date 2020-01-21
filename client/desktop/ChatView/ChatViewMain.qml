@@ -23,6 +23,7 @@ Page {
     property var ownedConversation
     property var conversationMembers
     property alias convoTimer: messageBar.timerMenu
+    property var convId
 
     background: Rectangle {
         color: CmnCfg.palette.white
@@ -149,7 +150,7 @@ Page {
 
         id: typingIndicator
         anchors.bottom: divider.top
-        conversationMembers: chatPage.conversationMembers
+        conversationMembers: ContentMap.get(chatPage.convId).members
     }
 
     MessageDialog {

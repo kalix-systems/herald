@@ -24,6 +24,7 @@ Item {
     property int subLabelFontSize: CmnCfg.entitySubLabelSize
     property alias receiptFill: receiptImage.icon.color
     property int typeSize: CmnCfg.smallMargin
+    property int bigType: typeSize + 1
 
     property bool typeActive: false
     // json summary
@@ -174,6 +175,7 @@ Item {
                 width: height
                 radius: width
                 color: typeColor
+                Layout.alignment: Qt.AlignVCenter
             }
             Rectangle {
                 id: rect2
@@ -181,6 +183,7 @@ Item {
                 width: height
                 radius: width
                 color: typeColor
+                Layout.alignment: Qt.AlignVCenter
             }
             Rectangle {
                 id: rect3
@@ -188,53 +191,11 @@ Item {
                 width: height
                 radius: width
                 color: typeColor
+                Layout.alignment: Qt.AlignVCenter
             }
 
-            SequentialAnimation {
+            TypeAnimation {
                 id: anim
-                loops: Animation.Infinite
-                PropertyAnimation {
-                    target: rect1
-                    property: "color"
-                    to: typeColorAnim
-                }
-                PauseAnimation {
-                    duration: 100
-                }
-                PropertyAnimation {
-                    target: rect1
-                    property: "color"
-                    to: typeColor
-                }
-                PropertyAnimation {
-                    target: rect2
-                    property: "color"
-                    to: typeColorAnim
-                }
-                PauseAnimation {
-                    duration: 100
-                }
-                PropertyAnimation {
-                    target: rect2
-                    property: "color"
-                    to: typeColor
-                }
-                PropertyAnimation {
-                    target: rect3
-                    property: "color"
-                    to: typeColorAnim
-                }
-                PauseAnimation {
-                    duration: 100
-                }
-                PropertyAnimation {
-                    target: rect3
-                    property: "color"
-                    to: typeColor
-                }
-                PauseAnimation {
-                    duration: 140
-                }
             }
         }
     }
