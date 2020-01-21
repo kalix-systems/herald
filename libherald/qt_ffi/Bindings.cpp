@@ -751,6 +751,8 @@ qint64 conversations_index_by_id(const Conversations::Private *, const char *,
 bool conversations_remove_conversation(Conversations::Private *, quint64);
 void conversations_set_profile_picture(Conversations::Private *, quint64,
                                        const ushort *, int);
+void conversations_set_status_by_id(Conversations::Private *, const char *, int,
+                                    quint8);
 bool conversations_toggle_filter_regex(Conversations::Private *);
 }
 extern "C" {
@@ -1047,6 +1049,7 @@ herald_conversation_builder_get(const Herald::Private *);
 Conversations::Private *herald_conversations_get(const Herald::Private *);
 Errors::Private *herald_errors_get(const Herald::Private *);
 MessageSearch::Private *herald_message_search_get(const Herald::Private *);
+Notifications::Private *herald_notifications_get(const Herald::Private *);
 option_quint8 herald_registration_failure_code_get(const Herald::Private *);
 Users::Private *herald_users_get(const Herald::Private *);
 UsersSearch::Private *herald_users_search_get(const Herald::Private *);
@@ -2227,6 +2230,11 @@ void messages_set_elision_line_count(Messages::Private *, quint8);
 void messages_set_search_hint(Messages::Private *, float, float);
 }
 extern "C" {
+Notifications::Private *notifications_new(NotificationsPtrBundle *);
+void notifications_free(Notifications::Private *);
+void notifications_next_notif(Notifications::Private *, QString *, qstring_set);
+}
+extern "C" {
 option_quint32 shared_conversations_data_conversation_color(
     const SharedConversations::Private *, int);
 void shared_conversations_data_conversation_id(
@@ -3319,6 +3327,11 @@ void Conversations::setProfilePicture(quint64 index,
   return conversations_set_profile_picture(m_d, index, profile_picture.utf16(),
                                            profile_picture.size());
 }
+void Conversations::setStatusById(const QByteArray &conversation_id,
+                                  quint8 status) {
+  return conversations_set_status_by_id(m_d, conversation_id.data(),
+                                        conversation_id.size(), status);
+}
 bool Conversations::toggleFilterRegex() {
   return conversations_toggle_filter_regex(m_d);
 }
@@ -3503,6 +3516,7 @@ Herald::Herald(bool /*owned*/, QObject *parent)
       m_conversations(new Conversations(false, this)),
       m_errors(new Errors(false, this)),
       m_messageSearch(new MessageSearch(false, this)),
+      m_notifications(new Notifications(false, this)),
       m_users(new Users(false, this)),
       m_usersSearch(new UsersSearch(false, this)),
       m_utils(new Utils(false, this)), m_d(nullptr), m_ownsPrivate(false) {}
@@ -3513,6 +3527,7 @@ Herald::Herald(QObject *parent)
       m_conversations(new Conversations(false, this)),
       m_errors(new Errors(false, this)),
       m_messageSearch(new MessageSearch(false, this)),
+      m_notifications(new Notifications(false, this)),
       m_users(new Users(false, this)),
       m_usersSearch(new UsersSearch(false, this)),
       m_utils(new Utils(false, this)),
@@ -3621,6 +3636,8 @@ Herald::Herald(QObject *parent)
           [](MessageSearch *o) { o->endRemoveRows(); }
 
           ,
+          m_notifications,
+          [](const Notifications *o) { Q_EMIT o->notify(); },
           heraldRegistrationFailureCodeChanged,
           m_users,
           usersFilterChanged,
@@ -3689,6 +3706,7 @@ Herald::Herald(QObject *parent)
   m_conversations->m_d = herald_conversations_get(m_d);
   m_errors->m_d = herald_errors_get(m_d);
   m_messageSearch->m_d = herald_message_search_get(m_d);
+  m_notifications->m_d = herald_notifications_get(m_d);
   m_users->m_d = herald_users_get(m_d);
   m_usersSearch->m_d = herald_users_search_get(m_d);
   m_utils->m_d = herald_utils_get(m_d);
@@ -3756,6 +3774,9 @@ Errors *Herald::errors() { return m_errors; }
 
 const MessageSearch *Herald::messageSearch() const { return m_messageSearch; }
 MessageSearch *Herald::messageSearch() { return m_messageSearch; }
+
+const Notifications *Herald::notifications() const { return m_notifications; }
+Notifications *Herald::notifications() { return m_notifications; }
 
 QVariant Herald::registrationFailureCode() const {
   QVariant v;
@@ -4516,6 +4537,26 @@ void Messages::setElisionLineCount(quint8 line_count) {
 }
 void Messages::setSearchHint(float scrollbar_position, float scrollbar_height) {
   return messages_set_search_hint(m_d, scrollbar_position, scrollbar_height);
+}
+
+Notifications::Notifications(bool /*owned*/, QObject *parent)
+    : QObject(parent), m_d(nullptr), m_ownsPrivate(false) {}
+
+Notifications::Notifications(QObject *parent)
+    : QObject(parent),
+      m_d(notifications_new(new NotificationsPtrBundle{
+          this, [](const Notifications *o) { Q_EMIT o->notify(); }})),
+      m_ownsPrivate(true) {}
+
+Notifications::~Notifications() {
+  if (m_ownsPrivate) {
+    notifications_free(m_d);
+  }
+}
+QString Notifications::nextNotif() {
+  QString s;
+  notifications_next_notif(m_d, &s, set_qstring);
+  return s;
 }
 
 SharedConversations::SharedConversations(bool /*owned*/, QObject *parent)

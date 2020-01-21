@@ -67,7 +67,7 @@ impl SearchState {
         let index = match self.matches.binary_search(&Match(*closest_message)) {
             Ok(ix) => ix,
             Err(ix) => {
-                if ix < container.len() {
+                if ix < self.matches.len() {
                     ix
                 } else {
                     ix.saturating_sub(1)

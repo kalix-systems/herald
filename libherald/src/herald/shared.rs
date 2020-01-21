@@ -18,8 +18,12 @@ impl Into<Update> for RegistrationFailureCode {
     }
 }
 
+// some of these enums may only ever be constructed outside of
+// this crate
+#[allow(dead_code)]
 pub enum Update {
     RegistrationSuccess,
+    Notification(json::JsonValue),
     RegistrationFailed(RegistrationFailureCode),
     Conv(crate::conversations::shared::ConvUpdate),
     User(crate::users::shared::UserUpdate),
@@ -65,12 +69,15 @@ fn emit_new_data() -> Option<()> {
 }
 
 pub(crate) fn push<T: Into<Update>>(update: T) {
-    // if this fails, our typical error reporting machinery is broken
-    // (which would be odd given that the channel should never be dropped)
-    // but we might want to log it some other way.  TODO
-    if bus().tx.clone().send(update.into()).is_ok() {
-        emit_new_data();
-    }
+    let update = update.into();
+    drop(std::thread::Builder::new().spawn(move || {
+        // if this fails, our typical error reporting machinery is broken
+        // (which would be odd given that the channel should never be dropped)
+        // but we might want to log it some other way. TODO?
+        if bus().tx.clone().send(update).is_ok() {
+            emit_new_data();
+        }
+    }));
 }
 
 pub(super) fn set_emitter(emit: crate::interface::HeraldEmitter) {
@@ -86,6 +93,9 @@ impl super::Herald {
         for update in updates() {
             use Update::*;
             match update {
+                Notification(msg) => {
+                    self.notifications.handle_notifications(msg);
+                }
                 RegistrationSuccess => {
                     self.load_props.setup();
                     self.emit.config_init_changed();

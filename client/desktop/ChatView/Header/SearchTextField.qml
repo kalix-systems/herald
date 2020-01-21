@@ -32,6 +32,11 @@ ScrollView {
             //don't allow enter key to affect textfield
             event.accepted = true
 
+            if (searchText.text.length === 1) {
+                ownedConversation.searchActive = false
+                searchToolBar.state = ""
+                return
+            }
             ownedConversation.searchActive = true
 
             const x = convWindow.chatScrollBar.position
@@ -55,6 +60,12 @@ ScrollView {
         }
 
         onTextChanged: {
+            if (searchText.text.length === 1) {
+                ownedConversation.searchActive = false
+                searchToolBar.state = ""
+                return
+            }
+
             ownedConversation.searchActive = true
             ownedConversation.searchPattern = searchText.text
 

@@ -45,15 +45,15 @@ ToolBar {
         anchors.rightMargin: CmnCfg.defaultMargin
         anchors.right: parent.right
         anchors.verticalCenter: parent.verticalCenter
-        height: implicitHeight //searchField.height //parent.height - CmnCfg.microMargin
+        height: implicitHeight
 
         BorderedTextField {
             id: searchField
             color: CmnCfg.palette.white
             borderColor: "transparent"
-            placeholderText: parentPage.state === "fromComposeButton" ?
-                                 qsTr("Enter username or group title") :
-                                 qsTr("Search your conversations")
+            placeholderText: parentPage.state
+                             === "fromComposeButton" ? qsTr("Enter username or group title") : qsTr(
+                                                           "Search your conversations")
             // Load previous search query in search field in case user gets
             // to this view via back button and expects state to be preserved
             text: Herald.conversations.filter

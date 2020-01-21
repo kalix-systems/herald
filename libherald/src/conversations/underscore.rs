@@ -317,4 +317,23 @@ impl super::Conversations {
         self.model.data_changed(index, index);
         true
     }
+
+    pub(crate) fn set_status_by_id_(
+        &mut self,
+        id: ffi::ConversationIdRef,
+        status: u8,
+    ) {
+        let cid = err!(ConversationId::try_from(id));
+        let status = none!(Status::from_u8(status));
+        let index = none!(self
+            .list
+            .iter()
+            .position(|super::Conversation { id, .. }| id == &cid));
+
+        none!(self.set_status_inner(index, status));
+
+        spawn!(err!(heraldcore::conversation::set_status(&cid, status)));
+
+        self.model.data_changed(index, index);
+    }
 }

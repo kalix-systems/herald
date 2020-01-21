@@ -25,6 +25,7 @@ Column {
                                                                filename.length))
         }
     }
+
     Column {
 
         anchors.left: parent.left
