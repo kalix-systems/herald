@@ -5,7 +5,7 @@
 #include <QStandardPaths>
 #include <QtQml/qqml.h>
 #include <QWindow>
- #include <QDebug>
+#include <QDebug>
 
 int main(int argc, char* argv[])
 {
@@ -18,7 +18,6 @@ int main(int argc, char* argv[])
   QIcon icon = QIcon(":/herald.png");
   QApplication::setWindowIcon(icon);
 
-  qRegisterMetaType<ConversationContent*>("ConversationContent");
   qmlRegisterSingletonType<Herald>(
       "LibHerald", 1, 0, "Herald",
       [](QQmlEngine* engine, QJSEngine* scriptEngine) {
@@ -36,7 +35,7 @@ int main(int argc, char* argv[])
         return state;
       });
 
-
+  qRegisterMetaType<ConversationContent*>("ConversationContent");
   qmlRegisterSingletonType<ConversationMap>("LibHerald", 1,0, "ContentMap",
     [](QQmlEngine* engine, QJSEngine* scriptEngine){
         Q_UNUSED(engine)

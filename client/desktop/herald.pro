@@ -18,11 +18,7 @@ CONFIG += sdk_no_version_check
 RESOURCES += \
     qml.qrc
 
-SOURCES   += main.cpp
-
-
-HEADERS += \
-    conversationmap.h
+SOURCES += main.cpp
 
 # libherald headers, source, and libs
 include(../foundation/foundation.pri)

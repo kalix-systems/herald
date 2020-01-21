@@ -51,12 +51,7 @@ Page {
                 isGroup: !model.pairwise
                 lastMsgDigest: model.lastMsgDigest
                 isEmpty: model.isEmpty
-                convoContent: ConversationContent {
-                    id: convContent
-                    conversationId: model.conversationId
-                }
-
-
+                convoContent: ContentMap.get(model.conversationId)
                 visible: (cvMainView.state === "archiveState"
                           && model.status === 1)
                          || (cvMainView.state !== "archiveState"

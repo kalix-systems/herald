@@ -42,7 +42,7 @@ Rectangle {
     property int __typing: __secondsSinceLastReset < 8
 
     Connections {
-        target: convContent.members
+        target: convoContent.members
         onNewTypingIndicator: {
             conversationItem.__secondsSinceLastReset = 0
 

@@ -12,7 +12,7 @@
 class ConversationMap: public QObject {
   Q_OBJECT
 public:
-  ConversationMap(){};
+        ConversationMap(){}
         /// get(msgid), attempts to get a pointer to a conversation
         /// with Id msgid, if it does not exist, it is allocated and inserted
         Q_INVOKABLE QVariant get(const QByteArray msgId)  {
