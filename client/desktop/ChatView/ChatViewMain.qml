@@ -20,8 +20,8 @@ Page {
     //TODO: rename this to something sane
     property var conversationItem
     //TODO: rename to something sane and not a shadow
-    property var ownedConversation
-    property var conversationMembers
+    property Messages ownedConversation
+    property Members conversationMembers
     property alias convoTimer: messageBar.timerMenu
     property var convId
 

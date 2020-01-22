@@ -12,7 +12,7 @@ import "../../common" as Common
 ToolBar {
     id: chatToolBar
     property var conversationItem
-    property var ownedConversation: parent.ownedConversation
+    property Messages ownedConversation: parent.ownedConversation
     property alias timerMenu: timer
 
     height: CmnCfg.toolbarHeight

@@ -14,7 +14,7 @@ Rectangle {
     color: CmnCfg.palette.medGrey
 
     //pass in messages.builder on desktop and mobile
-    property var builderData
+    property MessageBuilder builderData
     property bool outboundReply: Herald.config.configId === builderData.opAuthor
 
     property color authorColor: CmnCfg.palette.avatarColors[Herald.users.userColorById(

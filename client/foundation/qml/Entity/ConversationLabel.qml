@@ -23,10 +23,12 @@ Item {
     property int labelFontSize: CmnCfg.entityLabelSize
     property int subLabelFontSize: CmnCfg.entitySubLabelSize
     property alias receiptFill: receiptImage.icon.color
+
+    //properties for displaying typing animation
     property int typeSize: CmnCfg.smallMargin
     property int bigType: typeSize + 1
-
     property bool typeActive: false
+
     // json summary
     property string lastMsgDigest
     property color typeColor

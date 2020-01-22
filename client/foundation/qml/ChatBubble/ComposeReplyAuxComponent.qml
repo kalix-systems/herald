@@ -13,7 +13,7 @@ Rectangle {
     color: CmnCfg.palette.medGrey
 
     //pass in messages.builder on desktop and mobile
-    property var builderData
+    property MessageBuilder builderData
     property var auxData: JSON.parse(builderData.opAuxContent)
 
     property string authorName: outboundReply ? Herald.config.name : Herald.users.nameById(

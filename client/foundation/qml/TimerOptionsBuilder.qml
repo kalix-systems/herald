@@ -11,7 +11,7 @@ Menu {
 
     // Item in `Conversations` model
     property var conversationItem
-    property var builder
+    property MessageBuilder builder
     property int chosenPeriod: builderDefault ? 0 : (builder.expirationPeriod + 1)
 
     property string chosenTimer: timerModel[chosenPeriod].path
