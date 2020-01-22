@@ -14,8 +14,8 @@ Column {
         Label {
             anchors.right: parent.left
             anchors.verticalCenter: parent.verticalCenter
-            anchors.rightMargin: CmnCfg.defaultMargin + (CmnCfg.fabDiameter
-                                                         - CmnCfg.miniFabDiameter) / 2
+            anchors.rightMargin: CmnCfg.defaultMargin
+                                 + (CmnCfg.fabDiameter - CmnCfg.miniFabDiameter) / 2
             text: qsTr("New contact")
             font.pointSize: 12
             padding: CmnCfg.smallMargin
@@ -54,8 +54,8 @@ Column {
         Label {
             anchors.right: parent.left
             anchors.verticalCenter: parent.verticalCenter
-            anchors.rightMargin: CmnCfg.defaultMargin + (CmnCfg.fabDiameter
-                                                         - CmnCfg.miniFabDiameter) / 2
+            anchors.rightMargin: CmnCfg.defaultMargin
+                                 + (CmnCfg.fabDiameter - CmnCfg.miniFabDiameter) / 2
             text: qsTr("New group")
             font.pointSize: 12
             padding: CmnCfg.smallMargin
@@ -105,7 +105,6 @@ Column {
             }
         }
 
-
         icon.source: "qrc:/pencil-icon.svg"
         icon.color: CmnCfg.palette.black
         icon.height: CmnCfg.iconSize
@@ -121,8 +120,9 @@ Column {
         TapHandler {
             gesturePolicy: TapHandler.ReleaseWithinBounds
             onTapped: {
-                mainView.push(globalSearchView, {"state": "fromComposeButton"},
-                              StackView.Immediate)
+                mainView.push(globalSearchView, {
+                                  "state": "fromComposeButton"
+                              }, StackView.Immediate)
                 cvMainView.state = "default"
             }
         }

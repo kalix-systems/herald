@@ -31,6 +31,7 @@ Rectangle {
     property var lastMsgDigest
     property alias ownedCV: ownedChatView
     property alias tapEnabled: tapHandler.enabled
+    property alias optionsBar: optionsLoader.item
 
     //height: CmnCfg.convoHeight + optionsBar.height
     height: visible ? convoRectWrapper.height + optionsBar.height : 0
@@ -167,10 +168,17 @@ Rectangle {
         }
     }
 
-    Controls.ConvoOptionsBar {
-        id: optionsBar
-        width: parent.width
+    Loader {
+        id: optionsLoader
+        active: tapEnabled
         anchors.top: convoRectWrapper.bottom
-        isArchived: conversationItem.isArchived
+        height: active ? item.height : 0
+        width: parent.width
+
+        sourceComponent: Controls.ConvoOptionsBar {
+            id: optionsBar
+            width: parent.width
+            isArchived: conversationItem.isArchived
+        }
     }
 }

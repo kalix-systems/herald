@@ -51,20 +51,22 @@ Page {
 
             model: Herald.conversations
             delegate: ConversationItem {
+                property var conversationData: model
                 itemTitle: title
-                colorCode: model.conversationColor
-                imageSource: Utils.safeStringOrDefault(model.picture, "")
-                isGroup: !model.pairwise
-                lastMsgDigest: model.lastMsgDigest
-                isEmpty: model.isEmpty
+                colorCode: conversationData.conversationColor
+                imageSource: Utils.safeStringOrDefault(
+                                 conversationData.picture, "")
+                isGroup: !conversationData.pairwise
+                lastMsgDigest: conversationData.lastMsgDigest
+                isEmpty: conversationData.isEmpty
                 tapEnabled: false
-                visible: model.matched
+                visible: conversationData.matched
                 height: visible ? CmnCfg.convoHeight : 0
                 TapHandler {
                     // TODO if state is fromComposeButton we should probably
                     // pop this view off the stack, so ChatView back button
                     // goes to home screen
-                    onTapped: convoClicked(model.conversationId)
+                    onTapped: convoClicked(conversationData.conversationId)
                 }
             }
         }

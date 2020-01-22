@@ -70,7 +70,7 @@ Page {
 
     Router {
         id: appRouter
-        stack: appLoader.item.stackView
+        stack: mainView
     }
 
     StackView {
