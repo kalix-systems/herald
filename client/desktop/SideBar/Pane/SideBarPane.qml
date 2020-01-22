@@ -140,8 +140,8 @@ Flickable {
         Loader {
             id: messageSearchLoader
             width: parent.width
-            property var searchModel
-            active: sideBarState.state === "globalSearchState"
+            property MessageSearch searchModel
+            active: sideBarState.state === "globalSearch"
 
             //model loaded into search view only in search state
             sourceComponent: Component {

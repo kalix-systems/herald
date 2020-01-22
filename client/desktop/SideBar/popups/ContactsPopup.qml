@@ -207,7 +207,7 @@ Popup {
                 width: contactsPopup.width
                 height: visible ? row.height + 1 : 0
 
-                property var sharedConvos: SharedConversations {
+                property SharedConversations sharedConvos: SharedConversations {
                     userId: userData.userId
                 }
 
