@@ -120,10 +120,10 @@ Column {
         TapHandler {
             gesturePolicy: TapHandler.ReleaseWithinBounds
             onTapped: {
+                cvMainView.state = "default"
                 mainView.push(globalSearchView, {
                                   "state": "fromComposeButton"
                               }, StackView.Immediate)
-                cvMainView.state = "default"
             }
         }
     }
