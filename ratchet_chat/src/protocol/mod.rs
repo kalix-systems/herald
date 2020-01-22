@@ -132,6 +132,7 @@ pub fn handle_payload<S: SigStore + ConversationStore>(
 
     match payload {
         Noop => {}
+
         AddToConvo(cid, mems) => {
             if !store
                 .member_of(cid, from.uid)
@@ -141,11 +142,13 @@ pub fn handle_payload<S: SigStore + ConversationStore>(
             }
             store.add_to_convo(cid, mems).map_err(PayloadError::Store)?;
         }
+
         LeaveConvo(cid) => {
             store
                 .left_convo(cid, from.uid)
                 .map_err(PayloadError::Store)?;
         }
+
         Msg(content) => {
             msg = Some(content);
         }
@@ -265,10 +268,10 @@ fn mk_ad(
 }
 
 pub struct MsgResult {
-    ack: Option<Ack>,
-    forward: Option<Msg>,
-    output: Option<Bytes>,
-    response: Option<Msg>,
+    pub ack: Option<Ack>,
+    pub forward: Option<Msg>,
+    pub output: Option<Bytes>,
+    pub response: Option<Msg>,
 }
 
 #[allow(unused_mut)]

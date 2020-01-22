@@ -32,6 +32,10 @@ pub fn to_vec<T: ser::Ser + ?Sized>(t: &T) -> Vec<u8> {
     out.0
 }
 
+pub fn to_bytes<T: ser::Ser + ?Sized>(t: &T) -> Bytes {
+    Bytes::copy_from_slice(&to_vec(t))
+}
+
 pub fn from_bytes<T: de::De>(from: prelude::Bytes) -> Result<T, errors::KsonError> {
     T::de(&mut de::Deserializer::new(from))
 }
