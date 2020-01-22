@@ -48,3 +48,10 @@ CREATE TABLE IF NOT EXISTS sigchain_deprecations (
     key BLOB NOT NULL,
     user_id TEXT NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS keys (
+    public_key BLOB NOT NULL,
+    key BLOB NOT NULL,
+    ix INTEGER NOT NULL,
+    PRIMARY KEY(public_key, ix)
+);

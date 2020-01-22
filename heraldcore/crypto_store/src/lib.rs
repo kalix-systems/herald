@@ -9,6 +9,7 @@ pub mod prelude {
     pub use crate::connection::{as_conn, raw_conn, Conn};
     pub use crate::errors::Error;
     pub use ratchet_chat::protocol::*;
+    pub use ratchet_chat::ratchet::double::KeyStore;
 }
 
 macro_rules! ok_none {
@@ -41,6 +42,7 @@ macro_rules! st {
 
 mod conversation;
 mod errors;
+mod keystore;
 mod pending;
 mod ratchet;
 mod sigstore;
