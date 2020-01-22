@@ -91,5 +91,6 @@
         <file>EmojiKeyboard/PickerInterior.qml</file>
         <file>EmojiKeyboard/SearchInteriorComponent.qml</file>
         <file>EmojiKeyboard/StandardInterior.qml</file>
+        <file>Entity/TypeAnimation.qml</file>
     </qresource>
 </RCC>

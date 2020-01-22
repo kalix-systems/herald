@@ -12,6 +12,7 @@ pub use members::*;
 pub use message_builder::*;
 pub use message_search::*;
 pub use messages::*;
+pub use notifications::*;
 use riqtshaw_types::*;
 pub use shared_conversations::*;
 pub use users::*;
@@ -45,6 +46,8 @@ mod message_builder;
 mod message_search;
 
 mod messages;
+
+mod notifications;
 
 mod shared_conversations;
 

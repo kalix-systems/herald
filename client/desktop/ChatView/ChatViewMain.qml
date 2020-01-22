@@ -20,9 +20,10 @@ Page {
     //TODO: rename this to something sane
     property var conversationItem
     //TODO: rename to something sane and not a shadow
-    property var ownedConversation
-    property var conversationMembers
+    property Messages ownedConversation
+    property Members conversationMembers
     property alias convoTimer: messageBar.timerMenu
+    property var convId
 
     background: Rectangle {
         color: CmnCfg.palette.white
@@ -80,7 +81,7 @@ Page {
     // having to use explicit x and y positioning
     Item {
         anchors {
-            left: parent.left
+            right: parent.right
             bottom: chatTextArea.top
             margins: 12
         }
@@ -149,7 +150,7 @@ Page {
 
         id: typingIndicator
         anchors.bottom: divider.top
-        conversationMembers: chatPage.conversationMembers
+        conversationMembers: ContentMap.get(chatPage.convId).members
     }
 
     MessageDialog {

@@ -45,7 +45,7 @@ Rectangle {
         anchors.right: parent.right
         anchors.rightMargin: CmnCfg.smallMargin
         anchors.bottom: parent.bottom
-        bottomPadding: CmnCfg.smallMargin * 0.5
+        bottomPadding: CmnCfg.units.dp(4)
         source: "qrc:/attach-icon.svg"
     }
     Imports.IconButton {
@@ -53,12 +53,13 @@ Rectangle {
         id: timerButton
         source: timerMenu.chosenTimer
         fill: "transparent"
-        anchors.right: attachmentsButton.left
-        anchors.rightMargin: CmnCfg.smallMargin
+        anchors.left: parent.left
+        anchors.leftMargin: CmnCfg.smallMargin
         anchors.bottom: parent.bottom
-        bottomPadding: CmnCfg.smallMargin * 0.5
+        bottomPadding: CmnCfg.units.dp(3)
         topPadding: 1
         onClicked: timerMenu.open()
+        tooltipText: "Set single-message expiration"
     }
 
     Imports.TimerOptionsBuilder {
@@ -69,10 +70,10 @@ Rectangle {
 
     Imports.IconButton {
         id: emojiButton
-        anchors.left: parent.left
-        anchors.leftMargin: CmnCfg.smallMargin
+        anchors.right: attachmentsButton.left
+        anchors.rightMargin: CmnCfg.smallMargin
         anchors.bottom: parent.bottom
-        bottomPadding: CmnCfg.smallMargin * 0.5
+        bottomPadding: CmnCfg.units.dp(3)
         source: "qrc:/emoticon-icon.svg"
     }
 
@@ -81,16 +82,16 @@ Rectangle {
         id: containerCol
 
         anchors {
-            left: emojiButton.right
-            right: timerButton.left
+            left: timerButton.right
+            right: emojiButton.left
             leftMargin: CmnCfg.smallMargin * 2
             rightMargin: CmnCfg.smallMargin
             bottomMargin: CmnCfg.smallMargin * 0.5
         }
 
         topPadding: CmnCfg.smallMargin * 0.5
-        bottomPadding: CmnCfg.smallMargin * 0.5
 
+        //   bottomPadding: CmnCfg.units.dp(1)
         Column {
             width: textWrapperRect.width
             spacing: CmnCfg.smallMargin
@@ -149,29 +150,52 @@ Rectangle {
             }
         }
 
-        ScrollView {
+        Flickable {
             id: scrollView
-            height: Math.min(contentHeight, 100)
+            height: Math.min(Math.max(chatText.contentHeight, chatText.height),
+                             CmnCfg.units.dp(100))
             width: containerCol.width
             focus: true
+            contentWidth: width
+            clip: true
+            contentHeight: Math.max(chatText.contentHeight, chatText.height)
+            leftMargin: 0
 
-            TextArea {
+            maximumFlickVelocity: 1200
+            flickDeceleration: chatText.height * 10
+
+            ScrollBar.vertical: ScrollBar {}
+            boundsBehavior: Flickable.StopAtBounds
+            boundsMovement: Flickable.StopAtBounds
+            contentY: chatText.cursorRectangle.y
+            TextEdit {
                 id: chatText
-                background: Rectangle {
-                    color: CmnCfg.palette.white
-                }
-
-                //TODO: use system palette.
-                leftPadding: CmnCfg.microMargin
-                bottomPadding: CmnCfg.smallMargin * 0.5
                 selectionColor: CmnCfg.palette.highlightColor
                 color: CmnCfg.palette.black
                 selectByMouse: true
                 wrapMode: TextArea.WrapAtWordBoundaryOrAnywhere
-                placeholderText: qsTr("Message") + " "
-                                 + (!Herald.utils.compareByteArray(
-                                        conversationItem.conversationId,
-                                        Herald.config.ntsConversationId) ? conversationItem.title : qsTr("Note to Self"))
+                width: containerCol.width
+                topPadding: CmnCfg.units.dp(5)
+                bottomPadding: CmnCfg.units.dp(5)
+                rightPadding: CmnCfg.smallMargin
+
+                font.pixelSize: CmnCfg.chatTextSize
+                Text {
+                    text: qsTr("Message") + " "
+                          + (!Herald.utils.compareByteArray(
+                                 conversationItem.conversationId,
+                                 Herald.config.ntsConversationId) ? conversationItem.title : qsTr(
+                                                                        "Note to Self"))
+                    color: CmnCfg.palette.darkGrey
+                    opacity: (chatText.text.length === 0) ? 1.0 : 0.0
+                    anchors.baseline: parent.baseline
+                    width: containerCol.width
+                    elide: Text.ElideRight
+                    font.pixelSize: CmnCfg.chatTextSize
+                    font.family: CmnCfg.chatFont.name
+                    font.weight: Font.Light
+                    padding: 0
+                }
 
                 Keys.forwardTo: keysProxy
                 Keys.onEscapePressed: focus = false

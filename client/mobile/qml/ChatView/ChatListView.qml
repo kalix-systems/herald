@@ -21,6 +21,7 @@ ListView {
         easing.type: Easing.InCubic
     }
 
+    // Used to close other OptionsDropdowns when a new one is opened
     signal closeDropdown
 
     // this is set to a higher value in `Component.onCompleted`
@@ -29,6 +30,9 @@ ListView {
     Component.onCompleted: {
         cacheBuffer = chatListView.height * 5
 
+        ownedMessages.setElisionLineCount(20)
+        ownedMessages.setElisionCharCount(20 * 30)
+        ownedMessages.setElisionCharsPerLine(30)
         if (chatListView.contentHeight < chatListView.height) {
             chatListView.height = chatListView.contentHeight
         }

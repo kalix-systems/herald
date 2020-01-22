@@ -229,11 +229,7 @@ impl UserBuilder {
 
         let user_type = user_type.unwrap_or(UserType::Remote);
 
-        let title = if UserType::Local == user_type {
-            crate::config::NTS_CONVERSATION_NAME
-        } else {
-            name.as_str()
-        };
+        let title = name.as_str();
 
         conv_builder.title(title.to_owned());
         if let Some(cid) = pairwise_conversation {

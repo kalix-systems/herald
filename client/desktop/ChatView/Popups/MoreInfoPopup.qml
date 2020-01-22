@@ -14,9 +14,9 @@ import "qrc:/imports" as Imports
 
 Popup {
     id: moreInfoPopup
-    property var convoMembers: parent.convoMembers
+    property Members convoMembers: parent.convoMembers
     property var messageData: parent.messageData
-    property var ownedMessages: parent.ownedMessages
+    property Messages ownedMessages: parent.ownedMessages
     property var receiptData
     property var outbound: messageData.author === Herald.config.configId
     modal: true

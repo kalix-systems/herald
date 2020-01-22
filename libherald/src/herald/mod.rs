@@ -1,7 +1,7 @@
 use crate::{
     config::Config, conversation_builder::ConversationBuilder, conversations::Conversations, err,
-    errors::Errors, ffi, interface::*, message_search::MessageSearch, push_err, spawn,
-    users::Users, users_search::UsersSearch, Loadable,
+    errors::Errors, ffi, interface::*, message_search::MessageSearch, notifications::Notifications,
+    push_err, spawn, users::Users, users_search::UsersSearch, Loadable,
 };
 use herald_common::*;
 use heraldcore::{
@@ -27,10 +27,10 @@ pub(crate) mod underscore;
 pub struct Herald {
     emit: HeraldEmitter,
     errors: Errors,
+    notifications: Notifications,
     message_search: MessageSearch,
     users_search: UsersSearch,
     utils: Utils,
     load_props: imp::LoadProps,
-
     registration_failure_code: Option<shared::RegistrationFailureCode>,
 }

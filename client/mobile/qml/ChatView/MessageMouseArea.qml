@@ -15,14 +15,13 @@ MouseArea {
     z: CmnCfg.overlayZ
 
     onPressAndHold: {
-        cb.hoverHighlight = true
-        dropdown.activate()
         chatList.closeDropdown()
+        cb.isSelected = true
+        dropdown.activate()
     }
-    onReleased: {
-        cb.hoverHighlight = false
-    }
-    onExited: {
-        cb.hoverHighlight = false
+
+    onPressed: {
+        cb.isSelected = false
+        dropdown.deactivate()
     }
 }

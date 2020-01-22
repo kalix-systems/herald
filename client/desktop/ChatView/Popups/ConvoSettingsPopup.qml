@@ -17,7 +17,7 @@ import "qrc:/imports/Settings/SettingsComponents" as SC
 Popup {
     id: convoSettingsPopup
     property var convoData: parent.convoData
-    property var convoMembers: parent.convoMembers
+    property Members convoMembers: parent.convoMembers
 
     padding: 0
     height: chatView.height

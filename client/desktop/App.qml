@@ -183,7 +183,6 @@ Item {
             height: appRoot.height
 
             Rectangle {
-
                 anchors.horizontalCenter: parent.left
                 width: 9
                 height: parent.height
@@ -197,6 +196,7 @@ Item {
                     color: CmnCfg.palette.offBlack
                     z: parent.z + 1
                 }
+
                 MouseArea {
                     id: mouse
                     drag.target: parent
@@ -217,12 +217,7 @@ Item {
 
     Component.onCompleted: Herald.login()
 
-    SystemTrayIcon {
+    TrayIcon {
         id: tray
-        icon.source: "qrc:/herald.png"
-        icon.mask: true
-
-        Component.onCompleted: if (Qt.platform.os === "windows")
-                                   show()
     }
 }

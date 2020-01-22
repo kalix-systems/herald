@@ -15,7 +15,7 @@ Rectangle {
     property var messageModelData
     property bool outbound: messageModelData.author === Herald.config.configId
 
-    property var ownedConversation
+    property Messages ownedConversation
     property alias highlightItem: bubbleHighlight
     readonly property color bubbleColor: CmnCfg.palette.lightGrey
 
@@ -39,6 +39,7 @@ Rectangle {
     property bool moreInfo: false
     property bool aux: true
     property MouseArea hitbox
+    property bool isSelected: false
 
     Connections {
         target: appRoot.globalTimer

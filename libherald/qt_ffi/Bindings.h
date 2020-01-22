@@ -19,6 +19,7 @@ class Members;
 class MessageBuilder;
 class MessageSearch;
 class Messages;
+class Notifications;
 class SharedConversations;
 class Users;
 class UsersSearch;
@@ -37,6 +38,7 @@ using MembersPtrBundle = struct MembersPtrBundle;
 using MessageBuilderPtrBundle = struct MessageBuilderPtrBundle;
 using MessageSearchPtrBundle = struct MessageSearchPtrBundle;
 using MessagesPtrBundle = struct MessagesPtrBundle;
+using NotificationsPtrBundle = struct NotificationsPtrBundle;
 using SharedConversationsPtrBundle = struct SharedConversationsPtrBundle;
 using UsersPtrBundle = struct UsersPtrBundle;
 using UsersSearchPtrBundle = struct UsersSearchPtrBundle;
@@ -308,6 +310,8 @@ struct HeraldPtrBundle {
   void (*message_search_end_move_rows)(MessageSearch *);
   void (*message_search_begin_remove_rows)(MessageSearch *, int, int);
   void (*message_search_end_remove_rows)(MessageSearch *);
+  Notifications *notifications;
+  void (*notifications_notify)(const Notifications *);
   void (*herald_registration_failure_code_changed)(Herald *);
   Users *users;
   void (*users_filter_changed)(Users *);
@@ -542,6 +546,10 @@ struct MessagesPtrBundle {
   void (*messages_begin_remove_rows)(Messages *, int, int);
   void (*messages_end_remove_rows)(Messages *);
 };
+struct NotificationsPtrBundle {
+  Notifications *notifications;
+  void (*notifications_notify)(const Notifications *);
+};
 struct SharedConversationsPtrBundle {
   SharedConversations *shared_conversations;
   void (*shared_conversations_user_id_changed)(SharedConversations *);
@@ -618,6 +626,7 @@ class Config : public QObject {
   friend class MessageBuilder;
   friend class MessageSearch;
   friend class Messages;
+  friend class Notifications;
   friend class SharedConversations;
   friend class Users;
   friend class UsersSearch;
@@ -676,6 +685,7 @@ class ConversationBuilder : public QAbstractItemModel {
   friend class MessageBuilder;
   friend class MessageSearch;
   friend class Messages;
+  friend class Notifications;
   friend class SharedConversations;
   friend class Users;
   friend class UsersSearch;
@@ -757,6 +767,7 @@ class ConversationContent : public QObject {
   friend class MessageBuilder;
   friend class MessageSearch;
   friend class Messages;
+  friend class Notifications;
   friend class SharedConversations;
   friend class Users;
   friend class UsersSearch;
@@ -806,6 +817,7 @@ class Conversations : public QAbstractItemModel {
   friend class MessageBuilder;
   friend class MessageSearch;
   friend class Messages;
+  friend class Notifications;
   friend class SharedConversations;
   friend class Users;
   friend class UsersSearch;
@@ -835,6 +847,8 @@ public:
   Q_INVOKABLE bool removeConversation(quint64 row_index);
   Q_INVOKABLE void setProfilePicture(quint64 index,
                                      const QString &profile_picture);
+  Q_INVOKABLE void setStatusById(const QByteArray &conversation_id,
+                                 quint8 status);
   Q_INVOKABLE bool toggleFilterRegex();
   int columnCount(const QModelIndex &parent = QModelIndex()) const override;
   QVariant data(const QModelIndex &index,
@@ -905,6 +919,7 @@ class DocumentAttachments : public QAbstractItemModel {
   friend class MessageBuilder;
   friend class MessageSearch;
   friend class Messages;
+  friend class Notifications;
   friend class SharedConversations;
   friend class Users;
   friend class UsersSearch;
@@ -973,6 +988,7 @@ class EmojiPicker : public QAbstractItemModel {
   friend class MessageBuilder;
   friend class MessageSearch;
   friend class Messages;
+  friend class Notifications;
   friend class SharedConversations;
   friend class Users;
   friend class UsersSearch;
@@ -1077,6 +1093,7 @@ class Errors : public QObject {
   friend class MessageBuilder;
   friend class MessageSearch;
   friend class Messages;
+  friend class Notifications;
   friend class SharedConversations;
   friend class Users;
   friend class UsersSearch;
@@ -1111,6 +1128,7 @@ class Herald : public QObject {
   friend class MessageBuilder;
   friend class MessageSearch;
   friend class Messages;
+  friend class Notifications;
   friend class SharedConversations;
   friend class Users;
   friend class UsersSearch;
@@ -1125,6 +1143,7 @@ private:
   Conversations *const m_conversations;
   Errors *const m_errors;
   MessageSearch *const m_messageSearch;
+  Notifications *const m_notifications;
   Users *const m_users;
   UsersSearch *const m_usersSearch;
   Utils *const m_utils;
@@ -1143,6 +1162,8 @@ private:
   Q_PROPERTY(Errors *errors READ errors NOTIFY errorsChanged FINAL)
   Q_PROPERTY(MessageSearch *messageSearch READ messageSearch NOTIFY
                  messageSearchChanged FINAL)
+  Q_PROPERTY(Notifications *notifications READ notifications NOTIFY
+                 notificationsChanged FINAL)
   Q_PROPERTY(QVariant registrationFailureCode READ registrationFailureCode
                  NOTIFY registrationFailureCodeChanged FINAL)
   Q_PROPERTY(Users *users READ users NOTIFY usersChanged FINAL)
@@ -1167,6 +1188,8 @@ public:
   Errors *errors();
   const MessageSearch *messageSearch() const;
   MessageSearch *messageSearch();
+  const Notifications *notifications() const;
+  Notifications *notifications();
   QVariant registrationFailureCode() const;
   const Users *users() const;
   Users *users();
@@ -1188,6 +1211,7 @@ Q_SIGNALS:
   void conversationsChanged();
   void errorsChanged();
   void messageSearchChanged();
+  void notificationsChanged();
   void registrationFailureCodeChanged();
   void usersChanged();
   void usersSearchChanged();
@@ -1208,6 +1232,7 @@ class MediaAttachments : public QAbstractItemModel {
   friend class MessageBuilder;
   friend class MessageSearch;
   friend class Messages;
+  friend class Notifications;
   friend class SharedConversations;
   friend class Users;
   friend class UsersSearch;
@@ -1275,6 +1300,7 @@ class Members : public QAbstractItemModel {
   friend class MessageBuilder;
   friend class MessageSearch;
   friend class Messages;
+  friend class Notifications;
   friend class SharedConversations;
   friend class Users;
   friend class UsersSearch;
@@ -1364,6 +1390,7 @@ class MessageBuilder : public QAbstractItemModel {
   friend class Members;
   friend class MessageSearch;
   friend class Messages;
+  friend class Notifications;
   friend class SharedConversations;
   friend class Users;
   friend class UsersSearch;
@@ -1495,6 +1522,7 @@ class MessageSearch : public QAbstractItemModel {
   friend class Members;
   friend class MessageBuilder;
   friend class Messages;
+  friend class Notifications;
   friend class SharedConversations;
   friend class Users;
   friend class UsersSearch;
@@ -1583,6 +1611,7 @@ class Messages : public QAbstractItemModel {
   friend class Members;
   friend class MessageBuilder;
   friend class MessageSearch;
+  friend class Notifications;
   friend class SharedConversations;
   friend class Users;
   friend class UsersSearch;
@@ -1711,6 +1740,41 @@ Q_SIGNALS:
   void searchPatternChanged();
   void searchRegexChanged();
 };
+class Notifications : public QObject {
+  Q_OBJECT
+  friend class Config;
+  friend class ConversationBuilder;
+  friend class ConversationContent;
+  friend class Conversations;
+  friend class DocumentAttachments;
+  friend class EmojiPicker;
+  friend class Errors;
+  friend class Herald;
+  friend class MediaAttachments;
+  friend class Members;
+  friend class MessageBuilder;
+  friend class MessageSearch;
+  friend class Messages;
+  friend class SharedConversations;
+  friend class Users;
+  friend class UsersSearch;
+  friend class Utils;
+
+public:
+  class Private;
+
+private:
+  Private *m_d;
+  bool m_ownsPrivate;
+  explicit Notifications(bool owned, QObject *parent);
+
+public:
+  explicit Notifications(QObject *parent = nullptr);
+  ~Notifications() override;
+  Q_INVOKABLE QString nextNotif();
+Q_SIGNALS:
+  void notify() const;
+};
 class SharedConversations : public QAbstractItemModel {
   Q_OBJECT
   friend class Config;
@@ -1726,6 +1790,7 @@ class SharedConversations : public QAbstractItemModel {
   friend class MessageBuilder;
   friend class MessageSearch;
   friend class Messages;
+  friend class Notifications;
   friend class Users;
   friend class UsersSearch;
   friend class Utils;
@@ -1803,6 +1868,7 @@ class Users : public QAbstractItemModel {
   friend class MessageBuilder;
   friend class MessageSearch;
   friend class Messages;
+  friend class Notifications;
   friend class SharedConversations;
   friend class UsersSearch;
   friend class Utils;
@@ -1897,6 +1963,7 @@ class UsersSearch : public QAbstractItemModel {
   friend class MessageBuilder;
   friend class MessageSearch;
   friend class Messages;
+  friend class Notifications;
   friend class SharedConversations;
   friend class Users;
   friend class Utils;
@@ -1979,6 +2046,7 @@ class Utils : public QObject {
   friend class MessageBuilder;
   friend class MessageSearch;
   friend class Messages;
+  friend class Notifications;
   friend class SharedConversations;
   friend class Users;
   friend class UsersSearch;

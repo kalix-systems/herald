@@ -19,6 +19,9 @@ Rectangle {
     property bool isMessageResult: false
     property int topTextMargin: CmnCfg.defaultMargin
     property int bottomTextMargin: CmnCfg.defaultMargin
+    property alias label: conversationItemLabel.item
+
+    color: "transparent"
 
     Avatar {
         id: itemAvatar

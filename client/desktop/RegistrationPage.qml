@@ -104,9 +104,11 @@ Rectangle {
                 radius: 3
             }
 
-            onClicked: Herald.registerNewUser(entryField.text.trim(),
-                                              serverAddrTextField.text.trim(),
-                                              serverPortTextField.text.trim())
+            onClicked: {
+                Herald.registerNewUser(entryField.text.trim(),
+                                       serverAddrTextField.text.trim(),
+                                       serverPortTextField.text.trim())
+            }
         }
 
         Text {

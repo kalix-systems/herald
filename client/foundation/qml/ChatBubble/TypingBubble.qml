@@ -7,7 +7,7 @@ Rectangle {
     height: typingLoader.height
     width: parent.width
     color: typingLoader.active ? CmnCfg.palette.white : "transparent"
-    property var conversationMembers
+    property Members conversationMembers
     Rectangle {
         visible: typingLoader.active
         anchors.top: parent.top

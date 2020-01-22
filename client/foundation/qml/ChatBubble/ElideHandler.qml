@@ -6,8 +6,9 @@ import LibHerald 1.0
 TextEdit {
     visible: elided
     text: !bubbleRoot.expanded ? qsTr("Read more") : qsTr("Collapse")
-    font.bold: true
     font.family: CmnCfg.chatFont.name
+    font.weight: Font.Medium
+    font.pixelSize: CmnCfg.chatTextSize
     color: CmnCfg.palette.black
     Layout.leftMargin: CmnCfg.smallMargin
     Layout.rightMargin: CmnCfg.smallMargin
@@ -18,9 +19,10 @@ TextEdit {
     MouseArea {
         anchors.fill: parent
         onClicked: bubbleRoot.expanded = !bubbleRoot.expanded
+        cursorShape: Qt.PointingHandCursor
     }
 
-    TapHandler {
-        onTapped: bubbleRoot.expanded = !bubbleRoot.expanded
-    }
+    //    TapHandler {
+    //        onTapped: bubbleRoot.expanded = !bubbleRoot.expanded
+    //    }
 }

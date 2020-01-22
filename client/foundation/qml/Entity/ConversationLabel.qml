@@ -24,9 +24,15 @@ Item {
     property int subLabelFontSize: CmnCfg.entitySubLabelSize
     property alias receiptFill: receiptImage.icon.color
 
+    //properties for displaying typing animation
+    property int typeSize: CmnCfg.smallMargin
+    property int bigType: typeSize + 1
     property bool typeActive: false
+
     // json summary
     property string lastMsgDigest
+    property color typeColor
+    property color typeColorAnim: Qt.darker(typeColor, 1.4)
 
     // This component expects one of the following groups of properties,
     // either a lastMsgDigest property (a JSON object), or the subsequent group of
@@ -95,7 +101,7 @@ Item {
                 pixelSize: labelFontSize
                 weight: Font.Medium
             }
-            Layout.maximumWidth: wrapper.width - ts.width
+            Layout.maximumWidth: wrapper.width - ts.width - CmnCfg.smallMargin
             elide: "ElideRight"
             text: convoTitle
             color: labelColor
@@ -148,23 +154,50 @@ Item {
         active: typeActive
         anchors.left: parent.left
         anchors.bottom: parent.bottom
+        anchors.bottomMargin: CmnCfg.microMargin
         width: active ? item.implicitWidth : 0
         height: active ? item.implicitHeight : 0
-        sourceComponent: GridLayout {
+        onActiveChanged: if (active) {
+                             item.animation.start()
+                         }
+
+        sourceComponent: RowLayout {
             id: typeGrid
-            Label {
-                id: type
-                font {
-                    family: CmnCfg.chatFont.name
-                    pixelSize: subLabelFontSize
+            spacing: CmnCfg.units.dp(6)
+            property alias animation: anim
+            Connections {
+                target: wrapper
+                onTypeColorAnimChanged: {
+                    animation.restart()
                 }
-                background: Item {}
-                elide: "ElideRight"
-                text: "<i>" + qsTr("Someone is typing") + "...</i>"
-                Layout.maximumWidth: wrapper.width - CmnCfg.defaultMargin * 2
-                color: labelColor
-                textFormat: Text.StyledText
-                padding: 0
+            }
+            Rectangle {
+                id: rect1
+                height: typeSize
+                width: height
+                radius: width
+                color: typeColor
+                Layout.alignment: Qt.AlignVCenter
+            }
+            Rectangle {
+                id: rect2
+                height: typeSize
+                width: height
+                radius: width
+                color: typeColor
+                Layout.alignment: Qt.AlignVCenter
+            }
+            Rectangle {
+                id: rect3
+                height: typeSize
+                width: height
+                radius: width
+                color: typeColor
+                Layout.alignment: Qt.AlignVCenter
+            }
+
+            TypeAnimation {
+                id: anim
             }
         }
     }

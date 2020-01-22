@@ -15,7 +15,7 @@ Page {
 
     property var messageData
     // members of the conversation content
-    property var members
+    property Members members
     readonly property string stateName: "info"
     // list of receipt-user objects. set on completion
     property var receiptData: []

@@ -3,7 +3,7 @@ import QtQuick.Layouts 1.12
 import QtQuick 2.12
 import LibHerald 1.0
 // Includes CVFLoatingButton. ListItem, and Header
-import "./Controls"
+import "./Controls" as Controls
 import "../Common" as Common
 import "qrc:/imports/js/utils.mjs" as Utils
 import QtGraphicalEffects 1.0
@@ -21,6 +21,24 @@ Page {
     }
     Component.onCompleted: appRoot.router.cvView = cvMainView
     signal messagePositionRequested(var requestMsgId)
+    // Used to close any open per-convo options menu bars when new one opened
+    signal closeAllOptionsBars
+
+    Label {
+        id: noConvosLabel
+        anchors {
+            top: parent.top
+            topMargin: CmnCfg.defaultMargin
+            horizontalCenter: parent.horizontalCenter
+            //left: parent.left
+        }
+        text: "No conversations to show"
+        font.family: CmnCfg.chatFont.name
+        font.pixelSize: CmnCfg.chatTextSize
+        font.italic: true
+        horizontalAlignment: Text.AlighHCenter
+        visible: false
+    }
 
     // the body of this entire element
     // displays conversations
@@ -35,6 +53,7 @@ Page {
             anchors.fill: parent
             model: Herald.conversations
             delegate: ConversationItem {
+                id: conversationItem
                 property var conversationData: model
                 isNTS: {
                     Herald.utils.compareByteArray(
@@ -50,14 +69,10 @@ Page {
                 isGroup: !model.pairwise
                 lastMsgDigest: model.lastMsgDigest
                 isEmpty: model.isEmpty
-                convoContent: ConversationContent {
-                    id: convContent
-                    conversationId: model.conversationId
-                }
-                visible: (cvMainView.state === "archiveState"
-                          && model.status === 1)
-                         || (cvMainView.state !== "archiveState"
-                             && model.status === 0)
+                convoContent: ContentMap.get(model.conversationId)
+                isArchived: model.status === 1
+                visible: (cvMainView.state === "archiveState" && isArchived) ||
+                         (cvMainView.state !== "archiveState" && !isArchived)
             }
             Connections {
                 target: appRoot.router
@@ -77,7 +92,6 @@ Page {
             Connections {
                 target: appRouter
                 onConvoClicked: {
-
                     const conv_idx = Herald.conversations.indexById(
                                        searchConversationId)
 
@@ -88,10 +102,10 @@ Page {
                     stackView.push(cvListView.itemAtIndex(conv_idx).ownedCV)
                 }
             }
+
             Connections {
                 target: appRouter
                 onGroupRequested: {
-
                     const conv_idx = Herald.conversations.indexById(groupId)
 
                     // early return on out of bounds
@@ -121,12 +135,12 @@ Page {
 
     Component {
         id: fab
-        ExpandedComposeButtons {}
+        Controls.ExpandedComposeButtons {}
     }
 
     Component {
         id: plusButton
-        ComposeButton {
+        Controls.ComposeButton {
             iconSource: "qrc:/plus-icon.svg"
             TapHandler {
                 gesturePolicy: TapHandler.ReleaseWithinBounds
@@ -171,6 +185,10 @@ Page {
             PropertyChanges {
                 target: buttonLoader
                 visible: false
+            }
+            PropertyChanges {
+                target: noConvosLabel
+                visible: true
             }
         }
     ]

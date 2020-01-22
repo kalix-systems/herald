@@ -77,7 +77,7 @@ Component {
                 fill: CmnCfg.palette.lightGrey
                 onClicked: {
                     ownedConversation.searchActive = false
-                    messageBar.state = ""
+                    messageBar.state = "default"
                 }
                 scale: 0.8
             }

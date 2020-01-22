@@ -10,15 +10,15 @@ import QtGraphicalEffects 1.0
 Flow {
     anchors.horizontalCenter: parent.horizontalCenter
     anchors.verticalCenter: parent.verticalCenter
-    spacing: CmnCfg.microMargin
-    width: 100
+    spacing: CmnCfg.units.dp(2)
+    width: CmnCfg.units.dp(80)
 
     Repeater {
         model: userRect.sharedConvos
         delegate: Avatar {
             id: groupAv
             property var groupData: model
-            size: 30
+            size: CmnCfg.units.dp(22)
             isGroup: true
             visible: index < 6
 
@@ -63,7 +63,7 @@ Flow {
                 color: "transparent"
 
                 id: overlay
-                visible: (userRect.sharedConvos.rowCount() > 5 && index === 5)
+                visible: (userRect.sharedConvos.rowCount() > 6 && index === 5)
                 ColorOverlay {
                     anchors.fill: parent
                     color: "black"

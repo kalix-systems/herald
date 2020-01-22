@@ -163,6 +163,14 @@ impl ConversationsTrait for Conversations {
         self.set_status_(index, status)
     }
 
+    fn set_status_by_id(
+        &mut self,
+        id: ffi::ConversationIdRef,
+        status: u8,
+    ) {
+        self.set_status_by_id_(id, status)
+    }
+
     fn status(
         &self,
         index: usize,

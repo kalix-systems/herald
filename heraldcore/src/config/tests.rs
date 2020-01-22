@@ -42,7 +42,7 @@ fn complicated_add_get_set_config() {
 
     let meta = crate::conversation::db::meta(&conn, &config.nts_conversation).expect(womp!());
 
-    assert_eq!(meta.title.expect(womp!()), NTS_CONVERSATION_NAME);
+    assert_eq!(meta.title.expect(womp!()), "stuff");
 
     let db_config = db::get(&conn).expect(womp!());
 

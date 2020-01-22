@@ -9,10 +9,9 @@ import "qrc:/imports/Entity" as Entity
 
 Page {
     id: searchView
-    readonly property Component headerComponent:
-        GlobalSearchHeader {
-          parentPage: searchView
-        }
+    readonly property Component headerComponent: GlobalSearchHeader {
+        parentPage: searchView
+    }
 
     background: Rectangle {
         color: CmnCfg.palette.white
@@ -52,20 +51,22 @@ Page {
 
             model: Herald.conversations
             delegate: ConversationItem {
+                property var conversationData: model
                 itemTitle: title
-                colorCode: model.conversationColor
-                imageSource: Utils.safeStringOrDefault(model.picture, "")
-                isGroup: !model.pairwise
-                lastMsgDigest: model.lastMsgDigest
-                isEmpty: model.isEmpty
+                colorCode: conversationData.conversationColor
+                imageSource: Utils.safeStringOrDefault(
+                                 conversationData.picture, "")
+                isGroup: !conversationData.pairwise
+                lastMsgDigest: conversationData.lastMsgDigest
+                isEmpty: conversationData.isEmpty
                 tapEnabled: false
-                visible: model.matched
+                visible: conversationData.matched
                 height: visible ? CmnCfg.convoHeight : 0
                 TapHandler {
                     // TODO if state is fromComposeButton we should probably
                     // pop this view off the stack, so ChatView back button
                     // goes to home screen
-                    onTapped: convoClicked(model.conversationId)
+                    onTapped: convoClicked(conversationData.conversationId)
                 }
             }
         }
@@ -96,8 +97,7 @@ Page {
                     icon.width: CmnCfg.iconSize
                     anchors {
                         left: parent.left
-                        leftMargin: CmnCfg.microMargin +
-                                    (CmnCfg.avatarSize - CmnCfg.iconSize) / 2
+                        leftMargin: CmnCfg.microMargin + (CmnCfg.avatarSize - CmnCfg.iconSize) / 2
                         verticalCenter: parent.verticalCenter
                     }
 
@@ -112,8 +112,7 @@ Page {
                     font.weight: Font.Medium
                     anchors {
                         left: createGroupIcon.right
-                        leftMargin: (CmnCfg.avatarSize - CmnCfg.iconSize) / 2 +
-                                    CmnCfg.defaultMargin
+                        leftMargin: (CmnCfg.avatarSize - CmnCfg.iconSize) / 2 + CmnCfg.defaultMargin
                         verticalCenter: parent.verticalCenter
                     }
                 }
