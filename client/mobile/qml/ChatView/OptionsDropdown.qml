@@ -32,7 +32,7 @@ Rectangle {
         onCloseDropdown: {
             if (active)
                 deactivate()
-                cb.isSelected = false
+            cb.isSelected = false
         }
     }
 
@@ -69,6 +69,16 @@ Rectangle {
             clip: true
             layoutDirection: Qt.RightToLeft
             spacing: CmnCfg.defaultMargin
+
+            CMN.AnimIconButton {
+                icon.color: CmnCfg.palette.white
+                visible: false
+                imageSource: "qrc:/download-icon.svg"
+                anchors.verticalCenter: parent.verticalCenter
+                onTapped: {
+
+                }
+            }
 
             CMN.AnimIconButton {
                 icon.color: CmnCfg.palette.white

@@ -49,30 +49,49 @@ Rectangle {
     readonly property string fullMedAttachments: isNull ? "" : messageModelData.fullMediaAttachments
 
     readonly property string documentAttachments: isNull ? "" : messageModelData.docAttachments
-    readonly property bool imageAttach: isNull ? "" : medAttachments.length !== 0
-    readonly property bool docAttach: isNull ? "" : documentAttachments.length !== 0
+    // imageAttach: whether or not this message has an image attached to it.
+    readonly property bool imageAttach: isNull ? false : medAttachments.length !== 0
+    // docAttach: whether or not this message has any non-previewable attachments.
+    readonly property bool docAttach: isNull ? false : documentAttachments.length !== 0
 
+    // replyId: The message ID QByteArray corresponding to the message that this message is replying to, if any.
     readonly property var replyId: isNull ? undefined : messageModelData.opMsgId
+    // reply: whether or this message is a reply to a pre existing message
     readonly property bool reply: isNull ? false : messageModelData.replyType > 0
 
+    // isHead: true if this message is the first of a logical flurry of messages from the same user.
+    // a logical flurry is a group of messages that have not been interrupted by a message from another user,
+    // with less than five minutes (CHECK ME) inbetween each message.
     readonly property bool isHead: isNull ? false : messageModelData.isHead
+    // isTail: true if this message is the last message in a logical flurry. see isHead.
     readonly property bool isTail: isNull ? false : messageModelData.isTail
+    // hasReactions: whether or not this messages has an emoji reaction associated with it.
     readonly property bool hasReactions: isNull ? false : messageModelData.reactions.length > 0
 
     readonly property real maxWidth: defaultWidth * 0.75
+    // friendlyTimestamp: the user friendly timestamp corresponding to when this message was received
     property string friendlyTimestamp: isNull ? "" : Utils.friendlyTimestamp(
                                                     messageModelData.insertionTime)
-
+    // timerIcon: the rcc path corresponding to the hourglass icon used to indicate how much time is left before this message
+    // self destructs.
     property string timerIcon: isNull ? "" : messageModelData.expirationTime
                                         !== undefined ? Utils.timerIcon(
                                                             messageModelData.expirationTime,
                                                             messageModelData.insertionTime) : ""
+    // receiptImage: the rcc path corresponding to the check mark icon indicating whether or not the receipient of this message
+    // has seen it or not.
     readonly property string receiptImage: isNull ? "" : outbound ? Utils.receiptCodeSwitch(
                                                                         messageModelData.receiptStatus) : ""
+    // authorColor: the QColor corresponding to the user set hue used to color the flair of the message.
     readonly property color authorColor: isNull ? "white" : CmnCfg.avatarColors[messageModelData.authorColor]
 
+    // pfpUrl: the file url corresponding to the authors profile picture.
     readonly property string pfpUrl: isNull ? "" : messageModelData.authorProfilePicture
+
+    // hoverHighlight: whether or not this item is currently hovered, showing a color overlay, i.e. `highlightItem`
     property bool hoverHighlight: false
+
+    // moreInfo: (CHECK ME)
     property bool moreInfo: true
 
     height: contentRoot.height
