@@ -126,6 +126,33 @@ ListView {
                             messageData: bubbleActual.messageModelData
                         }
                     }
+
+                    imageClickedCallBack: function (source) {
+                        var mediaParsed = JSON.parse(
+                                    bubbleActual.medAttachments)
+                        let currentIndex = mediaParsed.items.findIndex(
+                                function (object) {
+                                    if (object === undefined
+                                            || object === null) {
+                                        return false
+                                    }
+
+                                    return String(
+                                                "file:" + object.path) === String(
+                                                source)
+                                })
+                        print(currentIndex, source)
+
+                        //                        galleryLoader.imageAttachments = JSON.parse(
+                        //                                    fullMedAttachments).items
+                        //                        galleryLoader.currentIndex = currentIndex
+                        //  galleryLoader.active = true
+                        stackView.push(galleryView, {
+                                           "imageAttachments": JSON.parse(
+                                                                   fullMedAttachments).items,
+                                           "currentIndex": currentIndex
+                                       })
+                    }
                 }
             }
 

@@ -12,19 +12,7 @@ Column {
     property var mediaParsed
     // callback triggered whenever an image is tapped
     // TODO: Rename this it is nonsense
-    property var imageClickedCallBack: function (source) {
-        let currentIndex = mediaParsed.items.findIndex(function (object) {
-            if (object === undefined || object === null) {
-                return false
-            }
-
-            return String("file:" + object.path) === String(source)
-        })
-        galleryLoader.imageAttachments = JSON.parse(fullMedAttachments).items
-        galleryLoader.currentIndex = currentIndex
-        galleryLoader.active = true
-        galleryLoader.item.open()
-    }
+    property var imageClickedCallBack
     property var imageLongPressedCallBack: function (url) {
         attachmentDownloader.filePath = url
         attachmentDownloader.open()

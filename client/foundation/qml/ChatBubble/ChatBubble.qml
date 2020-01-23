@@ -16,6 +16,7 @@ Rectangle {
     property Item convContainer
     property var messageModelData
 
+    property alias imageClickedCallBack: imageLoader.imageClickedCallBack
     property Messages ownedConversation
     property alias highlightItem: bubbleHighlight
     readonly property color bubbleColor: CmnCfg.palette.lightGrey
@@ -249,12 +250,16 @@ Rectangle {
         Column {
             spacing: CmnCfg.defaultMargin
             Loader {
+                property var imageClickedCallBack
                 id: imageLoader
                 sourceComponent: imageAttach ? image : undefined
                 // image component
                 Component {
                     id: image
-                    AttachmentContent {}
+                    AttachmentContent {
+
+                        imageClickedCallBack: imageLoader.imageClickedCallBack
+                    }
                 }
             }
 

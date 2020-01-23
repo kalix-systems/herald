@@ -3,6 +3,7 @@ import QtQuick.Controls 2.14
 import Qt.labs.platform 1.1
 import "qrc:/imports/errors"
 import "./LoginPage" as LoginPage
+import "./ChatView" as CV
 import LibHerald 1.0
 
 ApplicationWindow {
