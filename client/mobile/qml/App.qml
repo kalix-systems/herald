@@ -68,6 +68,10 @@ Page {
         Contacts.ContactViewMain {}
     }
 
+    Component {
+        id: galleryView
+        ChatView.GalleryView {}
+    }
     Router {
         id: appRouter
         stack: mainView
