@@ -12,23 +12,42 @@ Rectangle {
     id: bubbleRoot
 
     property real defaultWidth
-    property bool elided: isNull ? false : body.length !== messageModelData.fullBody.length
-    property bool expanded: false
-    property bool outbound: isNull ? false : messageModelData.author === Herald.config.configId
-    property Item convContainer
-    property var messageModelData
     property bool isNull: messageModelData === null
 
+    // elided: describes whether or not the body of this message has been shortened
+    // by helper functions defined in rust.
+    property bool elided: isNull ? false : body.length !== messageModelData.fullBody.length
+    // expanded: true if the message was elided and is now showing the full body after the user presses
+    // the read more button
+    property bool expanded: false
+    // outbound: true if the user is the author of this message
+    property bool outbound: isNull ? false : messageModelData.author === Herald.config.configId
+
+    property Item convContainer
+
+    property var messageModelData
+
+    // highlightItem: an exported component which is simply the rectangle that colors
+    // the bubble on hover.
     property alias highlightItem: bubbleHighlight
+
     readonly property color bubbleColor: CmnCfg.palette.lightGrey
+    // highlight: whether or not the current message has been found in a user search
+    // query. referring to the fact that part of the message is in a highlight span.
     readonly property bool highlight: isNull ? false : messageModelData.matchStatus === 2
 
+    // body: the displayed message body
     readonly property string body: isNull ? "" : messageModelData.body
+    // authorId: the userId of the author
     readonly property string authorId: isNull ? "" : messageModelData.author
+    // authorName: the display name of the author
     readonly property string authorName: isNull ? "" : messageModelData.authorName
-
+    // medAttachments: a JSON serialized string listing all media attachments. includes
+    // information about their dimensions. this is only the first six.
     readonly property string medAttachments: isNull ? "" : messageModelData.mediaAttachments
+    // fullMedAttachments: See medAttachments
     readonly property string fullMedAttachments: isNull ? "" : messageModelData.fullMediaAttachments
+
     readonly property string documentAttachments: isNull ? "" : messageModelData.docAttachments
     readonly property bool imageAttach: isNull ? "" : medAttachments.length !== 0
     readonly property bool docAttach: isNull ? "" : documentAttachments.length !== 0
