@@ -20,7 +20,7 @@ Page {
     // onClosed: galleryLoader.active = false
     background: Rectangle {
         id: background
-        color: CmnCfg.palette.medGrey
+        color: CmnCfg.palette.black
     }
     Component.onCompleted: loader.active = true
     Loader {
@@ -38,14 +38,14 @@ Page {
                 height: 30
                 spacing: CmnCfg.smallMargin
 
-                IconButton {
+                AnimIconButton {
                     id: xIcon
-                    source: "qrc:/x-icon.svg"
+                    imageSource: "qrc:/x-icon.svg"
                     icon.height: 30
                     icon.width: 30
-                    fill: CmnCfg.palette.white
+                    color: CmnCfg.palette.white
                     z: galleryPage.z + 1
-                    onClicked: {
+                    onTapped: {
                         mainView.pop()
                     }
                 }
@@ -179,20 +179,17 @@ Page {
                 boundsMovement: Flickable.StopAtBounds
                 Component.onCompleted: print(width, height, image.width,
                                              image.height)
-
                 Image {
                     id: image
                     source: "file:" + imageAttachments[currentIndex].path
                     fillMode: Image.PreserveAspectFit
                     anchors.fill: parent
-                    sourceSize.height: parent.height
-                    sourceSize.width: parent.width
-
-                    mipmap: true
-                    //    asynchronous: true
+                    property var dims: JSON.parse(
+                                           Herald.utils.imageScaling(
+                                               imageAttachments[index].path,
+                                               parent.width))
                 }
             }
-
             PinchArea {
                 id: pinchArea
                 anchors.fill: parent
