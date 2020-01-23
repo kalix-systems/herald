@@ -1,10 +1,11 @@
 use super::*;
+use crypto_store::prelude::Msg;
 
 /// An event. These are produced in response a message being received from the server.
 #[derive(Debug)]
 pub struct Event {
     pub(super) notifications: Vec<Notification>,
-    pub(super) replies: Vec<(ConversationId, ConversationMessage)>,
+    pub(super) replies: Vec<(sig::PublicKey, Msg)>,
     pub(super) errors: Vec<HErr>,
 }
 
@@ -18,8 +19,32 @@ impl Event {
         self.replies.append(&mut other.replies);
     }
 
-    /// Sends replies to inbound messages and calls `f`, passing each notification in as an
-    /// argument.
+    /// Adds a reply
+    pub fn reply(
+        &mut self,
+        pk: sig::PublicKey,
+        msg: Msg,
+    ) {
+        self.replies.push((pk, msg));
+    }
+
+    /// Adds replies in bulk
+    pub fn replies(
+        &mut self,
+        mut rs: Vec<(sig::PublicKey, Msg)>,
+    ) {
+        self.replies.append(&mut rs);
+    }
+
+    /// Adds a notification
+    pub fn note<T: Into<Notification>>(
+        &mut self,
+        notif: T,
+    ) {
+        self.notifications.push(notif.into());
+    }
+
+    /// Sends replies to inbound messages sends notifications
     pub fn execute(self) -> Result<(), HErr> {
         let Event {
             notifications,
@@ -36,7 +61,7 @@ impl Event {
         }
 
         for (cid, content) in replies {
-            send_cmessage(cid, &content)?;
+            //send_cmessage(cid, &content)?;
         }
 
         Ok(())
@@ -44,11 +69,11 @@ impl Event {
 }
 
 impl Default for Event {
-    fn default() -> Self {
+    fn default() -> Event {
         Event {
-            notifications: Vec::new(),
+            notifications: Default::default(),
             replies: Vec::new(),
-            errors: Vec::new(),
+            errors: Default::default(),
         }
     }
 }

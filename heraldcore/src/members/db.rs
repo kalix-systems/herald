@@ -20,12 +20,13 @@ pub(crate) fn add_members_with_tx(
 pub(crate) fn add_member(
     conn: &rusqlite::Connection,
     conversation_id: &ConversationId,
-    member_id: UserId,
+    member_id: &UserId,
 ) -> Result<(), HErr> {
     w!(conn.execute(
         include_str!("sql/add_member.sql"),
         params![conversation_id, member_id],
     ));
+
     Ok(())
 }
 

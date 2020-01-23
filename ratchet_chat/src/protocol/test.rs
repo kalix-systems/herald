@@ -219,12 +219,14 @@ impl PendingStore for Stores {
                 self.pending_by_to.remove(&to);
             }
         }
+
         if let Some((_, by_id)) = self.pending_by_id.get_mut(&id) {
             by_id.remove(&to);
             if by_id.is_empty() {
                 self.pending_by_id.remove(&id);
             }
         }
+
         Ok(())
     }
 }

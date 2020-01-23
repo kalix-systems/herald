@@ -1,14 +1,14 @@
-use super::cmessages::*;
+use crate::*;
 use rusqlite::types::{self, FromSql, FromSqlError, FromSqlResult, ToSql};
 
-impl FromSql for ConversationMessage {
+impl FromSql for NetMsg {
     fn column_result(value: types::ValueRef) -> FromSqlResult<Self> {
         kson::from_slice(value.as_blob().map_err(|_| FromSqlError::InvalidType)?)
             .map_err(|_| FromSqlError::InvalidType)
     }
 }
 
-impl ToSql for ConversationMessage {
+impl ToSql for NetMsg {
     fn to_sql(&self) -> Result<types::ToSqlOutput, rusqlite::Error> {
         use types::*;
 

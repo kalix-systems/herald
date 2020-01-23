@@ -28,6 +28,13 @@ pub type RequestTx = UnboundedSender<HandledReq>;
 pub type RequestRx = UnboundedReceiver<HandledReq>;
 pub type RegistrationTx = Sender<register::ClientEvent>;
 
+pub trait PushHandler: Send + 'static + Sized {
+    fn handle(
+        &mut self,
+        push: Push,
+    );
+}
+
 #[inline]
 pub fn login<PH, CF>(
     uid: UserId,
@@ -38,7 +45,7 @@ pub fn login<PH, CF>(
     connection_failed: CF,
 ) -> Result<Requester, Error>
 where
-    PH: FnMut(Push) + Send + 'static,
+    PH: PushHandler,
     CF: FnOnce(Error) + Send + 'static,
 {
     let (tx, rx) = unbounded_channel();
@@ -72,7 +79,7 @@ pub fn register<PH, RH, CF>(
     connection_failed: CF,
 ) -> Result<RegistrationHandle, Error>
 where
-    PH: FnMut(Push) + Send + 'static,
+    PH: PushHandler,
     RH: FnMut(register::ServeEvent) + Send + 'static,
     CF: FnOnce(Error) + Send + 'static,
 {

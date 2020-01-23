@@ -10,7 +10,7 @@ pub fn begin_registration((dns, port): (String, u16)) -> Result<hn::Registration
         kp,
         dns,
         port,
-        handle_push,
+        Pushy::default(),
         |_| todo!(),
         |e| push(Notification::ConnectionDown(e)),
     )

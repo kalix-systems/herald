@@ -97,6 +97,7 @@ pub fn decrypt_payload<S: RatchetStore + dr::KeyStore>(
     payload: Bytes,
 ) -> Result<Payload, TransitError<S::Error>> {
     let ad = mk_ad(*me.public(), id);
+
     let mut ratchet = store
         .get_ratchet(them)
         .map_err(TransitError::Store)?
@@ -117,21 +118,22 @@ pub fn decrypt_payload<S: RatchetStore + dr::KeyStore>(
     Ok(payload)
 }
 
-pub struct PayloadResult {
-    pub msg: Option<Bytes>,
+#[derive(Debug, PartialEq)]
+pub enum PayloadResult {
+    AddToConvo(ConversationId, Vec<UserId>),
+    LeaveConvo(ConversationId),
+    Msg(Bytes),
 }
 
 pub fn handle_payload<S: SigStore + ConversationStore>(
     store: &mut S,
     from: GlobalId,
     payload: Payload,
-) -> Result<Option<Bytes>, PayloadError<S::Error>> {
+) -> Result<Option<PayloadResult>, PayloadError<S::Error>> {
     use Payload::*;
 
-    let mut msg = None;
-
     match payload {
-        Noop => {}
+        Noop => Ok(None),
 
         AddToConvo(cid, mems) => {
             if !store
@@ -140,21 +142,23 @@ pub fn handle_payload<S: SigStore + ConversationStore>(
             {
                 return Err(PayloadError::InvalidSender);
             }
-            store.add_to_convo(cid, mems).map_err(PayloadError::Store)?;
+            store
+                .add_to_convo(cid, mems.clone())
+                .map_err(PayloadError::Store)?;
+
+            Ok(Some(PayloadResult::AddToConvo(cid, mems)))
         }
 
         LeaveConvo(cid) => {
             store
                 .left_convo(cid, from.uid)
                 .map_err(PayloadError::Store)?;
+
+            Ok(PayloadResult::LeaveConvo(cid).into())
         }
 
-        Msg(content) => {
-            msg = Some(content);
-        }
+        Msg(content) => Ok(PayloadResult::Msg(content).into()),
     }
-
-    Ok(msg)
 }
 
 fn keys_of_cid<S: ConversationStore + SigStore>(
@@ -184,6 +188,7 @@ where
     S: dr::KeyStore + RatchetStore + PendingStore,
 {
     let id = PayloadId(UQ::gen_new());
+
     store
         .add_pending_payload(id, payload.clone(), &send_to)
         .map_err(TransitError::Store)?;
@@ -270,7 +275,7 @@ fn mk_ad(
 pub struct MsgResult {
     pub ack: Option<Ack>,
     pub forward: Option<Msg>,
-    pub output: Option<Bytes>,
+    pub output: Option<PayloadResult>,
     pub response: Option<Msg>,
 }
 
@@ -285,15 +290,17 @@ where
     S: dr::KeyStore + RatchetStore + PendingStore,
 {
     let mut out = None;
+
     match ack {
         Ack::Success(id) => {
             store.del_pending(id, them).map_err(TransitError::Store)?;
         }
         Ack::Failed { .. } => {
-            // error handling can be much smarter, for now we just fail
-            todo!("{:?}", ack);
+            // TODO error handling can be much smarter, for now we just fail
+            println!("{:?}", ack);
         }
     }
+
     Ok(out)
 }
 

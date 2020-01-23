@@ -1,5 +1,6 @@
 use super::*;
 pub use coretypes::conversation::settings::*;
+use network_types as nt;
 
 pub(crate) mod db {
     use super::*;
@@ -8,9 +9,9 @@ pub(crate) mod db {
         conn: &rusqlite::Connection,
         period: ExpirationPeriod,
         cid: &ConversationId,
-    ) -> Result<cmessages::GroupSettingsUpdate, HErr> {
+    ) -> Result<nt::GroupSettingsUpdate, HErr> {
         use crate::conversation::db::*;
-        use cmessages::GroupSettingsUpdate::*;
+        use nt::GroupSettingsUpdate::*;
 
         set_expiration_period(&conn, cid, period)?;
         Ok(Expiration(period))
@@ -20,9 +21,9 @@ pub(crate) mod db {
         conn: &rusqlite::Connection,
         title: Option<String>,
         cid: &ConversationId,
-    ) -> Result<cmessages::GroupSettingsUpdate, HErr> {
+    ) -> Result<nt::GroupSettingsUpdate, HErr> {
         use crate::conversation::db::*;
-        use cmessages::GroupSettingsUpdate::*;
+        use nt::GroupSettingsUpdate::*;
 
         set_title(&conn, cid, title.as_ref().map(String::as_str))?;
         Ok(Title(title))
@@ -32,9 +33,9 @@ pub(crate) mod db {
         conn: &rusqlite::Connection,
         group_picture: Option<image_utils::ProfilePicture>,
         cid: &ConversationId,
-    ) -> Result<(cmessages::GroupSettingsUpdate, Option<String>), HErr> {
+    ) -> Result<(nt::GroupSettingsUpdate, Option<String>), HErr> {
         use crate::conversation::db::*;
-        use cmessages::GroupSettingsUpdate::*;
+        use nt::GroupSettingsUpdate::*;
 
         let path = set_picture(&conn, cid, group_picture)?;
         let buf = path.as_ref().map(std::fs::read).transpose()?;
@@ -43,11 +44,11 @@ pub(crate) mod db {
 
     pub(crate) fn apply_inbound(
         conn: &rusqlite::Connection,
-        update: cmessages::GroupSettingsUpdate,
+        update: nt::GroupSettingsUpdate,
         cid: &ConversationId,
     ) -> Result<SettingsUpdate, HErr> {
         use crate::conversation::db::*;
-        use cmessages::GroupSettingsUpdate::*;
+        use nt::GroupSettingsUpdate::*;
 
         match update {
             Expiration(period) => {

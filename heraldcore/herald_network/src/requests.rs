@@ -14,7 +14,7 @@ impl Requester {
         let boxed = Box::new(f);
 
         // TODO: should this trigger a reconnect?
-        // this should probably also go in pending sometimes
+        // push requests should probably also go in pending
         self.tx
             .send((req, boxed))
             .map_err(|_| anyhow!("Failed to send request"))?;

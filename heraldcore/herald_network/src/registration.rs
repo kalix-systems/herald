@@ -9,7 +9,7 @@ pub(super) async fn register_inner<PH, RH, CF>(
     request_rx: RequestRx,
 ) -> Result<(), Error>
 where
-    PH: FnMut(Push) + Send + 'static,
+    PH: PushHandler,
     RH: FnMut(register::ServeEvent) + Send + 'static,
     CF: FnOnce(Error) + Send + 'static,
 {

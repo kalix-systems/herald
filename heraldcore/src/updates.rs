@@ -1,6 +1,6 @@
 use crate::conversation::settings;
 use crate::errors::HErr;
-use crate::message;
+use crate::{members, message};
 use coretypes::conversation::ConversationMeta;
 use crossbeam_channel::{unbounded, Receiver, Sender};
 use herald_common::UserId;
@@ -12,10 +12,13 @@ use once_cell::sync::OnceCell;
 pub enum Notification {
     /// Network connection has failed
     ConnectionDown(HErr),
+
     /// A new message has been received.
     NewMsg(Box<message::Message>),
+
     /// A message has been received.
     MsgReceipt(message::MessageReceipt),
+
     /// A message reaction has been received
     Reaction {
         /// Conversation id
@@ -29,26 +32,39 @@ pub enum Notification {
         /// Is this reaction update an addition or a removal?
         remove: bool,
     },
+
     /// A typing indicator has been received
     TypingIndicator(ConversationId, UserId),
+
     /// A new user has been added
     NewUser(Box<(herald_user::User, ConversationMeta)>),
+
     /// A new conversation has been added
     NewConversation(ConversationMeta),
+
     /// Response to user request.
     AddUserResponse(ConversationId, UserId, bool),
+
     /// Response to request to join conversation.
     AddConversationResponse(ConversationId, UserId, bool),
+
     /// The conversation settings have been updated
     Settings(ConversationId, settings::SettingsUpdate),
+
     /// Message GC thread updates
-    GC(crate::message::gc::ConvMessages),
+    GC(message::gc::ConvMessages),
+
     /// Incremental updates to oubound message sending
-    OutboundMsg(crate::message::StoreAndSend),
+    OutboundMsg(message::StoreAndSend),
+
     /// Incremental updates to outbound auxilliary message sending
-    OutboundAux(crate::message::OutboundAux),
+    OutboundAux(message::OutboundAux),
+
     /// User profile information changed
     UserChanged(UserId, herald_user::UserChange),
+
+    /// Conversation membership has changed
+    Membership(members::Membership),
 }
 
 /// Registers handlers for notifications

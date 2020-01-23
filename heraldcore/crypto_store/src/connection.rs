@@ -21,7 +21,7 @@ impl<'conn> std::ops::Deref for Conn<'conn> {
 }
 
 impl<'conn> Conn<'conn> {
-    fn commit(self) -> Result<(), rusqlite::Error> {
+    pub fn commit(self) -> Result<(), rusqlite::Error> {
         self.0.commit()
     }
 }

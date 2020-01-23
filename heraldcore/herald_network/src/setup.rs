@@ -12,7 +12,7 @@ pub(super) async fn login_inner<PH, CF>(
     request_rx: RequestRx,
 ) -> Result<(), Error>
 where
-    PH: FnMut(Push) + Send + 'static,
+    PH: PushHandler,
     CF: FnOnce(Error) + Send + 'static,
 {
     let (client, rx, err_rx) = Client::login(uid, keys, &server_dns, server_port).await?;
@@ -30,7 +30,7 @@ pub(crate) async fn handle_events<PH, CF>(
     err_rx: oneshot::Receiver<Error>,
     mut req_rx: RequestRx,
 ) where
-    PH: FnMut(Push) + Send + 'static,
+    PH: PushHandler,
     CF: FnOnce(Error) + Send + 'static,
 {
     tokio::spawn(handle_connection_failure(connection_failed, err_rx));
@@ -51,7 +51,7 @@ pub(crate) async fn handle_events<PH, CF>(
     });
 
     while let Some(push) = rx.recv().await {
-        push_handler(push);
+        push_handler.handle(push);
     }
 
     drop(crate::quit());

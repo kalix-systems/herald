@@ -1,9 +1,6 @@
 use super::*;
 use coremacros::w;
 
-/// How old does a typing indicator need to be before being ignored?
-const TYPING_FUZZ: i64 = 10_000;
-
 pub(super) fn handle_content(
     cid: ConversationId,
     uid: UserId,
@@ -29,6 +26,7 @@ pub(super) fn handle_content(
             } = receipt;
 
             w!(crate::message::add_receipt(msg_id, uid, status));
+
             ev.notifications
                 .push(Notification::MsgReceipt(message::MessageReceipt {
                     msg_id,

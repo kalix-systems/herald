@@ -57,15 +57,6 @@ path = "./crypto_store"
 [dependencies.herald_network]
 path = "./herald_network"
 
-[dependencies.websocket]
-version          = "0.23"
-default_features = false
-features         = ["sync"]
-
-[dependencies.ureq]
-version          = "0.11"
-default_features = false
-
 [dependencies.rusqlite]
 version          = "0.21"
 default_features = false

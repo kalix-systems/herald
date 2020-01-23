@@ -1,4 +1,5 @@
 use super::*;
+use handlers::Pushy;
 
 /// Runs login flow
 pub fn login() -> Result<(), HErr> {
@@ -6,7 +7,7 @@ pub fn login() -> Result<(), HErr> {
     let uid = crate::config::id()?;
     let (dns, port) = crate::config::home_server()?;
 
-    let handle = hn::login(uid, kp, dns, port, handle_push, |e| {
+    let handle = hn::login(uid, kp, dns, port, Pushy::default(), |e| {
         push(Notification::ConnectionDown(e))
     })?;
 

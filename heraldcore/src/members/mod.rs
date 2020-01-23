@@ -1,17 +1,59 @@
 use crate::{db::Database, errors::HErr, types::*};
-use coremacros::w;
+use coremacros::{from_fn, w};
 use herald_common::UserId;
 use rusqlite::params;
+
+/// A change in conversation membership
+#[derive(Debug)]
+pub struct Membership {
+    /// Conversation that changed
+    cid: ConversationId,
+    /// The change
+    change: MembershipUpdate,
+}
+
+/// A change in conversation membership
+#[derive(Debug)]
+pub enum MembershipUpdate {
+    /// Members have been added
+    Added {
+        members: Vec<UserId>,
+        added_by: UserId,
+    },
+    /// A member has left
+    Left(UserId),
+}
+
+from_fn!(
+    crate::Notification,
+    Membership,
+    crate::Notification::Membership
+);
 
 pub(crate) mod db;
 
 /// Add a user with `member_id` to the conversation with `conversation_id`.
 pub fn add_member(
     conversation_id: &ConversationId,
-    member_id: UserId,
+    member_id: &UserId,
 ) -> Result<(), HErr> {
     let db = Database::get()?;
     db::add_member(&db, conversation_id, member_id)
+}
+
+pub(crate) fn add_members(
+    cid: &ConversationId,
+    members: &[UserId],
+) -> Result<(), HErr> {
+    let mut db = Database::get()?;
+
+    let tx = db.transaction()?;
+    for member in members {
+        w!(db::add_member(&tx, &cid, member));
+    }
+    tx.commit()?;
+
+    Ok(())
 }
 
 /// Remove a user with `member_id` to the conversation with `conversation_id`.
