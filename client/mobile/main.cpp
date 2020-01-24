@@ -50,9 +50,9 @@ int main(int argc, char* argv[])
       "LibHerald", 1, 0, "UserMap",
       [](QQmlEngine* engine, QJSEngine* scriptEngine) {
         Q_UNUSED(scriptEngine)
+        Q_UNUSED(engine)
 
         UserMap* userMap = new UserMap();
-        engine->setObjectOwnership(userMap, QQmlEngine::CppOwnership);
 
         return userMap;
       });
@@ -87,9 +87,9 @@ int main(int argc, char* argv[])
       "LibHerald", 1, 0, "ContentMap",
       [](QQmlEngine* engine, QJSEngine* scriptEngine) {
         Q_UNUSED(scriptEngine)
+        Q_UNUSED(engine)
 
         ConversationMap* contentMap = new ConversationMap();
-        engine->setObjectOwnership(contentMap, QQmlEngine::CppOwnership);
 
         return contentMap;
       });

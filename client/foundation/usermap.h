@@ -2,6 +2,7 @@
 #define USERMAP_H
 #include "Bindings.h"
 #include <QHash>
+#include <QQmlApplicationEngine>
 
 class UserMap : public QObject {
   Q_OBJECT
@@ -13,15 +14,17 @@ public:
   {
     auto iter = userHash.find(uid);
 
-    if (iter == userHash.end()) {
+    if ((iter == userHash.end()) || (iter.value() == nullptr)) {
       // user does not exist
       auto user = new User();
+      // save us from the GC
+      QQmlEngine::setObjectOwnership(user, QQmlEngine::CppOwnership);
+
       user->setUserId(uid);
       userHash.insert(uid, user);
       return QVariant::fromValue(user);
     }
     else {
-      // user exists
       return QVariant::fromValue(iter.value());
     }
   }

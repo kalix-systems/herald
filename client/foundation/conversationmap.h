@@ -2,7 +2,7 @@
 #define CONVERSATIONMAP_H
 #include "Bindings.h"
 #include <QHash>
-
+#include <QQmlApplicationEngine>
 
 /// If you are reading this file please read this preface before hand.
 /// ConversationContent objects are just thin routing wrappers on top
@@ -21,6 +21,9 @@ public:
           if(iter == conversationHash.end()) {
             // conversation does not exist
             auto conv = new ConversationContent();
+            // save us from the GC
+            QQmlEngine::setObjectOwnership(conv, QQmlEngine::CppOwnership);
+
             conv->setConversationId(cid);
             conversationHash.insert(cid, conv);
             return QVariant::fromValue(conv);
