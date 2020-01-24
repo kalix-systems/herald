@@ -24,7 +24,9 @@ Rectangle {
 
     readonly property string body: messageModelData.body
     readonly property string authorId: messageModelData.author
-    readonly property string authorName: outbound ? Herald.config.name : messageModelData.authorName
+    readonly property string authorName: outbound ? UserMap.get(
+                                                        Herald.config.configId).name : UserMap.get(
+                                                        messageModelData.author).name
 
     readonly property string medAttachments: messageModelData.mediaAttachments
     readonly property string fullMedAttachments: messageModelData.fullMediaAttachments
@@ -49,7 +51,8 @@ Rectangle {
     readonly property string receiptImage: outbound ? Utils.receiptCodeSwitch(
                                                           messageModelData.receiptStatus) : ""
     //not readonly in order to be assigned tied to convo color for pairwise
-    property color authorColor: CmnCfg.avatarColors[messageModelData.authorColor]
+    property color authorColor: CmnCfg.avatarColors[UserMap.get(
+                                                        messageModelData.author).userColor]
 
     readonly property string pfpUrl: outbound ? Herald.config.profilePicture : messageModelData.authorProfilePicture
     // true if this message's options menu is open (mobile only)

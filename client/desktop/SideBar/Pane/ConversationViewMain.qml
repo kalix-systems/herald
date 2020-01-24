@@ -124,7 +124,8 @@ ListView {
                                               conversationData.conversationId)
             }
             boxTitle: !nts ? title : qsTr("Note to Self")
-            boxColor: !nts ? conversationData.conversationColor : Herald.config.configColor
+            boxColor: !nts ? conversationData.conversationColor : UserMap.get(
+                                 Herald.config.configId).userColor
             picture: !nts ? Utils.safeStringOrDefault(
                                 conversationData.picture,
                                 "") : Utils.safeStringOrDefault(

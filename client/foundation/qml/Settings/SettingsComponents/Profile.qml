@@ -43,8 +43,9 @@ ColumnLayout {
             Layout.bottomMargin: CmnCfg.smallMargin
 
             Entity.Avatar {
-                pfpPath: Herald.config.profilePicture
-                color: CmnCfg.palette.avatarColors[Herald.config.configColor]
+                pfpPath: UserMap.get(Herald.config.configId).profilePicture
+                color: CmnCfg.palette.avatarColors[UserMap.get(
+                                                       Herald.config.configId).userColor]
                 size: parent.height
                 textColor: CmnCfg.palette.iconFill
                 initials: Utils.initialize(Herald.config.name)
@@ -108,7 +109,7 @@ ColumnLayout {
 
         BorderedTextField {
             id: displayName
-            text: Herald.config.name
+            text: UserMap.get(Herald.config.configId).name
             selectByMouse: true
             selectionColor: CmnCfg.palette.highlightColor
             readOnly: true
