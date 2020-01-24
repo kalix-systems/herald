@@ -265,8 +265,13 @@ fn init_recv() {
         .expect("failed to create bob sigchain for alice");
 
     // alice sends noop to initialize the session
-    let msgs = prepare_send_to_user(&mut alice_store, &alice, bob_gid.uid, Payload::Noop)
-        .expect("failed to prepare messages");
+    let msgs = prepare_send_to_user(
+        &mut alice_store,
+        &alice,
+        bob_gid.uid,
+        Bytes::from_static(b""),
+    )
+    .expect("failed to prepare messages");
 
     assert_eq!(msgs.len(), 1);
     let (did, msg) = msgs.into_iter().next().unwrap();
@@ -283,7 +288,7 @@ fn init_recv() {
 
     assert_eq!(ack, Some(Ack::Success(pid)));
     assert_eq!(forward, None);
-    assert_eq!(output, None);
+    assert_eq!(output.as_ref().map(|b| b.as_ref()), Some(b"" as &[u8]));
     assert_eq!(response, None);
 
     // now bob requests keys from the server for alice, which we simulate by magically giving them to him
@@ -306,7 +311,7 @@ fn init_recv() {
     assert_eq!(output, None);
     assert_eq!(response, None);
 
-    let msgs = prepare_send_to_user(&mut bob_store, &bob, alice_gid.uid, Payload::Noop)
+    let msgs = prepare_send_to_user(&mut bob_store, &bob, alice_gid.uid, Bytes::from_static(b""))
         .expect("failed to prepare messages from bob");
 
     assert_eq!(msgs.len(), 1);
@@ -324,7 +329,7 @@ fn init_recv() {
 
     assert_eq!(ack, Some(Ack::Success(pid)));
     assert_eq!(forward, None);
-    assert_eq!(output, None);
+    assert_eq!(output.as_ref().map(|b| b.as_ref()), Some(b"" as &[u8]));
     assert_eq!(response, None);
 
     let alice_ack = Msg::Ack(ack.unwrap());
