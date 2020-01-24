@@ -201,16 +201,6 @@ pub trait UsersSearchTrait {
         index: usize,
     ) -> bool;
 
-    fn name(
-        &self,
-        index: usize,
-    ) -> Option<String>;
-
-    fn profile_picture(
-        &self,
-        index: usize,
-    ) -> Option<String>;
-
     fn selected(
         &self,
         index: usize,
@@ -221,11 +211,6 @@ pub trait UsersSearchTrait {
         index: usize,
         _: bool,
     ) -> bool;
-
-    fn user_color(
-        &self,
-        index: usize,
-    ) -> Option<u32>;
 
     fn user_id(
         &self,
@@ -390,36 +375,6 @@ pub unsafe extern "C" fn users_search_data_matched(
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn users_search_data_name(
-    ptr: *const UsersSearch,
-    row: c_int,
-    d: *mut QString,
-    set: fn(*mut QString, *const c_char, len: c_int),
-) {
-    let obj = &*ptr;
-    let data = obj.name(to_usize(row).unwrap_or(0));
-    if let Some(data) = data {
-        let str_: *const c_char = data.as_ptr() as (*const c_char);
-        set(d, str_, to_c_int(data.len()));
-    }
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn users_search_data_profile_picture(
-    ptr: *const UsersSearch,
-    row: c_int,
-    d: *mut QString,
-    set: fn(*mut QString, *const c_char, len: c_int),
-) {
-    let obj = &*ptr;
-    let data = obj.profile_picture(to_usize(row).unwrap_or(0));
-    if let Some(data) = data {
-        let str_: *const c_char = data.as_ptr() as (*const c_char);
-        set(d, str_, to_c_int(data.len()));
-    }
-}
-
-#[no_mangle]
 pub unsafe extern "C" fn users_search_data_selected(
     ptr: *const UsersSearch,
     row: c_int,
@@ -435,15 +390,6 @@ pub unsafe extern "C" fn users_search_set_data_selected(
     value: bool,
 ) -> bool {
     (&mut *ptr).set_selected(to_usize(row).unwrap_or(0), value)
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn users_search_data_user_color(
-    ptr: *const UsersSearch,
-    row: c_int,
-) -> COption<u32> {
-    let obj = &*ptr;
-    obj.user_color(to_usize(row).unwrap_or(0)).into()
 }
 
 #[no_mangle]

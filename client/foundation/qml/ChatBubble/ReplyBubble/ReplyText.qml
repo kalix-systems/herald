@@ -11,14 +11,14 @@ import "dyn"
 
 Rectangle {
     id: replyWrapper
-    property color opColor: CmnCfg.avatarColors[messageModelData.opColor]
+    property color opColor: CmnCfg.avatarColors[UserMap.get(
+                                                    messageModelData.opAuthor).userColor]
 
     property string replyBody: messageModelData.opBody
     color: CmnCfg.palette.medGrey
     width: bubbleRoot.maxWidth
     height: replyWrapperCol.height
     property alias mouseEnabled: mouseArea.enabled
-
 
     ReplyMouseArea {
         id: mouseArea

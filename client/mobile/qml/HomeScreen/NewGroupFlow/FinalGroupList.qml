@@ -19,13 +19,14 @@ ListView {
         height: visible ? CmnCfg.convoHeight : 0
         width: parent.width
 
+        property var memberData: UserMap.get(model.memberId)
         PlatonicRectangle {
-            boxTitle: memberName
-            boxColor: memberColor
-            picture: memberProfilePicture
+            boxTitle: memberId.name
+            boxColor: memberId.userColor
+            picture: memberId.profilePicture
 
             labelComponent: Entity.ContactLabel {
-                displayName: Herald.users.nameById(memberId)
+                displayName: memberId.name
                 username: memberId
             }
         }

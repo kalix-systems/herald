@@ -41,7 +41,8 @@ Rectangle {
     // authorId: the userId of the author
     readonly property string authorId: isNull ? "" : messageModelData.author
     // authorName: the display name of the author
-    readonly property string authorName: isNull ? "" : messageModelData.authorName
+    readonly property string authorName: isNull ? "" : UserMap.get(
+                                                      messageModelData.author).name
     // medAttachments: a JSON serialized string listing all media attachments. includes
     // information about their dimensions. this is only the first six.
     readonly property string medAttachments: isNull ? "" : messageModelData.mediaAttachments
@@ -83,10 +84,11 @@ Rectangle {
     readonly property string receiptImage: isNull ? "" : outbound ? Utils.receiptCodeSwitch(
                                                                         messageModelData.receiptStatus) : ""
     // authorColor: the QColor corresponding to the user set hue used to color the flair of the message.
-    readonly property color authorColor: isNull ? "white" : CmnCfg.avatarColors[messageModelData.authorColor]
+    readonly property color authorColor: isNull ? "white" : CmnCfg.avatarColors[UserMap.get(messageModelData.author).userColor]
 
     // pfpUrl: the file url corresponding to the authors profile picture.
-    readonly property string pfpUrl: isNull ? "" : messageModelData.authorProfilePicture
+    readonly property string pfpUrl: isNull ? "" : UserMap.get(
+                                                  messageModelData.author).profilePicture
 
     // hoverHighlight: whether or not this item is currently hovered, showing a color overlay, i.e. `highlightItem`
     property bool hoverHighlight: false

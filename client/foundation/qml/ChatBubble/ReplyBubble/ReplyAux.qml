@@ -13,7 +13,7 @@ Rectangle {
     id: replyWrapper
 
     property var auxData: JSON.parse(messageModelData.opAuxData)
-    property string authorName: messageModelData.opName
+    property string authorName: UserMap.get(messageModelData.opAuthor).name
     property string friendlyTimestamp: Utils.friendlyTimestamp(
                                            messageModelData.opInsertionTime)
     color: CmnCfg.palette.medGrey

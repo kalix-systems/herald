@@ -1,7 +1,7 @@
 use crate::{
     err, ffi,
     interface::{UsersSearchEmitter as Emitter, UsersSearchList as List, UsersSearchTrait},
-    users::shared::{color, name, profile_picture, user_ids},
+    users::shared::user_ids,
 };
 use herald_common::UserId;
 use search_pattern::SearchPattern;
@@ -46,34 +46,6 @@ impl UsersSearchTrait for UsersSearch {
         row_index: usize,
     ) -> Option<ffi::UserIdRef> {
         Some(self.list.get(row_index)?.id.as_str())
-    }
-
-    /// Returns users name
-    fn name(
-        &self,
-        row_index: usize,
-    ) -> Option<String> {
-        let uid = &self.list.get(row_index).as_ref()?.id;
-
-        Some(name(uid).unwrap_or_else(|| uid.to_string()))
-    }
-
-    /// Returns profile picture
-    fn profile_picture(
-        &self,
-        row_index: usize,
-    ) -> Option<String> {
-        let uid = &self.list.get(row_index)?.id;
-        profile_picture(&uid)
-    }
-
-    /// Returns user's color
-    fn user_color(
-        &self,
-        row_index: usize,
-    ) -> Option<u32> {
-        let uid = self.list.get(row_index)?.id;
-        Some(color(&uid).unwrap_or(0))
     }
 
     fn selected(

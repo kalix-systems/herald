@@ -218,25 +218,10 @@ pub trait ConversationBuilderTrait {
     ) {
     }
 
-    fn member_color(
-        &self,
-        index: usize,
-    ) -> u32;
-
     fn member_id(
         &self,
         index: usize,
     ) -> &str;
-
-    fn member_name(
-        &self,
-        index: usize,
-    ) -> String;
-
-    fn member_profile_picture(
-        &self,
-        index: usize,
-    ) -> String;
 }
 
 #[no_mangle]
@@ -440,15 +425,6 @@ pub unsafe extern "C" fn conversation_builder_sort(
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn conversation_builder_data_member_color(
-    ptr: *const ConversationBuilder,
-    row: c_int,
-) -> u32 {
-    let obj = &*ptr;
-    obj.member_color(to_usize(row).unwrap_or(0))
-}
-
-#[no_mangle]
 pub unsafe extern "C" fn conversation_builder_data_member_id(
     ptr: *const ConversationBuilder,
     row: c_int,
@@ -457,32 +433,6 @@ pub unsafe extern "C" fn conversation_builder_data_member_id(
 ) {
     let obj = &*ptr;
     let data = obj.member_id(to_usize(row).unwrap_or(0));
-    let str_: *const c_char = data.as_ptr() as *const c_char;
-    set(d, str_, to_c_int(data.len()));
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn conversation_builder_data_member_name(
-    ptr: *const ConversationBuilder,
-    row: c_int,
-    d: *mut QString,
-    set: fn(*mut QString, *const c_char, len: c_int),
-) {
-    let obj = &*ptr;
-    let data = obj.member_name(to_usize(row).unwrap_or(0));
-    let str_: *const c_char = data.as_ptr() as *const c_char;
-    set(d, str_, to_c_int(data.len()));
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn conversation_builder_data_member_profile_picture(
-    ptr: *const ConversationBuilder,
-    row: c_int,
-    d: *mut QString,
-    set: fn(*mut QString, *const c_char, len: c_int),
-) {
-    let obj = &*ptr;
-    let data = obj.member_profile_picture(to_usize(row).unwrap_or(0));
     let str_: *const c_char = data.as_ptr() as *const c_char;
     set(d, str_, to_c_int(data.len()));
 }

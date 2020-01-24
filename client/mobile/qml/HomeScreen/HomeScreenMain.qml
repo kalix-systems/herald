@@ -61,7 +61,8 @@ Page {
                                 model.conversationId)
                 }
                 itemTitle: !isNTS ? title : qsTr("Note to Self")
-                colorCode: !isNTS ? model.conversationColor : Herald.config.configColor
+                colorCode: !isNTS ? model.conversationColor : UserMap.get(
+                                        Herald.config.configId).userColor
                 imageSource: !isNTS ? Utils.safeStringOrDefault(
                                           model.picture,
                                           "") : Utils.safeStringOrDefault(
@@ -71,8 +72,8 @@ Page {
                 isEmpty: model.isEmpty
                 convoContent: ContentMap.get(model.conversationId)
                 isArchived: model.status === 1
-                visible: (cvMainView.state === "archiveState" && isArchived) ||
-                         (cvMainView.state !== "archiveState" && !isArchived)
+                visible: (cvMainView.state === "archiveState" && isArchived)
+                         || (cvMainView.state !== "archiveState" && !isArchived)
             }
             Connections {
                 target: appRoot.router

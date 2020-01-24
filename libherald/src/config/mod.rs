@@ -23,20 +23,6 @@ impl ConfigTrait for Config {
         none!(self.inner.as_ref(), &ffi::NULL_USER_ID).id.as_str()
     }
 
-    /// Name of the current user
-    fn name(&self) -> &str {
-        none!(self.inner.as_ref(), "").name.as_str()
-    }
-
-    /// Returns the path to the current users profile picture, if it is set.
-    /// Otherwise returns None.
-    fn profile_picture(&self) -> Option<&str> {
-        none!(self.inner.as_ref(), None)
-            .profile_picture
-            .as_ref()
-            .map(|s| s.as_str())
-    }
-
     /// Returns id of the "note to self" conversation
     fn nts_conversation_id(&self) -> ffi::ConversationIdRef {
         none!(self.inner.as_ref(), &ffi::NULL_CONV_ID)
@@ -44,26 +30,9 @@ impl ConfigTrait for Config {
             .as_slice()
     }
 
-    /// Returns the color of the current user.
-    fn config_color(&self) -> u32 {
-        none!(self.inner.as_ref(), 0).color
-    }
-
     /// Returns of the preferred expiration period of the current user.
     fn preferred_expiration(&self) -> u8 {
         none!(self.inner.as_ref(), 0).preferred_expiration as u8
-    }
-
-    /// Sets the color of the current user.
-    fn set_config_color(
-        &mut self,
-        color: u32,
-    ) {
-        let inner = none!(self.inner.as_mut());
-        spawn!(core::set_color(color));
-        inner.color = color;
-
-        self.emit.config_color_changed();
     }
 
     /// Sets the name of the current user.
@@ -84,9 +53,12 @@ impl ConfigTrait for Config {
             spawn!(core::set_name(name));
         }
 
-        inner.name = name;
+        crate::user_push(
+            inner.id,
+            herald_user::UserChange::DisplayName(Some(name.clone())),
+        );
 
-        self.emit.name_changed();
+        inner.name = name;
     }
 
     /// Set  the preferred expiration period of the current user.

@@ -84,7 +84,7 @@ Page {
 
         delegate: Rectangle {
             id: userRect
-            property var userData: model
+            property var userData: UserMap.get(model.userId)
             color: CmnCfg.palette.white
             width: parent.width
             height: visible ? row.height + 1 : 0
@@ -133,9 +133,10 @@ Page {
                     anchors.leftMargin: CmnCfg.smallMargin
                     anchors.verticalCenter: parent.verticalCenter
                     height: CmnCfg.units.dp(CmnCfg.avatarSize - 10)
-                    pfpPath: Utils.safeStringOrDefault(model.profilePicture, "")
-                    color: CmnCfg.avatarColors[model.userColor]
-                    initials: Utils.initialize(name)
+                    pfpPath: Utils.safeStringOrDefault(userData.profilePicture,
+                                                       "")
+                    color: CmnCfg.avatarColors[userData.userColor]
+                    initials: Utils.initialize(userData.name)
                     MouseArea {
                         cursorShape: Qt.PointingHandCursor
                         anchors.fill: parent
@@ -166,7 +167,7 @@ Page {
                                 font.weight: Font.DemiBold
                                 font.pixelSize: CmnCfg.entityLabelSize
                                 font.family: CmnCfg.chatFont.name
-                                text: name
+                                text: userData.name
                                 color: CmnCfg.palette.offBlack
                                 Layout.maximumWidth: nameHeader.width
                                 elide: Label.ElideRight

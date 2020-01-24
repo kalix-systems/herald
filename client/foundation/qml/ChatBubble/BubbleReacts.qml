@@ -66,7 +66,7 @@ Flow {
                             model: emojiText.emojiModel[index]["reactionaries"]
                             delegate: Label {
                                 property var reactData: repeater.model
-                                text: Herald.users.nameById(reactData[index])
+                                text: UserMap.get(reactData[index]).name
                                 font.pixelSize: CmnCfg.minorTextSize
                                 font.weight: Font.Medium
                                 color: CmnCfg.palette.white

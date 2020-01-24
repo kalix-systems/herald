@@ -89,6 +89,7 @@ pub(super) fn updates() -> TryIter<'static, Update> {
 }
 
 impl super::Herald {
+    // TODO consider spawning threads
     pub(super) fn process_updates(&mut self) {
         for update in updates() {
             use Update::*;
