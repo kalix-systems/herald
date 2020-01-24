@@ -6,7 +6,6 @@ use crypto_store::prelude::Msg;
 pub struct Event {
     pub(super) notifications: Vec<Notification>,
     pub(super) replies: Vec<(sig::PublicKey, Msg)>,
-    pub(super) errors: Vec<HErr>,
 }
 
 impl Event {
@@ -48,7 +47,6 @@ impl Event {
     pub fn execute(self) -> Result<(), HErr> {
         let Event {
             notifications,
-            errors,
             replies,
         } = self;
 
@@ -56,9 +54,9 @@ impl Event {
             crate::push(note);
         }
 
-        for herr in errors {
-            crate::err(herr);
-        }
+        //for herr in errors {
+        //    crate::err(herr);
+        //}
 
         for (cid, content) in replies {
             //send_cmessage(cid, &content)?;
@@ -73,7 +71,6 @@ impl Default for Event {
         Event {
             notifications: Default::default(),
             replies: Vec::new(),
-            errors: Default::default(),
         }
     }
 }

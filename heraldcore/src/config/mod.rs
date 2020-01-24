@@ -117,6 +117,11 @@ pub fn keypair() -> Result<sig::KeyPair, HErr> {
     db::keypair(&db)
 }
 
+pub(crate) fn id_kp() -> Result<(UserId, sig::KeyPair), HErr> {
+    let conn = Database::get()?;
+    db::id_kp(&conn)
+}
+
 /// Gets the current user's GlobalId
 pub fn gid() -> Result<GlobalId, HErr> {
     let db = Database::get()?;
@@ -140,9 +145,10 @@ pub fn home_server() -> Result<(String, u16), HErr> {
 pub fn set_name(name: String) -> Result<(), HErr> {
     let db = Database::get()?;
     db::set_name(&db, name.as_str())?;
-    crate::network::send_profile_update(network_types::cmessages::ProfileChanged::DisplayName(
-        name.into(),
-    ))?;
+    // TODO
+    //crate::network::send_profile_update(network_types::cmessages::ProfileChanged::DisplayName(
+    //    name.into(),
+    //))?;
     Ok(())
 }
 
@@ -155,7 +161,8 @@ pub fn set_profile_picture(
 
     let buf = path.as_ref().map(std::fs::read).transpose()?;
 
-    crate::network::send_profile_update(network_types::cmessages::ProfileChanged::Picture(buf))?;
+    // TODO
+    // crate::network::send_profile_update(network_types::cmessages::ProfileChanged::Picture(buf))?;
 
     Ok(path)
 }
@@ -170,7 +177,8 @@ pub fn set_preferred_expiration(period: ExpirationPeriod) -> Result<(), HErr> {
 pub fn set_color(color: u32) -> Result<(), HErr> {
     let db = Database::get()?;
     db::set_color(&db, color)?;
-    crate::network::send_profile_update(network_types::cmessages::ProfileChanged::Color(color))?;
+    // TODO
+    // crate::network::send_profile_update(network_types::cmessages::ProfileChanged::Color(color))?;
     Ok(())
 }
 

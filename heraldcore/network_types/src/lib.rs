@@ -34,6 +34,9 @@ pub enum Substance {
 
     /// Initializes a conversation
     Init(ConversationInit),
+
+    /// A change in conversation membership
+    Membership(Membership),
 }
 
 #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
@@ -109,19 +112,25 @@ pub struct Reaction {
     pub remove: bool,
 }
 
-#[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
-/// A message received by a user when they are addeded to a conversation.
-pub struct AddedToConvo {
-    /// The current members in that conversation.
-    pub members: Vec<UserId>,
-    /// The [`ConversationId`]
-    pub cid: ConversationId,
-    /// The conversation's title.
-    pub title: Option<String>,
-    /// The conversation's picture (as bytes)
-    pub picture: Option<Vec<u8>>,
-    /// The conversation's initial expiration period
-    pub expiration_period: ExpirationPeriod,
+/// A change in conversation membership
+#[derive(Ser, De, Clone, PartialEq, Eq, Debug)]
+pub struct Membership {
+    /// Conversation that changed
+    cid: ConversationId,
+    /// The change
+    change: MembershipUpdate,
+}
+
+/// A change in conversation membership
+#[derive(Ser, De, Clone, PartialEq, Eq, Debug)]
+pub enum MembershipUpdate {
+    /// Members have been added
+    Added {
+        members: Vec<UserId>,
+        added_by: UserId,
+    },
+    /// A member has left
+    Left(UserId),
 }
 
 #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]

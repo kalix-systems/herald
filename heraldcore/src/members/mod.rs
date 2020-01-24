@@ -1,28 +1,8 @@
 use crate::{db::Database, errors::HErr, types::*};
 use coremacros::{from_fn, w};
 use herald_common::UserId;
+use network_types::Membership;
 use rusqlite::params;
-
-/// A change in conversation membership
-#[derive(Debug)]
-pub struct Membership {
-    /// Conversation that changed
-    cid: ConversationId,
-    /// The change
-    change: MembershipUpdate,
-}
-
-/// A change in conversation membership
-#[derive(Debug)]
-pub enum MembershipUpdate {
-    /// Members have been added
-    Added {
-        members: Vec<UserId>,
-        added_by: UserId,
-    },
-    /// A member has left
-    Left(UserId),
-}
 
 from_fn!(
     crate::Notification,

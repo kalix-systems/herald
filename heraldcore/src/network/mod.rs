@@ -7,7 +7,6 @@ use std::{
     net::SocketAddr,
     sync::atomic::{AtomicBool, Ordering},
 };
-use websocket::{message::OwnedMessage as WMessage, sync::client as wsclient};
 
 mod requester;
 pub use requester::*;

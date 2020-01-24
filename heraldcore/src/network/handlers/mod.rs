@@ -33,8 +33,7 @@ impl PushHandler for Pushy {
         let mut ev = Event::default();
 
         let payload: Msg = e!(kson::from_bytes(msg));
-        let kp = e!(crate::config::keypair());
-        let id = e!(crate::config::id());
+        let (id, kp) = e!(crate::config::id_kp());
 
         let mut raw = raw_conn().lock();
         let mut conn: Conn = e!(raw.transaction()).into();
@@ -84,6 +83,8 @@ fn handle_output(
     match output {
         P::Msg(bytes) => {
             let msg: nt::NetMsg = w!(kson::from_bytes(bytes));
+
+            w!(substance::net_msg(&mut ev, from, msg, ts));
         }
 
         P::AddToConvo(cid, members) => {

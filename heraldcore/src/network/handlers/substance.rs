@@ -11,11 +11,16 @@ pub(super) fn net_msg(
 
     match sub {
         S::Init(init) => w!(self::init(ev, cid, init)),
+
         S::Msg(msg) => w!(self::msg(ev, cid, msg, ts)),
+
         S::ProfileChanged(change) => w!(profile(ev, uid, change)),
+
         S::Reaction(reaction) => w!(self::reaction(ev, cid, uid, reaction)),
+
         S::Typing(time_sent) => self::typing(ev, cid, uid, time_sent, ts),
-        S::Receipt(_) => {}
+
+        S::Receipt(receipt) => w!(self::receipt(ev, cid, uid, receipt)),
     };
 
     Ok(())
@@ -25,6 +30,15 @@ fn init(
     ev: &mut Event,
     cid: ConversationId,
     init: nt::ConversationInit,
+) -> Result<(), HErr> {
+    todo!()
+}
+
+fn msg(
+    ev: &mut Event,
+    cid: ConversationId,
+    msg: nt::Msg,
+    ts: Time,
 ) -> Result<(), HErr> {
     todo!()
 }
@@ -40,24 +54,14 @@ fn receipt(
 ) -> Result<(), HErr> {
     w!(crate::message::add_receipt(msg_id, uid, status));
 
-    ev.notifications
-        .push(Notification::MsgReceipt(message::MessageReceipt {
-            msg_id,
-            cid,
-            recipient: uid,
-            status,
-        }));
+    ev.note(Notification::MsgReceipt(message::MessageReceipt {
+        msg_id,
+        cid,
+        recipient: uid,
+        status,
+    }));
 
     Ok(())
-}
-
-fn msg(
-    ev: &mut Event,
-    cid: ConversationId,
-    msg: nt::Msg,
-    ts: Time,
-) -> Result<(), HErr> {
-    todo!()
 }
 
 fn profile(
@@ -73,20 +77,17 @@ fn profile(
         U::Color(color) => {
             if uid == crate::config::id()? {
                 crate::user::set_color(uid, color)?;
-                ev.notifications
-                    .push(Notification::UserChanged(uid, Color(color)));
+                ev.note(Notification::UserChanged(uid, Color(color)));
             }
         }
 
         U::DisplayName(name) => {
             crate::user::set_name(uid, name.as_ref().map(String::as_str))?;
 
-            ev.notifications
-                .push(Notification::UserChanged(uid, DisplayName(name.clone())));
+            ev.note(Notification::UserChanged(uid, DisplayName(name.clone())));
 
             if let Some(cid) = crate::conversation::get_pairwise_conversations(&[uid])?.pop() {
-                ev.notifications
-                    .push(Notification::Settings(cid, S::Title(name)));
+                ev.note(Notification::Settings(cid, S::Title(name)));
             }
         }
 
@@ -97,14 +98,13 @@ fn profile(
                 uid,
                 buf.as_ref().map(Vec::as_slice),
             )?;
-            ev.notifications
-                .push(Notification::UserChanged(uid, Picture(path.clone())));
+
+            ev.note(Notification::UserChanged(uid, Picture(path.clone())));
 
             if let Some(cid) =
                 crate::conversation::db::get_pairwise_conversations(&conn, &[uid])?.pop()
             {
-                ev.notifications
-                    .push(Notification::Settings(cid, S::Picture(path)));
+                ev.note(Notification::Settings(cid, S::Picture(path)));
             }
         }
     }
@@ -131,7 +131,8 @@ fn reaction(
     } else {
         w!(crate::message::add_reaction(&msg_id, &uid, &react_content));
     }
-    ev.notifications.push(Notification::Reaction {
+
+    ev.note(Notification::Reaction {
         cid,
         msg_id,
         reactionary: uid,

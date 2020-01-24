@@ -32,6 +32,21 @@ pub(crate) fn set_profile_picture(
     Ok(path)
 }
 
+pub(crate) fn id_kp(conn: &rusqlite::Connection) -> Result<(UserId, sig::KeyPair), HErr> {
+    let mut stmt = w!(conn.prepare_cached(include_str!("sql/id_kp.sql")));
+
+    let (id, kp) = w!(stmt.query_row(NO_PARAMS, |row| {
+        Ok((
+            w!(row.get::<_, UserId>("id")),
+            w!(row.get::<_, Vec<u8>>("kp")),
+        ))
+    }));
+
+    let kp = w!(kson::from_slice(&kp));
+
+    Ok((id, kp))
+}
+
 /// Update user's color
 pub(crate) fn set_color(
     conn: &rusqlite::Connection,
