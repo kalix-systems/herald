@@ -35,14 +35,14 @@ Page {
                 anchors.top: parent.top
                 anchors.right: parent.right
                 layoutDirection: Qt.RightToLeft
-                height: 30
+                height: CmnCfg.units.dp(28)
                 spacing: CmnCfg.smallMargin
 
                 AnimIconButton {
                     id: xIcon
                     imageSource: "qrc:/x-icon.svg"
-                    icon.height: 30
-                    icon.width: 30
+                    icon.height: CmnCfg.units.dp(28)
+                    icon.width: CmnCfg.units.dp(28)
                     color: CmnCfg.palette.white
                     z: galleryPage.z + 1
                     onTapped: {
@@ -54,20 +54,21 @@ Page {
                     id: download
                     imageSource: "qrc:/download-icon.svg"
                     color: CmnCfg.palette.white
-                    icon.height: 30
-                    icon.width: 30
+                    icon.height: CmnCfg.units.dp(28)
+                    icon.width: CmnCfg.units.dp(28)
                     z: galleryPage.z + 1
                 }
             }
 
             Label {
                 anchors.top: parent.top
+                anchors.topMargin: CmnCfg.microMargin
                 anchors.left: buttonRowLeft.right
                 anchors.right: buttonRowRight.left
                 anchors.leftMargin: CmnCfg.smallMargin
                 anchors.rightMargin: CmnCfg.smallMargin
                 text: imageAttachments[currentIndex].name
-                font.pixelSize: 20
+                font.pixelSize: CmnCfg.labelFontSize
                 font.family: CmnCfg.chatFont.name
                 color: CmnCfg.palette.white
                 elide: Text.ElideMiddle
@@ -86,8 +87,8 @@ Page {
                     imageSource: "qrc:/zoom-in-icon.svg"
                     onTapped: zoomInFunction()
                     color: CmnCfg.palette.white
-                    icon.height: 30
-                    icon.width: 30
+                    icon.height: CmnCfg.units.dp(28)
+                    icon.width: CmnCfg.units.dp(28)
                     enabled: imageScale < 4.0
                     opacity: enabled ? 1.0 : 0.5
                     z: galleryPage.z + 1
@@ -101,8 +102,8 @@ Page {
                         resizeContent()
                     }
                     color: CmnCfg.palette.white
-                    icon.height: 30
-                    icon.width: 30
+                    icon.height: CmnCfg.units.dp(28)
+                    icon.width: CmnCfg.units.dp(28)
                     enabled: imageScale > 0.5
                     opacity: enabled ? 1.0 : 0.5
                     z: galleryPage.z + 1
@@ -112,8 +113,8 @@ Page {
             AnimIconButton {
                 id: next
                 z: galleryPage.z + 1
-                icon.height: 30
-                icon.width: 30
+                icon.height: CmnCfg.units.dp(28)
+                icon.width: CmnCfg.units.dp(28)
                 anchors.verticalCenter: flickable.verticalCenter
                 anchors.left: flickable.right
                 anchors.leftMargin: CmnCfg.smallMargin
@@ -124,6 +125,8 @@ Page {
                 onTapped: {
                     galleryPage.imageScale = 1.0
                     galleryPage.currentIndex += 1
+                    flickable.contentHeight = flickable.height
+                    flickable.contentWidth = flickable.width
                     clipScroll.positionViewAtIndex(galleryPage.currentIndex,
                                                    ListView.Contain)
                 }
@@ -132,8 +135,8 @@ Page {
             AnimIconButton {
                 id: back
                 z: galleryPage.z + 1
-                icon.height: 30
-                icon.width: 30
+                icon.height: CmnCfg.units.dp(28)
+                icon.width: CmnCfg.units.dp(28)
                 anchors.verticalCenter: flickable.verticalCenter
                 anchors.right: flickable.left
                 anchors.rightMargin: CmnCfg.smallMargin
@@ -144,6 +147,8 @@ Page {
                 onTapped: {
                     galleryPage.imageScale = 1.0
                     galleryPage.currentIndex -= 1
+                    flickable.contentHeight = flickable.height
+                    flickable.contentWidth = flickable.width
                     clipScroll.positionViewAtIndex(galleryPage.currentIndex,
                                                    ListView.Contain)
                 }
@@ -165,8 +170,8 @@ Page {
                 id: flickable
                 width: parent.width - 64
                 height: parent.height - 120
-                anchors.top: parent.top
-                // anchors.topMargin: 40
+                anchors.top: buttonRowLeft.bottom
+                anchors.topMargin: CmnCfg.microMargin
                 anchors.horizontalCenter: parent.horizontalCenter
 
                 clip: true
@@ -177,39 +182,34 @@ Page {
                 contentItem.anchors.centerIn: (contentHeight
                                                < flickable.height) ? flickable : undefined
                 boundsMovement: Flickable.StopAtBounds
-                Component.onCompleted: print(width, height, image.width,
-                                             image.height)
                 Image {
                     id: image
                     source: "file:" + imageAttachments[currentIndex].path
                     fillMode: Image.PreserveAspectFit
                     anchors.fill: parent
-                    property var dims: JSON.parse(
-                                           Herald.utils.imageScaling(
-                                               imageAttachments[index].path,
-                                               parent.width))
-                }
-            }
-            PinchArea {
-                id: pinchArea
-                anchors.fill: parent
-
-                property point pt
-                property real flickableStartX
-                property real flickableStartY
-
-                onPinchUpdated: {
-                    pt = Qt.point(flickable.contentWidth / 2,
-                                  flickable.contentHeight / 2)
-
-                    galleryPage.imageScale += (pinch.scale - pinch.previousScale) * 1.2
-                    flickable.resizeContent(
-                                galleryPage.width * constrainedZoom,
-                                galleryPage.height * constrainedZoom, pt)
                 }
 
-                onPinchFinished: {
-                    flickable.returnToBounds()
+                PinchArea {
+                    id: pinchArea
+                    anchors.fill: parent
+
+                    property point pt
+                    property real flickableStartX
+                    property real flickableStartY
+
+                    onPinchUpdated: {
+                        pt = Qt.point(flickable.contentWidth / 2,
+                                      flickable.contentHeight / 2)
+
+                        galleryPage.imageScale += (pinch.scale - pinch.previousScale) * 1.2
+                        flickable.resizeContent(
+                                    galleryPage.width * constrainedZoom,
+                                    galleryPage.height * constrainedZoom, pt)
+                    }
+
+                    onPinchFinished: {
+                        flickable.returnToBounds()
+                    }
                 }
             }
 
