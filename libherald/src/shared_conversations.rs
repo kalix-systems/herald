@@ -1,5 +1,4 @@
 use crate::{
-    conversations::shared::{color, picture, title},
     err, ffi,
     interface::{
         SharedConversationsEmitter as Emit, SharedConversationsList as List,
@@ -78,14 +77,6 @@ impl Interface for SharedConversations {
         self.inner.len()
     }
 
-    fn conversation_color(
-        &self,
-        index: usize,
-    ) -> Option<u32> {
-        let cid = self.inner.get(index)?;
-        color(&cid)
-    }
-
     fn conversation_id(
         &self,
         index: usize,
@@ -94,21 +85,5 @@ impl Interface for SharedConversations {
             .get(index)
             .map(|c| c.as_slice())
             .unwrap_or(&ffi::NULL_CONV_ID)
-    }
-
-    fn conversation_picture(
-        &self,
-        index: usize,
-    ) -> Option<String> {
-        let cid = self.inner.get(index)?;
-        picture(&cid)
-    }
-
-    fn conversation_title(
-        &self,
-        index: usize,
-    ) -> Option<String> {
-        let cid = self.inner.get(index)?;
-        title(&cid)
     }
 }

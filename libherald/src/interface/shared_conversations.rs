@@ -204,25 +204,10 @@ pub trait SharedConversationsTrait {
     ) {
     }
 
-    fn conversation_color(
-        &self,
-        index: usize,
-    ) -> Option<u32>;
-
     fn conversation_id(
         &self,
         index: usize,
     ) -> &[u8];
-
-    fn conversation_picture(
-        &self,
-        index: usize,
-    ) -> Option<String>;
-
-    fn conversation_title(
-        &self,
-        index: usize,
-    ) -> Option<String>;
 }
 
 #[no_mangle]
@@ -373,15 +358,6 @@ pub unsafe extern "C" fn shared_conversations_sort(
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn shared_conversations_data_conversation_color(
-    ptr: *const SharedConversations,
-    row: c_int,
-) -> COption<u32> {
-    let obj = &*ptr;
-    obj.conversation_color(to_usize(row).unwrap_or(0)).into()
-}
-
-#[no_mangle]
 pub unsafe extern "C" fn shared_conversations_data_conversation_id(
     ptr: *const SharedConversations,
     row: c_int,
@@ -392,36 +368,6 @@ pub unsafe extern "C" fn shared_conversations_data_conversation_id(
     let data = obj.conversation_id(to_usize(row).unwrap_or(0));
     let str_: *const c_char = data.as_ptr() as *const c_char;
     set(d, str_, to_c_int(data.len()));
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn shared_conversations_data_conversation_picture(
-    ptr: *const SharedConversations,
-    row: c_int,
-    d: *mut QString,
-    set: fn(*mut QString, *const c_char, len: c_int),
-) {
-    let obj = &*ptr;
-    let data = obj.conversation_picture(to_usize(row).unwrap_or(0));
-    if let Some(data) = data {
-        let str_: *const c_char = data.as_ptr() as (*const c_char);
-        set(d, str_, to_c_int(data.len()));
-    }
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn shared_conversations_data_conversation_title(
-    ptr: *const SharedConversations,
-    row: c_int,
-    d: *mut QString,
-    set: fn(*mut QString, *const c_char, len: c_int),
-) {
-    let obj = &*ptr;
-    let data = obj.conversation_title(to_usize(row).unwrap_or(0));
-    if let Some(data) = data {
-        let str_: *const c_char = data.as_ptr() as (*const c_char);
-        set(d, str_, to_c_int(data.len()));
-    }
 }
 
 #[derive(Clone, Copy)]

@@ -353,10 +353,6 @@ impl Interface for Messages {
         self.send_typing_indicator_()
     }
 
-    fn is_empty(&self) -> bool {
-        self.container.is_empty()
-    }
-
     fn last_msg_digest(&self) -> String {
         self.last_msg_digest_()
     }

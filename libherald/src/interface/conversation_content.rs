@@ -269,7 +269,6 @@ pub unsafe fn conversation_content_new_inner(
         builder_end_move_rows,
         builder_begin_remove_rows,
         builder_end_remove_rows,
-        messages_is_empty_changed,
         messages_last_msg_digest_changed,
         messages_search_active_changed,
         messages_search_index_changed,
@@ -394,7 +393,6 @@ pub unsafe fn conversation_content_new_inner(
     );
     let messages_emit = MessagesEmitter {
         qobject: Arc::new(AtomicPtr::new(messages)),
-        is_empty_changed: messages_is_empty_changed,
         last_msg_digest_changed: messages_last_msg_digest_changed,
         search_active_changed: messages_search_active_changed,
         search_index_changed: messages_search_index_changed,
@@ -682,7 +680,6 @@ pub struct ConversationContentPtrBundle {
     builder_end_move_rows: fn(*mut MessageBuilderQObject),
     builder_begin_remove_rows: fn(*mut MessageBuilderQObject, usize, usize),
     builder_end_remove_rows: fn(*mut MessageBuilderQObject),
-    messages_is_empty_changed: fn(*mut MessagesQObject),
     messages_last_msg_digest_changed: fn(*mut MessagesQObject),
     messages_search_active_changed: fn(*mut MessagesQObject),
     messages_search_index_changed: fn(*mut MessagesQObject),

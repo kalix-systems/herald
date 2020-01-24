@@ -108,12 +108,8 @@ impl Messages {
         }
     }
 
-    pub(crate) fn is_empty(&self) -> bool {
-        self.container.is_empty()
-    }
-
     pub(crate) fn last_msg_id(&self) -> Option<MsgId> {
-        self.container.list.last().map(|m| m.msg_id)
+        self.container.list.front().map(|m| m.msg_id)
     }
 }
 

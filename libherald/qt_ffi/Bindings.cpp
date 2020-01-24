@@ -225,7 +225,6 @@ inline void messageSearchRegexSearchChanged(MessageSearch *o) {
 inline void messageSearchSearchPatternChanged(MessageSearch *o) {
   Q_EMIT o->searchPatternChanged();
 }
-inline void messagesIsEmptyChanged(Messages *o) { Q_EMIT o->isEmptyChanged(); }
 inline void messagesLastMsgDigestChanged(Messages *o) {
   Q_EMIT o->lastMsgDigestChanged();
 }
@@ -1938,7 +1937,6 @@ extern "C" {
 Messages::Private *messages_new(MessagesPtrBundle *);
 void messages_free(Messages::Private *);
 MessageBuilder::Private *messages_builder_get(const Messages::Private *);
-bool messages_is_empty_get(const Messages::Private *);
 void messages_last_msg_digest_get(const Messages::Private *, QString *,
                                   qstring_set);
 bool messages_search_active_get(const Messages::Private *);
@@ -1976,14 +1974,8 @@ void notifications_free(Notifications::Private *);
 void notifications_next_notif(Notifications::Private *, QString *, qstring_set);
 }
 extern "C" {
-option_quint32 shared_conversations_data_conversation_color(
-    const SharedConversations::Private *, int);
 void shared_conversations_data_conversation_id(
     const SharedConversations::Private *, int, QByteArray *, qbytearray_set);
-void shared_conversations_data_conversation_picture(
-    const SharedConversations::Private *, int, QString *, qstring_set);
-void shared_conversations_data_conversation_title(
-    const SharedConversations::Private *, int, QString *, qstring_set);
 void shared_conversations_sort(SharedConversations::Private *,
                                unsigned char column,
                                Qt::SortOrder order = Qt::AscendingOrder);
@@ -2046,28 +2038,10 @@ Qt::ItemFlags SharedConversations::flags(const QModelIndex &i) const {
   return flags;
 }
 
-QVariant SharedConversations::conversationColor(int row) const {
-  QVariant v;
-  v = shared_conversations_data_conversation_color(m_d, row);
-  return v;
-}
-
 QByteArray SharedConversations::conversationId(int row) const {
   QByteArray b;
   shared_conversations_data_conversation_id(m_d, row, &b, set_qbytearray);
   return b;
-}
-
-QString SharedConversations::conversationPicture(int row) const {
-  QString s;
-  shared_conversations_data_conversation_picture(m_d, row, &s, set_qstring);
-  return s;
-}
-
-QString SharedConversations::conversationTitle(int row) const {
-  QString s;
-  shared_conversations_data_conversation_title(m_d, row, &s, set_qstring);
-  return s;
 }
 
 QVariant SharedConversations::data(const QModelIndex &index, int role) const {
@@ -2076,15 +2050,7 @@ QVariant SharedConversations::data(const QModelIndex &index, int role) const {
   case 0:
     switch (role) {
     case Qt::UserRole + 0:
-      return conversationColor(index.row());
-    case Qt::UserRole + 1:
       return QVariant::fromValue(conversationId(index.row()));
-    case Qt::UserRole + 2:
-      return cleanNullQVariant(
-          QVariant::fromValue(conversationPicture(index.row())));
-    case Qt::UserRole + 3:
-      return cleanNullQVariant(
-          QVariant::fromValue(conversationTitle(index.row())));
     }
     break;
   }
@@ -2103,10 +2069,7 @@ int SharedConversations::role(const char *name) const {
 }
 QHash<int, QByteArray> SharedConversations::roleNames() const {
   QHash<int, QByteArray> names = QAbstractItemModel::roleNames();
-  names.insert(Qt::UserRole + 0, "conversationColor");
-  names.insert(Qt::UserRole + 1, "conversationId");
-  names.insert(Qt::UserRole + 2, "conversationPicture");
-  names.insert(Qt::UserRole + 3, "conversationTitle");
+  names.insert(Qt::UserRole + 0, "conversationId");
   return names;
 }
 
@@ -2752,7 +2715,6 @@ ConversationContent::ConversationContent(QObject *parent)
           [](MessageBuilder *o) { o->endRemoveRows(); }
 
           ,
-          messagesIsEmptyChanged,
           messagesLastMsgDigestChanged,
           messagesSearchActiveChanged,
           messagesSearchIndexChanged,
@@ -4059,7 +4021,6 @@ Messages::Messages(QObject *parent)
           [](MessageBuilder *o) { o->endRemoveRows(); }
 
           ,
-          messagesIsEmptyChanged,
           messagesLastMsgDigestChanged,
           messagesSearchActiveChanged,
           messagesSearchIndexChanged,
@@ -4134,8 +4095,6 @@ void Messages::initHeaderData() {}
 
 const MessageBuilder *Messages::builder() const { return m_builder; }
 MessageBuilder *Messages::builder() { return m_builder; }
-
-bool Messages::isEmpty() const { return messages_is_empty_get(m_d); }
 
 QString Messages::lastMsgDigest() const {
   QString v;

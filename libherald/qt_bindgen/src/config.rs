@@ -293,7 +293,6 @@ fn messages() -> Object {
         searchIndex: Prop::new().simple(QUint64),
 
         lastMsgDigest: Prop::new().simple(QString).get_by_value(),
-        isEmpty: Prop::new().simple(Bool),
 
         builder: Prop::new().object(message_builder())
     };

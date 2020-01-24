@@ -158,7 +158,6 @@ struct ConversationContentPtrBundle {
   void (*message_builder_end_move_rows)(MessageBuilder *);
   void (*message_builder_begin_remove_rows)(MessageBuilder *, int, int);
   void (*message_builder_end_remove_rows)(MessageBuilder *);
-  void (*messages_is_empty_changed)(Messages *);
   void (*messages_last_msg_digest_changed)(Messages *);
   void (*messages_search_active_changed)(Messages *);
   void (*messages_search_index_changed)(Messages *);
@@ -533,7 +532,6 @@ struct MessagesPtrBundle {
   void (*message_builder_end_move_rows)(MessageBuilder *);
   void (*message_builder_begin_remove_rows)(MessageBuilder *, int, int);
   void (*message_builder_end_remove_rows)(MessageBuilder *);
-  void (*messages_is_empty_changed)(Messages *);
   void (*messages_last_msg_digest_changed)(Messages *);
   void (*messages_search_active_changed)(Messages *);
   void (*messages_search_index_changed)(Messages *);
@@ -1644,7 +1642,6 @@ private:
   Private *m_d;
   bool m_ownsPrivate;
   Q_PROPERTY(MessageBuilder *builder READ builder NOTIFY builderChanged FINAL)
-  Q_PROPERTY(bool isEmpty READ isEmpty NOTIFY isEmptyChanged FINAL)
   Q_PROPERTY(QString lastMsgDigest READ lastMsgDigest NOTIFY
                  lastMsgDigestChanged FINAL)
   Q_PROPERTY(bool searchActive READ searchActive WRITE setSearchActive NOTIFY
@@ -1664,7 +1661,6 @@ public:
   ~Messages() override;
   const MessageBuilder *builder() const;
   MessageBuilder *builder();
-  bool isEmpty() const;
   QString lastMsgDigest() const;
   bool searchActive() const;
   void setSearchActive(bool v);
@@ -1753,7 +1749,6 @@ private:
   void updatePersistentIndexes();
 Q_SIGNALS:
   void builderChanged();
-  void isEmptyChanged();
   void lastMsgDigestChanged();
   void searchActiveChanged();
   void searchIndexChanged();
@@ -1859,10 +1854,7 @@ public:
   removeRows(int row, int count,
              const QModelIndex &parent = QModelIndex()) override;
 
-  Q_INVOKABLE QVariant conversationColor(int row) const;
   Q_INVOKABLE QByteArray conversationId(int row) const;
-  Q_INVOKABLE QString conversationPicture(int row) const;
-  Q_INVOKABLE QString conversationTitle(int row) const;
 
 Q_SIGNALS:
   // new data is ready to be made available to the model with fetchMore()
