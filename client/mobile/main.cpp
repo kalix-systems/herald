@@ -1,11 +1,12 @@
 #include "Bindings.h"
+#include "androidhelper.h"
 #include "conversationmap.h"
 #include "objectiveutils.h"
-#include "androidhelper.h"
-#include <QScreen>
-#include <QQmlContext>
+#include "usermap.h"
 #include <QApplication>
 #include <QQmlApplicationEngine>
+#include <QQmlContext>
+#include <QScreen>
 #include <QStandardPaths>
 #include <QtQml/qqml.h>
 
@@ -43,6 +44,22 @@ int main(int argc, char* argv[])
 
   qmlRegisterUncreatableType<Users>("LibHerald", 1, 0, "Users",
                                     heraldMsg("Users"));
+
+  // Provides access to user information
+  qmlRegisterSingletonType<UserMap>(
+      "LibHerald", 1, 0, "UserMap",
+      [](QQmlEngine* engine, QJSEngine* scriptEngine) {
+        Q_UNUSED(scriptEngine)
+
+        UserMap* userMap = new UserMap();
+        engine->setObjectOwnership(userMap, QQmlEngine::CppOwnership);
+
+        return userMap;
+      });
+
+  qmlRegisterUncreatableType<User>("LibHerald", 1, 0, "User",
+                                   errMsg("User", "UserMap"));
+
   qmlRegisterUncreatableType<Config>("LibHerald", 1, 0, "Config",
                                      heraldMsg("Config"));
 
