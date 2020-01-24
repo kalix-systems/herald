@@ -3,7 +3,7 @@ use super::*;
 pub(crate) fn add_to_pending(
     conn: &rusqlite::Connection,
     cid: ConversationId,
-    content: &ConversationMessage,
+    content: &Substance,
 ) -> Result<(), HErr> {
     conn.execute(
         include_str!("sql/add_to_pending.sql"),
@@ -14,7 +14,7 @@ pub(crate) fn add_to_pending(
 
 pub(crate) fn get_pending(
     conn: &rusqlite::Connection
-) -> Result<Vec<(i64, ConversationId, ConversationMessage)>, HErr> {
+) -> Result<Vec<(i64, ConversationId, Substance)>, HErr> {
     let mut stmt = conn.prepare(include_str!("sql/get_pending.sql"))?;
 
     let res = stmt.query_map(NO_PARAMS, |row| Ok((row.get(0)?, row.get(1)?, row.get(2)?)))?;

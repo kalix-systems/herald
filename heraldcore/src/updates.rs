@@ -64,7 +64,7 @@ pub enum Notification {
     UserChanged(UserId, herald_user::UserChange),
 
     /// Conversation membership has changed
-    Membership(members::Membership),
+    Membership(network_types::Membership),
 }
 
 /// Registers handlers for notifications

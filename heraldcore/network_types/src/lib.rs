@@ -1,7 +1,6 @@
-use coretypes::messages::NewMembers;
 use coretypes::{
     conversation::ExpirationPeriod,
-    messages::{MessageBody, ReactContent, ReceiptStatus},
+    messages::{Membership, MessageBody, ReactContent, ReceiptStatus},
 };
 use herald_attachments::Attachment;
 use herald_common::*;
@@ -34,9 +33,6 @@ pub enum Substance {
 
     /// Initializes a conversation
     Init(ConversationInit),
-
-    /// A change in conversation membership
-    Membership(Membership),
 }
 
 #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
@@ -67,7 +63,8 @@ pub struct Msg {
 pub enum MsgContent {
     Normal(Message),
     GroupSettings(GroupSettingsUpdate),
-    NewMembers(NewMembers),
+    /// A change in conversation membership
+    Membership(Membership),
 }
 
 #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
@@ -110,27 +107,6 @@ pub struct Reaction {
     pub react_content: ReactContent,
     /// Whether this is a removal or addition
     pub remove: bool,
-}
-
-/// A change in conversation membership
-#[derive(Ser, De, Clone, PartialEq, Eq, Debug)]
-pub struct Membership {
-    /// Conversation that changed
-    cid: ConversationId,
-    /// The change
-    change: MembershipUpdate,
-}
-
-/// A change in conversation membership
-#[derive(Ser, De, Clone, PartialEq, Eq, Debug)]
-pub enum MembershipUpdate {
-    /// Members have been added
-    Added {
-        members: Vec<UserId>,
-        added_by: UserId,
-    },
-    /// A member has left
-    Left(UserId),
 }
 
 #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]

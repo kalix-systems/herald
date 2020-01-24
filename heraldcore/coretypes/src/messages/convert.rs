@@ -250,7 +250,7 @@ impl From<Reactions> for json::JsonValue {
     }
 }
 
-from_fn!(AuxItem, NewMembers, AuxItem::NewMembers);
+from_fn!(AuxItem, Membership, AuxItem::Membership);
 from_fn!(
     AuxItem,
     crate::conversation::settings::SettingsUpdate,
@@ -286,10 +286,21 @@ impl From<AuxItem> for JsonValue {
                     }
                 }
             },
-            AuxItem::NewMembers(members) => {
+
+            AuxItem::Membership(Membership::Added { members, added_by }) => {
                 json::object! {
                     "code" => code,
-                    "content" => members.0.into_iter().map(|u| u.to_string()).collect::<Vec<_>>(),
+                    "content" => json::object! {
+                        "added_by" => added_by.as_str(),
+                        "members" => members.into_iter().map(|u| u.to_string()).collect::<Vec<_>>(),
+                    }
+                }
+            }
+
+            AuxItem::Membership(Membership::Left(uid)) => {
+                json::object! {
+                    "code" => code,
+                    "content" => uid.as_str(),
                 }
             }
         }

@@ -1,7 +1,7 @@
 use crate::{db::Database, errors::HErr, types::*};
 use coremacros::{from_fn, w};
+use coretypes::messages::Membership;
 use herald_common::UserId;
-use network_types::Membership;
 use rusqlite::params;
 
 from_fn!(

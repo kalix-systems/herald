@@ -52,7 +52,7 @@ impl PushHandler for Pushy {
 
         if let Some(forward) = forward {
             let bytes = kson::to_bytes(&forward);
-            let replies = e!(prepare_send_to_self(tx, &kp, id, Payload::Msg(bytes)));
+            let replies = e!(prepare_send_to_self(tx, &kp, id, bytes));
 
             ev.replies(replies);
         }
@@ -73,41 +73,36 @@ impl PushHandler for Pushy {
 }
 
 fn handle_output(
-    output: PayloadResult,
+    output: Bytes,
     from: UserId,
     ts: Time,
 ) -> Result<Event, HErr> {
-    use PayloadResult as P;
     let mut ev = Event::default();
 
-    match output {
-        P::Msg(bytes) => {
-            let msg: nt::NetMsg = w!(kson::from_bytes(bytes));
+    let msg: nt::NetMsg = w!(kson::from_bytes(output));
 
-            w!(substance::net_msg(&mut ev, from, msg, ts));
-        }
+    w!(substance::net_msg(&mut ev, from, msg, ts));
 
-        P::AddToConvo(cid, members) => {
-            w!(members::add_members(&cid, &members));
+    // P::AddToConvo(cid, members) => {
+    //     w!(members::add_members(&cid, &members));
 
-            ev.note(members::Membership {
-                cid,
-                change: members::MembershipUpdate::Added {
-                    members,
-                    added_by: from,
-                },
-            });
-        }
+    //     ev.note(members::Membership {
+    //         cid,
+    //         change: members::MembershipUpdate::Added {
+    //             members,
+    //             added_by: from,
+    //         },
+    //     });
+    // }
 
-        P::LeaveConvo(cid) => {
-            w!(members::remove_member(&cid, from));
+    // P::LeaveConvo(cid) => {
+    //     w!(members::remove_member(&cid, from));
 
-            ev.note(members::Membership {
-                cid,
-                change: members::MembershipUpdate::Left(from),
-            });
-        }
-    };
+    //     ev.note(members::Membership {
+    //         cid,
+    //         change: members::MembershipUpdate::Left(from),
+    //     });
+    // }
 
     Ok(ev)
 }

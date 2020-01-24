@@ -195,7 +195,7 @@ impl Item {
 #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
 pub enum AuxItem {
     GroupSettings(crate::conversation::settings::SettingsUpdate),
-    NewMembers(NewMembers),
+    Membership(Membership),
 }
 
 impl AuxItem {
@@ -208,14 +208,14 @@ impl AuxItem {
                 Title(_) => 1,
                 Picture(_) => 2,
             },
-            AuxItem::NewMembers(_) => 3,
+
+            AuxItem::Membership(variant) => match variant {
+                Membership::Added { .. } => 3,
+                Membership::Left { .. } => 4,
+            },
         }
     }
 }
-
-#[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
-/// Members that have just been added to a conversation.
-pub struct NewMembers(pub Vec<UserId>);
 
 #[derive(Clone, Copy, Debug)]
 /// Time data relating to messages
@@ -365,4 +365,17 @@ impl Ord for MessageMeta {
             None => self.msg_id.cmp(&rhs.msg_id),
         }
     }
+}
+
+/// A change in conversation membership
+#[derive(Ser, De, Clone, PartialEq, Eq, Debug)]
+pub enum Membership {
+    /// Members have been added
+    Added {
+        members: Vec<UserId>,
+        added_by: UserId,
+    },
+
+    /// A member has left
+    Left(UserId),
 }

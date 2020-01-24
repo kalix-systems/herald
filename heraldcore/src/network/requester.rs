@@ -1,6 +1,7 @@
 use super::*;
 use anyhow::anyhow;
 use herald_network::Requester;
+use network_types as nt;
 use once_cell::sync::OnceCell;
 use parking_lot::Mutex;
 
@@ -73,7 +74,7 @@ pub fn send_user_req(
 
 pub(crate) fn send_normal_message(
     cid: ConversationId,
-    msg: cmessages::Msg,
+    msg: nt::Msg,
 ) -> Result<SendOutcome, HErr> {
     todo!()
     //let mid = msg.mid;
@@ -97,14 +98,14 @@ pub(crate) fn send_group_settings_message(
     mid: MsgId,
     cid: ConversationId,
     expiration: Option<Time>,
-    update: cmessages::GroupSettingsUpdate,
+    update: nt::GroupSettingsUpdate,
 ) -> Result<(), HErr> {
     if let SendOutcome::Success = send_normal_message(
         cid,
-        cmessages::Msg {
+        nt::Msg {
             mid,
             expiration,
-            content: cmessages::MsgContent::GroupSettings(update),
+            content: nt::MsgContent::GroupSettings(update),
         },
     )? {
         crate::push(crate::message::OutboundAux::SendDone(cid, mid));
@@ -112,7 +113,7 @@ pub(crate) fn send_group_settings_message(
     Ok(())
 }
 
-pub(crate) fn send_profile_update(update: cmessages::ProfileChanged) -> Result<(), HErr> {
+pub(crate) fn send_profile_update(update: nt::ProfileChanged) -> Result<(), HErr> {
     todo!()
     //let conn = crate::db::Database::get()?;
 

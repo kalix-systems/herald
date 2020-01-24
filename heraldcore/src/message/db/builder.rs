@@ -1,5 +1,6 @@
 use super::*;
 use coretypes::messages::PlainItem;
+use network_types as nt;
 
 impl OutboundMessageBuilder {
     pub(crate) fn store_and_send_db(
@@ -140,13 +141,13 @@ impl OutboundMessageBuilder {
             attachment_meta,
         ));
 
-        let content = cmessages::MsgContent::Normal(cmessages::Message {
+        let content = nt::MsgContent::Normal(nt::Message {
             body,
             attachments,
             op,
         });
 
-        let msg = cmessages::Msg {
+        let msg = nt::Msg {
             mid: msg_id,
             content,
             expiration,
