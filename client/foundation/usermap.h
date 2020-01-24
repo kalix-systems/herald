@@ -13,7 +13,7 @@ public:
   {
     auto iter = userHash.find(uid);
 
-    if (iter == userHash.end() || iter == nullptr) {
+    if (iter == userHash.end()) {
       // user does not exist
       auto user = new User();
       user->setUserId(uid);

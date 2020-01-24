@@ -21,7 +21,9 @@ Row {
         TextMetrics {
             id: opNameTM
             text: (messageModelData.opAuthor
-                   === Herald.config.configId) ? Herald.config.name : messageModelData.opName
+                   === Herald.config.configId) ? UserMap.get(
+                                                     Herald.config.configId).name : UserMap.get(
+                                                     messageModelData.opAuthor).name
             font.weight: Font.Bold
             font.family: CmnCfg.chatFont.name
             elideWidth: replyWrapper.width * 0.75

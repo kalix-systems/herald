@@ -202,7 +202,7 @@ Popup {
 
             delegate: Rectangle {
                 id: userRect
-                property var userData: model
+                property var userData: UserMap.get(model.userId)
                 color: CmnCfg.palette.white
                 width: contactsPopup.width
                 height: visible ? row.height + 1 : 0

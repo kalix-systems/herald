@@ -82,7 +82,7 @@ Popup {
                 width: parent.width
                 spacing: CmnCfg.smallMargin
                 leftPadding: CmnCfg.defaultMargin
-                property var contactMember: model
+                property var contactMember: UserMap.get(model.userId)
                 height: visible ? contentHeight : 0
                 visible: contactMember.userId !== Herald.config.configId
                 Item {

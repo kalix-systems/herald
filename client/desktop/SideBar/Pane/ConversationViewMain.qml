@@ -129,7 +129,8 @@ ListView {
             picture: !nts ? Utils.safeStringOrDefault(
                                 conversationData.picture,
                                 "") : Utils.safeStringOrDefault(
-                                Herald.config.profilePicture, "")
+                                UserMap.get(
+                                    Herald.config.configId).profilePicture, "")
             isGroupPicture: !conversationData.pairwise
 
             labelComponent: Ent.ConversationLabel {

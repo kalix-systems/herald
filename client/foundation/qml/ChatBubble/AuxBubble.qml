@@ -29,9 +29,10 @@ Rectangle {
                                                                   insertionTime) : ""
     readonly property string receiptImage: outbound ? Utils.receiptCodeSwitch(
                                                           messageModelData.receiptStatus) : ""
-    readonly property color authorColor: CmnCfg.avatarColors[messageModelData.authorColor]
-    property string authorName: outbound ? "You" : Herald.users.nameById(
-                                               messageModelData.author)
+    readonly property color authorColor: CmnCfg.avatarColors[UserMap.get(
+                                                                 messageModelData.author).userColor]
+    property string authorName: outbound ? "You" : UserMap.get(
+                                               messageModelData.author).name
 
     property bool hoverHighlight: false
     property alias expireInfo: expireInfo

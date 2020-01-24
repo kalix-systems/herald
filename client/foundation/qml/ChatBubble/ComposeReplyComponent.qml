@@ -17,10 +17,11 @@ Rectangle {
     property MessageBuilder builderData
     property bool outboundReply: Herald.config.configId === builderData.opAuthor
 
-    property color authorColor: CmnCfg.palette.avatarColors[Herald.users.userColorById(
-                                                                builderData.opAuthor)]
-    property string authorName: outboundReply ? Herald.config.name : Herald.users.nameById(
-                                                    builderData.opAuthor)
+    property color authorColor: CmnCfg.palette.avatarColors[UserMap.get(
+                                                                builderData.opAuthor).userColor]
+    property string authorName: outboundReply ? UserMap.get(
+                                                    Herald.config.configId).name : UserMap.get(
+                                                    builderData.opAuthor).name
     property string friendlyTimestamp: Utils.friendlyTimestamp(
                                            builderData.opTime)
     property var maxWidth: wrapper.width - CmnCfg.smallMargin

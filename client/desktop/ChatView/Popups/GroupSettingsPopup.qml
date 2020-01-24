@@ -205,7 +205,7 @@ Popup {
                 delegate: Item {
                     height: visible ? CmnCfg.convoHeight : 0
                     width: parent.width
-                    property var memberData: model
+                    property var memberData: UserMap.get(model.userId)
                     Common.PlatonicRectangle {
                         boxTitle: memberData.name
                         boxColor: memberData.memberColor
