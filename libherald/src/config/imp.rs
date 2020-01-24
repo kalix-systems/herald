@@ -31,7 +31,10 @@ impl Config {
                 use crate::conversations::shared::{ConvItemUpdate, ConvItemUpdateVariant};
                 self.inner.as_mut()?.profile_picture = path.clone();
 
-                self.emit.profile_picture_changed();
+                crate::user_push(
+                    self.inner.as_ref()?.id,
+                    herald_user::UserChange::Picture(path.clone()),
+                );
 
                 crate::push(ConvItemUpdate {
                     cid: self.inner.as_ref()?.nts_conversation,

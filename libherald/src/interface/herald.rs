@@ -165,12 +165,9 @@ pub unsafe fn herald_new_inner(ptr_bundle: *mut HeraldPtrBundle) -> Herald {
     let HeraldPtrBundle {
         herald,
         config,
-        config_config_color_changed,
         config_config_id_changed,
-        config_name_changed,
         config_nts_conversation_id_changed,
         config_preferred_expiration_changed,
-        config_profile_picture_changed,
         herald_config_init_changed,
         herald_connection_pending_changed,
         herald_connection_up_changed,
@@ -257,12 +254,9 @@ pub unsafe fn herald_new_inner(ptr_bundle: *mut HeraldPtrBundle) -> Herald {
     } = ptr_bundle;
     let config_emit = ConfigEmitter {
         qobject: Arc::new(AtomicPtr::new(config)),
-        config_color_changed: config_config_color_changed,
         config_id_changed: config_config_id_changed,
-        name_changed: config_name_changed,
         nts_conversation_id_changed: config_nts_conversation_id_changed,
         preferred_expiration_changed: config_preferred_expiration_changed,
-        profile_picture_changed: config_profile_picture_changed,
     };
     let d_config = Config::new(config_emit);
     let conversation_builder_emit = ConversationBuilderEmitter {
@@ -535,12 +529,9 @@ pub unsafe extern "C" fn herald_utils_get(ptr: *mut Herald) -> *mut Utils {
 pub struct HeraldPtrBundle {
     herald: *mut HeraldQObject,
     config: *mut ConfigQObject,
-    config_config_color_changed: fn(*mut ConfigQObject),
     config_config_id_changed: fn(*mut ConfigQObject),
-    config_name_changed: fn(*mut ConfigQObject),
     config_nts_conversation_id_changed: fn(*mut ConfigQObject),
     config_preferred_expiration_changed: fn(*mut ConfigQObject),
-    config_profile_picture_changed: fn(*mut ConfigQObject),
     herald_config_init_changed: fn(*mut HeraldQObject),
     herald_connection_pending_changed: fn(*mut HeraldQObject),
     herald_connection_up_changed: fn(*mut HeraldQObject),

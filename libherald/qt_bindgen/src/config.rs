@@ -54,6 +54,8 @@ fn objects() -> BTreeMap<String, Rc<Object>> {
 
        shared_conversations(),
 
+       user(),
+
        media_attachments(),
        document_attachments(),
        emoji_picker()
@@ -193,21 +195,13 @@ fn users() -> Object {
 
     let item_props = item_props! {
        userId: ItemProp::new(QString),
-       name: ItemProp::new(QString).get_by_value(),
-       pairwiseConversationId: ItemProp::new(QByteArray).get_by_value(),
-       status: ItemProp::new(QUint8).write(),
-       matched: matched_item_prop(),
-       profilePicture: picture_item_prop().get_by_value(),
-       userColor: color_item_prop().write()
+       matched: matched_item_prop()
     };
 
     let funcs = functions! {
         mut add(id: QString) => QByteArray,
         mut toggleFilterRegex() => Bool,
         mut clearFilter() => Void,
-        const userColorById(id: QString) => QUint32,
-        const nameById(id: QString) => QString,
-        const profilePictureById(id: QString) => QString,
         const indexById(id: QString) => Qint64,
     };
 
@@ -242,12 +236,7 @@ fn members() -> Object {
 
     let item_props = item_props! {
        userId: ItemProp::new(QString),
-       name: ItemProp::new(QString).get_by_value(),
-       pairwiseConversationId: ItemProp::new(QByteArray).get_by_value(),
-       status: ItemProp::new(QUint8),
        matched: matched_item_prop(),
-       profilePicture: picture_item_prop().get_by_value(),
-       memberColor: color_item_prop(),
        lastTyping: ItemProp::new(Qint64).optional()
     };
 
@@ -324,13 +313,6 @@ fn messages() -> Object {
         // Time the message will expire, if ever
         expirationTime: ItemProp::new(Qint64).optional(),
 
-        // User profile picture
-        authorProfilePicture: ItemProp::new(QString).get_by_value(),
-        // User color
-        authorColor: ItemProp::new(QUint32).optional(),
-        // User name
-        authorName: ItemProp::new(QString).optional().get_by_value(),
-
         // Message reactions
         reactions: ItemProp::new(QString).get_by_value(),
         // Auxiliary message data, serialized as JSON
@@ -362,11 +344,10 @@ fn messages() -> Object {
         // Message preview properties
         opMsgId: ItemProp::new(QByteArray).optional().get_by_value(),
         opAuthor: ItemProp::new(QString).optional().get_by_value(),
-        opName: ItemProp::new(QString).optional().get_by_value(),
         opBody: ItemProp::new(QString).get_by_value(),
         opInsertionTime: ItemProp::new(Qint64).optional(),
         opExpirationTime: ItemProp::new(Qint64).optional(),
-        opColor: ItemProp::new(QUint32).optional(),
+
         // Auxiliary message data, serialized as JSON
         opAuxData: ItemProp::new(QString).get_by_value(),
 
@@ -416,15 +397,19 @@ fn message_builder() -> Object {
 
         // Message id of the message being replied to, if any
         opId: Prop::new().simple(QByteArray).optional().write(),
-        opAuthor: Prop::new().simple(QString).optional(),
+        // Body of the message
         opBody: Prop::new().simple(QString).optional(),
-        opTime: Prop::new().simple(Qint64).optional(),
+
+        opAuthor: Prop::new().simple(QString).optional(),
+
         // Media attachments metadata, serialized as JSON
         opMediaAttachments: Prop::new().simple(QString),
         // Document attachments metadata, serialized as JSON
         opDocAttachments: Prop::new().simple(QString),
         // Aux content metadata, serialized as JSON
         opAuxContent: Prop::new().simple(QString),
+        // Message timestamp
+        opTime: Prop::new().simple(Qint64).optional(),
         // Time the message will expire, if ever
         opExpirationTime: Prop::new().simple(Qint64).optional()
     );
@@ -446,9 +431,6 @@ fn message_builder() -> Object {
 fn config() -> Object {
     let props = props! {
         configId: Prop::new().simple(QString),
-        name: Prop::new().simple(QString).write(),
-        profilePicture: Prop::new().simple(QString).optional(),
-        configColor: Prop::new().simple(QUint32).write(),
         ntsConversationId: Prop::new().simple(QByteArray),
         preferredExpiration: Prop::new().simple(QUint8).write()
     };
@@ -457,6 +439,7 @@ fn config() -> Object {
         // `profile_picture` is a path and bounding rectangle encoded as JSON.
         // See `heraldcore/image_utils`.
         mut setProfilePicture(profile_picture: QString) => Void,
+        mut setName(name: QString) => Void,
     };
 
     obj! {
@@ -466,10 +449,7 @@ fn config() -> Object {
 
 fn conversation_builder() -> Object {
     let item_prop = item_props! {
-        memberId: ItemProp::new(QString),
-        memberColor: ItemProp::new(QUint32),
-        memberName: ItemProp::new(QString).get_by_value(),
-        memberProfilePicture: ItemProp::new(QString).get_by_value()
+        memberId: ItemProp::new(QString)
     };
 
     let prop = props! {
@@ -502,9 +482,6 @@ fn users_search() -> Object {
 
     let item_props = item_props! {
        userId: ItemProp::new(QString).optional(),
-       name: ItemProp::new(QString).get_by_value().optional(),
-       profilePicture: picture_item_prop().get_by_value().optional(),
-       userColor: color_item_prop().optional(),
        selected: ItemProp::new(Bool).write(),
        matched: matched_item_prop()
     };
@@ -571,6 +548,20 @@ fn message_search() -> Object {
 
     obj! {
         MessageSearch: Obj::new().list().funcs(funcs).props(props).item_props(item_props)
+    }
+}
+
+fn user() -> Object {
+    let props = props! {
+       userId: Prop::new().simple(QString).write().optional(),
+       name: Prop::new().simple(QString).get_by_value(),
+       pairwiseConversationId: Prop::new().simple(QByteArray).get_by_value(),
+       profilePicture: Prop::new().simple(QString).optional().get_by_value(),
+       userColor: Prop::new().simple(QUint32).write()
+    };
+
+    obj! {
+        User: Obj::new().props(props)
     }
 }
 

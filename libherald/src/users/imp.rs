@@ -24,7 +24,7 @@ impl Users {
     ) {
         match update {
             UserUpdate::NewUser(data) => {
-                let new_user = User {
+                let new_user = UserIndex {
                     matched: self
                         .filter
                         .as_ref()
@@ -51,27 +51,7 @@ impl Users {
                 }
             }
             UserUpdate::UserChanged(uid, update) => {
-                use herald_user::UserChange as U;
-                let mut lock = shared::user_data().write();
-                match update {
-                    U::Color(color) => {
-                        lock.entry(uid).and_modify(|u| u.color = color);
-                    }
-                    U::Picture(picture) => {
-                        lock.entry(uid).and_modify(|u| u.profile_picture = picture);
-                    }
-                    U::DisplayName(name) => {
-                        lock.entry(uid)
-                            .and_modify(|u| u.name = name.unwrap_or_else(|| u.id.to_string()));
-                    }
-                }
-                drop(lock);
-
-                let pos = match self.list.iter().rposition(|User { id, .. }| id == &uid) {
-                    Some(pos) => pos,
-                    None => return,
-                };
-                self.model.data_changed(pos, pos);
+                crate::user_push(uid, update);
             }
         }
     }
@@ -88,7 +68,7 @@ impl crate::Loadable for Users {
         for user in users {
             let id = user.id;
             lock.insert(id, user);
-            self.list.push(User { id, matched: true });
+            self.list.push(UserIndex { id, matched: true });
         }
         drop(lock);
 

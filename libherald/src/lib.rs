@@ -41,6 +41,8 @@ pub mod notifications;
 pub mod shared_conversations;
 /// Desktop push notifications
 pub mod toasts;
+/// User object
+pub mod user;
 /// Users object
 pub mod users;
 /// Users search object
@@ -50,6 +52,7 @@ pub mod utils;
 
 pub(crate) use conversation_content::content_push;
 pub(crate) use herald::{push, Update};
+pub(crate) use user::user_push;
 
 pub(crate) trait Loadable {
     type Error;

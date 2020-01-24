@@ -9,7 +9,7 @@ use std::collections::HashMap;
 /// Concurrent hashmap from `UserId` to `User`. Used to avoid data replication.
 static USER_DATA: OnceCell<RwLock<HashMap<UserId, user::User>>> = OnceCell::new();
 
-pub(super) fn user_data() -> &'static RwLock<HashMap<UserId, user::User>> {
+pub(crate) fn user_data() -> &'static RwLock<HashMap<UserId, user::User>> {
     USER_DATA.get_or_init(|| RwLock::new(HashMap::default()))
 }
 
@@ -21,7 +21,7 @@ pub(crate) fn matches(
     uid: &UserId,
     pattern: &SearchPattern,
 ) -> bool {
-    let lock = crate::users::shared::user_data().read();
+    let lock = user_data().read();
     match lock.get(&uid) {
         Some(u) => u.matches(pattern),
         None => false,
@@ -30,10 +30,6 @@ pub(crate) fn matches(
 
 pub(crate) fn color(uid: &UserId) -> Option<u32> {
     Some(user_data().read().get(uid)?.color)
-}
-
-pub(crate) fn status(uid: &UserId) -> Option<user::UserStatus> {
-    Some(user_data().read().get(uid)?.status)
 }
 
 pub(crate) fn name(uid: &UserId) -> Option<String> {

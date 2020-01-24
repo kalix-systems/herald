@@ -4,12 +4,9 @@ pub struct ConfigQObject;
 
 pub struct ConfigEmitter {
     pub(super) qobject: Arc<AtomicPtr<ConfigQObject>>,
-    pub(super) config_color_changed: fn(*mut ConfigQObject),
     pub(super) config_id_changed: fn(*mut ConfigQObject),
-    pub(super) name_changed: fn(*mut ConfigQObject),
     pub(super) nts_conversation_id_changed: fn(*mut ConfigQObject),
     pub(super) preferred_expiration_changed: fn(*mut ConfigQObject),
-    pub(super) profile_picture_changed: fn(*mut ConfigQObject),
 }
 
 impl ConfigEmitter {
@@ -22,12 +19,9 @@ impl ConfigEmitter {
     pub fn clone(&mut self) -> ConfigEmitter {
         ConfigEmitter {
             qobject: self.qobject.clone(),
-            config_color_changed: self.config_color_changed,
             config_id_changed: self.config_id_changed,
-            name_changed: self.name_changed,
             nts_conversation_id_changed: self.nts_conversation_id_changed,
             preferred_expiration_changed: self.preferred_expiration_changed,
-            profile_picture_changed: self.profile_picture_changed,
         }
     }
 
@@ -37,27 +31,11 @@ impl ConfigEmitter {
             .store(n as *mut ConfigQObject, Ordering::SeqCst);
     }
 
-    pub fn config_color_changed(&mut self) {
-        let ptr = self.qobject.load(Ordering::SeqCst);
-
-        if !ptr.is_null() {
-            (self.config_color_changed)(ptr);
-        }
-    }
-
     pub fn config_id_changed(&mut self) {
         let ptr = self.qobject.load(Ordering::SeqCst);
 
         if !ptr.is_null() {
             (self.config_id_changed)(ptr);
-        }
-    }
-
-    pub fn name_changed(&mut self) {
-        let ptr = self.qobject.load(Ordering::SeqCst);
-
-        if !ptr.is_null() {
-            (self.name_changed)(ptr);
         }
     }
 
@@ -76,14 +54,6 @@ impl ConfigEmitter {
             (self.preferred_expiration_changed)(ptr);
         }
     }
-
-    pub fn profile_picture_changed(&mut self) {
-        let ptr = self.qobject.load(Ordering::SeqCst);
-
-        if !ptr.is_null() {
-            (self.profile_picture_changed)(ptr);
-        }
-    }
 }
 
 pub trait ConfigTrait {
@@ -91,21 +61,7 @@ pub trait ConfigTrait {
 
     fn emit(&mut self) -> &mut ConfigEmitter;
 
-    fn config_color(&self) -> u32;
-
-    fn set_config_color(
-        &mut self,
-        value: u32,
-    );
-
     fn config_id(&self) -> &str;
-
-    fn name(&self) -> &str;
-
-    fn set_name(
-        &mut self,
-        value: String,
-    );
 
     fn nts_conversation_id(&self) -> &[u8];
 
@@ -116,7 +72,10 @@ pub trait ConfigTrait {
         value: u8,
     );
 
-    fn profile_picture(&self) -> Option<&str>;
+    fn set_name(
+        &mut self,
+        name: String,
+    ) -> ();
 
     fn set_profile_picture(
         &mut self,
@@ -135,21 +94,15 @@ pub unsafe fn config_new_inner(ptr_bundle: *mut ConfigPtrBundle) -> Config {
 
     let ConfigPtrBundle {
         config,
-        config_config_color_changed,
         config_config_id_changed,
-        config_name_changed,
         config_nts_conversation_id_changed,
         config_preferred_expiration_changed,
-        config_profile_picture_changed,
     } = ptr_bundle;
     let config_emit = ConfigEmitter {
         qobject: Arc::new(AtomicPtr::new(config)),
-        config_color_changed: config_config_color_changed,
         config_id_changed: config_config_id_changed,
-        name_changed: config_name_changed,
         nts_conversation_id_changed: config_nts_conversation_id_changed,
         preferred_expiration_changed: config_preferred_expiration_changed,
-        profile_picture_changed: config_profile_picture_changed,
     };
     let d_config = Config::new(config_emit);
     d_config
@@ -158,6 +111,18 @@ pub unsafe fn config_new_inner(ptr_bundle: *mut ConfigPtrBundle) -> Config {
 #[no_mangle]
 pub unsafe extern "C" fn config_free(ptr: *mut Config) {
     Box::from_raw(ptr).emit().clear();
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn config_set_name(
+    ptr: *mut Config,
+    name_str: *const c_ushort,
+    name_len: c_int,
+) {
+    let obj = &mut *ptr;
+    let mut name = String::new();
+    set_string_from_utf16(&mut name, name_str, name_len);
+    obj.set_name(name)
 }
 
 #[no_mangle]
@@ -177,19 +142,6 @@ pub unsafe extern "C" fn config_set_profile_picture(
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn config_config_color_get(ptr: *const Config) -> u32 {
-    (&*ptr).config_color()
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn config_config_color_set(
-    ptr: *mut Config,
-    value: u32,
-) {
-    (&mut *ptr).set_config_color(value)
-}
-
-#[no_mangle]
 pub unsafe extern "C" fn config_config_id_get(
     ptr: *const Config,
     prop: *mut QString,
@@ -199,30 +151,6 @@ pub unsafe extern "C" fn config_config_id_get(
     let value = obj.config_id();
     let str_: *const c_char = value.as_ptr() as *const c_char;
     set(prop, str_, to_c_int(value.len()));
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn config_name_get(
-    ptr: *const Config,
-    prop: *mut QString,
-    set: fn(*mut QString, *const c_char, c_int),
-) {
-    let obj = &*ptr;
-    let value = obj.name();
-    let str_: *const c_char = value.as_ptr() as *const c_char;
-    set(prop, str_, to_c_int(value.len()));
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn config_name_set(
-    ptr: *mut Config,
-    value: *const c_ushort,
-    len: c_int,
-) {
-    let obj = &mut *ptr;
-    let mut s = String::new();
-    set_string_from_utf16(&mut s, value, len);
-    obj.set_name(s);
 }
 
 #[no_mangle]
@@ -250,28 +178,11 @@ pub unsafe extern "C" fn config_preferred_expiration_set(
     (&mut *ptr).set_preferred_expiration(value)
 }
 
-#[no_mangle]
-pub unsafe extern "C" fn config_profile_picture_get(
-    ptr: *const Config,
-    prop: *mut QString,
-    set: fn(*mut QString, *const c_char, c_int),
-) {
-    let obj = &*ptr;
-    let value = obj.profile_picture();
-    if let Some(value) = value {
-        let str_: *const c_char = value.as_ptr() as (*const c_char);
-        set(prop, str_, to_c_int(value.len()));
-    }
-}
-
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct ConfigPtrBundle {
     config: *mut ConfigQObject,
-    config_config_color_changed: fn(*mut ConfigQObject),
     config_config_id_changed: fn(*mut ConfigQObject),
-    config_name_changed: fn(*mut ConfigQObject),
     config_nts_conversation_id_changed: fn(*mut ConfigQObject),
     config_preferred_expiration_changed: fn(*mut ConfigQObject),
-    config_profile_picture_changed: fn(*mut ConfigQObject),
 }

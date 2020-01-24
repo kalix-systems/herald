@@ -46,7 +46,6 @@ impl MessageBuilder {
 
     pub(super) fn emit_op_changed(&mut self) {
         self.emit.op_id_changed();
-        self.emit.op_body_changed();
         self.emit.op_author_changed();
         self.emit.op_time_changed();
         self.emit.op_doc_attachments_changed();
