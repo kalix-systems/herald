@@ -152,6 +152,24 @@ void ObjectiveUtils::launch_camera_dialog(){
     [dialog openImageDialog];
 }
 
+void ObjectiveUtils::save_file_to_gallery(QString fname) {
+  auto ns_fname = [[NSString alloc] initWithUTF8String:fname.toUtf8().constData()];
+  UIImage *image = [UIImage imageNamed: ns_fname];
+  UIImageWriteToSavedPhotosAlbum(image, nil, nil, nil);
+}
+
+void ObjectiveUtils::save_file_to_documents(QString fname){
+  // async dispatch, copying is a blocking maneuver
+  dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+    auto ns_fname_str = [[NSString alloc] initWithUTF8String:fname.toUtf8().constData()];
+    auto ns_fname_url =  [[NSURL alloc] initWithString: ns_fname_str];
+    auto search_array = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    auto ns_document_dir_str = search_array[0];
+    auto ns_document_dir_url =  [[NSURL alloc] initWithString: ns_document_dir_str];
+    [[NSFileManager defaultManager] copyItemAtURL:ns_fname_url toURL:ns_document_dir_url error:nil];
+  });
+}
+
 
 @end
 

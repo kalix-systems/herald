@@ -72,18 +72,12 @@ Rectangle {
 
             CMN.AnimIconButton {
                 icon.color: CmnCfg.palette.white
-                visible: mediaAttachments.length === 1
-                         || docAttachments.length === 1
+                visible: mediaAttachments.length > 0
                 imageSource: "qrc:/download-icon.svg"
                 anchors.verticalCenter: parent.verticalCenter
                 onTapped: {
-                    if (MediaAttachments.length === 1) {
-
-                        // save to gallery
-                    } else {
-
-                        // save to documents
-                    }
+                    const url = JSON.parse(mediaAttachments).items[0].path
+                    mobHelper.save_file_to_gallery(url)
                 }
             }
 

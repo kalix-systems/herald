@@ -61,6 +61,7 @@ Rectangle {
     property bool aux: false
     property var convoExpiration
     property MouseArea hitbox
+    signal downloadFileAttachmentTapped(string filename)
 
     property bool sameExpiration: {
         if (messageModelData.expirationTime === undefined) {

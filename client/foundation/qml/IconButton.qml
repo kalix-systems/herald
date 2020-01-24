@@ -1,4 +1,4 @@
-import QtQuick 2.4
+import QtQuick 2.14
 import QtQuick.Controls 2.13
 import QtGraphicalEffects 1.13
 import LibHerald 1.0
@@ -23,7 +23,6 @@ ToolButton {
         hoverEnabled: true
         acceptedButtons: Qt.NoButton
         cursorShape: Qt.PointingHandCursor
-        preventStealing: true
         z: parent.z + 1
     }
 

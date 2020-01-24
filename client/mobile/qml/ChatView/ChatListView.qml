@@ -120,6 +120,10 @@ ListView {
                     convoExpiration: convoItem.expirationPeriod
                     ownedConversation: ownedMessages
                     bubbleIndex: index
+
+                    onDownloadFileAttachmentTapped: mobHelper.save_file_to_documents(
+                                                        filename)
+
                     property Component infoPage: Component {
                         InfoPage {
                             members: convContent.members

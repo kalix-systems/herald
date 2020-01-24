@@ -94,6 +94,8 @@ Rectangle {
     // moreInfo: (CHECK ME)
     property bool moreInfo: true
 
+    signal downloadFileAttachmentTapped(string filename)
+
     height: contentRoot.height
     width: defaultWidth
 

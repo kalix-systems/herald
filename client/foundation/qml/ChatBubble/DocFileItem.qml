@@ -9,7 +9,6 @@ import "../js/utils.mjs" as Utils
 // A visual list of documents
 ListView {
     id: fileList
-
     interactive: false
     width: contentItem.childrenRect.width + CmnCfg.smallMargin * 2
     height: 24 * (!expand ? Math.min(docParsed.length, 4) : docParsed.length)
@@ -31,6 +30,8 @@ ListView {
                 attachmentDownloader.filePath = path
                 attachmentDownloader.open()
             }
+
+            //          tapHandler.onTapped: bubbleRoot.downloadFileAttachmentTapped(path)
             mouseArea.onEntered: bubbleActual.hoverHighlight = true
             mouseArea.onExited: if (!bubbleActual.hitbox.containsMouse) {
                                     bubbleActual.hoverHighlight = false
