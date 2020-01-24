@@ -14,13 +14,7 @@ pub use traits::*;
 #[derive(Ser, De, Eq, PartialEq, Ord, PartialOrd, Hash, Clone, Copy, Debug)]
 pub struct PayloadId(random::UQ);
 
-#[derive(Ser, De, Eq, PartialEq, Hash, Clone, Debug)]
-pub enum Payload {
-    Noop,
-    AddToConvo(ConversationId, Vec<UserId>),
-    LeaveConvo(ConversationId),
-    Msg(Bytes),
-}
+pub type Payload = Bytes;
 
 #[derive(Ser, De, Eq, PartialEq, Hash, Clone, Debug)]
 pub enum Msg {
@@ -118,49 +112,6 @@ pub fn decrypt_payload<S: RatchetStore + dr::KeyStore>(
     Ok(payload)
 }
 
-#[derive(Debug, PartialEq)]
-pub enum PayloadResult {
-    AddToConvo(ConversationId, Vec<UserId>),
-    LeaveConvo(ConversationId),
-    Msg(Bytes),
-}
-
-pub fn handle_payload<S: SigStore + ConversationStore>(
-    store: &mut S,
-    from: GlobalId,
-    payload: Payload,
-) -> Result<Option<PayloadResult>, PayloadError<S::Error>> {
-    use Payload::*;
-
-    match payload {
-        Noop => Ok(None),
-
-        AddToConvo(cid, mems) => {
-            if !store
-                .member_of(cid, from.uid)
-                .map_err(PayloadError::Store)?
-            {
-                return Err(PayloadError::InvalidSender);
-            }
-            store
-                .add_to_convo(cid, mems.clone())
-                .map_err(PayloadError::Store)?;
-
-            Ok(Some(PayloadResult::AddToConvo(cid, mems)))
-        }
-
-        LeaveConvo(cid) => {
-            store
-                .left_convo(cid, from.uid)
-                .map_err(PayloadError::Store)?;
-
-            Ok(PayloadResult::LeaveConvo(cid).into())
-        }
-
-        Msg(content) => Ok(PayloadResult::Msg(content).into()),
-    }
-}
-
 fn keys_of_cid<S: ConversationStore + SigStore>(
     store: &mut S,
     my_key: sig::PublicKey,
@@ -231,7 +182,7 @@ where
     S: dr::KeyStore + RatchetStore + ConversationStore + PendingStore + SigStore,
 {
     let keys = keys_of_cid(store, *my_keypair.public(), cid).map_err(TransitError::Store)?;
-    let payload = Payload::Msg(msg);
+    let payload = msg;
     prepare_send_to_keys(store, my_keypair, keys, payload)
 }
 
@@ -275,7 +226,7 @@ fn mk_ad(
 pub struct MsgResult {
     pub ack: Option<Ack>,
     pub forward: Option<Msg>,
-    pub output: Option<PayloadResult>,
+    pub output: Option<Bytes>,
     pub response: Option<Msg>,
 }
 
@@ -374,18 +325,10 @@ where
                         reason: e.into(),
                     });
                 }
-                Ok(payload) => match handle_payload(store, from, payload) {
-                    Err(e) => {
-                        res.ack.replace(Ack::Failed {
-                            id,
-                            reason: e.into(),
-                        });
-                    }
-                    Ok(msg) => {
-                        res.ack.replace(Ack::Success(id));
-                        res.output = msg;
-                    }
-                },
+                Ok(payload) => {
+                    res.ack.replace(Ack::Success(id));
+                    res.output.replace(payload);
+                }
             };
         }
     }
