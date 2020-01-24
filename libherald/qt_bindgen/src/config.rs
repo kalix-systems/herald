@@ -46,10 +46,10 @@ fn objects() -> BTreeMap<String, Rc<Object>> {
        utils(),
        errors(),
        notifications(),
-       members(),
 
        conversation_content(),
        messages(),
+       members(),
        message_builder(),
 
        shared_conversations(),
@@ -587,8 +587,15 @@ fn shared_conversations() -> Object {
         | connect tryLoad load
     };
 
+    let o = Obj::new()
+        .list()
+        .item_props(item_props)
+        .props(props)
+        .funcs(funcs)
+        .hooks(hooks);
+
     obj! {
-       SharedConversations: Obj::new().list().item_props(item_props).props(props).funcs(funcs).hooks(hooks)
+       SharedConversations: o
     }
 }
 

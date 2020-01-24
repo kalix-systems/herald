@@ -10,7 +10,7 @@ QML_IMPORT_PATH +=\
 
 HEADERS += \
      $$PWD/../../libherald/qt_ffi/Bindings.h \ \
-    $$PWD/conversationmap.h \
+    $$PWD/contentmap.h \
     $$PWD/usermap.h
 
 

@@ -1,6 +1,6 @@
 #include "Bindings.h"
 #include "androidhelper.h"
-#include "conversationmap.h"
+#include "contentmap.h"
 #include "objectiveutils.h"
 #include "usermap.h"
 #include <QApplication>
@@ -83,13 +83,13 @@ int main(int argc, char* argv[])
                                             heraldMsg("Conversations"));
 
   // Provides access to per conversation content
-  qmlRegisterSingletonType<ConversationMap>(
+  qmlRegisterSingletonType<ContentMap>(
       "LibHerald", 1, 0, "ContentMap",
       [](QQmlEngine* engine, QJSEngine* scriptEngine) {
         Q_UNUSED(scriptEngine)
         Q_UNUSED(engine)
 
-        ConversationMap* contentMap = new ConversationMap();
+        ContentMap* contentMap = new ContentMap();
 
         return contentMap;
       });
