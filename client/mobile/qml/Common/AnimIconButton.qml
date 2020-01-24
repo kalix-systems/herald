@@ -19,7 +19,7 @@ ToolButton {
     }
 
     // buttons "onClicked" property does not work on mobile
-    // so I made a tapped signal, because there is not one by defaultx
+    // so I made a tapped signal, because there is not one by default
     background: Rectangle {
         id: splash
         anchors.centerIn: parent
