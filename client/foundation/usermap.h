@@ -12,7 +12,8 @@ public:
   Q_INVOKABLE QVariant get(const QString uid)
   {
     auto iter = userHash.find(uid);
-    if (iter == userHash.end()) {
+
+    if (iter == userHash.end() || iter == nullptr) {
       // user does not exist
       auto user = new User();
       user->setUserId(uid);
