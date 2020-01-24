@@ -202,7 +202,7 @@ Popup {
 
             delegate: Rectangle {
                 id: userRect
-                property var userData: UserMap.get(model.userId)
+                property User userData: UserMap.get(model.userId)
                 color: CmnCfg.palette.white
                 width: contactsPopup.width
                 height: visible ? row.height + 1 : 0
@@ -253,9 +253,9 @@ Popup {
                         anchors.verticalCenter: parent.verticalCenter
                         height: CmnCfg.avatarSize
                         pfpPath: Utils.safeStringOrDefault(
-                                     model.profilePicture, "")
-                        color: CmnCfg.avatarColors[model.userColor]
-                        initials: Utils.initialize(name)
+                                     userData.profilePicture, "")
+                        color: CmnCfg.avatarColors[userData.userColor]
+                        initials: Utils.initialize(userData.name)
                         MouseArea {
                             cursorShape: Qt.PointingHandCursor
                             anchors.fill: parent
@@ -289,14 +289,14 @@ Popup {
                                     font.weight: Font.DemiBold
                                     font.pixelSize: CmnCfg.labelFontSize
                                     font.family: CmnCfg.chatFont.name
-                                    text: name
+                                    text: userData.name
                                     color: CmnCfg.palette.offBlack
                                     Layout.maximumWidth: nameHeader.width
                                     elide: Label.ElideRight
                                 }
                             }
                             Label {
-                                text: "@" + userId
+                                text: "@" + userData.userId
                                 font.family: CmnCfg.chatFont.name
                                 color: CmnCfg.palette.offBlack
                                 font.pixelSize: CmnCfg.defaultFontSize

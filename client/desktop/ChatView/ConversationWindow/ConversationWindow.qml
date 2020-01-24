@@ -155,7 +155,8 @@ ListView {
                             return CmnCfg.palette.avatarColors[UserMap.get(
                                                                    messageModelData.author).userColor]
                         }
-                        CmnCfg.palette.avatarColors[Herald.config.configColor]
+                        CmnCfg.palette.avatarColors[UserMap.get(
+                                                        Herald.config.configId).userColor]
                     }
 
                     convoExpiration: conversationItem.expirationPeriod

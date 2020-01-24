@@ -48,7 +48,8 @@ ColumnLayout {
                                                        Herald.config.configId).userColor]
                 size: parent.height
                 textColor: CmnCfg.palette.iconFill
-                initials: Utils.initialize(Herald.config.name)
+                initials: Utils.initialize(UserMap.get(
+                                               Herald.config.configId).name)
 
                 MouseArea {
                     anchors.fill: parent

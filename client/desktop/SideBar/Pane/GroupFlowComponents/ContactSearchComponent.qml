@@ -46,7 +46,7 @@ Column {
         }
         delegate: Item {
             id: contactItem
-            property var contactData: model
+            property var contactData: UserMap.get(model.userId)
             height: visible ? CmnCfg.convoHeight : 0
             width: parent.width
             visible: matched && contactData.userId !== Herald.config.configId
@@ -59,8 +59,8 @@ Column {
                 picture: Utils.safeStringOrDefault(contactData.profilePicture,
                                                    "")
 
-                        topTextMargin: CmnCfg.smallMargin
-                        bottomTextMargin: CmnCfg.defaultMargin
+                topTextMargin: CmnCfg.smallMargin
+                bottomTextMargin: CmnCfg.defaultMargin
                 labelComponent: Entity.ContactLabel {
                     displayName: contactData.name
                     labelColor: contactRectangle.state

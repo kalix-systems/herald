@@ -45,7 +45,7 @@ Page {
                         if ((idx < 0) || (idx >= Herald.users.rowCount()))
                             return
 
-                        Herald.users.setUserColor(idx, colorIndex)
+                        userData.userColor = colorIndex
                     }
                 }
             }

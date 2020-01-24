@@ -13,7 +13,7 @@ import "../" as Popups
 
 Drawer {
     id: drawer
-    property var userData
+    property User userData
     width: 0.33 * contactsPopup.width
     height: contactsPopup.height
     edge: Qt.RightEdge
@@ -22,7 +22,7 @@ Drawer {
     closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside | Popup.CloseOnReleaseOutside
     Loader {
         anchors.fill: parent
-        active: drawer.userData !== undefined
+        active: drawer.userData !== null
         sourceComponent: Flickable {
             boundsBehavior: Flickable.StopAtBounds
             boundsMovement: Flickable.StopAtBounds
@@ -139,7 +139,7 @@ Drawer {
                                         || (idx >= Herald.users.rowCount()))
                                     return
 
-                                Herald.users.setUserColor(idx, colorIndex)
+                                userData.userColor = colorIndex
                             }
                         }
                     }

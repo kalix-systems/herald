@@ -35,8 +35,9 @@ ToolBar {
 
     Avatar {
         id: avatar
-        color: CmnCfg.palette.avatarColors[Herald.config.configColor]
-        initials: Herald.config.name[0].toUpperCase()
+        color: CmnCfg.palette.avatarColors[UserMap.get(
+                                               Herald.config.configId).userColor]
+        initials: UserMap.get(Herald.config.configId).name[0].toUpperCase()
         pfpPath: Utils.safeStringOrDefault(Herald.config.profilePicture, "")
         size: CmnCfg.headerAvatarSize
         visible: parentPage.state !== "archiveState"
@@ -54,8 +55,8 @@ ToolBar {
 
         Label {
             id: stateLabel
-            text: parentPage.state === "archiveState" ? qsTr("Archived") :
-                                                        qsTr("Conversations")
+            text: parentPage.state === "archiveState" ? qsTr("Archived") : qsTr(
+                                                            "Conversations")
             font.family: CmnCfg.headerFont.family
             font.pixelSize: CmnCfg.headerFontSize
             Layout.maximumWidth: parent.width - avatar.width - buttonRow.implicitWidth

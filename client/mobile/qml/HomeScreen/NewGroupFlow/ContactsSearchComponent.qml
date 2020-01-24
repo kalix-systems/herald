@@ -47,7 +47,7 @@ Column {
         }
 
         delegate: Item {
-            property var contactData: model
+            property var contactData: UserMap.get(model.userId)
             height: visible ? CmnCfg.convoHeight : 0
             width: parent.width
             visible: matched && contactData.userId !== Herald.config.configId

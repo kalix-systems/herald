@@ -205,8 +205,7 @@ Popup {
                                                         )))
                                             return
 
-                                        Herald.users.setUserColor(idx,
-                                                                  colorIndex)
+                                        contactMember.userColor = colorIndex
                                     }
                                 }
                             }
