@@ -1,6 +1,7 @@
 use super::*;
 use crate::messages::MsgUpdate;
 use crossbeam_channel::*;
+use heraldcore::conversation::{settings::SettingsUpdate as CoreSettingsUpdate, ExpirationPeriod};
 use heraldcore::{channel_send_err, errors::HErr};
 use once_cell::sync::OnceCell;
 use parking_lot::{Mutex, RwLock};
@@ -20,25 +21,65 @@ static CHANS: OnceCell<RwLock<HashMap<ConversationId, Bus>>> = OnceCell::new();
 static EMITTERS: OnceCell<Mutex<HashMap<ConversationId, Emitter>>> = OnceCell::new();
 
 fn chans() -> &'static RwLock<HashMap<ConversationId, Bus>> {
-    CHANS.get_or_init(|| RwLock::new(HashMap::default()))
+    CHANS.get_or_init(Default::default)
 }
 
 fn emitters() -> &'static Mutex<HashMap<ConversationId, Emitter>> {
-    EMITTERS.get_or_init(|| Mutex::new(HashMap::default()))
+    EMITTERS.get_or_init(Default::default)
 }
 
-/// An update to a conversation's message model or members model
+/// An update to a conversation data
 #[derive(Debug)]
 pub(crate) enum ContentUpdate {
     /// Messages model update
     Msg(MsgUpdate),
     /// Members model update
     Member(MemberUpdate),
+    /// Conversation meta data update
+    Meta(MetaUpdate),
+}
+
+#[derive(Debug)]
+pub enum MetaUpdate {
+    /// Expiration period has been changed
+    ExpirationChanged(ExpirationPeriod),
+    /// Conversation picture has been changed
+    PictureChanged(Option<String>),
+    /// Conversation title has been changed
+    TitleChanged(Option<String>),
+    /// Pairwise user data changed
+    UserChanged(herald_user::UserChange),
+    NewActivity,
+}
+
+impl From<CoreSettingsUpdate> for ContentUpdate {
+    fn from(update: CoreSettingsUpdate) -> Self {
+        use MetaUpdate::*;
+        let update = match update {
+            CoreSettingsUpdate::Expiration(period) => ExpirationChanged(period),
+            CoreSettingsUpdate::Title(title) => TitleChanged(title),
+            CoreSettingsUpdate::Picture(path) => PictureChanged(path),
+        };
+
+        update.into()
+    }
+}
+
+impl From<herald_user::UserChange> for ContentUpdate {
+    fn from(u: herald_user::UserChange) -> Self {
+        ContentUpdate::Meta(MetaUpdate::UserChanged(u))
+    }
 }
 
 impl From<MemberUpdate> for ContentUpdate {
     fn from(update: MemberUpdate) -> ContentUpdate {
         ContentUpdate::Member(update)
+    }
+}
+
+impl From<MetaUpdate> for ContentUpdate {
+    fn from(update: MetaUpdate) -> ContentUpdate {
+        ContentUpdate::Meta(update)
     }
 }
 
@@ -107,6 +148,11 @@ pub(crate) fn content_push<T: Into<ContentUpdate>>(
     Ok(())
 }
 
+pub(crate) fn new_activity(cid: ConversationId) {
+    err!(content_push(cid, MetaUpdate::NewActivity));
+    crate::push(crate::conversations::shared::ConvUpdate::NewActivity(cid));
+}
+
 impl super::ConversationContent {
     pub(super) fn process_updates(&mut self) -> Option<()> {
         let id = self.id?;
@@ -120,6 +166,9 @@ impl super::ConversationContent {
                 Member(update) => {
                     self.members.process_update(update);
                 }
+                Meta(update) => {
+                    self.handle_meta_update(update);
+                }
             }
         }
 
@@ -131,6 +180,65 @@ impl super::ConversationContent {
         let id = self.id?;
 
         emitters().lock().insert(id, self.emit.clone());
+
+        Some(())
+    }
+
+    fn handle_meta_update(
+        &mut self,
+        update: MetaUpdate,
+    ) -> Option<()> {
+        use MetaUpdate::*;
+
+        let mut write = cs::conv_data().write();
+        let data = write.get_mut(&self.id?)?;
+
+        match update {
+            PictureChanged(path) => {
+                data.picture = path;
+                drop(write);
+
+                self.emit.picture_changed();
+            }
+            TitleChanged(title) => {
+                data.title = title;
+                drop(write);
+
+                self.emit.title_changed();
+            }
+            ExpirationChanged(period) => {
+                data.expiration_period = period;
+                drop(write);
+
+                self.emit.expiration_period_changed();
+            }
+            UserChanged(update) => {
+                use herald_user::UserChange as U;
+
+                if data.pairwise_uid.is_none() {
+                    return Some(());
+                }
+
+                match update {
+                    U::Picture(_) => {
+                        self.emit.picture_changed();
+                    }
+                    U::Color(_) => {
+                        self.emit.conversation_color_changed();
+                    }
+                    U::DisplayName(_) => {
+                        self.emit.title_changed();
+                    }
+                }
+            }
+            NewActivity => {
+                use heraldcore::conversation::Status;
+                if data.status == Status::Archived {
+                    data.status = Status::Active;
+                    self.emit.status_changed();
+                }
+            }
+        };
 
         Some(())
     }

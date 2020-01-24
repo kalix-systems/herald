@@ -165,4 +165,43 @@ impl Messages {
     pub(crate) fn builder_mut_(&mut self) -> &mut MessageBuilder {
         &mut self.builder
     }
+
+    pub(crate) fn last_msg_digest_(&self) -> String {
+        let f = || {
+            let mid = &self.last_msg_id()?;
+
+            let MsgData {
+                author,
+                receipts,
+                send_status,
+                time,
+                content,
+                ..
+            } = messages_helper::container::get(&mid)?;
+
+            let body = content.as_str();
+            let time = time.insertion;
+            let aux_code = content.aux_code();
+            let has_attachments = content
+                .attachments()
+                .map(|a| !a.is_empty())
+                .unwrap_or(false);
+
+            let receipt_status = receipts.iter().map(|(_, r)| r).max().copied();
+            let status = heraldcore::message::Status::from((send_status, receipt_status)) as u8;
+
+            let object = json::object! {
+                "author" => author.as_str(),
+                "body" => body,
+                "time" => *time.as_i64(),
+                "auxCode" => aux_code,
+                "status" => status,
+                "hasAttachments" => has_attachments
+            };
+
+            Some(object.dump())
+        };
+
+        f().unwrap_or_default()
+    }
 }

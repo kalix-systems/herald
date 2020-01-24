@@ -54,16 +54,14 @@ impl Interface for User {
         let uid = none!(self.id);
 
         spawn!({
-            use crate::conversations::shared::{ConvItemUpdate as C, ConvItemUpdateVariant as CV};
-
             err!(heraldcore::user::set_color(uid, color));
 
             let cid = none!(data::pairwise_cid(&uid));
 
-            crate::push(C {
+            err!(crate::content_push(
                 cid,
-                variant: CV::UserChanged,
-            });
+                herald_user::UserChange::Color(color)
+            ));
         });
 
         {

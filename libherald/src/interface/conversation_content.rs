@@ -4,7 +4,14 @@ pub struct ConversationContentQObject;
 
 pub struct ConversationContentEmitter {
     pub(super) qobject: Arc<AtomicPtr<ConversationContentQObject>>,
+    pub(super) conversation_color_changed: fn(*mut ConversationContentQObject),
     pub(super) conversation_id_changed: fn(*mut ConversationContentQObject),
+    pub(super) expiration_period_changed: fn(*mut ConversationContentQObject),
+    pub(super) muted_changed: fn(*mut ConversationContentQObject),
+    pub(super) pairwise_changed: fn(*mut ConversationContentQObject),
+    pub(super) picture_changed: fn(*mut ConversationContentQObject),
+    pub(super) status_changed: fn(*mut ConversationContentQObject),
+    pub(super) title_changed: fn(*mut ConversationContentQObject),
     pub(super) try_poll: fn(*mut ConversationContentQObject),
 }
 
@@ -18,7 +25,14 @@ impl ConversationContentEmitter {
     pub fn clone(&mut self) -> ConversationContentEmitter {
         ConversationContentEmitter {
             qobject: self.qobject.clone(),
+            conversation_color_changed: self.conversation_color_changed,
             conversation_id_changed: self.conversation_id_changed,
+            expiration_period_changed: self.expiration_period_changed,
+            muted_changed: self.muted_changed,
+            pairwise_changed: self.pairwise_changed,
+            picture_changed: self.picture_changed,
+            status_changed: self.status_changed,
+            title_changed: self.title_changed,
             try_poll: self.try_poll,
         }
     }
@@ -29,11 +43,67 @@ impl ConversationContentEmitter {
             .store(n as *mut ConversationContentQObject, Ordering::SeqCst);
     }
 
+    pub fn conversation_color_changed(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+
+        if !ptr.is_null() {
+            (self.conversation_color_changed)(ptr);
+        }
+    }
+
     pub fn conversation_id_changed(&mut self) {
         let ptr = self.qobject.load(Ordering::SeqCst);
 
         if !ptr.is_null() {
             (self.conversation_id_changed)(ptr);
+        }
+    }
+
+    pub fn expiration_period_changed(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+
+        if !ptr.is_null() {
+            (self.expiration_period_changed)(ptr);
+        }
+    }
+
+    pub fn muted_changed(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+
+        if !ptr.is_null() {
+            (self.muted_changed)(ptr);
+        }
+    }
+
+    pub fn pairwise_changed(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+
+        if !ptr.is_null() {
+            (self.pairwise_changed)(ptr);
+        }
+    }
+
+    pub fn picture_changed(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+
+        if !ptr.is_null() {
+            (self.picture_changed)(ptr);
+        }
+    }
+
+    pub fn status_changed(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+
+        if !ptr.is_null() {
+            (self.status_changed)(ptr);
+        }
+    }
+
+    pub fn title_changed(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+
+        if !ptr.is_null() {
+            (self.title_changed)(ptr);
         }
     }
 
@@ -55,11 +125,20 @@ pub trait ConversationContentTrait {
 
     fn emit(&mut self) -> &mut ConversationContentEmitter;
 
+    fn conversation_color(&self) -> u32;
+
     fn conversation_id(&self) -> Option<&[u8]>;
 
     fn set_conversation_id(
         &mut self,
         value: Option<&[u8]>,
+    );
+
+    fn expiration_period(&self) -> u8;
+
+    fn set_expiration_period(
+        &mut self,
+        value: u8,
     );
 
     fn members(&self) -> &Members;
@@ -70,7 +149,37 @@ pub trait ConversationContentTrait {
 
     fn messages_mut(&mut self) -> &mut Messages;
 
+    fn muted(&self) -> bool;
+
+    fn set_muted(
+        &mut self,
+        value: bool,
+    );
+
+    fn pairwise(&self) -> bool;
+
+    fn picture(&self) -> Option<String>;
+
+    fn status(&self) -> u8;
+
+    fn set_status(
+        &mut self,
+        value: u8,
+    );
+
+    fn title(&self) -> Option<String>;
+
+    fn set_title(
+        &mut self,
+        value: Option<String>,
+    );
+
     fn poll_update(&mut self) -> ();
+
+    fn set_picture(
+        &mut self,
+        picture: String,
+    ) -> ();
 }
 
 #[no_mangle]
@@ -88,7 +197,9 @@ pub unsafe fn conversation_content_new_inner(
 
     let ConversationContentPtrBundle {
         conversation_content,
+        conversation_content_conversation_color_changed,
         conversation_content_conversation_id_changed,
+        conversation_content_expiration_period_changed,
         members,
         members_filter_changed,
         members_filter_regex_changed,
@@ -158,6 +269,8 @@ pub unsafe fn conversation_content_new_inner(
         builder_end_move_rows,
         builder_begin_remove_rows,
         builder_end_remove_rows,
+        messages_is_empty_changed,
+        messages_last_msg_digest_changed,
         messages_search_active_changed,
         messages_search_index_changed,
         messages_search_num_matches_changed,
@@ -175,6 +288,11 @@ pub unsafe fn conversation_content_new_inner(
         messages_end_move_rows,
         messages_begin_remove_rows,
         messages_end_remove_rows,
+        conversation_content_muted_changed,
+        conversation_content_pairwise_changed,
+        conversation_content_picture_changed,
+        conversation_content_status_changed,
+        conversation_content_title_changed,
         conversation_content_try_poll,
     } = ptr_bundle;
     let members_emit = MembersEmitter {
@@ -276,6 +394,8 @@ pub unsafe fn conversation_content_new_inner(
     );
     let messages_emit = MessagesEmitter {
         qobject: Arc::new(AtomicPtr::new(messages)),
+        is_empty_changed: messages_is_empty_changed,
+        last_msg_digest_changed: messages_last_msg_digest_changed,
         search_active_changed: messages_search_active_changed,
         search_index_changed: messages_search_index_changed,
         search_num_matches_changed: messages_search_num_matches_changed,
@@ -300,7 +420,14 @@ pub unsafe fn conversation_content_new_inner(
     let d_messages = Messages::new(messages_emit, model, d_builder);
     let conversation_content_emit = ConversationContentEmitter {
         qobject: Arc::new(AtomicPtr::new(conversation_content)),
+        conversation_color_changed: conversation_content_conversation_color_changed,
         conversation_id_changed: conversation_content_conversation_id_changed,
+        expiration_period_changed: conversation_content_expiration_period_changed,
+        muted_changed: conversation_content_muted_changed,
+        pairwise_changed: conversation_content_pairwise_changed,
+        picture_changed: conversation_content_picture_changed,
+        status_changed: conversation_content_status_changed,
+        title_changed: conversation_content_title_changed,
         try_poll: conversation_content_try_poll,
     };
     let d_conversation_content =
@@ -317,6 +444,25 @@ pub unsafe extern "C" fn conversation_content_free(ptr: *mut ConversationContent
 pub unsafe extern "C" fn conversation_content_poll_update(ptr: *mut ConversationContent) {
     let obj = &mut *ptr;
     obj.poll_update()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn conversation_content_set_picture(
+    ptr: *mut ConversationContent,
+    picture_str: *const c_ushort,
+    picture_len: c_int,
+) {
+    let obj = &mut *ptr;
+    let mut picture = String::new();
+    set_string_from_utf16(&mut picture, picture_str, picture_len);
+    obj.set_picture(picture)
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn conversation_content_conversation_color_get(
+    ptr: *const ConversationContent
+) -> u32 {
+    (&*ptr).conversation_color()
 }
 
 #[no_mangle]
@@ -353,6 +499,21 @@ pub unsafe extern "C" fn conversation_content_conversation_id_set_none(
 }
 
 #[no_mangle]
+pub unsafe extern "C" fn conversation_content_expiration_period_get(
+    ptr: *const ConversationContent
+) -> u8 {
+    (&*ptr).expiration_period()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn conversation_content_expiration_period_set(
+    ptr: *mut ConversationContent,
+    value: u8,
+) {
+    (&mut *ptr).set_expiration_period(value)
+}
+
+#[no_mangle]
 pub unsafe extern "C" fn conversation_content_members_get(
     ptr: *mut ConversationContent
 ) -> *mut Members {
@@ -366,11 +527,92 @@ pub unsafe extern "C" fn conversation_content_messages_get(
     (&mut *ptr).messages_mut()
 }
 
+#[no_mangle]
+pub unsafe extern "C" fn conversation_content_muted_get(ptr: *const ConversationContent) -> bool {
+    (&*ptr).muted()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn conversation_content_muted_set(
+    ptr: *mut ConversationContent,
+    value: bool,
+) {
+    (&mut *ptr).set_muted(value)
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn conversation_content_pairwise_get(
+    ptr: *const ConversationContent
+) -> bool {
+    (&*ptr).pairwise()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn conversation_content_picture_get(
+    ptr: *const ConversationContent,
+    prop: *mut QString,
+    set: fn(*mut QString, *const c_char, c_int),
+) {
+    let obj = &*ptr;
+    let value = obj.picture();
+    if let Some(value) = value {
+        let str_: *const c_char = value.as_ptr() as (*const c_char);
+        set(prop, str_, to_c_int(value.len()));
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn conversation_content_status_get(ptr: *const ConversationContent) -> u8 {
+    (&*ptr).status()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn conversation_content_status_set(
+    ptr: *mut ConversationContent,
+    value: u8,
+) {
+    (&mut *ptr).set_status(value)
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn conversation_content_title_get(
+    ptr: *const ConversationContent,
+    prop: *mut QString,
+    set: fn(*mut QString, *const c_char, c_int),
+) {
+    let obj = &*ptr;
+    let value = obj.title();
+    if let Some(value) = value {
+        let str_: *const c_char = value.as_ptr() as (*const c_char);
+        set(prop, str_, to_c_int(value.len()));
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn conversation_content_title_set(
+    ptr: *mut ConversationContent,
+    value: *const c_ushort,
+    len: c_int,
+) {
+    let obj = &mut *ptr;
+    let mut s = String::new();
+    set_string_from_utf16(&mut s, value, len);
+    obj.set_title(Some(s));
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn conversation_content_title_set_none(ptr: *mut ConversationContent) {
+    let obj = &mut *ptr;
+    obj.set_title(None);
+}
+
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct ConversationContentPtrBundle {
     conversation_content: *mut ConversationContentQObject,
+    conversation_content_conversation_color_changed: fn(*mut ConversationContentQObject),
     conversation_content_conversation_id_changed: fn(*mut ConversationContentQObject),
+    conversation_content_expiration_period_changed: fn(*mut ConversationContentQObject),
     members: *mut MembersQObject,
     members_filter_changed: fn(*mut MembersQObject),
     members_filter_regex_changed: fn(*mut MembersQObject),
@@ -440,6 +682,8 @@ pub struct ConversationContentPtrBundle {
     builder_end_move_rows: fn(*mut MessageBuilderQObject),
     builder_begin_remove_rows: fn(*mut MessageBuilderQObject, usize, usize),
     builder_end_remove_rows: fn(*mut MessageBuilderQObject),
+    messages_is_empty_changed: fn(*mut MessagesQObject),
+    messages_last_msg_digest_changed: fn(*mut MessagesQObject),
     messages_search_active_changed: fn(*mut MessagesQObject),
     messages_search_index_changed: fn(*mut MessagesQObject),
     messages_search_num_matches_changed: fn(*mut MessagesQObject),
@@ -457,5 +701,10 @@ pub struct ConversationContentPtrBundle {
     messages_end_move_rows: fn(*mut MessagesQObject),
     messages_begin_remove_rows: fn(*mut MessagesQObject, usize, usize),
     messages_end_remove_rows: fn(*mut MessagesQObject),
+    conversation_content_muted_changed: fn(*mut ConversationContentQObject),
+    conversation_content_pairwise_changed: fn(*mut ConversationContentQObject),
+    conversation_content_picture_changed: fn(*mut ConversationContentQObject),
+    conversation_content_status_changed: fn(*mut ConversationContentQObject),
+    conversation_content_title_changed: fn(*mut ConversationContentQObject),
     conversation_content_try_poll: fn(*mut ConversationContentQObject),
 }

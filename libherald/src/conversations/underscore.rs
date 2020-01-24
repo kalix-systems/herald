@@ -1,9 +1,6 @@
 use crate::interface::{ConversationsEmitter, ConversationsList};
 use crate::{err, ffi, none, spawn};
-use heraldcore::{
-    conversation::{self, ExpirationPeriod, Status},
-    types::ConversationId,
-};
+use heraldcore::types::ConversationId;
 use im::Vector;
 use search_pattern::SearchPattern;
 use std::convert::TryFrom;
@@ -34,142 +31,11 @@ impl super::Conversations {
         self.list.len()
     }
 
-    pub(crate) fn color_(
-        &self,
-        index: usize,
-    ) -> u32 {
-        none!(self.color_inner(index), 0)
-    }
-
     pub(crate) fn conversation_id_(
         &self,
         index: usize,
     ) -> ffi::ConversationId {
         none!(self.list.get(index), vec![]).id.to_vec()
-    }
-
-    pub(crate) fn expiration_period_(
-        &self,
-        index: usize,
-    ) -> u8 {
-        none!(
-            self.expiration_inner(index),
-            ExpirationPeriod::default() as u8
-        ) as u8
-    }
-
-    pub(crate) fn set_expiration_period_(
-        &mut self,
-        index: usize,
-        period: u8,
-    ) -> bool {
-        let period = period.into();
-
-        let cid = none!(self.id(index), false);
-
-        spawn!(
-            {
-                use conversation::*;
-                err!(set_expiration_period(&cid, period));
-            },
-            false
-        );
-
-        none!(self.set_expiration_inner(index, period), false);
-
-        true
-    }
-
-    pub(crate) fn muted_(
-        &self,
-        index: usize,
-    ) -> bool {
-        none!(self.muted_inner(index), true)
-    }
-
-    pub(crate) fn set_muted_(
-        &mut self,
-        index: usize,
-        muted: bool,
-    ) -> bool {
-        let cid = none!(self.id(index), false);
-
-        spawn!(
-            err!(heraldcore::conversation::set_muted(&cid, muted)),
-            false
-        );
-
-        none!(self.set_muted_inner(index, muted), false);
-
-        true
-    }
-
-    pub(crate) fn picture_(
-        &self,
-        index: usize,
-    ) -> Option<String> {
-        self.picture_inner(index)
-    }
-
-    pub(crate) fn set_profile_picture_(
-        &mut self,
-        index: u64,
-        picture_json: String,
-    ) {
-        let index = index as usize;
-
-        if self.pairwise_inner(index).unwrap_or(false) {
-            return;
-        }
-
-        let cid = none!(self.id(index));
-
-        let profile_picture =
-            heraldcore::image_utils::ProfilePicture::from_json_string(picture_json);
-
-        spawn!({
-            use crate::conversations::shared::{ConvItemUpdate, ConvItemUpdateVariant};
-            let path = err!(conversation::set_picture(&cid, profile_picture));
-            crate::push(ConvItemUpdate {
-                cid,
-                variant: ConvItemUpdateVariant::PictureChanged(path),
-            });
-        });
-    }
-
-    pub(crate) fn title_(
-        &self,
-        index: usize,
-    ) -> Option<String> {
-        self.title_inner(index)
-    }
-
-    pub(crate) fn set_title_(
-        &mut self,
-        index: usize,
-        title: Option<String>,
-    ) -> bool {
-        let cid = none!(self.id(index), false);
-        {
-            let title = title.clone();
-            spawn!(
-                {
-                    use heraldcore::conversation::*;
-                    err!(set_title(&cid, title));
-                },
-                false
-            );
-        }
-
-        self.set_title_inner(index, title);
-        true
-    }
-
-    pub(crate) fn pairwise_(
-        &self,
-        index: usize,
-    ) -> bool {
-        none!(self.pairwise_inner(index), false)
     }
 
     pub(crate) fn remove_conversation_(
@@ -291,49 +157,5 @@ impl super::Conversations {
             .position(|super::Conversation { id, .. }| id == &conversation_id)
             .map(|n| n as i64)
             .unwrap_or(-1)
-    }
-
-    pub(crate) fn status_(
-        &self,
-        index: usize,
-    ) -> u8 {
-        self.status_inner(index).unwrap_or_default() as u8
-    }
-
-    pub(crate) fn set_status_(
-        &mut self,
-        index: usize,
-        status: u8,
-    ) -> bool {
-        let status = none!(Status::from_u8(status), false);
-        let cid = none!(self.id(index), false);
-        none!(self.set_status_inner(index, status), false);
-
-        spawn!(
-            err!(heraldcore::conversation::set_status(&cid, status)),
-            false
-        );
-
-        self.model.data_changed(index, index);
-        true
-    }
-
-    pub(crate) fn set_status_by_id_(
-        &mut self,
-        id: ffi::ConversationIdRef,
-        status: u8,
-    ) {
-        let cid = err!(ConversationId::try_from(id));
-        let status = none!(Status::from_u8(status));
-        let index = none!(self
-            .list
-            .iter()
-            .position(|super::Conversation { id, .. }| id == &cid));
-
-        none!(self.set_status_inner(index, status));
-
-        spawn!(err!(heraldcore::conversation::set_status(&cid, status)));
-
-        self.model.data_changed(index, index);
     }
 }

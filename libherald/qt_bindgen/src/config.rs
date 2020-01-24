@@ -158,20 +158,7 @@ fn conversations() -> Object {
 
     let item_props = item_props! {
        conversationId: ItemProp::new(QByteArray).get_by_value(),
-       title: ItemProp::new(QString).write().optional().get_by_value(),
-       muted: ItemProp::new(Bool).write(),
-       pairwise: ItemProp::new(Bool),
-       expirationPeriod: ItemProp::new(QUint8).write(),
-       matched: matched_item_prop(),
-       picture: picture_item_prop().get_by_value(),
-       conversationColor: color_item_prop(),
-
-       // 0 => not archived
-       // 1 => is archived
-       status: ItemProp::new(QUint8).write(),
-
-       lastMsgDigest: ItemProp::new(QString).get_by_value(),
-       isEmpty: ItemProp::new(Bool)
+       matched: matched_item_prop()
     };
 
     let funcs = functions! {
@@ -180,8 +167,6 @@ fn conversations() -> Object {
         mut clearFilter() => Void,
         // `profile_picture` is a path and bounding rectangle encoded as JSON.
         // See `heraldcore/image_utils`.
-        mut setProfilePicture(index: QUint64, profile_picture: QString) => Void,
-        mut setStatusById(conversation_id: QByteArray, status: QUint8) => Void,
         const indexById(conversation_id: QByteArray) => Qint64,
     };
 
@@ -212,13 +197,26 @@ fn users() -> Object {
 
 fn conversation_content() -> Object {
     let props = props! {
+        conversationId: conv_id_prop(),
+
+        title: Prop::new().simple(QString).write().optional().get_by_value(),
+        muted: Prop::new().simple(Bool).write(),
+        pairwise: Prop::new().simple(Bool),
+        expirationPeriod: Prop::new().simple(QUint8).write(),
+        picture: Prop::new().simple(QString).optional().get_by_value(),
+        conversationColor: Prop::new().simple(QUint32),
+
+        // 0 => not archived
+        // 1 => is archived
+        status: Prop::new().simple(QUint8).write(),
+
         members: Prop::new().object(members()),
-        messages: Prop::new(                 ).object(messages()),
-        conversationId: conv_id_prop()
+        messages: Prop::new().object(messages())
     };
 
     let funcs = functions! {
         mut pollUpdate() => Void,
+        mut setPicture(picture: QString) => Void,
     };
 
     let hooks = signals! {
@@ -293,6 +291,9 @@ fn messages() -> Object {
         searchNumMatches: Prop::new().simple(QUint64),
         // Position in search results of focused item, e.g., 4 out of 7
         searchIndex: Prop::new().simple(QUint64),
+
+        lastMsgDigest: Prop::new().simple(QString).get_by_value(),
+        isEmpty: Prop::new().simple(Bool),
 
         builder: Prop::new().object(message_builder())
     };
@@ -566,16 +567,14 @@ fn user() -> Object {
 }
 
 /// Shared conversations
+// TODO consider having users own this
 fn shared_conversations() -> Object {
     let props = props! {
        userId: Prop::new().simple(QString).optional().write()
     };
 
     let item_props = item_props! {
-        conversationId: ItemProp::new(QByteArray),
-        conversationPicture: ItemProp::new(QString).get_by_value().optional(),
-        conversationTitle: ItemProp::new(QString).get_by_value().optional(),
-        conversationColor: ItemProp::new(QUint32).get_by_value().optional()
+        conversationId: ItemProp::new(QByteArray)
     };
 
     let funcs = functions! {
@@ -623,12 +622,4 @@ fn filter_props() -> BTreeMap<String, Property> {
         filter: filter_prop(),
         filterRegex: filter_regex_prop()
     }
-}
-
-fn color_item_prop() -> ItemProp {
-    ItemProp::new(SimpleType::QUint32)
-}
-
-fn picture_item_prop() -> ItemProp {
-    ItemProp::new(SimpleType::QString).optional()
 }
