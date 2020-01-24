@@ -161,7 +161,7 @@ Item {
         // filler mouse area to pin split view cursor when in resize mode
         MouseArea {
             anchors.fill: parent
-            enabled: mouse.drag.active
+            enabled: splitHandleMouseArea.drag.active
             cursorShape: if (enabled)
                              Qt.SplitHCursor
             z: enabled ? sideBar.z + 1 : rootSplitView.z - 1
@@ -198,7 +198,7 @@ Item {
                 }
 
                 MouseArea {
-                    id: mouse
+                    id: splitHandleMouseArea
                     drag.target: parent
                     anchors.fill: parent
                     drag.axis: Drag.XAxis

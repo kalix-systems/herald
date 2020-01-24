@@ -28,6 +28,7 @@ Column {
     }
 
     DocFileItem {
+
         model: docModel
     }
 

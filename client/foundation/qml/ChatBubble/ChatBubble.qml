@@ -263,7 +263,6 @@ Rectangle {
                 Component {
                     id: image
                     AttachmentContent {
-
                         imageClickedCallBack: imageLoader.imageClickedCallBack
                     }
                 }

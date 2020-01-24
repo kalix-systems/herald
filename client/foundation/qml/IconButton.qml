@@ -8,7 +8,7 @@ ToolButton {
     property string source
     // TODO rename this fillColor
     property color fill: CmnCfg.palette.iconMatte
-    property alias mouseArea: mouse
+    property alias mouseArea: mouseArea
     property alias tooltipText: tooltip.text
     background: Item {}
     padding: 0
@@ -18,13 +18,18 @@ ToolButton {
     icon.height: CmnCfg.iconSize
 
     MouseArea {
-        id: mouse
+        id: mouseArea
         anchors.fill: parent
         hoverEnabled: true
         acceptedButtons: Qt.NoButton
+        preventStealing: true
+        propagateComposedEvents: true
+        onClicked: mouse.accepted = false
         cursorShape: Qt.PointingHandCursor
         z: parent.z + 1
     }
+
+
 
     ToolTip {
         id: tooltip

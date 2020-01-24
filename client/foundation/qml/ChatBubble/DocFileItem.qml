@@ -31,7 +31,6 @@ ListView {
                 attachmentDownloader.open()
             }
 
-            //          tapHandler.onTapped: bubbleRoot.downloadFileAttachmentTapped(path)
             mouseArea.onEntered: bubbleActual.hoverHighlight = true
             mouseArea.onExited: if (!bubbleActual.hitbox.containsMouse) {
                                     bubbleActual.hoverHighlight = false

@@ -163,7 +163,6 @@ ListView {
             Component {
                 id: auxBubble
                 CB.AuxBubble {
-
                     id: bubbleActual
                     auxData: JSON.parse(model.auxData)
                     messageModelData: model
