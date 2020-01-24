@@ -219,6 +219,8 @@ impl super::ConversationContent {
                     return Some(());
                 }
 
+                drop(write);
+
                 match update {
                     U::Picture(_) => {
                         self.emit.picture_changed();
