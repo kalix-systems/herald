@@ -16,8 +16,9 @@ Rectangle {
     // TODO move this into CmnCfg
     readonly property real imageSize: 80
     property string replyBody: messageModelData.opBody
-    property color opColor: CmnCfg.avatarColors[messageModelData.opColor]
     property alias mouseEnabled: mouseArea.enabled
+    property color opColor: CmnCfg.avatarColors[UserMap.get(
+                                                    messageModelData.opAuthor).userColor]
 
     Component.onCompleted: JS.parseMedia(messageModelData, imageClip)
 

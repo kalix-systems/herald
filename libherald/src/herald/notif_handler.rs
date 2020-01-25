@@ -62,10 +62,10 @@ impl NotifHandler {
                 push(UserUpdate::NewUser(user));
 
                 // add pairwise conversation
-                push(GlobalConvUpdate::NewConversation(meta));
+                push(ConvUpdate::NewConversation(meta));
             }
             NewConversation(meta) => {
-                push(GlobalConvUpdate::NewConversation(meta));
+                push(ConvUpdate::NewConversation(meta));
             }
             AddUserResponse(cid, uid, accepted) => {
                 // handle response
@@ -75,14 +75,14 @@ impl NotifHandler {
                 if accepted {
                     let meta = err!(heraldcore::conversation::meta(&cid));
 
-                    push(GlobalConvUpdate::NewConversation(meta));
+                    push(ConvUpdate::NewConversation(meta));
                 }
             }
             AddConversationResponse(cid, uid, accepted) => {
                 err!(content_push(cid, MemberUpdate::ReqResp(uid, accepted)));
             }
             Settings(cid, settings) => {
-                push((cid, settings));
+                err!(content_push(cid, settings));
             }
             GC(convs) => convs.into_iter().for_each(|(cid, mids)| {
                 err!(content_push(cid, MsgUpdate::ExpiredMessages(mids)));

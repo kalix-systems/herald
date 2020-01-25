@@ -24,13 +24,14 @@ ListView {
 
         height: CmnCfg.convoHeight
         width: parent.width
+        property User memberData: UserMap.get(model.memberId)
 
         Common.PlatonicRectangle {
             id: memberRectangle
             color: CmnCfg.palette.offBlack
-            boxColor: memberColor
-            boxTitle: memberName
-            picture: memberProfilePicture
+            boxColor: memberData.userColor
+            boxTitle: memberData.name
+            picture: memberData.profilePicture
             topTextMargin: CmnCfg.smallMargin
             bottomTextMargin: CmnCfg.defaultMargin
 
@@ -42,8 +43,8 @@ ListView {
             }
 
             labelComponent: Ent.ContactLabel {
-                displayName: memberName
-                username: memberId
+                displayName: memberData.name
+                username: memberData.userId
                 labelColor: CmnCfg.palette.lightGrey
             }
 

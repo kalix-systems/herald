@@ -4,6 +4,7 @@ pub struct MessagesQObject;
 
 pub struct MessagesEmitter {
     pub(super) qobject: Arc<AtomicPtr<MessagesQObject>>,
+    pub(super) last_msg_digest_changed: fn(*mut MessagesQObject),
     pub(super) search_active_changed: fn(*mut MessagesQObject),
     pub(super) search_index_changed: fn(*mut MessagesQObject),
     pub(super) search_num_matches_changed: fn(*mut MessagesQObject),
@@ -22,6 +23,7 @@ impl MessagesEmitter {
     pub fn clone(&mut self) -> MessagesEmitter {
         MessagesEmitter {
             qobject: self.qobject.clone(),
+            last_msg_digest_changed: self.last_msg_digest_changed,
             search_active_changed: self.search_active_changed,
             search_index_changed: self.search_index_changed,
             search_num_matches_changed: self.search_num_matches_changed,
@@ -35,6 +37,14 @@ impl MessagesEmitter {
         let n: *const MessagesQObject = null();
         self.qobject
             .store(n as *mut MessagesQObject, Ordering::SeqCst);
+    }
+
+    pub fn last_msg_digest_changed(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+
+        if !ptr.is_null() {
+            (self.last_msg_digest_changed)(ptr);
+        }
     }
 
     pub fn search_active_changed(&mut self) {
@@ -199,6 +209,8 @@ pub trait MessagesTrait {
 
     fn builder_mut(&mut self) -> &mut MessageBuilder;
 
+    fn last_msg_digest(&self) -> String;
+
     fn search_active(&self) -> bool;
 
     fn set_search_active(
@@ -329,21 +341,6 @@ pub trait MessagesTrait {
         index: usize,
     ) -> Option<String>;
 
-    fn author_color(
-        &self,
-        index: usize,
-    ) -> Option<u32>;
-
-    fn author_name(
-        &self,
-        index: usize,
-    ) -> Option<String>;
-
-    fn author_profile_picture(
-        &self,
-        index: usize,
-    ) -> String;
-
     fn aux_data(
         &self,
         index: usize,
@@ -419,11 +416,6 @@ pub trait MessagesTrait {
         index: usize,
     ) -> String;
 
-    fn op_color(
-        &self,
-        index: usize,
-    ) -> Option<u32>;
-
     fn op_doc_attachments(
         &self,
         index: usize,
@@ -448,11 +440,6 @@ pub trait MessagesTrait {
         &self,
         index: usize,
     ) -> Option<Vec<u8>>;
-
-    fn op_name(
-        &self,
-        index: usize,
-    ) -> Option<String>;
 
     fn reactions(
         &self,
@@ -543,6 +530,7 @@ pub unsafe fn messages_new_inner(ptr_bundle: *mut MessagesPtrBundle) -> Messages
         builder_end_move_rows,
         builder_begin_remove_rows,
         builder_end_remove_rows,
+        messages_last_msg_digest_changed,
         messages_search_active_changed,
         messages_search_index_changed,
         messages_search_num_matches_changed,
@@ -638,6 +626,7 @@ pub unsafe fn messages_new_inner(ptr_bundle: *mut MessagesPtrBundle) -> Messages
     );
     let messages_emit = MessagesEmitter {
         qobject: Arc::new(AtomicPtr::new(messages)),
+        last_msg_digest_changed: messages_last_msg_digest_changed,
         search_active_changed: messages_search_active_changed,
         search_index_changed: messages_search_index_changed,
         search_num_matches_changed: messages_search_num_matches_changed,
@@ -822,6 +811,18 @@ pub unsafe extern "C" fn messages_builder_get(ptr: *mut Messages) -> *mut Messag
 }
 
 #[no_mangle]
+pub unsafe extern "C" fn messages_last_msg_digest_get(
+    ptr: *const Messages,
+    prop: *mut QString,
+    set: fn(*mut QString, *const c_char, c_int),
+) {
+    let obj = &*ptr;
+    let value = obj.last_msg_digest();
+    let str_: *const c_char = value.as_ptr() as *const c_char;
+    set(prop, str_, to_c_int(value.len()));
+}
+
+#[no_mangle]
 pub unsafe extern "C" fn messages_search_active_get(ptr: *const Messages) -> bool {
     (&*ptr).search_active()
 }
@@ -942,43 +943,6 @@ pub unsafe extern "C" fn messages_data_author(
         let str_: *const c_char = data.as_ptr() as (*const c_char);
         set(d, str_, to_c_int(data.len()));
     }
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn messages_data_author_color(
-    ptr: *const Messages,
-    row: c_int,
-) -> COption<u32> {
-    let obj = &*ptr;
-    obj.author_color(to_usize(row).unwrap_or(0)).into()
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn messages_data_author_name(
-    ptr: *const Messages,
-    row: c_int,
-    d: *mut QString,
-    set: fn(*mut QString, *const c_char, len: c_int),
-) {
-    let obj = &*ptr;
-    let data = obj.author_name(to_usize(row).unwrap_or(0));
-    if let Some(data) = data {
-        let str_: *const c_char = data.as_ptr() as (*const c_char);
-        set(d, str_, to_c_int(data.len()));
-    }
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn messages_data_author_profile_picture(
-    ptr: *const Messages,
-    row: c_int,
-    d: *mut QString,
-    set: fn(*mut QString, *const c_char, len: c_int),
-) {
-    let obj = &*ptr;
-    let data = obj.author_profile_picture(to_usize(row).unwrap_or(0));
-    let str_: *const c_char = data.as_ptr() as *const c_char;
-    set(d, str_, to_c_int(data.len()));
 }
 
 #[no_mangle]
@@ -1161,15 +1125,6 @@ pub unsafe extern "C" fn messages_data_op_body(
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn messages_data_op_color(
-    ptr: *const Messages,
-    row: c_int,
-) -> COption<u32> {
-    let obj = &*ptr;
-    obj.op_color(to_usize(row).unwrap_or(0)).into()
-}
-
-#[no_mangle]
 pub unsafe extern "C" fn messages_data_op_doc_attachments(
     ptr: *const Messages,
     row: c_int,
@@ -1222,21 +1177,6 @@ pub unsafe extern "C" fn messages_data_op_msg_id(
 ) {
     let obj = &*ptr;
     let data = obj.op_msg_id(to_usize(row).unwrap_or(0));
-    if let Some(data) = data {
-        let str_: *const c_char = data.as_ptr() as (*const c_char);
-        set(d, str_, to_c_int(data.len()));
-    }
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn messages_data_op_name(
-    ptr: *const Messages,
-    row: c_int,
-    d: *mut QString,
-    set: fn(*mut QString, *const c_char, len: c_int),
-) {
-    let obj = &*ptr;
-    let data = obj.op_name(to_usize(row).unwrap_or(0));
     if let Some(data) = data {
         let str_: *const c_char = data.as_ptr() as (*const c_char);
         set(d, str_, to_c_int(data.len()));
@@ -1352,6 +1292,7 @@ pub struct MessagesPtrBundle {
     builder_end_move_rows: fn(*mut MessageBuilderQObject),
     builder_begin_remove_rows: fn(*mut MessageBuilderQObject, usize, usize),
     builder_end_remove_rows: fn(*mut MessageBuilderQObject),
+    messages_last_msg_digest_changed: fn(*mut MessagesQObject),
     messages_search_active_changed: fn(*mut MessagesQObject),
     messages_search_index_changed: fn(*mut MessagesQObject),
     messages_search_num_matches_changed: fn(*mut MessagesQObject),

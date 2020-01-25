@@ -14,7 +14,8 @@ import "dyn"
 Rectangle {
     id: replyWrapper
 
-    property color opColor: CmnCfg.avatarColors[messageModelData.opColor]
+    property color opColor: CmnCfg.avatarColors[UserMap.get(
+                                                    messageModelData.opAuthor).userColor]
     property string replyBody: messageModelData.opBody
     property int fileCount
     readonly property real imageSize: 80

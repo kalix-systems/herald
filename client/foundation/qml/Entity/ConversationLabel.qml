@@ -61,7 +61,7 @@ Item {
             return qsTr('You')
 
         if (!isEmpty)
-            return Herald.users.nameById(lastMessage.author)
+            return UserMap.get((lastMessage.author)).name
 
         return ''
     }

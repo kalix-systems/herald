@@ -52,13 +52,13 @@ Page {
             model: Herald.conversations
             delegate: ConversationItem {
                 property var conversationData: model
+                convoContent: ContentMap.get(model.conversationId)
                 itemTitle: title
-                colorCode: conversationData.conversationColor
-                imageSource: Utils.safeStringOrDefault(
-                                 conversationData.picture, "")
-                isGroup: !conversationData.pairwise
-                lastMsgDigest: conversationData.lastMsgDigest
-                isEmpty: conversationData.isEmpty
+                colorCode: convoContent.conversationColor
+                imageSource: Utils.safeStringOrDefault(convoContent.picture, "")
+                isGroup: !convoContent.pairwise
+                lastMsgDigest: convoContent.lastMsgDigest
+                isEmpty: lastMsgDigest === ""
                 tapEnabled: false
                 visible: conversationData.matched
                 height: visible ? CmnCfg.convoHeight : 0

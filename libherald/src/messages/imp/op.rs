@@ -26,22 +26,6 @@ impl Messages {
             .map(str::to_string)
     }
 
-    pub(crate) fn op_color_(
-        &self,
-        index: usize,
-    ) -> Option<u32> {
-        let uid = self.container.op_author(index)?;
-        crate::users::shared::color(&uid)
-    }
-
-    pub(crate) fn op_name_(
-        &self,
-        index: usize,
-    ) -> Option<String> {
-        let uid = self.container.op_author(index)?;
-        crate::users::shared::name(&uid)
-    }
-
     pub(crate) fn op_doc_attachments_(
         &self,
         index: usize,

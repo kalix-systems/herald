@@ -21,6 +21,7 @@ class MessageSearch;
 class Messages;
 class Notifications;
 class SharedConversations;
+class User;
 class Users;
 class UsersSearch;
 class Utils;
@@ -40,17 +41,15 @@ using MessageSearchPtrBundle = struct MessageSearchPtrBundle;
 using MessagesPtrBundle = struct MessagesPtrBundle;
 using NotificationsPtrBundle = struct NotificationsPtrBundle;
 using SharedConversationsPtrBundle = struct SharedConversationsPtrBundle;
+using UserPtrBundle = struct UserPtrBundle;
 using UsersPtrBundle = struct UsersPtrBundle;
 using UsersSearchPtrBundle = struct UsersSearchPtrBundle;
 using UtilsPtrBundle = struct UtilsPtrBundle;
 struct ConfigPtrBundle {
   Config *config;
-  void (*config_config_color_changed)(Config *);
   void (*config_config_id_changed)(Config *);
-  void (*config_name_changed)(Config *);
   void (*config_nts_conversation_id_changed)(Config *);
   void (*config_preferred_expiration_changed)(Config *);
-  void (*config_profile_picture_changed)(Config *);
 };
 struct ConversationBuilderPtrBundle {
   ConversationBuilder *conversation_builder;
@@ -76,7 +75,10 @@ struct ConversationBuilderPtrBundle {
 };
 struct ConversationContentPtrBundle {
   ConversationContent *conversation_content;
+  void (*conversation_content_conversation_color_changed)(
+      ConversationContent *);
   void (*conversation_content_conversation_id_changed)(ConversationContent *);
+  void (*conversation_content_expiration_period_changed)(ConversationContent *);
   Members *members;
   void (*members_filter_changed)(Members *);
   void (*members_filter_regex_changed)(Members *);
@@ -156,6 +158,7 @@ struct ConversationContentPtrBundle {
   void (*message_builder_end_move_rows)(MessageBuilder *);
   void (*message_builder_begin_remove_rows)(MessageBuilder *, int, int);
   void (*message_builder_end_remove_rows)(MessageBuilder *);
+  void (*messages_last_msg_digest_changed)(Messages *);
   void (*messages_search_active_changed)(Messages *);
   void (*messages_search_index_changed)(Messages *);
   void (*messages_search_num_matches_changed)(Messages *);
@@ -174,6 +177,11 @@ struct ConversationContentPtrBundle {
   void (*messages_end_move_rows)(Messages *);
   void (*messages_begin_remove_rows)(Messages *, int, int);
   void (*messages_end_remove_rows)(Messages *);
+  void (*conversation_content_muted_changed)(ConversationContent *);
+  void (*conversation_content_pairwise_changed)(ConversationContent *);
+  void (*conversation_content_picture_changed)(ConversationContent *);
+  void (*conversation_content_status_changed)(ConversationContent *);
+  void (*conversation_content_title_changed)(ConversationContent *);
   void (*conversation_content_tryPoll)(const ConversationContent *);
 };
 struct ConversationsPtrBundle {
@@ -247,12 +255,9 @@ struct ErrorsPtrBundle {
 struct HeraldPtrBundle {
   Herald *herald;
   Config *config;
-  void (*config_config_color_changed)(Config *);
   void (*config_config_id_changed)(Config *);
-  void (*config_name_changed)(Config *);
   void (*config_nts_conversation_id_changed)(Config *);
   void (*config_preferred_expiration_changed)(Config *);
-  void (*config_profile_picture_changed)(Config *);
   void (*herald_config_init_changed)(Herald *);
   void (*herald_connection_pending_changed)(Herald *);
   void (*herald_connection_up_changed)(Herald *);
@@ -527,6 +532,7 @@ struct MessagesPtrBundle {
   void (*message_builder_end_move_rows)(MessageBuilder *);
   void (*message_builder_begin_remove_rows)(MessageBuilder *, int, int);
   void (*message_builder_end_remove_rows)(MessageBuilder *);
+  void (*messages_last_msg_digest_changed)(Messages *);
   void (*messages_search_active_changed)(Messages *);
   void (*messages_search_index_changed)(Messages *);
   void (*messages_search_num_matches_changed)(Messages *);
@@ -572,6 +578,14 @@ struct SharedConversationsPtrBundle {
                                                  int);
   void (*shared_conversations_end_remove_rows)(SharedConversations *);
   void (*shared_conversations_tryLoad)(const SharedConversations *);
+};
+struct UserPtrBundle {
+  User *user;
+  void (*user_name_changed)(User *);
+  void (*user_pairwise_conversation_id_changed)(User *);
+  void (*user_profile_picture_changed)(User *);
+  void (*user_user_color_changed)(User *);
+  void (*user_user_id_changed)(User *);
 };
 struct UsersPtrBundle {
   Users *users;
@@ -628,6 +642,7 @@ class Config : public QObject {
   friend class Messages;
   friend class Notifications;
   friend class SharedConversations;
+  friend class User;
   friend class Users;
   friend class UsersSearch;
   friend class Utils;
@@ -638,38 +653,26 @@ public:
 private:
   Private *m_d;
   bool m_ownsPrivate;
-  Q_PROPERTY(quint32 configColor READ configColor WRITE setConfigColor NOTIFY
-                 configColorChanged FINAL)
   Q_PROPERTY(QString configId READ configId NOTIFY configIdChanged FINAL)
-  Q_PROPERTY(QString name READ name WRITE setName NOTIFY nameChanged FINAL)
   Q_PROPERTY(QByteArray ntsConversationId READ ntsConversationId NOTIFY
                  ntsConversationIdChanged FINAL)
   Q_PROPERTY(quint8 preferredExpiration READ preferredExpiration WRITE
                  setPreferredExpiration NOTIFY preferredExpirationChanged FINAL)
-  Q_PROPERTY(QString profilePicture READ profilePicture NOTIFY
-                 profilePictureChanged FINAL)
   explicit Config(bool owned, QObject *parent);
 
 public:
   explicit Config(QObject *parent = nullptr);
   ~Config() override;
-  quint32 configColor() const;
-  void setConfigColor(quint32 v);
   QString configId() const;
-  QString name() const;
-  void setName(const QString &v);
   QByteArray ntsConversationId() const;
   quint8 preferredExpiration() const;
   void setPreferredExpiration(quint8 v);
-  QString profilePicture() const;
+  Q_INVOKABLE void setName(const QString &name);
   Q_INVOKABLE void setProfilePicture(const QString &profile_picture);
 Q_SIGNALS:
-  void configColorChanged();
   void configIdChanged();
-  void nameChanged();
   void ntsConversationIdChanged();
   void preferredExpirationChanged();
-  void profilePictureChanged();
 };
 class ConversationBuilder : public QAbstractItemModel {
   Q_OBJECT
@@ -687,6 +690,7 @@ class ConversationBuilder : public QAbstractItemModel {
   friend class Messages;
   friend class Notifications;
   friend class SharedConversations;
+  friend class User;
   friend class Users;
   friend class UsersSearch;
   friend class Utils;
@@ -737,10 +741,7 @@ public:
   removeRows(int row, int count,
              const QModelIndex &parent = QModelIndex()) override;
 
-  Q_INVOKABLE quint32 memberColor(int row) const;
   Q_INVOKABLE QString memberId(int row) const;
-  Q_INVOKABLE QString memberName(int row) const;
-  Q_INVOKABLE QString memberProfilePicture(int row) const;
 
 Q_SIGNALS:
   // new data is ready to be made available to the model with fetchMore()
@@ -769,6 +770,7 @@ class ConversationContent : public QObject {
   friend class Messages;
   friend class Notifications;
   friend class SharedConversations;
+  friend class User;
   friend class Users;
   friend class UsersSearch;
   friend class Utils;
@@ -781,26 +783,55 @@ private:
   Messages *const m_messages;
   Private *m_d;
   bool m_ownsPrivate;
+  Q_PROPERTY(quint32 conversationColor READ conversationColor NOTIFY
+                 conversationColorChanged FINAL)
   Q_PROPERTY(QByteArray conversationId READ conversationId WRITE
                  setConversationId NOTIFY conversationIdChanged FINAL)
+  Q_PROPERTY(quint8 expirationPeriod READ expirationPeriod WRITE
+                 setExpirationPeriod NOTIFY expirationPeriodChanged FINAL)
   Q_PROPERTY(Members *members READ members NOTIFY membersChanged FINAL)
   Q_PROPERTY(Messages *messages READ messages NOTIFY messagesChanged FINAL)
+  Q_PROPERTY(bool muted READ muted WRITE setMuted NOTIFY mutedChanged FINAL)
+  Q_PROPERTY(bool pairwise READ pairwise NOTIFY pairwiseChanged FINAL)
+  Q_PROPERTY(QString picture READ picture NOTIFY pictureChanged FINAL)
+  Q_PROPERTY(
+      quint8 status READ status WRITE setStatus NOTIFY statusChanged FINAL)
+  Q_PROPERTY(QString title READ title WRITE setTitle NOTIFY titleChanged FINAL)
   explicit ConversationContent(bool owned, QObject *parent);
 
 public:
   explicit ConversationContent(QObject *parent = nullptr);
   ~ConversationContent() override;
+  quint32 conversationColor() const;
   QByteArray conversationId() const;
   void setConversationId(const QByteArray &v);
+  quint8 expirationPeriod() const;
+  void setExpirationPeriod(quint8 v);
   const Members *members() const;
   Members *members();
   const Messages *messages() const;
   Messages *messages();
+  bool muted() const;
+  void setMuted(bool v);
+  bool pairwise() const;
+  QString picture() const;
+  quint8 status() const;
+  void setStatus(quint8 v);
+  QString title() const;
+  void setTitle(const QString &v);
   Q_INVOKABLE void pollUpdate();
+  Q_INVOKABLE void setPicture(const QString &picture);
 Q_SIGNALS:
+  void conversationColorChanged();
   void conversationIdChanged();
+  void expirationPeriodChanged();
   void membersChanged();
   void messagesChanged();
+  void mutedChanged();
+  void pairwiseChanged();
+  void pictureChanged();
+  void statusChanged();
+  void titleChanged();
   void tryPoll() const;
 };
 class Conversations : public QAbstractItemModel {
@@ -819,6 +850,7 @@ class Conversations : public QAbstractItemModel {
   friend class Messages;
   friend class Notifications;
   friend class SharedConversations;
+  friend class User;
   friend class Users;
   friend class UsersSearch;
   friend class Utils;
@@ -845,10 +877,6 @@ public:
   Q_INVOKABLE void clearFilter();
   Q_INVOKABLE qint64 indexById(const QByteArray &conversation_id) const;
   Q_INVOKABLE bool removeConversation(quint64 row_index);
-  Q_INVOKABLE void setProfilePicture(quint64 index,
-                                     const QString &profile_picture);
-  Q_INVOKABLE void setStatusById(const QByteArray &conversation_id,
-                                 quint8 status);
   Q_INVOKABLE bool toggleFilterRegex();
   int columnCount(const QModelIndex &parent = QModelIndex()) const override;
   QVariant data(const QModelIndex &index,
@@ -875,23 +903,8 @@ public:
   removeRows(int row, int count,
              const QModelIndex &parent = QModelIndex()) override;
 
-  bool setData(const QModelIndex &index, const QVariant &value,
-               int role = Qt::EditRole) override;
-  Q_INVOKABLE quint32 conversationColor(int row) const;
   Q_INVOKABLE QByteArray conversationId(int row) const;
-  Q_INVOKABLE quint8 expirationPeriod(int row) const;
-  Q_INVOKABLE bool setExpirationPeriod(int row, quint8 value);
-  Q_INVOKABLE bool isEmpty(int row) const;
-  Q_INVOKABLE QString lastMsgDigest(int row) const;
   Q_INVOKABLE bool matched(int row) const;
-  Q_INVOKABLE bool muted(int row) const;
-  Q_INVOKABLE bool setMuted(int row, bool value);
-  Q_INVOKABLE bool pairwise(int row) const;
-  Q_INVOKABLE QString picture(int row) const;
-  Q_INVOKABLE quint8 status(int row) const;
-  Q_INVOKABLE bool setStatus(int row, quint8 value);
-  Q_INVOKABLE QString title(int row) const;
-  Q_INVOKABLE bool setTitle(int row, const QString &value);
 
 Q_SIGNALS:
   // new data is ready to be made available to the model with fetchMore()
@@ -921,6 +934,7 @@ class DocumentAttachments : public QAbstractItemModel {
   friend class Messages;
   friend class Notifications;
   friend class SharedConversations;
+  friend class User;
   friend class Users;
   friend class UsersSearch;
   friend class Utils;
@@ -990,6 +1004,7 @@ class EmojiPicker : public QAbstractItemModel {
   friend class Messages;
   friend class Notifications;
   friend class SharedConversations;
+  friend class User;
   friend class Users;
   friend class UsersSearch;
   friend class Utils;
@@ -1095,6 +1110,7 @@ class Errors : public QObject {
   friend class Messages;
   friend class Notifications;
   friend class SharedConversations;
+  friend class User;
   friend class Users;
   friend class UsersSearch;
   friend class Utils;
@@ -1130,6 +1146,7 @@ class Herald : public QObject {
   friend class Messages;
   friend class Notifications;
   friend class SharedConversations;
+  friend class User;
   friend class Users;
   friend class UsersSearch;
   friend class Utils;
@@ -1234,6 +1251,7 @@ class MediaAttachments : public QAbstractItemModel {
   friend class Messages;
   friend class Notifications;
   friend class SharedConversations;
+  friend class User;
   friend class Users;
   friend class UsersSearch;
   friend class Utils;
@@ -1302,6 +1320,7 @@ class Members : public QAbstractItemModel {
   friend class Messages;
   friend class Notifications;
   friend class SharedConversations;
+  friend class User;
   friend class Users;
   friend class UsersSearch;
   friend class Utils;
@@ -1356,11 +1375,6 @@ public:
 
   Q_INVOKABLE QVariant lastTyping(int row) const;
   Q_INVOKABLE bool matched(int row) const;
-  Q_INVOKABLE quint32 memberColor(int row) const;
-  Q_INVOKABLE QString name(int row) const;
-  Q_INVOKABLE QByteArray pairwiseConversationId(int row) const;
-  Q_INVOKABLE QString profilePicture(int row) const;
-  Q_INVOKABLE quint8 status(int row) const;
   Q_INVOKABLE QString userId(int row) const;
 
 Q_SIGNALS:
@@ -1392,6 +1406,7 @@ class MessageBuilder : public QAbstractItemModel {
   friend class Messages;
   friend class Notifications;
   friend class SharedConversations;
+  friend class User;
   friend class Users;
   friend class UsersSearch;
   friend class Utils;
@@ -1524,6 +1539,7 @@ class MessageSearch : public QAbstractItemModel {
   friend class Messages;
   friend class Notifications;
   friend class SharedConversations;
+  friend class User;
   friend class Users;
   friend class UsersSearch;
   friend class Utils;
@@ -1613,6 +1629,7 @@ class Messages : public QAbstractItemModel {
   friend class MessageSearch;
   friend class Notifications;
   friend class SharedConversations;
+  friend class User;
   friend class Users;
   friend class UsersSearch;
   friend class Utils;
@@ -1625,6 +1642,8 @@ private:
   Private *m_d;
   bool m_ownsPrivate;
   Q_PROPERTY(MessageBuilder *builder READ builder NOTIFY builderChanged FINAL)
+  Q_PROPERTY(QString lastMsgDigest READ lastMsgDigest NOTIFY
+                 lastMsgDigestChanged FINAL)
   Q_PROPERTY(bool searchActive READ searchActive WRITE setSearchActive NOTIFY
                  searchActiveChanged FINAL)
   Q_PROPERTY(
@@ -1642,6 +1661,7 @@ public:
   ~Messages() override;
   const MessageBuilder *builder() const;
   MessageBuilder *builder();
+  QString lastMsgDigest() const;
   bool searchActive() const;
   void setSearchActive(bool v);
   quint64 searchIndex() const;
@@ -1693,9 +1713,6 @@ public:
              const QModelIndex &parent = QModelIndex()) override;
 
   Q_INVOKABLE QString author(int row) const;
-  Q_INVOKABLE QVariant authorColor(int row) const;
-  Q_INVOKABLE QString authorName(int row) const;
-  Q_INVOKABLE QString authorProfilePicture(int row) const;
   Q_INVOKABLE QString auxData(int row) const;
   Q_INVOKABLE QString body(int row) const;
   Q_INVOKABLE QString docAttachments(int row) const;
@@ -1711,13 +1728,11 @@ public:
   Q_INVOKABLE QString opAuthor(int row) const;
   Q_INVOKABLE QString opAuxData(int row) const;
   Q_INVOKABLE QString opBody(int row) const;
-  Q_INVOKABLE QVariant opColor(int row) const;
   Q_INVOKABLE QString opDocAttachments(int row) const;
   Q_INVOKABLE QVariant opExpirationTime(int row) const;
   Q_INVOKABLE QVariant opInsertionTime(int row) const;
   Q_INVOKABLE QString opMediaAttachments(int row) const;
   Q_INVOKABLE QByteArray opMsgId(int row) const;
-  Q_INVOKABLE QString opName(int row) const;
   Q_INVOKABLE QString reactions(int row) const;
   Q_INVOKABLE QVariant receiptStatus(int row) const;
   Q_INVOKABLE QVariant replyType(int row) const;
@@ -1734,6 +1749,7 @@ private:
   void updatePersistentIndexes();
 Q_SIGNALS:
   void builderChanged();
+  void lastMsgDigestChanged();
   void searchActiveChanged();
   void searchIndexChanged();
   void searchNumMatchesChanged();
@@ -1756,6 +1772,7 @@ class Notifications : public QObject {
   friend class MessageSearch;
   friend class Messages;
   friend class SharedConversations;
+  friend class User;
   friend class Users;
   friend class UsersSearch;
   friend class Utils;
@@ -1791,6 +1808,7 @@ class SharedConversations : public QAbstractItemModel {
   friend class MessageSearch;
   friend class Messages;
   friend class Notifications;
+  friend class User;
   friend class Users;
   friend class UsersSearch;
   friend class Utils;
@@ -1836,10 +1854,7 @@ public:
   removeRows(int row, int count,
              const QModelIndex &parent = QModelIndex()) override;
 
-  Q_INVOKABLE QVariant conversationColor(int row) const;
   Q_INVOKABLE QByteArray conversationId(int row) const;
-  Q_INVOKABLE QString conversationPicture(int row) const;
-  Q_INVOKABLE QString conversationTitle(int row) const;
 
 Q_SIGNALS:
   // new data is ready to be made available to the model with fetchMore()
@@ -1852,6 +1867,61 @@ private:
 Q_SIGNALS:
   void userIdChanged();
   void tryLoad() const;
+};
+class User : public QObject {
+  Q_OBJECT
+  friend class Config;
+  friend class ConversationBuilder;
+  friend class ConversationContent;
+  friend class Conversations;
+  friend class DocumentAttachments;
+  friend class EmojiPicker;
+  friend class Errors;
+  friend class Herald;
+  friend class MediaAttachments;
+  friend class Members;
+  friend class MessageBuilder;
+  friend class MessageSearch;
+  friend class Messages;
+  friend class Notifications;
+  friend class SharedConversations;
+  friend class Users;
+  friend class UsersSearch;
+  friend class Utils;
+
+public:
+  class Private;
+
+private:
+  Private *m_d;
+  bool m_ownsPrivate;
+  Q_PROPERTY(QString name READ name NOTIFY nameChanged FINAL)
+  Q_PROPERTY(QByteArray pairwiseConversationId READ pairwiseConversationId
+                 NOTIFY pairwiseConversationIdChanged FINAL)
+  Q_PROPERTY(QString profilePicture READ profilePicture NOTIFY
+                 profilePictureChanged FINAL)
+  Q_PROPERTY(quint32 userColor READ userColor WRITE setUserColor NOTIFY
+                 userColorChanged FINAL)
+  Q_PROPERTY(
+      QString userId READ userId WRITE setUserId NOTIFY userIdChanged FINAL)
+  explicit User(bool owned, QObject *parent);
+
+public:
+  explicit User(QObject *parent = nullptr);
+  ~User() override;
+  QString name() const;
+  QByteArray pairwiseConversationId() const;
+  QString profilePicture() const;
+  quint32 userColor() const;
+  void setUserColor(quint32 v);
+  QString userId() const;
+  void setUserId(const QString &v);
+Q_SIGNALS:
+  void nameChanged();
+  void pairwiseConversationIdChanged();
+  void profilePictureChanged();
+  void userColorChanged();
+  void userIdChanged();
 };
 class Users : public QAbstractItemModel {
   Q_OBJECT
@@ -1870,6 +1940,7 @@ class Users : public QAbstractItemModel {
   friend class Messages;
   friend class Notifications;
   friend class SharedConversations;
+  friend class User;
   friend class UsersSearch;
   friend class Utils;
 
@@ -1895,10 +1966,7 @@ public:
   Q_INVOKABLE QByteArray add(const QString &id);
   Q_INVOKABLE void clearFilter();
   Q_INVOKABLE qint64 indexById(const QString &id) const;
-  Q_INVOKABLE QString nameById(const QString &id) const;
-  Q_INVOKABLE QString profilePictureById(const QString &id) const;
   Q_INVOKABLE bool toggleFilterRegex();
-  Q_INVOKABLE quint32 userColorById(const QString &id) const;
   int columnCount(const QModelIndex &parent = QModelIndex()) const override;
   QVariant data(const QModelIndex &index,
                 int role = Qt::DisplayRole) const override;
@@ -1924,16 +1992,7 @@ public:
   removeRows(int row, int count,
              const QModelIndex &parent = QModelIndex()) override;
 
-  bool setData(const QModelIndex &index, const QVariant &value,
-               int role = Qt::EditRole) override;
   Q_INVOKABLE bool matched(int row) const;
-  Q_INVOKABLE QString name(int row) const;
-  Q_INVOKABLE QByteArray pairwiseConversationId(int row) const;
-  Q_INVOKABLE QString profilePicture(int row) const;
-  Q_INVOKABLE quint8 status(int row) const;
-  Q_INVOKABLE bool setStatus(int row, quint8 value);
-  Q_INVOKABLE quint32 userColor(int row) const;
-  Q_INVOKABLE bool setUserColor(int row, quint32 value);
   Q_INVOKABLE QString userId(int row) const;
 
 Q_SIGNALS:
@@ -1965,6 +2024,7 @@ class UsersSearch : public QAbstractItemModel {
   friend class Messages;
   friend class Notifications;
   friend class SharedConversations;
+  friend class User;
   friend class Users;
   friend class Utils;
 
@@ -2013,11 +2073,8 @@ public:
   bool setData(const QModelIndex &index, const QVariant &value,
                int role = Qt::EditRole) override;
   Q_INVOKABLE bool matched(int row) const;
-  Q_INVOKABLE QString name(int row) const;
-  Q_INVOKABLE QString profilePicture(int row) const;
   Q_INVOKABLE bool selected(int row) const;
   Q_INVOKABLE bool setSelected(int row, bool value);
-  Q_INVOKABLE QVariant userColor(int row) const;
   Q_INVOKABLE QString userId(int row) const;
 
 Q_SIGNALS:
@@ -2048,6 +2105,7 @@ class Utils : public QObject {
   friend class Messages;
   friend class Notifications;
   friend class SharedConversations;
+  friend class User;
   friend class Users;
   friend class UsersSearch;
 

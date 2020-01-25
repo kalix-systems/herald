@@ -1,11 +1,12 @@
 #include "Bindings.h"
-#include "conversationmap.h"
-#include "objectiveutils.h"
 #include "androidhelper.h"
-#include <QScreen>
-#include <QQmlContext>
+#include "contentmap.h"
+#include "objectiveutils.h"
+#include "usermap.h"
 #include <QApplication>
 #include <QQmlApplicationEngine>
+#include <QQmlContext>
+#include <QScreen>
 #include <QStandardPaths>
 #include <QtQml/qqml.h>
 
@@ -43,6 +44,22 @@ int main(int argc, char* argv[])
 
   qmlRegisterUncreatableType<Users>("LibHerald", 1, 0, "Users",
                                     heraldMsg("Users"));
+
+  // Provides access to user information
+  qmlRegisterSingletonType<UserMap>(
+      "LibHerald", 1, 0, "UserMap",
+      [](QQmlEngine* engine, QJSEngine* scriptEngine) {
+        Q_UNUSED(scriptEngine)
+        Q_UNUSED(engine)
+
+        UserMap* userMap = new UserMap();
+
+        return userMap;
+      });
+
+  qmlRegisterUncreatableType<User>("LibHerald", 1, 0, "User",
+                                   errMsg("User", "UserMap"));
+
   qmlRegisterUncreatableType<Config>("LibHerald", 1, 0, "Config",
                                      heraldMsg("Config"));
 
@@ -66,13 +83,13 @@ int main(int argc, char* argv[])
                                             heraldMsg("Conversations"));
 
   // Provides access to per conversation content
-  qmlRegisterSingletonType<ConversationMap>(
+  qmlRegisterSingletonType<ContentMap>(
       "LibHerald", 1, 0, "ContentMap",
       [](QQmlEngine* engine, QJSEngine* scriptEngine) {
         Q_UNUSED(scriptEngine)
+        Q_UNUSED(engine)
 
-        ConversationMap* contentMap = new ConversationMap();
-        engine->setObjectOwnership(contentMap, QQmlEngine::CppOwnership);
+        ContentMap* contentMap = new ContentMap();
 
         return contentMap;
       });

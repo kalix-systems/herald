@@ -34,7 +34,7 @@ impl Container {
 
         model.entry_changed(ix);
         if ix == 0 {
-            emit.last_changed(cid, Some(mid));
+            emit.last_changed(cid);
         }
 
         Some(())
@@ -75,7 +75,7 @@ impl Container {
         model.entry_changed(ix);
 
         if ix == 0 {
-            emit.last_changed(conversation_id, self.list.front().map(|m| m.msg_id));
+            emit.last_changed(conversation_id);
         }
 
         Some(())
@@ -102,7 +102,7 @@ impl Container {
         model.entry_changed(ix);
 
         if ix == 0 {
-            emit.last_changed(cid, Some(mid));
+            emit.last_changed(cid);
         }
 
         Some(())

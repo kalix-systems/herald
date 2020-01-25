@@ -4,11 +4,10 @@ use crate::{
     none, spawn,
 };
 use herald_common::UserId;
-use herald_user::UserStatus;
 use heraldcore::network;
 use heraldcore::user::{self, UserBuilder};
 use search_pattern::SearchPattern;
-use std::convert::{TryFrom, TryInto};
+use std::convert::TryInto;
 
 pub(crate) mod shared;
 use shared::*;
@@ -19,7 +18,7 @@ mod trait_imp;
 /// Thin wrapper around a `UserId`,
 /// with an additional field to facilitate filtering
 /// in the UI.
-pub struct User {
+pub struct UserIndex {
     pub(crate) id: UserId,
     pub(crate) matched: bool,
 }
@@ -31,7 +30,7 @@ pub struct Users {
     model: List,
     filter: Option<SearchPattern>,
     filter_regex: bool,
-    list: Vec<User>,
+    list: Vec<UserIndex>,
     loaded: bool,
 }
 
@@ -63,7 +62,7 @@ impl Interface for Users {
 
         let pairwise_conversation = data.pairwise_conversation;
 
-        let user = User {
+        let user = UserIndex {
             matched: self
                 .filter
                 .as_ref()
@@ -102,34 +101,6 @@ impl Interface for Users {
         none!(self.list.get(row_index), "").id.as_str()
     }
 
-    /// Returns conversation id.
-    fn pairwise_conversation_id(
-        &self,
-        row_index: usize,
-    ) -> ffi::ConversationId {
-        let uid = &none!(self.list.get(row_index), ffi::NULL_CONV_ID.to_vec()).id;
-        none!(shared::pairwise_cid(uid), ffi::NULL_CONV_ID.to_vec()).to_vec()
-    }
-
-    /// Returns users name
-    fn name(
-        &self,
-        row_index: usize,
-    ) -> String {
-        let uid = &none!(self.list.get(row_index), "".to_owned()).id;
-
-        none!(shared::name(uid), uid.to_string())
-    }
-
-    /// Returns name if it is set, otherwise returns empty string
-    fn name_by_id(
-        &self,
-        id: ffi::UserId,
-    ) -> String {
-        let uid = &err!(id.as_str().try_into(), "".to_owned());
-        name(uid).unwrap_or_else(|| "".to_owned())
-    }
-
     fn index_by_id(
         &self,
         uid: ffi::UserId,
@@ -137,114 +108,9 @@ impl Interface for Users {
         let uid = &err!(uid.as_str().try_into(), -1);
         self.list
             .iter()
-            .position(|User { id, .. }| id == uid)
+            .position(|UserIndex { id, .. }| id == uid)
             .map(|n| n as i64)
             .unwrap_or(-1)
-    }
-
-    /// Returns profile picture
-    fn profile_picture(
-        &self,
-        row_index: usize,
-    ) -> Option<String> {
-        let uid = &self.list.get(row_index)?.id;
-        profile_picture(&uid)
-    }
-
-    /// Returns path to profile if it is set, otherwise returns the empty string.
-    fn profile_picture_by_id(
-        &self,
-        id: ffi::UserId,
-    ) -> String {
-        let uid = &err!(id.as_str().try_into(), "".to_owned());
-        profile_picture(uid).unwrap_or_else(|| "".to_owned())
-    }
-
-    /// Returns user's color
-    fn user_color(
-        &self,
-        row_index: usize,
-    ) -> u32 {
-        let uid = none!(self.list.get(row_index), 0).id;
-        color(&uid).unwrap_or(0)
-    }
-
-    /// Returns user's color given user id
-    fn user_color_by_id(
-        &self,
-        id: ffi::UserId,
-    ) -> u32 {
-        let uid = &err!(id.as_str().try_into(), 0);
-
-        color(&uid).unwrap_or(0)
-    }
-
-    /// Sets color
-    fn set_user_color(
-        &mut self,
-        row_index: usize,
-        color: u32,
-    ) -> bool {
-        let uid = none!(self.list.get(row_index), false).id;
-
-        spawn!(
-            {
-                use crate::conversations::shared::{
-                    ConvItemUpdate as C, ConvItemUpdateVariant as CV,
-                };
-
-                err!(user::set_color(uid, color));
-
-                let cid = none!(shared::pairwise_cid(&uid));
-
-                crate::push(C {
-                    cid,
-                    variant: CV::UserChanged,
-                });
-            },
-            false
-        );
-
-        {
-            let mut lock = user_data().write();
-            let mut inner = none!(lock.get_mut(&uid), false);
-            inner.color = color;
-        }
-        true
-    }
-
-    fn status(
-        &self,
-        row_index: usize,
-    ) -> u8 {
-        let uid = none!(self.list.get(row_index), 0).id;
-        none!(status(&uid), 0) as u8
-    }
-
-    fn set_status(
-        &mut self,
-        row_index: usize,
-        status: u8,
-    ) -> bool {
-        let status = err!(UserStatus::try_from(status), false);
-        let uid = none!(self.list.get(row_index), false).id;
-
-        spawn!(user::set_status(uid, status), false);
-
-        {
-            let mut lock = user_data().write();
-            let mut inner = none!(lock.get_mut(&uid), false);
-            inner.status = status;
-        }
-
-        if status == UserStatus::Deleted {
-            self.model.begin_remove_rows(row_index, row_index);
-            self.list.remove(row_index);
-            user_data().write().remove(&uid);
-            self.model.end_remove_rows();
-        }
-
-        true
     }
 
     fn matched(

@@ -45,12 +45,9 @@ impl Messages {
         let model = &mut self.model;
         let search = &mut self.search;
         let cid = none!(self.conversation_id);
+
         let push = |cid| {
-            use crate::conversations::shared::*;
-            crate::push(ConvItemUpdate {
-                cid,
-                variant: ConvItemUpdateVariant::NewActivity,
-            })
+            crate::conversation_content::new_activity(cid);
         };
 
         match update {
@@ -109,6 +106,10 @@ impl Messages {
                 self.emit_last_changed();
             }
         }
+    }
+
+    pub(crate) fn last_msg_id(&self) -> Option<MsgId> {
+        self.container.list.front().map(|m| m.msg_id)
     }
 }
 

@@ -60,55 +60,6 @@ impl MembersTrait for Members {
             .as_str()
     }
 
-    /// Returns conversation id.
-    fn pairwise_conversation_id(
-        &self,
-        row_index: usize,
-    ) -> ffi::ConversationId {
-        let uid = &none!(self.list.get(row_index), ffi::NULL_CONV_ID.to_vec()).id;
-
-        none!(
-            crate::users::shared::pairwise_cid(uid),
-            ffi::NULL_CONV_ID.to_vec()
-        )
-        .to_vec()
-    }
-
-    /// Returns users name
-    fn name(
-        &self,
-        row_index: usize,
-    ) -> String {
-        let uid = &none!(self.list.get(row_index), "".to_owned()).id;
-        crate::users::shared::name(uid).unwrap_or_else(|| uid.to_string())
-    }
-
-    /// Returns profile picture
-    fn profile_picture(
-        &self,
-        row_index: usize,
-    ) -> Option<String> {
-        let uid = &self.list.get(row_index)?.id;
-        crate::users::shared::profile_picture(uid)
-    }
-
-    /// Returns user's color
-    fn member_color(
-        &self,
-        row_index: usize,
-    ) -> u32 {
-        let uid = none!(self.list.get(row_index), 0).id;
-        none!(crate::users::shared::color(&uid), 0)
-    }
-
-    fn status(
-        &self,
-        row_index: usize,
-    ) -> u8 {
-        let uid = none!(self.list.get(row_index), 0).id;
-        none!(crate::users::shared::status(&uid), 0) as u8
-    }
-
     fn matched(
         &self,
         row_index: usize,

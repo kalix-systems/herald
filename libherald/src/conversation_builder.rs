@@ -1,5 +1,5 @@
 use crate::{
-    conversations::shared::GlobalConvUpdate, err, ffi, interface::*, none, push, spawn,
+    conversations::shared::ConvUpdate, err, ffi, interface::*, none, push, spawn,
     users::shared::user_in_cache,
 };
 use herald_common::UserId;
@@ -120,7 +120,7 @@ impl ConversationBuilderTrait for ConversationBuilder {
             let conv = err!(inner.add());
 
             // send update to Conversations list
-            push(GlobalConvUpdate::BuilderFinished(conv.meta.clone()));
+            push(ConvUpdate::BuilderFinished(conv.meta.clone()));
 
             err!(start(conv));
         });
@@ -161,39 +161,6 @@ impl ConversationBuilderTrait for ConversationBuilder {
         index: usize,
     ) -> ffi::UserIdRef {
         none!(self.inner.members().get(index), "").as_str()
-    }
-
-    fn member_color(
-        &self,
-        index: usize,
-    ) -> u32 {
-        self.inner
-            .members()
-            .get(index)
-            .and_then(crate::users::shared::color)
-            .unwrap_or(0)
-    }
-
-    fn member_name(
-        &self,
-        index: usize,
-    ) -> String {
-        self.inner
-            .members()
-            .get(index)
-            .and_then(crate::users::shared::name)
-            .unwrap_or_default()
-    }
-
-    fn member_profile_picture(
-        &self,
-        index: usize,
-    ) -> String {
-        self.inner
-            .members()
-            .get(index)
-            .and_then(crate::users::shared::profile_picture)
-            .unwrap_or_default()
     }
 }
 

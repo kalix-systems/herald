@@ -189,22 +189,7 @@ pub trait UsersTrait {
         id: String,
     ) -> i64;
 
-    fn name_by_id(
-        &self,
-        id: String,
-    ) -> String;
-
-    fn profile_picture_by_id(
-        &self,
-        id: String,
-    ) -> String;
-
     fn toggle_filter_regex(&mut self) -> bool;
-
-    fn user_color_by_id(
-        &self,
-        id: String,
-    ) -> u32;
 
     fn row_count(&self) -> usize;
 
@@ -240,43 +225,6 @@ pub trait UsersTrait {
     fn matched(
         &self,
         index: usize,
-    ) -> bool;
-
-    fn name(
-        &self,
-        index: usize,
-    ) -> String;
-
-    fn pairwise_conversation_id(
-        &self,
-        index: usize,
-    ) -> Vec<u8>;
-
-    fn profile_picture(
-        &self,
-        index: usize,
-    ) -> Option<String>;
-
-    fn status(
-        &self,
-        index: usize,
-    ) -> u8;
-
-    fn set_status(
-        &mut self,
-        index: usize,
-        _: u8,
-    ) -> bool;
-
-    fn user_color(
-        &self,
-        index: usize,
-    ) -> u32;
-
-    fn set_user_color(
-        &mut self,
-        index: usize,
-        _: u32,
     ) -> bool;
 
     fn user_id(
@@ -375,53 +323,9 @@ pub unsafe extern "C" fn users_index_by_id(
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn users_name_by_id(
-    ptr: *const Users,
-    id_str: *const c_ushort,
-    id_len: c_int,
-    data: *mut QString,
-    set: fn(*mut QString, str_: *const c_char, len: c_int),
-) {
-    let obj = &*ptr;
-    let mut id = String::new();
-    set_string_from_utf16(&mut id, id_str, id_len);
-    let ret = obj.name_by_id(id);
-    let str_: *const c_char = ret.as_ptr() as (*const c_char);
-    set(data, str_, ret.len() as i32);
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn users_profile_picture_by_id(
-    ptr: *const Users,
-    id_str: *const c_ushort,
-    id_len: c_int,
-    data: *mut QString,
-    set: fn(*mut QString, str_: *const c_char, len: c_int),
-) {
-    let obj = &*ptr;
-    let mut id = String::new();
-    set_string_from_utf16(&mut id, id_str, id_len);
-    let ret = obj.profile_picture_by_id(id);
-    let str_: *const c_char = ret.as_ptr() as (*const c_char);
-    set(data, str_, ret.len() as i32);
-}
-
-#[no_mangle]
 pub unsafe extern "C" fn users_toggle_filter_regex(ptr: *mut Users) -> bool {
     let obj = &mut *ptr;
     obj.toggle_filter_regex()
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn users_user_color_by_id(
-    ptr: *const Users,
-    id_str: *const c_ushort,
-    id_len: c_int,
-) -> u32 {
-    let obj = &*ptr;
-    let mut id = String::new();
-    set_string_from_utf16(&mut id, id_str, id_len);
-    obj.user_color_by_id(id)
 }
 
 #[no_mangle]
@@ -516,83 +420,6 @@ pub unsafe extern "C" fn users_data_matched(
 ) -> bool {
     let obj = &*ptr;
     obj.matched(to_usize(row).unwrap_or(0))
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn users_data_name(
-    ptr: *const Users,
-    row: c_int,
-    d: *mut QString,
-    set: fn(*mut QString, *const c_char, len: c_int),
-) {
-    let obj = &*ptr;
-    let data = obj.name(to_usize(row).unwrap_or(0));
-    let str_: *const c_char = data.as_ptr() as *const c_char;
-    set(d, str_, to_c_int(data.len()));
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn users_data_pairwise_conversation_id(
-    ptr: *const Users,
-    row: c_int,
-    d: *mut QByteArray,
-    set: fn(*mut QByteArray, *const c_char, len: c_int),
-) {
-    let obj = &*ptr;
-    let data = obj.pairwise_conversation_id(to_usize(row).unwrap_or(0));
-    let str_: *const c_char = data.as_ptr() as *const c_char;
-    set(d, str_, to_c_int(data.len()));
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn users_data_profile_picture(
-    ptr: *const Users,
-    row: c_int,
-    d: *mut QString,
-    set: fn(*mut QString, *const c_char, len: c_int),
-) {
-    let obj = &*ptr;
-    let data = obj.profile_picture(to_usize(row).unwrap_or(0));
-    if let Some(data) = data {
-        let str_: *const c_char = data.as_ptr() as (*const c_char);
-        set(d, str_, to_c_int(data.len()));
-    }
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn users_data_status(
-    ptr: *const Users,
-    row: c_int,
-) -> u8 {
-    let obj = &*ptr;
-    obj.status(to_usize(row).unwrap_or(0))
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn users_set_data_status(
-    ptr: *mut Users,
-    row: c_int,
-    value: u8,
-) -> bool {
-    (&mut *ptr).set_status(to_usize(row).unwrap_or(0), value)
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn users_data_user_color(
-    ptr: *const Users,
-    row: c_int,
-) -> u32 {
-    let obj = &*ptr;
-    obj.user_color(to_usize(row).unwrap_or(0))
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn users_set_data_user_color(
-    ptr: *mut Users,
-    row: c_int,
-    value: u32,
-) -> bool {
-    (&mut *ptr).set_user_color(to_usize(row).unwrap_or(0), value)
 }
 
 #[no_mangle]

@@ -5,6 +5,7 @@ use herald_ids::ConversationId;
 use std::net::SocketAddr;
 
 /// User configuration
+// TODO several fields are now redundant with User
 #[derive(Debug, Clone)]
 pub struct Config {
     /// ID of the local user

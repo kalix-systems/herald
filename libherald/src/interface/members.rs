@@ -243,31 +243,6 @@ pub trait MembersTrait {
         index: usize,
     ) -> bool;
 
-    fn member_color(
-        &self,
-        index: usize,
-    ) -> u32;
-
-    fn name(
-        &self,
-        index: usize,
-    ) -> String;
-
-    fn pairwise_conversation_id(
-        &self,
-        index: usize,
-    ) -> Vec<u8>;
-
-    fn profile_picture(
-        &self,
-        index: usize,
-    ) -> Option<String>;
-
-    fn status(
-        &self,
-        index: usize,
-    ) -> u8;
-
     fn user_id(
         &self,
         index: usize,
@@ -471,65 +446,6 @@ pub unsafe extern "C" fn members_data_matched(
 ) -> bool {
     let obj = &*ptr;
     obj.matched(to_usize(row).unwrap_or(0))
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn members_data_member_color(
-    ptr: *const Members,
-    row: c_int,
-) -> u32 {
-    let obj = &*ptr;
-    obj.member_color(to_usize(row).unwrap_or(0))
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn members_data_name(
-    ptr: *const Members,
-    row: c_int,
-    d: *mut QString,
-    set: fn(*mut QString, *const c_char, len: c_int),
-) {
-    let obj = &*ptr;
-    let data = obj.name(to_usize(row).unwrap_or(0));
-    let str_: *const c_char = data.as_ptr() as *const c_char;
-    set(d, str_, to_c_int(data.len()));
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn members_data_pairwise_conversation_id(
-    ptr: *const Members,
-    row: c_int,
-    d: *mut QByteArray,
-    set: fn(*mut QByteArray, *const c_char, len: c_int),
-) {
-    let obj = &*ptr;
-    let data = obj.pairwise_conversation_id(to_usize(row).unwrap_or(0));
-    let str_: *const c_char = data.as_ptr() as *const c_char;
-    set(d, str_, to_c_int(data.len()));
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn members_data_profile_picture(
-    ptr: *const Members,
-    row: c_int,
-    d: *mut QString,
-    set: fn(*mut QString, *const c_char, len: c_int),
-) {
-    let obj = &*ptr;
-    let data = obj.profile_picture(to_usize(row).unwrap_or(0));
-    if let Some(data) = data {
-        let str_: *const c_char = data.as_ptr() as (*const c_char);
-        set(d, str_, to_c_int(data.len()));
-    }
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn members_data_status(
-    ptr: *const Members,
-    row: c_int,
-) -> u8 {
-    let obj = &*ptr;
-    obj.status(to_usize(row).unwrap_or(0))
 }
 
 #[no_mangle]
