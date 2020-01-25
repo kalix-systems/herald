@@ -172,7 +172,8 @@ Drawer {
 
                     delegate: Item {
                         width: parent.width
-                        property var groupData: model
+                        property var groupData: ContentMap.get(
+                                                    model.conversationId)
                         height: 42
                         Avatar {
                             id: groupPic
@@ -182,12 +183,12 @@ Drawer {
                             property int groupColor: groupData.conversationColor
                                                      !== undefined ? groupData.conversationColor : 0
                             pfpPath: Utils.safeStringOrDefault(
-                                         groupData.conversationPicture, "")
+                                         groupData.picture, "")
 
                             color: CmnCfg.avatarColors[groupColor]
                             initials: Utils.initialize(
                                           Utils.safeStringOrDefault(
-                                              groupData.conversationTitle))
+                                              groupData.title))
                             MouseArea {
                                 anchors.fill: parent
                                 cursorShape: Qt.PointingHandCursor
@@ -207,8 +208,7 @@ Drawer {
                         Label {
                             anchors.left: groupPic.right
                             anchors.leftMargin: CmnCfg.smallMargin
-                            text: Utils.safeStringOrDefault(
-                                      groupData.conversationTitle, "")
+                            text: Utils.safeStringOrDefault(groupData.title, "")
                             color: CmnCfg.palette.offBlack
                             font.family: CmnCfg.chatFont.name
                             anchors.verticalCenter: groupPic.verticalCenter

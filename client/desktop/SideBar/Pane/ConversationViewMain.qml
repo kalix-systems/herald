@@ -54,7 +54,7 @@ ListView {
 
         readonly property var conversationData: model
         readonly property var conversationIdProxy: conversationId
-        property bool isPairwise: pairwise
+        property bool isPairwise: convContent.pairwise
         property bool outbound: convContent.messages.lastAuthor === Herald.config.configId
 
         property ConversationContent convContent: ContentMap.get(
@@ -66,7 +66,7 @@ ListView {
         property Component childChatView: Component {
             CV.ChatViewMain {
                 id: cvMain
-                conversationItem: conversationData
+                conversationItem: convContent
                 ownedConversation: convContent.messages
                 conversationMembers: convContent.members
                 convId: conversationData.conversationId
@@ -109,9 +109,9 @@ ListView {
                 return conversationData.matched
             }
             if (!archiveView) {
-                return conversationData.matched && conversationData.status !== 1
+                return conversationData.matched && convContent.status !== 1
             }
-            return conversationData.status === 1
+            return convContent.status === 1
         }
 
         height: visible ? CmnCfg.convoHeight : 0
@@ -123,23 +123,27 @@ ListView {
                 Herald.utils.compareByteArray(Herald.config.ntsConversationId,
                                               conversationData.conversationId)
             }
-            boxTitle: !nts ? title : qsTr("Note to Self")
-            boxColor: !nts ? conversationData.conversationColor : UserMap.get(
+            boxTitle: !nts ? convContent.title : qsTr("Note to Self")
+            boxColor: !nts ? convContent.conversationColor : UserMap.get(
                                  Herald.config.configId).userColor
             picture: !nts ? Utils.safeStringOrDefault(
-                                conversationData.picture,
+                                convContent.picture,
                                 "") : Utils.safeStringOrDefault(
                                 UserMap.get(
                                     Herald.config.configId).profilePicture, "")
-            isGroupPicture: !conversationData.pairwise
+            isGroupPicture: !conversationItem.convContent.pairwise
 
             labelComponent: Ent.ConversationLabel {
                 id: conversationLabel
                 width: parent.width
                 height: parent.height
-                lastMsgDigest: conversationItem.conversationData.lastMsgDigest
-                isEmpty: conversationItem.conversationData.isEmpty
-                convoTitle: !convoRectangle.nts ? title : qsTr("Note to Self")
+                lastMsgDigest: conversationItem.convContent.messages.lastMsgDigest
+                isEmpty: {
+
+                    lastMsgDigest == ""
+                }
+                convoTitle: !convoRectangle.nts ? convContent.title : qsTr(
+                                                      "Note to Self")
                 labelColor: convoRectangle.state
                             !== "" ? CmnCfg.palette.black : CmnCfg.palette.lightGrey
                 minorTextColor: convoRectangle.state
@@ -181,7 +185,7 @@ ListView {
             MenuItem {
                 text: "Archive"
                 onTriggered: {
-                    conversationData.status = 1
+                    convContent.status = 1
 
                     const convIdx = Herald.conversations.indexById(
                                       conversationData.conversationId)
@@ -201,7 +205,7 @@ ListView {
             id: unarchiveMenu
             MenuItem {
                 text: qsTr("Unarchive conversation")
-                onTriggered: conversationData.status = 0
+                onTriggered: convContent.status = 0
             }
         }
     }
