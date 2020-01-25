@@ -17,19 +17,18 @@ Flow {
         model: userRect.sharedConvos
         delegate: Avatar {
             id: groupAv
-            property var groupData: model
+            property var groupData: ContentMap.get(model.conversationId)
             size: CmnCfg.units.dp(22)
             isGroup: true
             visible: index < 6
 
             property int groupColor: groupData.conversationColor
                                      !== undefined ? groupData.conversationColor : 0
-            pfpPath: Utils.safeStringOrDefault(groupData.conversationPicture,
-                                               "")
+            pfpPath: Utils.safeStringOrDefault(groupData.picture, "")
 
             color: CmnCfg.avatarColors[groupColor]
             initials: Utils.initialize(Utils.safeStringOrDefault(
-                                           groupData.conversationTitle))
+                                           groupData.title))
 
             TapHandler {
                 enabled: !overlay.visible

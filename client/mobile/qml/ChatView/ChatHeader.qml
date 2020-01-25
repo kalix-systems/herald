@@ -187,7 +187,7 @@ ToolBar {
 
     TimerOptions {
         id: timerMenu
-        conversationItem: chatPage.convoItem
+        conversationItem: chatPage.convContent
     }
 
     Component.onDestruction: {
