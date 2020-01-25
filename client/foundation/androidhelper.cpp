@@ -1,14 +1,20 @@
 #include "androidhelper.h"
 
+
+
+#ifdef Q_OS_ANDROID
+#include <QAndroidJniObject>
+#include <QAndroidIntent>
+#include <QAndroidActivityResultReceiver>
+#include <QUrl>
+#include <QtAndroid>
+#include <QColor>
+
 AndroidHelper::AndroidHelper()
 {
 
 }
 
-#ifdef Q_OS_ANDROID
-#include <QAndroidJniObject>
-#include <QtAndroid>
-#include <QColor>
 void AndroidHelper::set_status_bar_color(QColor color) {
   QtAndroid::runOnAndroidThread([=]() {
   QAndroidJniObject window = QtAndroid::androidActivity().callObjectMethod("getWindow", "()Landroid/view/Window;");
@@ -18,17 +24,31 @@ void AndroidHelper::set_status_bar_color(QColor color) {
   });
 }
 
-void AndroidHelper::send_notification(QString content) {
-    QAndroidJniObject javaNotification = QAndroidJniObject::fromString(content);
-    QAndroidJniObject::callStaticMethod<void>("org/qtproject/notification/NotificationBuilder", "notify", "(Ljava/lang/String;)V", javaNotification.object<jstring>());
+//void AndroidHelper::send_notification(QString content) {
+//    QAndroidJniObject javaNotification = QAndroidJniObject::fromString(content);
+//    QAndroidJniObject::callStaticMethod<void>("org/qtproject/notification/NotificationBuilder", "notify", "(Ljava/lang/String;)V", javaNotification.object<jstring>());
+//}
+
+void AndroidHelper::launch_camera_dialog() {
+// QAndroidJniObject::callStaticMethod<void>("org/qtproject/notification/NotificationBuilder", "open_gallery", "(V)String");
 }
 
-QFile* AndroidHelper::open_gallery() {
- QAndroidJniObject::callStaticMethod<void>("org/qtproject/notification/NotificationBuilder", "open_gallery", "(V)String");
- return new QFile();
+void AndroidHelper::launch_file_picker() {
+
 }
 
-QFile* AndroidHelper::open_file_browser() {
- return new QFile();
+void AndroidHelper::save_file_to_documents(QString fname) {
+
 }
+
+void AndroidHelper::save_file_to_gallery(QString fname) {
+
+}
+
+int AndroidHelper::resolve_content_url(QString content_url) {
+  auto content_path =  QAndroidJniObject::fromString(content_url).object<jstring>();
+  auto ctx =  QtAndroid::androidContext();
+  return QAndroidJniObject::callStaticMethod<jint>("org/qtproject/notification/NotificationBuilder", "resolve_uri", "(Landroid/content/Context;Ljava/lang/String;)I", &ctx, content_path);
+}
+
 #endif
