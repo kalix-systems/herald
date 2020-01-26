@@ -1,24 +1,24 @@
 [package]
-name = "herald_server"
-version = "0.1.0"
-authors = ["theseriousadult <jack@gallabytes.com>", "Baeo Maltinsky <baeo.maltinsky@gmail.com>"]
-edition = "2018"
+name        = "herald_server"
+version     = "0.1.0"
+authors     = ["theseriousadult <jack@gallabytes.com>", "Baeo Maltinsky <baeo.maltinsky@gmail.com>"]
+edition     = "2018"
 default-run = "herald_server"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-dashmap         = "1.0"
-lazy_static     = "1.4"
-sodiumoxide     = "0.2"
-tokio           = "0.2.0"
-tokio-postgres  = "0.5.0-alpha.2"
-crossbeam-channel = "0.3.9"
-once_cell = "1.2.0"
-rcgen = "0.7.0"
-anyhow = "1.0.26"
-rustls = "0.16.0"
+anyhow       = "1.0.26"
+once_cell    = "1.3.0"
+rcgen        = "0.7.0"
+rustls       = "0.16.0"
+rustop       = "1.0.4"
 tokio-rustls = "0.12.2"
+futures = "0.3.1"
+
+[dependencies.tokio]
+version  = "0.2.6"
+features = ["macros", "rt-threaded"]
 
 [dependencies.herald_common]
 path = "../herald_common"
@@ -32,7 +32,6 @@ path = "server_store"
 [dependencies.server_protocol]
 path = "server_protocol"
 
-[dev-dependencies]
-serial_test        = "0.2.0"
-serial_test_derive = "0.2.0"
-womp = { git  = "https://github.com/kalix-systems/womp"}
+[dependencies.krpc]
+path = "../krpc"
+features = ["async", "ws"]

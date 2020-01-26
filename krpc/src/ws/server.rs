@@ -1,6 +1,6 @@
 use super::*;
 use futures::{
-    future::{self, FutureExt, TryFuture},
+    future::{self, Future, FutureExt},
     stream::{self, StreamExt, TryStreamExt},
 };
 use tokio::sync::mpsc::unbounded_channel;
@@ -121,7 +121,7 @@ macro_rules! serve_body {
             tokio::net::TcpListener::bind($socket).await.ok(),
             move |mlistener| {
                 let server = $server;
-                let tls = $tls;
+                let tls = $tls.clone();
                 async move {
                     let mut listener = mlistener?;
                     let (stream, _) = listener.accept().await.ok()?;
@@ -142,9 +142,9 @@ macro_rules! serve_body {
 
 pub async fn serve<'a, P, S>(
     server: &'a S,
-    socket: &'a SocketAddr,
-    tls: &'a tokio_rustls::TlsAcceptor,
-) -> impl Stream<Item = impl TryFuture<Ok = (), Error = Error> + 'a> + 'a
+    socket: SocketAddr,
+    tls: tokio_rustls::TlsAcceptor,
+) -> impl Stream<Item = impl Future<Output = Result<(), Error>> + 'a> + 'a
 where
     P: Protocol,
     S: KrpcServer<P>,
@@ -158,12 +158,12 @@ pub async fn serve_arc<P, S>(
     server: Arc<S>,
     socket: SocketAddr,
     tls: tokio_rustls::TlsAcceptor,
-) -> impl Stream<Item = impl TryFuture<Ok = (), Error = Error>>
+) -> impl Stream<Item = impl Future<Output = Result<(), Error>>>
 where
     P: Protocol,
     S: KrpcServer<P>,
     P::Push: Clone,
     S::ServePush: Into<P::Push> + Clone,
 {
-    serve_body!(server.clone(), socket, tls.clone())
+    serve_body!(server.clone(), &socket, tls.clone())
 }
