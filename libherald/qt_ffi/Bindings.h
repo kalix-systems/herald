@@ -186,6 +186,7 @@ struct ConversationContentPtrBundle {
 };
 struct ConversationsPtrBundle {
   Conversations *conversations;
+  void (*conversations_builder_conversation_id_changed)(Conversations *);
   void (*conversations_filter_changed)(Conversations *);
   void (*conversations_filter_regex_changed)(Conversations *);
 
@@ -282,6 +283,7 @@ struct HeraldPtrBundle {
                                                  int);
   void (*conversation_builder_end_remove_rows)(ConversationBuilder *);
   Conversations *conversations;
+  void (*conversations_builder_conversation_id_changed)(Conversations *);
   void (*conversations_filter_changed)(Conversations *);
   void (*conversations_filter_regex_changed)(Conversations *);
 
@@ -861,6 +863,8 @@ public:
 private:
   Private *m_d;
   bool m_ownsPrivate;
+  Q_PROPERTY(QByteArray builderConversationId READ builderConversationId NOTIFY
+                 builderConversationIdChanged FINAL)
   Q_PROPERTY(
       QString filter READ filter WRITE setFilter NOTIFY filterChanged FINAL)
   Q_PROPERTY(bool filterRegex READ filterRegex WRITE setFilterRegex NOTIFY
@@ -870,6 +874,7 @@ private:
 public:
   explicit Conversations(QObject *parent = nullptr);
   ~Conversations() override;
+  QByteArray builderConversationId() const;
   QString filter() const;
   void setFilter(const QString &v);
   bool filterRegex() const;
@@ -915,6 +920,7 @@ private:
   void initHeaderData();
   void updatePersistentIndexes();
 Q_SIGNALS:
+  void builderConversationIdChanged();
   void filterChanged();
   void filterRegexChanged();
 };

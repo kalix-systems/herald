@@ -186,6 +186,7 @@ pub unsafe fn herald_new_inner(ptr_bundle: *mut HeraldPtrBundle) -> Herald {
         conversation_builder_begin_remove_rows,
         conversation_builder_end_remove_rows,
         conversations,
+        conversations_builder_conversation_id_changed,
         conversations_filter_changed,
         conversations_filter_regex_changed,
         conversations_new_data_ready,
@@ -281,6 +282,7 @@ pub unsafe fn herald_new_inner(ptr_bundle: *mut HeraldPtrBundle) -> Herald {
     let d_conversation_builder = ConversationBuilder::new(conversation_builder_emit, model);
     let conversations_emit = ConversationsEmitter {
         qobject: Arc::new(AtomicPtr::new(conversations)),
+        builder_conversation_id_changed: conversations_builder_conversation_id_changed,
         filter_changed: conversations_filter_changed,
         filter_regex_changed: conversations_filter_regex_changed,
         new_data_ready: conversations_new_data_ready,
@@ -550,6 +552,7 @@ pub struct HeraldPtrBundle {
     conversation_builder_begin_remove_rows: fn(*mut ConversationBuilderQObject, usize, usize),
     conversation_builder_end_remove_rows: fn(*mut ConversationBuilderQObject),
     conversations: *mut ConversationsQObject,
+    conversations_builder_conversation_id_changed: fn(*mut ConversationsQObject),
     conversations_filter_changed: fn(*mut ConversationsQObject),
     conversations_filter_regex_changed: fn(*mut ConversationsQObject),
     conversations_new_data_ready: fn(*mut ConversationsQObject),

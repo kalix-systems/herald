@@ -80,4 +80,8 @@ impl ConversationsTrait for Conversations {
     ) -> i64 {
         self.index_by_id_(cid)
     }
+
+    fn builder_conversation_id(&self) -> Option<ffi::ConversationIdRef> {
+        self.builder_cid.as_ref().map(|c| c.as_slice())
+    }
 }

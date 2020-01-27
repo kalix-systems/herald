@@ -154,7 +154,11 @@ fn utils() -> Object {
 }
 
 fn conversations() -> Object {
-    let props = filter_props();
+    let mut props = props! {
+       builderConversationId: Prop::new().simple(QByteArray).optional()
+    };
+
+    props.extend(filter_props());
 
     let item_props = item_props! {
        conversationId: ItemProp::new(QByteArray).get_by_value(),

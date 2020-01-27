@@ -13,7 +13,12 @@ impl Conversations {
                 self.loaded = true;
                 self.model.end_reset_model();
             }
-            BuilderFinished(meta) => self.insert_new_conversation(meta),
+            BuilderFinished(meta) => {
+                let cid = meta.conversation_id;
+                self.insert_new_conversation(meta);
+                self.builder_cid.replace(cid);
+                self.emit.builder_conversation_id_changed();
+            }
             NewConversation(meta) => self.insert_new_conversation(meta),
             NewActivity(cid) => {
                 let pos = self
