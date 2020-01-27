@@ -10,9 +10,6 @@ import "qrc:/imports/js/utils.mjs" as JS
 // TODO:
 // move the property translation functions into
 // some common js directory , receipt urls are not numbers, nor are timestamps
-
-// TODO this should probably be called something to reflect that it's also used
-// for contacts, not just conversations
 Item {
     id: wrapper
     // the group name or displayName of the conversation
@@ -109,9 +106,9 @@ Item {
         }
     }
     Label {
+        id: ts
         anchors.right: parent.right
         anchors.top: nameGrid.top
-        id: ts
         font {
             family: CmnCfg.chatFont.name
             pixelSize: CmnCfg.minorTextSize
@@ -214,4 +211,4 @@ Item {
         padding: 0
         background: Item {}
     }
-} //}
+}

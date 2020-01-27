@@ -1,49 +1,52 @@
 import QtQuick 2.14
 import QtQuick.Controls 2.14
-import LibHerald 1.0
-import "qrc:/imports/Entity"
-import "qrc:/imports/js/utils.mjs" as Utils
 import QtQuick.Layouts 1.2
+import LibHerald 1.0
+import "qrc:/imports/Entity" as Entity
+import "qrc:/imports/js/utils.mjs" as Utils
+import "../Common" as Common
 
 Page {
-    id: contactsPopup
+    id: contactsView
     readonly property Component headerComponent: ContactsHeader {}
     ContactPage {
         id: contactPage
     }
 
-    Component.onCompleted: appRouter.contactView = contactsPopup
+    Component.onCompleted: appRouter.contactView = contactsView
     signal groupClicked(var groupId)
-    Item {
-        id: rowLabel
-        height: CmnCfg.units.dp(CmnCfg.toolbarHeight - 10)
-        width: parent.width
 
-        Item {
-            width: CmnCfg.units.dp(CmnCfg.avatarSize - 10)
-            anchors.left: parent.left
-            id: avatarFiller
-            height: CmnCfg.units.dp(10)
-            anchors.leftMargin: CmnCfg.smallMargin
-        }
+
+    Item {
+        id: columnLabels
+        height: CmnCfg.units.dp(CmnCfg.toolbarHeight - 20)
+        width: parent.width
 
         Text {
             id: nameHeader
-            anchors.left: avatarFiller.right
-            anchors.leftMargin: CmnCfg.smallMargin
+            anchors {
+                left: parent.left
+                // leftMargin calculated from avatar width + margins, plus an
+                // infuriatingly mysterious 4dp
+                leftMargin: CmnCfg.smallMargin + CmnCfg.avatarSize +
+                            CmnCfg.defaultMargin + CmnCfg.units.dp(4)
+                right: groupHeader.left
+                rightMargin: CmnCfg.megaMargin
+                verticalCenter: parent.verticalCenter
+            }
             text: "Name"
-            anchors.verticalCenter: parent.verticalCenter
-            font.family: CmnCfg.chatFont.name
             color: CmnCfg.palette.offBlack
+            font.family: CmnCfg.chatFont.name
             font.pixelSize: CmnCfg.chatTextSize
             font.weight: Font.Medium
-            anchors.right: groupHeader.left
-            anchors.rightMargin: CmnCfg.megaMargin
         }
 
         Text {
             id: groupHeader
             text: "Groups"
+            anchors.left: parent.left
+            // leftMargin calculated from avatarAndName width + left margin
+            anchors.leftMargin: CmnCfg.smallMargin + contactsView.width * 0.6
             anchors.verticalCenter: parent.verticalCenter
             anchors.horizontalCenter: parent.horizontalCenter
             font.family: CmnCfg.chatFont.name
@@ -51,6 +54,7 @@ Page {
             font.pixelSize: CmnCfg.chatTextSize
             font.weight: Font.Medium
         }
+
         Rectangle {
             anchors {
                 right: parent.right
@@ -68,7 +72,7 @@ Page {
         boundsBehavior: Flickable.StopAtBounds
         boundsMovement: Flickable.StopAtBounds
         anchors {
-            top: rowLabel.bottom
+            top: columnLabels.bottom
             right: parent.right
             left: parent.left
             bottom: parent.bottom
@@ -87,14 +91,63 @@ Page {
             property var userData: UserMap.get(model.userId)
             color: CmnCfg.palette.white
             width: parent.width
-            height: visible ? row.height + 1 : 0
+            height: visible ? CmnCfg.convoHeight + 1 : 0
 
             visible: (userData.userId !== Herald.config.configId && matched)
 
             property var sharedConvos: SharedConversations {
                 userId: userData.userId
             }
-            //top header
+
+            // item wrapping avatar and label; not using platonic rectangle
+            // because it expects to fill its parent's full width
+            Item {
+                id: avatarAndName
+                width: contactsView.width * 0.6
+                height: parent.height
+
+                Entity.Avatar {
+                    id: avatar
+                    anchors.left: parent.left
+                    anchors.leftMargin: CmnCfg.smallMargin
+                    anchors.verticalCenter: parent.verticalCenter
+                    height: CmnCfg.units.dp(CmnCfg.avatarSize - 10)
+                    pfpPath: Utils.safeStringOrDefault(
+                                 userData.profilePicture, "")
+                    color: CmnCfg.avatarColors[userData.userColor]
+                    initials: Utils.initialize(userData.name)
+                }
+
+                Entity.ContactLabel {
+                    displayName: userData.name
+                    username: userId
+                    anchors {
+                        left: avatar.right
+                        leftMargin: CmnCfg.defaultMargin
+                        verticalCenter: parent.verticalCenter
+                    }
+                }
+
+                TapHandler {
+                    onTapped: {
+                        contactPage.userData = userRect.userData
+                        stackView.push(contactPage)
+                    }
+                }
+
+            }
+
+            CommonGroupsFlow {
+                anchors {
+                    left: avatarAndName.right
+                    leftMargin: CmnCfg.smallMargin
+                    right: parent.right
+                    rightMargin: CmnCfg.smallMargin
+                    verticalCenter: parent.verticalCenter
+                }
+            }
+
+            //top divider
             Rectangle {
                 anchors {
                     right: parent.right
@@ -106,7 +159,7 @@ Page {
                 color: CmnCfg.palette.medGrey
             }
 
-            //bottom header
+            //bottom divider
             Rectangle {
                 anchors {
                     right: parent.right
@@ -117,72 +170,6 @@ Page {
                 color: CmnCfg.palette.medGrey
                 z: parent.z + 1
                 visible: index === (listView.count - 1)
-            }
-
-            //item wrapping avatar and label; not using platonic rectangle
-            //so they can have separate mouse areas
-            Item {
-                id: row
-                width: contactsPopup.width
-                height: CmnCfg.units.dp(48)
-
-                //avatar
-                Avatar {
-                    id: avatar
-                    anchors.left: parent.left
-                    anchors.leftMargin: CmnCfg.smallMargin
-                    anchors.verticalCenter: parent.verticalCenter
-                    height: CmnCfg.units.dp(CmnCfg.avatarSize - 10)
-                    pfpPath: Utils.safeStringOrDefault(userData.profilePicture,
-                                                       "")
-                    color: CmnCfg.avatarColors[userData.userColor]
-                    initials: Utils.initialize(userData.name)
-                    MouseArea {
-                        cursorShape: Qt.PointingHandCursor
-                        anchors.fill: parent
-                        onClicked: {
-                            contactPage.userData = userRect.userData
-                            stackView.push(contactPage)
-                        }
-                    }
-                }
-                MouseArea {
-                    height: labelCol.height
-                    width: labelCol.width
-                    cursorShape: Qt.PointingHandCursor
-                    anchors.left: avatar.right
-                    anchors.leftMargin: CmnCfg.defaultMargin
-                    anchors.verticalCenter: avatar.verticalCenter
-                    onClicked: {
-                        contactPage.userData = userRect.userData
-                        stackView.push(contactPage)
-                    }
-
-                    //contact label
-                    Column {
-                        id: labelCol
-                        spacing: 2
-                        GridLayout {
-                            Label {
-                                font.weight: Font.DemiBold
-                                font.pixelSize: CmnCfg.entityLabelSize
-                                font.family: CmnCfg.chatFont.name
-                                text: userData.name
-                                color: CmnCfg.palette.offBlack
-                                Layout.maximumWidth: nameHeader.width
-                                elide: Label.ElideRight
-                            }
-                        }
-                        Label {
-                            text: "@" + userId
-                            font.family: CmnCfg.chatFont.name
-                            color: CmnCfg.palette.offBlack
-                            font.pixelSize: CmnCfg.entitySubLabelSize
-                        }
-                    }
-                }
-                //common groups
-                CommonGroupsFlow {}
             }
         }
     }
