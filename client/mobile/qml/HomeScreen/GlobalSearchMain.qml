@@ -53,15 +53,19 @@ Page {
             delegate: ConversationItem {
                 property var conversationData: model
                 convoContent: ContentMap.get(model.conversationId)
-                itemTitle: title
-                colorCode: convoContent.conversationColor
-                imageSource: Utils.safeStringOrDefault(convoContent.picture, "")
-                isGroup: !convoContent.pairwise
-                lastMsgDigest: convoContent.lastMsgDigest
-                isEmpty: lastMsgDigest === ""
                 tapEnabled: false
                 visible: conversationData.matched
                 height: visible ? CmnCfg.convoHeight : 0
+                itemTitle: !isNTS ? convoContent.title : qsTr("Note to Self")
+                colorCode: !isNTS ? convoContent.conversationColor : UserMap.get(
+                                        Herald.config.configId).userColor
+                imageSource: !isNTS ? Utils.safeStringOrDefault(
+                                          convoContent.picture,
+                                          "") : Utils.safeStringOrDefault(
+                                          Herald.config.profilePicture, "")
+                isGroup: !convoContent.pairwise
+                lastMsgDigest: convoContent.lastMsgDigest
+                isEmpty: lastMsgDigest === ""
                 TapHandler {
                     // TODO if state is fromComposeButton we should probably
                     // pop this view off the stack, so ChatView back button
