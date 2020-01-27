@@ -20,6 +20,7 @@ impl super::Conversations {
             model,
             list: Vector::new(),
             loaded: false,
+            builder_cid: None,
         }
     }
 

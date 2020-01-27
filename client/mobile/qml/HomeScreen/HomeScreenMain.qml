@@ -113,7 +113,6 @@ Page {
                     if ((conv_idx < 0) || (conv_idx >= cvListView.count))
                         return
 
-                    stackView.pop(null, StackView.Immediate)
                     stackView.push(cvListView.itemAtIndex(conv_idx).ownedCV)
                 }
             }

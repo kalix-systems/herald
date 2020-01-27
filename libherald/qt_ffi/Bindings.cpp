@@ -131,6 +131,9 @@ inline void conversationContentStatusChanged(ConversationContent *o) {
 inline void conversationContentTitleChanged(ConversationContent *o) {
   Q_EMIT o->titleChanged();
 }
+inline void conversationsBuilderConversationIdChanged(Conversations *o) {
+  Q_EMIT o->builderConversationIdChanged();
+}
 inline void conversationsFilterChanged(Conversations *o) {
   Q_EMIT o->filterChanged();
 }
@@ -580,6 +583,8 @@ bool Conversations::setHeaderData(int section, Qt::Orientation orientation,
 extern "C" {
 Conversations::Private *conversations_new(ConversationsPtrBundle *);
 void conversations_free(Conversations::Private *);
+void conversations_builder_conversation_id_get(const Conversations::Private *,
+                                               QByteArray *, qbytearray_set);
 void conversations_filter_get(const Conversations::Private *, QString *,
                               qstring_set);
 void conversations_filter_set(Conversations::Private *, const ushort *str,
@@ -2888,7 +2893,8 @@ Conversations::Conversations(bool /*owned*/, QObject *parent)
 Conversations::Conversations(QObject *parent)
     : QAbstractItemModel(parent),
       m_d(conversations_new(new ConversationsPtrBundle{
-          this, conversationsFilterChanged, conversationsFilterRegexChanged,
+          this, conversationsBuilderConversationIdChanged,
+          conversationsFilterChanged, conversationsFilterRegexChanged,
           [](const Conversations *o) { Q_EMIT o->newDataReady(QModelIndex()); },
           [](Conversations *o) { Q_EMIT o->layoutAboutToBeChanged(); },
           [](Conversations *o) {
@@ -2930,6 +2936,12 @@ Conversations::~Conversations() {
   }
 }
 void Conversations::initHeaderData() {}
+
+QByteArray Conversations::builderConversationId() const {
+  QByteArray v;
+  conversations_builder_conversation_id_get(m_d, &v, set_qbytearray);
+  return v;
+}
 
 QString Conversations::filter() const {
   QString v;
@@ -3195,6 +3207,7 @@ Herald::Herald(QObject *parent)
 
           ,
           m_conversations,
+          conversationsBuilderConversationIdChanged,
           conversationsFilterChanged,
           conversationsFilterRegexChanged,
           [](const Conversations *o) { Q_EMIT o->newDataReady(QModelIndex()); },

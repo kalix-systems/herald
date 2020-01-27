@@ -4,6 +4,7 @@ pub struct ConversationsQObject;
 
 pub struct ConversationsEmitter {
     pub(super) qobject: Arc<AtomicPtr<ConversationsQObject>>,
+    pub(super) builder_conversation_id_changed: fn(*mut ConversationsQObject),
     pub(super) filter_changed: fn(*mut ConversationsQObject),
     pub(super) filter_regex_changed: fn(*mut ConversationsQObject),
     pub(super) new_data_ready: fn(*mut ConversationsQObject),
@@ -19,6 +20,7 @@ impl ConversationsEmitter {
     pub fn clone(&mut self) -> ConversationsEmitter {
         ConversationsEmitter {
             qobject: self.qobject.clone(),
+            builder_conversation_id_changed: self.builder_conversation_id_changed,
             filter_changed: self.filter_changed,
             filter_regex_changed: self.filter_regex_changed,
             new_data_ready: self.new_data_ready,
@@ -29,6 +31,14 @@ impl ConversationsEmitter {
         let n: *const ConversationsQObject = null();
         self.qobject
             .store(n as *mut ConversationsQObject, Ordering::SeqCst);
+    }
+
+    pub fn builder_conversation_id_changed(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+
+        if !ptr.is_null() {
+            (self.builder_conversation_id_changed)(ptr);
+        }
     }
 
     pub fn filter_changed(&mut self) {
@@ -164,6 +174,8 @@ pub trait ConversationsTrait {
 
     fn emit(&mut self) -> &mut ConversationsEmitter;
 
+    fn builder_conversation_id(&self) -> Option<&[u8]>;
+
     fn filter(&self) -> &str;
 
     fn set_filter(
@@ -247,6 +259,7 @@ pub unsafe fn conversations_new_inner(ptr_bundle: *mut ConversationsPtrBundle) -
 
     let ConversationsPtrBundle {
         conversations,
+        conversations_builder_conversation_id_changed,
         conversations_filter_changed,
         conversations_filter_regex_changed,
         conversations_new_data_ready,
@@ -264,6 +277,7 @@ pub unsafe fn conversations_new_inner(ptr_bundle: *mut ConversationsPtrBundle) -
     } = ptr_bundle;
     let conversations_emit = ConversationsEmitter {
         qobject: Arc::new(AtomicPtr::new(conversations)),
+        builder_conversation_id_changed: conversations_builder_conversation_id_changed,
         filter_changed: conversations_filter_changed,
         filter_regex_changed: conversations_filter_regex_changed,
         new_data_ready: conversations_new_data_ready,
@@ -321,6 +335,20 @@ pub unsafe extern "C" fn conversations_remove_conversation(
 pub unsafe extern "C" fn conversations_toggle_filter_regex(ptr: *mut Conversations) -> bool {
     let obj = &mut *ptr;
     obj.toggle_filter_regex()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn conversations_builder_conversation_id_get(
+    ptr: *const Conversations,
+    prop: *mut QByteArray,
+    set: fn(*mut QByteArray, *const c_char, c_int),
+) {
+    let obj = &*ptr;
+    let value = obj.builder_conversation_id();
+    if let Some(value) = value {
+        let str_: *const c_char = value.as_ptr() as (*const c_char);
+        set(prop, str_, to_c_int(value.len()));
+    }
 }
 
 #[no_mangle]
@@ -434,6 +462,7 @@ pub unsafe extern "C" fn conversations_data_matched(
 #[repr(C)]
 pub struct ConversationsPtrBundle {
     conversations: *mut ConversationsQObject,
+    conversations_builder_conversation_id_changed: fn(*mut ConversationsQObject),
     conversations_filter_changed: fn(*mut ConversationsQObject),
     conversations_filter_regex_changed: fn(*mut ConversationsQObject),
     conversations_new_data_ready: fn(*mut ConversationsQObject),

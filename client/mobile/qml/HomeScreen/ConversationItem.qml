@@ -86,6 +86,7 @@ Rectangle {
                 isEmpty: conversationItem.isEmpty
                 typeColor: CmnCfg.palette.medGrey
                 typeSize: CmnCfg.defaultMargin
+                receiptFill: CmnCfg.palette.black
             }
             z: CmnCfg.middleZ
         }
