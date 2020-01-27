@@ -104,6 +104,26 @@ ListView {
                 chatView.currentConvoId = groupId
             }
         }
+
+        Connections {
+            target: Herald.conversations
+            onBuilderConversationIdChanged: {
+
+                if (Herald.conversations.builderConversationId == undefined) {
+                    return
+                }
+
+                const convIdx = Herald.conversations.indexById(
+                                  Herald.conversations.builderConversationId)
+                if ((convIdx < 0) || (convIdx >= conversationList.count))
+                    return
+
+                conversationList.currentIndex = convIdx
+                chatView.sourceComponent = conversationList.currentItem.childChatView
+                chatView.currentConvoId = Herald.conversations.builderConversationId
+            }
+        }
+
         visible: {
             if (sideBarState.state === "globalSearch") {
                 return conversationData.matched
