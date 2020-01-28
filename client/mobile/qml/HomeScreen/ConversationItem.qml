@@ -82,10 +82,11 @@ Rectangle {
 
             labelComponent: Ent.ConversationLabel {
                 convoTitle: itemTitle
-                lastMsgDigest: conversationItem.lastMsgDigest
+                lastMsgDigest: conversationItem.convoContent.messages.lastMsgDigest
                 isEmpty: conversationItem.isEmpty
                 typeColor: CmnCfg.palette.medGrey
                 typeSize: CmnCfg.defaultMargin
+                receiptFill: CmnCfg.palette.black
             }
             z: CmnCfg.middleZ
         }

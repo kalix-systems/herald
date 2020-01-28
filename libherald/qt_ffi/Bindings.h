@@ -75,7 +75,10 @@ struct ConversationBuilderPtrBundle {
 };
 struct ConversationContentPtrBundle {
   ConversationContent *conversation_content;
+  void (*conversation_content_conversation_color_changed)(
+      ConversationContent *);
   void (*conversation_content_conversation_id_changed)(ConversationContent *);
+  void (*conversation_content_expiration_period_changed)(ConversationContent *);
   Members *members;
   void (*members_filter_changed)(Members *);
   void (*members_filter_regex_changed)(Members *);
@@ -155,6 +158,7 @@ struct ConversationContentPtrBundle {
   void (*message_builder_end_move_rows)(MessageBuilder *);
   void (*message_builder_begin_remove_rows)(MessageBuilder *, int, int);
   void (*message_builder_end_remove_rows)(MessageBuilder *);
+  void (*messages_last_msg_digest_changed)(Messages *);
   void (*messages_search_active_changed)(Messages *);
   void (*messages_search_index_changed)(Messages *);
   void (*messages_search_num_matches_changed)(Messages *);
@@ -173,10 +177,16 @@ struct ConversationContentPtrBundle {
   void (*messages_end_move_rows)(Messages *);
   void (*messages_begin_remove_rows)(Messages *, int, int);
   void (*messages_end_remove_rows)(Messages *);
+  void (*conversation_content_muted_changed)(ConversationContent *);
+  void (*conversation_content_pairwise_changed)(ConversationContent *);
+  void (*conversation_content_picture_changed)(ConversationContent *);
+  void (*conversation_content_status_changed)(ConversationContent *);
+  void (*conversation_content_title_changed)(ConversationContent *);
   void (*conversation_content_tryPoll)(const ConversationContent *);
 };
 struct ConversationsPtrBundle {
   Conversations *conversations;
+  void (*conversations_builder_conversation_id_changed)(Conversations *);
   void (*conversations_filter_changed)(Conversations *);
   void (*conversations_filter_regex_changed)(Conversations *);
 
@@ -273,6 +283,7 @@ struct HeraldPtrBundle {
                                                  int);
   void (*conversation_builder_end_remove_rows)(ConversationBuilder *);
   Conversations *conversations;
+  void (*conversations_builder_conversation_id_changed)(Conversations *);
   void (*conversations_filter_changed)(Conversations *);
   void (*conversations_filter_regex_changed)(Conversations *);
 
@@ -523,6 +534,7 @@ struct MessagesPtrBundle {
   void (*message_builder_end_move_rows)(MessageBuilder *);
   void (*message_builder_begin_remove_rows)(MessageBuilder *, int, int);
   void (*message_builder_end_remove_rows)(MessageBuilder *);
+  void (*messages_last_msg_digest_changed)(Messages *);
   void (*messages_search_active_changed)(Messages *);
   void (*messages_search_index_changed)(Messages *);
   void (*messages_search_num_matches_changed)(Messages *);
@@ -773,26 +785,55 @@ private:
   Messages *const m_messages;
   Private *m_d;
   bool m_ownsPrivate;
+  Q_PROPERTY(quint32 conversationColor READ conversationColor NOTIFY
+                 conversationColorChanged FINAL)
   Q_PROPERTY(QByteArray conversationId READ conversationId WRITE
                  setConversationId NOTIFY conversationIdChanged FINAL)
+  Q_PROPERTY(quint8 expirationPeriod READ expirationPeriod WRITE
+                 setExpirationPeriod NOTIFY expirationPeriodChanged FINAL)
   Q_PROPERTY(Members *members READ members NOTIFY membersChanged FINAL)
   Q_PROPERTY(Messages *messages READ messages NOTIFY messagesChanged FINAL)
+  Q_PROPERTY(bool muted READ muted WRITE setMuted NOTIFY mutedChanged FINAL)
+  Q_PROPERTY(bool pairwise READ pairwise NOTIFY pairwiseChanged FINAL)
+  Q_PROPERTY(QString picture READ picture NOTIFY pictureChanged FINAL)
+  Q_PROPERTY(
+      quint8 status READ status WRITE setStatus NOTIFY statusChanged FINAL)
+  Q_PROPERTY(QString title READ title WRITE setTitle NOTIFY titleChanged FINAL)
   explicit ConversationContent(bool owned, QObject *parent);
 
 public:
   explicit ConversationContent(QObject *parent = nullptr);
   ~ConversationContent() override;
+  quint32 conversationColor() const;
   QByteArray conversationId() const;
   void setConversationId(const QByteArray &v);
+  quint8 expirationPeriod() const;
+  void setExpirationPeriod(quint8 v);
   const Members *members() const;
   Members *members();
   const Messages *messages() const;
   Messages *messages();
+  bool muted() const;
+  void setMuted(bool v);
+  bool pairwise() const;
+  QString picture() const;
+  quint8 status() const;
+  void setStatus(quint8 v);
+  QString title() const;
+  void setTitle(const QString &v);
   Q_INVOKABLE void pollUpdate();
+  Q_INVOKABLE void setPicture(const QString &picture);
 Q_SIGNALS:
+  void conversationColorChanged();
   void conversationIdChanged();
+  void expirationPeriodChanged();
   void membersChanged();
   void messagesChanged();
+  void mutedChanged();
+  void pairwiseChanged();
+  void pictureChanged();
+  void statusChanged();
+  void titleChanged();
   void tryPoll() const;
 };
 class Conversations : public QAbstractItemModel {
@@ -822,6 +863,8 @@ public:
 private:
   Private *m_d;
   bool m_ownsPrivate;
+  Q_PROPERTY(QByteArray builderConversationId READ builderConversationId NOTIFY
+                 builderConversationIdChanged FINAL)
   Q_PROPERTY(
       QString filter READ filter WRITE setFilter NOTIFY filterChanged FINAL)
   Q_PROPERTY(bool filterRegex READ filterRegex WRITE setFilterRegex NOTIFY
@@ -831,6 +874,7 @@ private:
 public:
   explicit Conversations(QObject *parent = nullptr);
   ~Conversations() override;
+  QByteArray builderConversationId() const;
   QString filter() const;
   void setFilter(const QString &v);
   bool filterRegex() const;
@@ -838,10 +882,6 @@ public:
   Q_INVOKABLE void clearFilter();
   Q_INVOKABLE qint64 indexById(const QByteArray &conversation_id) const;
   Q_INVOKABLE bool removeConversation(quint64 row_index);
-  Q_INVOKABLE void setProfilePicture(quint64 index,
-                                     const QString &profile_picture);
-  Q_INVOKABLE void setStatusById(const QByteArray &conversation_id,
-                                 quint8 status);
   Q_INVOKABLE bool toggleFilterRegex();
   int columnCount(const QModelIndex &parent = QModelIndex()) const override;
   QVariant data(const QModelIndex &index,
@@ -868,23 +908,8 @@ public:
   removeRows(int row, int count,
              const QModelIndex &parent = QModelIndex()) override;
 
-  bool setData(const QModelIndex &index, const QVariant &value,
-               int role = Qt::EditRole) override;
-  Q_INVOKABLE quint32 conversationColor(int row) const;
   Q_INVOKABLE QByteArray conversationId(int row) const;
-  Q_INVOKABLE quint8 expirationPeriod(int row) const;
-  Q_INVOKABLE bool setExpirationPeriod(int row, quint8 value);
-  Q_INVOKABLE bool isEmpty(int row) const;
-  Q_INVOKABLE QString lastMsgDigest(int row) const;
   Q_INVOKABLE bool matched(int row) const;
-  Q_INVOKABLE bool muted(int row) const;
-  Q_INVOKABLE bool setMuted(int row, bool value);
-  Q_INVOKABLE bool pairwise(int row) const;
-  Q_INVOKABLE QString picture(int row) const;
-  Q_INVOKABLE quint8 status(int row) const;
-  Q_INVOKABLE bool setStatus(int row, quint8 value);
-  Q_INVOKABLE QString title(int row) const;
-  Q_INVOKABLE bool setTitle(int row, const QString &value);
 
 Q_SIGNALS:
   // new data is ready to be made available to the model with fetchMore()
@@ -895,6 +920,7 @@ private:
   void initHeaderData();
   void updatePersistentIndexes();
 Q_SIGNALS:
+  void builderConversationIdChanged();
   void filterChanged();
   void filterRegexChanged();
 };
@@ -1622,6 +1648,8 @@ private:
   Private *m_d;
   bool m_ownsPrivate;
   Q_PROPERTY(MessageBuilder *builder READ builder NOTIFY builderChanged FINAL)
+  Q_PROPERTY(QString lastMsgDigest READ lastMsgDigest NOTIFY
+                 lastMsgDigestChanged FINAL)
   Q_PROPERTY(bool searchActive READ searchActive WRITE setSearchActive NOTIFY
                  searchActiveChanged FINAL)
   Q_PROPERTY(
@@ -1639,6 +1667,7 @@ public:
   ~Messages() override;
   const MessageBuilder *builder() const;
   MessageBuilder *builder();
+  QString lastMsgDigest() const;
   bool searchActive() const;
   void setSearchActive(bool v);
   quint64 searchIndex() const;
@@ -1726,6 +1755,7 @@ private:
   void updatePersistentIndexes();
 Q_SIGNALS:
   void builderChanged();
+  void lastMsgDigestChanged();
   void searchActiveChanged();
   void searchIndexChanged();
   void searchNumMatchesChanged();
@@ -1830,10 +1860,7 @@ public:
   removeRows(int row, int count,
              const QModelIndex &parent = QModelIndex()) override;
 
-  Q_INVOKABLE QVariant conversationColor(int row) const;
   Q_INVOKABLE QByteArray conversationId(int row) const;
-  Q_INVOKABLE QString conversationPicture(int row) const;
-  Q_INVOKABLE QString conversationTitle(int row) const;
 
 Q_SIGNALS:
   // new data is ready to be made available to the model with fetchMore()

@@ -52,7 +52,7 @@ Item {
     readonly property real chatTextSize: units.dp(14)
     readonly property real defaultFontSize: units.dp(15)
     /// size for contact/group name labels in lists
-    readonly property int entityLabelSize: units.dp(16)
+    readonly property int entityLabelSize: units.dp(15)
     /// size for contact/group name labels in lists
     readonly property int entitySubLabelSize: units.dp(14)
     /// standard button text size
@@ -65,7 +65,7 @@ Item {
     // default font for basic UI text
     readonly property font defaultFont: Qt.font({
                                                     "family": chatFont.name,
-                                                    "pixelSize": units.dp(12)
+                                                    "pixelSize": defaultFontSize
                                                 })
 
     readonly property font headerFont: Qt.font({

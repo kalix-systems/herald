@@ -18,85 +18,11 @@ impl ConversationsTrait for Conversations {
         self.row_count_()
     }
 
-    fn conversation_color(
-        &self,
-        index: usize,
-    ) -> u32 {
-        self.color_(index)
-    }
-
     fn conversation_id(
         &self,
         index: usize,
     ) -> ffi::ConversationId {
         self.conversation_id_(index)
-    }
-
-    fn expiration_period(
-        &self,
-        index: usize,
-    ) -> u8 {
-        self.expiration_period_(index)
-    }
-
-    fn set_expiration_period(
-        &mut self,
-        index: usize,
-        period: u8,
-    ) -> bool {
-        self.set_expiration_period_(index, period)
-    }
-
-    fn muted(
-        &self,
-        index: usize,
-    ) -> bool {
-        self.muted_(index)
-    }
-
-    fn set_muted(
-        &mut self,
-        index: usize,
-        muted: bool,
-    ) -> bool {
-        self.set_muted_(index, muted)
-    }
-
-    fn picture(
-        &self,
-        index: usize,
-    ) -> Option<String> {
-        self.picture_(index)
-    }
-
-    fn set_profile_picture(
-        &mut self,
-        index: u64,
-        picture_json: String,
-    ) {
-        self.set_profile_picture_(index, picture_json)
-    }
-
-    fn title(
-        &self,
-        index: usize,
-    ) -> Option<String> {
-        self.title_(index)
-    }
-
-    fn set_title(
-        &mut self,
-        index: usize,
-        title: Option<String>,
-    ) -> bool {
-        self.set_title_(index, title)
-    }
-
-    fn pairwise(
-        &self,
-        index: usize,
-    ) -> bool {
-        self.pairwise_(index)
     }
 
     fn remove_conversation(
@@ -155,40 +81,7 @@ impl ConversationsTrait for Conversations {
         self.index_by_id_(cid)
     }
 
-    fn set_status(
-        &mut self,
-        index: usize,
-        status: u8,
-    ) -> bool {
-        self.set_status_(index, status)
-    }
-
-    fn set_status_by_id(
-        &mut self,
-        id: ffi::ConversationIdRef,
-        status: u8,
-    ) {
-        self.set_status_by_id_(id, status)
-    }
-
-    fn status(
-        &self,
-        index: usize,
-    ) -> u8 {
-        self.status_(index) as u8
-    }
-
-    fn is_empty(
-        &self,
-        index: usize,
-    ) -> bool {
-        self.is_empty_(index).unwrap_or(true)
-    }
-
-    fn last_msg_digest(
-        &self,
-        index: usize,
-    ) -> String {
-        self.last_msg_digest_(index).unwrap_or_default()
+    fn builder_conversation_id(&self) -> Option<ffi::ConversationIdRef> {
+        self.builder_cid.as_ref().map(|c| c.as_slice())
     }
 }

@@ -55,23 +55,23 @@ Page {
             delegate: ConversationItem {
                 id: conversationItem
                 property var conversationData: model
+                convoContent: ContentMap.get(model.conversationId)
                 isNTS: {
                     Herald.utils.compareByteArray(
                                 Herald.config.ntsConversationId,
                                 model.conversationId)
                 }
-                itemTitle: !isNTS ? title : qsTr("Note to Self")
-                colorCode: !isNTS ? model.conversationColor : UserMap.get(
+                itemTitle: !isNTS ? convoContent.title : qsTr("Note to Self")
+                colorCode: !isNTS ? convoContent.conversationColor : UserMap.get(
                                         Herald.config.configId).userColor
                 imageSource: !isNTS ? Utils.safeStringOrDefault(
-                                          model.picture,
+                                          convoContent.picture,
                                           "") : Utils.safeStringOrDefault(
                                           Herald.config.profilePicture, "")
-                isGroup: !model.pairwise
-                lastMsgDigest: model.lastMsgDigest
-                isEmpty: model.isEmpty
-                convoContent: ContentMap.get(model.conversationId)
-                isArchived: model.status === 1
+                isGroup: !convoContent.pairwise
+                lastMsgDigest: convoContent.lastMsgDigest
+                isEmpty: lastMsgDigest === ""
+                isArchived: convoContent.status === 1
                 visible: (cvMainView.state === "archiveState" && isArchived)
                          || (cvMainView.state !== "archiveState" && !isArchived)
             }
@@ -113,7 +113,6 @@ Page {
                     if ((conv_idx < 0) || (conv_idx >= cvListView.count))
                         return
 
-                    stackView.pop(null, StackView.Immediate)
                     stackView.push(cvListView.itemAtIndex(conv_idx).ownedCV)
                 }
             }

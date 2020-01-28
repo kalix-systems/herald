@@ -4,6 +4,7 @@ pub struct MessagesQObject;
 
 pub struct MessagesEmitter {
     pub(super) qobject: Arc<AtomicPtr<MessagesQObject>>,
+    pub(super) last_msg_digest_changed: fn(*mut MessagesQObject),
     pub(super) search_active_changed: fn(*mut MessagesQObject),
     pub(super) search_index_changed: fn(*mut MessagesQObject),
     pub(super) search_num_matches_changed: fn(*mut MessagesQObject),
@@ -22,6 +23,7 @@ impl MessagesEmitter {
     pub fn clone(&mut self) -> MessagesEmitter {
         MessagesEmitter {
             qobject: self.qobject.clone(),
+            last_msg_digest_changed: self.last_msg_digest_changed,
             search_active_changed: self.search_active_changed,
             search_index_changed: self.search_index_changed,
             search_num_matches_changed: self.search_num_matches_changed,
@@ -35,6 +37,14 @@ impl MessagesEmitter {
         let n: *const MessagesQObject = null();
         self.qobject
             .store(n as *mut MessagesQObject, Ordering::SeqCst);
+    }
+
+    pub fn last_msg_digest_changed(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+
+        if !ptr.is_null() {
+            (self.last_msg_digest_changed)(ptr);
+        }
     }
 
     pub fn search_active_changed(&mut self) {
@@ -198,6 +208,8 @@ pub trait MessagesTrait {
     fn builder(&self) -> &MessageBuilder;
 
     fn builder_mut(&mut self) -> &mut MessageBuilder;
+
+    fn last_msg_digest(&self) -> String;
 
     fn search_active(&self) -> bool;
 
@@ -518,6 +530,7 @@ pub unsafe fn messages_new_inner(ptr_bundle: *mut MessagesPtrBundle) -> Messages
         builder_end_move_rows,
         builder_begin_remove_rows,
         builder_end_remove_rows,
+        messages_last_msg_digest_changed,
         messages_search_active_changed,
         messages_search_index_changed,
         messages_search_num_matches_changed,
@@ -613,6 +626,7 @@ pub unsafe fn messages_new_inner(ptr_bundle: *mut MessagesPtrBundle) -> Messages
     );
     let messages_emit = MessagesEmitter {
         qobject: Arc::new(AtomicPtr::new(messages)),
+        last_msg_digest_changed: messages_last_msg_digest_changed,
         search_active_changed: messages_search_active_changed,
         search_index_changed: messages_search_index_changed,
         search_num_matches_changed: messages_search_num_matches_changed,
@@ -794,6 +808,18 @@ pub unsafe extern "C" fn messages_set_search_hint(
 #[no_mangle]
 pub unsafe extern "C" fn messages_builder_get(ptr: *mut Messages) -> *mut MessageBuilder {
     (&mut *ptr).builder_mut()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn messages_last_msg_digest_get(
+    ptr: *const Messages,
+    prop: *mut QString,
+    set: fn(*mut QString, *const c_char, c_int),
+) {
+    let obj = &*ptr;
+    let value = obj.last_msg_digest();
+    let str_: *const c_char = value.as_ptr() as *const c_char;
+    set(prop, str_, to_c_int(value.len()));
 }
 
 #[no_mangle]
@@ -1266,6 +1292,7 @@ pub struct MessagesPtrBundle {
     builder_end_move_rows: fn(*mut MessageBuilderQObject),
     builder_begin_remove_rows: fn(*mut MessageBuilderQObject, usize, usize),
     builder_end_remove_rows: fn(*mut MessageBuilderQObject),
+    messages_last_msg_digest_changed: fn(*mut MessagesQObject),
     messages_search_active_changed: fn(*mut MessagesQObject),
     messages_search_index_changed: fn(*mut MessagesQObject),
     messages_search_num_matches_changed: fn(*mut MessagesQObject),

@@ -17,8 +17,8 @@ Rectangle {
     property string picture
     property bool isGroupPicture: false
     property bool isMessageResult: false
-    property int topTextMargin: CmnCfg.defaultMargin
-    property int bottomTextMargin: CmnCfg.defaultMargin
+    property int topTextMargin: CmnCfg.units.dp(13)
+    property int bottomTextMargin: CmnCfg.units.dp(13)
     property alias label: conversationItemLabel.item
 
     color: "transparent"
@@ -39,14 +39,14 @@ Rectangle {
     Loader {
         id: conversationItemLabel
         anchors {
+            left: itemAvatar.right
             leftMargin: CmnCfg.defaultMargin
+            right: parent.right
             rightMargin: CmnCfg.defaultMargin
             topMargin: topTextMargin
             bottomMargin: bottomTextMargin
             top: parent.top
             bottom: parent.bottom
-            left: itemAvatar.right
-            right: parent.right
         }
         sourceComponent: bgBox.labelComponent
     }

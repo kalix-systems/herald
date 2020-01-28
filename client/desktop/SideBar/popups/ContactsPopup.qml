@@ -279,6 +279,7 @@ Popup {
                         }
 
                         //contact label
+                        // TODO why isn't this an Entity/ContactLabel?
                         Column {
                             id: labelCol
                             spacing: 2

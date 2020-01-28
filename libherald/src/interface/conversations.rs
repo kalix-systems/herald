@@ -4,6 +4,7 @@ pub struct ConversationsQObject;
 
 pub struct ConversationsEmitter {
     pub(super) qobject: Arc<AtomicPtr<ConversationsQObject>>,
+    pub(super) builder_conversation_id_changed: fn(*mut ConversationsQObject),
     pub(super) filter_changed: fn(*mut ConversationsQObject),
     pub(super) filter_regex_changed: fn(*mut ConversationsQObject),
     pub(super) new_data_ready: fn(*mut ConversationsQObject),
@@ -19,6 +20,7 @@ impl ConversationsEmitter {
     pub fn clone(&mut self) -> ConversationsEmitter {
         ConversationsEmitter {
             qobject: self.qobject.clone(),
+            builder_conversation_id_changed: self.builder_conversation_id_changed,
             filter_changed: self.filter_changed,
             filter_regex_changed: self.filter_regex_changed,
             new_data_ready: self.new_data_ready,
@@ -29,6 +31,14 @@ impl ConversationsEmitter {
         let n: *const ConversationsQObject = null();
         self.qobject
             .store(n as *mut ConversationsQObject, Ordering::SeqCst);
+    }
+
+    pub fn builder_conversation_id_changed(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+
+        if !ptr.is_null() {
+            (self.builder_conversation_id_changed)(ptr);
+        }
     }
 
     pub fn filter_changed(&mut self) {
@@ -164,6 +174,8 @@ pub trait ConversationsTrait {
 
     fn emit(&mut self) -> &mut ConversationsEmitter;
 
+    fn builder_conversation_id(&self) -> Option<&[u8]>;
+
     fn filter(&self) -> &str;
 
     fn set_filter(
@@ -189,18 +201,6 @@ pub trait ConversationsTrait {
         &mut self,
         row_index: u64,
     ) -> bool;
-
-    fn set_profile_picture(
-        &mut self,
-        index: u64,
-        profile_picture: String,
-    ) -> ();
-
-    fn set_status_by_id(
-        &mut self,
-        conversation_id: &[u8],
-        status: u8,
-    ) -> ();
 
     fn toggle_filter_regex(&mut self) -> bool;
 
@@ -235,83 +235,14 @@ pub trait ConversationsTrait {
     ) {
     }
 
-    fn conversation_color(
-        &self,
-        index: usize,
-    ) -> u32;
-
     fn conversation_id(
         &self,
         index: usize,
     ) -> Vec<u8>;
 
-    fn expiration_period(
-        &self,
-        index: usize,
-    ) -> u8;
-
-    fn set_expiration_period(
-        &mut self,
-        index: usize,
-        _: u8,
-    ) -> bool;
-
-    fn is_empty(
-        &self,
-        index: usize,
-    ) -> bool;
-
-    fn last_msg_digest(
-        &self,
-        index: usize,
-    ) -> String;
-
     fn matched(
         &self,
         index: usize,
-    ) -> bool;
-
-    fn muted(
-        &self,
-        index: usize,
-    ) -> bool;
-
-    fn set_muted(
-        &mut self,
-        index: usize,
-        _: bool,
-    ) -> bool;
-
-    fn pairwise(
-        &self,
-        index: usize,
-    ) -> bool;
-
-    fn picture(
-        &self,
-        index: usize,
-    ) -> Option<String>;
-
-    fn status(
-        &self,
-        index: usize,
-    ) -> u8;
-
-    fn set_status(
-        &mut self,
-        index: usize,
-        _: u8,
-    ) -> bool;
-
-    fn title(
-        &self,
-        index: usize,
-    ) -> Option<String>;
-
-    fn set_title(
-        &mut self,
-        index: usize,
-        _: Option<String>,
     ) -> bool;
 }
 
@@ -328,6 +259,7 @@ pub unsafe fn conversations_new_inner(ptr_bundle: *mut ConversationsPtrBundle) -
 
     let ConversationsPtrBundle {
         conversations,
+        conversations_builder_conversation_id_changed,
         conversations_filter_changed,
         conversations_filter_regex_changed,
         conversations_new_data_ready,
@@ -345,6 +277,7 @@ pub unsafe fn conversations_new_inner(ptr_bundle: *mut ConversationsPtrBundle) -
     } = ptr_bundle;
     let conversations_emit = ConversationsEmitter {
         qobject: Arc::new(AtomicPtr::new(conversations)),
+        builder_conversation_id_changed: conversations_builder_conversation_id_changed,
         filter_changed: conversations_filter_changed,
         filter_regex_changed: conversations_filter_regex_changed,
         new_data_ready: conversations_new_data_ready,
@@ -399,38 +332,23 @@ pub unsafe extern "C" fn conversations_remove_conversation(
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn conversations_set_profile_picture(
-    ptr: *mut Conversations,
-    index: u64,
-    profile_picture_str: *const c_ushort,
-    profile_picture_len: c_int,
-) {
-    let obj = &mut *ptr;
-    let mut profile_picture = String::new();
-    set_string_from_utf16(
-        &mut profile_picture,
-        profile_picture_str,
-        profile_picture_len,
-    );
-    obj.set_profile_picture(index, profile_picture)
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn conversations_set_status_by_id(
-    ptr: *mut Conversations,
-    conversation_id_str: *const c_char,
-    conversation_id_len: c_int,
-    status: u8,
-) {
-    let obj = &mut *ptr;
-    let conversation_id = { qba_slice!(conversation_id_str, conversation_id_len) };
-    obj.set_status_by_id(conversation_id, status)
-}
-
-#[no_mangle]
 pub unsafe extern "C" fn conversations_toggle_filter_regex(ptr: *mut Conversations) -> bool {
     let obj = &mut *ptr;
     obj.toggle_filter_regex()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn conversations_builder_conversation_id_get(
+    ptr: *const Conversations,
+    prop: *mut QByteArray,
+    set: fn(*mut QByteArray, *const c_char, c_int),
+) {
+    let obj = &*ptr;
+    let value = obj.builder_conversation_id();
+    if let Some(value) = value {
+        let str_: *const c_char = value.as_ptr() as (*const c_char);
+        set(prop, str_, to_c_int(value.len()));
+    }
 }
 
 #[no_mangle]
@@ -519,15 +437,6 @@ pub unsafe extern "C" fn conversations_sort(
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn conversations_data_conversation_color(
-    ptr: *const Conversations,
-    row: c_int,
-) -> u32 {
-    let obj = &*ptr;
-    obj.conversation_color(to_usize(row).unwrap_or(0))
-}
-
-#[no_mangle]
 pub unsafe extern "C" fn conversations_data_conversation_id(
     ptr: *const Conversations,
     row: c_int,
@@ -541,46 +450,6 @@ pub unsafe extern "C" fn conversations_data_conversation_id(
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn conversations_data_expiration_period(
-    ptr: *const Conversations,
-    row: c_int,
-) -> u8 {
-    let obj = &*ptr;
-    obj.expiration_period(to_usize(row).unwrap_or(0))
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn conversations_set_data_expiration_period(
-    ptr: *mut Conversations,
-    row: c_int,
-    value: u8,
-) -> bool {
-    (&mut *ptr).set_expiration_period(to_usize(row).unwrap_or(0), value)
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn conversations_data_is_empty(
-    ptr: *const Conversations,
-    row: c_int,
-) -> bool {
-    let obj = &*ptr;
-    obj.is_empty(to_usize(row).unwrap_or(0))
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn conversations_data_last_msg_digest(
-    ptr: *const Conversations,
-    row: c_int,
-    d: *mut QString,
-    set: fn(*mut QString, *const c_char, len: c_int),
-) {
-    let obj = &*ptr;
-    let data = obj.last_msg_digest(to_usize(row).unwrap_or(0));
-    let str_: *const c_char = data.as_ptr() as *const c_char;
-    set(d, str_, to_c_int(data.len()));
-}
-
-#[no_mangle]
 pub unsafe extern "C" fn conversations_data_matched(
     ptr: *const Conversations,
     row: c_int,
@@ -589,106 +458,11 @@ pub unsafe extern "C" fn conversations_data_matched(
     obj.matched(to_usize(row).unwrap_or(0))
 }
 
-#[no_mangle]
-pub unsafe extern "C" fn conversations_data_muted(
-    ptr: *const Conversations,
-    row: c_int,
-) -> bool {
-    let obj = &*ptr;
-    obj.muted(to_usize(row).unwrap_or(0))
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn conversations_set_data_muted(
-    ptr: *mut Conversations,
-    row: c_int,
-    value: bool,
-) -> bool {
-    (&mut *ptr).set_muted(to_usize(row).unwrap_or(0), value)
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn conversations_data_pairwise(
-    ptr: *const Conversations,
-    row: c_int,
-) -> bool {
-    let obj = &*ptr;
-    obj.pairwise(to_usize(row).unwrap_or(0))
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn conversations_data_picture(
-    ptr: *const Conversations,
-    row: c_int,
-    d: *mut QString,
-    set: fn(*mut QString, *const c_char, len: c_int),
-) {
-    let obj = &*ptr;
-    let data = obj.picture(to_usize(row).unwrap_or(0));
-    if let Some(data) = data {
-        let str_: *const c_char = data.as_ptr() as (*const c_char);
-        set(d, str_, to_c_int(data.len()));
-    }
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn conversations_data_status(
-    ptr: *const Conversations,
-    row: c_int,
-) -> u8 {
-    let obj = &*ptr;
-    obj.status(to_usize(row).unwrap_or(0))
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn conversations_set_data_status(
-    ptr: *mut Conversations,
-    row: c_int,
-    value: u8,
-) -> bool {
-    (&mut *ptr).set_status(to_usize(row).unwrap_or(0), value)
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn conversations_data_title(
-    ptr: *const Conversations,
-    row: c_int,
-    d: *mut QString,
-    set: fn(*mut QString, *const c_char, len: c_int),
-) {
-    let obj = &*ptr;
-    let data = obj.title(to_usize(row).unwrap_or(0));
-    if let Some(data) = data {
-        let str_: *const c_char = data.as_ptr() as (*const c_char);
-        set(d, str_, to_c_int(data.len()));
-    }
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn conversations_set_data_title(
-    ptr: *mut Conversations,
-    row: c_int,
-    str_: *const c_ushort,
-    len: c_int,
-) -> bool {
-    let obj = &mut *ptr;
-    let mut value = String::new();
-    set_string_from_utf16(&mut value, str_, len);
-    obj.set_title(to_usize(row).unwrap_or(0), Some(value))
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn conversations_set_data_title_none(
-    ptr: *mut Conversations,
-    row: c_int,
-) -> bool {
-    (&mut *ptr).set_title(to_usize(row).unwrap_or(0), None)
-}
-
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct ConversationsPtrBundle {
     conversations: *mut ConversationsQObject,
+    conversations_builder_conversation_id_changed: fn(*mut ConversationsQObject),
     conversations_filter_changed: fn(*mut ConversationsQObject),
     conversations_filter_regex_changed: fn(*mut ConversationsQObject),
     conversations_new_data_ready: fn(*mut ConversationsQObject),

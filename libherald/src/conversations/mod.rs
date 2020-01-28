@@ -24,4 +24,5 @@ pub struct Conversations {
     filter_regex: bool,
     list: Vector<Conversation>,
     loaded: bool,
+    builder_cid: Option<ConversationId>,
 }

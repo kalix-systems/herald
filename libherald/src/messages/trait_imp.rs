@@ -352,4 +352,8 @@ impl Interface for Messages {
     fn send_typing_indicator(&mut self) {
         self.send_typing_indicator_()
     }
+
+    fn last_msg_digest(&self) -> String {
+        self.last_msg_digest_()
+    }
 }

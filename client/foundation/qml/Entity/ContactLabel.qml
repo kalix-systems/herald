@@ -5,7 +5,7 @@ import LibHerald 1.0
 import "qrc:/imports/js/utils.mjs" as JS
 
 // Label showing display name and username for a contact
-ColumnLayout {
+Column {
     // the group name or displayName of the conversation
     property string displayName
     property string username
@@ -14,9 +14,11 @@ ColumnLayout {
     property int displayNameSize: CmnCfg.entityLabelSize
     property int usernameSize: CmnCfg.entitySubLabelSize
 
-    anchors.fill: parent.fill
+    height: CmnCfg.avatarSize
+    spacing: CmnCfg.units.dp(3)
 
     Label {
+        id: displayNameLabel
         font {
             family: CmnCfg.chatFont.name
             pixelSize: displayNameSize
@@ -25,13 +27,10 @@ ColumnLayout {
         elide: "ElideRight"
         text: displayName
         color: labelColor
-
-        width: parent.width
-        Layout.maximumWidth: parent.width
-        Layout.preferredHeight: parent.height * 0.5
     }
 
     Label {
+        id: usernameLabel
         font {
             family: CmnCfg.chatFont.name
             pixelSize: usernameSize
@@ -39,9 +38,5 @@ ColumnLayout {
         elide: "ElideRight"
         text: '@' + username
         color: labelColor
-
-        width: parent.width
-        Layout.maximumWidth: parent.width
-        Layout.preferredHeight: parent.height * 0.5
     }
 }

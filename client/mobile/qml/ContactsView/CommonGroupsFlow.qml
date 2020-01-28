@@ -8,28 +8,25 @@ import "qrc:/imports/js/utils.mjs" as Utils
 import QtGraphicalEffects 1.0
 
 Flow {
-    anchors.horizontalCenter: parent.horizontalCenter
-    anchors.verticalCenter: parent.verticalCenter
-    spacing: CmnCfg.units.dp(1)
-    width: CmnCfg.units.dp(80)
+    spacing: CmnCfg.microMargin
 
     Repeater {
         model: userRect.sharedConvos
         delegate: Avatar {
             id: groupAv
-            property var groupData: model
+            property var groupData: ContentMap.get(model.conversationId)
             size: CmnCfg.units.dp(22)
             isGroup: true
+            // TODO try making this 8 and see if any phones are too small
             visible: index < 6
 
             property int groupColor: groupData.conversationColor
                                      !== undefined ? groupData.conversationColor : 0
-            pfpPath: Utils.safeStringOrDefault(groupData.conversationPicture,
-                                               "")
+            pfpPath: Utils.safeStringOrDefault(groupData.picture, "")
 
             color: CmnCfg.avatarColors[groupColor]
             initials: Utils.initialize(Utils.safeStringOrDefault(
-                                           groupData.conversationTitle))
+                                           groupData.title))
 
             TapHandler {
                 enabled: !overlay.visible
@@ -42,6 +39,7 @@ Flow {
 
                 id: overlay
                 visible: (userRect.sharedConvos.rowCount() > 6 && index === 5)
+
                 ColorOverlay {
                     anchors.fill: parent
                     color: "black"
@@ -50,7 +48,6 @@ Flow {
                 TapHandler {
                     onTapped: {
                         contactPage.userData = userData
-
                         stackView.push(contactPage)
                     }
                 }
@@ -58,10 +55,10 @@ Flow {
                 Label {
                     anchors.centerIn: parent
                     text: "+" + (userRect.sharedConvos.rowCount() - 6)
-                    color: "white"
+                    color: CmnCfg.palette.white
                     font.family: CmnCfg.chatFont.name
-                    font.weight: Font.DemiBold
-                    font.pixelSize: CmnCfg.defaultFontSize
+                    font.weight: Font.Medium
+                    font.pixelSize: CmnCfg.minorTextSize
                 }
             }
         }
