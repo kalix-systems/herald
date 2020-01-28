@@ -20,12 +20,12 @@ public class NotificationBuilder extends org.qtproject.qt5.android.bindings.QtAc
     private static NotificationBuilder m_instance;
     private static int id_ct;
 
-//    public NotificationBuilder() {
-//        id_ct = 0;
-//        m_instance = this;
-//        String channelId = "herald messages";
-//        m_channel = new NotificationChannel(channelId, channelId, NotificationManager.IMPORTANCE_DEFAULT);
-//    }
+    public NotificationBuilder() {
+        id_ct = 0;
+        m_instance = this;
+        String channelId = "herald messages";
+        m_channel = new NotificationChannel(channelId, channelId, NotificationManager.IMPORTANCE_DEFAULT);
+    }
 
 //    public static void notify(String s) {
 //        id_ct += 1;

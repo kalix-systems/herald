@@ -23,7 +23,6 @@ ApplicationWindow {
     Item {
         // conversation content map
         id: ccMap
-
         property var map: ({})
     }
 

@@ -3,6 +3,7 @@
 #include "contentmap.h"
 #include "objectiveutils.h"
 #include "usermap.h"
+#include "qqqmlclipboard.h"
 #include <QApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
@@ -92,6 +93,18 @@ int main(int argc, char* argv[])
         ContentMap* contentMap = new ContentMap();
 
         return contentMap;
+      });
+
+
+  // Wraps clipboard functionality
+  qmlRegisterSingletonType<QQqmlClipBoard>(
+      "LibHerald", 1, 0, "ClipBoard",
+      [](QQmlEngine* engine, QJSEngine* scriptEngine) {
+        Q_UNUSED(scriptEngine)
+        Q_UNUSED(engine)
+        QQqmlClipBoard* clipboard = new QQqmlClipBoard();
+
+        return clipboard;
       });
 
   // per conversation content

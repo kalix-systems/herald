@@ -11,6 +11,7 @@ QML_IMPORT_PATH +=\
 HEADERS += \
      $$PWD/../../libherald/qt_ffi/Bindings.h \ \
     $$PWD/contentmap.h \
+    $$PWD/qqmlclipboard.h \
     $$PWD/usermap.h
 
 
