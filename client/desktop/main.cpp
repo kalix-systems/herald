@@ -4,7 +4,7 @@
 #include <QApplication>
 #include <QDebug>
 #include <QQmlApplicationEngine>
-#include <qqqmlclipboard.h>
+#include <qqmlclipboard.h>
 #include <QStandardPaths>
 #include <QWindow>
 #include <QtQml/qqml.h>
@@ -96,14 +96,13 @@ int main(int argc, char* argv[])
       });
 
   // Wraps clipboard functionality
-  qmlRegisterSingletonType<QQqmlClipBoard>(
+  qmlRegisterSingletonType<QqmlClipBoard>(
       "LibHerald", 1, 0, "ClipBoard",
       [](QQmlEngine* engine, QJSEngine* scriptEngine) {
         Q_UNUSED(scriptEngine)
         Q_UNUSED(engine)
 
-        QQqmlClipBoard* clipboard = new QQqmlClipBoard();
-
+        QqmlClipBoard* clipboard = new QqmlClipBoard();
         return clipboard;
       });
 
