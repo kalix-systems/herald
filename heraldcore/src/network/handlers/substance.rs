@@ -10,7 +10,7 @@ pub(super) fn net_msg(
     use network_types::Substance as S;
 
     match sub {
-        S::Init(init) => w!(self::init(ev, cid, init)),
+        S::Init(init) => w!(self::init(ev, cid, uid, init)),
 
         S::Msg(msg) => w!(self::msg(ev, cid, msg, ts)),
 
@@ -29,9 +29,40 @@ pub(super) fn net_msg(
 fn init(
     ev: &mut Event,
     cid: ConversationId,
+    uid: UserId,
     init: nt::ConversationInit,
 ) -> Result<(), HErr> {
-    todo!()
+    match init {
+        nt::ConversationInit::Pairwise => w!(pairwise_init(ev, cid, uid)),
+        nt::ConversationInit::Group {
+            members,
+            title,
+            picture,
+            expiration_period,
+        } => {
+            //use crate::conversation as c;
+            //let mut builder = c::ConversationBuilder::new();
+            //if let Some(picture) =
+            //builder.title(title).picture(picture).
+        }
+    };
+
+    Ok(())
+}
+
+fn pairwise_init(
+    ev: &mut Event,
+    cid: ConversationId,
+    uid: UserId,
+) -> Result<(), HErr> {
+    use crate::user;
+
+    let builder = user::UserBuilder::new(uid).pairwise_conversation(cid);
+    let (user, conv) = w!(builder.add());
+
+    ev.note(Notification::NewUser(Box::new((user, conv.meta))));
+
+    Ok(())
 }
 
 fn msg(

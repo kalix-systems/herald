@@ -83,26 +83,5 @@ fn handle_output(
 
     w!(substance::net_msg(&mut ev, from, msg, ts));
 
-    // P::AddToConvo(cid, members) => {
-    //     w!(members::add_members(&cid, &members));
-
-    //     ev.note(members::Membership {
-    //         cid,
-    //         change: members::MembershipUpdate::Added {
-    //             members,
-    //             added_by: from,
-    //         },
-    //     });
-    // }
-
-    // P::LeaveConvo(cid) => {
-    //     w!(members::remove_member(&cid, from));
-
-    //     ev.note(members::Membership {
-    //         cid,
-    //         change: members::MembershipUpdate::Left(from),
-    //     });
-    // }
-
     Ok(ev)
 }
