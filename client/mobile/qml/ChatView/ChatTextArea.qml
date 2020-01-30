@@ -70,7 +70,7 @@ Column {
 
         Imports.TimerOptionsBuilder {
             id: timerMenu
-            conversationItem: chatPage.convoItem
+            conversationItem: chatPage.convContent
             builder: ownedMessages.builder
         }
         ScrollView {

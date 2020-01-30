@@ -77,6 +77,20 @@ Page {
         stack: mainView
     }
 
+    Component {
+        id: chatViewMain
+        ChatView.ChatViewMain {}
+    }
+
+    Connections {
+        target: Herald.conversations
+        onBuilderConversationIdChanged: {
+            stackView.push(chatViewMain, {
+                               "convId": Herald.conversations.builderConversationId
+                           })
+        }
+    }
+
     StackView {
         id: mainView
         anchors.fill: parent
