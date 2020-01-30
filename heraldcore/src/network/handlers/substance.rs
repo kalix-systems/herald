@@ -160,6 +160,8 @@ fn msg(
         }),
     ));
 
+    w!(conn.commit());
+
     ev.replies(replies);
 
     Ok(())
