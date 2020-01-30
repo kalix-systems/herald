@@ -24,11 +24,13 @@ pub struct ConfigBuilder {
 
 impl ConfigBuilder {
     /// Creates new `ConfigBuilder`
-    pub fn new(
+    pub fn new<S: Into<String>>(
         id: UserId,
         keypair: sig::KeyPair,
-        home_server: (String, u16),
+        (s, p): (S, u16),
     ) -> Self {
+        let home_server = (s.into(), p);
+
         Self {
             id,
             keypair,

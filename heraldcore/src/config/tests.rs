@@ -4,7 +4,7 @@ use platform_dirs::pictures_dir;
 use serial_test_derive::serial;
 use std::convert::TryInto;
 
-const HOME_SERVER: (String, u16) = ("localhost".into(), 0);
+const HOME_SERVER: (&'static str, u16) = ("localhost", 0);
 
 #[test]
 fn simple_add_get_set_config() {
