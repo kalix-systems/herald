@@ -1,5 +1,6 @@
 use super::*;
 use crate::{message::ReceiptStatus, types};
+use network_types::*;
 
 #[test]
 fn add_get_delete() {
@@ -14,14 +15,12 @@ fn add_get_delete() {
     builder.conversation_id(conv_id);
     builder.add_db(&mut conn).expect(womp!());
 
-    let msg = types::cmessages::Receipt {
+    let sub = Substance::Receipt(Receipt {
         of: [1; 32].into(),
         stat: ReceiptStatus::Received,
-    };
+    });
 
-    let body = ConversationMessage::Message(network_types::cmessages::Content::Receipt(msg));
-
-    db::add_to_pending(&conn, conv_id, &body).expect(womp!());
+    db::add_to_pending(&conn, conv_id, &sub).expect(womp!());
     let pending = db::get_pending(&conn).expect(womp!());
     assert_eq!(pending.len(), 1);
 

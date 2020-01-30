@@ -173,7 +173,7 @@ fn add_remove_member() {
 
     let users = db::all(&conn).expect(womp!());
 
-    crate::members::db::add_member(&conn, &conv_id, users[0].id)
+    crate::members::db::add_member(&conn, &conv_id, &users[0].id)
         .expect(womp!("failed to add member"));
 
     let members = db::conversation_members(&conn, &conv_id).expect(womp!("failed to get members"));

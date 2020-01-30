@@ -18,7 +18,7 @@ fn add_remove_member() {
     let mems = db::members(&conn, &cid).expect(womp!());
     assert_eq!(mems.len(), 1);
 
-    db::add_member(&conn, &cid, uid).expect(womp!());
+    db::add_member(&conn, &cid, &uid).expect(womp!());
     let mems = db::members(&conn, &cid).expect(womp!());
     assert_eq!(mems.len(), 2);
 

@@ -4,6 +4,8 @@ use platform_dirs::pictures_dir;
 use serial_test_derive::serial;
 use std::convert::TryInto;
 
+const HOME_SERVER: (String, u16) = ("localhost".into(), 0);
+
 #[test]
 fn simple_add_get_set_config() {
     let mut conn = Database::in_memory().expect(womp!());
@@ -11,7 +13,9 @@ fn simple_add_get_set_config() {
     let id = "HelloWorld".try_into().expect(womp!());
 
     let kp = KeyPair::gen_new();
-    ConfigBuilder::new(id, kp).add_db(&mut conn).expect(womp!());
+    ConfigBuilder::new(id, kp, HOME_SERVER)
+        .add_db(&mut conn)
+        .expect(womp!());
 
     let config = db::get(&conn).expect(womp!());
     assert_eq!(config.id, id);
@@ -32,7 +36,7 @@ fn complicated_add_get_set_config() {
     let name = "stuff";
     let nts_id = [0u8; 32].into();
     let kp = KeyPair::gen_new();
-    let config = ConfigBuilder::new(id, kp)
+    let config = ConfigBuilder::new(id, kp, HOME_SERVER)
         .name(name.into())
         .colorscheme(1)
         .color(2)
@@ -90,11 +94,13 @@ fn two_configs() {
     let kp2 = KeyPair::gen_new();
     let id2 = "2".try_into().expect(womp!());
 
-    ConfigBuilder::new(id1, kp1)
+    ConfigBuilder::new(id1, kp1, HOME_SERVER)
         .add_db(&mut conn)
         .expect(womp!());
 
-    assert!(ConfigBuilder::new(id2, kp2).add_db(&mut conn).is_err());
+    assert!(ConfigBuilder::new(id2, kp2, HOME_SERVER)
+        .add_db(&mut conn)
+        .is_err());
 }
 
 #[test]
@@ -103,7 +109,9 @@ fn get_id() {
 
     let id = "HelloWorld".try_into().expect(womp!());
     let kp = KeyPair::gen_new();
-    let config = ConfigBuilder::new(id, kp).add_db(&mut conn).expect(womp!());
+    let config = ConfigBuilder::new(id, kp, HOME_SERVER)
+        .add_db(&mut conn)
+        .expect(womp!());
 
     let db_id = db::id(&conn).expect(womp!());
     assert_eq!(config.id, db_id);
@@ -115,7 +123,7 @@ fn get_kp() {
 
     let id = "HelloWorld".try_into().expect(womp!());
     let kp = KeyPair::gen_new();
-    ConfigBuilder::new(id, kp.clone())
+    ConfigBuilder::new(id, kp.clone(), HOME_SERVER)
         .add_db(&mut conn)
         .expect(womp!());
 

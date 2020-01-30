@@ -240,9 +240,9 @@ fn add_remove_member() {
     bld.add_db(&mut conn)
         .expect(womp!("Failed to create conversation"));
 
-    crate::members::db::add_member(&conn, &conv_id, id1).expect(womp!("failed to add member"));
+    crate::members::db::add_member(&conn, &conv_id, &id1).expect(womp!("failed to add member"));
 
-    crate::members::db::add_member(&conn, &conv_id, id2).expect(womp!("failed to add member"));
+    crate::members::db::add_member(&conn, &conv_id, &id2).expect(womp!("failed to add member"));
 
     let members =
         crate::members::db::members(&conn, &conv_id).expect(womp!("failed to get members"));

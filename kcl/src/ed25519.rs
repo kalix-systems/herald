@@ -22,7 +22,7 @@ new_type! {
     secret Seed(SEED_LEN)
 }
 
-#[derive(Ser, De, Clone, Debug, Getters, TypedBuilder)]
+#[derive(Ser, De, Clone, Debug, Getters, TypedBuilder, Eq, PartialEq)]
 pub struct KeyPair {
     pub(crate) public: PublicKey,
     pub(crate) secret: SecretKey,
