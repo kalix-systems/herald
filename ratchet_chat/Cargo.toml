@@ -1,0 +1,25 @@
+[package]
+name = "ratchet_chat"
+version = "0.1.0"
+authors = ["theseriousadult <jack@kalix.io>"]
+edition = "2018"
+
+[dependencies]
+bytes = "0.5.3"
+typed-builder = "0.4.0"
+derive-getters = "0.1.0"
+thiserror = "1.0.9"
+void = "1.0.2"
+
+[dependencies.kcl]
+path = "../kcl"
+
+[dependencies.kson]
+path = "../kson"
+
+[dependencies.herald_common]
+path = "../herald_common"
+default_features = false
+
+[dev-dependencies]
+serial_test = "0.3.2"

@@ -18,7 +18,7 @@ pub enum Error {
     LoginFailed,
     RegistrationFailed,
     BadSessionType(u8),
-    TimedOut(tokio::timer::timeout::Elapsed),
+    TimedOut(tokio::time::Elapsed),
     StreamDied,
 }
 
@@ -38,4 +38,4 @@ from_fn!(Error, std::io::Error, Error::IO);
 from_fn!(Error, tokio_postgres::Error, Error::PgError);
 from_fn!(Error, herald_common::KsonError, Kson);
 from_fn!(Error, warp::Error, Error::Warp);
-from_fn!(Error, tokio::timer::timeout::Elapsed, TimedOut);
+from_fn!(Error, tokio::time::Elapsed, TimedOut);

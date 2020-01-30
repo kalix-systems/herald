@@ -1,10 +1,9 @@
-use crate::{hash, new_type, random};
+use super::*;
 use kson::prelude::*;
-use libsodium_sys::*;
 
-pub const KEY_LEN: usize = crypto_aead_xchacha20poly1305_ietf_KEYBYTES as usize;
-pub const NONCE_LEN: usize = crypto_aead_xchacha20poly1305_ietf_NPUBBYTES as usize;
-pub const MAC_LEN: usize = crypto_aead_xchacha20poly1305_ietf_ABYTES as usize;
+pub const KEY_LEN: usize = ffi::crypto_aead_xchacha20poly1305_ietf_KEYBYTES as usize;
+pub const NONCE_LEN: usize = ffi::crypto_aead_xchacha20poly1305_ietf_NPUBBYTES as usize;
+pub const MAC_LEN: usize = ffi::crypto_aead_xchacha20poly1305_ietf_ABYTES as usize;
 
 new_type! {
     secret Key(KEY_LEN)
@@ -20,9 +19,6 @@ new_type! {
 
 #[derive(Debug, Hash, Ser, De, Copy, Clone, Eq, PartialEq)]
 pub struct Tag(Mac, Nonce);
-
-#[must_use = "you should definitely check if the decryption was successful"]
-pub struct OpenSucceeded(pub bool);
 
 impl Key {
     pub fn new() -> Self {
@@ -42,21 +38,9 @@ impl Key {
         // generate a random nonce
         random::gen_into(&mut nonce_buf);
 
-        // take the hash code of the associated data and the message
-        // we'll then xor this with the nonce to ensure nonce uniqueness
-        // this makes encryption slightly slower but also harder to screw up
-        let mut hasher = hash::Builder::new().out_len(NONCE_LEN).build();
-        hasher.update(ad);
-        hasher.update(msg);
-        let hash = hasher.finalize();
-
-        for (n, h) in nonce_buf.iter_mut().zip(hash.0) {
-            *n ^= h;
-        }
-
         let mut mac_len = 0u64;
         let res = unsafe {
-            crypto_aead_xchacha20poly1305_ietf_encrypt_detached(
+            ffi::crypto_aead_xchacha20poly1305_ietf_encrypt_detached(
                 msg.as_mut_ptr(),
                 mac_buf.as_mut_ptr(),
                 (&mut mac_len) as _,
@@ -77,17 +61,19 @@ impl Key {
         Tag(Mac(mac_buf), Nonce(nonce_buf))
     }
 
+    #[must_use = "you should definitely check if the decryption was successful"]
     pub fn open(
         &self,
         ad: &[u8],
         tag: Tag,
         msg: &mut [u8],
-    ) -> OpenSucceeded {
+    ) -> bool {
         let Tag(mac, nonce) = tag;
 
         let res = unsafe {
-            crypto_aead_xchacha20poly1305_ietf_decrypt_detached(
+            ffi::crypto_aead_xchacha20poly1305_ietf_decrypt_detached(
                 msg.as_mut_ptr(),
+                // should always be null according to libsodium docs
                 std::ptr::null_mut(),
                 msg.as_ptr(),
                 msg.len() as _,
@@ -99,6 +85,75 @@ impl Key {
             )
         };
 
-        OpenSucceeded(res == 0)
+        res == 0
+    }
+
+    pub fn seal_attached(
+        &self,
+        ad: &[u8],
+        pt: &[u8],
+    ) -> Vec<u8> {
+        let mut output = vec![0; NONCE_LEN + MAC_LEN + pt.len()];
+
+        let (nonce, rest) = output[..].split_at_mut(NONCE_LEN);
+        // generate a random nonce
+        random::gen_into(nonce);
+
+        let mut clen = 0u64;
+        let res = unsafe {
+            ffi::crypto_aead_xchacha20poly1305_ietf_encrypt(
+                rest.as_mut_ptr(),
+                &mut clen as *mut _,
+                pt.as_ptr(),
+                pt.len() as _,
+                ad.as_ptr(),
+                ad.len() as _,
+                // should always be null according to libsodium docs
+                std::ptr::null(),
+                nonce.as_ptr(),
+                self.as_ref().as_ptr(),
+            )
+        };
+
+        assert_eq!(res, 0);
+        assert_eq!(clen as usize, MAC_LEN + pt.len());
+
+        output
+    }
+
+    #[must_use]
+    pub fn open_attached(
+        &self,
+        ad: &[u8],
+        ct: &[u8],
+    ) -> Option<Vec<u8>> {
+        let mut output = Vec::with_capacity(ct.len() - NONCE_LEN - MAC_LEN);
+        let (nonce, ct) = ct[..].split_at(NONCE_LEN);
+
+        let mut plen = 0u64;
+        let res = unsafe {
+            ffi::crypto_aead_xchacha20poly1305_ietf_decrypt(
+                output.as_mut_ptr(),
+                &mut plen as *mut _,
+                // should always be null according to libsodium docs
+                std::ptr::null_mut(),
+                ct.as_ptr(),
+                ct.len() as _,
+                ad.as_ptr(),
+                ad.len() as _,
+                nonce.as_ptr(),
+                self.as_ref().as_ptr(),
+            )
+        };
+
+        if res != 0 {
+            None
+        } else {
+            unsafe {
+                assert_eq!(plen as usize, output.capacity());
+                output.set_len(plen as usize);
+            }
+            Some(output)
+        }
     }
 }

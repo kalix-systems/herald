@@ -1,17 +1,7 @@
 use super::*;
 use arrayvec::ArrayString;
-use bytes::Bytes;
 use kson::*;
 use std::convert::TryFrom;
-
-mod requests;
-pub use requests::*;
-
-mod packets;
-pub use packets::*;
-
-mod pushes;
-pub use pushes::*;
 
 type UserIdInner = [u8; 32];
 
@@ -76,9 +66,10 @@ impl TryFrom<&str> for UserId {
     }
 }
 
-#[derive(Ser, De, Debug, Clone, PartialEq, Eq, Default)]
+#[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
 pub struct UserMeta {
-    pub keys: BTreeMap<sig::PublicKey, sig::PKMeta>,
+    pub initial: Signed<UserId>,
+    pub sig_chain: Vec<Signed<sig::SigUpdate>>,
 }
 
 #[derive(Ser, De, Hash, Debug, Clone, Copy, PartialEq, Eq)]
@@ -99,4 +90,5 @@ pub enum PKIResponse {
     BadSig(SigValid),
     Redundant,
     DeadKey,
+    InvalidOp,
 }

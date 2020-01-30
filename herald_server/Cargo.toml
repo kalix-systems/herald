@@ -11,14 +11,11 @@ default-run = "herald_server"
 dashmap         = "1.0"
 lazy_static     = "1.4"
 sodiumoxide     = "0.2"
-tokio           = "0.2.0-alpha.6"
-futures-preview = "0.3.0-alpha.19"
-tokio-postgres  = "0.5.0-alpha.1"
+tokio           = "0.2"
+futures= "0.3"
+tokio-postgres  = "0.5"
 crossbeam-channel = "0.3.9"
-
-[dependencies.warp]
-git = "https://github.com/seanmonstar/warp"
-rev = "5c26956"
+warp = "0.2"
 
 [dependencies.herald_common]
 path = "../herald_common"

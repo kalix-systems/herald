@@ -1,26 +1,7 @@
-use crate::new_type;
+use super::*;
+pub use crate::ed25519::*;
 
-use libsodium_sys::*;
-
-pub const SECRET_KEY_LEN: usize = crypto_sign_ed25519_SECRETKEYBYTES as usize;
-pub const PUBLIC_KEY_LEN: usize = crypto_sign_ed25519_PUBLICKEYBYTES as usize;
-pub const SIGNATURE_LEN: usize = crypto_sign_ed25519_BYTES as usize;
-pub const SEED_LEN: usize = crypto_sign_ed25519_SEEDBYTES as usize;
-
-new_type! {
-    /// A secret key for signing data
-    secret SecretKey(SECRET_KEY_LEN)
-}
-
-new_type! {
-    /// A seed for randomly generating a secret key
-    secret Seed(SEED_LEN)
-}
-
-new_type! {
-    /// A public key for signing data
-    public PublicKey(PUBLIC_KEY_LEN)
-}
+pub const SIGNATURE_LEN: usize = ffi::crypto_sign_ed25519_BYTES as usize;
 
 new_type! {
     /// A signature
@@ -35,7 +16,7 @@ impl SecretKey {
         let mut sigbuf = [0u8; SIGNATURE_LEN];
         let mut siglen = 0;
         unsafe {
-            crypto_sign_ed25519_detached(
+            ffi::crypto_sign_ed25519_detached(
                 sigbuf.as_mut_ptr(),
                 &mut siglen,
                 data.as_ptr(),
@@ -55,7 +36,7 @@ impl PublicKey {
         sig: Signature,
     ) -> bool {
         let ret_code = unsafe {
-            crypto_sign_ed25519_verify_detached(
+            ffi::crypto_sign_ed25519_verify_detached(
                 sig.0.as_ptr(),
                 data.as_ptr(),
                 data.len() as _,
@@ -67,26 +48,18 @@ impl PublicKey {
     }
 }
 
-pub fn gen_keypair() -> (PublicKey, SecretKey) {
-    let mut pkbuf = [0; PUBLIC_KEY_LEN];
-    let mut skbuf = [0; SECRET_KEY_LEN];
-    let ret_code = unsafe { crypto_sign_ed25519_keypair(pkbuf.as_mut_ptr(), skbuf.as_mut_ptr()) };
-    assert_eq!(ret_code, 0);
-    (PublicKey(pkbuf), SecretKey(skbuf))
-}
-
-impl Seed {
-    pub fn gen_keypair(&self) -> (PublicKey, SecretKey) {
-        let mut pkbuf = [0; PUBLIC_KEY_LEN];
-        let mut skbuf = [0; SECRET_KEY_LEN];
-        let ret_code = unsafe {
-            crypto_sign_ed25519_seed_keypair(
-                pkbuf.as_mut_ptr(),
-                skbuf.as_mut_ptr(),
-                self.0.as_ptr(),
-            )
-        };
-        assert_eq!(ret_code, 0);
-        (PublicKey(pkbuf), SecretKey(skbuf))
+#[cfg(test)]
+mod test {
+    use super::*;
+    #[test]
+    fn sign_verify() {
+        init();
+        let keypair = KeyPair::gen_new();
+        let mut data = [0u8; 64];
+        for _ in 0..100 {
+            random::gen_into(&mut data);
+            let sig = keypair.secret().sign(&data);
+            assert!(keypair.public().verify(&data, sig));
+        }
     }
 }

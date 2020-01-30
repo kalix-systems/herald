@@ -5,6 +5,7 @@ use kcl::*;
 use kson::*;
 
 #[derive(Ser, De, Hash, Debug, Clone, Copy, PartialEq, Eq)]
+#[must_use]
 pub enum SigValid {
     Yes,
     BadTime {
@@ -12,6 +13,19 @@ pub enum SigValid {
         verify_time: Time,
     },
     BadSign,
+    BadSigner,
+}
+
+impl SigValid {
+    pub fn and<F: FnOnce() -> SigValid>(
+        self,
+        other: F,
+    ) -> SigValid {
+        match self {
+            SigValid::Yes => other(),
+            s => s,
+        }
+    }
 }
 
 /// How far in the future a signature can be stamped and still considered valid, in milliseconds.
@@ -22,7 +36,7 @@ pub const TIMESTAMP_FUZZ: i64 = 3_600_000;
 /// the device with id `signer` of a bytestring consisting of `data` followed by
 /// `timestamp.timestamp`
 #[derive(Ser, De, Hash, Debug, Clone, Copy, PartialEq, Eq)]
-pub struct Signed<T: AsRef<[u8]>> {
+pub struct Signed<T> {
     data: T,
     timestamp: Time,
     sig: sign::Signature,
@@ -36,7 +50,7 @@ pub struct SigMeta {
     signed_by: sign::PublicKey,
 }
 
-impl<T: AsRef<[u8]>> From<(T, SigMeta)> for Signed<T> {
+impl<T> From<(T, SigMeta)> for Signed<T> {
     fn from(pair: (T, SigMeta)) -> Signed<T> {
         let (
             data,
@@ -86,7 +100,7 @@ fn verify_sig(
     }
 }
 
-impl<T: AsRef<[u8]>> Signed<T> {
+impl<T: Ser> Signed<T> {
     pub fn into_data(self) -> T {
         self.split().0
     }
@@ -119,7 +133,12 @@ impl<T: AsRef<[u8]>> Signed<T> {
     }
 
     pub fn verify_sig(&self) -> SigValid {
-        verify_sig(self.data.as_ref(), self.timestamp, self.sig, self.signed_by)
+        verify_sig(
+            &kson::to_vec(&self.data),
+            self.timestamp,
+            self.sig,
+            self.signed_by,
+        )
     }
 
     pub fn signed_by(&self) -> &sign::PublicKey {
@@ -162,160 +181,103 @@ impl SigMeta {
 
 pub mod sig {
     use super::*;
-    pub use sign::{PublicKey, Signature};
+    pub use sign::{KeyPair, PublicKey, Signature};
 
     pub const PUBLIC_KEY_BYTES: usize = sign::PUBLIC_KEY_LEN;
     pub const SIGNATURE_BYTES: usize = sign::SIGNATURE_LEN;
 
-    #[derive(Ser, De, Hash, Debug, Clone, PartialEq, Eq)]
-    pub struct PKMeta {
-        sig: SigMeta,
-        deprecated: Option<SigMeta>,
+    pub fn sign_ser<T: Ser>(
+        keys: &KeyPair,
+        data: T,
+    ) -> Signed<T> {
+        let timestamp = Time::now();
+        let to_sign = compute_signing_data(&kson::to_vec(&data), timestamp);
+        let sig = keys.secret().sign(&to_sign);
+        let signed = Signed {
+            data,
+            timestamp,
+            sig,
+            signed_by: *keys.public(),
+        };
+        debug_assert_eq!(signed.verify_sig(), SigValid::Yes);
+        signed
     }
 
-    impl From<SigMeta> for PKMeta {
-        fn from(sig: SigMeta) -> Self {
-            PKMeta {
-                sig,
-                deprecated: None,
-            }
-        }
+    #[derive(Ser, De, Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    pub enum SigUpdate {
+        Endorse(Signed<UserId>),
+        Deprecate(sig::PublicKey),
     }
 
-    impl PKMeta {
-        pub fn new(
-            sig: SigMeta,
-            deprecated: Option<SigMeta>,
-        ) -> Self {
-            Self { sig, deprecated }
-        }
-
-        pub fn key_is_valid(
-            &self,
-            key: PublicKey,
-        ) -> bool {
-            if let Some(d) = self.deprecated {
-                if d.verify_sig(key.as_ref()) == SigValid::Yes {
-                    return false;
-                }
-            }
-
-            self.sig.verify_sig(key.as_ref()) == SigValid::Yes
-        }
-
-        pub fn deprecate(
-            &mut self,
-            deprecation: SigMeta,
-        ) -> bool {
-            if self.deprecated.is_some() {
-                false
-            } else {
-                self.deprecated = Some(deprecation);
-                true
-            }
-        }
+    pub fn validate_update(sig: &Signed<SigUpdate>) -> SigValid {
+        sig.verify_sig().and(|| match sig.data() {
+            SigUpdate::Endorse(e) => e.verify_sig(),
+            SigUpdate::Deprecate(_) => SigValid::Yes,
+        })
     }
 
     #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
-    pub struct KeyPair {
-        public: sign::PublicKey,
-        secret: sign::SecretKey,
+    pub struct SigChain {
+        pub initial: Signed<UserId>,
+        pub sig_chain: Vec<Signed<SigUpdate>>,
     }
 
-    impl KeyPair {
-        pub fn gen_new() -> Self {
-            let (public, secret) = sign::gen_keypair();
-            KeyPair { public, secret }
+    impl SigChain {
+        pub fn validate(&self) -> SigValid {
+            use std::collections::HashSet;
+            use SigUpdate::*;
+
+            self.sig_chain
+                .iter()
+                .fold(
+                    (HashSet::new(), self.initial.verify_sig()),
+                    |(mut valid_keys, status), update| {
+                        let new_status = status.and(|| {
+                            validate_update(update).and(|| {
+                                if valid_keys.contains(update.signed_by()) {
+                                    match update.data() {
+                                        Endorse(e) => {
+                                            valid_keys.insert(*e.signed_by());
+                                        }
+                                        Deprecate(k) => {
+                                            valid_keys.remove(k);
+                                        }
+                                    }
+                                    SigValid::Yes
+                                } else {
+                                    SigValid::BadSigner
+                                }
+                            })
+                        });
+                        (valid_keys, new_status)
+                    },
+                )
+                .1
         }
 
-        // TODO: make this copy public key instead of referencing it
-        pub fn public_key(&self) -> &sign::PublicKey {
-            &self.public
-        }
-
-        pub fn secret_key(&self) -> &sign::SecretKey {
-            &self.secret
-        }
-
-        pub fn sign<T: AsRef<[u8]>>(
-            &self,
-            data: T,
-        ) -> Signed<T> {
-            let timestamp = Time::now();
-            let to_sign = compute_signing_data(data.as_ref(), timestamp);
-            let sig = self.secret.sign(&to_sign);
-            let signed = Signed {
-                data,
-                timestamp,
-                sig,
-                signed_by: self.public,
-            };
-            debug_assert!(signed.verify_sig() == SigValid::Yes);
-            signed
-        }
-
-        pub fn sign_detached(
-            &self,
-            data: &[u8],
-        ) -> SigMeta {
-            let timestamp = Time::now();
-            let to_sign = compute_signing_data(data, timestamp);
-            let sig = self.secret.sign(&to_sign);
-            let meta = SigMeta {
-                timestamp,
-                sig,
-                signed_by: self.public,
-            };
-            debug_assert!(meta.verify_sig(data) == SigValid::Yes);
-            meta
+        pub fn active_keys(&self) -> std::collections::HashSet<sig::PublicKey> {
+            let mut keys = std::collections::HashSet::new();
+            keys.insert(*self.initial.signed_by());
+            for update in self.sig_chain.iter() {
+                match &update.data {
+                    SigUpdate::Endorse(e) => {
+                        keys.insert(*e.signed_by());
+                    }
+                    SigUpdate::Deprecate(k) => {
+                        keys.remove(k);
+                    }
+                }
+            }
+            keys
         }
     }
 }
 
-// pub mod sealed {
-//     use super::*;
-//     use std::ops::Deref;
+#[derive(Ser, De, Debug, Clone, Copy, PartialEq, Eq)]
+pub struct Prekey(pub kcl::kx::PublicKey);
 
-//     #[derive(Ser, De, Hash, Debug, Clone, Copy, PartialEq, Eq)]
-//     pub struct PublicKey(pub Signed<box_::PublicKey>);
-
-//     impl Deref for PublicKey {
-//         type Target = Signed<box_::PublicKey>;
-//         fn deref(&self) -> &Self::Target {
-//             &self.0
-//         }
-//     }
-
-//     impl PublicKey {
-//         pub fn seal(&self, msg: &[u8]) -> Vec<u8> {
-//             sealedbox::seal(msg, &self.0.data)
-//         }
-//     }
-
-//     #[derive(Ser, De, Debug, Clone)]
-//     pub struct KeyPair {
-//         sealed: box_::PublicKey,
-//         sk: box_::SecretKey,
-//     }
-
-//     impl KeyPair {
-//         pub fn gen_new() -> Self {
-//             sodiumoxide::init().expect("failed to init libsodium");
-//             let (sealed, sk) = box_::gen_keypair();
-//             KeyPair { sealed, sk }
-//         }
-
-//         pub fn public_key(&self) -> &box_::PublicKey {
-//             &self.sealed
-//         }
-
-//         // TODO: figure out if this will ever fail
-//         pub fn sign_pub(&self, pair: &sig::KeyPair) -> PublicKey {
-//             PublicKey(pair.sign(self.sealed))
-//         }
-
-//         pub fn open(&self, msg: &[u8]) -> Option<Vec<u8>> {
-//             sealedbox::open(msg, &self.sealed, &self.sk).ok()
-//         }
-//     }
-// }
+impl Prekey {
+    pub fn from_slice(bytes: &[u8]) -> Option<Self> {
+        kcl::kx::PublicKey::from_slice(bytes).map(Self)
+    }
+}
