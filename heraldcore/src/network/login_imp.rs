@@ -1,6 +1,7 @@
 use super::*;
 use coremacros::w;
 
+tilde! {
 /// Attempts to login to the server, spawning a long-lived thread to handle messages pushed from
 /// the server.
 pub fn login() -> Result<(), HErr> {
@@ -10,7 +11,7 @@ pub fn login() -> Result<(), HErr> {
 
     CAUGHT_UP.store(false, Ordering::Release);
 
-    let uid = w!(config::id());
+    let uid = config::id().~w!();
     let kp = w!(config::keypair());
 
     let gid = GlobalId {
@@ -20,18 +21,18 @@ pub fn login() -> Result<(), HErr> {
 
     let wsurl = format!("ws://{}/login", home_server());
 
-    let mut ws = w!(wsclient::ClientBuilder::new(&wsurl)
+    let mut ws = wsclient::ClientBuilder::new(&wsurl)
         .expect("failed to parse server url")
-        .connect_insecure());
+        .connect_insecure().~w!();
 
-    w!(sock_send_msg(&mut ws, &SignAs(gid)));
+    sock_send_msg(&mut ws, &SignAs(gid)).~w!();
 
-    match w!(sock_get_msg(&mut ws)) {
+    match sock_get_msg(&mut ws).~w!() {
         SignAsResponse::Sign(u) => {
             let token = LoginToken(kp.secret_key().sign(u.as_ref()));
-            w!(sock_send_msg(&mut ws, &token));
+            sock_send_msg(&mut ws, &token).~w!();
 
-            match w!(sock_get_msg(&mut ws)) {
+            match sock_get_msg(&mut ws).~w!() {
                 LoginTokenResponse::Success => {}
                 e => return Err(SignInFailed(e)),
             }
@@ -39,7 +40,7 @@ pub fn login() -> Result<(), HErr> {
         e => return Err(GIDSpecFailed(e)),
     }
 
-    let ev = w!(catchup(&mut ws));
+    let ev = catchup(&mut ws).~w!();
 
     CAUGHT_UP.store(true, Ordering::Release);
 
@@ -63,6 +64,7 @@ pub fn login() -> Result<(), HErr> {
     });
 
     Ok(())
+}
 }
 
 fn sock_get_msg<S: websocket::stream::Stream, T: De>(
