@@ -35,3 +35,6 @@ pub(crate) use updates::{err, push};
 #[cfg(test)]
 #[macro_use]
 extern crate coremacros;
+
+#[macro_use]
+extern crate tilde;

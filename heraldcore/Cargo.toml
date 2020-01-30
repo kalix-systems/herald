@@ -11,6 +11,7 @@ once_cell            = "1.2"
 parking_lot          = "0.10"
 tar                  = "0.4"
 unicode-segmentation = "1.6"
+tilde = "0.0.4"
 
 [dependencies.herald_common]
 path             = "../herald_common"
