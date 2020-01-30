@@ -58,18 +58,19 @@ impl Herald {
         server_addr: String,
         server_port: String,
     ) {
-        use register::*;
-
-        let addr = if !(server_addr.is_empty() && server_port.is_empty()) {
-            Some(err!(format!("{}:{}", server_addr, server_port).parse()))
+        let (dns, port) = if !server_addr.is_empty() && !server_port.is_empty() {
+            (server_addr, err!(server_port.parse()))
         } else {
-            None
+            // TODO throw error
+            return;
         };
 
         let uid = err!(UserId::try_from(user_id.as_str()));
 
+        let handle = push_err!(net::begin_registration(dns, port), "Registration failed");
+
         spawn!(
-            match push_err!(net::register(uid, addr), "Registration failed") {
+            match push_err!(net::begin_registration(dns, port), "Registration failed") {
                 Some(Res::UIDTaken) => {
                     push(shared::RegistrationFailureCode::UserIdTaken);
                 }
