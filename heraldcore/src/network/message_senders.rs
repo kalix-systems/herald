@@ -25,10 +25,12 @@ pub(crate) fn send_cmessage(
 
         match helper::push_users(&req) {
             Ok(push_users::Res::Success) => Ok(SendOutcome::Success),
+
             Ok(push_users::Res::Missing(missing)) => Err(HeraldError(format!(
                 "tried to send messages to nonexistent users {:?}",
                 missing
             ))),
+
             Err(e) => {
                 // TODO: maybe try more than once?
                 // maybe have some mechanism to send a signal that more things have gone wrong?
@@ -41,11 +43,13 @@ pub(crate) fn send_cmessage(
                 CAUGHT_UP.store(false, Ordering::Release);
 
                 w!(pending::add_to_pending(cid, content));
+
                 Ok(SendOutcome::Pending)
             }
         }
     } else {
         w!(pending::add_to_pending(cid, content));
+
         Ok(SendOutcome::Pending)
     }
 }
