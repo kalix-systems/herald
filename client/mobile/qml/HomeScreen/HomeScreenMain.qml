@@ -78,14 +78,9 @@ Page {
             Connections {
                 target: appRoot.router
                 onConvoRequest: {
-                    const conv_idx = Herald.conversations.indexById(
-                                       searchConversationId)
-
-                    // early return on out of bounds
-                    if ((conv_idx < 0) || (conv_idx >= cvListView.count))
-                        return
-
-                    stackView.push(cvListView.itemAtIndex(conv_idx).ownedCV)
+                    mainView.push(chatViewMain, {
+                                      "convId": searchConversationId
+                                  })
                     messagePositionRequested(searchMsgId)
                 }
             }
@@ -93,27 +88,18 @@ Page {
             Connections {
                 target: appRouter
                 onConvoClicked: {
-                    const conv_idx = Herald.conversations.indexById(
-                                       searchConversationId)
-
-                    // early return on out of bounds
-                    if ((conv_idx < 0) || (conv_idx >= cvListView.count))
-                        return
-
-                    stackView.push(cvListView.itemAtIndex(conv_idx).ownedCV)
+                    mainView.push(chatViewMain, {
+                                      "convId": searchConversationId
+                                  })
                 }
             }
 
             Connections {
                 target: appRouter
                 onGroupRequested: {
-                    const conv_idx = Herald.conversations.indexById(groupId)
-
-                    // early return on out of bounds
-                    if ((conv_idx < 0) || (conv_idx >= cvListView.count))
-                        return
-
-                    stackView.push(cvListView.itemAtIndex(conv_idx).ownedCV)
+                    mainView.push(chatViewMain, {
+                                      "convId": groupId
+                                  })
                 }
             }
         }

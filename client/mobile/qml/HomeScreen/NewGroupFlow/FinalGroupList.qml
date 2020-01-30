@@ -21,12 +21,12 @@ ListView {
 
         property var memberData: UserMap.get(model.memberId)
         PlatonicRectangle {
-            boxTitle: memberId.name
-            boxColor: memberId.userColor
-            picture: memberId.profilePicture
+            boxTitle: memberData.name
+            boxColor: memberData.userColor
+            picture: Utils.safeStringOrDefault(memberData.profilePicture, "")
 
             labelComponent: Entity.ContactLabel {
-                displayName: memberId.name
+                displayName: memberData.name
                 username: memberId
             }
         }

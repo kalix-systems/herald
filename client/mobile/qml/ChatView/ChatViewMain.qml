@@ -10,9 +10,9 @@ Page {
     readonly property Component headerComponent: ChatHeader {}
     //swappable message model, set by the appstate
     property Messages ownedMessages: convContent !== undefined ? convContent.messages : undefined
-    property string headerTitle
-    property var convoItem
-    property ConversationContent convContent
+    property string headerTitle: convContent !== undefined ? convContent.title : ""
+    property ConversationContent convContent: ContentMap.get(convId)
+    property var convId
 
     background: Rectangle {
         color: CmnCfg.palette.white

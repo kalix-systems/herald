@@ -117,7 +117,7 @@ ListView {
                     defaultWidth: chatListView.width
                     messageModelData: containerCol.messageModelData
                     convContainer: parent
-                    convoExpiration: convoItem.expirationPeriod
+                    convoExpiration: convContent.expirationPeriod
                     ownedConversation: ownedMessages
                     bubbleIndex: index
                     property Component infoPage: Component {

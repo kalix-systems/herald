@@ -29,7 +29,6 @@ Rectangle {
     property bool isSelected: false
     // most recent message content to display in this item
     property var lastMsgDigest
-    property alias ownedCV: ownedChatView
     property alias tapEnabled: tapHandler.enabled
     property alias optionsBar: optionsLoader.item
 
@@ -132,18 +131,11 @@ Rectangle {
                 from: 0.2
                 to: 0
             }
-            onRunningChanged: if (!running)
-                                  mainView.push(ownedChatView)
-        }
-
-        Component {
-            id: ownedChatView
-            ChatView.ChatViewMain {
-                property string stateName: "chat"
-                headerTitle: itemTitle
-                convoItem: conversationItem.conversationData
-                convContent: convoContent
-            }
+            onRunningChanged: if (!running) {
+                                  mainView.push(chatViewMain, {
+                                                    "convId": conversationItem.convoContent.conversationId
+                                                })
+                              }
         }
 
         TapHandler {
