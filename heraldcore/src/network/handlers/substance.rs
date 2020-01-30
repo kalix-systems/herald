@@ -135,7 +135,13 @@ fn msg(
             }
         }
 
-        M::Membership(_) => {}
+        M::Membership(m) => {
+            use coretypes::messages::Membership as M;
+            match m {
+                M::Added { members, added_by } => todo!(),
+                M::Left(_) => todo!(),
+            }
+        }
     };
 
     let mut raw = raw_conn().lock();
