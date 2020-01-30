@@ -14,10 +14,11 @@ pub(crate) fn send_cmessage(
     content: &ConversationMessage,
 ) -> Result<SendOutcome, HErr> {
     if CAUGHT_UP.load(Ordering::Acquire) {
-        let cm = cmessages::seal(cid, &content)?;
+        let cm = w!(cmessages::seal(cid, &content));
 
-        let to = crate::members::members(&cid)?;
-        let exc = *crate::config::keypair()?.public_key();
+        let to = w!(crate::members::members(&cid));
+        let exc = *w!(crate::config::keypair()).public_key();
+
         let msg = kson::to_vec(&cm).into();
 
         let req = push_users::Req { to, exc, msg };
@@ -39,12 +40,12 @@ pub(crate) fn send_cmessage(
 
                 CAUGHT_UP.store(false, Ordering::Release);
 
-                pending::add_to_pending(cid, content)?;
+                w!(pending::add_to_pending(cid, content));
                 Ok(SendOutcome::Pending)
             }
         }
     } else {
-        pending::add_to_pending(cid, content)?;
+        w!(pending::add_to_pending(cid, content));
         Ok(SendOutcome::Pending)
     }
 }
@@ -53,12 +54,12 @@ pub(super) fn send_dmessage(
     to: sig::PublicKey,
     dm: &DeviceMessageBody,
 ) -> Result<(), HErr> {
-    let msg = kson::to_vec(&dmessages::seal(to, dm)?).into();
+    let msg = kson::to_vec(&w!(dmessages::seal(to, dm))).into();
 
     let req = push_devices::Req { to: vec![to], msg };
 
     // TODO retry logic? for now, things go to the void
-    match helper::push_devices(&req)? {
+    match w!(helper::push_devices(&req)) {
         push_devices::Res::Success => Ok(()),
         push_devices::Res::Missing(missing) => Err(HeraldError(format!(
             "tried to send messages to nonexistent keys {:?}",
@@ -71,7 +72,7 @@ pub(super) fn send_umessage(
     uid: UserId,
     msg: &DeviceMessageBody,
 ) -> Result<(), HErr> {
-    let meta = match keys_of(vec![uid])?.pop() {
+    let meta_res = match w!(keys_of(vec![uid])).pop() {
         Some((u, m)) => {
             if u == uid {
                 Ok(m)
@@ -90,11 +91,12 @@ pub(super) fn send_umessage(
             uid,
             line!()
         ))),
-    }?;
+    };
+    let meta = w!(meta_res);
 
     let keys: Vec<sig::PublicKey> = meta.keys.into_iter().map(|(k, _)| k).collect();
     for key in keys {
-        send_dmessage(key, msg)?;
+        w!(send_dmessage(key, msg));
     }
 
     Ok(())

@@ -36,7 +36,7 @@ impl Event {
         }
 
         for (cid, content) in replies {
-            send_cmessage(cid, &content)?;
+            w!(send_cmessage(cid, &content));
         }
 
         Ok(())

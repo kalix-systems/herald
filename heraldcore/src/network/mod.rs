@@ -8,6 +8,7 @@ use crate::{
 };
 use chainkeys;
 use channel_ratchet::RatchetState;
+use coremacros::w;
 use herald_common::*;
 use std::{
     net::SocketAddr,
@@ -37,16 +38,16 @@ mod helper;
 
 /// Deprecates key on server.
 pub fn dep_key(to_dep: sig::PublicKey) -> Result<PKIResponse, HErr> {
-    let kp = config::keypair()?;
+    let kp = w!(config::keypair());
     let req = dep_key::Req(kp.sign(to_dep));
-    Ok(helper::dep_key(&req)?.0)
+    Ok(w!(helper::dep_key(&req)).0)
 }
 
 /// Adds new key to the server's key registry.
 pub fn new_key(to_new: sig::PublicKey) -> Result<PKIResponse, HErr> {
-    let kp = config::keypair()?;
+    let kp = w!(config::keypair());
     let req = new_key::Req(kp.sign(to_new));
-    Ok(helper::new_key(&req)?.0)
+    Ok(w!(helper::new_key(&req)).0)
 }
 
 /// Registers new user on the server.
@@ -62,13 +63,13 @@ pub fn register(
     let sig = kp.sign(*kp.public_key());
     let req = register::Req(uid, sig);
 
-    let res = helper::register(&req, home_server)?;
+    let res = w!(helper::register(&req, home_server));
 
     // TODO: retry if this fails?
     if let register::Res::Success = &res {
-        crate::config::ConfigBuilder::new(uid, kp)
+        w!(crate::config::ConfigBuilder::new(uid, kp)
             .home_server(home_server)
-            .add()?;
+            .add());
     }
 
     Ok(res)
@@ -79,22 +80,22 @@ pub fn send_read_receipt(
     cid: ConversationId,
     msg_id: MsgId,
 ) -> Result<(), HErr> {
-    send_cmessage(
+    w!(send_cmessage(
         cid,
         &ConversationMessage::Message(NetContent::Receipt(cmessages::Receipt {
             of: msg_id,
             stat: ReceiptStatus::Read,
         })),
-    )?;
+    ));
     Ok(())
 }
 
 /// Sends a typing indicator
 pub fn send_typing_indicator(cid: ConversationId) -> Result<(), HErr> {
-    send_cmessage(
+    w!(send_cmessage(
         cid,
         &ConversationMessage::Message(NetContent::Typing(Time::now())),
-    )?;
+    ));
 
     Ok(())
 }
@@ -105,7 +106,7 @@ pub fn send_user_req(
     cid: ConversationId,
 ) -> Result<(), HErr> {
     let ratchet = RatchetState::new();
-    chainkeys::store_state(cid, &ratchet)?;
+    w!(chainkeys::store_state(cid, &ratchet));
 
     let req = dmessages::UserReq { ratchet, cid };
 
@@ -117,16 +118,19 @@ pub(crate) fn send_normal_message(
     msg: cmessages::Msg,
 ) -> Result<SendOutcome, HErr> {
     let mid = msg.mid;
-    let outcome = send_cmessage(cid, &ConversationMessage::Message(NetContent::Msg(msg)))?;
+    let outcome = w!(send_cmessage(
+        cid,
+        &ConversationMessage::Message(NetContent::Msg(msg))
+    ));
 
     if let SendOutcome::Success = outcome {
         {
-            let conn = crate::db::Database::get()?;
-            crate::message::db::update_send_status(
+            let conn = w!(crate::db::Database::get());
+            w!(crate::message::db::update_send_status(
                 &conn,
                 mid,
                 coretypes::messages::SendStatus::Ack,
-            )?;
+            ));
         }
     }
 
@@ -139,37 +143,39 @@ pub(crate) fn send_group_settings_message(
     expiration: Option<Time>,
     update: cmessages::GroupSettingsUpdate,
 ) -> Result<(), HErr> {
-    if let SendOutcome::Success = send_normal_message(
+    if let SendOutcome::Success = w!(send_normal_message(
         cid,
         cmessages::Msg {
             mid,
             expiration,
             content: cmessages::MsgContent::GroupSettings(update),
         },
-    )? {
+    )) {
         crate::push(crate::message::OutboundAux::SendDone(cid, mid));
     }
     Ok(())
 }
 
 pub(crate) fn send_profile_update(update: cmessages::ProfileChanged) -> Result<(), HErr> {
-    let conn = crate::db::Database::get()?;
+    let conn = w!(crate::db::Database::get());
 
     use cmessages::ProfileChanged as P;
     match update {
         color @ P::Color(_) => {
-            let cid = crate::config::db::nts_conversation(&conn)?;
+            let cid = w!(crate::config::db::nts_conversation(&conn));
             let msg = ConversationMessage::Message(NetContent::ProfileChanged(color));
 
-            send_cmessage(cid, &msg)?;
+            w!(send_cmessage(cid, &msg));
         }
         other => {
-            let cids = crate::conversation::db::get_all_pairwise_conversations(&conn)?;
+            let cids = w!(crate::conversation::db::get_all_pairwise_conversations(
+                &conn
+            ));
 
             let msg = ConversationMessage::Message(NetContent::ProfileChanged(other));
 
             for cid in cids {
-                send_cmessage(cid, &msg)?;
+                w!(send_cmessage(cid, &msg));
             }
         }
     }
@@ -183,14 +189,14 @@ pub fn send_reaction(
     msg_id: MsgId,
     react_content: crate::message::ReactContent,
 ) -> Result<(), HErr> {
-    send_cmessage(
+    w!(send_cmessage(
         cid,
         &ConversationMessage::Message(NetContent::Reaction(cmessages::Reaction {
             msg_id,
             react_content,
             remove: false,
         })),
-    )?;
+    ));
     Ok(())
 }
 
@@ -200,14 +206,14 @@ pub fn send_reaction_removal(
     msg_id: MsgId,
     react_content: crate::message::ReactContent,
 ) -> Result<(), HErr> {
-    send_cmessage(
+    w!(send_cmessage(
         cid,
         &ConversationMessage::Message(NetContent::Reaction(cmessages::Reaction {
             msg_id,
             react_content,
             remove: true,
         })),
-    )?;
+    ));
     Ok(())
 }
 
@@ -219,7 +225,7 @@ macro_rules! get_of_helper {
     ($name: tt, $of: ty, $to: ty) => {
         #[allow(missing_docs)]
         pub fn $name(of: $of) -> Result<$to, HErr> {
-            Ok(helper::$name(&$name::Req(of))?.0)
+            Ok(w!(helper::$name(&$name::Req(of))).0)
         }
     };
 }

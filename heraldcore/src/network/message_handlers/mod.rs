@@ -13,11 +13,11 @@ pub(super) fn handle_cmessage(
     use ConversationMessage::*;
     let mut ev = Event::default();
 
-    let (cid, GlobalId { uid, .. }, msg) = cmessages::open(cm)?;
+    let (cid, GlobalId { uid, .. }, msg) = w!(cmessages::open(cm));
 
     match msg {
-        NewKey(nk) => crate::user_keys::add_keys(uid, &[nk.0])?,
-        DepKey(dk) => crate::user_keys::deprecate_keys(&[dk.0])?,
+        NewKey(nk) => w!(crate::user_keys::add_keys(uid, &[nk.0])),
+        DepKey(dk) => w!(crate::user_keys::deprecate_keys(&[dk.0])),
         AddedToConvo { info, ratchet } => {
             use crate::types::cmessages::AddedToConvo;
 
@@ -38,20 +38,20 @@ pub(super) fn handle_cmessage(
             conv_builder.title = title;
 
             conv_builder.picture = match picture {
-                Some(bytes) => Some(image_utils::update_picture_buf(&bytes)?),
+                Some(bytes) => Some(w!(image_utils::update_picture_buf(&bytes))),
                 None => None,
             };
 
-            let mut db = crate::db::Database::get()?;
-            let conv = conv_builder.add_db(&mut db)?;
+            let mut db = w!(crate::db::Database::get());
+            let conv = w!(conv_builder.add_db(&mut db));
 
-            chainkeys::store_state(cid, &ratchet)?;
+            w!(chainkeys::store_state(cid, &ratchet));
 
             ev.notifications
                 .push(Notification::NewConversation(conv.meta));
         }
 
-        Message(content) => handle_content(cid, uid, ts, &mut ev, content)?,
+        Message(content) => w!(handle_content(cid, uid, ts, &mut ev, content)),
     }
 
     Ok(ev)
@@ -63,18 +63,18 @@ pub(super) fn handle_dmessage(
 ) -> Result<Event, HErr> {
     let mut ev = Event::default();
 
-    let (from, msg) = dmessages::open(msg)?;
+    let (from, msg) = w!(dmessages::open(msg));
     let GlobalId { uid, .. } = from;
 
     match msg {
         DeviceMessageBody::Req(cr) => {
             let dmessages::UserReq { ratchet, cid } = cr;
-            let (user, conversation) = crate::user::UserBuilder::new(uid)
+            let (user, conversation) = w!(crate::user::UserBuilder::new(uid)
                 .pairwise_conversation(cid)
-                .add()?;
+                .add());
 
             let coretypes::conversation::Conversation { meta, .. } = conversation;
-            chainkeys::store_state(cid, &ratchet)?;
+            w!(chainkeys::store_state(cid, &ratchet));
 
             ev.notifications
                 .push(Notification::NewUser(Box::new((user, meta))));

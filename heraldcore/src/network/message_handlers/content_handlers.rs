@@ -118,11 +118,13 @@ fn handle_msg(
 
         // group settings update
         cmessages::MsgContent::GroupSettings(settings) => {
-            let mut conn = crate::db::Database::get()?;
+            let mut conn = w!(crate::db::Database::get());
 
-            let update = crate::conversation::settings::db::apply_inbound(&conn, settings, &cid)?;
+            let update = w!(crate::conversation::settings::db::apply_inbound(
+                &conn, settings, &cid
+            ));
 
-            let msg = crate::message::db::inbound_aux(
+            let msg = w!(crate::message::db::inbound_aux(
                 &mut conn,
                 update.clone(),
                 cid,
@@ -130,7 +132,7 @@ fn handle_msg(
                 uid,
                 ts,
                 expiration,
-            )?;
+            ));
 
             if let Some(msg) = msg {
                 ev.notifications.push(Notification::NewMsg(Box::new(msg)));
@@ -140,13 +142,14 @@ fn handle_msg(
 
         // group membership update
         cmessages::MsgContent::NewMembers(nm) => {
-            let mut conn = crate::db::Database::get()?;
-            let tx = conn.transaction()?;
-            crate::members::db::add_members_with_tx(&tx, cid, &nm.0)?;
-            tx.commit()?;
+            let mut conn = w!(crate::db::Database::get());
+            let tx = w!(conn.transaction());
+            w!(crate::members::db::add_members_with_tx(&tx, cid, &nm.0));
+            w!(tx.commit());
 
-            let msg =
-                crate::message::db::inbound_aux(&mut conn, nm, cid, mid, uid, ts, expiration)?;
+            let msg = w!(crate::message::db::inbound_aux(
+                &mut conn, nm, cid, mid, uid, ts, expiration
+            ));
 
             if let Some(msg) = msg {
                 ev.notifications.push(Notification::NewMsg(Box::new(msg)));
@@ -168,37 +171,43 @@ fn profile_change(
 
     match change {
         U::Color(color) => {
-            if uid == crate::config::id()? {
-                crate::user::set_color(uid, color)?;
+            if uid == w!(crate::config::id()) {
+                w!(crate::user::set_color(uid, color));
                 ev.notifications
                     .push(Notification::UserChanged(uid, Color(color)));
             }
         }
 
         U::DisplayName(name) => {
-            crate::user::set_name(uid, name.as_ref().map(String::as_str))?;
+            w!(crate::user::set_name(
+                uid,
+                name.as_ref().map(String::as_str)
+            ));
 
             ev.notifications
                 .push(Notification::UserChanged(uid, DisplayName(name.clone())));
 
-            if let Some(cid) = crate::conversation::get_pairwise_conversations(&[uid])?.pop() {
+            if let Some(cid) = w!(crate::conversation::get_pairwise_conversations(&[uid])).pop() {
                 ev.notifications
                     .push(Notification::Settings(cid, S::Title(name)));
             }
         }
 
         U::Picture(buf) => {
-            let conn = crate::db::Database::get()?;
-            let path = crate::user::db::set_profile_picture_buf(
+            let conn = w!(crate::db::Database::get());
+            let path = w!(crate::user::db::set_profile_picture_buf(
                 &conn,
                 uid,
                 buf.as_ref().map(Vec::as_slice),
-            )?;
+            ));
             ev.notifications
                 .push(Notification::UserChanged(uid, Picture(path.clone())));
 
-            if let Some(cid) =
-                crate::conversation::db::get_pairwise_conversations(&conn, &[uid])?.pop()
+            if let Some(cid) = w!(crate::conversation::db::get_pairwise_conversations(
+                &conn,
+                &[uid]
+            ))
+            .pop()
             {
                 ev.notifications
                     .push(Notification::Settings(cid, S::Picture(path)));
