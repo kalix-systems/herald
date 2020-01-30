@@ -1,5 +1,5 @@
 [package]
-name = "kcl"
+name = "kson_strategy"
 version = "0.1.0"
 authors = ["theseriousadult <jack@kalix.io>"]
 edition = "2018"
@@ -7,10 +7,7 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-libsodium-sys  = "0.2.4"
-arrayvec       = "0.5.1"
-derive-getters = "0.1.0"
-typed-builder  = "0.4.0"
+proptest = "0.9.4"
 
 [dependencies.kson]
-path = "../kson"
+path = "../"

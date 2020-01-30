@@ -2,10 +2,17 @@ SELECT EXISTS (
   SELECT
     1
   FROM
-    keys
+    sigchain
   WHERE
-    key = $1 AND
-    dep_ts IS NULL AND
-    dep_signed_by IS NULL AND
-    dep_signature IS NULL
+    sigchain.key = $1 AND
+    sigchain.is_creation = true AND
+    sigchain.key NOT IN (
+        SELECT
+            sigchain.key
+        FROM
+            sigchain
+        WHERE
+            is_creation = false
+    )
+  LIMIT 1
 )

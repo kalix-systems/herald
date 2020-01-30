@@ -7,10 +7,16 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-tokio-postgres = "0.5"
-tokio          = "0.2"
-warp           = "0.2"
+thiserror       = "1.0"
+tokio-postgres  = "0.5.0-alpha.2"
+warp = "0.2"
+
+[dependencies.tokio]
+version = "0.2"
+features = ["time"]
+
+[dependencies.kson]
+path = "../../kson"
 
 [dependencies.herald_common]
 path = "../../herald_common"
-

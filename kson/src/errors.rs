@@ -1,9 +1,9 @@
 use backtrace::Backtrace;
 use bytes::Bytes;
 use location::Location;
-use std::{fmt, str::Utf8Error, sync::Arc};
+use std::{fmt, str::Utf8Error};
 
-pub type KsonError = Arc<KsonErrorInner>;
+pub type KsonError = Box<KsonErrorInner>;
 
 #[derive(Debug, Clone)]
 pub struct KsonErrorInner {
@@ -46,6 +46,10 @@ pub enum Variant {
     },
     CollectionTooLarge {
         max_len: usize,
+        found: usize,
+    },
+    WrongCollSize {
+        expected: usize,
         found: usize,
     },
     BadUtf8String(Utf8Error),
@@ -108,6 +112,10 @@ impl fmt::Display for KsonErrorInner {
                     "collection was too large - had capacity for {} elements but {} were found",
                     max_len, found
                 ),
+                WrongCollSize { expected, found } => format!(
+                    "collection was wrong size - expected {} elements but stated length was {}",
+                    expected, found
+                ),
                 BadUtf8String(u) => format!("bad utf-8 string, error was {}", u),
                 UnknownType(u) => format!("unknown type found: {}", u),
                 UnknownConst(u) => format!("unknown constant with value {:x?}", u),
@@ -118,10 +126,12 @@ impl fmt::Display for KsonErrorInner {
     }
 }
 
+impl std::error::Error for KsonErrorInner {}
+
 #[macro_export]
 macro_rules! E {
     ($var: expr, $byt: expr, $offset: expr, $($t: tt),*) => {
-        ::std::sync::Arc::new($crate::errors::KsonErrorInner {
+        Box::new($crate::errors::KsonErrorInner {
             backtrace: $crate::prelude::backtrace::Backtrace::new(),
             location: $crate::loc!(),
             bytes: $byt,
@@ -135,7 +145,7 @@ macro_rules! E {
     };
 
     ($var: expr, $byt: expr, $offset: expr) => {
-        ::std::sync::Arc::new($crate::errors::KsonErrorInner {
+        Box::new($crate::errors::KsonErrorInner {
             backtrace: $crate::prelude::backtrace::Backtrace::new(),
             location: $crate::loc!(),
             bytes: $byt,

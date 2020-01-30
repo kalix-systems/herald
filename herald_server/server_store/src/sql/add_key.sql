@@ -1,3 +1,3 @@
 INSERT INTO
-  keys(key, signed_by, ts, signature)
-VALUES($1, $2, $3, $4)
+  sigchain(key, inner_signature, inner_ts, is_creation)
+VALUES($1, $2, $3, true)

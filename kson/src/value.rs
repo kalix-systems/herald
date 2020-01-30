@@ -69,6 +69,22 @@ pub enum Collection<T, K: Ord, V> {
     Map(BTreeMap<K, V>),
 }
 
+impl<T, K: Ord, V> Collection<T, K, V> {
+    fn is_map(&self) -> bool {
+        match self {
+            Collection::Arr(_) => false,
+            Collection::Map(_) => true,
+        }
+    }
+
+    fn len(&self) -> usize {
+        match self {
+            Collection::Arr(a) => a.len(),
+            Collection::Map(m) => m.len(),
+        }
+    }
+}
+
 impl<T: Ser, K: Ser + Ord, V: Ser> Ser for Collection<T, K, V> {
     fn ser(
         &self,
@@ -103,13 +119,65 @@ pub enum Value {
     Cons(Box<Value>, Collection<Value, Value, Value>),
 }
 
-// impl Ser for Value {
-//     fn ser(&self, into: &mut Serializer) {
-//         match self {
-//             Atom(a) => a.ser(into),
-//             Array(v) => v.ser(into),
-//             Cons(t, r) =>
-//             Map(m)
-//         }
-//     }
-// }
+impl Ser for Value {
+    fn ser(
+        &self,
+        into: &mut Serializer,
+    ) {
+        match self {
+            Value::Atom(a) => a.ser(into),
+            Value::Collection(c) => c.ser(into),
+            Value::Cons(t, r) => {
+                into.start_cons(r.is_map(), r.len());
+                into.put_cons_tag(t);
+                match r {
+                    Collection::Arr(a) => {
+                        for i in a {
+                            into.put_cons_item(i);
+                        }
+                    }
+                    Collection::Map(m) => {
+                        for (k, v) in m {
+                            into.put_cons_pair(k, v);
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+impl De for Value {
+    fn de(from: &mut Deserializer) -> Result<Self, KsonError> {
+        let typ = from.read_tag_byte()?.typ;
+        from.ix -= 1;
+        match typ {
+            Type::Collection => from.take_val().map(Value::Collection),
+            Type::Cons => from.read_cons(
+                |from, is_map, len| {
+                    let tag = Box::new(from.take_val()?);
+                    Ok((tag, is_map, len))
+                },
+                |from, (tag, is_map, len)| {
+                    let coll = if is_map {
+                        let mut inner = BTreeMap::new();
+                        for _ in 0..len {
+                            let key = from.take_val()?;
+                            let val = from.take_val()?;
+                            inner.insert(key, val);
+                        }
+                        Collection::Map(inner)
+                    } else {
+                        let mut inner = Vec::with_capacity(len);
+                        for _ in 0..len {
+                            inner.push(from.take_val()?);
+                        }
+                        Collection::Arr(inner)
+                    };
+                    Ok(Value::Cons(tag, coll))
+                },
+            ),
+            _ => from.take_val().map(Value::Atom),
+        }
+    }
+}

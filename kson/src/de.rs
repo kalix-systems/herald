@@ -68,7 +68,7 @@ impl Deserializer {
             )
         }
 
-        let out = self.data.slice(self.ix, self.ix + len);
+        let out = self.data.slice(self.ix..self.ix + len);
         self.ix += len;
 
         Ok(out)
@@ -143,7 +143,6 @@ macro_rules! tag_reader_method {
                         $message
                     )
                 }
-
                 Ok(TagByte { is_big, val })
             }
         }
@@ -501,6 +500,7 @@ macro_rules! trivial_de {
     };
 }
 
+trivial_de!((), read_null);
 trivial_de!(bool, read_bool);
 trivial_de!(u8, read_u8);
 trivial_de!(u16, read_u16);
@@ -693,7 +693,7 @@ mod __impls {
         impl<T: De, A: Array<Item = T>> De for ArrayVec<A> {
             fn de(d: &mut Deserializer) -> Result<Self, KsonError> {
                 let tag = d.read_coll_tag()?;
-                let len = d.read_map_len_from_tag(tag)?;
+                let len = d.read_array_len_from_tag(tag)?;
 
                 if len > A::CAPACITY {
                     e!(
