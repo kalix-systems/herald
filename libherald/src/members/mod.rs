@@ -141,9 +141,9 @@ impl MembersTrait for Members {
         &mut self,
         user_id: ffi::UserId,
     ) -> bool {
-        let user_id = err!(user_id.as_str().try_into(), false);
+        let user_id: UserId = err!(user_id.as_str().try_into(), false);
         let conv_id = none!(self.conversation_id, false);
-        err!(heraldcore::members::add_member(&conv_id, user_id), false);
+        err!(heraldcore::members::add_member(&conv_id, &user_id), false);
 
         self.model
             .begin_insert_rows(self.list.len(), self.list.len());

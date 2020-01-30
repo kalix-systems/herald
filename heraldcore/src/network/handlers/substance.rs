@@ -109,6 +109,7 @@ fn msg(
             builder.body = body;
             builder.op = op;
             builder.expiration = expiration;
+
             if let Some(msg) = w!(builder.store()) {
                 ev.note(Notification::NewMsg(Box::new(msg)));
             }
@@ -131,6 +132,7 @@ fn msg(
 
             if let Some(msg) = msg {
                 ev.note(Notification::NewMsg(Box::new(msg)));
+
                 ev.note(Notification::Settings(cid, update));
             }
         }
@@ -139,6 +141,7 @@ fn msg(
             use coretypes::messages::Membership as M;
             match m {
                 M::Added { members, added_by } => todo!(),
+
                 M::Left(_) => todo!(),
             }
         }
@@ -150,15 +153,23 @@ fn msg(
 
     let kp = w!(crate::config::keypair());
 
-    let replies = w!(prepare_send_to_convo(
-        tx,
-        &kp,
-        cid,
-        kson::to_bytes(&nt::Receipt {
-            of: mid,
-            stat: ReceiptStatus::Received,
-        }),
-    ));
+    let users = w!(crate::members::members(&cid));
+
+    let mut replies = vec![];
+
+    for u in users {
+        let keys = w!(prepare_send_to_user(
+            tx,
+            &kp,
+            u,
+            kson::to_bytes(&nt::Receipt {
+                of: mid,
+                stat: ReceiptStatus::Received,
+            }),
+        ));
+
+        replies.extend(keys);
+    }
 
     w!(conn.commit());
 

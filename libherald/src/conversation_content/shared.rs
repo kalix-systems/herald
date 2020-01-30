@@ -1,8 +1,9 @@
 use super::*;
 use crate::messages::MsgUpdate;
+use anyhow::anyhow;
 use crossbeam_channel::*;
 use heraldcore::conversation::{settings::SettingsUpdate as CoreSettingsUpdate, ExpirationPeriod};
-use heraldcore::{channel_send_err, errors::HErr};
+use heraldcore::errors::HErr;
 use once_cell::sync::OnceCell;
 use parking_lot::{Mutex, RwLock};
 use std::collections::HashMap;
@@ -117,7 +118,7 @@ pub(crate) fn content_push<T: Into<ContentUpdate>>(
 
                     err!(tx
                         .send(update.into_inner())
-                        .map_err(|_| channel_send_err!()));
+                        .map_err(|_| anyhow!("Failed to send update")));
 
                     drop(chan_lock);
                 }
@@ -133,7 +134,9 @@ pub(crate) fn content_push<T: Into<ContentUpdate>>(
                         rx,
                     },
                 );
-                err!(tx.send(update).map_err(|_| channel_send_err!()));
+                err!(tx
+                    .send(update)
+                    .map_err(|_| anyhow!("Failed to send update")));
 
                 drop(chan_lock);
             }
