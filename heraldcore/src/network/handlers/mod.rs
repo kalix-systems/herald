@@ -57,6 +57,9 @@ impl PushHandler for Pushy {
             ev.replies(replies);
         }
 
+        e!(conn.commit());
+        drop(raw);
+
         if let Some(response) = response {
             ev.reply(gid.did, response);
         }
@@ -67,7 +70,6 @@ impl PushHandler for Pushy {
             }
         }
 
-        e!(conn.commit());
         e!(ev.execute());
     }
 }

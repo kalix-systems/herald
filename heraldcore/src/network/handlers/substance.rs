@@ -12,7 +12,7 @@ pub(super) fn net_msg(
     match sub {
         S::Init(init) => w!(self::init(ev, cid, uid, init)),
 
-        S::Msg(msg) => w!(self::msg(ev, cid, msg, ts)),
+        S::Msg(msg) => w!(self::msg(ev, cid, msg, uid, ts)),
 
         S::ProfileChanged(change) => w!(profile(ev, uid, change)),
 
@@ -40,10 +40,24 @@ fn init(
             picture,
             expiration_period,
         } => {
-            //use crate::conversation as c;
-            //let mut builder = c::ConversationBuilder::new();
-            //if let Some(picture) =
-            //builder.title(title).picture(picture).
+            use crate::conversation as c;
+            let mut conv_builder = c::ConversationBuilder::new();
+            conv_builder
+                .conversation_id(cid)
+                .override_members(members)
+                .expiration_period(expiration_period);
+
+            conv_builder.title = title;
+
+            conv_builder.picture = match picture {
+                Some(bytes) => image_utils::update_picture_buf(&bytes).ok(),
+                None => None,
+            };
+
+            let mut db = w!(crate::db::Database::get());
+            let conv = w!(conv_builder.add_db(&mut db));
+
+            ev.note(Notification::NewConversation(conv.meta));
         }
     };
 
@@ -68,10 +82,81 @@ fn pairwise_init(
 fn msg(
     ev: &mut Event,
     cid: ConversationId,
-    msg: nt::Msg,
+    nt::Msg {
+        mid,
+        content,
+        expiration,
+    }: nt::Msg,
+    uid: UserId,
     ts: Time,
 ) -> Result<(), HErr> {
-    todo!()
+    use nt::MsgContent as M;
+    match content {
+        M::Normal(nt::Message {
+            body,
+            attachments,
+            op,
+        }) => {
+            let mut builder = crate::message::InboundMessageBuilder::default();
+
+            builder
+                .id(mid)
+                .author(uid)
+                .conversation_id(cid)
+                .attachments(attachments)
+                .timestamp(ts);
+
+            builder.body = body;
+            builder.op = op;
+            builder.expiration = expiration;
+            if let Some(msg) = w!(builder.store()) {
+                ev.note(Notification::NewMsg(Box::new(msg)));
+            }
+        }
+
+        M::GroupSettings(settings) => {
+            let mut conn = crate::db::Database::get()?;
+
+            let update = crate::conversation::settings::db::apply_inbound(&conn, settings, &cid)?;
+
+            let msg = crate::message::db::inbound_aux(
+                &mut conn,
+                update.clone(),
+                cid,
+                mid,
+                uid,
+                ts,
+                expiration,
+            )?;
+
+            if let Some(msg) = msg {
+                ev.note(Notification::NewMsg(Box::new(msg)));
+                ev.note(Notification::Settings(cid, update));
+            }
+        }
+
+        M::Membership(_) => {}
+    };
+
+    let mut raw = raw_conn().lock();
+    let mut conn: Conn = w!(raw.transaction()).into();
+    let tx = &mut conn;
+
+    let kp = w!(crate::config::keypair());
+
+    let replies = w!(prepare_send_to_convo(
+        tx,
+        &kp,
+        cid,
+        kson::to_bytes(&nt::Receipt {
+            of: mid,
+            stat: ReceiptStatus::Received,
+        }),
+    ));
+
+    ev.replies(replies);
+
+    Ok(())
 }
 
 fn receipt(
