@@ -40,7 +40,6 @@ macro_rules! st {
     };
 }
 
-mod conversation;
 mod errors;
 mod keystore;
 mod pending;

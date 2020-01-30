@@ -8,7 +8,6 @@ use std::{
 pub struct Stores {
     ratchets: HashMap<sig::PublicKey, dr::DoubleRatchet>,
     sigs: HashMap<UserId, sig::SigChain>,
-    convos: HashMap<ConversationId, HashSet<UserId>>,
     pending_by_id: HashMap<PayloadId, (Payload, HashSet<sig::PublicKey>)>,
     pending_by_to: HashMap<sig::PublicKey, HashSet<PayloadId>>,
     keys: HashMap<kx::PublicKey, HashMap<dr::Counter, aead::Key>>,
@@ -133,53 +132,6 @@ impl SigStore for Stores {
             .flat_map(|chain| chain.active_keys().into_iter())
             .collect();
         Ok(keys)
-    }
-}
-impl ConversationStore for Stores {
-    fn add_to_convo(
-        &mut self,
-        cid: ConversationId,
-        members: Vec<UserId>,
-    ) -> Result<(), Self::Error> {
-        let c = self.convos.entry(cid).or_default();
-        for member in members {
-            c.insert(member);
-        }
-        Ok(())
-    }
-
-    fn left_convo(
-        &mut self,
-        cid: ConversationId,
-        from: UserId,
-    ) -> Result<(), Self::Error> {
-        if let Some(c) = self.convos.get_mut(&cid) {
-            c.remove(&from);
-        }
-        Ok(())
-    }
-
-    fn get_members(
-        &mut self,
-        cid: ConversationId,
-    ) -> Result<Vec<UserId>, Self::Error> {
-        Ok(self
-            .convos
-            .get(&cid)
-            .map(|c| c.iter().copied().collect())
-            .unwrap_or(vec![]))
-    }
-
-    fn member_of(
-        &mut self,
-        cid: ConversationId,
-        uid: UserId,
-    ) -> Result<bool, Self::Error> {
-        Ok(self
-            .convos
-            .get(&cid)
-            .map(|c| c.contains(&uid))
-            .unwrap_or(false))
     }
 }
 

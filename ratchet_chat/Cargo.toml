@@ -21,8 +21,5 @@ path = "../kson"
 path = "../herald_common"
 default_features = false
 
-[dependencies.herald_ids]
-path = "../heraldcore/herald_ids"
-
 [dev-dependencies]
 serial_test = "0.3.2"

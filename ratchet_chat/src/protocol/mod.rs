@@ -1,7 +1,6 @@
 use super::*;
 use crate::ratchet::double as dr;
 use herald_common::*;
-use herald_ids::ConversationId;
 use kcl::*;
 use std::error::Error as StdError;
 use thiserror::*;
@@ -112,23 +111,6 @@ pub fn decrypt_payload<S: RatchetStore + dr::KeyStore>(
     Ok(payload)
 }
 
-fn keys_of_cid<S: ConversationStore + SigStore>(
-    store: &mut S,
-    my_key: sig::PublicKey,
-    cid: ConversationId,
-) -> Result<Vec<sig::PublicKey>, S::Error> {
-    let mems = store.get_members(cid)?;
-    let mut out = Vec::with_capacity(mems.len());
-    for mem in mems {
-        let keys = store.active_keys(mem)?;
-        out.reserve(keys.len());
-        for key in keys.into_iter().filter(|k| k != &my_key) {
-            out.push(key);
-        }
-    }
-    Ok(out)
-}
-
 fn prepare_send_to_keys<S>(
     store: &mut S,
     my_keypair: &sig::KeyPair,
@@ -169,20 +151,6 @@ where
         .filter(|k| k != my_keypair.public())
         .collect();
 
-    prepare_send_to_keys(store, my_keypair, keys, payload)
-}
-
-pub fn prepare_send_to_convo<S>(
-    store: &mut S,
-    my_keypair: &sig::KeyPair,
-    cid: ConversationId,
-    msg: Bytes,
-) -> Result<Vec<(sig::PublicKey, Msg)>, TransitError<S::Error>>
-where
-    S: dr::KeyStore + RatchetStore + ConversationStore + PendingStore + SigStore,
-{
-    let keys = keys_of_cid(store, *my_keypair.public(), cid).map_err(TransitError::Store)?;
-    let payload = msg;
     prepare_send_to_keys(store, my_keypair, keys, payload)
 }
 
@@ -262,7 +230,7 @@ pub fn handle_incoming<S>(
     msg: Msg,
 ) -> Result<MsgResult, TransitError<S::Error>>
 where
-    S: dr::KeyStore + RatchetStore + PendingStore + SigStore + ConversationStore,
+    S: dr::KeyStore + RatchetStore + PendingStore + SigStore,
 {
     let mut res = MsgResult {
         ack: None,

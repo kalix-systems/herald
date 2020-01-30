@@ -49,31 +49,6 @@ pub trait SigStore: StoreLike {
     fn all_active_keys(&mut self) -> Result<Vec<sig::PublicKey>, Self::Error>;
 }
 
-pub trait ConversationStore: StoreLike {
-    fn add_to_convo(
-        &mut self,
-        cid: ConversationId,
-        members: Vec<UserId>,
-    ) -> Result<(), Self::Error>;
-
-    fn left_convo(
-        &mut self,
-        cid: ConversationId,
-        from: UserId,
-    ) -> Result<(), Self::Error>;
-
-    fn get_members(
-        &mut self,
-        cid: ConversationId,
-    ) -> Result<Vec<UserId>, Self::Error>;
-
-    fn member_of(
-        &mut self,
-        cid: ConversationId,
-        uid: UserId,
-    ) -> Result<bool, Self::Error>;
-}
-
 pub trait PendingStore: StoreLike {
     fn add_pending_payload(
         &mut self,

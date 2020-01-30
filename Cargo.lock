@@ -1823,7 +1823,6 @@ dependencies = [
  "bytes 0.5.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "derive-getters 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "herald_common 0.1.0",
- "herald_ids 0.1.0",
  "kcl 0.1.0",
  "kson 0.1.0",
  "serial_test 0.3.2 (registry+https://github.com/rust-lang/crates.io-index)",

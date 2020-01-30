@@ -121,6 +121,7 @@ mod tests {
     use super::*;
     use crate::connection::in_memory;
     use coremacros::womp;
+    use herald_common::Bytes;
 
     #[test]
     fn pending_ops() {
@@ -132,7 +133,7 @@ mod tests {
         let id1 = &id(1);
 
         // I hate typing clone
-        let payload = || Payload::Noop;
+        let payload = || Bytes::from_static(b"a");
 
         // trivial add
         conn.add_pending_payload_raw(id1, payload(), &[])
