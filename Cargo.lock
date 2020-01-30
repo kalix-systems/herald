@@ -655,6 +655,7 @@ dependencies = [
 name = "herald"
 version = "0.1.0"
 dependencies = [
+ "anyhow 1.0.26 (registry+https://github.com/rust-lang/crates.io-index)",
  "coremacros 0.1.0",
  "crossbeam-channel 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "emoji_utils 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",

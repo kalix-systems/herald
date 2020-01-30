@@ -14,8 +14,8 @@ pub fn strip_qrc(path: String) -> Option<String> {
     Some(path)
 }
 
-pub(crate) fn err_string_msg<E: std::error::Error>(
-    e: &E,
+pub(crate) fn err_string_msg(
+    e: String,
     file: &str,
     line: u32,
     msg: &'static str,
@@ -29,8 +29,8 @@ pub(crate) fn err_string_msg<E: std::error::Error>(
     )
 }
 
-pub(crate) fn err_string<E: std::error::Error>(
-    e: &E,
+pub(crate) fn err_string(
+    e: String,
     file: &str,
     line: u32,
 ) -> String {
@@ -54,7 +54,8 @@ macro_rules! err {
             Err(e) => {
                 use ::std::io::Write;
 
-                let err_string = crate::utils::err_string(&e, file!(), line!());
+                let e = anyhow::Error::from(e);
+                let err_string = crate::utils::err_string(e.to_string(), file!(), line!());
 
                 let mut se = ::std::io::stderr();
                 drop(writeln!(&mut se, "{}", err_string));
@@ -76,7 +77,7 @@ macro_rules! cont_err {
                 use ::std::io::Write;
                 use $crate::shared::SingletonBus;
 
-                let err_string = crate::utils::err_string(&e, file!(), line!());
+                let err_string = crate::utils::err_string(e.to_string(), file!(), line!());
 
                 let mut se = ::std::io::stderr();
                 drop(writeln!(&mut se, "{}", err_string));
@@ -97,7 +98,8 @@ macro_rules! push_err {
             Err(e) => {
                 use ::std::io::Write;
 
-                let err_string = crate::utils::err_string_msg(&e, file!(), line!(), $msg);
+                let err_string =
+                    crate::utils::err_string_msg(e.to_string(), file!(), line!(), $msg);
 
                 let mut se = ::std::io::stderr();
                 drop(writeln!(&mut se, "{}", err_string));
