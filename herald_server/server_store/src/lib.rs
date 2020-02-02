@@ -43,8 +43,8 @@ impl Conn {
     pub async fn new_user(
         &mut self,
         init: Signed<UserId>,
-    ) -> Res<protocol::auth::register::ServeEvent> {
-        use protocol::auth::register::ServeEvent;
+    ) -> Res<protocol::auth::RegisterResponse> {
+        use protocol::auth::RegisterResponse;
 
         let (user_id, meta) = init.split();
 
@@ -57,7 +57,7 @@ impl Conn {
             .await?
             .get::<_, bool>(0)
         {
-            return Ok(ServeEvent::Taken);
+            return Ok(RegisterResponse::Taken);
         }
 
         let add_key_stmt = tx
@@ -85,7 +85,7 @@ impl Conn {
         .await?;
         tx.commit().await?;
 
-        Ok(ServeEvent::Success)
+        Ok(RegisterResponse::Success)
     }
 
     pub async fn key_is_valid(

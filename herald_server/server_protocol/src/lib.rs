@@ -47,10 +47,8 @@ impl ActiveSession {
     ) -> Result<(), tokio::sync::mpsc::error::SendError<TaggedPush>> {
         if let Some(s) = &self.ready {
             let _guard = s.acquire().await;
-            self.emitter.clone().send(TaggedPush { push, id })
-        } else {
-            self.emitter.clone().send(TaggedPush { push, id })
         }
+        self.emitter.clone().send(TaggedPush { push, id })
     }
 
     pub fn ready(&mut self) {
@@ -81,11 +79,11 @@ impl State {
             .context("failed to get connection to postgres")
     }
 
-    pub async fn handle_login<Tx, Rx, E>(
+    pub async fn handle_auth_ws<Tx, Rx, E>(
         &self,
         tx: &mut Tx,
         rx: &mut Rx,
-    ) -> Result<GlobalId, anyhow::Error>
+    ) -> Result<(), anyhow::Error>
     where
         Tx: Sink<Bytes> + Unpin,
         <Tx as Sink<Bytes>>::Error: StdError + Send + Sync + 'static,
@@ -93,16 +91,43 @@ impl State {
         E: StdError + Send + Sync + 'static,
     {
         let mut state = AuthState::AwaitMethod;
-        loop {
+        let g = loop {
             match state {
                 AuthState::Done(g) => {
-                    return Ok(g);
+                    break g;
                 }
                 s => {
                     state = self.auth_transition(s, tx, rx).await?;
                 }
             }
+        };
+
+        let _on_close = scopeguard::guard((), |_| {
+            if let Some((_, s)) = self.active.remove(&g.did) {
+                s.interrupt()
+            }
+        });
+
+        // chunked catchup to reduce number of roundtrips after a long offline period
+        self.catchup(g.did, tx, rx).await?;
+
+        let mut incoming = self.pushes(g).await?;
+        while let Some(TaggedPush { id, push }) = incoming.next().await {
+            send_ser(tx, &push).await?;
+            match read_de(rx).await? {
+                PushAck::Success => {
+                    self.new_connection()
+                        .await?
+                        .del_pending(g.did, stream::once(future::ready(id)))
+                        .await?;
+                }
+                PushAck::Quit => {
+                    break;
+                }
+                PushAck::LogFailure => todo!(),
+            }
         }
+        Ok(())
     }
 
     pub async fn catchup<Tx, Rx, E>(
@@ -125,8 +150,8 @@ impl State {
         while !unsent.is_empty() {
             let to_send = &unsent[..catchup::CHUNK_SIZE];
 
-            write_ser(tx, &Catchup::NewMessages);
-            write_ser(tx, &KsonIterator::new(to_send.iter().map(|(p, _)| p))).await?;
+            send_ser(tx, &Catchup::NewMessages).await?;
+            send_ser(tx, &KsonIterator::new(to_send.iter().map(|(p, _)| p))).await?;
 
             match read_de(rx).await? {
                 CatchupAck::Success => {
@@ -170,22 +195,6 @@ impl From<TaggedPush> for Push {
 }
 
 impl State {
-    async fn init<Tx, Rx, E>(
-        &self,
-        tx: &mut Tx,
-        rx: &mut Rx,
-    ) -> Result<GlobalId, Error>
-    where
-        Tx: Sink<Bytes> + Unpin,
-        <Tx as Sink<Bytes>>::Error: StdError + Send + Sync + 'static,
-        Rx: Stream<Item = Result<Vec<u8>, E>> + Unpin,
-        E: StdError + Send + Sync + 'static,
-    {
-        let g = self.handle_login(tx, rx).await?;
-        self.catchup(g.did, tx, rx).await?;
-        Ok(g)
-    }
-
     async fn pushes(
         &self,
         meta: GlobalId,
@@ -224,30 +233,9 @@ impl State {
             }
         }
     }
-
-    async fn on_push_ack(
-        &self,
-        gid: GlobalId,
-        push: TaggedPush,
-    ) -> Result<(), Error> {
-        self.new_connection()
-            .await?
-            .del_pending(gid.did, stream::once(future::ready(push.id)))
-            .await?;
-        Ok(())
-    }
-
-    async fn on_close(
-        &self,
-        gid: GlobalId,
-    ) {
-        if let Some((_, s)) = self.active.remove(&gid.did) {
-            s.interrupt()
-        }
-    }
 }
 
-fn write_ser<'a, Tx: Sink<Bytes> + Unpin, T: Ser>(
+fn send_ser<'a, Tx: Sink<Bytes> + Unpin, T: Ser>(
     tx: &'a mut Tx,
     t: &T,
 ) -> impl Future<Output = Result<(), Tx::Error>> + 'a {

@@ -11,7 +11,7 @@ futures = "0.3"
 lazy_static     = "1.4"
 tokio-postgres  = "0.5.0-alpha.2"
 crossbeam-channel = "0.3.9"
-scopeguard = "1.0"
+scopeguard = "1.0.0"
 stream-cancel = "0.5.0-alpha.5"
 
 [dependencies.tokio]

@@ -20,6 +20,13 @@ pub struct PushMeta {
     pub gid: GlobalId,
 }
 
+#[derive(Ser, De, Debug, Clone, Copy, PartialEq, Eq)]
+pub enum PushAck {
+    Success,
+    LogFailure,
+    Quit,
+}
+
 pub mod catchup {
     use super::*;
 
