@@ -1,9 +1,19 @@
+#![allow(unused_imports)]
+
+use anyhow::*;
 use dashmap::DashMap;
-use futures::stream::*;
-use herald_common::*;
-use server_errors::*;
+use futures::{
+    future::{self, TryFutureExt},
+    sink::{self, Sink, SinkExt},
+    stream::{self, BoxStream, Stream, StreamExt},
+};
+use herald_common::{
+    protocol::{auth::*, *},
+    *,
+};
+use server_errors::Error as ServerError;
 use server_store::*;
-use std::time::Duration;
+use std::{error::Error as StdError, future::Future, sync::Arc, time::Duration};
 use stream_cancel::{Trigger, Tripwire, Valved};
 use tokio::{
     prelude::*,
@@ -11,35 +21,40 @@ use tokio::{
         mpsc::{
             unbounded_channel as channel, UnboundedReceiver as Receiver, UnboundedSender as Sender,
         },
-        oneshot,
+        oneshot, Semaphore,
     },
-    timer::Timeout,
+    time,
 };
-use warp::filters::ws::{self, WebSocket};
 
-type WTx = SplitSink<WebSocket, ws::Message>;
+mod handlers;
+mod login;
 
 pub struct ActiveSession {
     interrupt: Trigger,
-    done: Tripwire,
-    emitter: Sender<()>,
+    emitter: Sender<TaggedPush>,
+    ready: Option<Arc<Semaphore>>,
 }
 
 impl ActiveSession {
-    #[allow(clippy::unneeded_field_pattern)]
-    pub async fn interrupt(self) -> bool {
-        let ActiveSession {
-            interrupt,
-            done,
-            emitter: _,
-        } = self;
-
-        interrupt.cancel();
-        done.await
+    pub fn interrupt(self) {
+        self.interrupt.cancel()
     }
 
-    pub fn emit(&self) -> Result<(), tokio::sync::mpsc::error::UnboundedTrySendError<()>> {
-        self.emitter.clone().try_send(())
+    pub async fn push(
+        &self,
+        push: Push,
+        id: i64,
+    ) -> Result<(), tokio::sync::mpsc::error::SendError<TaggedPush>> {
+        if let Some(s) = &self.ready {
+            let _guard = s.acquire().await;
+            self.emitter.clone().send(TaggedPush { push, id })
+        } else {
+            self.emitter.clone().send(TaggedPush { push, id })
+        }
+    }
+
+    pub fn ready(&mut self) {
+        self.ready = None;
     }
 }
 
@@ -51,10 +66,6 @@ pub struct State {
     pub pool: Pool,
 }
 
-pub mod get;
-pub mod login;
-pub mod post;
-
 impl State {
     pub fn new() -> Self {
         State {
@@ -64,265 +75,192 @@ impl State {
     }
 
     pub async fn new_connection(&self) -> Result<Conn, Error> {
-        Ok(self.pool.get().await?)
+        self.pool
+            .get()
+            .await
+            .context("failed to get connection to postgres")
     }
 
-    pub async fn handle_login(
-        &'static self,
-        ws: WebSocket,
-    ) -> Result<(), Error> {
-        let mut store: Conn = self.new_connection().await?;
-
-        // all the channels we'll need for plumbing
-        // first we split the websocket
-        let (mut wtx, mut wrx) = ws.split();
-        // bytevec messages received from the socket
-        let (mut rtx, mut rrx) = channel::<Vec<u8>>();
-        // push emitter which will be stored in the active sessions dashmap
-        let (ptx, prx) = channel::<()>();
-        // session-close emitter
-        let (close, closed) = oneshot::channel::<()>();
-
-        // on graceful exit, notify runtime to close channel
-        // we set things up this way so that the rrx channel
-        // will be populated before we call login, hence before
-        // we know the gid
-        tokio::spawn(async move {
-            while let Some(Ok(m)) = wrx.next().await {
-                if m.is_close() || (m.is_binary() && rtx.send(m.into_bytes()).await.is_err()) {
-                    break;
+    pub async fn handle_login<Tx, Rx, E>(
+        &self,
+        tx: &mut Tx,
+        rx: &mut Rx,
+    ) -> Result<GlobalId, anyhow::Error>
+    where
+        Tx: Sink<Bytes> + Unpin,
+        <Tx as Sink<Bytes>>::Error: StdError + Send + Sync + 'static,
+        Rx: Stream<Item = Result<Vec<u8>, E>> + Unpin,
+        E: StdError + Send + Sync + 'static,
+    {
+        let mut state = AuthState::AwaitMethod;
+        loop {
+            match state {
+                AuthState::Done(g) => {
+                    return Ok(g);
+                }
+                s => {
+                    state = self.auth_transition(s, tx, rx).await?;
                 }
             }
+        }
+    }
 
-            close.send(()).ok();
-        });
+    pub async fn catchup<Tx, Rx, E>(
+        &self,
+        pk: sig::PublicKey,
+        tx: &mut Tx,
+        rx: &mut Rx,
+    ) -> Result<(), anyhow::Error>
+    where
+        Tx: Sink<Bytes> + Unpin,
+        <Tx as Sink<Bytes>>::Error: StdError + Send + Sync + 'static,
+        Rx: Stream<Item = Result<Vec<u8>, E>> + Unpin,
+        E: StdError + Send + Sync + 'static,
+    {
+        use catchup::{Catchup, CatchupAck};
 
-        let gid: GlobalId = login::login(&self.active, &mut store, &mut wtx, &mut rrx).await?;
+        let pending = self.new_connection().await?.get_pending(pk).await?;
+        let mut unsent = &pending[..];
 
-        let (interrupt, prx) = Valved::new(prx);
-        let (trigger_done, done) = Tripwire::new();
+        while !unsent.is_empty() {
+            let to_send = &unsent[..catchup::CHUNK_SIZE];
+
+            write_ser(tx, &Catchup::NewMessages);
+            write_ser(tx, &KsonIterator::new(to_send.iter().map(|(p, _)| p))).await?;
+
+            match read_de(rx).await? {
+                CatchupAck::Success => {
+                    self.new_connection()
+                        .await?
+                        .del_pending(
+                            pk,
+                            stream::iter(to_send.iter().map(|(_, id): &(Push, i64)| *id)),
+                        )
+                        .await?;
+
+                    unsent = &unsent[catchup::CHUNK_SIZE..];
+                }
+                CatchupAck::Failure => {
+                    return Err(anyhow!("catchup failed")).context("ack failure");
+                }
+            }
+        }
+
+        tx.send(kson::to_vec(&Catchup::Done).into()).await?;
+
+        Ok(())
+    }
+
+    pub async fn reset(&self) -> Result<(), Error> {
+        self.new_connection().await?.reset_all().await?;
+        Ok(())
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct TaggedPush {
+    id: i64,
+    push: Push,
+}
+
+impl From<TaggedPush> for Push {
+    fn from(t: TaggedPush) -> Push {
+        t.push
+    }
+}
+
+impl State {
+    async fn init<Tx, Rx, E>(
+        &self,
+        tx: &mut Tx,
+        rx: &mut Rx,
+    ) -> Result<GlobalId, Error>
+    where
+        Tx: Sink<Bytes> + Unpin,
+        <Tx as Sink<Bytes>>::Error: StdError + Send + Sync + 'static,
+        Rx: Stream<Item = Result<Vec<u8>, E>> + Unpin,
+        E: StdError + Send + Sync + 'static,
+    {
+        let g = self.handle_login(tx, rx).await?;
+        self.catchup(g.did, tx, rx).await?;
+        Ok(g)
+    }
+
+    async fn pushes(
+        &self,
+        meta: GlobalId,
+    ) -> Result<Valved<Receiver<TaggedPush>>, Error> {
+        let (sender, receiver) = channel();
+        let (interrupt, output) = Valved::new(receiver);
+        let sem = Arc::new(Semaphore::new(0));
         let sess = ActiveSession {
             interrupt,
-            done,
-            emitter: ptx,
+            emitter: sender.clone(),
+            ready: Some(sem.clone()),
         };
-        self.active.insert(gid.did, sess);
+        self.active.insert(meta.did, sess);
 
-        // remove active session on graceful exit
-        tokio::spawn(async move {
-            drop(closed.await);
-            if let Some((_, s)) = self.active.remove(&gid.did) {
-                s.interrupt().await;
+        let catchup = async {
+            for (push, id) in self.new_connection().await?.get_pending(meta.did).await? {
+                sender.send(TaggedPush { push, id })?;
             }
-        });
+            Ok(())
+        };
 
-        // TODO: handle this error somehow?
-        // for now we're just dropping it
-        if catchup(gid.did, &mut store, &mut wtx, &mut rrx)
-            .await
-            .is_ok()
-        {
-            let mut prx: Timeout<Valved<Receiver<()>>> = prx.timeout(Duration::from_secs(60));
-            drop(
-                self.send_pushes(&mut store, &mut wtx, &mut rrx, &mut prx, gid.did)
-                    .await,
-            );
-            trigger_done.cancel();
+        match catchup.await {
+            Err(e) => {
+                sem.add_permits(usize::max_value());
+                if let Some((_, s)) = self.active.remove(&meta.did) {
+                    s.interrupt();
+                }
+                Err(e)
+            }
+            Ok(()) => {
+                sem.add_permits(1);
+                if let Some(mut s) = self.active.async_get_mut(meta.did).await {
+                    s.ready();
+                }
+                Ok(output)
+            }
         }
+    }
 
+    async fn on_push_ack(
+        &self,
+        gid: GlobalId,
+        push: TaggedPush,
+    ) -> Result<(), Error> {
+        self.new_connection()
+            .await?
+            .del_pending(gid.did, stream::once(future::ready(push.id)))
+            .await?;
+        Ok(())
+    }
+
+    async fn on_close(
+        &self,
+        gid: GlobalId,
+    ) {
         if let Some((_, s)) = self.active.remove(&gid.did) {
-            s.interrupt().await;
+            s.interrupt()
         }
-
-        Ok(())
-    }
-
-    pub async fn push_users(
-        &self,
-        req: push_users::Req,
-    ) -> Result<push_users::Res, Error> {
-        let push_users::Req { to, exc, msg } = req;
-        let msg: Push = Push {
-            tag: PushTag::User,
-            timestamp: Time::now(),
-            msg,
-        };
-
-        let mut missing_users: Vec<UserId> = Vec::new();
-        let mut to_devs: Vec<sig::PublicKey> = Vec::new();
-        let mut conn: Conn = self.new_connection().await?;
-
-        for user in to {
-            if !conn.user_exists(&user).await? {
-                missing_users.push(user);
-            } else {
-                for dev in conn.valid_keys(&user).await? {
-                    if dev != exc {
-                        to_devs.push(dev);
-                    }
-                }
-            }
-        }
-
-        Ok(if !missing_users.is_empty() {
-            push_users::Res::Missing(missing_users)
-        } else {
-            self.send_push_to_devices(&mut conn, to_devs, msg).await?;
-            push_users::Res::Success
-        })
-    }
-
-    pub async fn push_devices(
-        &self,
-        req: push_devices::Req,
-    ) -> Result<push_devices::Res, Error> {
-        let push_devices::Req { to, msg } = req;
-        let msg = Push {
-            tag: PushTag::Device,
-            timestamp: Time::now(),
-            msg,
-        };
-
-        let mut conn = self.new_connection().await?;
-        let mut missing_devs: Vec<sig::PublicKey> = Vec::new();
-
-        for dev in to.iter() {
-            if !conn.device_exists(dev).await? {
-                missing_devs.push(*dev);
-            }
-        }
-
-        Ok(if !missing_devs.is_empty() {
-            push_devices::Res::Missing(missing_devs)
-        } else {
-            self.send_push_to_devices(&mut conn, to, msg).await?;
-            push_devices::Res::Success
-        })
-    }
-
-    async fn send_push_to_devices(
-        &self,
-        con: &mut Conn,
-        to_devs: Vec<sig::PublicKey>,
-        msg: Push,
-    ) -> Result<(), Error> {
-        con.add_pending(to_devs.clone(), &[msg]).await?;
-
-        for dev in to_devs {
-            if let Some(s) = self.active.async_get(dev).await {
-                drop(s.emit());
-            }
-        }
-
-        Ok(())
-    }
-
-    async fn send_pushes(
-        &self,
-        store: &mut Conn,
-        wtx: &mut WTx,
-        rrx: &mut Receiver<Vec<u8>>,
-        rx: &mut Timeout<Valved<Receiver<()>>>,
-        did: sig::PublicKey,
-    ) -> Result<(), Error> {
-        while let Some(p) = rx.next().await {
-            if p.is_ok() {
-                catchup(did, store, wtx, rrx).await?;
-            } else {
-                wtx.send(ws::Message::ping(vec![0u8]))
-                    .timeout(Duration::from_secs(5))
-                    .await??;
-            }
-        }
-
-        Ok(())
     }
 }
 
-async fn catchup(
-    did: sig::PublicKey,
-    s: &mut Conn,
-    wtx: &mut WTx,
-    rrx: &mut Receiver<Vec<u8>>,
-) -> Result<(), Error> {
-    use catchup::*;
-
-    loop {
-        let pending: Vec<Push> = s.get_pending(did, CHUNK_SIZE).await?;
-        if pending.is_empty() {
-            break;
-        } else {
-            let len = pending.len() as u64;
-            let msg = Catchup::Messages(pending);
-
-            loop {
-                write_msg(&msg, wtx, rrx).await?;
-
-                if CatchupAck(len) == read_msg(rrx).await? {
-                    s.expire_pending(did, len as u32).await?;
-                    break;
-                }
-            }
-        }
-    }
-
-    write_msg(&Catchup::Done, wtx, rrx).await?;
-
-    Ok(())
-}
-
-const TIMEOUT_DUR: std::time::Duration = Duration::from_secs(10);
-
-async fn read_msg<T>(rx: &mut Receiver<Vec<u8>>) -> Result<T, Error>
-where
-    T: De,
-{
-    let m = rx.next().await.ok_or(StreamDied)?;
-    let t = kson::from_slice(&m)?;
-    Ok(t)
-}
-
-fn ser_msg<T: Ser>(t: &T) -> ws::Message {
-    ws::Message::binary(kson::to_vec(t))
-}
-
-async fn write_msg<T>(
+fn write_ser<'a, Tx: Sink<Bytes> + Unpin, T: Ser>(
+    tx: &'a mut Tx,
     t: &T,
-    wtx: &mut WTx,
-    rrx: &mut Receiver<Vec<u8>>,
-) -> Result<(), Error>
-where
-    T: Ser,
-{
-    let bvec = Bytes::from(kson::to_vec(t));
-    let packets = Packet::from_bytes(bvec);
-    let len = packets.len() as u64;
+) -> impl Future<Output = Result<(), Tx::Error>> + 'a {
+    tx.send(kson::to_vec(t).into())
+}
 
-    loop {
-        wtx.send(ser_msg(&len)).timeout(TIMEOUT_DUR).await??;
-
-        if len == read_msg::<u64>(rrx).timeout(TIMEOUT_DUR).await?? {
-            wtx.send(ser_msg(&PacketResponse::Success))
-                .timeout(TIMEOUT_DUR)
-                .await??;
-            break;
-        } else {
-            wtx.send(ser_msg(&PacketResponse::Retry))
-                .timeout(TIMEOUT_DUR)
-                .await??;
-        }
-    }
-
-    loop {
-        for packet in packets.iter() {
-            wtx.send(ser_msg(packet)).timeout(TIMEOUT_DUR).await??;
-        }
-
-        match read_msg(rrx).timeout(TIMEOUT_DUR).await?? {
-            PacketResponse::Success => break,
-            PacketResponse::Retry => {}
-        }
-    }
-
-    Ok(())
+async fn read_de<
+    E: StdError + Send + Sync + 'static,
+    Rx: Stream<Item = Result<Vec<u8>, E>> + Unpin,
+    T: De,
+>(
+    rx: &mut Rx
+) -> Result<T, Error> {
+    let bvec = rx.next().await.ok_or_else(|| anyhow!("stream empty"))??;
+    Ok(kson::from_bytes(bvec.into())?)
 }

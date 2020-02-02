@@ -50,7 +50,7 @@ pub mod catchup {
 
     #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
     pub enum Catchup {
-        Messages(Vec<Push>),
+        NewMessages,
         Done,
     }
 

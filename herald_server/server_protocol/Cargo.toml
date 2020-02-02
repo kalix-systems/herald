@@ -4,17 +4,19 @@ version = "0.1.0"
 authors = ["theseriousadult <jack@kalix.io>"]
 edition = "2018"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
-dashmap           = "1.0"
-lazy_static       = "1.4"
-tokio             = "0.2.0-alpha.6"
-futures-preview   = "0.3.0-alpha.19"
-tokio-postgres    = "0.5.0-alpha.1"
+anyhow = "1.0"
+dashmap         = "1.0"
+futures = "0.3"
+lazy_static     = "1.4"
+tokio-postgres  = "0.5.0-alpha.2"
 crossbeam-channel = "0.3.9"
-stream-cancel     = "0.5.0-alpha.4"
-warp              = "0.2"
+scopeguard = "1.0"
+stream-cancel = "0.5.0-alpha.5"
+
+[dependencies.tokio]
+version = "0.2.6"
+features = ["macros", "rt-core",  "sync", "time", "stream"]
 
 [dependencies.herald_common]
 path = "../../herald_common"
@@ -29,3 +31,10 @@ path = "../server_store"
 serial_test        = "0.2.0"
 serial_test_derive = "0.2.0"
 womp = { git  = "https://github.com/kalix-systems/womp"}
+portpicker = "0.1"
+rcgen = "0.7"
+rustls = "0.16"
+rustls-native-certs = "0.1"
+tokio-rustls = "0.12"
+webpki = "0.21"
+

@@ -23,14 +23,17 @@ pub struct PushMeta {
 pub mod catchup {
     use super::*;
 
-    pub const CHUNK_SIZE: u32 = 256;
+    pub const CHUNK_SIZE: usize = 256;
 
     #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
     pub enum Catchup {
-        Messages(Vec<Push>),
+        NewMessages,
         Done,
     }
 
     #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
-    pub struct CatchupAck(pub u64);
+    pub enum CatchupAck {
+        Success,
+        Failure,
+    }
 }
