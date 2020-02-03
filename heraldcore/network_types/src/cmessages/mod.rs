@@ -15,10 +15,10 @@ pub use crypto::*;
 #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
 /// A message in a conversation
 pub enum ConversationMessage {
-    /// A new key
-    NewKey(NewKey),
-    /// A key to be marked as deprecated
-    DepKey(DepKey),
+    // /// A new key
+    // NewKey(NewKey),
+    // /// A key to be marked as deprecated
+    // DepKey(DepKey),
     /// A message a user receives upon being added to a conversation
     AddedToConvo {
         info: Box<AddedToConvo>,

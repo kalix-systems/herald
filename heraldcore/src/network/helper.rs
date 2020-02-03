@@ -19,14 +19,13 @@ macro_rules! mk_request {
     };
 }
 
-mk_request!(get, keys_of);
-mk_request!(get, key_info);
-mk_request!(get, keys_exist);
-mk_request!(get, users_exist);
-mk_request!(post, new_key);
-mk_request!(post, dep_key);
-mk_request!(post, push_users);
-mk_request!(post, push_devices);
+mk_request!(get, get_sigchain);
+mk_request!(get, recip_exists);
+mk_request!(get, new_sig);
+mk_request!(get, new_prekeys);
+mk_request!(get, get_prekeys);
+mk_request!(get, send_push);
+mk_request!(get, register);
 
 pub fn register(
     req: &register::Req,

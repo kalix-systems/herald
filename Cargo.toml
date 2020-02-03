@@ -1,7 +1,6 @@
 [workspace]
 
 members = [
-  "channel_ratchet",
   "herald_common",
   "herald_server",
   "herald_server/server_errors",

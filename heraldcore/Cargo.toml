@@ -16,13 +16,10 @@ tilde = "0.0.4"
 [dependencies.herald_common]
 path             = "../herald_common"
 default_features = false
-features         = ["rusqlite_"]
+features         = ["rusqlite"]
 
 [dependencies.kcl]
 path = "../kcl"
-
-[dependencies.channel_ratchet]
-path = "../channel_ratchet"
 
 [dependencies.coretypes]
 path = "./coretypes"

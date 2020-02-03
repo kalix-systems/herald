@@ -7,7 +7,7 @@ edition = "2018"
 [dependencies.herald_common]
 path             = "../../herald_common"
 default_features = false
-features         = ["rusqlite_"]
+features         = ["rusqlite"]
 
 [dependencies.rusqlite]
 version          = "0.21"

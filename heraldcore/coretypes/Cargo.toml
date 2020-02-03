@@ -11,7 +11,7 @@ unicode-segmentation = "1.6.0"
 [dependencies.herald_common]
 path             = "../../herald_common"
 default_features = false
-features         = ["rusqlite_"]
+features         = ["rusqlite"]
 
 [dependencies.herald_ids]
 path = "../herald_ids"

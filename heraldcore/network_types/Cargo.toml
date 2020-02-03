@@ -7,10 +7,7 @@ edition = "2018"
 [dependencies.herald_common]
 path             = "../../herald_common"
 default_features = false
-features         = ["rusqlite_"]
-
-[dependencies.channel_ratchet]
-path = "../../channel_ratchet"
+features         = ["rusqlite"]
 
 [dependencies.kson]
 path = "../../kson"

@@ -22,8 +22,8 @@ pub struct DeviceMessage {
 #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
 /// A contact request.
 pub struct UserReq {
-    /// The genesis block for the conversation.
-    pub ratchet: RatchetState,
+    // /// The genesis block for the conversation.
+    // pub ratchet: RatchetState,
     /// The proposed conversation id.
     pub cid: ConversationId,
 }
