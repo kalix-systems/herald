@@ -124,6 +124,7 @@ impl State {
                 PushAck::Quit => {
                     break;
                 }
+                // not sure what to do in this case, but we should probably have a way to leave a log that something went wrong without having to retry
                 PushAck::LogFailure => todo!(),
             }
         }

@@ -125,4 +125,17 @@ impl State {
             }
         }
     }
+
+    pub async fn register(
+        &self,
+        claim: Signed<UserId>,
+    ) -> Result<protocol::auth::RegisterResponse, Error> {
+        use protocol::auth::RegisterResponse;
+        let sigvalid = claim.verify_sig();
+        if sigvalid != SigValid::Yes {
+            Ok(RegisterResponse::BadSig(sigvalid))
+        } else {
+            Ok(self.new_connection().await?.new_user(claim).await?)
+        }
+    }
 }
