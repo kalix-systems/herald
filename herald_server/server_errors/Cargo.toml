@@ -10,6 +10,7 @@ edition = "2018"
 thiserror       = "1.0"
 tokio-postgres  = "0.5.0-alpha.2"
 warp = "0.2"
+anyhow = "1.0.26"
 
 [dependencies.tokio]
 version = "0.2"

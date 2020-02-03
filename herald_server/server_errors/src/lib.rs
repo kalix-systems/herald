@@ -25,6 +25,10 @@ pub enum Error {
     Underscore(#[from] Box<dyn std::error::Error + Send + Sync + 'static>),
     #[error("Invalid user id")]
     InvalidUserId(#[from] herald_common::InvalidUserId),
+    #[error("Anyhow: {0}")]
+    Anyhow(#[from] anyhow::Error),
 }
+
+impl warp::reject::Reject for Error {}
 
 pub use Error::*;

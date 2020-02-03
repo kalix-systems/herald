@@ -86,6 +86,8 @@ pub mod push {
 
     #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
     pub struct Req {
+        // todo: replace this with auth token
+        pub from: GlobalId,
         pub to: Recip,
         pub msg: Bytes,
     }

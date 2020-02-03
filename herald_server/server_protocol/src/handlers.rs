@@ -85,17 +85,18 @@ impl State {
 
     pub async fn send_push(
         &self,
-        from: GlobalId,
-        to: Recip,
-        msg: Bytes,
+        // from: GlobalId,
+        push::Req { from, to, msg }: push::Req,
     ) -> Result<push::Res, Error> {
         let timestamp = Time::now();
+
         let psh = Push {
             tag: to.tag(),
             timestamp,
             gid: from,
             msg,
         };
+
         match self
             .new_connection()
             .await?
@@ -131,11 +132,15 @@ impl State {
         claim: Signed<UserId>,
     ) -> Result<protocol::auth::RegisterResponse, Error> {
         use protocol::auth::RegisterResponse;
+
         let sigvalid = claim.verify_sig();
-        if sigvalid != SigValid::Yes {
-            Ok(RegisterResponse::BadSig(sigvalid))
+
+        let res = if sigvalid != SigValid::Yes {
+            RegisterResponse::BadSig(sigvalid)
         } else {
-            Ok(self.new_connection().await?.new_user(claim).await?)
-        }
+            self.new_connection().await?.new_user(claim).await?
+        };
+
+        Ok(res)
     }
 }
