@@ -1,4 +1,3 @@
-use channel_ratchet::*;
 use herald_common::*;
 use herald_ids::ConversationId;
 use kcl::box_;
