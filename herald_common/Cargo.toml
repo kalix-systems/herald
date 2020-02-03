@@ -19,6 +19,3 @@ path = "../kson"
 [dependencies.kcl]
 path = "../kcl"
 
-[dependencies.tokio]
-version = "0.2"
-features = ["io-util"]

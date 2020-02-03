@@ -51,9 +51,6 @@ path = "./platform_dirs"
 [dependencies.image_utils]
 path = "./image_utils"
 
-[dependencies.chainkeys]
-path = "./chainkeys"
-
 [dependencies.websocket]
 version          = "0.23"
 default_features = false
