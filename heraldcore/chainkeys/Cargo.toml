@@ -36,7 +36,7 @@ path             = "../platform_dirs"
 [dependencies.rusqlite]
 version          = "0.21"
 default_features = false
-features         = ["functions", "bundled"]
+features         = ["functions"]
 
 [dev-dependencies]
 serial_test        = "0.2.0"

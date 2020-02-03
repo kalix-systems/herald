@@ -66,7 +66,6 @@ default_features = false
 [dependencies.rusqlite]
 version          = "0.21"
 default_features = false
-features         = ["bundled"]
 
 [features]
 deploy = ["platform_dirs/deploy"]

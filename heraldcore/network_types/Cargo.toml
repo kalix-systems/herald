@@ -24,4 +24,3 @@ path = "../herald_ids"
 [dependencies.rusqlite]
 version          = "0.21"
 default_features = false
-features         = ["bundled"]

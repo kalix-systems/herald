@@ -12,7 +12,7 @@ features         = ["rusqlite"]
 [dependencies.rusqlite]
 version          = "0.21"
 default_features = false
-features         = ["functions", "bundled"]
+features         = ["functions"]
 
 [dependencies.kson]
 path = "../../kson"
