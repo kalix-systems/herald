@@ -1,6 +1,6 @@
 mod crypto;
 pub use crypto::*;
-#[cfg(feature = "rusqlite_")]
+#[cfg(feature = "rusqlite")]
 mod rusqlite_impls;
 mod types;
 pub use types::*;

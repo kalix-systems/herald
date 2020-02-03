@@ -23,7 +23,6 @@ path = "../../kcl"
 [dependencies.rusqlite]
 version          = "0.21"
 default_features = false
-features         = ["bundled"]
 
 [dependencies.coremacros]
 path = "../coremacros"
