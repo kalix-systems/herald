@@ -10,7 +10,7 @@ fn add_and_deprecate() {
     UserBuilder::new(uid).add_db(&mut conn).expect(womp!());
 
     let kp = sig::KeyPair::gen_new();
-    let pk_signed = kp.sign(*kp.public_key());
+    let pk_signed = sig::sign_ser(&kp, *kp.public());
 
     db::add_keys(&mut conn, uid, &[pk_signed]).expect(womp!());
     db::deprecate_keys(&mut conn, &[pk_signed]).expect(womp!());
@@ -24,8 +24,8 @@ fn get_valid_deprecated() {
 
     let kp1 = sig::KeyPair::gen_new();
     let kp2 = sig::KeyPair::gen_new();
-    let pk1_signed = kp1.sign(*kp1.public_key());
-    let pk2_signed = kp1.sign(*kp2.public_key());
+    let pk1_signed = sig::sign_ser(&kp1, *kp1.public());
+    let pk2_signed = sig::sign_ser(&kp1, *kp2.public());
 
     db::add_keys(&mut conn, uid, &[pk1_signed, pk2_signed]).expect(womp!());
     let valid = db::get_valid_keys(&conn, uid).expect(womp!());

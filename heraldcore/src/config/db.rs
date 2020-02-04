@@ -134,7 +134,7 @@ pub(crate) fn keypair(conn: &rusqlite::Connection) -> Result<sig::KeyPair, HErr>
 /// Gets the current user's GlobalId
 pub(crate) fn gid(conn: &rusqlite::Connection) -> Result<GlobalId, HErr> {
     let uid = id(conn)?;
-    let did = *keypair(conn)?.public_key();
+    let did = *keypair(conn)?.public();
     Ok(GlobalId { uid, did })
 }
 

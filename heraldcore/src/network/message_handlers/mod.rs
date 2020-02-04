@@ -18,7 +18,7 @@ pub(super) fn handle_cmessage(
     match msg {
         NewKey(nk) => w!(crate::user_keys::add_keys(uid, &[nk.0])),
         DepKey(dk) => w!(crate::user_keys::deprecate_keys(&[dk.0])),
-        AddedToConvo { info, ratchet } => {
+        AddedToConvo { info } => {
             use crate::types::cmessages::AddedToConvo;
 
             let AddedToConvo {
@@ -68,7 +68,7 @@ pub(super) fn handle_dmessage(
 
     match msg {
         DeviceMessageBody::Req(cr) => {
-            let dmessages::UserReq { ratchet, cid } = cr;
+            let dmessages::UserReq { cid } = cr;
             let (user, conversation) = w!(crate::user::UserBuilder::new(uid)
                 .pairwise_conversation(cid)
                 .add());

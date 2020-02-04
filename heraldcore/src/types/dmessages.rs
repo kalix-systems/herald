@@ -1,5 +1,4 @@
 use super::*;
-use bytes::*;
 pub(crate) use network_types::dmessages::*;
 
 pub(crate) fn seal(
@@ -9,7 +8,7 @@ pub(crate) fn seal(
     let mut content = kson::to_vec(content);
 
     let pk = to.into();
-    let sk = kcl::box_::SecretKey::from(config::keypair()?.secret_key().clone());
+    let sk = kcl::box_::SecretKey::from(config::keypair()?.secret().clone());
 
     let tag = sk.seal(pk, &mut content);
 
@@ -29,10 +28,10 @@ pub(crate) fn open(message: DeviceMessage) -> Result<(GlobalId, DeviceMessageBod
         from, content, tag, ..
     } = message;
 
-    let mut content = BytesMut::from(content);
+    let mut content = content.to_vec();
 
     let pk = from.did.into();
-    let sk = kcl::box_::SecretKey::from(config::keypair()?.secret_key().clone());
+    let sk = kcl::box_::SecretKey::from(config::keypair()?.secret().clone());
 
     if sk.open(pk, tag, &mut content).0 {
         let dm = kson::from_bytes(content.into())?;

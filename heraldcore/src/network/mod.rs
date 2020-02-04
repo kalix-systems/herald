@@ -6,9 +6,8 @@ use crate::{
     types::*,
     *,
 };
-use chainkeys;
-use channel_ratchet::RatchetState;
 use coremacros::w;
+use herald_common::sig::sign_ser;
 use herald_common::*;
 use std::{
     net::SocketAddr,
@@ -39,14 +38,14 @@ mod helper;
 /// Deprecates key on server.
 pub fn dep_key(to_dep: sig::PublicKey) -> Result<PKIResponse, HErr> {
     let kp = w!(config::keypair());
-    let req = dep_key::Req(kp.sign(to_dep));
+    let req = dep_key::Req(sign_ser(&kp, to_dep));
     Ok(w!(helper::dep_key(&req)).0)
 }
 
 /// Adds new key to the server's key registry.
 pub fn new_key(to_new: sig::PublicKey) -> Result<PKIResponse, HErr> {
     let kp = w!(config::keypair());
-    let req = new_key::Req(kp.sign(to_new));
+    let req = new_key::Req(sign_ser(&kp, to_new));
     Ok(w!(helper::new_key(&req)).0)
 }
 
@@ -60,7 +59,7 @@ pub fn register(
     let home_server = home_server.unwrap_or_else(|| *default_server());
 
     let kp = sig::KeyPair::gen_new();
-    let sig = kp.sign(*kp.public_key());
+    let sig = sign_ser(&kp, *kp.public());
     let req = register::Req(uid, sig);
 
     let res = w!(helper::register(&req, home_server));
@@ -108,7 +107,7 @@ pub fn send_user_req(
     let ratchet = RatchetState::new();
     w!(chainkeys::store_state(cid, &ratchet));
 
-    let req = dmessages::UserReq { ratchet, cid };
+    let req = dmessages::UserReq { cid };
 
     send_umessage(uid, &DeviceMessageBody::Req(req))
 }

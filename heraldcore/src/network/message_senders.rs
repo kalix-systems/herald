@@ -17,7 +17,7 @@ pub(crate) fn send_cmessage(
         let cm = w!(cmessages::seal(cid, &content));
 
         let to = w!(crate::members::members(&cid));
-        let exc = *w!(crate::config::keypair()).public_key();
+        let exc = *w!(crate::config::keypair()).public();
 
         let msg = kson::to_vec(&cm).into();
 
