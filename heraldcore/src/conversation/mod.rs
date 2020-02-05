@@ -12,8 +12,7 @@ mod builder;
 pub use builder::*;
 
 /// Starts the conversation, sending it to the proposed members.
-pub fn start(conversation: Conversation) -> Result<(), HErr> {
-    use channel_ratchet::*;
+pub fn start(conversation: Conversation) -> Result<NetworkAction, HErr> {
     use std::fs;
 
     let Conversation { members, meta } = conversation;
@@ -26,8 +25,8 @@ pub fn start(conversation: Conversation) -> Result<(), HErr> {
         ..
     } = meta;
 
-    let ratchet = RatchetState::new();
-    chainkeys::store_state(cid, &ratchet)?;
+    // let ratchet = RatchetState::new();
+    // chainkeys::store_state(cid, &ratchet)?;
 
     let picture = match picture_path {
         Some(path) => Some(fs::read(path)?),
@@ -36,23 +35,15 @@ pub fn start(conversation: Conversation) -> Result<(), HErr> {
 
     let pairwise = get_pairwise_conversations(&members)?;
 
-    let body = ConversationMessage::AddedToConvo {
-        info: Box::new(cmessages::AddedToConvo {
-            members,
-            cid,
-            title,
-            expiration_period,
-            picture,
-        }),
+    let act = NetworkAction::StartConvo(Box::new(cmessages::AddedToConvo {
+        members,
+        cid,
+        title,
+        expiration_period,
+        picture,
+    }));
 
-        ratchet,
-    };
-
-    for pw_cid in pairwise {
-        crate::network::send_cmessage(pw_cid, &body)?;
-    }
-
-    Ok(())
+    Ok(act)
 }
 
 /// Get conversation metadata
@@ -65,7 +56,7 @@ pub fn meta(conversation_id: &ConversationId) -> Result<ConversationMeta, HErr> 
 pub fn set_title(
     conversation_id: &ConversationId,
     title: Option<String>,
-) -> Result<(), HErr> {
+) -> Result<NetworkAction, HErr> {
     let mut db = Database::get()?;
     let update = settings::db::update_title(&db, title.clone(), conversation_id)?;
     let (mid, expiration) = crate::message::db::outbound_aux(
@@ -74,15 +65,19 @@ pub fn set_title(
         conversation_id,
     )?;
 
-    crate::network::send_group_settings_message(mid, *conversation_id, expiration, update)?;
-    Ok(())
+    Ok(NetworkAction::UpdateSettings {
+        mid,
+        cid: *conversation_id,
+        expiration,
+        update,
+    })
 }
 
 /// Sets picture for a conversation
 pub fn set_picture(
     conversation_id: &ConversationId,
     picture: Option<image_utils::ProfilePicture>,
-) -> Result<Option<String>, HErr> {
+) -> Result<(Option<String>, NetworkAction), HErr> {
     let mut db = Database::get()?;
 
     let (update, path) = settings::db::update_picture(&db, picture, conversation_id)?;
@@ -93,16 +88,21 @@ pub fn set_picture(
         conversation_id,
     )?;
 
-    crate::network::send_group_settings_message(mid, *conversation_id, expiration, update)?;
+    let act = NetworkAction::UpdateSettings {
+        mid,
+        cid: *conversation_id,
+        expiration,
+        update,
+    };
 
-    Ok(path)
+    Ok((path, act))
 }
 
 /// Sets expiration period for a conversation
 pub fn set_expiration_period(
     conversation_id: &ConversationId,
     expiration_period: ExpirationPeriod,
-) -> Result<(), HErr> {
+) -> Result<NetworkAction, HErr> {
     let mut db = Database::get()?;
 
     let update = settings::db::update_expiration(&db, expiration_period, conversation_id)?;
@@ -112,8 +112,13 @@ pub fn set_expiration_period(
         conversation_id,
     )?;
 
-    crate::network::send_group_settings_message(mid, *conversation_id, expiration, update)?;
-    Ok(())
+    let act = NetworkAction::UpdateSettings {
+        mid,
+        cid: *conversation_id,
+        expiration,
+        update,
+    };
+    Ok(act)
 }
 
 /// Sets muted status of a conversation

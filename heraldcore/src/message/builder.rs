@@ -73,12 +73,12 @@ impl OutboundMessageBuilder {
         self
     }
 
-    /// Stores and sends the message
-    pub fn store_and_send(self) -> Result<(), HErr> {
-        let mut db = Database::get()?;
-        self.store_and_send_db(&mut db);
-        Ok(())
-    }
+    // /// Stores and sends the message
+    // pub fn store_and_send(self) -> Result<(), HErr> {
+    //     let mut db = Database::get()?;
+    //     self.store_and_send_db(&mut db);
+    //     Ok(())
+    // }
 
     /// Stores the message without sending it. This function is meant for testing
     /// and not intended to be used outside of this workspace.

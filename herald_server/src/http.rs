@@ -42,7 +42,7 @@ pub async fn serve(
             new_sig,
             new_prekeys,
             get_prekeys,
-            send_push,
+            push,
             register,
         )
         .or(warp::path("login")

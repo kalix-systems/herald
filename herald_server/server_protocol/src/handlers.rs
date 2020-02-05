@@ -83,7 +83,7 @@ impl State {
             .collect())
     }
 
-    pub async fn send_push(
+    pub async fn push(
         &self,
         // from: GlobalId,
         push::Req { from, to, msg }: push::Req,

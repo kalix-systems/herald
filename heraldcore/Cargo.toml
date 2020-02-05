@@ -12,6 +12,7 @@ parking_lot          = "0.10"
 tar                  = "0.4"
 unicode-segmentation = "1.6"
 tilde = "0.0.4"
+thiserror = "1.0.10"
 
 [dependencies.herald_common]
 path             = "../herald_common"

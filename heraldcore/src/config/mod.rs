@@ -1,4 +1,5 @@
 use crate::{conversation::ExpirationPeriod, db::Database, errors::*, types::*};
+use cmessages::ProfileChanged;
 pub use coretypes::config::Config;
 use herald_common::*;
 use rusqlite::NO_PARAMS;
@@ -100,8 +101,6 @@ impl ConfigBuilder {
         let mut db = Database::get()?;
         let conf = self.add_db(&mut db)?;
 
-        let ratchet = channel_ratchet::RatchetState::new();
-        chainkeys::store_state(conf.nts_conversation, &ratchet)?;
         Ok(conf)
     }
 }
@@ -143,27 +142,25 @@ pub fn home_server() -> Result<std::net::SocketAddr, HErr> {
 }
 
 /// Updates user's display name
-pub fn set_name(name: String) -> Result<(), HErr> {
+pub fn set_name(name: String) -> Result<NetworkAction, HErr> {
     let db = Database::get()?;
     db::set_name(&db, name.as_str())?;
-    crate::network::send_profile_update(network_types::cmessages::ProfileChanged::DisplayName(
+    Ok(NetworkAction::UpdateProfile(ProfileChanged::DisplayName(
         name.into(),
-    ))?;
-    Ok(())
+    )))
 }
 
 /// Updates user's profile picture
 pub fn set_profile_picture(
     profile_picture: Option<image_utils::ProfilePicture>
-) -> Result<Option<String>, HErr> {
+) -> Result<(Option<String>, NetworkAction), HErr> {
     let db = Database::get()?;
     let path = db::set_profile_picture(&db, profile_picture)?;
 
     let buf = path.as_ref().map(std::fs::read).transpose()?;
+    let act = NetworkAction::UpdateProfile(ProfileChanged::Picture(buf));
 
-    crate::network::send_profile_update(network_types::cmessages::ProfileChanged::Picture(buf))?;
-
-    Ok(path)
+    Ok((path, act))
 }
 
 /// Update user's preferred expiration period
@@ -173,11 +170,11 @@ pub fn set_preferred_expiration(period: ExpirationPeriod) -> Result<(), HErr> {
 }
 
 /// Update user's color
-pub fn set_color(color: u32) -> Result<(), HErr> {
+pub fn set_color(color: u32) -> Result<NetworkAction, HErr> {
     let db = Database::get()?;
     db::set_color(&db, color)?;
-    crate::network::send_profile_update(network_types::cmessages::ProfileChanged::Color(color))?;
-    Ok(())
+    let act = NetworkAction::UpdateProfile(ProfileChanged::Color(color));
+    Ok(act)
 }
 
 /// Update user's colorscheme

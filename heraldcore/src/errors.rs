@@ -1,4 +1,3 @@
-use chainkeys::ChainKeysError;
 use coremacros::from_fn;
 use coretypes::messages::{
     EmptyMessageBody, MissingInboundMessageField, MissingOutboundMessageField,
@@ -7,118 +6,131 @@ use herald_common::*;
 use herald_ids::*;
 use location::Location;
 use std::fmt;
+use thiserror::*;
 
-#[derive(Debug)]
+#[derive(Debug, Error)]
 /// Error variants
 pub enum HErr {
+    #[error("Herald error: {0}")]
     /// Uncategorized error.
     HeraldError(String),
+    #[error("Database error: {0}")]
     /// Database error.
-    DatabaseError(rusqlite::Error),
+    DatabaseError(#[from] rusqlite::Error),
+    #[error("Invalid ID: {0}")]
     /// Invalid `ConversationId` or `MsgId`
-    BadRandomId(InvalidRandomIdLength),
+    BadRandomId(#[from] InvalidRandomIdLength),
+    #[error("Missing outbound message field: {0}")]
     /// Missing fields when sending a message
-    MissingOutboundMessageField(MissingOutboundMessageField),
+    MissingOutboundMessageField(#[from] MissingOutboundMessageField),
+    #[error("Missing inbound message field: {0}")]
     /// Missing fields when storing a received a message
-    MissingInboundMessageField(MissingInboundMessageField),
+    MissingInboundMessageField(#[from] MissingInboundMessageField),
+    #[error("IO error: {0}")]
     /// IO Error
-    IoError(std::io::Error),
+    IoError(#[from] std::io::Error),
+    #[error("ImageError: {0}")]
     /// Error processing images
-    ImageError(image_utils::ImageError),
+    ImageError(#[source] image_utils::ImageError),
+    #[error("Invalid regex: {0}")]
     /// Error compiling regex
-    RegexError(search_pattern::SearchPatternError),
+    RegexError(#[from] search_pattern::SearchPatternError),
+    #[error("Kson: {0}")]
     /// Deserialization error
-    KsonError(KsonError),
-    /// Global ID was either already active or involved a nonexistent user
-    GIDSpecFailed(login::SignAsResponse),
-    /// Failed to sign in - either signature or timestamp was invalid
-    SignInFailed(login::LoginTokenResponse),
+    KsonError(#[from] KsonError),
+    #[error("Login failed: bad sig")]
+    LoginChallengeFailed,
+    #[error("Login failed: invalid claim {0:?}")]
+    LoginClaimFailed(protocol::auth::login_types::ClaimResponse),
+    #[error("Websocket error: {0}")]
     /// An HTTP request was dropped
     /// Websocket issue
-    WebsocketError(websocket::result::WebSocketError),
+    WebsocketError(#[from] websocket::result::WebSocketError),
+    #[error("Unexpected None at {0}")]
     /// Unexpected `None`
     NoneError(Location),
+    #[error("Channel send failed at {0}")]
     /// An error occured sending a value through a channel
     ChannelSendError(Location),
+    #[error("Channel recv failed at {0}")]
     /// An error occured receiving a value from a channel
     ChannelRecvError(Location),
-    /// Error from `chainkeys`
-    ChainError(ChainKeysError),
+    #[error("Malformed path: {0:?}")]
     /// Malformed path
     BadPath(std::ffi::OsString),
+    #[error("Attachment error: {0}")]
     /// Attachments error
-    Attachment(herald_attachments::Error),
+    Attachment(#[from] herald_attachments::Error),
+    #[error("Message body cannot be empty: {0}")]
     /// An empty message body,
     EmptyMessageBody(EmptyMessageBody),
+    #[error("Invalid socket addr")]
     /// Bad socket address
-    BadSocketAddr(std::net::AddrParseError),
+    BadSocketAddr(#[from] std::net::AddrParseError),
 }
 
-impl fmt::Display for HErr {
-    fn fmt(
-        &self,
-        f: &mut fmt::Formatter<'_>,
-    ) -> fmt::Result {
-        use HErr::*;
-        match self {
-            DatabaseError(e) => write!(f, "Database Error: {}", e),
-            HeraldError(s) => write!(f, "Herald Error: {}", s),
-            IoError(e) => write!(f, "IoError: {}", e),
-            ImageError(s) => write!(f, "ImageError: {}", s),
-            KsonError(e) => write!(f, "KsonError error: {}", e),
-            BadPath(s) => write!(f, "Bad path: {:?}", s),
-            RegexError(e) => write!(f, "RegexError: {}", e),
-            // FIXME ChainError could have a good display implementation
-            ChainError(e) => write!(f, "ChainError: {:?}", e),
-            GIDSpecFailed(lt) => write!(f, "GIDSpecFailed: {:?}", lt),
-            SignInFailed(lt) => write!(f, "SignInFailed: {:?}", lt),
-            WebsocketError(e) => write!(f, "WebsocketError: {}", e),
-            MissingOutboundMessageField(missing) => write!(f, "{}", missing),
-            MissingInboundMessageField(missing) => write!(f, "{}", missing),
-            NoneError(location) => write!(f, "Unexpected none at {}", location),
-            ChannelSendError(location) => write!(f, "Channel send error at {}", location),
-            ChannelRecvError(location) => write!(f, "Channel receive error at {}", location),
-            BadRandomId(e) => write!(f, "{}", e),
-            Attachment(e) => write!(f, "{}", e),
-            EmptyMessageBody(e) => write!(f, "{}", e),
-            BadSocketAddr(e) => write!(f, "{}", e),
-        }
-    }
-}
+// impl fmt::Display for HErr {
+//     fn fmt(
+//         &self,
+//         f: &mut fmt::Formatter<'_>,
+//     ) -> fmt::Result {
+//         use HErr::*;
+//         match self {
+//             DatabaseError(e) => write!(f, "Database Error: {}", e),
+//             HeraldError(s) => write!(f, "Herald Error: {}", s),
+//             IoError(e) => write!(f, "IoError: {}", e),
+//             ImageError(s) => write!(f, "ImageError: {}", s),
+//             KsonError(e) => write!(f, "KsonError error: {}", e),
+//             BadPath(s) => write!(f, "Bad path: {:?}", s),
+//             RegexError(e) => write!(f, "RegexError: {}", e),
+//             GIDSpecFailed(lt) => write!(f, "GIDSpecFailed: {:?}", lt),
+//             SignInFailed(lt) => write!(f, "SignInFailed: {:?}", lt),
+//             WebsocketError(e) => write!(f, "WebsocketError: {}", e),
+//             MissingOutboundMessageField(missing) => write!(f, "{}", missing),
+//             MissingInboundMessageField(missing) => write!(f, "{}", missing),
+//             NoneError(location) => write!(f, "Unexpected none at {}", location),
+//             ChannelSendError(location) => write!(f, "Channel send error at {}", location),
+//             ChannelRecvError(location) => write!(f, "Channel receive error at {}", location),
+//             BadRandomId(e) => write!(f, "{}", e),
+//             Attachment(e) => write!(f, "{}", e),
+//             EmptyMessageBody(e) => write!(f, "{}", e),
+//             BadSocketAddr(e) => write!(f, "{}", e),
+//         }
+//     }
+// }
 
-impl std::error::Error for HErr {
-    fn cause(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        use HErr::*;
-        Some(match self {
-            DatabaseError(e) => e,
-            IoError(e) => e,
-            ImageError(s) => s,
-            // KsonError(e) => e,
-            RegexError(e) => e,
-            WebsocketError(e) => e,
-            _ => return None,
-        })
-    }
-}
+// impl std::error::Error for HErr {
+//     fn cause(&self) -> Option<&(dyn std::error::Error + 'static)> {
+//         use HErr::*;
+//         Some(match self {
+//             DatabaseError(e) => e,
+//             IoError(e) => e,
+//             ImageError(s) => s,
+//             // KsonError(e) => e,
+//             RegexError(e) => e,
+//             WebsocketError(e) => e,
+//             _ => return None,
+//         })
+//     }
+// }
 
-macro_rules! herr {
-    ($from:ty, $fn:ident) => {
-        from_fn!(HErr, $from, HErr::$fn);
-    };
-}
+// macro_rules! herr {
+//     ($from:ty, $fn:ident) => {
+//         from_fn!(HErr, $from, HErr::$fn);
+//     };
+// }
 
-herr!(MissingOutboundMessageField, MissingOutboundMessageField);
-herr!(MissingInboundMessageField, MissingInboundMessageField);
-herr!(EmptyMessageBody, EmptyMessageBody);
-herr!(ChainKeysError, ChainError);
-herr!(rusqlite::Error, DatabaseError);
-herr!(std::io::Error, IoError);
-herr!(KsonError, KsonError);
-herr!(websocket::result::WebSocketError, WebsocketError);
-herr!(search_pattern::SearchPatternError, RegexError);
-herr!(std::ffi::OsString, BadPath);
-herr!(herald_attachments::Error, Attachment);
-herr!(std::net::AddrParseError, BadSocketAddr);
+// herr!(MissingOutboundMessageField, MissingOutboundMessageField);
+// herr!(MissingInboundMessageField, MissingInboundMessageField);
+// herr!(EmptyMessageBody, EmptyMessageBody);
+// herr!(rusqlite::Error, DatabaseError);
+// herr!(std::io::Error, IoError);
+// herr!(KsonError, KsonError);
+// herr!(websocket::result::WebSocketError, WebsocketError);
+// herr!(search_pattern::SearchPatternError, RegexError);
+// herr!(std::ffi::OsString, BadPath);
+// herr!(herald_attachments::Error, Attachment);
+// herr!(std::net::AddrParseError, BadSocketAddr);
 
 impl From<image_utils::ImageError> for HErr {
     fn from(e: image_utils::ImageError) -> Self {

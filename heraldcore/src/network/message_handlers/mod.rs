@@ -1,6 +1,5 @@
 use super::*;
 use crate::types::{cmessages, dmessages};
-use channel_ratchet::Cipher;
 use network_types::{cmessages::ConversationMessage, dmessages::DeviceMessage};
 
 mod content_handlers;
@@ -8,7 +7,7 @@ use content_handlers::handle_content;
 
 pub(super) fn handle_cmessage(
     ts: Time,
-    cm: Cipher,
+    msg: Bytes,
 ) -> Result<Event, HErr> {
     use ConversationMessage::*;
     let mut ev = Event::default();

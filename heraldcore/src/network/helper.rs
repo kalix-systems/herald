@@ -24,22 +24,22 @@ mk_request!(get, recip_exists);
 mk_request!(get, new_sig);
 mk_request!(get, new_prekeys);
 mk_request!(get, get_prekeys);
-mk_request!(get, send_push);
-mk_request!(get, register);
+mk_request!(get, push);
+// mk_request!(get, register);
 
-pub fn register(
-    req: &register::Req,
-    home_server: SocketAddr,
-) -> Result<register::Res, HErr> {
-    use std::io::Read;
+// pub fn register(
+//     req: &register::Req,
+//     home_server: SocketAddr,
+// ) -> Result<register::Res, HErr> {
+//     use std::io::Read;
 
-    let mut res_buf = Vec::new();
-    let url = format!("http://{}/register", home_server);
+//     let mut res_buf = Vec::new();
+//     let url = format!("http://{}/register", home_server);
 
-    w!(ureq::post(&url)
-        .send_bytes(&kson::to_vec(req))
-        .into_reader()
-        .read_to_end(&mut res_buf));
-    let res = w!(kson::from_bytes(res_buf.into()));
-    Ok(res)
-}
+//     w!(ureq::post(&url)
+//         .send_bytes(&kson::to_vec(req))
+//         .into_reader()
+//         .read_to_end(&mut res_buf));
+//     let res = w!(kson::from_bytes(res_buf.into()));
+//     Ok(res)
+// }

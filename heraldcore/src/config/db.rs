@@ -124,11 +124,13 @@ pub(crate) fn preferred_expiration(
 
 /// Gets the current user's keypair
 pub(crate) fn keypair(conn: &rusqlite::Connection) -> Result<sig::KeyPair, HErr> {
-    Ok(w!(conn.query_row(
+    let raw_kp: Vec<u8> = w!(conn.query_row(
         include_str!("sql/get_keypair.sql"),
         NO_PARAMS,
         |row| { row.get(0) }
-    )))
+    ));
+    let kp = w!(kson::from_bytes(raw_kp.into()));
+    Ok(kp)
 }
 
 /// Gets the current user's GlobalId
@@ -172,6 +174,7 @@ impl ConfigBuilder {
         let colorscheme = colorscheme.unwrap_or(0);
 
         let home_server = home_server.unwrap_or_else(|| *crate::network::default_server());
+        // let home_server = todo!();
 
         let mut user_builder = crate::user::UserBuilder::new(id).local();
 
@@ -190,7 +193,7 @@ impl ConfigBuilder {
             include_str!("sql/add_config.sql"),
             named_params! {
                 "@id": id,
-                "@kp": keypair,
+                "@kp": kson::to_vec(&keypair),
                 "@colorscheme": colorscheme,
                 "@home_server": home_server.to_string(),
                 "@preferred_expiration": preferred_expiration
