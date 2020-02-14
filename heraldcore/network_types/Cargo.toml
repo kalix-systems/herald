@@ -21,6 +21,6 @@ path = "../herald_attachments"
 [dependencies.herald_ids]
 path = "../herald_ids"
 
-[dependencies.rusqlite]
-version          = "0.21"
-default_features = false
+# [dependencies.rusqlite]
+# version          = "0.21"
+# default_features = false

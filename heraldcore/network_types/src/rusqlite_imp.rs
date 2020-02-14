@@ -1,4 +1,5 @@
 use super::cmessages::*;
+use herald_common::*;
 use rusqlite::types::{self, FromSql, FromSqlError, FromSqlResult, ToSql};
 
 impl FromSql for ConversationMessage {

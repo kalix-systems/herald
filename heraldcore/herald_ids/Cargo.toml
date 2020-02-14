@@ -9,10 +9,10 @@ path             = "../../herald_common"
 default_features = false
 features         = ["rusqlite"]
 
-[dependencies.rusqlite]
-version          = "0.21"
-default_features = false
-features         = ["functions"]
+# [dependencies.rusqlite]
+# version          = "0.21"
+# default_features = false
+# features         = ["functions"]
 
 [dependencies.kson]
 path = "../../kson"

@@ -20,9 +20,9 @@ features         = ["rusqlite"]
 [dependencies.kcl]
 path = "../../kcl"
 
-[dependencies.rusqlite]
-version          = "0.21"
-default_features = false
+# [dependencies.rusqlite]
+# version          = "0.21"
+# default_features = false
 
 [dependencies.coremacros]
 path = "../coremacros"

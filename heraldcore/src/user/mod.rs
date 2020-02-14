@@ -1,3 +1,4 @@
+use super::*;
 use crate::{db::Database, errors::HErr, image_utils, types::*};
 pub use coretypes::conversation::Conversation;
 use herald_common::*;

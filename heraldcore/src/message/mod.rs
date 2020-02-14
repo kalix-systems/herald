@@ -1,3 +1,4 @@
+use super::*;
 use crate::{db::Database, errors::HErr, types::*};
 use coremacros::{from_fn, w};
 use herald_common::*;

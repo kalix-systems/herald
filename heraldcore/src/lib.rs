@@ -3,6 +3,8 @@
 // #![warn(missing_docs)]
 #![allow(warnings)]
 
+use herald_common::*;
+
 /// User configuration
 pub mod config;
 /// Conversations

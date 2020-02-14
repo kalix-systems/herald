@@ -293,7 +293,6 @@ dependencies = [
  "kcl 0.1.0",
  "kson 0.1.0",
  "location 0.1.0",
- "rusqlite 0.21.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "search_pattern 0.1.0",
  "unicode-segmentation 1.6.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
@@ -362,7 +361,6 @@ dependencies = [
  "parking_lot 0.9.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "platform_dirs 0.1.0",
  "ratchet_chat 0.1.0",
- "rusqlite 0.21.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "thiserror 1.0.10 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
@@ -731,7 +729,7 @@ dependencies = [
  "anyhow 1.0.26 (registry+https://github.com/rust-lang/crates.io-index)",
  "kcl 0.1.0",
  "kson 0.1.0",
- "rusqlite 0.21.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "rusqlite 0.21.0 (git+https://github.com/jgallagher/rusqlite.git)",
 ]
 
 [[package]]
@@ -740,7 +738,6 @@ version = "0.1.0"
 dependencies = [
  "herald_common 0.1.0",
  "kson 0.1.0",
- "rusqlite 0.21.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -771,7 +768,6 @@ version = "0.1.0"
 dependencies = [
  "herald_common 0.1.0",
  "herald_ids 0.1.0",
- "rusqlite 0.21.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "search_pattern 0.1.0",
 ]
 
@@ -794,7 +790,6 @@ dependencies = [
  "once_cell 1.3.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "parking_lot 0.10.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "platform_dirs 0.1.0",
- "rusqlite 0.21.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "search_pattern 0.1.0",
  "serial_test 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "serial_test_derive 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -1118,8 +1113,8 @@ dependencies = [
 
 [[package]]
 name = "libsqlite3-sys"
-version = "0.17.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
+version = "0.18.0"
+source = "git+https://github.com/jgallagher/rusqlite.git#406cd6d2cfe7197ea41fa197cb4c9931134ddc61"
 dependencies = [
  "pkg-config 0.3.17 (registry+https://github.com/rust-lang/crates.io-index)",
  "vcpkg 0.2.8 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -1359,7 +1354,6 @@ dependencies = [
  "herald_common 0.1.0",
  "herald_ids 0.1.0",
  "kson 0.1.0",
- "rusqlite 0.21.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -2031,12 +2025,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 [[package]]
 name = "rusqlite"
 version = "0.21.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
+source = "git+https://github.com/jgallagher/rusqlite.git#406cd6d2cfe7197ea41fa197cb4c9931134ddc61"
 dependencies = [
  "bitflags 1.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "fallible-iterator 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "fallible-streaming-iterator 0.1.9 (registry+https://github.com/rust-lang/crates.io-index)",
- "libsqlite3-sys 0.17.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "libsqlite3-sys 0.18.0 (git+https://github.com/jgallagher/rusqlite.git)",
  "lru-cache 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "memchr 2.3.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "time 0.1.42 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -3087,7 +3081,7 @@ dependencies = [
 "checksum libdbus-sys 0.2.1 (registry+https://github.com/rust-lang/crates.io-index)" = "dc12a3bc971424edbbf7edaf6e5740483444db63aa8e23d3751ff12a30f306f0"
 "checksum libflate 0.1.27 (registry+https://github.com/rust-lang/crates.io-index)" = "d9135df43b1f5d0e333385cb6e7897ecd1a43d7d11b91ac003f4d2c2d2401fdd"
 "checksum libsodium-sys 0.2.5 (registry+https://github.com/rust-lang/crates.io-index)" = "1c344ff12b90ef8fa1f0fffacd348c1fd041db331841fec9eab23fdb991f5e73"
-"checksum libsqlite3-sys 0.17.1 (registry+https://github.com/rust-lang/crates.io-index)" = "266eb8c361198e8d1f682bc974e5d9e2ae90049fb1943890904d11dad7d4a77d"
+"checksum libsqlite3-sys 0.18.0 (git+https://github.com/jgallagher/rusqlite.git)" = "<none>"
 "checksum linked-hash-map 0.5.2 (registry+https://github.com/rust-lang/crates.io-index)" = "ae91b68aebc4ddb91978b11a1b02ddd8602a05ec19002801c5666000e05e0f83"
 "checksum lock_api 0.3.3 (registry+https://github.com/rust-lang/crates.io-index)" = "79b2de95ecb4691949fea4716ca53cdbcfccb2c612e19644a8bad05edcf9f47b"
 "checksum log 0.3.9 (registry+https://github.com/rust-lang/crates.io-index)" = "e19e8d5c34a3e0e2223db8e060f9e8264aeeb5c5fc64a4ee9965c062211c024b"
@@ -3182,7 +3176,7 @@ dependencies = [
 "checksum riqtshaw 0.0.1 (git+https://github.com/kalix-systems/riqtshaw?rev=d2b6c047403b567eae53fa10f667b859fcc0b1e3)" = "<none>"
 "checksum riqtshaw_types 0.1.0 (git+https://github.com/kalix-systems/riqtshaw_types?rev=ee0af86c4db49f9c554aef9c122255d3230d3b99)" = "<none>"
 "checksum rle-decode-fast 1.0.1 (registry+https://github.com/rust-lang/crates.io-index)" = "cabe4fa914dec5870285fa7f71f602645da47c486e68486d2b4ceb4a343e90ac"
-"checksum rusqlite 0.21.0 (registry+https://github.com/rust-lang/crates.io-index)" = "64a656821bb6317a84b257737b7934f79c0dbb7eb694710475908280ebad3e64"
+"checksum rusqlite 0.21.0 (git+https://github.com/jgallagher/rusqlite.git)" = "<none>"
 "checksum rust-argon2 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)" = "2bc8af4bda8e1ff4932523b94d3dd20ee30a87232323eda55903ffd71d2fb017"
 "checksum rustc-demangle 0.1.16 (registry+https://github.com/rust-lang/crates.io-index)" = "4c691c0e608126e00913e33f0ccf3727d5fc84573623b8d65b2df340b5201783"
 "checksum rustc_version 0.2.3 (registry+https://github.com/rust-lang/crates.io-index)" = "138e3e0acb6c9fb258b19b67cb8abd63c00679d2851805ea151465464fe9030a"

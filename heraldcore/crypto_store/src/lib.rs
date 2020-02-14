@@ -1,3 +1,4 @@
+use herald_common::*;
 use ratchet_chat::StoreLike;
 use rusqlite::named_params as np;
 

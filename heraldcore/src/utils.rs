@@ -1,3 +1,5 @@
+use super::*;
+
 const NUM_COLORS: u64 = 9;
 
 pub(crate) fn id_to_color<H: std::hash::Hash>(id: H) -> u32 {

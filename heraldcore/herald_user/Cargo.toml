@@ -8,9 +8,9 @@ edition = "2018"
 path             = "../../herald_common"
 default_features = false
 
-[dependencies.rusqlite]
-version          = "0.21"
-default_features = false
+# [dependencies.rusqlite]
+# version          = "0.21"
+# default_features = false
 
 [dependencies.search_pattern]
 path = "../../search_pattern"

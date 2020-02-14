@@ -1,3 +1,4 @@
+use super::*;
 use crate::{db::Database, errors::HErr};
 use herald_common::{sig, Signed, UserId};
 use rusqlite::params;
