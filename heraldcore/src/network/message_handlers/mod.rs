@@ -106,8 +106,8 @@ use content_handlers::handle_content;
 
 fn handle_cmessage(
     ts: Time,
-    cid: ConversationId,
     GlobalId { uid, did: _ }: GlobalId,
+    cid: ConversationId,
     msg: ConversationMessage,
 ) -> Result<Event, HErr> {
     use ConversationMessage::*;
