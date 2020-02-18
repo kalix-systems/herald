@@ -1,5 +1,5 @@
 use super::*;
-use crate::types::{cmessages, dmessages};
+use crate::types::cmessages;
 use crypto_store::prelude as cstore;
 use network_types::{cmessages::ConversationMessage, dmessages::DeviceMessage, Substance};
 use ratchet_chat::protocol as proto;

@@ -1,5 +1,5 @@
 use super::*;
-use crate::types::{cmessages, dmessages};
+use crate::types::cmessages;
 use ratchet_chat::protocol as rproto;
 
 /// Outcome of sending a `ConversationMessage`
