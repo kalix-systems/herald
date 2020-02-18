@@ -17,9 +17,7 @@ pub(crate) fn prepare_send_cmessage(
 ) -> Result<Vec<(Recip, proto::Msg)>, HErr> {
     let kp = w!(config::keypair());
 
-    let raw = cstore::raw_conn();
-    let mut lock = raw.lock();
-    let mut store = w!(cstore::as_conn(&mut lock));
+    get_crypto_conn!(store);
 
     let substance = network_types::Substance::Cm { cid, msg };
     let payload = proto::Payload::from(kson::to_vec(&substance));
@@ -90,9 +88,7 @@ pub(crate) fn prepare_send_umessage(
 ) -> Result<Vec<(Recip, proto::Msg)>, HErr> {
     let kp = w!(config::keypair());
 
-    let raw = cstore::raw_conn();
-    let mut lock = raw.lock();
-    let mut store = w!(cstore::as_conn(&mut lock));
+    get_crypto_conn!(store);
 
     let substance = network_types::Substance::Um(um);
     let payload = proto::Payload::from(kson::to_vec(&substance));

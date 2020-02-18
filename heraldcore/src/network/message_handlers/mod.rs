@@ -28,9 +28,7 @@ fn decode_push(
         output,
         response,
     } = {
-        let raw = cstore::raw_conn();
-        let mut lock = raw.lock();
-        let mut store = w!(cstore::as_conn(&mut lock));
+        get_crypto_conn!(store);
 
         let msg: proto::Msg = w!(kson::from_bytes(msg));
 

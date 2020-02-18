@@ -36,6 +36,18 @@ use event::*;
 
 mod helper;
 
+#[macro_export]
+macro_rules! get_crypto_conn {
+    ($store:ident) => {
+        let raw = cstore::raw_conn();
+        let mut lock = raw.lock();
+        let mut $store = w!(cstore::as_conn(&mut lock));
+    };
+}
+
+// pub fn execute_action(act: NetworkAction) -> Result<(), HErr> {
+//     todo!()
+// }
 // /// Deprecates key on server.
 // pub fn dep_key(to_dep: sig::PublicKey) -> Result<PKIResponse, HErr> {
 //     let kp = w!(config::keypair());
