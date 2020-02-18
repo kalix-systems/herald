@@ -45,99 +45,77 @@ pub(crate) fn prepare_send_cmessage(
     Ok(out)
 }
 
-// pub(crate) fn send_cmessage(
-//     cid: ConversationId,
-//     content: &ConversationMessage,
-// ) -> Result<SendOutcome, HErr> {
-//     if CAUGHT_UP.load(Ordering::Acquire) {
-//         let cm = w!(cmessages::seal(cid, &content));
+pub(crate) fn send_cmessage(
+    cid: ConversationId,
+    content: ConversationMessage,
+) -> Result<SendOutcome, HErr> {
+    let prepared = w!(prepare_send_cmessage(cid, content.clone()));
+    let from: GlobalId = w!(crate::config::gid());
 
-//         let to = w!(crate::members::members(&cid));
-//         let exc = *w!(crate::config::keypair()).public();
+    if CAUGHT_UP.load(Ordering::Acquire) {
+        for (to, msg) in prepared {
+            let req = push::Req {
+                from,
+                to,
+                msg: kson::to_vec(&msg).into(),
+            };
+            match helper::push(&req) {
+                Ok(push::Res::Success(ts)) => {}
+                Ok(push::Res::Missing(missing)) => {
+                    return Err(HeraldError(format!(
+                        "tried to send messages to nonexistent users {:?}",
+                        missing
+                    )));
+                }
+                Err(e) => {
+                    CAUGHT_UP.store(false, Ordering::Release);
+                    w!(pending::add_to_pending(cid, &content));
+                    return Ok(SendOutcome::Pending);
+                }
+            }
+        }
+        Ok(SendOutcome::Success)
+    } else {
+        w!(pending::add_to_pending(cid, &content));
+        Ok(SendOutcome::Pending)
+    }
+}
 
-//         let msg = kson::to_vec(&cm).into();
+pub(crate) fn prepare_send_umessage(
+    uid: UserId,
+    um: UserMessage,
+) -> Result<Vec<(Recip, proto::Msg)>, HErr> {
+    let kp = w!(config::keypair());
 
-//         let req = push_users::Req { to, exc, msg };
+    let raw = cstore::raw_conn();
+    let mut lock = raw.lock();
+    let mut store = w!(cstore::as_conn(&mut lock));
 
-//         match helper::push_users(&req) {
-//             Ok(push_users::Res::Success) => Ok(SendOutcome::Success),
+    let substance = network_types::Substance::Um(um);
+    let payload = proto::Payload::from(kson::to_vec(&substance));
 
-//             Ok(push_users::Res::Missing(missing)) => Err(HeraldError(format!(
-//                 "tried to send messages to nonexistent users {:?}",
-//                 missing
-//             ))),
+    let prepared = w!(proto::prepare_send_to_user(&mut store, &kp, uid, payload));
 
-//             Err(e) => {
-//                 // TODO: maybe try more than once?
-//                 // maybe have some mechanism to send a signal that more things have gone wrong?
-//                 eprintln!(
-//                     "failed to send message {:?}, error was {}\n\
-//                      assuming failed session and adding to pending now",
-//                     req, e
-//                 );
+    Ok(prepared
+        .into_iter()
+        .map(|(k, m)| (Recip::One(SingleRecip::Key(k)), m))
+        .collect())
+}
 
-//                 CAUGHT_UP.store(false, Ordering::Release);
+pub(super) fn send_umessage(
+    uid: UserId,
+    msg: UserMessage,
+) -> Result<(), HErr> {
+    let prepared = w!(prepare_send_umessage(uid, msg));
+    let from: GlobalId = w!(crate::config::gid());
+    for (to, msg) in prepared {
+        let req = push::Req {
+            from,
+            to,
+            msg: kson::to_vec(&msg).into(),
+        };
+        w!(helper::push(&req));
+    }
 
-//                 w!(pending::add_to_pending(cid, content));
-
-//                 Ok(SendOutcome::Pending)
-//             }
-//         }
-//     } else {
-//         w!(pending::add_to_pending(cid, content));
-
-//         Ok(SendOutcome::Pending)
-//     }
-// }
-
-// pub(super) fn send_dmessage(
-//     to: sig::PublicKey,
-//     dm: &DeviceMessageBody,
-// ) -> Result<(), HErr> {
-//     let msg = kson::to_vec(&w!(dmessages::seal(to, dm))).into();
-
-//     let req = push_devices::Req { to: vec![to], msg };
-
-//     // TODO retry logic? for now, things go to the void
-//     match w!(helper::push_devices(&req)) {
-//         push_devices::Res::Success => Ok(()),
-//         push_devices::Res::Missing(missing) => Err(HeraldError(format!(
-//             "tried to send messages to nonexistent keys {:?}",
-//             missing
-//         ))),
-//     }
-// }
-
-// pub(super) fn send_umessage(
-//     uid: UserId,
-//     msg: &DeviceMessageBody,
-// ) -> Result<(), HErr> {
-//     let meta_res = match w!(keys_of(vec![uid])).pop() {
-//         Some((u, m)) => {
-//             if u == uid {
-//                 Ok(m)
-//             } else {
-//                 Err(HErr::HeraldError(format!(
-//                     "Response returned keys not associated with uid {}\n\
-//                      failed at line {}",
-//                     uid,
-//                     line!()
-//                 )))
-//             }
-//         }
-//         None => Err(HErr::HeraldError(format!(
-//             "No keys associated with {}\n\
-//              failed at line {}",
-//             uid,
-//             line!()
-//         ))),
-//     };
-//     let meta = w!(meta_res);
-
-//     let keys: Vec<sig::PublicKey> = meta.keys.into_iter().map(|(k, _)| k).collect();
-//     for key in keys {
-//         w!(send_dmessage(key, msg));
-//     }
-
-//     Ok(())
-// }
+    Ok(())
+}

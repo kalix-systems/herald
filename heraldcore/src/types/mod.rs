@@ -5,7 +5,7 @@ use herald_common::*;
 pub use herald_ids::*;
 pub use network_types::{
     action::NetworkAction, cmessages::Content as NetContent, cmessages::ConversationMessage,
-    dmessages::DeviceMessage,
+    umessages::UserMessage,
 };
 
 /// Types relevant to [`ConversationMessage`]s

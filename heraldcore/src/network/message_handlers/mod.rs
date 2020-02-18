@@ -3,7 +3,7 @@ use crate::types::cmessages;
 use crypto_store::prelude as cstore;
 use network_types::{
     cmessages::ConversationMessage,
-    dmessages::{self, DeviceMessage},
+    umessages::{self, UserMessage},
     Substance,
 };
 use ratchet_chat::protocol as proto;
@@ -117,18 +117,18 @@ fn handle_cmessage(
     Ok(ev)
 }
 
-fn handle_dmessage(
+fn handle_umessage(
     _: Time,
     from: GlobalId,
-    msg: DeviceMessage,
+    msg: UserMessage,
 ) -> Result<Event, HErr> {
     let mut ev = Event::default();
 
     let GlobalId { uid, .. } = from;
 
     match msg {
-        DeviceMessage::Req(cr) => {
-            let dmessages::UserReq { cid } = cr;
+        UserMessage::Req(cr) => {
+            let umessages::UserReq { cid } = cr;
             let (user, conversation) = w!(crate::user::UserBuilder::new(uid)
                 .pairwise_conversation(cid)
                 .add());

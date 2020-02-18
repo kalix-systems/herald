@@ -2,8 +2,8 @@ use herald_common::*;
 use herald_ids::ConversationId;
 
 #[derive(Ser, De, Hash, Debug, Clone, PartialEq, Eq)]
-/// A message sent to a specific device.
-pub enum DeviceMessage {
+/// A message sent to a specific user.
+pub enum UserMessage {
     /// A contact request
     Req(UserReq),
 }

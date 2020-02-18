@@ -1,6 +1,6 @@
 pub mod action;
 pub mod cmessages;
-pub mod dmessages;
+pub mod umessages;
 
 use herald_common::kson::prelude::*;
 use herald_ids::*;
@@ -11,7 +11,7 @@ pub enum Substance {
         cid: ConversationId,
         msg: cmessages::ConversationMessage,
     },
-    Dm(dmessages::DeviceMessage),
+    Um(umessages::UserMessage),
 }
 
 mod rusqlite_imp;
