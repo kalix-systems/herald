@@ -10,6 +10,7 @@ use crate::{
 use coremacros::w;
 use herald_common::sig::sign_ser;
 use herald_common::*;
+use ratchet_chat::protocol::{self as proto, SigStore};
 use std::{
     net::SocketAddr,
     sync::atomic::{AtomicBool, Ordering},
@@ -39,21 +40,36 @@ mod helper;
 #[macro_export]
 macro_rules! get_crypto_conn {
     ($store:ident) => {
-        let raw = cstore::raw_conn();
+        let raw = crypto_store::prelude::raw_conn();
         let mut lock = raw.lock();
-        let mut $store = w!(cstore::as_conn(&mut lock));
+        let mut $store = w!(crypto_store::prelude::as_conn(&mut lock));
     };
 }
 
-// pub fn execute_action(act: NetworkAction) -> Result<(), HErr> {
-//     todo!()
-// }
-// /// Deprecates key on server.
-// pub fn dep_key(to_dep: sig::PublicKey) -> Result<PKIResponse, HErr> {
-//     let kp = w!(config::keypair());
-//     let req = dep_key::Req(sign_ser(&kp, to_dep));
-//     Ok(w!(helper::dep_key(&req)).0)
-// }
+/// Deprecates key on server.
+pub fn dep_key(to_dep: sig::PublicKey) -> Result<PKIResponse, HErr> {
+    get_crypto_conn!(store);
+
+    let kp = w!(config::keypair());
+    let gid = w!(config::gid());
+    let update = sign_ser(&kp, sig::SigUpdate::Deprecate(to_dep));
+
+    let res = w!(helper::new_sig(&Box::new(update)));
+
+    if res == PKIResponse::Success {
+        store.extend_sigchain(gid.uid, update.clone());
+        let as_msg = proto::Msg::SigUpdate(update);
+        // todo: get all relevant uids from crypto store here
+        let users: Vec<UserId> = todo!();
+        w!(helper::push(&push::Req {
+            from: gid,
+            to: Recip::Many(Recips::Users(users)),
+            msg: kson::to_vec(&as_msg).into(),
+        }));
+    }
+
+    Ok(res)
+}
 
 // /// Adds new key to the server's key registry.
 // pub fn new_key(to_new: sig::PublicKey) -> Result<PKIResponse, HErr> {
