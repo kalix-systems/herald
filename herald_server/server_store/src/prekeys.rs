@@ -157,7 +157,7 @@ impl Conn {
 
                     let meta = SigMeta::new(sig, signed_by, timestamp);
 
-                    prekeys.lock().push(TaggedPrekey {
+                    prekeys.lock().await.push(TaggedPrekey {
                         key: k,
                         prekey: Signed::from((prekey, meta)),
                     });

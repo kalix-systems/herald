@@ -13,7 +13,6 @@ crossbeam-channel = "0.4"
 futures           = "0.3"
 lazy_static       = "1.4.0"
 tokio-postgres    = "0.5.1"
-parking_lot       = "0.10.0"
 
 [dependencies.tokio]
 version = "0.2"

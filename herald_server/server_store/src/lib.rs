@@ -1,8 +1,7 @@
 #![recursion_limit = "256"]
 
-use futures::{try_join, FutureExt, Stream, StreamExt, TryStreamExt};
+use futures::{lock::Mutex, try_join, FutureExt, Stream, StreamExt, TryStreamExt};
 use herald_common::*;
-use parking_lot::Mutex;
 use server_errors::Error;
 use std::convert::TryFrom;
 

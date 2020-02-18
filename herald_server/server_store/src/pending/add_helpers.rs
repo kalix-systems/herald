@@ -122,7 +122,7 @@ impl Conn {
 
                     tx.execute(pending_stmt, params![key.as_ref(), push_row_id])
                         .await?;
-                    pushed_to.lock().push(key);
+                    pushed_to.lock().await.push(key);
                     Ok(())
                 }
             })
@@ -201,7 +201,7 @@ impl Conn {
                         tx.execute(pending_stmt, params![key.as_ref(), push_row_id])
                             .await?;
 
-                        pushed_to.lock().push(key);
+                        pushed_to.lock().await.push(key);
 
                         Ok(())
                     }
