@@ -7,7 +7,7 @@ use ratchet_chat::protocol as proto;
 #[derive(Default, Debug)]
 struct PushResult {
     substance: Option<Substance>,
-    outbox: Vec<(Recip, Bytes)>,
+    outbox: Vec<(Recip, proto::Msg)>,
 }
 
 impl PushResult {
@@ -15,7 +15,9 @@ impl PushResult {
         &mut self,
         msg: proto::Msg,
     ) -> Result<(), HErr> {
-        todo!()
+        let uid = w!(config::id());
+        self.outbox.push((Recip::One(SingleRecip::User(uid)), msg));
+        Ok(())
     }
 
     fn add_msg_to_user(
@@ -23,7 +25,8 @@ impl PushResult {
         to: UserId,
         msg: proto::Msg,
     ) -> Result<(), HErr> {
-        todo!()
+        self.outbox.push((Recip::One(SingleRecip::User(to)), msg));
+        Ok(())
     }
 
     fn add_msg_to_device(
@@ -31,7 +34,8 @@ impl PushResult {
         to: sig::PublicKey,
         msg: proto::Msg,
     ) -> Result<(), HErr> {
-        todo!()
+        self.outbox.push((Recip::One(SingleRecip::Key(to)), msg));
+        Ok(())
     }
 }
 
@@ -60,7 +64,11 @@ fn decode_push(
 
         let msg: proto::Msg = w!(kson::from_bytes(msg));
 
-        w!(proto::handle_incoming(&mut store, &kp, from, msg))
+        let res = w!(proto::handle_incoming(&mut store, &kp, from, msg));
+
+        w!(store.commit());
+
+        res
     };
 
     if let Some(ack) = ack {
