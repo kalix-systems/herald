@@ -140,7 +140,7 @@ fn handle_dmessage(
 
             w!(ev.push_cm(
                 cid,
-                &ConversationMessage::Message(NetContent::UserReqAck(cmessages::UserReqAck(true))),
+                ConversationMessage::Message(NetContent::UserReqAck(cmessages::UserReqAck(true))),
             ));
         }
     }

@@ -18,7 +18,7 @@ impl Event {
     ) {
         self.notifications.append(&mut other.notifications);
         self.outbox.append(&mut other.outbox);
-        // self.replies.append(&mut other.replies);
+        self.errors.append(&mut other.errors);
     }
 
     /// Sends replies to inbound messages and calls `f`, passing each notification in as an
@@ -74,33 +74,9 @@ impl Event {
     pub fn push_cm(
         &mut self,
         cid: ConversationId,
-        msg: &ConversationMessage,
+        msg: ConversationMessage,
     ) -> Result<(), HErr> {
-        let uid = w!(config::id());
-        let kp = w!(config::keypair());
-
-        let raw = cstore::raw_conn();
-        let mut lock = raw.lock();
-        let mut store = w!(cstore::as_conn(&mut lock));
-        let payload: proto::Payload = kson::to_vec(msg).into();
-
-        let to = w!(crate::members::members(&cid));
-
-        for user in to {
-            let pairs = w!(proto::prepare_send_to_user(
-                &mut store,
-                &kp,
-                user,
-                payload.clone()
-            ));
-
-            self.outbox.extend(
-                pairs
-                    .into_iter()
-                    .map(|(k, m)| (Recip::One(SingleRecip::Key(k)), m)),
-            );
-        }
-
+        self.outbox.extend(w!(prepare_send_cmessage(cid, msg)));
         Ok(())
     }
 }

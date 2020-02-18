@@ -1,6 +1,7 @@
 use super::*;
 use crate::types::cmessages;
-use ratchet_chat::protocol as rproto;
+use crypto_store::prelude as cstore;
+use ratchet_chat::protocol as proto;
 
 /// Outcome of sending a `ConversationMessage`
 pub enum SendOutcome {
@@ -8,6 +9,40 @@ pub enum SendOutcome {
     Success,
     /// Message was placed in pending
     Pending,
+}
+
+pub(crate) fn prepare_send_cmessage(
+    cid: ConversationId,
+    msg: ConversationMessage,
+) -> Result<Vec<(Recip, proto::Msg)>, HErr> {
+    let kp = w!(config::keypair());
+
+    let raw = cstore::raw_conn();
+    let mut lock = raw.lock();
+    let mut store = w!(cstore::as_conn(&mut lock));
+
+    let substance = network_types::Substance::Cm { cid, msg };
+    let payload = proto::Payload::from(kson::to_vec(&substance));
+
+    let members = w!(crate::members::members(&cid));
+    let mut out = Vec::with_capacity(members.len());
+
+    for user in members {
+        let pairs = w!(proto::prepare_send_to_user(
+            &mut store,
+            &kp,
+            user,
+            payload.clone()
+        ));
+
+        out.extend(
+            pairs
+                .into_iter()
+                .map(|(k, m)| (Recip::One(SingleRecip::Key(k)), m)),
+        );
+    }
+
+    Ok(out)
 }
 
 // pub(crate) fn send_cmessage(
