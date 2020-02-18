@@ -6,6 +6,7 @@ use coretypes::messages::{
 use herald_common::*;
 use herald_ids::*;
 use location::Location;
+use ratchet_chat::protocol::*;
 use std::fmt;
 use thiserror::*;
 
@@ -68,6 +69,10 @@ pub enum HErr {
     #[error("Invalid socket addr")]
     /// Bad socket address
     BadSocketAddr(#[from] std::net::AddrParseError),
+    #[error("Cryptographic transit error: {0}")]
+    TError(#[from] TransitError<crypto_store::Error>),
+    #[error("Cryptographic payload error: {0}")]
+    PayloadError(#[from] PayloadError<crypto_store::Error>),
 }
 
 impl From<image_utils::ImageError> for HErr {

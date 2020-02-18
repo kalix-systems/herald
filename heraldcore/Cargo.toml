@@ -22,35 +22,41 @@ features         = ["rusqlite"]
 [dependencies.kcl]
 path = "../kcl"
 
+[dependencies.coremacros]
+path = "./coremacros"
+
 [dependencies.coretypes]
 path = "./coretypes"
 
-[dependencies.herald_ids]
-path = "./herald_ids"
+[dependencies.crypto_store]
+path = "./crypto_store"
 
 [dependencies.herald_attachments]
 path = "./herald_attachments"
 
+[dependencies.herald_ids]
+path = "./herald_ids"
+
 [dependencies.herald_user]
 path = "./herald_user"
 
-[dependencies.coremacros]
-path = "./coremacros"
-
-[dependencies.network_types]
-path = "./network_types"
+[dependencies.image_utils]
+path = "./image_utils"
 
 [dependencies.location]
 path = "../location"
 
-[dependencies.search_pattern]
-path = "../search_pattern"
+[dependencies.network_types]
+path = "./network_types"
 
 [dependencies.platform_dirs]
 path = "./platform_dirs"
 
-[dependencies.image_utils]
-path = "./image_utils"
+[dependencies.ratchet_chat]
+path = "../ratchet_chat"
+
+[dependencies.search_pattern]
+path = "../search_pattern"
 
 [dependencies.websocket]
 version          = "0.23"
