@@ -42,6 +42,9 @@ pub(crate) fn prepare_send_cmessage(
         );
     }
 
+    // todo: consider committing later
+    w!(store.commit());
+
     Ok(out)
 }
 
@@ -95,6 +98,9 @@ pub(crate) fn prepare_send_umessage(
     let payload = proto::Payload::from(kson::to_vec(&substance));
 
     let prepared = w!(proto::prepare_send_to_user(&mut store, &kp, uid, payload));
+
+    // todo: consider committing later
+    w!(store.commit());
 
     Ok(prepared
         .into_iter()
