@@ -108,7 +108,7 @@ impl Conn {
 mod tests {
     use super::*;
     use crate::{w, wa};
-    use protocol::auth::register::ServeEvent;
+    use protocol::auth::RegisterResponse;
     use serial_test_derive::serial;
     use sig::sign_ser as sign;
     use std::convert::TryInto;
@@ -138,13 +138,13 @@ mod tests {
         let a_uid: UserId = "a".try_into().expect(womp!());
         let a_kp = sig::KeyPair::gen_new();
         let a_init = sign(&a_kp, a_uid);
-        assert_eq!(wa!(client.new_user(a_init)), ServeEvent::Success);
+        assert_eq!(wa!(client.new_user(a_init)), RegisterResponse::Success);
         assert!(wa!(client.one_user_exists(&a_uid)));
 
         let b_uid: UserId = "b".try_into().expect(womp!());
         let b_kp = sig::KeyPair::gen_new();
         let b_init = sign(&b_kp, b_uid);
-        assert_eq!(wa!(client.new_user(b_init)), ServeEvent::Success);
+        assert_eq!(wa!(client.new_user(b_init)), RegisterResponse::Success);
 
         assert!(wa!(client.many_users_exist(vec![a_uid, b_uid])));
 
@@ -162,14 +162,14 @@ mod tests {
         assert!(!wa!(client.one_key_exists(a_kp.public())));
 
         let a_init = sign(&a_kp, a_uid);
-        assert_eq!(wa!(client.new_user(a_init)), ServeEvent::Success);
+        assert_eq!(wa!(client.new_user(a_init)), RegisterResponse::Success);
         assert!(wa!(client.one_key_exists(a_kp.public())));
 
         let b_uid: UserId = "b".try_into().expect(womp!());
         let b_kp = sig::KeyPair::gen_new();
         assert!(!wa!(client.one_key_exists(b_kp.public())));
         let b_init = sign(&b_kp, b_uid);
-        assert_eq!(wa!(client.new_user(b_init)), ServeEvent::Success);
+        assert_eq!(wa!(client.new_user(b_init)), RegisterResponse::Success);
         assert!(wa!(
             client.many_keys_exist(vec![*a_kp.public(), *b_kp.public()])
         ));

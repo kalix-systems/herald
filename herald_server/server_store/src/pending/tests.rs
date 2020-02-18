@@ -2,7 +2,7 @@ use super::*;
 use crate::tests::get_client;
 use crate::{w, wa};
 use futures::stream::iter;
-use protocol::auth::register::ServeEvent;
+use protocol::auth::RegisterResponse;
 use serial_test_derive::serial;
 use sig::sign_ser as sign;
 use std::collections::BTreeSet as Set;
@@ -192,11 +192,11 @@ async fn many_users() {
 
     assert!(wa!(client.add_to_pending_and_get_valid_devs(&recip, &push)).is_missing());
 
-    assert_eq!(wa!(client.new_user(a_init)), ServeEvent::Success);
-    assert_eq!(wa!(client.new_user(b_init)), ServeEvent::Success);
+    assert_eq!(wa!(client.new_user(a_init)), RegisterResponse::Success);
+    assert_eq!(wa!(client.new_user(b_init)), RegisterResponse::Success);
     assert_eq!(
         client.new_user(c_init).await.expect(womp!()),
-        ServeEvent::Success
+        RegisterResponse::Success
     );
 
     let devs = match wa!(client.add_to_pending_and_get_valid_devs(&recip, &push)) {

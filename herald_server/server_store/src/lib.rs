@@ -148,7 +148,7 @@ fn slice_iter<'a>(
 #[cfg(test)]
 pub(crate) mod tests {
     use super::*;
-    use protocol::auth::register::ServeEvent;
+    use protocol::auth::RegisterResponse;
     use serial_test_derive::serial;
     use sig::sign_ser as sign;
     use std::convert::TryInto;
@@ -188,7 +188,7 @@ pub(crate) mod tests {
 
         assert!(wa!(client.user_of(pk)).is_none());
 
-        assert_eq!(wa!(client.new_user(init)), ServeEvent::Success);
+        assert_eq!(wa!(client.new_user(init)), RegisterResponse::Success);
 
         assert_eq!(wa!(client.user_of(pk)), Some(uid));
     }
@@ -206,7 +206,7 @@ pub(crate) mod tests {
 
         assert!(!wa!(client.key_is_valid(pk)));
 
-        assert_eq!(wa!(client.new_user(init)), ServeEvent::Success);
+        assert_eq!(wa!(client.new_user(init)), RegisterResponse::Success);
 
         assert!(wa!(client.key_is_valid(pk)));
     }
@@ -227,7 +227,7 @@ pub(crate) mod tests {
 
         assert!(!wa!(client.key_is_valid_for_user(&pk, &uid)));
 
-        assert_eq!(wa!(client.new_user(init)), ServeEvent::Success);
+        assert_eq!(wa!(client.new_user(init)), RegisterResponse::Success);
 
         assert!(!wa!(client.key_is_valid_for_user(&pk, &other_uid)));
         assert!(wa!(client.key_is_valid_for_user(&pk, &uid)));
