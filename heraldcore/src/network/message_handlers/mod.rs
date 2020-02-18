@@ -1,7 +1,11 @@
 use super::*;
 use crate::types::cmessages;
 use crypto_store::prelude as cstore;
-use network_types::{cmessages::ConversationMessage, dmessages::DeviceMessage, Substance};
+use network_types::{
+    cmessages::ConversationMessage,
+    dmessages::{self, DeviceMessage},
+    Substance,
+};
 use ratchet_chat::protocol as proto;
 
 #[derive(Default, Debug)]
@@ -100,8 +104,6 @@ fn decode_push(
 // mod content_handlers;
 // use content_handlers::handle_content;
 
-// pub(super) fn handle_push(ts:Time,msg:Bytes,
-
 // pub(super) fn handle_cmessage(
 //     ts: Time,
 //     msg: Bytes,
@@ -153,37 +155,36 @@ fn decode_push(
 //     Ok(ev)
 // }
 
-// pub(super) fn handle_dmessage(
-//     _: Time,
-//     msg: DeviceMessage,
-// ) -> Result<Event, HErr> {
-//     let mut ev = Event::default();
+pub(super) fn handle_dmessage(
+    _: Time,
+    from: GlobalId,
+    msg: DeviceMessage,
+) -> Result<Event, HErr> {
+    let mut ev = Event::default();
 
-//     let (from, msg) = w!(dmessages::open(msg));
-//     let GlobalId { uid, .. } = from;
+    let GlobalId { uid, .. } = from;
 
-//     match msg {
-//         DeviceMessageBody::Req(cr) => {
-//             let dmessages::UserReq { cid } = cr;
-//             let (user, conversation) = w!(crate::user::UserBuilder::new(uid)
-//                 .pairwise_conversation(cid)
-//                 .add());
+    match msg {
+        DeviceMessage::Req(cr) => {
+            let dmessages::UserReq { cid } = cr;
+            let (user, conversation) = w!(crate::user::UserBuilder::new(uid)
+                .pairwise_conversation(cid)
+                .add());
 
-//             let coretypes::conversation::Conversation { meta, .. } = conversation;
-//             w!(chainkeys::store_state(cid, &ratchet));
+            let coretypes::conversation::Conversation { meta, .. } = conversation;
 
-//             ev.notifications
-//                 .push(Notification::NewUser(Box::new((user, meta))));
+            ev.notifications
+                .push(Notification::NewUser(Box::new((user, meta))));
 
-//             ev.replies.push((
-//                 cid,
-//                 ConversationMessage::Message(NetContent::UserReqAck(cmessages::UserReqAck(true))),
-//             ))
-//         }
-//     }
+            ev.replies.push((
+                cid,
+                ConversationMessage::Message(NetContent::UserReqAck(cmessages::UserReqAck(true))),
+            ))
+        }
+    }
 
-//     Ok(ev)
-// }
+    Ok(ev)
+}
 
 // fn form_ack(mid: MsgId) -> ConversationMessage {
 //     ConversationMessage::Message(NetContent::Receipt(cmessages::Receipt {
