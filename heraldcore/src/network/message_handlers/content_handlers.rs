@@ -112,7 +112,7 @@ fn handle_msg(
 
             if let Some(msg) = w!(builder.store()) {
                 ev.notifications.push(Notification::NewMsg(Box::new(msg)));
-                ev.replies.push((cid, form_ack(mid)));
+                ev.push_cm(cid, &form_ack(mid));
             }
         }
 

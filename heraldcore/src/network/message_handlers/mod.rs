@@ -8,41 +8,6 @@ use network_types::{
 };
 use ratchet_chat::protocol as proto;
 
-#[derive(Default, Debug)]
-struct PushResult {
-    substance: Option<Substance>,
-    outbox: Vec<(Recip, proto::Msg)>,
-}
-
-impl PushResult {
-    fn add_msg_to_self(
-        &mut self,
-        msg: proto::Msg,
-    ) -> Result<(), HErr> {
-        let uid = w!(config::id());
-        self.outbox.push((Recip::One(SingleRecip::User(uid)), msg));
-        Ok(())
-    }
-
-    fn add_msg_to_user(
-        &mut self,
-        to: UserId,
-        msg: proto::Msg,
-    ) -> Result<(), HErr> {
-        self.outbox.push((Recip::One(SingleRecip::User(to)), msg));
-        Ok(())
-    }
-
-    fn add_msg_to_device(
-        &mut self,
-        to: sig::PublicKey,
-        msg: proto::Msg,
-    ) -> Result<(), HErr> {
-        self.outbox.push((Recip::One(SingleRecip::Key(to)), msg));
-        Ok(())
-    }
-}
-
 fn decode_push(
     Push {
         tag,
@@ -50,8 +15,9 @@ fn decode_push(
         msg,
         gid: from,
     }: Push
-) -> Result<PushResult, HErr> {
-    let mut res = PushResult::default();
+) -> Result<(Option<Substance>, Event), HErr> {
+    let mut ev = Event::default();
+    let mut substance = None;
 
     let uid = w!(config::id());
     let kp = w!(config::keypair());
@@ -76,21 +42,21 @@ fn decode_push(
     };
 
     if let Some(ack) = ack {
-        w!(res.add_msg_to_device(from.did, proto::Msg::Ack(ack)));
+        ev.add_msg_to_device(from.did, proto::Msg::Ack(ack));
     }
 
     if let Some(forward) = forward {
-        w!(res.add_msg_to_self(forward))
+        w!(ev.add_msg_to_self(forward))
     }
 
     if let Some(response) = response {
-        w!(res.add_msg_to_user(from.uid, response));
+        ev.add_msg_to_user(from.uid, response);
     }
 
     if let Some(msg) = output {
         match kson::from_bytes(msg) {
             Ok(s) => {
-                res.substance.replace(s);
+                substance.replace(s);
             }
             Err(e) => {
                 todo!();
@@ -98,7 +64,7 @@ fn decode_push(
         }
     }
 
-    Ok(res)
+    Ok((substance, ev))
 }
 
 mod content_handlers;
@@ -172,10 +138,10 @@ fn handle_dmessage(
             ev.notifications
                 .push(Notification::NewUser(Box::new((user, meta))));
 
-            ev.replies.push((
+            w!(ev.push_cm(
                 cid,
-                ConversationMessage::Message(NetContent::UserReqAck(cmessages::UserReqAck(true))),
-            ))
+                &ConversationMessage::Message(NetContent::UserReqAck(cmessages::UserReqAck(true))),
+            ));
         }
     }
 
