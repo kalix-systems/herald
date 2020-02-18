@@ -28,7 +28,7 @@ use message_handlers::*;
 
 mod message_senders;
 // pub(crate) use message_senders::send_cmessage;
-// pub use message_senders::SendOutcome;
+pub use message_senders::SendOutcome;
 use message_senders::*;
 
 mod event;

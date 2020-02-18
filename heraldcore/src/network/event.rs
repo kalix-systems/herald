@@ -24,26 +24,31 @@ impl Event {
     /// Sends replies to inbound messages and calls `f`, passing each notification in as an
     /// argument.
     pub fn execute(self) -> Result<(), HErr> {
-        todo!()
-        // let Event {
-        //     notifications,
-        //     errors,
-        //     replies,
-        // } = self;
+        let Event {
+            notifications,
+            errors,
+            outbox,
+        } = self;
 
-        // for note in notifications {
-        //     crate::push(note);
-        // }
+        let from = w!(crate::config::gid());
 
-        // for herr in errors {
-        //     crate::err(herr);
-        // }
+        for note in notifications {
+            crate::push(note);
+        }
 
-        // for (cid, content) in replies {
-        //     w!(send_cmessage(cid, &content));
-        // }
+        for herr in errors {
+            crate::err(herr);
+        }
 
-        // Ok(())
+        for (recip, msg) in outbox {
+            w!(helper::push(&push::Req {
+                from,
+                to: recip,
+                msg: kson::to_vec(&msg).into()
+            }));
+        }
+
+        Ok(())
     }
 
     pub fn add_msg_to_self(
