@@ -216,3 +216,10 @@ fn profile_change(
     }
     Ok(())
 }
+
+fn form_ack(mid: MsgId) -> ConversationMessage {
+    ConversationMessage::Message(NetContent::Receipt(cmessages::Receipt {
+        of: mid,
+        stat: ReceiptStatus::Received,
+    }))
+}

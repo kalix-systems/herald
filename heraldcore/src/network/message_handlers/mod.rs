@@ -101,61 +101,57 @@ fn decode_push(
     Ok(res)
 }
 
-// mod content_handlers;
-// use content_handlers::handle_content;
+mod content_handlers;
+use content_handlers::handle_content;
 
-// pub(super) fn handle_cmessage(
-//     ts: Time,
-//     msg: Bytes,
-// ) -> Result<Event, HErr> {
-//     use ConversationMessage::*;
-//     let mut ev = Event::default();
+fn handle_cmessage(
+    ts: Time,
+    cid: ConversationId,
+    GlobalId { uid, did: _ }: GlobalId,
+    msg: ConversationMessage,
+) -> Result<Event, HErr> {
+    use ConversationMessage::*;
+    let mut ev = Event::default();
 
-//     let (cid, GlobalId { uid, .. }, msg) = w!(cmessages::open(cm));
+    match msg {
+        AddedToConvo { info } => {
+            use crate::types::cmessages::AddedToConvo;
 
-//     match msg {
-//         NewKey(nk) => w!(crate::user_keys::add_keys(uid, &[nk.0])),
-//         DepKey(dk) => w!(crate::user_keys::deprecate_keys(&[dk.0])),
-//         AddedToConvo { info } => {
-//             use crate::types::cmessages::AddedToConvo;
+            let AddedToConvo {
+                members,
+                cid,
+                title,
+                picture,
+                expiration_period,
+            } = *info;
 
-//             let AddedToConvo {
-//                 members,
-//                 cid,
-//                 title,
-//                 picture,
-//                 expiration_period,
-//             } = *info;
+            let mut conv_builder = crate::conversation::ConversationBuilder::new();
+            conv_builder
+                .conversation_id(cid)
+                .override_members(members)
+                .expiration_period(expiration_period);
 
-//             let mut conv_builder = crate::conversation::ConversationBuilder::new();
-//             conv_builder
-//                 .conversation_id(cid)
-//                 .override_members(members)
-//                 .expiration_period(expiration_period);
+            conv_builder.title = title;
 
-//             conv_builder.title = title;
+            conv_builder.picture = match picture {
+                Some(bytes) => Some(w!(image_utils::update_picture_buf(&bytes))),
+                None => None,
+            };
 
-//             conv_builder.picture = match picture {
-//                 Some(bytes) => Some(w!(image_utils::update_picture_buf(&bytes))),
-//                 None => None,
-//             };
+            let mut db = w!(crate::db::Database::get());
+            let conv = w!(conv_builder.add_db(&mut db));
 
-//             let mut db = w!(crate::db::Database::get());
-//             let conv = w!(conv_builder.add_db(&mut db));
+            ev.notifications
+                .push(Notification::NewConversation(conv.meta));
+        }
 
-//             w!(chainkeys::store_state(cid, &ratchet));
+        Message(content) => w!(handle_content(cid, uid, ts, &mut ev, content)),
+    }
 
-//             ev.notifications
-//                 .push(Notification::NewConversation(conv.meta));
-//         }
+    Ok(ev)
+}
 
-//         Message(content) => w!(handle_content(cid, uid, ts, &mut ev, content)),
-//     }
-
-//     Ok(ev)
-// }
-
-pub(super) fn handle_dmessage(
+fn handle_dmessage(
     _: Time,
     from: GlobalId,
     msg: DeviceMessage,
@@ -185,10 +181,3 @@ pub(super) fn handle_dmessage(
 
     Ok(ev)
 }
-
-// fn form_ack(mid: MsgId) -> ConversationMessage {
-//     ConversationMessage::Message(NetContent::Receipt(cmessages::Receipt {
-//         of: mid,
-//         stat: ReceiptStatus::Received,
-//     }))
-// }
