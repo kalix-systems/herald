@@ -66,28 +66,30 @@ pub fn login() -> Result<(), HErr> {
         }
     }
 
-    // let ev = w!(catchup(&mut ws));
+    let ev = w!(catchup(&mut ws));
 
     CAUGHT_UP.store(true, Ordering::Release);
 
-    // // clear pending
-    // for (tag, cid, content) in w!(pending::get_pending()) {
-    //     w!(send_cmessage(cid, &content));
-    //     w!(pending::remove_pending(tag));
-    // }
+    // clear pending
+    for (tag, cid, content) in w!(pending::get_pending()) {
+        w!(send_cmessage(cid, content));
+        w!(pending::remove_pending(tag));
+    }
 
-    // // send read receipts, etc
-    // w!(ev.execute());
+    // send read receipts, etc
+    w!(ev.execute());
 
-    // std::thread::spawn(move || {
-    //     move || -> Result<(), HErr> {
-    //         loop {
-    //             w!(w!(catchup(&mut ws)).execute());
-    //         }
-    //     }()
-    //     .unwrap_or_else(|e| eprintln!("login connection closed with message: {}", e));
-    //     CAUGHT_UP.store(false, Ordering::Release);
-    // });
+    std::thread::spawn(move || {
+        move || -> Result<(), HErr> {
+            loop {
+                let push = recv!(ws, Push);
+                let ev = w!(handle_push(push));
+                w!(ev.execute());
+            }
+        }()
+        .unwrap_or_else(|e| eprintln!("login connection closed with message: {}", e));
+        CAUGHT_UP.store(false, Ordering::Release);
+    });
 
     Ok(())
 }
@@ -111,37 +113,27 @@ fn sock_send_msg<S: websocket::stream::Stream, T: Ser>(
     Ok(())
 }
 
-// fn handle_push(push: &Push) -> Result<Event, HErr> {
-//     match push.tag {
-//         PushTag::User => {
-//             let umsg = w!(kson::from_bytes(push.msg.clone()));
-//             handle_cmessage(push.timestamp, umsg)
-//         }
-//         PushTag::Device => {
-//             let dmsg = w!(kson::from_bytes(push.msg.clone()));
-//             handle_dmessage(push.timestamp, dmsg)
-//         }
-//     }
-// }
+fn catchup<S: websocket::stream::Stream>(ws: &mut wsclient::Client<S>) -> Result<Event, HErr> {
+    use catchup::*;
 
-// fn catchup<S: websocket::stream::Stream>(ws: &mut wsclient::Client<S>) -> Result<Event, HErr> {
-//     use catchup::*;
+    let mut ev = Event::default();
+    while Catchup::NewMessages == w!(sock_get_msg(ws)) {
+        let pushes: Vec<Push> = w!(sock_get_msg(ws));
+        let mut ev = Event::default();
+        for push in pushes {
+            let ev_ = match handle_push(push) {
+                Ok(ev) => {
+                    w!(sock_send_msg(ws, &CatchupAck::Success));
+                    ev
+                }
+                Err(e) => {
+                    w!(sock_send_msg(ws, &CatchupAck::Failure));
+                    return Err(e.into());
+                }
+            };
+            ev.merge(ev_);
+        }
+    }
 
-//     let mut ev = Event::default();
-
-//     while let Catchup::Messages(p) = w!(sock_get_msg(ws)) {
-//         let len = p.len() as u64;
-//         for push in p.iter() {
-//             match handle_push(push) {
-//                 Ok(e2) => ev.merge(e2),
-//                 Err(e) => {
-//                     eprintln!("error while catching up, error was:\n{}", e);
-//                     ev.errors.push(e);
-//                 }
-//             }
-//         }
-//         w!(sock_send_msg(ws, &CatchupAck(len)));
-//     }
-
-//     Ok(ev)
-// }
+    Ok(ev)
+}

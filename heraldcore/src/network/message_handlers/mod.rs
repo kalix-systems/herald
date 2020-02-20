@@ -8,6 +8,20 @@ use network_types::{
 };
 use ratchet_chat::protocol as proto;
 
+pub(crate) fn handle_push(push: Push) -> Result<Event, HErr> {
+    let ts = push.timestamp;
+    let from = push.gid;
+    let (substance, mut event) = w!(decode_push(push));
+    if let Some(substance) = substance {
+        let e2 = match substance {
+            Substance::Cm { cid, msg } => w!(handle_cmessage(ts, from, cid, msg)),
+            Substance::Um(um) => w!(handle_umessage(ts, from, um)),
+        };
+        event.merge(e2);
+    }
+    Ok(event)
+}
+
 fn decode_push(
     Push {
         tag,
@@ -57,6 +71,7 @@ fn decode_push(
                 substance.replace(s);
             }
             Err(e) => {
+                // not sure what to do here yet
                 todo!();
             }
         }
