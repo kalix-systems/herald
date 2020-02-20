@@ -73,6 +73,8 @@ pub enum HErr {
     TError(#[from] TransitError<crypto_store::Error>),
     #[error("Cryptographic payload error: {0}")]
     PayloadError(#[from] PayloadError<crypto_store::Error>),
+    #[error("Credential store error: {0}")]
+    CryptoStoreError(#[from] crypto_store::Error),
 }
 
 impl From<image_utils::ImageError> for HErr {

@@ -59,14 +59,15 @@ pub fn dep_key(to_dep: sig::PublicKey) -> Result<PKIResponse, HErr> {
     if res == PKIResponse::Success {
         store.extend_sigchain(gid.uid, update.clone());
         let as_msg = proto::Msg::SigUpdate(update);
-        // todo: get all relevant uids from crypto store here
-        let users: Vec<UserId> = todo!();
+        let users: Vec<UserId> = w!(store.get_all_users());
         w!(helper::push(&push::Req {
             from: gid,
             to: Recip::Many(Recips::Users(users)),
             msg: kson::to_vec(&as_msg).into(),
         }));
     }
+
+    w!(store.commit());
 
     Ok(res)
 }
