@@ -99,6 +99,13 @@ pub mod push {
     }
 }
 
+pub mod register {
+    use super::*;
+
+    pub type Req = Signed<UserId>;
+    pub type Res = crate::protocol::auth::RegisterResponse;
+}
+
 macro_rules! proto_enum {
     ($name:ident, $inner:ident, | $($extra:tt)* ) => {
         #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]

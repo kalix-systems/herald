@@ -79,30 +79,35 @@ pub fn dep_key(to_dep: sig::PublicKey) -> Result<PKIResponse, HErr> {
 //     Ok(w!(helper::new_key(&req)).0)
 // }
 
-// /// Registers new user on the server.
-// pub fn register(
-//     uid: UserId,
-//     home_server: Option<SocketAddr>,
-// ) -> Result<register::Res, HErr> {
-//     kcl::init();
+/// Registers new user on the server.
+pub fn register(
+    uid: UserId,
+    home_server: Option<SocketAddr>,
+) -> Result<protocol::auth::RegisterResponse, HErr> {
+    use protocol::auth::RegisterResponse;
 
-//     let home_server = home_server.unwrap_or_else(|| *default_server());
+    kcl::init();
 
-//     let kp = sig::KeyPair::gen_new();
-//     let sig = sign_ser(&kp, *kp.public());
-//     let req = register::Req(uid, sig);
+    let home_server = home_server.unwrap_or_else(|| *default_server());
 
-//     let res = w!(helper::register(&req, home_server));
+    let kp = sig::KeyPair::gen_new();
 
-//     // TODO: retry if this fails?
-//     if let register::Res::Success = &res {
-//         w!(crate::config::ConfigBuilder::new(uid, kp)
-//             .home_server(home_server)
-//             .add());
-//     }
+    let sig = sign_ser(&kp, uid);
 
-//     Ok(res)
-// }
+    get_crypto_conn!(store);
+
+    let res = w!(helper::register(&sig, home_server));
+
+    // TODO: retry if this fails?
+    if res == RegisterResponse::Success {
+        w!(store.start_sigchain(sig));
+        w!(crate::config::ConfigBuilder::new(uid, kp)
+            .home_server(home_server)
+            .add());
+    }
+
+    Ok(res)
+}
 
 // /// Sends a message read receipt
 // pub fn send_read_receipt(
