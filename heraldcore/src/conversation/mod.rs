@@ -1,5 +1,6 @@
 use super::*;
 use crate::{db::Database, errors::HErr, types::*};
+use coremacros::*;
 pub use coretypes::conversation::*;
 use herald_common::*;
 use rusqlite::{params, NO_PARAMS};
@@ -13,7 +14,7 @@ mod builder;
 pub use builder::*;
 
 /// Starts the conversation, sending it to the proposed members.
-pub fn start(conversation: Conversation) -> Result<NetworkAction, HErr> {
+pub fn start(conversation: Conversation) -> Result<(), HErr> {
     use std::fs;
 
     let Conversation { members, meta } = conversation;
@@ -25,9 +26,6 @@ pub fn start(conversation: Conversation) -> Result<NetworkAction, HErr> {
         expiration_period,
         ..
     } = meta;
-
-    // let ratchet = RatchetState::new();
-    // chainkeys::store_state(cid, &ratchet)?;
 
     let picture = match picture_path {
         Some(path) => Some(fs::read(path)?),
@@ -44,7 +42,9 @@ pub fn start(conversation: Conversation) -> Result<NetworkAction, HErr> {
         picture,
     }));
 
-    Ok(act)
+    w!(network::run_action(act));
+
+    Ok(())
 }
 
 /// Get conversation metadata
@@ -57,7 +57,7 @@ pub fn meta(conversation_id: &ConversationId) -> Result<ConversationMeta, HErr> 
 pub fn set_title(
     conversation_id: &ConversationId,
     title: Option<String>,
-) -> Result<NetworkAction, HErr> {
+) -> Result<(), HErr> {
     let mut db = Database::get()?;
     let update = settings::db::update_title(&db, title.clone(), conversation_id)?;
     let (mid, expiration) = crate::message::db::outbound_aux(
@@ -66,19 +66,23 @@ pub fn set_title(
         conversation_id,
     )?;
 
-    Ok(NetworkAction::UpdateSettings {
+    let act = NetworkAction::UpdateSettings {
         mid,
         cid: *conversation_id,
         expiration,
         update,
-    })
+    };
+
+    w!(network::run_action(act));
+
+    Ok(())
 }
 
 /// Sets picture for a conversation
 pub fn set_picture(
     conversation_id: &ConversationId,
     picture: Option<image_utils::ProfilePicture>,
-) -> Result<(Option<String>, NetworkAction), HErr> {
+) -> Result<Option<String>, HErr> {
     let mut db = Database::get()?;
 
     let (update, path) = settings::db::update_picture(&db, picture, conversation_id)?;
@@ -96,14 +100,16 @@ pub fn set_picture(
         update,
     };
 
-    Ok((path, act))
+    w!(network::run_action(act));
+
+    Ok(path)
 }
 
 /// Sets expiration period for a conversation
 pub fn set_expiration_period(
     conversation_id: &ConversationId,
     expiration_period: ExpirationPeriod,
-) -> Result<NetworkAction, HErr> {
+) -> Result<(), HErr> {
     let mut db = Database::get()?;
 
     let update = settings::db::update_expiration(&db, expiration_period, conversation_id)?;
@@ -119,7 +125,10 @@ pub fn set_expiration_period(
         expiration,
         update,
     };
-    Ok(act)
+
+    w!(network::run_action(act));
+
+    Ok(())
 }
 
 /// Sets muted status of a conversation

@@ -58,7 +58,7 @@ impl Herald {
         server_addr: String,
         server_port: String,
     ) {
-        use register::*;
+        use protocol::auth::*;
 
         let addr = if !(server_addr.is_empty() && server_port.is_empty()) {
             Some(err!(format!("{}:{}", server_addr, server_port).parse()))
@@ -70,16 +70,13 @@ impl Herald {
 
         spawn!(
             match push_err!(net::register(uid, addr), "Registration failed") {
-                Some(Res::UIDTaken) => {
+                Some(RegisterResponse::Taken) => {
                     push(shared::RegistrationFailureCode::UserIdTaken);
                 }
-                Some(Res::KeyTaken) => {
-                    push(shared::RegistrationFailureCode::KeyTaken);
-                }
-                Some(Res::BadSig(_)) => {
+                Some(RegisterResponse::BadSig(_)) => {
                     push(shared::RegistrationFailureCode::BadSignature);
                 }
-                Some(Res::Success) => {
+                Some(RegisterResponse::Success) => {
                     push(shared::Update::RegistrationSuccess);
                 }
                 None => {

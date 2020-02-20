@@ -12,27 +12,27 @@ pub enum NetworkAction {
         expiration: Option<Time>,
         update: cmessages::GroupSettingsUpdate,
     },
-    Receipt {
-        cid: ConversationId,
-        msg_id: MsgId,
-    },
-    TypingIn(ConversationId),
-    UserReq {
-        uid: UserId,
-        cid: ConversationId,
-    },
-    Message {
-        cid: ConversationId,
-        msg: cmessages::Msg,
-    },
-    React {
-        cid: ConversationId,
-        msg_id: MsgId,
-        body: String,
-    },
-    RemoveReact {
-        cid: ConversationId,
-        msg_id: MsgId,
-        body: String,
-    },
+    // Receipt {
+    //     cid: ConversationId,
+    //     msg_id: MsgId,
+    // },
+    // TypingIn(ConversationId),
+    // UserReq {
+    //     uid: UserId,
+    //     cid: ConversationId,
+    // },
+    // Message {
+    //     cid: ConversationId,
+    //     msg: cmessages::Msg,
+    // },
+    // React {
+    //     cid: ConversationId,
+    //     msg_id: MsgId,
+    //     body: String,
+    // },
+    // RemoveReact {
+    //     cid: ConversationId,
+    //     msg_id: MsgId,
+    //     body: String,
+    // },
 }

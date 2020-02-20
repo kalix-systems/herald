@@ -272,6 +272,38 @@ pub fn send_reaction_removal(
     Ok(())
 }
 
+pub fn run_action(act: NetworkAction) -> Result<(), HErr> {
+    match act {
+        NetworkAction::UpdateProfile(pc) => {
+            w!(send_profile_update(pc));
+        }
+        NetworkAction::StartConvo(convo) => {
+            let convos = w!(crate::conversation::get_pairwise_conversations(
+                &convo.members
+            ));
+
+            for cid in convos {
+                w!(send_cmessage(
+                    cid,
+                    ConversationMessage::AddedToConvo {
+                        info: convo.clone()
+                    }
+                ));
+            }
+        }
+        NetworkAction::UpdateSettings {
+            mid,
+            cid,
+            expiration,
+            update,
+        } => {
+            w!(send_group_settings_message(mid, cid, expiration, update));
+        }
+    }
+
+    Ok(())
+}
+
 pub(crate) fn server_url(ext: &str) -> String {
     format!("http://{}/{}", home_server(), ext)
 }

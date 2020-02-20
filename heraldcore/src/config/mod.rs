@@ -1,6 +1,7 @@
 use super::*;
 use crate::{conversation::ExpirationPeriod, db::Database, errors::*, types::*};
 use cmessages::ProfileChanged;
+use coremacros::*;
 pub use coretypes::config::Config;
 use herald_common::*;
 use rusqlite::NO_PARAMS;
@@ -154,14 +155,16 @@ pub fn set_name(name: String) -> Result<NetworkAction, HErr> {
 /// Updates user's profile picture
 pub fn set_profile_picture(
     profile_picture: Option<image_utils::ProfilePicture>
-) -> Result<(Option<String>, NetworkAction), HErr> {
+) -> Result<Option<String>, HErr> {
     let db = Database::get()?;
     let path = db::set_profile_picture(&db, profile_picture)?;
 
     let buf = path.as_ref().map(std::fs::read).transpose()?;
     let act = NetworkAction::UpdateProfile(ProfileChanged::Picture(buf));
 
-    Ok((path, act))
+    w!(network::run_action(act));
+
+    Ok(path)
 }
 
 /// Update user's preferred expiration period
