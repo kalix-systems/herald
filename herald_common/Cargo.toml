@@ -10,11 +10,10 @@ edition = "2018"
 anyhow = "1.0"
 
 [dependencies.rusqlite]
-# version = "0.21"
-git = "https://github.com/jgallagher/rusqlite.git"
+version = "0.21"
 optional = true
 default_features = false
-features = ["functions"]
+features = ["functions", "bundled", "buildtime_bindgen"]
 
 [dependencies.kson]
 path = "../kson"
