@@ -157,18 +157,15 @@ pub fn send_typing_indicator(cid: ConversationId) -> Result<(), HErr> {
     Ok(())
 }
 
-// /// Sends a user request to `uid` with a proposed conversation id `cid`.
-// pub fn send_user_req(
-//     uid: UserId,
-//     cid: ConversationId,
-// ) -> Result<(), HErr> {
-//     let ratchet = RatchetState::new();
-//     w!(chainkeys::store_state(cid, &ratchet));
+/// Sends a user request to `uid` with a proposed conversation id `cid`.
+pub fn send_user_req(
+    uid: UserId,
+    cid: ConversationId,
+) -> Result<(), HErr> {
+    let req = network_types::umessages::UserReq { cid };
 
-//     let req = dmessages::UserReq { cid };
-
-//     send_umessage(uid, &DeviceMessageBody::Req(req))
-// }
+    send_umessage(uid, UserMessage::Req(req))
+}
 
 pub(crate) fn send_normal_message(
     cid: ConversationId,
