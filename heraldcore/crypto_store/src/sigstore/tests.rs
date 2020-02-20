@@ -73,4 +73,5 @@ fn chain_ops() {
 
     assert!(!conn.key_is_valid(*kp1.public(), user_id).expect(womp!()));
     assert_eq!(conn.all_active_keys().expect(womp!()), vec![*kp2.public()]);
+    assert_eq!(conn.get_all_users().expect(womp!()), vec![user_id]);
 }

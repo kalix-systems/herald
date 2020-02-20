@@ -6,7 +6,7 @@ use herald_common::{
 };
 use ratchet_chat::protocol::SigStore;
 use rusqlite::NO_PARAMS;
-use std::ops::Not;
+use std::{convert::TryFrom, ops::Not};
 
 use Error::{BadKey, BadSignature};
 
@@ -128,6 +128,21 @@ impl<'conn> SigStore for Conn<'conn> {
             let key = w!(PK::from_slice(&raw_key).ok_or(BadKey));
 
             Ok(key)
+        })
+        .collect()
+    }
+}
+
+impl<'conn> Conn<'conn> {
+    pub fn get_all_users(&mut self) -> Result<Vec<UserId>, <Self as StoreLike>::Error> {
+        let mut stmt = st!(self, "sigchain", "all_users");
+
+        let res = w!(stmt.query_map(NO_PARAMS, |row| { row.get::<_, String>("user_id") }));
+        res.map(|raw_uid| {
+            let raw_uid = w!(raw_uid);
+            let uid = w!(UserId::try_from(raw_uid.as_str()));
+
+            Ok(uid)
         })
         .collect()
     }

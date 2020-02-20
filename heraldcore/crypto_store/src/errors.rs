@@ -11,4 +11,6 @@ pub enum Error {
     BadSignature,
     #[error("Bad key")]
     BadKey,
+    #[error("Invalid user id")]
+    InvalidUserId(#[from] InvalidUserId),
 }
