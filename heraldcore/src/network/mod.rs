@@ -44,6 +44,11 @@ macro_rules! get_crypto_conn {
         let mut lock = raw.lock();
         let mut $store = w!(crypto_store::prelude::as_conn(&mut lock));
     };
+    ($lock:ident, $store:ident) => {
+        let raw = crypto_store::prelude::raw_conn();
+        let mut $lock = raw.lock();
+        let mut $store = w!(crypto_store::prelude::as_conn(&mut $lock));
+    };
 }
 
 /// Deprecates key on server.
@@ -164,7 +169,24 @@ pub fn send_user_req(
 ) -> Result<(), HErr> {
     let req = network_types::umessages::UserReq { cid };
 
-    send_umessage(uid, UserMessage::Req(req))
+    let chain = w!(w!(helper::get_sigchain(&uid)).ok_or(HeraldError("missing user".into())));
+    let valid = chain.validate();
+    if valid != SigValid::Yes {
+        return Err(HeraldError("bad sigchain found on server".into()));
+    }
+    let sig::SigChain { initial, sig_chain } = chain;
+
+    get_crypto_conn!(lock, store);
+    w!(store.start_sigchain(initial));
+    for link in sig_chain {
+        w!(store.extend_sigchain(uid, link));
+    }
+    w!(store.commit());
+    drop(lock);
+
+    w!(send_umessage(uid, UserMessage::Req(req)));
+
+    Ok(())
 }
 
 pub(crate) fn send_normal_message(

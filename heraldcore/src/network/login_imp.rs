@@ -47,7 +47,6 @@ pub fn login() -> Result<(), HErr> {
     {
         let res = recv!(ws, ClaimResponse);
         if res != ClaimResponse::Challenge {
-            dbg!(res);
             return Err(HeraldError(
                 "login failed - did you register this device yet?".into(),
             ));
@@ -61,7 +60,6 @@ pub fn login() -> Result<(), HErr> {
     {
         let res = recv!(ws, ChallengeResult);
         if res != ChallengeResult::Success {
-            dbg!(res);
             return Err(HeraldError("login failed - bad sig".into()));
         }
     }
@@ -84,6 +82,8 @@ pub fn login() -> Result<(), HErr> {
             loop {
                 let push = recv!(ws, Push);
                 let ev = w!(handle_push(push));
+                send!(ws, PushAck::Success);
+
                 w!(ev.execute());
             }
         }()

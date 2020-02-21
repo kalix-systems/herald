@@ -151,6 +151,22 @@ fn handle_umessage(
             ev.notifications
                 .push(Notification::NewUser(Box::new((user, meta))));
 
+            let chain =
+                w!(w!(helper::get_sigchain(&from.uid)).ok_or(HeraldError("missing user".into())));
+            let valid = chain.validate();
+            if valid != SigValid::Yes {
+                return Err(HeraldError("bad sigchain found on server".into()));
+            }
+            let sig::SigChain { initial, sig_chain } = chain;
+
+            get_crypto_conn!(lock, store);
+            w!(store.start_sigchain(initial));
+            for link in sig_chain {
+                w!(store.extend_sigchain(uid, link));
+            }
+            w!(store.commit());
+            drop(lock);
+
             w!(ev.push_cm(
                 cid,
                 ConversationMessage::Message(NetContent::UserReqAck(cmessages::UserReqAck(true))),
