@@ -122,10 +122,7 @@ fn catchup<S: websocket::stream::Stream>(ws: &mut wsclient::Client<S>) -> Result
         let mut ev = Event::default();
         for push in pushes {
             let ev_ = match handle_push(push) {
-                Ok(ev) => {
-                    w!(sock_send_msg(ws, &CatchupAck::Success));
-                    ev
-                }
+                Ok(ev) => ev,
                 Err(e) => {
                     w!(sock_send_msg(ws, &CatchupAck::Failure));
                     return Err(e.into());
@@ -133,6 +130,7 @@ fn catchup<S: websocket::stream::Stream>(ws: &mut wsclient::Client<S>) -> Result
             };
             ev.merge(ev_);
         }
+        w!(sock_send_msg(ws, &CatchupAck::Success));
     }
 
     Ok(ev)
