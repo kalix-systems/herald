@@ -73,13 +73,7 @@ pub fn arb_value(
                 .prop_map(Value::Collection),
                 (
                     inner.clone(),
-                    arb_coll(
-                        max_width,
-                        max_width,
-                        inner.clone(),
-                        inner.clone(),
-                        inner.clone()
-                    )
+                    arb_coll(max_width, max_width, inner.clone(), inner.clone(), inner)
                 )
                     .prop_map(|(t, c)| Value::Cons(Box::new(t), c))
             ]

@@ -7,7 +7,7 @@ use parking_lot::Mutex;
 #[derive(Clone, Copy)]
 pub enum RegistrationFailureCode {
     UserIdTaken = 0,
-    KeyTaken = 1,
+    // KeyTaken = 1,
     BadSignature = 2,
     Other = 3,
 }

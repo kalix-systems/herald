@@ -338,7 +338,7 @@ impl DoubleRatchet {
             NextChain(rk, ckr, mks) => {
                 if self.ckr.is_some() && self.nr < h.pn {
                     let ckr = self.ckr.as_ref().ok_or(DecryptError::Uninit)?;
-                    let dhr = self.dhr.as_ref().ok_or(DecryptError::Uninit)?.clone();
+                    let dhr = self.dhr.ok_or(DecryptError::Uninit)?;
                     let (_, prev_mks) = Self::skip_message_keys(ckr, (h.pn - self.nr - 1) as usize);
                     store.extend(dhr, self.nr, prev_mks)?;
                 }

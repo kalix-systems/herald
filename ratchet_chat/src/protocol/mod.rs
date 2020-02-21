@@ -15,6 +15,7 @@ pub struct PayloadId(random::UQ);
 
 pub type Payload = Bytes;
 
+#[allow(clippy::large_enum_variant)]
 #[derive(Ser, De, Eq, PartialEq, Hash, Clone, Debug)]
 pub enum Msg {
     Encrypted {
@@ -98,8 +99,8 @@ pub fn decrypt_payload<S: RatchetStore + dr::KeyStore>(
             let me_as_kx = x25519::KeyPair::from(me.clone());
             let them_as_kx = x25519::PublicKey::from(them);
             let secret = dr::diffie_hellman(&me_as_kx, &them_as_kx);
-            let ratchet = dr::DoubleRatchet::new_bob(secret, me_as_kx, them_as_kx, None);
-            ratchet
+
+            dr::DoubleRatchet::new_bob(secret, me_as_kx, them_as_kx, None)
         });
 
     let decrypted = ratchet.ratchet_decrypt(store, &header, &payload, &ad)?;

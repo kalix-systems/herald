@@ -5,7 +5,7 @@ use crate::{
 };
 use herald_common::*;
 use heraldcore::{
-    config, db,
+    db,
     message::gc,
     network::{self as net},
     updates::Notification,
