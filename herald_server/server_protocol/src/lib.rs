@@ -149,7 +149,9 @@ impl State {
         let mut unsent = &pending[..];
 
         while !unsent.is_empty() {
-            let to_send = &unsent[..catchup::CHUNK_SIZE];
+            let slice_to = unsent.len().min(catchup::CHUNK_SIZE);
+            let (to_send, rest) = unsent.split_at(slice_to);
+            unsent = rest;
 
             send_ser(tx, &Catchup::NewMessages).await?;
             send_ser(tx, &KsonIterator::new(to_send.iter().map(|(p, _)| p))).await?;
@@ -163,8 +165,6 @@ impl State {
                             stream::iter(to_send.iter().map(|(_, id): &(Push, i64)| *id)),
                         )
                         .await?;
-
-                    unsent = &unsent[catchup::CHUNK_SIZE..];
                 }
                 CatchupAck::Failure => {
                     return Err(anyhow!("catchup failed")).context("ack failure");
