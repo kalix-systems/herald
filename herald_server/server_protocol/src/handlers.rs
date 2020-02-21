@@ -97,11 +97,16 @@ impl State {
             msg,
         };
 
+        // TODO Jack fix this
         match self
             .new_connection()
             .await?
-            .add_to_pending_and_get_valid_devs(&to, &psh)
+            .add_to_pending_and_get_valid_devs(&[(&to, &psh)])
             .await?
+            .recv()
+            .await
+            .unwrap()
+            .0
         {
             PushedTo::NoRecipients => Ok(push::Res::Success(timestamp)),
             PushedTo::Missing(m) => Ok(push::Res::Missing(m)),

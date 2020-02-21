@@ -1,6 +1,5 @@
 use super::*;
 use crate::tests::get_client;
-use crate::{w, wa};
 use futures::stream::iter;
 use protocol::auth::RegisterResponse;
 use serial_test_derive::serial;
@@ -19,7 +18,7 @@ impl PushedTo {
 }
 
 fn setup() -> (Push, UserId, sig::KeyPair) {
-    let uid = w!("a".try_into());
+    let uid = "a".try_into().unwrap();
     let kp = sig::KeyPair::gen_new();
     let did = *kp.public();
     let gid = GlobalId { uid, did };
@@ -54,7 +53,7 @@ async fn check_pending(
     devs: Vec<sig::PublicKey>,
 ) {
     for k in devs.into_iter().collect::<Set<_>>() {
-        let pending = wa!(client.get_pending(k));
+        let pending = client.get_pending(k).await.unwrap();
         assert_eq!(pending.len(), 1);
 
         let pending = pending
@@ -65,9 +64,9 @@ async fn check_pending(
             })
             .collect::<Vec<_>>();
 
-        wa!(client.del_pending(k, iter(pending)));
+        client.del_pending(k, iter(pending)).await.unwrap();
 
-        let pending = wa!(client.get_pending(k));
+        let pending = client.get_pending(k).await.unwrap();
         assert!(pending.is_empty());
     }
 }
@@ -75,7 +74,7 @@ async fn check_pending(
 #[tokio::test]
 #[serial]
 async fn one_key() {
-    let mut client = wa!(get_client());
+    let mut client = get_client().await.unwrap();
 
     let (push, a_uid, a_kp) = setup();
 
@@ -86,12 +85,28 @@ async fn one_key() {
 
     let recip = Recip::One(SingleRecip::Key(*a_kp2.public()));
 
-    assert!(wa!(client.add_to_pending_and_get_valid_devs(&recip, &push)).is_missing());
+    assert!(client
+        .add_to_pending_and_get_valid_devs(&[(&recip, &push)])
+        .await
+        .unwrap()
+        .recv()
+        .await
+        .unwrap()
+        .0
+        .is_missing());
 
-    wa!(client.new_user(a_init));
-    wa!(client.add_to_sigchain(a_add));
+    client.new_user(a_init).await.unwrap();
+    client.add_to_sigchain(a_add).await.unwrap();
 
-    let devs = match wa!(client.add_to_pending_and_get_valid_devs(&recip, &push)) {
+    let devs = match client
+        .add_to_pending_and_get_valid_devs(&[(&recip, &push)])
+        .await
+        .unwrap()
+        .recv()
+        .await
+        .unwrap()
+        .0
+    {
         PushedTo::PushedTo { devs, .. } => {
             assert_eq!(&devs, &[*a_kp2.public()]);
             devs
@@ -105,7 +120,7 @@ async fn one_key() {
 #[tokio::test]
 #[serial]
 async fn one_user() {
-    let mut client = wa!(get_client());
+    let mut client = get_client().await.unwrap();
 
     let (push, a_uid, a_kp) = setup();
     let a_init = sign(&a_kp, a_uid);
@@ -116,12 +131,28 @@ async fn one_user() {
 
     let recip = Recip::One(SingleRecip::User(b_uid));
 
-    assert!(wa!(client.add_to_pending_and_get_valid_devs(&recip, &push)).is_missing());
+    assert!(client
+        .add_to_pending_and_get_valid_devs(&[(&recip, &push)])
+        .await
+        .unwrap()
+        .recv()
+        .await
+        .unwrap()
+        .0
+        .is_missing());
 
-    wa!(client.new_user(a_init));
-    wa!(client.new_user(b_init));
+    client.new_user(a_init).await.unwrap();
+    client.new_user(b_init).await.unwrap();
 
-    let devs = match wa!(client.add_to_pending_and_get_valid_devs(&recip, &push)) {
+    let devs = match client
+        .add_to_pending_and_get_valid_devs(&[(&recip, &push)])
+        .await
+        .unwrap()
+        .recv()
+        .await
+        .unwrap()
+        .0
+    {
         PushedTo::PushedTo { devs, .. } => {
             assert_eq!(&devs, &[*b_kp.public()]);
             devs
@@ -135,7 +166,7 @@ async fn one_user() {
 #[tokio::test]
 #[serial]
 async fn many_keys() {
-    let mut client = wa!(get_client());
+    let mut client = get_client().await.unwrap();
 
     let (push, a_uid, a_kp) = setup();
     let a_init = sign(&a_kp, a_uid);
@@ -151,13 +182,29 @@ async fn many_keys() {
     let keys = vec![*a_kp2.public(), *b_kp.public()];
     let recip = Recip::Many(Recips::Keys(keys.clone()));
 
-    assert!(wa!(client.add_to_pending_and_get_valid_devs(&recip, &push)).is_missing());
+    assert!(client
+        .add_to_pending_and_get_valid_devs(&[(&recip, &push)])
+        .await
+        .unwrap()
+        .recv()
+        .await
+        .unwrap()
+        .0
+        .is_missing());
 
-    wa!(client.new_user(a_init));
-    wa!(client.add_to_sigchain(a_add));
-    wa!(client.new_user(b_init));
+    client.new_user(a_init).await.unwrap();
+    client.add_to_sigchain(a_add).await.unwrap();
+    client.new_user(b_init).await.unwrap();
 
-    let devs = match wa!(client.add_to_pending_and_get_valid_devs(&recip, &push)) {
+    let devs = match client
+        .add_to_pending_and_get_valid_devs(&[(&recip, &push)])
+        .await
+        .unwrap()
+        .recv()
+        .await
+        .unwrap()
+        .0
+    {
         PushedTo::PushedTo { devs, .. } => {
             same_devs(&devs, &keys);
             devs
@@ -171,7 +218,7 @@ async fn many_keys() {
 #[tokio::test]
 #[serial]
 async fn many_users() {
-    let mut client = wa!(get_client());
+    let mut client = get_client().await.unwrap();
 
     let (push, a_uid, a_kp) = setup();
     let a_init = sign(&a_kp, a_uid);
@@ -190,16 +237,38 @@ async fn many_users() {
     let users = vec![b_uid, c_uid];
     let recip = Recip::Many(Recips::Users(users.clone()));
 
-    assert!(wa!(client.add_to_pending_and_get_valid_devs(&recip, &push)).is_missing());
+    assert!(client
+        .add_to_pending_and_get_valid_devs(&[(&recip, &push)])
+        .await
+        .unwrap()
+        .recv()
+        .await
+        .unwrap()
+        .0
+        .is_missing());
 
-    assert_eq!(wa!(client.new_user(a_init)), RegisterResponse::Success);
-    assert_eq!(wa!(client.new_user(b_init)), RegisterResponse::Success);
+    assert_eq!(
+        client.new_user(a_init).await.unwrap(),
+        RegisterResponse::Success
+    );
+    assert_eq!(
+        client.new_user(b_init).await.unwrap(),
+        RegisterResponse::Success
+    );
     assert_eq!(
         client.new_user(c_init).await.expect(womp!()),
         RegisterResponse::Success
     );
 
-    let devs = match wa!(client.add_to_pending_and_get_valid_devs(&recip, &push)) {
+    let devs = match client
+        .add_to_pending_and_get_valid_devs(&[(&recip, &push)])
+        .await
+        .unwrap()
+        .recv()
+        .await
+        .unwrap()
+        .0
+    {
         PushedTo::PushedTo { devs, .. } => {
             same_devs(&devs, &keys);
             devs

@@ -2,6 +2,7 @@ use super::*;
 use crate::slice_iter;
 
 mod add_helpers;
+use add_helpers::*;
 
 #[derive(Debug, PartialEq)]
 pub enum PushedTo {
@@ -18,34 +19,60 @@ impl Conn {
     // only adds to pending when it finds all devices
     pub async fn add_to_pending_and_get_valid_devs(
         &mut self,
-        recip: &Recip,
-        Push {
-            tag,
-            timestamp,
-            msg,
-            gid,
-        }: &Push,
-    ) -> Res<PushedTo> {
+        pairs: &[(&Recip, &Push)],
+    ) -> Res<tokio::sync::mpsc::Receiver<(PushedTo, Push)>> {
         use Recip::*;
 
-        match recip {
-            One(single) => {
-                use SingleRecip::*;
+        let (mut sender, recv) = tokio::sync::mpsc::channel(pairs.len());
 
-                match single {
-                    User(uid) => self.one_user(uid, msg, *tag, *timestamp, *gid).await,
-                    Key(key) => self.one_key(key, msg, *tag, *timestamp, *gid).await,
-                }
-            }
-            Many(recips) => {
-                use Recips::*;
+        let mut tx = self.transaction().await?;
 
-                match recips {
-                    Users(uids) => self.many_users(uids, msg, *tag, *timestamp, *gid).await,
-                    Keys(keys) => self.many_keys(keys, msg, *tag, *timestamp, *gid).await,
+        for (recip, push) in pairs {
+            let Push {
+                msg,
+                tag,
+                timestamp,
+                gid,
+            } = push;
+
+            let dev = match recip {
+                One(single) => {
+                    use SingleRecip::*;
+
+                    match single {
+                        User(uid) => one_user(&mut tx, uid, msg, *tag, *timestamp, *gid).await,
+
+                        Key(key) => one_key(&mut tx, key, msg, *tag, *timestamp, *gid).await,
+                    }
                 }
-            }
+
+                Many(recips) => {
+                    use Recips::*;
+
+                    match recips {
+                        Users(uids) => many_users(&mut tx, uids, msg, *tag, *timestamp, *gid).await,
+
+                        Keys(keys) => many_keys(&mut tx, keys, msg, *tag, *timestamp, *gid).await,
+                    }
+                }
+            }?;
+
+            let push = Push {
+                msg: msg.clone(),
+                tag: *tag,
+                timestamp: *timestamp,
+                gid: *gid,
+            };
+
+            sender
+                .send((dev, push))
+                .await
+                .expect("If this happens, it's a probably a tokio mpsc bug");
         }
+
+        tx.commit().await?;
+
+        Ok(recv)
     }
 
     pub async fn get_pending(
