@@ -2,7 +2,7 @@ use super::*;
 use tokio_postgres::Transaction as Tx;
 
 pub(crate) async fn one_key(
-    tx: &mut Tx<'_>,
+    tx: &Tx<'_>,
     key: &sig::PublicKey,
     msg: &Bytes,
     tag: PushTag,
@@ -57,7 +57,7 @@ pub(crate) async fn one_key(
 }
 
 pub(crate) async fn one_user(
-    tx: &mut Tx<'_>,
+    tx: &Tx<'_>,
     uid: &UserId,
     msg: &Bytes,
     tag: PushTag,
@@ -130,7 +130,7 @@ pub(crate) async fn one_user(
 }
 
 pub(crate) async fn many_users(
-    tx: &mut Tx<'_>,
+    tx: &Tx<'_>,
     uids: &[UserId],
     msg: &Bytes,
     tag: PushTag,
@@ -207,7 +207,7 @@ pub(crate) async fn many_users(
 }
 
 pub(crate) async fn many_keys(
-    tx: &mut Tx<'_>,
+    tx: &Tx<'_>,
     keys: &[sig::PublicKey],
     msg: &Bytes,
     tag: PushTag,

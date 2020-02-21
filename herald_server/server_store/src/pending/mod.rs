@@ -23,52 +23,71 @@ impl Conn {
     ) -> Res<tokio::sync::mpsc::Receiver<(PushedTo, Push)>> {
         use Recip::*;
 
-        let (mut sender, recv) = tokio::sync::mpsc::channel(pairs.len());
+        let (sender, recv) = tokio::sync::mpsc::channel(pairs.len());
 
-        let mut tx = self.transaction().await?;
+        let tx = self.transaction().await?;
 
-        for (recip, push) in pairs {
-            let Push {
-                msg,
-                tag,
-                timestamp,
-                gid,
-            } = push;
+        futures::stream::iter(pairs)
+            .map(Ok::<_, Error>)
+            .try_for_each_concurrent(10, {
+                let tx = &tx;
 
-            let dev = match recip {
-                One(single) => {
-                    use SingleRecip::*;
+                move |(recip, push)| {
+                    let mut sender = sender.clone();
 
-                    match single {
-                        User(uid) => one_user(&mut tx, uid, msg, *tag, *timestamp, *gid).await,
+                    async move {
+                        let Push {
+                            msg,
+                            tag,
+                            timestamp,
+                            gid,
+                        } = push;
 
-                        Key(key) => one_key(&mut tx, key, msg, *tag, *timestamp, *gid).await,
+                        let dev = match recip {
+                            One(single) => {
+                                use SingleRecip::*;
+
+                                match single {
+                                    User(uid) => {
+                                        one_user(tx, uid, msg, *tag, *timestamp, *gid).await
+                                    }
+
+                                    Key(key) => one_key(tx, key, msg, *tag, *timestamp, *gid).await,
+                                }
+                            }
+
+                            Many(recips) => {
+                                use Recips::*;
+
+                                match recips {
+                                    Users(uids) => {
+                                        many_users(tx, uids, msg, *tag, *timestamp, *gid).await
+                                    }
+
+                                    Keys(keys) => {
+                                        many_keys(tx, keys, msg, *tag, *timestamp, *gid).await
+                                    }
+                                }
+                            }
+                        }?;
+
+                        let push = Push {
+                            msg: msg.clone(),
+                            tag: *tag,
+                            timestamp: *timestamp,
+                            gid: *gid,
+                        };
+
+                        sender
+                            .send((dev, push))
+                            .await
+                            .expect("If this happens, it's a probably a tokio mpsc bug");
+
+                        Ok(())
                     }
                 }
-
-                Many(recips) => {
-                    use Recips::*;
-
-                    match recips {
-                        Users(uids) => many_users(&mut tx, uids, msg, *tag, *timestamp, *gid).await,
-
-                        Keys(keys) => many_keys(&mut tx, keys, msg, *tag, *timestamp, *gid).await,
-                    }
-                }
-            }?;
-
-            let push = Push {
-                msg: msg.clone(),
-                tag: *tag,
-                timestamp: *timestamp,
-                gid: *gid,
-            };
-
-            sender
-                .send((dev, push))
-                .await
-                .expect("If this happens, it's a probably a tokio mpsc bug");
-        }
+            })
+            .await?;
 
         tx.commit().await?;
 
