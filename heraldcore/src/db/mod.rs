@@ -54,6 +54,20 @@ pub fn init() -> Result<(), HErr> {
     Ok(())
 }
 
+/// Indicates whether the database is initialized
+pub fn is_init() -> Result<bool, HErr> {
+    let conn = Database::get()?;
+    is_init_raw(&conn)
+}
+
+fn is_init_raw(conn: &rusqlite::Connection) -> Result<bool, HErr> {
+    Ok(w!(conn.query_row(
+        include_str!("../sql/is_db_init.sql"),
+        NO_PARAMS,
+        |row| row.get(0)
+    )))
+}
+
 /// Resets all tables in database.
 pub fn reset_all() -> Result<(), HErr> {
     let mut db = w!(Database::get());
@@ -123,5 +137,20 @@ impl Database {
         w!(tx.execute_batch(include_str!("../sql/create_all.sql")));
         w!(tx.commit());
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn is_db_init() {
+        let conn = super::Connection::open_in_memory().expect(womp!());
+
+        assert!(!super::is_init_raw(&conn).expect(womp!()));
+
+        conn.execute_batch(include_str!("../sql/create_all.sql"))
+            .expect(womp!());
+
+        assert!(super::is_init_raw(&conn).expect(womp!()));
     }
 }

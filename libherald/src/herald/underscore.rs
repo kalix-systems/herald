@@ -111,7 +111,7 @@ impl Herald {
     ) {
         none!(heraldcore::set_data_dir(std::path::PathBuf::from(path)));
 
-        if config::id().is_ok() {
+        if db::is_init().unwrap_or(false) {
             self.load_props.setup();
             self.emit.config_init_changed();
         } else {
