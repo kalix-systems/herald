@@ -67,10 +67,6 @@ features         = ["sync"]
 version          = "0.11"
 default_features = false
 
-# [dependencies.rusqlite]
-# version          = "0.21"
-# default_features = false
-
 [features]
 deploy = ["platform_dirs/deploy"]
 

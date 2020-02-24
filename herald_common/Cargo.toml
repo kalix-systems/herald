@@ -13,11 +13,10 @@ anyhow = "1.0"
 version = "0.21"
 optional = true
 default_features = false
-features = ["functions", "bundled", "buildtime_bindgen"]
+features = ["functions", "bundled"]
 
 [dependencies.kson]
 path = "../kson"
 
 [dependencies.kcl]
 path = "../kcl"
-
