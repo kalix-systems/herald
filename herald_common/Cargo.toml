@@ -9,11 +9,17 @@ edition = "2018"
 [dependencies]
 anyhow = "1.0"
 
-[dependencies.rusqlite]
+[target."cfg(target_os=\"windows\")".dependencies.rusqlite]
 version = "0.21"
 optional = true
 default_features = false
 features = ["functions", "bundled"]
+
+[target."cfg(not(target_os=\"windows\"))".dependencies.rusqlite]
+version = "0.21"
+optional = true
+default_features = false
+features = ["functions", "bundled", "buildtime_bindgen"]
 
 [dependencies.kson]
 path = "../kson"

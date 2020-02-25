@@ -50,7 +50,5 @@ deploy = ["heraldcore/deploy"]
 crate-type = ["cdylib", "staticlib"]
 
 [target]
-[target."cfg( all( target_family = \"unix\", not( any( target_os = \"android\", target_os=\"ios\" ) ) ) )"]
-[target."cfg( all( target_family = \"unix\", not( any( target_os = \"android\", target_os=\"ios\" ) ) ) )".dependencies]
 [target."cfg( all( target_family = \"unix\", not( any( target_os = \"android\", target_os=\"ios\" ) ) ) )".dependencies.notify-rust]
 version = "3.6.2"
