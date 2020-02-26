@@ -136,13 +136,14 @@ Popup {
 
                     topTextMargin: CmnCfg.smallMargin
                     bottomTextMargin: CmnCfg.defaultMargin
-                    boxTitle: messageData.authorName
-                    boxColor: messageData.authorColor
+                    boxTitle: UserMap.get(messageData.author).name
+                    boxColor: UserMap.get(messageData.author).userColor
                     picture: Utils.safeStringOrDefault(
-                                 messageData.authorProfilePicture, "")
+                                 UserMap.get(
+                                     messageData.author).profilePicture, "")
                     color: CmnCfg.palette.white
                     labelComponent: Ent.ContactLabel {
-                        displayName: messageData.authorName
+                        displayName: UserMap.get(messageData.author).name
                         username: messageData.author
                         labelColor: CmnCfg.palette.black
                     }
@@ -213,10 +214,10 @@ Popup {
                     // don't have an empty recipient list
                     visible: convoMembers.rowCount(
                                  ) > 1 ? memberData.userId !== messageData.author : true
-                    property var memberData: model
+                    property var memberData: UserMap.get(model.userId)
                     Common.PlatonicRectangle {
                         boxTitle: memberData.name
-                        boxColor: memberData.memberColor
+                        boxColor: memberData.userColor
                         picture: Utils.safeStringOrDefault(
                                      memberData.profilePicture, "")
                         property MouseArea hoverHandler
