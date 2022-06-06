@@ -10,7 +10,7 @@ edition = "2018"
 anyhow = "1.0"
 
 [dependencies.rusqlite]
-version = "0.21"
+version = "0.24"
 optional = true
 default_features = false
 features = ["functions", "bundled", "buildtime_bindgen"]
