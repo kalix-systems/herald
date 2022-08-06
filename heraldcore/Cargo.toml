@@ -59,7 +59,7 @@ path = "../ratchet_chat"
 path = "../search_pattern"
 
 [dependencies.websocket]
-version          = "0.23"
+version          = "0.26"
 default_features = false
 features         = ["sync"]
 
